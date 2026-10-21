@@ -7,7 +7,7 @@ Copy this template into your own portfolio and fill it after running your modifi
 Keep patch-order slices, visible-only feature shapes, hidden-patch counts, independent MSE and held-amplitude reconstruction results.
 
 - Command: `python3 phases/17-pretraining/02-mim/code/main.py`
-- Working directory: repository root
+- Working directory: Repository root
 - Python / JAX / NumPy versions: 
 - Hardware and device: 
 - My prediction before running: 

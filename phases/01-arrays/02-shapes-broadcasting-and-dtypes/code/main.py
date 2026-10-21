@@ -1,14 +1,14 @@
 """Shapes, broadcasting, and dtypes: worked experiments and reference solutions. CPU checks."""
 
-# Step 1: Set up imports and input tensors
+# Define two examples with three float32 features
 import jax.numpy as jnp
 batch = jnp.array([[1., 2., 3.], [4., 5., 6.]], dtype=jnp.float32)
 
-# Step 2: Apply the core JAX transformation
+# Broadcast one feature bias across both rows
 bias = jnp.array([10., 20., 30.], dtype=jnp.float32)
 y = batch + bias
 
-# Step 3: Verify shapes and numerical invariants
+# Verify the resulting shape and one concrete row
 assert y.shape == (2, 3)
 assert jnp.allclose(y[1], jnp.array([14., 25., 36.]))
 
@@ -24,7 +24,6 @@ assert y.shape == (2, 3)
 assert jnp.allclose(y[1], jnp.array([14., 25., 36.]))
 
 # Figure data experiment
-# Compute figure data for: Broadcasting repeats the bias across rows
 visual_data = {'kind': 'heatmap', 'values': (y - batch).tolist(), 'rows': ['observation 0', 'observation 1'], 'columns': ['feature 0', 'feature 1', 'feature 2'], 'unit': 'added bias'}
 
 # Experiment: Make the pairwise bug visible
@@ -59,21 +58,19 @@ assert offsets.shape == (2, 1)
 assert jnp.allclose(z, jnp.array([[101.,102.,103.],[204.,205.,206.]]))
 
 # Reference practice: Use both kinds of offsets together
-# Use both kinds of offsets together (Practice): The first row receives 100 in every feature and the second...
+# Use both kinds of offsets together (Practice)
 combined = batch + bias + jnp.array([100., 200.])[:, None]
 # Check tensor shape invariant: `combined.shape == (2, 3)`
 assert combined.shape == (2, 3)
 assert jnp.allclose(combined, jnp.array([[111., 122., 133.], [214., 225., 236.]]))
 
 # Reference practice: Reject an aligned-loss contract violation
-# Reject an aligned-loss contract violation (Challenge): Fix shapes at the data/model interface according to the...
+# Reject an aligned-loss contract violation (Challenge)
 def aligned_mse(prediction, target):
-    # Guard input contract (`prediction.shape != target.shape`) and fail fast if violated.
     if prediction.shape != target.shape:
         raise ValueError("aligned prediction and target shapes must match")
     return jnp.mean((prediction - target) ** 2)
 assert jnp.allclose(aligned_mse(predictions, targets), 0.)
-# Run the boundary check and catch the expected exception:
 try:
     aligned_mse(predictions, targets[:, None])
 except ValueError:

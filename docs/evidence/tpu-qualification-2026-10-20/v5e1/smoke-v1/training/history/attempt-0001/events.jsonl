@@ -1,0 +1,10 @@
+{"event": "started", "monotonic_s": 274.99105608, "pid": 5341, "backend": "tpu", "device_count": 1}
+{"event": "ready", "monotonic_s": 275.77659289, "compile_warmup_s": 0.2871371310000086, "step": 0}
+{"event": "progress", "monotonic_s": 275.77740731, "step": 1, "loss": 2.0478713512420654, "examples": 8, "update_s": 0.0002421900000513233, "state_hash": "954e1e883741fc7ec8b73618f97457c42f1a911fad6b7aa0f8356f664eb94bab"}
+{"event": "progress", "monotonic_s": 275.77798745, "step": 2, "loss": 3.633512496948242, "examples": 8, "update_s": 0.00020293000000037864, "state_hash": "353dda31de89021338e7a183281631f974ad36e48282edcc54daf6d88522a45f"}
+{"event": "checkpoint", "monotonic_s": 275.78058709, "step": 2, "state_hash": "353dda31de89021338e7a183281631f974ad36e48282edcc54daf6d88522a45f"}
+{"event": "progress", "monotonic_s": 275.78117234, "step": 3, "loss": 0.3778156042098999, "examples": 8, "update_s": 0.00020853000000897737, "state_hash": "a1132ae26aebcd8e7e2b8fca5506afdaefc4f90c567e1adf0e9c98217fb9f346"}
+{"event": "progress", "monotonic_s": 275.78174404, "step": 4, "loss": 1.512089490890503, "examples": 8, "update_s": 0.0002020700000002762, "state_hash": "7ee05f2a8d01e76be2235e327a5105ba45289ecaab86fea7a6d22643c5074dbe"}
+{"event": "checkpoint", "monotonic_s": 275.78340501, "step": 4, "state_hash": "7ee05f2a8d01e76be2235e327a5105ba45289ecaab86fea7a6d22643c5074dbe"}
+{"event": "checkpoint", "monotonic_s": 275.78504307, "step": 4, "state_hash": "7ee05f2a8d01e76be2235e327a5105ba45289ecaab86fea7a6d22643c5074dbe"}
+{"event": "completed", "monotonic_s": 275.78507228, "step": 4, "state_hash": "7ee05f2a8d01e76be2235e327a5105ba45289ecaab86fea7a6d22643c5074dbe"}

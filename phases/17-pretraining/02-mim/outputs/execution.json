@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "pretraining-02",
-  "contentHash": "546d7b69e5cbe151e99542665025a7bbfdd507e951bcde81b5c981400f065eab",
-  "executedAt": "2026-10-20T10:52:02.405713+00:00",
+  "contentHash": "fbdcf0dec49edee880ebd7e4e743c2c4de16e6fbf31d3b3963a50066b7a492a9",
+  "executedAt": "2026-10-20T22:26:44.902630+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -14,15 +14,15 @@
   "stdout": "Masked pixel MSE initial/final/held amplitudes: 0.5538085699081421 0.0016928859986364841 0.0011766081443056464\nMasked pixel MSE initial/final/held amplitudes: 0.5538085699081421 0.0016928859986364841 0.0011766081443056464\nHidden MSE unchanged; full-image MSE is large.\nAmbiguous target MSE at predictions 0, 1, 2: 2, 1, 2\nBottom-right patch order verified.\nThe zero-loss shortcut receives hidden pixels; the real features contain only eight visible pixels and a bias.\nAll rectangular RGB patches agree; hidden-pixel intervention preserves visible features.\nPASS: pretraining-02\n",
   "notebookCells": [
     {
-      "sourceHash": "642f2943e4227f895e2bc22dcb8165f9254d5d67daaeca5d903ad19ca55d6d24",
+      "sourceHash": "03903b2a4d9f849f4fe7d08a234558a43f9536d0934e700820268d2cbdb16963",
       "outputs": []
     },
     {
-      "sourceHash": "722b38eeb869e1eba84511605ff5eda1504e181e45167524375bde863bc14168",
+      "sourceHash": "d9f6ef5fe3afa7084e11456048446bc998b83b828b25a39a3d21f392677d82f5",
       "outputs": []
     },
     {
-      "sourceHash": "67904fc53e5169d024a4968041324263be09e9ead2bb75650134fd67a2edf4d1",
+      "sourceHash": "0fa31a6764319de7dd224b6cd553af8454ff386d3d861fac592e7960687efa9c",
       "outputs": [
         {
           "output_type": "stream",
@@ -34,7 +34,7 @@
       ]
     },
     {
-      "sourceHash": "e752eae67601d630225841e69368ef4afbbd243de91575ea94eaa8e59917ef99",
+      "sourceHash": "d9e7db9aee42a8dff07d16e6296fd81c2c597ed967c53c59db1f7a390660e4bc",
       "outputs": [
         {
           "output_type": "stream",
@@ -46,7 +46,7 @@
       ]
     },
     {
-      "sourceHash": "2bd39b3195d7381fd0923d63f81b9a0fa6fd1360d1c1354c691b706751d82742",
+      "sourceHash": "0ee3e3f327c6e8141428668efbf36b08758a2fa885f3469e1ce452f2db299a89",
       "outputs": []
     },
     {
@@ -65,7 +65,7 @@
       ]
     },
     {
-      "sourceHash": "3b657e5ce3e094a7f3116d8508320c0af35c3e739864fda20f6d2636ba5ce5a8",
+      "sourceHash": "66b152c22dc0d2ddb1dc3cb7bf91143b9f0afc5f916ba0866a3d20dad19eae31",
       "outputs": [
         {
           "output_type": "stream",
@@ -77,7 +77,7 @@
       ]
     },
     {
-      "sourceHash": "7074cefd3bcd046613ce84dab1caab1762f203025cba81341b94c71f0ca17876",
+      "sourceHash": "f2cd4a88d6716d30c9180c6ec84a057d2c422ea86af3e04edb4b361f4b41f22d",
       "outputs": [
         {
           "output_type": "stream",
@@ -89,11 +89,11 @@
       ]
     },
     {
-      "sourceHash": "3a898410f56e5c96ef60323fb80a5ecf61c9e79f7ea2120552fce9069d7086fd",
+      "sourceHash": "8388c374d96cc7132d17c08410c646d145406621f0ac721365084a4a4b5c85b7",
       "outputs": []
     },
     {
-      "sourceHash": "10529b6d6e45c129df8b31a5d70dea8c09d52ac9687429e3ab494c9fbcde63fa",
+      "sourceHash": "4ab516c3ca8a87c5bc5ac955bfb9492c618e96928f764e1c6522bb6a2954c10a",
       "outputs": [
         {
           "output_type": "stream",
@@ -105,11 +105,11 @@
       ]
     },
     {
-      "sourceHash": "c964d4ecaf8e609886abcd5ff73af203942531573f102a2ed99f59ade38af351",
+      "sourceHash": "a58b9327814989e3563d0a28febfd00fd9b852c87f19f929476143a8870c8998",
       "outputs": []
     },
     {
-      "sourceHash": "66fa3884c7ac58619146d4dc5050acf320fe6d9716f50ca79d6c44e424feffa2",
+      "sourceHash": "50170033257b30b3cd6e0360e1056508b1f676799950fe9493e0766dc8e94506",
       "outputs": [
         {
           "output_type": "stream",
@@ -121,11 +121,11 @@
       ]
     },
     {
-      "sourceHash": "460148f67aef079d50d9fc5ee1a7eb6722232cfa5013a6b8270559b848f2202d",
+      "sourceHash": "5076bdfa95b2ff97ee4273520ccdebe99f5e0e19dbf585c59067dc0e6495633b",
       "outputs": []
     },
     {
-      "sourceHash": "f998be538adc77451248902525712959223a83ac4adee001b1a2594939f02103",
+      "sourceHash": "206bebfb1642032fb0190fb7968c0d0a143da4bea869e6ed1bf1de032b32d677",
       "outputs": [
         {
           "output_type": "stream",

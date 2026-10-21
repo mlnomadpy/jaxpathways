@@ -1,0 +1,1 @@
+{"backend": "tpu", "batch_size": 8, "checkpoint_every": 2, "fail_after": null, "learning_rate": 0.04, "min_devices": 1, "momentum": 0.8, "resume": true, "seed": 3, "stall_at": null, "stall_seconds": 10.0, "steps": 8}

@@ -7,7 +7,7 @@ Copy this template into your own portfolio and fill it after running your modifi
 Keep the shape contract, loop/vmap/matrix equivalence, row/column layout checks, per-example gradient array, and mean-gradient identity under two target sets. Explain what each gradient shape means.
 
 - Command: `python3 phases/02-transforms/03-batch-a-function-with-vmap/code/main.py`
-- Working directory: repository root
+- Working directory: Repository root
 - Python / JAX / NumPy versions: 
 - Hardware and device: 
 - My prediction before running: 

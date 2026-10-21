@@ -2,6 +2,8 @@
 
 Phase 10: Scientific computing · about 115 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Fit a constrained physical parameter through an executed simulator.
@@ -76,9 +78,9 @@ The staged scientific-inverse project asks for a reusable simulation and fitting
 Append this block to main.py in your CPU course environment; for the first block create the file. Run blocks in order.
 
 ```python
-# Step 1 — Define the simulator and immutable observations: Observations come from the analytic physical model, not the same...
+# Step 1 — Define the simulator and immutable observations
 import jax
-# Update state in place with the new values.
+# Enable 64-bit arithmetic before importing jax.numpy or creating arrays.
 jax.config.update("jax_enable_x64", True)
 import jax.numpy as jnp
 import numpy as np
@@ -95,7 +97,6 @@ def solve(rate, initial, steps=40, dt=0.05):
     def advance(value, unused):
         next_value = rk4_step(rate, value, dt)
         return next_value, next_value
-    # Run compiled structured control flow via `jax.lax` (`(_, tail)`).
     _, tail = jax.lax.scan(advance, initial, None, length=steps)
     return jnp.concatenate((jnp.atleast_1d(initial), tail))
 
@@ -145,19 +146,16 @@ Append this block to main.py in your CPU course environment; for the first block
 ```python
 # Step 3 — Validate on unseen initial conditions and a finer grid: Held-out starts test transfer within this known equation.
 held_initials=jnp.array([0.4,1.1,3.2])
-# Convert `held_truth` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 held_truth=np.asarray(held_initials)[:,None]*np.exp(-true_rate*np.asarray(times))
-# Convert `held_prediction` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 held_prediction=np.asarray(predict(fitted_rate,held_initials))
-# Aggregate array values to compute `held_rmse`.
 held_rmse=float(np.sqrt(np.mean((held_prediction-held_truth)**2)))
 assert held_rmse < 1e-7
 # Vectorize across the batch dimension with `jax.vmap` (`fine`).
 fine=np.asarray(jax.vmap(lambda initial:solve(fitted_rate,initial,80,0.025))(held_initials))[:,::2]
-# Aggregate array values to compute `fine_rmse`.
 fine_rmse=float(np.sqrt(np.mean((fine-held_truth)**2)))
 assert fine_rmse < 1e-7
-# Differentiate the objective to obtain `initial_only_gradient` via automatic differentiation.
 initial_only_gradient=jax.grad(lambda p:jnp.mean((predict(jnp.exp(p),train_initials)[:,0]-observations[:,0])**2))(jnp.log(1.4))
 assert float(initial_only_gradient)==0.0
 print("Held-out RMSE:",held_rmse,"finer-grid RMSE:",fine_rmse)
@@ -169,9 +167,9 @@ Held-out starts test transfer within this known equation. Refinement tests wheth
 ## Run the example
 
 ```python
-# Step 1 — Define the simulator and immutable observations: Observations come from the analytic physical model, not the same...
+# Step 1 — Define the simulator and immutable observations
 import jax
-# Update state in place with the new values.
+# Enable 64-bit arithmetic before importing jax.numpy or creating arrays.
 jax.config.update("jax_enable_x64", True)
 import jax.numpy as jnp
 import numpy as np
@@ -188,7 +186,6 @@ def solve(rate, initial, steps=40, dt=0.05):
     def advance(value, unused):
         next_value = rk4_step(rate, value, dt)
         return next_value, next_value
-    # Run compiled structured control flow via `jax.lax` (`(_, tail)`).
     _, tail = jax.lax.scan(advance, initial, None, length=steps)
     return jnp.concatenate((jnp.atleast_1d(initial), tail))
 
@@ -222,19 +219,16 @@ print("Initial/final loss:",loss_history[0],loss_history[-1])
 
 # Step 3 — Validate on unseen initial conditions and a finer grid: Held-out starts test transfer within this known equation.
 held_initials=jnp.array([0.4,1.1,3.2])
-# Convert `held_truth` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 held_truth=np.asarray(held_initials)[:,None]*np.exp(-true_rate*np.asarray(times))
-# Convert `held_prediction` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 held_prediction=np.asarray(predict(fitted_rate,held_initials))
-# Aggregate array values to compute `held_rmse`.
 held_rmse=float(np.sqrt(np.mean((held_prediction-held_truth)**2)))
 assert held_rmse < 1e-7
 # Vectorize across the batch dimension with `jax.vmap` (`fine`).
 fine=np.asarray(jax.vmap(lambda initial:solve(fitted_rate,initial,80,0.025))(held_initials))[:,::2]
-# Aggregate array values to compute `fine_rmse`.
 fine_rmse=float(np.sqrt(np.mean((fine-held_truth)**2)))
 assert fine_rmse < 1e-7
-# Differentiate the objective to obtain `initial_only_gradient` via automatic differentiation.
 initial_only_gradient=jax.grad(lambda p:jnp.mean((predict(jnp.exp(p),train_initials)[:,0]-observations[:,0])**2))(jnp.log(1.4))
 assert float(initial_only_gradient)==0.0
 print("Held-out RMSE:",held_rmse,"finer-grid RMSE:",fine_rmse)
@@ -264,14 +258,13 @@ These recorded post-update values correspond to the same parameters shown above.
 A tiny final loss is plausible for noiseless synthetic data and a single smooth parameter. It is not an uncertainty estimate or proof about real instruments. Held-out starts, grid refinement and the deliberately biased Euler example provide the additional evidence needed to interpret the parameter.
 
 ```python
-# Compute figure data for: Recover a physical rate, then check what the fit means
 indices=list(range(61))
 visual_data={'panels':[{'kind':'line','x':indices,'xlabel':'completed updates','ylabel':'rate (inverse seconds)','series':[{'label':'fitted rate','y':rate_history[:61]},{'label':'known synthetic rate','y':[true_rate]*61}]},{'kind':'line','x':indices,'xlabel':'completed updates','ylabel':'mean squared trajectory error','yscale':'log','series':[{'label':'training error','y':loss_history[:61]}]}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:48:32.222051+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:22:57.997762+00:00. JAX 0.9.2.
 
 ```text
 Initial/fitted rate: 1.4 0.7000000090128304
@@ -283,7 +276,7 @@ Initial/final loss: 0.11676630453561089 1.9484774169068916e-32
 Held-out RMSE: 4.572895313141112e-16 finer-grid RMSE: 7.282689372293896e-09
 Initial-time-only gradient: 0.0
 True rate: 0.7 perfect coarse Euler rate: 0.5906238205625731
-batch, median milliseconds, milliseconds per trajectory: [(1, 0.007125083357095718, 0.007125083357095718), (16, 0.007792375981807709, 0.0004870234988629818), (256, 0.030416063964366913, 0.00011881274986080825)]
+batch, median milliseconds, milliseconds per trajectory: [(1, 0.005291774868965149, 0.005291774868965149), (16, 0.005333218723535538, 0.0003333261702209711), (256, 0.03358395770192146, 0.00013118733477313071)]
 Changed true/recovered rate: 0.4 0.40000000054230433
 Recovered initial amplitude: 2.8000000000000003
 Noisy grid-search estimate: 0.7 residual MSE: 2.6000611439697964e-05
@@ -315,19 +308,19 @@ The model parameter absorbs discretization error. Refining the numerical model i
 **Predict before running:** Will total time and time per trajectory necessarily move in the same direction?
 
 ```python
-# Experiment — Measure fixed-shape CPU batches: The warmed, synchronized boundary excludes compilation and...
+# Experiment — Measure fixed-shape CPU batches
 import time
 measurements=[]
 for batch_size in (1,16,256):
     starts=jnp.linspace(0.4,3.2,batch_size)
     # Wrap with `jax.jit` (`compiled`) so XLA traces and compiles the function.
     compiled=jax.jit(lambda values:predict(fitted_rate,values))
-    # Synchronize host execution until asynchronous device computation completes.
+    # Wait for device work to finish before timing it or comparing its result on the host.
     compiled(starts).block_until_ready()
     samples=[]
     for _ in range(7):
         beginning=time.perf_counter()
-        # Synchronize host execution until asynchronous device computation completes.
+        # Wait for device work to finish before timing it or comparing its result on the host.
         compiled(starts).block_until_ready()
         samples.append((time.perf_counter()-beginning)*1000)
     median_ms=float(np.median(samples))
@@ -350,28 +343,27 @@ Repeat inference for a new true rate $0.4$ using analytically generated observat
 - `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 - `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
-- `jax.jit(fn) / @jax.jit` — Traces `fn` with abstract shapes and compiles a fused XLA executable cached by input shape and dtype.
+- `jax.jit(fn) / @jax.jit` — Traces `fn` for its input signatures and compiles an executable. Changed shapes, dtypes or static arguments can trigger another compilation.
 
 **Step-by-step implementation plan:**
-1. Differentiate the objective to obtain `changed_update` via automatic differentiation.
-2. Convert `changed_held` to a host NumPy array for inspection or verification.
+1. Exercise solution
+2. Transfer the device result to the host for an independent NumPy comparison.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Repeat inference for a new true rate 0.4 using analytically generated...
+# Exercise solution
 changed_truth = ...  # TODO: compute changed_truth
 changed_observations = ...  # TODO: compute changed_observations
 def changed_objective(theta):
     return ...  # TODO: return computed result
-# Differentiate the objective to obtain `changed_update` via automatic differentiation.
 changed_update = jax.jit(...)  # TODO: compute changed_update
 changed_theta = jnp.log(...)  # TODO: compute changed_theta
 for _ in range(200):
     changed_theta = changed_update(...)  # TODO: compute changed_theta
 changed_rate = float(...)  # TODO: compute changed_rate
 assert abs(changed_rate-changed_truth)  # TODO: complete assertion check
-# Convert `changed_held` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 changed_held = np.asarray(...)  # TODO: compute changed_held
 np.testing.assert_allclose(predict(changed_rate,held_initials),changed_held,rtol = ...  # TODO: compute np.testing.assert_allclose(predict(changed_rate,held_initials),changed_held,rtol
 print("Changed true/recovered rate:",changed_truth,changed_rate)
@@ -380,19 +372,18 @@ print("Changed true/recovered rate:",changed_truth,changed_rate)
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Repeat inference for a new true rate 0.4 using analytically generated...
+# Exercise solution
 changed_truth=0.4
 changed_observations=train_initials[:,None]*jnp.exp(-changed_truth*times)
 def changed_objective(theta):
     return jnp.mean((predict(jnp.exp(theta),train_initials)-changed_observations)**2)
-# Differentiate the objective to obtain `changed_update` via automatic differentiation.
 changed_update=jax.jit(lambda theta:theta-0.4*jax.grad(changed_objective)(theta))
 changed_theta=jnp.log(0.9)
 for _ in range(200):
     changed_theta=changed_update(changed_theta)
 changed_rate=float(jnp.exp(changed_theta))
 assert abs(changed_rate-changed_truth)<1e-6
-# Convert `changed_held` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 changed_held=np.asarray(held_initials)[:,None]*np.exp(-changed_truth*np.asarray(times))
 np.testing.assert_allclose(predict(changed_rate,held_initials),changed_held,rtol=2e-6,atol=1e-7)
 print("Changed true/recovered rate:",changed_truth,changed_rate)
@@ -474,7 +465,7 @@ Search a dense one-dimensional grid using the analytic forward model and report 
 - `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
 
 **Step-by-step implementation plan:**
-1. Convert `reference_predictions` to a host NumPy array for inspection or verification.
+1. Transfer the device result to the host for an independent NumPy comparison.
 2. Reduce along axis=(1 to compute `reference_losses`.
 
 **Starter code scaffold (fill in the TODOs):**
@@ -483,7 +474,7 @@ Search a dense one-dimensional grid using the analytic forward model and report 
 # Compare noisy inference with an independent search (Challenge): A noisy optimum need not equal the generating parameter exactly.
 noisy = np.asarray(...)  # TODO: compute noisy
 candidates = np.linspace(...)  # TODO: compute candidates
-# Convert `reference_predictions` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 reference_predictions = np.asarray(...)  # TODO: compute reference_predictions
 # Reduce along axis=(1 to compute `reference_losses`.
 reference_losses = np.mean(...)  # TODO: compute reference_losses
@@ -499,7 +490,7 @@ print("Noisy grid-search estimate:",best,"residual MSE:",float(np.min(reference_
 # Compare noisy inference with an independent search (Challenge): A noisy optimum need not equal the generating parameter exactly.
 noisy=np.asarray(observations)+0.005*np.random.default_rng(19).normal(size=observations.shape)
 candidates=np.linspace(0.65,0.75,1001)
-# Convert `reference_predictions` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 reference_predictions=np.asarray(train_initials)[None,:,None]*np.exp(-candidates[:,None,None]*np.asarray(times)[None,None,:])
 # Reduce along axis=(1 to compute `reference_losses`.
 reference_losses=np.mean((reference_predictions-noisy[None,:,:])**2,axis=(1,2))

@@ -7,7 +7,7 @@ Copy this template into your own portfolio and fill it after running your modifi
 Save your annotated forward and derivative traces, offset-2 hand calculation, captured/explicit input comparison, unrolled/scan comparison and traced-branch error with both repaired numeric tests.
 
 - Command: `python3 phases/14-internals/01-read-your-first-jaxpr/code/main.py`
-- Working directory: repository root
+- Working directory: Repository root
 - Python / JAX / NumPy versions: 
 - Hardware and device: 
 - My prediction before running: 

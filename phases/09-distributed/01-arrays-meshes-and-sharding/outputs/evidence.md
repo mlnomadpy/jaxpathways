@@ -7,7 +7,7 @@ Copy this template into your own portfolio and fill it after running your modifi
 Padding repairs the shape but adds artificial rows. The mask keeps them out of both numerator and denominator. Checking only divisibility would miss this statistical error.
 
 - Command: `python3 phases/09-distributed/01-arrays-meshes-and-sharding/code/main.py`
-- Working directory: repository root
+- Working directory: Repository root
 - Python / JAX / NumPy versions: 
 - Hardware and device: 
 - My prediction before running: 

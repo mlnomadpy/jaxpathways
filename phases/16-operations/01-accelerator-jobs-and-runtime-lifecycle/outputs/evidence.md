@@ -7,7 +7,7 @@ Copy this template into your own portfolio and fill it after running your modifi
 Keep actual child exit codes, bounded timeout/termination output and proof that children were reaped. Distinguish launch failure, failed preflight, slow work and a stalled job.
 
 - Command: `python3 phases/16-operations/01-accelerator-jobs-and-runtime-lifecycle/code/main.py`
-- Working directory: repository root
+- Working directory: Repository root
 - Python / JAX / NumPy versions: 
 - Hardware and device: 
 - My prediction before running: 

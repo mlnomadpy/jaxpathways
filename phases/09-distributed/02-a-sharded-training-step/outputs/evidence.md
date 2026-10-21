@@ -7,7 +7,7 @@ Copy this template into your own portfolio and fill it after running your modifi
 Each local gradient already divides by its local count. Summing four equal local means omits division by four. For unequal counts, an unweighted mean also misrepresents examples; sum count-weighted local means and divide by total count.
 
 - Command: `python3 phases/09-distributed/02-a-sharded-training-step/code/main.py`
-- Working directory: repository root
+- Working directory: Repository root
 - Python / JAX / NumPy versions: 
 - Hardware and device: 
 - My prediction before running: 

@@ -1,0 +1,2 @@
+I1020 23:36:52.343256   10718 google_auth_provider.cc:181] Running on GCE, using service account <temporary-test-service-account>
+{"checkpointIdentitySha256": "2c181aab11be171fde7c16647915ebf64b98ca42a9f51863fa85083f1845fffa", "executionMode": "real-tpu-multi-host-sixteen-device", "processIndex": 0, "receipt": "/home/tahabsn/jaxpathways-qualification/runs/multihost-v4/process-000/execution-multihost.json"}

@@ -7,7 +7,7 @@ Copy this template into your own portfolio and fill it after running your modifi
 Keep the analytic error recurrence, per-step weight/loss/gradient norm for rates 0.1 and 0.3, observed 3.24 loss multiplier, changed-scale comparison, clipping bound, and one repaired nonfinite-input case.
 
 - Command: `python3 phases/05-networks/05-debug-unstable-learning/code/main.py`
-- Working directory: repository root
+- Working directory: Repository root
 - Python / JAX / NumPy versions: 
 - Hardware and device: 
 - My prediction before running: 

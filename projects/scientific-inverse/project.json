@@ -69,5 +69,13 @@
   ],
   "referenceCommand": "python3 projects/scientific-inverse/tests/check.py --implementation solution --stage all",
   "setupNote": "Extract the project ZIP into a fresh folder, install its requirements-cpu.txt in your course environment, and run commands from the extracted top folder. CPU float64 is enabled by the scaffold. Copy the starter scaffold `projects/scientific-inverse/starter/model.py` to `projects/scientific-inverse/my_model.py`, implement the stage functions in `projects/scientific-inverse/my_model.py`, and verify each stage with `python3 projects/scientific-inverse/tests/check.py --implementation projects/scientific-inverse/my_model.py --stage 1` (through `--stage 3`).",
-  "assessmentId": "science"
+  "assessmentId": "science",
+  "environment": {
+    "requirementsPath": "requirements-beginner.txt",
+    "pythonCompatibility": ">=3.11,<3.15",
+    "setupCommands": {
+      "unix": "python3 -m venv .venv\nsource .venv/bin/activate\npython -m pip install -r requirements-beginner.txt",
+      "windows": "py -3 -m venv .venv\n.\\.venv\\Scripts\\python.exe -m pip install -r requirements-beginner.txt"
+    }
+  }
 }

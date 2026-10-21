@@ -97,5 +97,13 @@
   ],
   "referenceCommand": "python3 projects/sharded-training/tests/check.py --implementation solution --stage all",
   "setupNote": "Use requirements-cpu.txt and a fresh Python interpreter. The checker configures four logical CPU devices before initializing JAX and executes a real small profile. The optional multi-host lesson extension remains separately unverified. Copy the starter scaffold `projects/sharded-training/starter/model.py` to `projects/sharded-training/my_model.py`, implement the stage functions in `projects/sharded-training/my_model.py`, and verify each stage with `python3 projects/sharded-training/tests/check.py --implementation projects/sharded-training/my_model.py --stage 1` (through `--stage 4`).",
-  "assessmentId": "scale"
+  "assessmentId": "scale",
+  "environment": {
+    "requirementsPath": "requirements-beginner.txt",
+    "pythonCompatibility": ">=3.11,<3.15",
+    "setupCommands": {
+      "unix": "python3 -m venv .venv\nsource .venv/bin/activate\npython -m pip install -r requirements-beginner.txt",
+      "windows": "py -3 -m venv .venv\n.\\.venv\\Scripts\\python.exe -m pip install -r requirements-beginner.txt"
+    }
+  }
 }

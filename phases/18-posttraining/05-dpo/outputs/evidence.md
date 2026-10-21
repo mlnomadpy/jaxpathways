@@ -7,7 +7,7 @@ Copy this template into your own portfolio and fill it after running your modifi
 Keep reference identity, response log-probability conventions, log(2) initialization, independent margin loss, reversed labels and frozen-reference checks.
 
 - Command: `python3 phases/18-posttraining/05-dpo/code/main.py`
-- Working directory: repository root
+- Working directory: Repository root
 - Python / JAX / NumPy versions: 
 - Hardware and device: 
 - My prediction before running: 

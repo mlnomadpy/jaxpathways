@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "tpu-02",
-  "contentHash": "90a369489019c4bccc04bade800129bfb8c90c341621d2a9a4160ef2a6d2b1d4",
-  "executedAt": "2026-10-20T10:58:53.178365+00:00",
+  "contentHash": "faba90e250eac21e49d496fa2c46348cb1b4270e3d576469881b319d0b0220d0",
+  "executedAt": "2026-10-20T22:27:11.475158+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -11,18 +11,18 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Resumed state_hash matches uninterrupted control: ecba6a13e41beb0003af0371f8422efa3b08538c4420efb07a9bc61b0a10cdc1\nLosses across 6 steps: [3.6712, 3.78913, 1.91372, 2.09553, 1.81174, 1.16636]\nResumed state_hash matches uninterrupted control: ecba6a13e41beb0003af0371f8422efa3b08538c4420efb07a9bc61b0a10cdc1\nLosses across 6 steps: [3.6712, 3.78913, 1.91372, 2.09553, 1.81174, 1.16636]\nWarmup ms: 79.34 Median steady step ms: 0.0432\nResume rejection: checkpoint state hash mismatch\nStep 8 resumed vs control hash: eba1c0bcfb80184d9f5108c1d6539369e21f95276e5d6806234237f41eccbed9 eba1c0bcfb80184d9f5108c1d6539369e21f95276e5d6806234237f41eccbed9\nRecorded event sequence: ['started', 'warmup', 'step', 'step', 'checkpoint', 'completed', 'restored', 'warmup', 'step', 'step', 'checkpoint', 'completed']\nLoaded step: 4 Leftover tmp files: []\nPASS: tpu-02\n",
+  "stdout": "Resumed state_hash matches uninterrupted control: ecba6a13e41beb0003af0371f8422efa3b08538c4420efb07a9bc61b0a10cdc1\nLosses across 6 steps: [3.6712, 3.78913, 1.91372, 2.09553, 1.81174, 1.16636]\nResumed state_hash matches uninterrupted control: ecba6a13e41beb0003af0371f8422efa3b08538c4420efb07a9bc61b0a10cdc1\nLosses across 6 steps: [3.6712, 3.78913, 1.91372, 2.09553, 1.81174, 1.16636]\nWarmup ms: 81.296 Median steady step ms: 0.0319\nResume rejection: checkpoint state hash mismatch\nStep 8 resumed vs control hash: eba1c0bcfb80184d9f5108c1d6539369e21f95276e5d6806234237f41eccbed9 eba1c0bcfb80184d9f5108c1d6539369e21f95276e5d6806234237f41eccbed9\nRecorded event sequence: ['started', 'warmup', 'step', 'step', 'checkpoint', 'completed', 'restored', 'warmup', 'step', 'step', 'checkpoint', 'completed']\nLoaded step: 4 Leftover tmp files: []\nPASS: tpu-02\n",
   "notebookCells": [
     {
-      "sourceHash": "b7112ebf276c607f35e15db89d335c8f7665191150cd7e1bf22c2e6801dab431",
+      "sourceHash": "604e58fa9a4da635572bd68f8189fa5b4376a9eef3ec06d3900ebc081f4c4c74",
       "outputs": []
     },
     {
-      "sourceHash": "b0f3d6ed93675f28e803e7c9127ce0a71308bb309b7db419bb36c84271f16645",
+      "sourceHash": "510e02d58437b80672e5806096951291c8bb10600e916e4190e62e8fac244756",
       "outputs": []
     },
     {
-      "sourceHash": "26a9e8f04c58c7d280a1fc06fa3388f05aa64e742bc16199b3c11a7041057684",
+      "sourceHash": "91af2fb6c5c60095a869f0c891328c1646ab16e0bba733eb6c5067c19110c69a",
       "outputs": [
         {
           "output_type": "stream",
@@ -35,7 +35,7 @@
       ]
     },
     {
-      "sourceHash": "848156daa3822ce35b68f6ce26c53e528c05fb1eab14d80ff6c62f0270eea5bf",
+      "sourceHash": "75d0769bf78045341c27bc6230fe95a71d1a2e49b31ebc473dd64c7444041c79",
       "outputs": [
         {
           "output_type": "stream",
@@ -48,7 +48,7 @@
       ]
     },
     {
-      "sourceHash": "0ab681f344616ad836608e8d22a7491bce5408a6d1437b8567af720ec9ca890a",
+      "sourceHash": "1c3a78f014eeb62ba4b376032ba5c4f667d799326c08c66cf914e99d4fe53515",
       "outputs": []
     },
     {
@@ -67,13 +67,13 @@
       ]
     },
     {
-      "sourceHash": "4927b6684b6ad4d5e472a876688107133cc8a5a62e53dcddd18d49867fc3e813",
+      "sourceHash": "9f7ec91c548e424e6db03bf94ea8c301434e5e5471dbc54972c7a1e314443ed4",
       "outputs": [
         {
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "Warmup ms: 81.028 Median steady step ms: 0.0458\n"
+            "Warmup ms: 111.928 Median steady step ms: 0.0638\n"
           ]
         }
       ]
@@ -91,11 +91,11 @@
       ]
     },
     {
-      "sourceHash": "cb46376f483f2038af3228387184950ee25f0bae181555d265040c243f903d5b",
+      "sourceHash": "ddef8ed461ce731c07d4b4861ef896faef62d7befbba15c8862b3342973c467f",
       "outputs": []
     },
     {
-      "sourceHash": "b0c28536a093ad0e86e6f79af0300a9c1cfba670cd2a7d8e74ec682acbe4662b",
+      "sourceHash": "0d23e43ec727fbc16c6510ca25fc0aed3453eafbe6b89be0383f2dd959c63c08",
       "outputs": [
         {
           "output_type": "stream",
@@ -107,11 +107,11 @@
       ]
     },
     {
-      "sourceHash": "464067448d2ab6a3e20a481bc2568e129609339bc9794e60b046e1d9c8f6aa34",
+      "sourceHash": "e271d66fc9c2948b7460f0ef095696d300411c442256a4b1273e26fd6819a55b",
       "outputs": []
     },
     {
-      "sourceHash": "416405b91ef0edad800ee06b7ffd8623c74e30f24397b37008a0c8a0415cf123",
+      "sourceHash": "cbb519c0c33b6e4c11b157f5aac42a3c2801fd89d5e3f14f927ac55fff13cc24",
       "outputs": [
         {
           "output_type": "stream",
@@ -123,11 +123,11 @@
       ]
     },
     {
-      "sourceHash": "af15fe1f7860f2cf64a182436875ca219542bfef511dbfeded02db9023cc3aa4",
+      "sourceHash": "5b925a340edc27b3cb0272853d16cf7440484b6cbc8d567d919dad14bd08e294",
       "outputs": []
     },
     {
-      "sourceHash": "f0c6dcd3f9df11ecb26f6ef2d66ffd6a6187e7eeaffe0fff9eb5be98eb639eb4",
+      "sourceHash": "e3589b9c0d24c35e9fd240055bf3fff96119dc7cb6b88f6eb75803a5503a3fac",
       "outputs": [
         {
           "output_type": "stream",

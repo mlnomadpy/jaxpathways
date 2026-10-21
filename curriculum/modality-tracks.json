@@ -179,10 +179,11 @@
         "engineering-release",
         "training-methods",
         "weight-conversion",
-        "embedding-lineage"
+        "embedding-lineage",
+        "causal-lineage"
       ],
       "status": "authored",
-      "available": "Runnable four-stage CPU byte-Transformer harness: real training, complete fresh-process recovery, fixed held-out evaluation, FP32/BF16/INT8 KV caches, six inference exports and profiler traces. Includes a local document loader. External-corpus quality, service load and physical TPU qualification remain extensions. An additional tiny bidirectional embedding pilot connects three objective phases and reports held-out retrieval against BM25, including a poor measured outcome.",
+      "available": "Runnable four-stage CPU byte-Transformer harness: real training, complete fresh-process recovery, fixed held-out evaluation, FP32/BF16/INT8 KV caches, six inference exports and profiler traces. Includes a local document loader. External-corpus quality, service load and physical TPU qualification remain extensions. An additional tiny bidirectional embedding pilot connects three objective phases and reports held-out retrieval against BM25, including a poor measured outcome. A separate 70,704-parameter causal pilot connects real-text next-token pretraining, response-masked continuation adaptation, chapter-held-out perplexity against a unigram baseline, and verified export sampling. Its weak evaluation and repetitive sample are retained.",
       "plot": "Read the measured training curve and final held-out comparison separately: a single final-model line is not a validation trajectory. Inspect one actual causal attention head, allocated cache bytes and isolated cache logit errors. Keep generation failures alongside aggregate metrics.",
       "stages": [
         {

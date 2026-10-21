@@ -1,0 +1,23 @@
+name: Physical TPU qualification
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  target:
+    # Configure a trusted, existing TPU VM with this label. This workflow does
+    # not provision cloud resources or install unreviewed accelerator packages.
+    runs-on: [self-hosted, linux, tpu-qualification]
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Run target qualification, rejecting CPU fallback
+        run: python3 scripts/smoke-tpu.py --output "$RUNNER_TEMP/tpu-qualification"
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: physical-tpu-qualification
+          path: ${{ runner.temp }}/tpu-qualification
+          if-no-files-found: error

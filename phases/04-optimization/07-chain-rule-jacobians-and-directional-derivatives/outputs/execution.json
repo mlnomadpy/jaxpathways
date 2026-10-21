@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "optimization-07",
-  "contentHash": "1aaac0936877ab47a75da09c427f592954229043d5aa10544c154d7bba1644c4",
-  "executedAt": "2026-10-20T10:45:39.979446+00:00",
+  "contentHash": "4c5f18de4705110739f4068a78104ffbb081ed4bd2e53ff83d77c3856624e77a",
+  "executedAt": "2026-10-20T22:20:27.311584+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -14,11 +14,11 @@
   "stdout": "Jv / loss gradient: [3. 1.] [46. 19.]\nJv / loss gradient: [3. 1.] [46. 19.]\nPASS: optimization-07\n",
   "notebookCells": [
     {
-      "sourceHash": "293764bce943f28b3d4df911ffde8e845037620dd36fc5ab674eb86b9a9d1b5e",
+      "sourceHash": "4274556a3e2b0d88105be9257a5aff40a6eda4c7f54dbc5b41f3e382ccc1662f",
       "outputs": []
     },
     {
-      "sourceHash": "7660c98fede305787b04eb49e85e4cb67d0f589c68cc7177ac3474952fa623ba",
+      "sourceHash": "b3d58d1db97e032649c71010487d45e8034a1d889dbf8c336850a18a7d3cd55c",
       "outputs": []
     },
     {
@@ -34,7 +34,7 @@
       ]
     },
     {
-      "sourceHash": "80ac1973361990aa33217bcf05693eeb727c18c098755f9c312a96ebc675e87c",
+      "sourceHash": "5a210a1dad901784b94c07c18cc8814f44b2f547446ed5d9e5a879fd47b4b5a7",
       "outputs": [
         {
           "output_type": "stream",
@@ -46,7 +46,7 @@
       ]
     },
     {
-      "sourceHash": "568166a66067dcbbfc5d6a1b9c29b0ea2c5d63125fdc8d9ddf3ce629ec433918",
+      "sourceHash": "004915f3b732ae2b30298e7d1050d2d41623a66a6b3bb9040f4745b407c42967",
       "outputs": []
     },
     {
@@ -69,7 +69,7 @@
       "outputs": []
     },
     {
-      "sourceHash": "563fb2df2ff610595ed52c3acc99e00852e29c79a2aca0bcf975bcff1e9df479",
+      "sourceHash": "0817aa3d3ecba4a3f2111e4412ae1c2b6ce7d23c9d920e03ba768c1cd662a879",
       "outputs": []
     },
     {
@@ -81,19 +81,19 @@
       "outputs": []
     },
     {
-      "sourceHash": "ef5703239b92c9d9528c9c1bc63c0887713948e145923bfcd2c37e79fc8f18cd",
+      "sourceHash": "13912cdc3a3801b58d706bbab5596516bb918465b09435021a30d95fa56a14cd",
       "outputs": []
     },
     {
-      "sourceHash": "0ae4816ccac4b8e8142abf1c4cbd6c40093c6f1e30e575404d5fa490a42b1a75",
+      "sourceHash": "5b7cf6c81ba001013e84effdb6e5765ba540da69a5ebf520f6aae5a4a90a963b",
       "outputs": []
     },
     {
-      "sourceHash": "cbac04ea08d5c678c6ac19fc9bd74a31fb7c7ecf89c751f1c69730cae4d879db",
+      "sourceHash": "e7692239066504001913968c3d7b928c932eda3f0bc340adc0713b853814a27f",
       "outputs": []
     },
     {
-      "sourceHash": "378b5f70dc3cb5e2c094929500a8edd3b4ed6c11cf3e3a915c73006d4c8e4ab5",
+      "sourceHash": "3c86c386b46368209d2e5861ee008586fc978bcfe1fb8f05bf2e3fc035486806",
       "outputs": []
     }
   ],

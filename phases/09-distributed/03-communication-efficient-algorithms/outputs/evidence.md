@@ -7,7 +7,7 @@ Copy this template into your own portfolio and fill it after running your modifi
 Keep global NumPy gradient checks, local shard shapes, lowered collectives, changed-value replicas and complete scatter/gather payload accounting. Separate the idealized ring model from observed CPU timings.
 
 - Command: `python3 phases/09-distributed/03-communication-efficient-algorithms/code/main.py`
-- Working directory: repository root
+- Working directory: Repository root
 - Python / JAX / NumPy versions: 
 - Hardware and device: 
 - My prediction before running: 

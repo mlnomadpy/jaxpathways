@@ -136,5 +136,13 @@
   ],
   "referenceCommand": "python3 projects/image-harness/tests/check.py --stage 8 --implementation solution",
   "setupNote": "Use the extracted top-level folder containing requirements-cpu.txt and projects/image-harness. The synthetic image fixture needs no download; an optional manifest loads existing local image files. Export and restore checks launch bounded fresh CPU interpreters. Copy the starter scaffold `projects/image-harness/starter/model.py` to `projects/image-harness/my_model.py`, implement the stage functions in `projects/image-harness/my_model.py`, and verify each stage with `python3 projects/image-harness/tests/check.py --implementation projects/image-harness/my_model.py --stage 1` (through `--stage 8`).",
-  "assessmentId": "models"
+  "assessmentId": "models",
+  "environment": {
+    "requirementsPath": "requirements-vision.txt",
+    "pythonCompatibility": ">=3.11,<3.15",
+    "setupCommands": {
+      "unix": "python3 -m venv .venv\nsource .venv/bin/activate\npython -m pip install -r requirements-vision.txt",
+      "windows": "py -3 -m venv .venv\n.\\.venv\\Scripts\\python.exe -m pip install -r requirements-vision.txt"
+    }
+  }
 }

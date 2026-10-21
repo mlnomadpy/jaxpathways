@@ -7,7 +7,7 @@ Copy this template into your own portfolio and fill it after running your modifi
 Warm timing samples, latency/throughput units, independent queue timeline and labeled simulation/replica assumptions. Keep the environment, observed outputs and your explanation of the figure.
 
 - Command: `python3 phases/15-deployment/04-inference-capacity-batching-and-autoscaling/code/main.py`
-- Working directory: repository root
+- Working directory: Repository root
 - Python / JAX / NumPy versions: 
 - Hardware and device: 
 - My prediction before running: 

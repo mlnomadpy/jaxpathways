@@ -2,6 +2,8 @@
 
 Phase 08: Performance diagnosis · about 100 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Explain why reverse-mode differentiation needs forward intermediates.
@@ -74,7 +76,7 @@ A training-memory claim requires the complete training step, representative mode
 Create a Python file in the course environment. Add this block after the preceding block, then run the assembled file.
 
 ```python
-# Step 1 — Define two differentiation policies: Both functions compute the same pure objective; only the...
+# Step 1 — Define two differentiation policies
 import contextlib
 import io
 import time
@@ -82,9 +84,7 @@ import numpy as np
 import jax
 import jax.numpy as jnp
 from jax.ad_checkpoint import print_saved_residuals
-# Draw pseudorandom samples for `rng` using the explicit RNG state.
 rng=np.random.default_rng(18)
-# Create device-backed JAX array `w`.
 w=jnp.asarray((rng.normal(size=(16,16))*.1).astype(np.float32))
 x=jnp.asarray(np.linspace(-.5,.5,16,dtype=np.float32))
 def layer(v):return jnp.tanh(w@v)
@@ -96,7 +96,6 @@ plain=lambda v:objective(v,False)
 remat=lambda v:objective(v,True)
 def residual_report(fn):
     stream=io.StringIO()
-    # Enter `contextlib.redirect_stdout(stream)` context block:
     with contextlib.redirect_stdout(stream):print_saved_residuals(fn,x)
     lines=[line for line in stream.getvalue().splitlines() if line.strip()]
     return lines
@@ -117,25 +116,22 @@ for _ in range(4):values.append(np.tanh(host_w@values[-1]))
 cotangent=2*values[-1]
 for i in range(4,0,-1):cotangent=host_w.T@(cotangent*(1-values[i]**2))
 for fn in (plain,remat):
-    # Differentiate the objective to obtain gradients ``.
     np.testing.assert_allclose(jax.grad(fn)(x),cotangent,rtol=3e-5,atol=1e-7)
-# Differentiate the objective to obtain gradients ``.
 np.testing.assert_allclose(jax.grad(plain)(x),jax.grad(remat)(x),rtol=1e-6,atol=1e-7)
-# Differentiate the objective to obtain `executables` via automatic differentiation.
 executables=[jax.jit(jax.grad(fn)).lower(x).compile() for fn in (plain,remat)]
 memory=[]
 times=[]
 for executable in executables:
     analysis=executable.memory_analysis()
     memory.append(None if analysis is None else {name:getattr(analysis,name) for name in ('argument_size_in_bytes','output_size_in_bytes','temp_size_in_bytes','alias_size_in_bytes')})
-    # Synchronize host execution until asynchronous device computation completes.
-    # Synchronize host execution until asynchronous device computation completes.
+    # Wait for device work to finish before timing it or comparing its result on the host.
+    # Wait for device work to finish before timing it or comparing its result on the host.
     executable(x).block_until_ready()
     samples=[]
     for _ in range(5):
-        # Synchronize host execution until asynchronous device computation completes.
-        # Synchronize host execution until asynchronous device computation completes.
-        # Synchronize host execution until asynchronous device computation completes.
+        # Wait for device work to finish before timing it or comparing its result on the host.
+        # Wait for device work to finish before timing it or comparing its result on the host.
+        # Wait for device work to finish before timing it or comparing its result on the host.
         start=time.perf_counter()
         executable(x).block_until_ready()
         samples.append(time.perf_counter()-start)
@@ -166,7 +162,7 @@ Checking these invariants confirms the computation is ready for the full worked 
 ## Run the example
 
 ```python
-# Step 1 — Define two differentiation policies: Both functions compute the same pure objective; only the...
+# Step 1 — Define two differentiation policies
 import contextlib
 import io
 import time
@@ -174,9 +170,7 @@ import numpy as np
 import jax
 import jax.numpy as jnp
 from jax.ad_checkpoint import print_saved_residuals
-# Draw pseudorandom samples for `rng` using the explicit RNG state.
 rng=np.random.default_rng(18)
-# Create device-backed JAX array `w`.
 w=jnp.asarray((rng.normal(size=(16,16))*.1).astype(np.float32))
 x=jnp.asarray(np.linspace(-.5,.5,16,dtype=np.float32))
 def layer(v):return jnp.tanh(w@v)
@@ -188,7 +182,6 @@ plain=lambda v:objective(v,False)
 remat=lambda v:objective(v,True)
 def residual_report(fn):
     stream=io.StringIO()
-    # Enter `contextlib.redirect_stdout(stream)` context block:
     with contextlib.redirect_stdout(stream):print_saved_residuals(fn,x)
     lines=[line for line in stream.getvalue().splitlines() if line.strip()]
     return lines
@@ -201,25 +194,22 @@ for _ in range(4):values.append(np.tanh(host_w@values[-1]))
 cotangent=2*values[-1]
 for i in range(4,0,-1):cotangent=host_w.T@(cotangent*(1-values[i]**2))
 for fn in (plain,remat):
-    # Differentiate the objective to obtain gradients ``.
     np.testing.assert_allclose(jax.grad(fn)(x),cotangent,rtol=3e-5,atol=1e-7)
-# Differentiate the objective to obtain gradients ``.
 np.testing.assert_allclose(jax.grad(plain)(x),jax.grad(remat)(x),rtol=1e-6,atol=1e-7)
-# Differentiate the objective to obtain `executables` via automatic differentiation.
 executables=[jax.jit(jax.grad(fn)).lower(x).compile() for fn in (plain,remat)]
 memory=[]
 times=[]
 for executable in executables:
     analysis=executable.memory_analysis()
     memory.append(None if analysis is None else {name:getattr(analysis,name) for name in ('argument_size_in_bytes','output_size_in_bytes','temp_size_in_bytes','alias_size_in_bytes')})
-    # Synchronize host execution until asynchronous device computation completes.
-    # Synchronize host execution until asynchronous device computation completes.
+    # Wait for device work to finish before timing it or comparing its result on the host.
+    # Wait for device work to finish before timing it or comparing its result on the host.
     executable(x).block_until_ready()
     samples=[]
     for _ in range(5):
-        # Synchronize host execution until asynchronous device computation completes.
-        # Synchronize host execution until asynchronous device computation completes.
-        # Synchronize host execution until asynchronous device computation completes.
+        # Wait for device work to finish before timing it or comparing its result on the host.
+        # Wait for device work to finish before timing it or comparing its result on the host.
+        # Wait for device work to finish before timing it or comparing its result on the host.
         start=time.perf_counter()
         executable(x).block_until_ready()
         samples.append(time.perf_counter()-start)
@@ -254,7 +244,6 @@ The independent reverse recurrence checks the numerical derivative for both poli
 These are not measurements of peak accelerator allocation or total training memory. The runtime samples are recorded separately, and a meaningful policy decision needs representative model size, optimizer state and actual target-device measurements. If a backend lacks memory analysis, the plot explicitly substitutes a labeled availability panel rather than treating missing bytes as zero.
 
 ```python
-# Compute figure data for: Changed autodiff storage does not guarantee changed compiled buffers
 panels=[{'kind':'bar','title':'Autodiff residual descriptions','labels':['ordinary','layer remat'],'ylabel':'saved entries (not bytes)','series':[{'label':'residual descriptions','y':[len(r) for r in reports]}]}]
 if all(m is not None for m in memory):
     panels.append({'kind':'bar','title':'Compiler memory estimate','labels':['ordinary','layer remat'],'ylabel':'estimated temporary bytes','series':[{'label':'compiler temporaries','y':[m['temp_size_in_bytes'] for m in memory]}]})
@@ -265,69 +254,69 @@ visual_data={'kind':'panels','panels':panels}
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:47:42.865487+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:22:18.455961+00:00. JAX 0.9.2.
 
 ```text
 Saved residual descriptions:
 plain 
 f32[16,16] from a constant
-f32[16] output of tanh from <string>:17:20 (layer)
-f32[16] output of sub from <string>:17:20 (layer)
-f32[16] output of tanh from <string>:17:20 (layer)
-f32[16] output of sub from <string>:17:20 (layer)
-f32[16] output of tanh from <string>:17:20 (layer)
-f32[16] output of sub from <string>:17:20 (layer)
-f32[16] output of tanh from <string>:17:20 (layer)
-f32[16] output of sub from <string>:17:20 (layer)
+f32[16] output of tanh from <string>:15:20 (layer)
+f32[16] output of sub from <string>:15:20 (layer)
+f32[16] output of tanh from <string>:15:20 (layer)
+f32[16] output of sub from <string>:15:20 (layer)
+f32[16] output of tanh from <string>:15:20 (layer)
+f32[16] output of sub from <string>:15:20 (layer)
+f32[16] output of tanh from <string>:15:20 (layer)
+f32[16] output of sub from <string>:15:20 (layer)
 remat 
 f32[16,16] from a constant
 f32[16] from the argument v
-f32[16] output of tanh from <string>:17:20 (layer)
-f32[16] output of tanh from <string>:17:20 (layer)
-f32[16] output of tanh from <string>:17:20 (layer)
-f32[16] output of tanh from <string>:17:20 (layer)
+f32[16] output of tanh from <string>:15:20 (layer)
+f32[16] output of tanh from <string>:15:20 (layer)
+f32[16] output of tanh from <string>:15:20 (layer)
+f32[16] output of tanh from <string>:15:20 (layer)
 Compiler memory estimates: [{'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}, {'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}]
-Synchronized gradient samples: [[0.0001016668975353241, 8.600018918514252e-05, 0.00013170810416340828, 5.487492308020592e-05, 3.0375085771083832e-05], [3.7041958421468735e-05, 2.6874709874391556e-05, 1.2292061001062393e-05, 9.582843631505966e-06, 9.292270988225937e-06]]
+Synchronized gradient samples: [[5.7625118643045425e-05, 4.0416140109300613e-05, 4.675006493926048e-05, 4.9625057727098465e-05, 1.833401620388031e-05], [2.370774745941162e-05, 1.233397051692009e-05, 9.917188435792923e-06, 9.125098586082458e-06, 8.66735354065895e-06]]
 Independent reverse recurrence agrees with both gradients.
 plain 
 f32[16,16] from a constant
-f32[16] output of tanh from <string>:17:20 (layer)
-f32[16] output of sub from <string>:17:20 (layer)
-f32[16] output of tanh from <string>:17:20 (layer)
-f32[16] output of sub from <string>:17:20 (layer)
-f32[16] output of tanh from <string>:17:20 (layer)
-f32[16] output of sub from <string>:17:20 (layer)
-f32[16] output of tanh from <string>:17:20 (layer)
-f32[16] output of sub from <string>:17:20 (layer)
+f32[16] output of tanh from <string>:15:20 (layer)
+f32[16] output of sub from <string>:15:20 (layer)
+f32[16] output of tanh from <string>:15:20 (layer)
+f32[16] output of sub from <string>:15:20 (layer)
+f32[16] output of tanh from <string>:15:20 (layer)
+f32[16] output of sub from <string>:15:20 (layer)
+f32[16] output of tanh from <string>:15:20 (layer)
+f32[16] output of sub from <string>:15:20 (layer)
 remat 
 f32[16,16] from a constant
 f32[16] from the argument v
-f32[16] output of tanh from <string>:17:20 (layer)
-f32[16] output of tanh from <string>:17:20 (layer)
-f32[16] output of tanh from <string>:17:20 (layer)
-f32[16] output of tanh from <string>:17:20 (layer)
+f32[16] output of tanh from <string>:15:20 (layer)
+f32[16] output of tanh from <string>:15:20 (layer)
+f32[16] output of tanh from <string>:15:20 (layer)
+f32[16] output of tanh from <string>:15:20 (layer)
 Compiler memory estimates: [{'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}, {'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}]
-Synchronized gradient samples: [[0.0001016668975353241, 8.600018918514252e-05, 0.00013170810416340828, 5.487492308020592e-05, 3.0375085771083832e-05], [3.7041958421468735e-05, 2.6874709874391556e-05, 1.2292061001062393e-05, 9.582843631505966e-06, 9.292270988225937e-06]]
+Synchronized gradient samples: [[5.7625118643045425e-05, 4.0416140109300613e-05, 4.675006493926048e-05, 4.9625057727098465e-05, 1.833401620388031e-05], [2.370774745941162e-05, 1.233397051692009e-05, 9.917188435792923e-06, 9.125098586082458e-06, 8.66735354065895e-06]]
 Saved residual descriptions:
 plain 
 f32[16,16] from a constant
-f32[16] output of tanh from <string>:89:20 (layer)
-f32[16] output of sub from <string>:89:20 (layer)
-f32[16] output of tanh from <string>:89:20 (layer)
-f32[16] output of sub from <string>:89:20 (layer)
-f32[16] output of tanh from <string>:89:20 (layer)
-f32[16] output of sub from <string>:89:20 (layer)
-f32[16] output of tanh from <string>:89:20 (layer)
-f32[16] output of sub from <string>:89:20 (layer)
+f32[16] output of tanh from <string>:81:20 (layer)
+f32[16] output of sub from <string>:81:20 (layer)
+f32[16] output of tanh from <string>:81:20 (layer)
+f32[16] output of sub from <string>:81:20 (layer)
+f32[16] output of tanh from <string>:81:20 (layer)
+f32[16] output of sub from <string>:81:20 (layer)
+f32[16] output of tanh from <string>:81:20 (layer)
+f32[16] output of sub from <string>:81:20 (layer)
 remat 
 f32[16,16] from a constant
 f32[16] from the argument v
-f32[16] output of tanh from <string>:89:20 (layer)
-f32[16] output of tanh from <string>:89:20 (layer)
-f32[16] output of tanh from <string>:89:20 (layer)
-f32[16] output of tanh from <string>:89:20 (layer)
+f32[16] output of tanh from <string>:81:20 (layer)
+f32[16] output of tanh from <string>:81:20 (layer)
+f32[16] output of tanh from <string>:81:20 (layer)
+f32[16] output of tanh from <string>:81:20 (layer)
 Compiler memory estimates: [{'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}, {'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}]
-Synchronized gradient samples: [[3.495905548334122e-05, 2.570822834968567e-05, 1.4999881386756897e-05, 1.4166813343763351e-05, 1.6415957361459732e-05], [2.570776268839836e-05, 2.408307045698166e-05, 8.791731670498848e-05, 7.383385673165321e-05, 5.5417418479919434e-05]]
+Synchronized gradient samples: [[2.5208108127117157e-05, 1.4833174645900726e-05, 1.1416152119636536e-05, 1.1333264410495758e-05, 9.832903742790222e-06], [2.3250002413988113e-05, 4.2708124965429306e-05, 5.6167133152484894e-05, 6.591575220227242e-05, 4.27919439971447e-05]]
 Independent reverse recurrence agrees with both gradients.
 Whole-objective residuals: ['f32[16,16] from a constant', 'f32[16] from the argument v']
 Whole-objective memory estimate: CompiledMemoryStats(generated_code_size_in_bytes=0, argument_size_in_bytes=64, output_size_in_bytes=64, alias_size_in_bytes=0, temp_size_in_bytes=256, host_generated_code_size_in_bytes=0, host_argument_size_in_bytes=0, host_output_size_in_bytes=0, host_alias_size_in_bytes=0, host_temp_size_in_bytes=0)
@@ -344,10 +333,8 @@ PASS: performance-05
 ```python
 # Experiment — Move the boundary to the entire objective: Correctness is necessary but does not choose the best policy.
 whole=jax.checkpoint(plain)
-# Differentiate the objective to obtain gradients ``.
 np.testing.assert_allclose(jax.grad(whole)(x),cotangent,rtol=3e-5,atol=1e-7)
 print('Whole-objective residuals:',residual_report(whole))
-# Differentiate the objective to obtain `whole_executable` via automatic differentiation.
 whole_executable=jax.jit(jax.grad(whole)).lower(x).compile()
 print('Whole-objective memory estimate:',whole_executable.memory_analysis())
 ```
@@ -367,16 +354,15 @@ Use the direction $v=(1,\ldots,1)$ and central differences to independently chec
 - `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
 
 **Step-by-step implementation plan:**
-1. Differentiate the objective to obtain `automatic` via automatic differentiation.
+1. Exercise solution
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Use the direction v=(1,\ldots,1) and central differences to...
+# Exercise solution
 direction = jnp.ones_like(...)  # TODO: compute direction
 eps = ...  # TODO: compute eps
 finite = ...  # TODO: compute finite
-# Differentiate the objective to obtain `automatic` via automatic differentiation.
 automatic = float(...)  # TODO: compute automatic
 np.testing.assert_allclose(finite,automatic,rtol = ...  # TODO: compute np.testing.assert_allclose(finite,automatic,rtol
 print('Directional derivative finite/automatic:',finite,automatic,'epsilon',eps)
@@ -385,11 +371,10 @@ print('Directional derivative finite/automatic:',finite,automatic,'epsilon',eps)
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Use the direction v=(1,\ldots,1) and central differences to...
+# Exercise solution
 direction=jnp.ones_like(x)
 eps=.001
 finite=(float(plain(x+eps*direction))-float(plain(x-eps*direction)))/(2*eps)
-# Differentiate the objective to obtain `automatic` via automatic differentiation.
 automatic=float(jnp.vdot(jax.grad(plain)(x),direction))
 np.testing.assert_allclose(finite,automatic,rtol=3e-3,atol=1e-6)
 print('Directional derivative finite/automatic:',finite,automatic,'epsilon',eps)
@@ -418,21 +403,17 @@ Apply jvp to each gradient function with the same primal point and tangent.
 - `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
 
 **Step-by-step implementation plan:**
-1. Differentiate the objective to obtain `(_, hvp_plain)` via automatic differentiation.
-2. Differentiate the objective to obtain `(_, hvp_remat)` via automatic differentiation.
-3. Confirm that all computed values remain finite (no NaN or Inf).
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Check higher-order differentiation (Transfer): Recomputation should preserve the differentiable function in...
+# Check higher-order differentiation (Transfer)
 direction = jnp.linspace(...)  # TODO: compute direction
-# Differentiate the objective to obtain `(_, hvp_plain)` via automatic differentiation.
 _,hvp_plain = jax.jvp(...)  # TODO: compute _,hvp_plain
-# Differentiate the objective to obtain `(_, hvp_remat)` via automatic differentiation.
 _,hvp_remat = jax.jvp(...)  # TODO: compute _,hvp_remat
 np.testing.assert_allclose(hvp_plain,hvp_remat,rtol = ...  # TODO: compute np.testing.assert_allclose(hvp_plain,hvp_remat,rtol
-# Confirm that all computed values remain finite (no NaN or Inf).
 assert np.isfinite(np.asarray(hvp_plain)).all()  # TODO: complete assertion check
 print('Higher-order directional derivatives agree.')
 ```
@@ -440,14 +421,11 @@ print('Higher-order directional derivatives agree.')
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Check higher-order differentiation (Transfer): Recomputation should preserve the differentiable function in...
+# Check higher-order differentiation (Transfer)
 direction=jnp.linspace(-1.,1.,len(x))
-# Differentiate the objective to obtain `(_, hvp_plain)` via automatic differentiation.
 _,hvp_plain=jax.jvp(jax.grad(plain),(x,),(direction,))
-# Differentiate the objective to obtain `(_, hvp_remat)` via automatic differentiation.
 _,hvp_remat=jax.jvp(jax.grad(remat),(x,),(direction,))
 np.testing.assert_allclose(hvp_plain,hvp_remat,rtol=3e-5,atol=1e-7)
-# Confirm that all computed values remain finite (no NaN or Inf).
 assert np.isfinite(np.asarray(hvp_plain)).all()
 print('Higher-order directional derivatives agree.')
 ```

@@ -7,7 +7,7 @@ Copy this template into your own portfolio and fill it after running your modifi
 Keep the actual XPlane and Perfetto paths, named interval durations and nesting check, units and an interpretation separating injected input delay from completed computation.
 
 - Command: `python3 phases/08-performance/03-read-an-xprof-trace/code/main.py`
-- Working directory: repository root
+- Working directory: Repository root
 - Python / JAX / NumPy versions: 
 - Hardware and device: 
 - My prediction before running: 

@@ -2,6 +2,8 @@
 
 Phase 04: Math & optimization · about 80 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Build an independent derivative estimate
@@ -73,7 +75,7 @@ The function $f(x)=|x|$ has slope $-1$ for negative inputs and $1$ for positive 
 Create a file named main.py in your activated learning environment. Add these imports and inputs first. Shapes and numeric types are part of the experiment.
 
 ```python
-# Step 1 — 1. Prepare the inputs: This block establishes the values used by the following steps; run...
+# Step 1 — 1. Prepare the inputs
 import jax
 import jax.numpy as jnp
 ```
@@ -93,7 +95,6 @@ h = 1e-2
 basis = jnp.eye(2)
 # Vectorize across the batch dimension with `jax.vmap` (`finite`).
 finite = jax.vmap(lambda e: (objective(w+h*e)-objective(w-h*e))/(2*h))(basis)
-# Differentiate the objective to obtain `automatic` via automatic differentiation.
 automatic = jax.grad(objective)(w)
 analytic = 2 * (w - jnp.array([2., -1.]))
 ```
@@ -117,7 +118,7 @@ Both gradients are approximately $[-3., 2.5]$. The analytic and autodiff gradien
 ## Run the example
 
 ```python
-# Step 1 — 1. Prepare the inputs: This block establishes the values used by the following steps; run...
+# Step 1 — 1. Prepare the inputs
 import jax
 import jax.numpy as jnp
 # Step 2 — 2. Define the computation: Each row of basis perturbs one coordinate.
@@ -128,7 +129,6 @@ h = 1e-2
 basis = jnp.eye(2)
 # Vectorize across the batch dimension with `jax.vmap` (`finite`).
 finite = jax.vmap(lambda e: (objective(w+h*e)-objective(w-h*e))/(2*h))(basis)
-# Differentiate the objective to obtain `automatic` via automatic differentiation.
 automatic = jax.grad(objective)(w)
 analytic = 2 * (w - jnp.array([2., -1.]))
 # Step 3 — 3. Measure and verify: Both gradients are approximately [-3., 2.5].
@@ -161,7 +161,6 @@ At very small steps, float32 rounding makes the two nearby function evaluations 
 This particular objective is quadratic, so a central difference has no truncation error in exact arithmetic. Do not expect a pronounced U-shaped error curve on the right of this example. For a general nonlinear objective, overly large steps can introduce truncation error too. Check several step sizes and look for agreement across a useful range, rather than choosing the smallest available step.
 
 ```python
-# Compute figure data for: Smaller perturbations eventually lose accuracy
 steps = jnp.logspace(-8.0, -1.0, 22)
 errors = []
 for h_plot in steps:
@@ -174,7 +173,7 @@ visual_data['yscale'] = 'log'
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:45:42.659689+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:20:29.990002+00:00. JAX 0.9.2.
 
 ```text
 Finite difference: [-2.9999971  2.4999976]
@@ -194,7 +193,7 @@ PASS: optimization-02
 **Predict before running:** Will $10^{-8}$ produce a more accurate estimate than $10^{-2}$ in float32?
 
 ```python
-# Experiment — Sweep the perturbation size: Nearby float32 inputs can coincide, so reducing the step does...
+# Experiment — Sweep the perturbation size
 for step_size in [1e-1, 1e-2, 1e-4, 1e-8]:
     # Vectorize across the batch dimension with `jax.vmap` (`estimate`).
     estimate = jax.vmap(lambda e: (objective(w+step_size*e)-objective(w-step_size*e))/(2*step_size))(basis)
@@ -213,7 +212,7 @@ Nearby float32 inputs can coincide, so reducing the step does not monotonically 
 **Predict before running:** For direction $[1, -2]$, predict grad dot direction before evaluation.
 
 ```python
-# Experiment — Check a new direction: A new projection supplies a separate numerical check, though it...
+# Experiment — Check a new direction
 direction = jnp.array([1., -2.])
 directional = (objective(w+h*direction)-objective(w-h*direction))/(2*h)
 assert jnp.allclose(directional, -8., atol=2e-4)
@@ -306,7 +305,7 @@ Use cosine as the analytic reference; here truncation error also matters.
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Move to a different smooth objective (Transfer / diagnosis): The analytic reference checks a nonquadratic function at a...
+# Move to a different smooth objective (Transfer / diagnosis)
 z = jnp.array(...)  # TODO: compute z
 def trig_loss(z):
     return ...  # TODO: return computed result
@@ -319,7 +318,7 @@ assert jnp.allclose(fd, jnp.cos(z), atol=5e-5, rtol=5e-5)  # TODO: complete asse
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Move to a different smooth objective (Transfer / diagnosis): The analytic reference checks a nonquadratic function at a...
+# Move to a different smooth objective (Transfer / diagnosis)
 z = jnp.array([0.2, -0.7])
 def trig_loss(z):
     return jnp.sum(jnp.sin(z))
@@ -353,15 +352,15 @@ Differentiate $(z_0-2)^2$ and compare both coordinates.
 - `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
 
 **Step-by-step implementation plan:**
-1. Differentiate the objective to obtain `bad` via automatic differentiation.
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Catch the wrong objective despite correct gradients (Transfer / diagnosis): The omitted term is a specification error; numerical...
+# Catch the wrong objective despite correct gradients (Transfer / diagnosis)
 def incomplete(z):
     return ...  # TODO: return computed result
-# Differentiate the objective to obtain `bad` via automatic differentiation.
 bad = jax.grad(...)  # TODO: compute bad
 assert jnp.allclose(bad, jnp.array([-3., 0.]))  # TODO: complete assertion check
 assert not jnp.allclose(bad, analytic)  # TODO: complete assertion check
@@ -371,10 +370,9 @@ assert jnp.allclose(jax.grad(objective)(w), analytic)  # TODO: complete assertio
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Catch the wrong objective despite correct gradients (Transfer / diagnosis): The omitted term is a specification error; numerical...
+# Catch the wrong objective despite correct gradients (Transfer / diagnosis)
 def incomplete(z):
     return (z[0]-2.)**2
-# Differentiate the objective to obtain `bad` via automatic differentiation.
 bad = jax.grad(incomplete)(w)
 assert jnp.allclose(bad, jnp.array([-3., 0.]))
 assert not jnp.allclose(bad, analytic)

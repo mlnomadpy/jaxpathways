@@ -7,7 +7,7 @@ Copy this template into your own portfolio and fill it after running your modifi
 Hand-derived Jacobian/Hessian, adjoint scalar, changed-point checks, finite-difference HVP and a Gauss–Newton distinction. Keep the environment, observed outputs and your explanation of the figure.
 
 - Command: `python3 phases/14-internals/02-jvps-vjps-and-higher-order-derivatives/code/main.py`
-- Working directory: repository root
+- Working directory: Repository root
 - Python / JAX / NumPy versions: 
 - Hardware and device: 
 - My prediction before running: 

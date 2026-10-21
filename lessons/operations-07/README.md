@@ -2,6 +2,8 @@
 
 Phase 16: Workload operations · about 75 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Version the application boundary
@@ -81,15 +83,14 @@ Freeze the case inventory before collecting responses. Pair responses by stable 
 Create main.py and add this setup block. Continue with the next block in the same file.
 
 ```python
-# Step 1 — Prepare the explicit contract: For a text generator, record the model revision, tokenizer, prompt...
+# Step 1 — Prepare the explicit contract
 import os
-# Configure environment variable before initializing the runtime.
+# Set MLFLOW_DISABLE_AGENT_HINT before importing its runtime.
 os.environ["MLFLOW_DISABLE_AGENT_HINT"]="1"
-# Configure environment variable before initializing the runtime.
+# Set MLFLOW_ENABLE_ASYNC_TRACE_LOGGING before importing its runtime.
 os.environ["MLFLOW_ENABLE_ASYNC_TRACE_LOGGING"]="false"
-# Configure environment variable before initializing the runtime.
+# Set MLFLOW_ENABLE_TELEMETRY before importing its runtime.
 os.environ["MLFLOW_ENABLE_TELEMETRY"]="false"
-# Import required JAX, NumPy, and standard-library modules.
 import tempfile
 from pathlib import Path
 import mlflow
@@ -103,7 +104,7 @@ For a text generator, record the model revision, tokenizer, prompt template and 
 Append this block, run main.py in the course environment, and retain the actual output.
 
 ```python
-# Step 2 — Run and inspect the controlled experiment: A trace connects one request’s spans: retrieval, model invocation,...
+# Step 2 — Run and inspect the controlled experiment
 def llm_case(case, answer, allowed_citations):
     """Deterministic replay evaluator, not an LLM judge or a general safety classifier."""
     if set(answer) != {'answer', 'citations', 'abstain'} or not isinstance(answer['answer'], str):
@@ -123,9 +124,8 @@ answer = dict(answer='CPU', citations=['course-v1'], abstain=False)
 unsafe = [dict(answer) for _ in cases]
 guarded = [dict(answer) for _ in cases[:-1]] + [dict(answer='', citations=[], abstain=True)]
 results = []
-# Create an isolated temporary directory to run and inspect artifacts safely:
+# Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory(prefix='llmops-') as folder:
-    # Execute `mlflow.set_tracking_uri('sqlite:///' + str(Path(folder) / 'traces.db'))`.
     mlflow.set_tracking_uri('sqlite:///' + str(Path(folder) / 'traces.db'))
     client = MlflowClient()
     experiment = client.create_experiment('replay-evaluation', artifact_location=(Path(folder)/'artifacts').as_uri())
@@ -162,21 +162,20 @@ Checking these invariants confirms the computation is ready for the full worked 
 ## Run the example
 
 ```python
-# Step 1 — Prepare the explicit contract: For a text generator, record the model revision, tokenizer, prompt...
+# Step 1 — Prepare the explicit contract
 import os
-# Configure environment variable before initializing the runtime.
+# Set MLFLOW_DISABLE_AGENT_HINT before importing its runtime.
 os.environ["MLFLOW_DISABLE_AGENT_HINT"]="1"
-# Configure environment variable before initializing the runtime.
+# Set MLFLOW_ENABLE_ASYNC_TRACE_LOGGING before importing its runtime.
 os.environ["MLFLOW_ENABLE_ASYNC_TRACE_LOGGING"]="false"
-# Configure environment variable before initializing the runtime.
+# Set MLFLOW_ENABLE_TELEMETRY before importing its runtime.
 os.environ["MLFLOW_ENABLE_TELEMETRY"]="false"
-# Import required JAX, NumPy, and standard-library modules.
 import tempfile
 from pathlib import Path
 import mlflow
 from mlflow import MlflowClient
 
-# Step 2 — Run and inspect the controlled experiment: A trace connects one request’s spans: retrieval, model invocation,...
+# Step 2 — Run and inspect the controlled experiment
 def llm_case(case, answer, allowed_citations):
     """Deterministic replay evaluator, not an LLM judge or a general safety classifier."""
     if set(answer) != {'answer', 'citations', 'abstain'} or not isinstance(answer['answer'], str):
@@ -196,9 +195,8 @@ answer = dict(answer='CPU', citations=['course-v1'], abstain=False)
 unsafe = [dict(answer) for _ in cases]
 guarded = [dict(answer) for _ in cases[:-1]] + [dict(answer='', citations=[], abstain=True)]
 results = []
-# Create an isolated temporary directory to run and inspect artifacts safely:
+# Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory(prefix='llmops-') as folder:
-    # Execute `mlflow.set_tracking_uri('sqlite:///' + str(Path(folder) / 'traces.db'))`.
     mlflow.set_tracking_uri('sqlite:///' + str(Path(folder) / 'traces.db'))
     client = MlflowClient()
     experiment = client.create_experiment('replay-evaluation', artifact_location=(Path(folder)/'artifacts').as_uri())
@@ -239,13 +237,12 @@ The horizontal axis names the aggregate, answerable and unsupported groups. The 
 The plot reports evaluator outputs from controlled answer objects recorded in real traces. It does not report accuracy of a live language model. In a real suite, expand critical cases and preserve sample counts and model-version evidence before making a release claim.
 
 ```python
-# Compute figure data for: The unsupported case changes the release decision
 visual_data={'kind':'bar','labels':['overall (10)','answerable (9)','unsupported (1)'],'xlabel':'fixture group (count)','ylabel':'fixture pass fraction','series':[{'label':name,'y':[r[k] for k in ['overall','answerable','unanswerable']]} for name,r in zip(['always-answer','contract-aware'],results)]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:51:53.818799+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:26:31.002086+00:00. JAX 0.9.2.
 
 ```text
 Observed replay scores: [{'overall': 0.9, 'answerable': 1.0, 'unanswerable': 0.0}, {'overall': 1.0, 'answerable': 1.0, 'unanswerable': 1.0}]
@@ -266,7 +263,7 @@ PASS: operations-07
 **Predict before running:** Can the 90% candidate satisfy a rule that requires the unsupported case to pass?
 
 ```python
-# Experiment — Separate aggregate and critical-case behavior: The extra gate encodes a required behavior that the overall...
+# Experiment — Separate aggregate and critical-case behavior
 release=[r['overall']>=.9 and r['unanswerable']==1. for r in results]
 assert release==[False,True]
 print('Release decisions:',release)
@@ -285,10 +282,8 @@ The extra gate encodes a required behavior that the overall average hides. One u
 def score_replay(inventory, replies, allowed_citations):
     ids = [case['id'] for case in inventory]
     reply_ids = [reply['id'] for reply in replies]
-    # Guard input contract (`not ids or len(set(ids)) != len(ids)`) and fail fast if violated.
     if not ids or len(set(ids)) != len(ids):
         raise ValueError('empty or duplicate case inventory')
-    # Guard input contract (`len(set(reply_ids)) != len(reply_ids) or set(reply_ids) != set(ids)`) and fail fast if violated.
     if len(set(reply_ids)) != len(reply_ids) or set(reply_ids) != set(ids):
         raise ValueError('missing, duplicate or unknown response IDs')
     by_id = {reply['id']: reply['response'] for reply in replies}
@@ -319,18 +314,13 @@ Add a response with an invented citation and require the evaluator to fail it.
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `llm_case(...)` — Call `llm_case` with your updated parameters or inputs from this lesson's workspace.
-- `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
-
 **Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+1. Exercise solution
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Add a response with an invented citation and require the evaluator to...
+# Exercise solution
 for citation in ['invented','old-index-v0']:
     assert not llm_case(cases[0],dict(answer='CPU',citations=[citation],abstain=False),['course-v1'])  # TODO: complete assertion check
 print('Unrecognized citations rejected.')
@@ -339,7 +329,7 @@ print('Unrecognized citations rejected.')
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Add a response with an invented citation and require the evaluator to...
+# Exercise solution
 for citation in ['invented','old-index-v0']:
     assert not llm_case(cases[0],dict(answer='CPU',citations=[citation],abstain=False),['course-v1'])
 print('Unrecognized citations rejected.')
@@ -361,18 +351,13 @@ The fixture contract requires both empty answer text and no citations.
 
 ### How to write: Check abstention structure — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `structure(...)` — Call `structure` with your updated parameters or inputs from this lesson's workspace.
-- `llm_case(...)` — Call `llm_case` with your updated parameters or inputs from this lesson's workspace.
-- `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
-
 **Step-by-step implementation plan:**
-1. Check abstention structure (transfer): Validate the full response object; a boolean alone cannot...
+1. Check abstention structure (transfer)
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Check abstention structure (transfer): Validate the full response object; a boolean alone cannot...
+# Check abstention structure (transfer)
 bad = dict(...)  # TODO: compute bad
 assert not llm_case(cases[-1],bad,['course-v1'])  # TODO: complete assertion check
 print('An abstention flag alone does not satisfy the output contract.')
@@ -381,7 +366,7 @@ print('An abstention flag alone does not satisfy the output contract.')
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Check abstention structure (transfer): Validate the full response object; a boolean alone cannot...
+# Check abstention structure (transfer)
 bad=dict(answer='An unsupported claim',citations=[],abstain=True)
 assert not llm_case(cases[-1],bad,['course-v1'])
 print('An abstention flag alone does not satisfy the output contract.')
@@ -405,11 +390,6 @@ Use the contract-aware replies as the starting point. An empty abstention is cor
 
 ### How to write: Keep failed work in the evaluation inventory — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `inventory(...)` — Call `inventory` with your updated parameters or inputs from this lesson's workspace.
-- `zip(...)` — Call `zip` with your updated parameters or inputs from this lesson's workspace.
-- `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
-
 **Step-by-step implementation plan:**
 1. Set up the changed input or configuration parameters requested in the prompt.
 2. Run the target function or transformation and assert that the output matches your prediction.
@@ -417,7 +397,7 @@ Use the contract-aware replies as the starting point. An empty abstention is cor
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Keep failed work in the evaluation inventory (Transfer): The fixture represents an unsuccessful answer as an empty...
+# Keep failed work in the evaluation inventory (Transfer)
 timeout_replies = ...  # TODO: compute timeout_replies
 timeout_replies[0]['response'] = dict(...)  # TODO: compute timeout_replies[0]['response']
 timeout_summary = score_replay(...)  # TODO: compute timeout_summary
@@ -428,7 +408,7 @@ print('Failed answerable work remains in denominator:', timeout_summary)
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Keep failed work in the evaluation inventory (Transfer): The fixture represents an unsuccessful answer as an empty...
+# Keep failed work in the evaluation inventory (Transfer)
 timeout_replies = [{'id': case['id'], 'response': dict(reply)} for case, reply in zip(cases, guarded)]
 timeout_replies[0]['response'] = dict(answer='', citations=[], abstain=True)
 timeout_summary = score_replay(cases, timeout_replies, ['course-v1'])

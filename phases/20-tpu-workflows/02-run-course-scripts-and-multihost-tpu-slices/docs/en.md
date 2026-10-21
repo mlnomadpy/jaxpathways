@@ -1,13 +1,15 @@
-# Run course scripts and multi-host TPU Pod slices
+# Review scripts before TPU staging
 
 Phase 20: TPU Workflows: Launching Jobs & Checkpointed Experiments · about 20 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
-- Classify course scripts using a CPU-only / single-host-compatible / multi-host-qualified execution matrix before staging.
-- Distinguish single-host TPU slices (`1` host, `1–8` chips) from multi-host TPU Pod slices (`2+` hosts, `--worker=all`).
-- Generate exact `gcloud compute tpus tpu-vm scp` and `ssh` command pipelines for single-host and multi-host runs.
-- Retrieve `events.jsonl`, stdout logs, and checkpoints via `scp --recurse` before deleting the TPU VM.
+- Classify each course script as CPU-only, review-required, single-host-compatible, or multi-host-qualified before staging.
+- Keep CPU-only `distributed-02` on CPU; do not infer compatibility for Transformers, Pallas, or other lessons.
+- Generate a TPU command only for a source-reviewed target with an explicit backend assertion, pinned dependencies, known topology, and data-ownership contract.
+- Distinguish `--worker=all` process discovery from a multi-host program with verified global data and collective updates.
 
 ## The problem
 
@@ -15,13 +17,13 @@ A course script may contain CPU-specific device selection or assumptions that do
 
 ## The idea
 
-Use a per-script execution matrix. `distributed-02` is CPU-only because it explicitly selects CPU devices; route it to CPU. Treat other scripts as unreviewed until their source is checked. A TPU-compatible single-host script may run on one TPU VM after its backend contract is verified. Multi-host requires simultaneous worker launch and distributed initialization, followed by a program that assigns each process data and uses the intended collective. Keep discovery receipts separate from training receipts.
+Use a per-script execution matrix. `distributed-02` is CPU-only because it explicitly selects CPU devices; route it to CPU. Treat other scripts as unreviewed until their exact source, backend selection, dependencies, topology assumptions, and data ownership are checked. Existing bounded receipts cover the v5e1 checkpointed launcher and precision target and the four-device single-host collective target; each is limited to its named source and configuration. Multi-host requires simultaneous worker launch and initialization, followed by distinct process-owned inputs and a checked global update. Keep discovery receipts separate from training receipts.
 
-## Why multi-host TPU Pod slices require `--worker=all` and `jax.distributed.initialize()`
+## Why every worker must launch and initialize
 
-`--worker=all` starts a process on each host, and `jax.distributed.initialize()` lets those processes discover the global topology. These steps establish process and device discovery only. They do not create a training mesh, distribute data, perform a collective update, or prove checkpoint recovery. A multi-host training receipt must separately record each process identity, its owned input range, collective result, synchronized update, and per-process logs.
+`--worker=all` starts a process on each host, and `jax.distributed.initialize()` lets those processes discover the global topology. These steps establish process and device discovery only. They do not create a training mesh, distribute data, perform a collective update, or prove checkpoint recovery.
 
-**Execution matrix:** `distributed-02` → CPU-only (its source requests `jax.devices("cpu")`); do not set `JAX_PLATFORMS=tpu`. Other lesson scripts → inspect-required until a source review identifies device selection and assumptions. Single-host TPU-compatible → allowed only after that review and a backend assertion. Multi-host-qualified → allowed only after the program explicitly initializes all hosts, assigns distinct process-local inputs, and checks a global result. No generic “run any script” command is valid.
+**Execution matrix:** `distributed-02` → CPU-only (its source requests `jax.devices("cpu")`); do not set `JAX_PLATFORMS=tpu`. Other lesson scripts → inspect-required until a source review identifies device selection, dependencies, topology assumptions, and data ownership. A TPU-compatible single-host script may run only after that review, with a backend assertion and matching pinned environment. Multi-host-qualified requires all hosts, distinct process-owned inputs, and a verified global result. Existing bounded receipts cover the v5e1 launcher and precision target, four single-device Pallas cases, the four-device single-host collective fixture, and a separate sixteen-device fixture across four VM workers. That last target checks distinct process-owned data and same-process Orbax checkpoint restore and replay; it does not qualify this lesson’s discovery example, a fresh TPU process-group restart, or production model training. Each receipt applies only to its recorded source, environment, cases, and hardware; no generic “run any script” command is valid.
 
 $$
 g_{\text{global}} = \frac{1}{P}\sum_{p=0}^{P-1} g^{(p)} = \operatorname{psum}(g^{(p)}, \texttt{'data'}) / P
@@ -39,7 +41,7 @@ If a TPU slice has `hosts = 4` and `chips_per_host = 4` (`v5litepod-16`), what a
 
 ## 1. Route a script using the execution matrix
 
-For `distributed-02`, use its CPU mode and retain its CPU receipt. For a script reviewed as single-host TPU-compatible, set `LESSON_ID` to that reviewed ID and run on one TPU VM. Use `set -o pipefail` so `tee` cannot hide a failed Python process. Do not infer TPU compatibility from a successful import or from `JAX_PLATFORMS=tpu`.
+For `distributed-02`, use its CPU mode and retain its CPU receipt; the command below runs that CPU path only. The separate v5e1 launcher and precision target and four-device single-host collective target are qualified only for their recorded sources, pinned environments, and device layouts. A different lesson ID is not a substitute for one of those target programs: review its exact source, backend assertion, dependencies, topology, and input ownership before considering a new TPU qualification.
 
 **Run the known CPU-only distributed lesson in CPU mode**
 
@@ -53,9 +55,9 @@ python "public/exercises/${LESSON_ID}.py" | tee "${LESSON_ID}-cpu.txt"
 
 ## 2. Separate multi-host discovery from a qualified training run
 
-Launching with `--worker=all` and calling `jax.distributed.initialize()` verifies that processes can discover the global device topology. The command below is a discovery check only. A training claim additionally requires distinct per-process data, an explicit global reduction/update, and synchronized output/checkpoint evidence; no TPU training has been qualified by this lesson.
+Launching with `--worker=all` and calling `jax.distributed.initialize()` verifies that processes can discover the global device topology. The command below is a discovery check only. A training claim additionally requires distinct per-process data, an explicit global reduction/update, independently derived expected values, synchronized output/checkpoint evidence, and a receipt from every process.
 
-The following one-step example performs an actual global reduction and parameter update: every process contributes a distinct scalar input, `lax.psum` computes a global mean gradient, each replica applies the same update, and process 0 publishes a checkpoint after a global barrier. It is executable code, not a claimed result. Qualify it on a named TPU slice and retain all per-worker receipts before describing it as verified.
+The following one-step example is executable but unqualified; it is not a reported TPU result. Run it only after the same pinned dependencies are installed on each worker, then retain every receipt and validate the named multi-host slice. Do not infer multi-host support from a single-host receipt. A separate sixteen-device v5e checkpoint test has actual per-process receipts: see the [hardware evidence guide](https://www.tahabouhsine.com/jaxpathways/tpu-performance.html). It uses `resources/tpu-gcp/multihost_target.py`, not this one-step teaching example; its result does not qualify the example below.
 
 **Record multi-host process and device discovery only**
 
@@ -139,26 +141,20 @@ gcloud compute tpus tpu-vm scp --recurse "$TPU_NAME":~/jax-tpu-lab/multihost-run
 Create main.py with SLICE_CATALOG and compute global_chips, total_hbm_gib, and multi_host.
 
 ```python
-# Step 1 — Tabulate single-host and multi-host TPU slice topologies: Separating hosts from chips_per_host shows immediately when a...
-# Import json for this computation.
+# Step 1 — Tabulate single-host and multi-host TPU slice topologies
 import json
 import jax
 import numpy as np
 
-# Initialize list `SLICE_CATALOG` for the stage values.
 SLICE_CATALOG = [
     {"slice": "v5litepod-4", "hosts": 1, "chips_per_host": 4, "hbm_per_chip_gib": 16},
     {"slice": "v5litepod-8", "hosts": 1, "chips_per_host": 8, "hbm_per_chip_gib": 16},
     {"slice": "v5litepod-16", "hosts": 4, "chips_per_host": 4, "hbm_per_chip_gib": 16},
     {"slice": "v6e-16", "hosts": 4, "chips_per_host": 4, "hbm_per_chip_gib": 32},
 ]
-# Iterate over `entry` to step through the computation:
 for entry in SLICE_CATALOG:
-    # Compute `entry["global_chips"]` from `entry["hosts"] * entry["chips_per_host"]`
     entry["global_chips"] = entry["hosts"] * entry["chips_per_host"]
-    # Compute `entry["total_hbm_gib"]` from `entry["global_chips"] * entry["hbm_per_chip_gib"]`
     entry["total_hbm_gib"] = entry["global_chips"] * entry["hbm_per_chip_gib"]
-    # Compute `entry["multi_host"]` from `entry["hosts"] > 1`
     entry["multi_host"] = entry["hosts"] > 1
 ```
 
@@ -224,30 +220,22 @@ The completed checks retain the CPU route and reject a Pod launch for this CPU-o
 ## Run the example
 
 ```python
-# Run course scripts and multi-host TPU Pod slices: Every lesson in this course generates a self-contained script in...
-# Import json for this computation.
 import json
 import jax
 import numpy as np
 
-# Initialize list `SLICE_CATALOG` for the stage values.
 SLICE_CATALOG = [
     {"slice": "v5litepod-4", "hosts": 1, "chips_per_host": 4, "hbm_per_chip_gib": 16},
     {"slice": "v5litepod-8", "hosts": 1, "chips_per_host": 8, "hbm_per_chip_gib": 16},
     {"slice": "v5litepod-16", "hosts": 4, "chips_per_host": 4, "hbm_per_chip_gib": 16},
     {"slice": "v6e-16", "hosts": 4, "chips_per_host": 4, "hbm_per_chip_gib": 32},
 ]
-# Iterate over `entry` to step through the computation:
 for entry in SLICE_CATALOG:
-    # Compute `entry["global_chips"]` from `entry["hosts"] * entry["chips_per_host"]`
     entry["global_chips"] = entry["hosts"] * entry["chips_per_host"]
-    # Compute `entry["total_hbm_gib"]` from `entry["global_chips"] * entry["hbm_per_chip_gib"]`
     entry["total_hbm_gib"] = entry["global_chips"] * entry["hbm_per_chip_gib"]
-    # Compute `entry["multi_host"]` from `entry["hosts"] > 1`
     entry["multi_host"] = entry["hosts"] > 1
 
 
-# Function `build_tpu_experiment_commands(tpu_name, zone, lesson_id, hosts)` implementing this stage's computation:
 def build_tpu_experiment_commands(tpu_name, zone, lesson_id, hosts=1, execution_class="review-required"):
     if execution_class == "review-required":
         raise ValueError("classify and review the script before generating a TPU launch command")
@@ -265,22 +253,17 @@ def build_tpu_experiment_commands(tpu_name, zone, lesson_id, hosts=1, execution_
     scp_fetch = f"gcloud compute tpus tpu-vm scp {tpu_name}:~/jax-tpu-lab/{lesson_id}-tpu.txt ./ --zone={zone}"
     return {"scp_stage": scp_stage, "ssh_run": ssh_run, "scp_fetch": scp_fetch, "multi_host": hosts > 1}
 
-# Run `build_tpu_experiment_commands` to compute `single_cmds`.
 single_cmds = build_tpu_experiment_commands("jax-tpu-course", "us-west1-c", "distributed-02", hosts=1, execution_class="cpu-only")
-# Run `build_tpu_experiment_commands` to compute `pod_cmds`.
 pod_cmds = None  # This lesson has no multi-host-qualified training program.
 # Assert the CPU route does not request TPU execution.
 assert single_cmds["run"] == "python public/exercises/distributed-02.py"
-# Assert that `"--worker=all" in pod_cmds["scp_stage"] and "--worker=all" in pod_cmds["ssh_run"]`.
 try:
     build_tpu_experiment_commands("jax-tpu-pod", "us-west1-c", "distributed-02", hosts=4, execution_class="cpu-only")
 except ValueError:
     print("Correctly rejected CPU-only lesson for TPU Pod execution")
 else:
     raise AssertionError("CPU-only lesson must not be routed to TPU Pod")
-# Print the observed values to compare against the expected result.
 print("Slice catalog global chips:", {s["slice"]: s["global_chips"] for s in SLICE_CATALOG})
-# Print diagnostic summary of the computed outputs.
 print("CPU route:", single_cmds["run"])
 ```
 
@@ -303,8 +286,6 @@ The horizontal axis compares four Cloud TPU slices (`v5litepod-4`, `v5litepod-8`
 `v5litepod-4` and `v5litepod-8` keep `hosts = 1`, whereas `v5litepod-16` and `v6e-16` use `4` hosts with `4` local chips each (`16` global chips), visually showing why `--worker=all` becomes mandatory at 16 chips.
 
 ```python
-# Compute figure data for: Host count, per-host local chips, and global TPU chips across single-host and Pod slices
-# Construct dictionary `visual_data` with the structured fields for this stage.
 visual_data = {
     'kind': 'bar',
     'labels': [s['slice'] for s in SLICE_CATALOG],
@@ -320,7 +301,7 @@ visual_data = {
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:58:54.082998+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T00:02:36.742376+00:00. JAX 0.9.2.
 
 ```text
 CPU route: python public/exercises/distributed-02.py
@@ -344,11 +325,9 @@ PASS: tpu-05
 **Predict before running:** How many global chips are left idle if you launch a script without `--worker=all` on `v5litepod-16`?
 
 ```python
-# Experiment — Compare local vs global device counts across slices: Worker 0 only controls its own 4 local chips; the other 3 hosts...
+# Experiment — Compare local vs global device counts across slices
 v5e16 = next(s for s in SLICE_CATALOG if s["slice"] == "v5litepod-16")
-# Compute `idle_without_worker_all` from `v5e16["global_chips"] - v5e16["chips_per_host"]`
 idle_without_worker_all = v5e16["global_chips"] - v5e16["chips_per_host"]
-# Print the observed values to compare against the expected result.
 print("v5litepod-16 global chips:", v5e16["global_chips"], "Idle chips without --worker=all:", idle_without_worker_all)
 # Assert invariant `idle_without_worker_all == 12` holds
 assert idle_without_worker_all == 12
@@ -363,11 +342,9 @@ Worker 0 only controls its own 4 local chips; the other 3 hosts (`3 * 4 = 12` ch
 **Predict before running:** How much total HBM is available across a 16-chip `v6e-16` Pod slice compared to `v5litepod-16`?
 
 ```python
-# Experiment — Verify total HBM scaling from v5litepod-16 to v6e-16: Doubling per-chip HBM on Trillium (v6e) doubles the total...
+# Experiment — Verify total HBM scaling from v5litepod-16 to v6e-16
 hbm_by_slice = {s["slice"]: s["total_hbm_gib"] for s in SLICE_CATALOG}
-# Print the observed values to compare against the expected result.
 print("Total HBM GiB by slice:", hbm_by_slice)
-# Assert that `hbm_by_slice["v6e-16"] == 512 and hbm_by_slice["v5litepod-16"] == 256`.
 assert hbm_by_slice["v6e-16"] == 512 and hbm_by_slice["v5litepod-16"] == 256
 ```
 
@@ -380,11 +357,6 @@ Doubling per-chip HBM on Trillium (`v6e`) doubles the total sharded model state 
 Use `build_tpu_experiment_commands` for the reviewed CPU-only `distributed-02` route. Then verify that its default unreviewed class and a four-host CPU-only request both raise `ValueError`.
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
-
-**Key functions & syntax to use:**
-- `build_tpu_experiment_commands(...)` — Call `build_tpu_experiment_commands` with your updated parameters or inputs from this lesson's workspace.
-- `in(...)` — Call `in` with your updated parameters or inputs from this lesson's workspace.
-- `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
 
 **Step-by-step implementation plan:**
 1. Set up the changed input or configuration parameters requested in the prompt.
@@ -436,22 +408,15 @@ Filter by `s['multi_host']`.
 
 ### How to write: Filter multi-host slices from the catalog — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `catalog(...)` — Call `catalog` with your updated parameters or inputs from this lesson's workspace.
-- `hosts(...)` — Call `hosts` with your updated parameters or inputs from this lesson's workspace.
-- `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
-
 **Step-by-step implementation plan:**
-1. Filter multi-host slices from the catalog (Foundations): Both 16-chip slices span 4 hosts (4 chips per host) and...
-2. Print the observed values to compare against the expected result.
-3. Assert invariant `pod_slices == ["v5litepod-16"` holds
+1. Filter multi-host slices from the catalog (Foundations)
+2. Assert invariant `pod_slices == ["v5litepod-16"` holds
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Filter multi-host slices from the catalog (Foundations): Both 16-chip slices span 4 hosts (4 chips per host) and...
+# Filter multi-host slices from the catalog (Foundations)
 pod_slices = ...  # TODO: compute pod_slices
-# Print the observed values to compare against the expected result.
 print("Multi-host Pod slices:", pod_slices)
 # Assert invariant `pod_slices == ["v5litepod-16"` holds
 assert pod_slices  # TODO: complete assertion check
@@ -460,9 +425,8 @@ assert pod_slices  # TODO: complete assertion check
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Filter multi-host slices from the catalog (Foundations): Both 16-chip slices span 4 hosts (4 chips per host) and...
+# Filter multi-host slices from the catalog (Foundations)
 pod_slices = [s["slice"] for s in SLICE_CATALOG if s["multi_host"]]
-# Print the observed values to compare against the expected result.
 print("Multi-host Pod slices:", pod_slices)
 # Assert invariant `pod_slices == ["v5litepod-16"` holds
 assert pod_slices == ["v5litepod-16", "v6e-16"]
@@ -486,27 +450,15 @@ Multiply `8 * chips_per_host` and `8 * global_chips`.
 
 ### How to write: Compute per-host vs global batch size on a 4-host Pod slice — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `slice(...)` — Call `slice` with your updated parameters or inputs from this lesson's workspace.
-- `chips(...)` — Call `chips` with your updated parameters or inputs from this lesson's workspace.
-- `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
-
 **Step-by-step implementation plan:**
-1. Compute `per_host_batch` from `microbatch_per_chip * 4`
-2. Compute `global_batch` from `microbatch_per_chip * 16`
-3. Print the observed values to compare against the expected result.
-4. Assert invariant `per_host_batch == 32 and global_batch == 128` holds
+1. Assert invariant `per_host_batch == 32 and global_batch == 128` holds
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Compute per-host vs global batch size on a 4-host Pod slice (Transfer / diagnosis): Each host feeds its 4 local chips (32 sequences per host),...
 microbatch_per_chip = ...  # TODO: compute microbatch_per_chip
-# Compute `per_host_batch` from `microbatch_per_chip * 4`
 per_host_batch = ...  # TODO: compute per_host_batch
-# Compute `global_batch` from `microbatch_per_chip * 16`
 global_batch = ...  # TODO: compute global_batch
-# Print the observed values to compare against the expected result.
 print("Per-host batch:", per_host_batch, "Global batch:", global_batch)
 # Assert invariant `per_host_batch == 32 and global_batch == 128` holds
 assert per_host_batch  # TODO: complete assertion check
@@ -515,13 +467,9 @@ assert per_host_batch  # TODO: complete assertion check
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Compute per-host vs global batch size on a 4-host Pod slice (Transfer / diagnosis): Each host feeds its 4 local chips (32 sequences per host),...
 microbatch_per_chip = 8
-# Compute `per_host_batch` from `microbatch_per_chip * 4`
 per_host_batch = microbatch_per_chip * 4
-# Compute `global_batch` from `microbatch_per_chip * 16`
 global_batch = microbatch_per_chip * 16
-# Print the observed values to compare against the expected result.
 print("Per-host batch:", per_host_batch, "Global batch:", global_batch)
 # Assert invariant `per_host_batch == 32 and global_batch == 128` holds
 assert per_host_batch == 32 and global_batch == 128
@@ -543,7 +491,7 @@ What happens if you launch a distributed JAX script on a 4-host `v5litepod-16` s
 
 Only worker 0 starts Python, so `jax.distributed.initialize()` hangs waiting for the other 3 hosts (or 12 of the 16 TPU chips sit idle)
 
-Every host in a multi-host TPU Pod slice runs its own OS and Python process; `--worker=all` is required so all hosts join the collective mesh.
+Each TPU VM worker has its own OS and Python process. Every worker must participate in the distributed program. gcloud --worker=all can launch them together; concurrent explicit worker commands or another supported job manager can do the same. Launching only one worker does not complete a global collective.
 
 </details>
 
@@ -553,12 +501,12 @@ If `gcloud compute tpus tpu-vm ssh --worker=all` fails on one worker because `.v
 
 ## Carry forward
 
-- Stage any `public/exercises/<lesson-id>.py` script with `gcloud compute tpus tpu-vm scp` to run course experiments on TPU in parallel.
-- Use single-host commands for `1–8` chip slices (`v5litepod-4`, `v5litepod-8`, `v6e-4`) and add `--worker=all` + `jax.distributed.initialize()` for multi-host slices (`v5litepod-16`, `v6e-16`).
+- Keep `distributed-02` on CPU. Before staging another script, inspect its exact backend selection and dependencies, assert the TPU backend and topology, and document which process owns each input.
+- Every hardware receipt applies to its exact source, environment, devices and workload. `--worker=all` provides a launch mechanism; training and recovery need their own checked global updates and complete worker receipts. The recorded sixteen-device checkpoint test is separate from this lesson's one-step example.
 
 ## Keep your evidence
 
-Keep the generated scp_in_cmd, ssh_run_cmd, and scp_out_cmd workflow for single-host and multi-host slices plus the process-0 checkpoint writer check.
+Keep the execution classification and rejected-route checks. For a target run, retain the exact source/environment hashes, selected backend and devices, data ownership, numerical check, and all worker receipts required by that target. A topology receipt alone is not a training result.
 
 Save your predictions, modified code, terminal outputs, and reasoning in your engineering portfolio.
 

@@ -1,7 +1,7 @@
 """Gradient checking and numerical accuracy: worked experiments and reference solutions. CPU checks."""
 
 # 1. Prepare the inputs
-# Step 1 — 1. Prepare the inputs: This block establishes the values used by the following steps; run...
+# Step 1 — 1. Prepare the inputs
 import jax
 import jax.numpy as jnp
 
@@ -14,7 +14,6 @@ h = 1e-2
 basis = jnp.eye(2)
 # Vectorize across the batch dimension with `jax.vmap` (`finite`).
 finite = jax.vmap(lambda e: (objective(w+h*e)-objective(w-h*e))/(2*h))(basis)
-# Differentiate the objective to obtain `automatic` via automatic differentiation.
 automatic = jax.grad(objective)(w)
 analytic = 2 * (w - jnp.array([2., -1.]))
 
@@ -25,7 +24,7 @@ print("Autodiff:", automatic)
 assert jnp.allclose(automatic, analytic)
 assert jnp.allclose(finite, automatic, atol=2e-4, rtol=2e-4)
 
-# Step 1 — 1. Prepare the inputs: This block establishes the values used by the following steps; run...
+# Step 1 — 1. Prepare the inputs
 import jax
 import jax.numpy as jnp
 # Step 2 — 2. Define the computation: Each row of basis perturbs one coordinate.
@@ -36,7 +35,6 @@ h = 1e-2
 basis = jnp.eye(2)
 # Vectorize across the batch dimension with `jax.vmap` (`finite`).
 finite = jax.vmap(lambda e: (objective(w+h*e)-objective(w-h*e))/(2*h))(basis)
-# Differentiate the objective to obtain `automatic` via automatic differentiation.
 automatic = jax.grad(objective)(w)
 analytic = 2 * (w - jnp.array([2., -1.]))
 # Step 3 — 3. Measure and verify: Both gradients are approximately [-3., 2.5].
@@ -46,7 +44,6 @@ assert jnp.allclose(automatic, analytic)
 assert jnp.allclose(finite, automatic, atol=2e-4, rtol=2e-4)
 
 # Figure data experiment
-# Compute figure data for: Smaller perturbations eventually lose accuracy
 steps = jnp.logspace(-8.0, -1.0, 22)
 errors = []
 for h_plot in steps:
@@ -57,7 +54,7 @@ visual_data = {'kind': 'line', 'x': steps.tolist(), 'xscale': 'log', 'xlabel': '
 visual_data['yscale'] = 'log'
 
 # Experiment: Sweep the perturbation size
-# Experiment — Sweep the perturbation size: Nearby float32 inputs can coincide, so reducing the step does...
+# Experiment — Sweep the perturbation size
 for step_size in [1e-1, 1e-2, 1e-4, 1e-8]:
     # Vectorize across the batch dimension with `jax.vmap` (`estimate`).
     estimate = jax.vmap(lambda e: (objective(w+step_size*e)-objective(w-step_size*e))/(2*step_size))(basis)
@@ -67,7 +64,7 @@ tiny = jax.vmap(lambda e: (objective(w+1e-8*e)-objective(w-1e-8*e))/(2e-8))(basi
 assert not jnp.allclose(tiny, analytic, atol=1e-3)
 
 # Experiment: Check a new direction
-# Experiment — Check a new direction: A new projection supplies a separate numerical check, though it...
+# Experiment — Check a new direction
 direction = jnp.array([1., -2.])
 directional = (objective(w+h*direction)-objective(w-h*direction))/(2*h)
 assert jnp.allclose(directional, -8., atol=2e-4)
@@ -91,7 +88,7 @@ assert jnp.allclose(jax.grad(objective)(minimum), jnp.zeros(2))
 assert jnp.allclose(objective(minimum), 0.)
 
 # Reference practice: Move to a different smooth objective
-# Move to a different smooth objective (Transfer / diagnosis): The analytic reference checks a nonquadratic function at a...
+# Move to a different smooth objective (Transfer / diagnosis)
 z = jnp.array([0.2, -0.7])
 def trig_loss(z):
     return jnp.sum(jnp.sin(z))
@@ -101,10 +98,9 @@ assert jnp.allclose(jax.grad(trig_loss)(z), jnp.cos(z))
 assert jnp.allclose(fd, jnp.cos(z), atol=5e-5, rtol=5e-5)
 
 # Reference practice: Catch the wrong objective despite correct gradients
-# Catch the wrong objective despite correct gradients (Transfer / diagnosis): The omitted term is a specification error; numerical...
+# Catch the wrong objective despite correct gradients (Transfer / diagnosis)
 def incomplete(z):
     return (z[0]-2.)**2
-# Differentiate the objective to obtain `bad` via automatic differentiation.
 bad = jax.grad(incomplete)(w)
 assert jnp.allclose(bad, jnp.array([-3., 0.]))
 assert not jnp.allclose(bad, analytic)

@@ -2,6 +2,8 @@
 
 Phase 06: Data & checkpoint recovery · about 70 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Decide what makes runs comparable
@@ -81,27 +83,26 @@ python projects/engineering-release/mlflow_lab.py --output ./engineering-run
 
 **Expected:** Two training runs, two registered versions, one prompt version, one three-span trace and a model.json artifact are written. Use a fresh folder for another independent run.
 
-## Step 1: Set up imports and input tensors
+## Set MLflow options and load hashing and serialization tools
 
-Import the required JAX modules and define the initial inputs for track experiments and lineage with mlflow.
+Set the two MLflow environment options before importing the package, then import hashing, JSON, temporary-directory, and NumPy helpers.
 
 ```python
 import os
-# Configure environment variable before initializing the runtime.
+# Set MLFLOW_DISABLE_AGENT_HINT before importing its runtime.
 os.environ['MLFLOW_DISABLE_AGENT_HINT'] = '1'
-# Configure environment variable before initializing the runtime.
+# Set MLFLOW_ENABLE_TELEMETRY before importing its runtime.
 os.environ['MLFLOW_ENABLE_TELEMETRY'] = 'false'
-# Import required JAX, NumPy, and standard-library modules.
 import hashlib, json, tempfile
 from pathlib import Path
 import numpy as np
 ```
 
-Establishing explicit input shapes and dtypes first makes the downstream transformation contract deterministic.
+Setting these options before MLflow loads makes the run quiet and local. The SHA-256 digest will identify the exact synthetic training arrays.
 
-## Step 2: Apply the core JAX transformation
+## Define the synthetic regression data and JAX optimizer
 
-Write the core computation and transformation step over the initialized inputs.
+Import JAX and MLflow, create training points on $y=2x+1$, and reserve separate validation points.
 
 ```python
 import jax
@@ -112,30 +113,27 @@ x = jnp.array([-2., -1., 0., 1., 2.])
 y = 2 * x + 1
 ```
 
-This stage executes the primary numerical transformation and binds the intermediate outputs.
+The training and validation inputs come from the same known line but contain different x values. The objective is mean squared error; jax.grad supplies each gradient step.
 
-## Step 3: Verify shapes and numerical invariants
+## Log, read back, and independently validate two learning-rate runs
 
-Check that the resulting arrays satisfy the expected shape, dtype, and numerical tolerances.
+Hash the data, train each rate in a temporary SQLite-backed MLflow experiment, log metrics and model values, then read the records back and select by validation MSE.
 
 ```python
 vx = jnp.array([-1.5, -.5, .5, 1.5])
 vy = 2 * vx + 1
-# Aggregate array values to compute `objective`.
 objective = lambda p: jnp.mean((p[0] * x + p[1] - y) ** 2)
-# Differentiate the objective to obtain `update` via automatic differentiation.
 update = jax.jit(lambda p, rate: p - rate * jax.grad(objective)(p))
-# Convert `data_hash` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 data_hash = hashlib.sha256(np.asarray(x).tobytes() + np.asarray(y).tobytes()).hexdigest()
 curves, validation, run_ids = [], [], []
-# Create an isolated temporary directory to run and inspect artifacts safely:
+# Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory(prefix='tracking-lesson-') as folder:
     root = Path(folder)
     mlflow.set_tracking_uri('sqlite:///' + str(root / 'tracking.db'))
     client = MlflowClient()
     experiment = client.create_experiment('two-rates', artifact_location=(root / 'artifacts').as_uri())
     for rate in [.02, .15]:
-        # Allocate initialized array `p` with the specified shape and dtype.
         p = jnp.zeros(2)
         history = []
         with mlflow.start_run(experiment_id=experiment) as run:
@@ -158,7 +156,6 @@ with tempfile.TemporaryDirectory(prefix='tracking-lesson-') as folder:
         validation.append(held)
         saved = client.get_metric_history(run_ids[-1], 'train_mse')
         assert [m.step for m in saved] == list(range(1, 31))
-        # Execute `np.testing.assert_allclose([m.value for m in saved], history`
         np.testing.assert_allclose([m.value for m in saved], history)
         assert client.get_run(run_ids[-1]).data.tags['data_sha256'] == data_hash
     selected = client.search_runs([experiment], order_by=['metrics.validation_mse ASC'])[0]
@@ -168,18 +165,17 @@ with tempfile.TemporaryDirectory(prefix='tracking-lesson-') as folder:
     assert abs(restored['weight'] - 2) < .001 and abs(restored['bias'] - 1) < .001
 ```
 
-These assertions lock in the exact numerical contract before you run the full experiment and variations.
+The host-side validation calculation checks what the logged validation metric measures. Readback verifies step numbers, tags, and the saved model artifact; comparing validation scores selects the candidate without treating training loss as the selection criterion.
 
 ## Run the example
 
 ```python
-# Track experiments and lineage with MLflow: A tracker is useful when a plotted point leads back to the data,...
+# Track experiments and lineage with MLflow
 import os
-# Configure environment variable before initializing the runtime.
+# Set MLFLOW_DISABLE_AGENT_HINT before importing its runtime.
 os.environ['MLFLOW_DISABLE_AGENT_HINT'] = '1'
-# Configure environment variable before initializing the runtime.
+# Set MLFLOW_ENABLE_TELEMETRY before importing its runtime.
 os.environ['MLFLOW_ENABLE_TELEMETRY'] = 'false'
-# Import required JAX, NumPy, and standard-library modules.
 import hashlib, json, tempfile
 from pathlib import Path
 import numpy as np
@@ -191,26 +187,23 @@ x = jnp.array([-2., -1., 0., 1., 2.])
 y = 2 * x + 1
 vx = jnp.array([-1.5, -.5, .5, 1.5])
 vy = 2 * vx + 1
-# Aggregate array values to compute `objective`.
 objective = lambda p: jnp.mean((p[0] * x + p[1] - y) ** 2)
-# Differentiate the objective to obtain `update` via automatic differentiation.
 update = jax.jit(lambda p, rate: p - rate * jax.grad(objective)(p))
-# Convert `data_hash` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 data_hash = hashlib.sha256(np.asarray(x).tobytes() + np.asarray(y).tobytes()).hexdigest()
 curves, validation, run_ids = [], [], []
-# Create an isolated temporary directory to run and inspect artifacts safely:
+# Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory(prefix='tracking-lesson-') as folder:
     root = Path(folder)
     mlflow.set_tracking_uri('sqlite:///' + str(root / 'tracking.db'))
     client = MlflowClient()
     experiment = client.create_experiment('two-rates', artifact_location=(root / 'artifacts').as_uri())
     for rate in [.02, .15]:
-        # Allocate initialized array `p` with the specified shape and dtype.
         p = jnp.zeros(2)
         history = []
         with mlflow.start_run(experiment_id=experiment) as run:
             mlflow.log_params({'rate': rate, 'updates': 30})
-            # Check which hardware backend (`cpu`, `gpu`, or `tpu`) JAX selected for ``.
+            # Record the selected backend with the experiment metadata.
             mlflow.set_tags({'data_sha256': data_hash, 'jax': jax.__version__, 'backend': jax.default_backend(), 'metric_boundary': 'after update'})
             for step in range(1, 31):
                 p = update(p, rate)
@@ -228,7 +221,6 @@ with tempfile.TemporaryDirectory(prefix='tracking-lesson-') as folder:
         validation.append(held)
         saved = client.get_metric_history(run_ids[-1], 'train_mse')
         assert [m.step for m in saved] == list(range(1, 31))
-        # Execute `np.testing.assert_allclose([m.value for m in saved], history`
         np.testing.assert_allclose([m.value for m in saved], history)
         assert client.get_run(run_ids[-1]).data.tags['data_sha256'] == data_hash
     selected = client.search_runs([experiment], order_by=['metrics.validation_mse ASC'])[0]
@@ -260,13 +252,12 @@ The horizontal axis counts completed updates, from $1$ to $30$. The vertical axi
 The comparison is controlled by shared data, initialization and update budget. It illustrates tracking and retrieval of evidence, not a general optimizer ranking. A separately held-out test and release checks still belong after validation selection.
 
 ```python
-# Compute figure data for: Compare the runs that MLflow actually recorded
 visual_data={'kind':'line','x':list(range(1,31)),'xlabel':'completed update','ylabel':'post-update training MSE (log scale)','yscale':'log','series':[{'label':'rate 0.02','y':curves[0]},{'label':'rate 0.15','y':curves[1]}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:47:02.065912+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:21:49.231439+00:00. JAX 0.9.2.
 
 ```text
 Validation MSE by learning rate: {0.02: 0.11994461715221405, 0.15: 5.049471951679152e-10}
@@ -298,19 +289,13 @@ Add a third, deliberately wrong model artifact and show why the smallest trainin
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `sum(...)` — Call `sum` with your updated parameters or inputs from this lesson's workspace.
-- `min(...)` — Call `min` with your updated parameters or inputs from this lesson's workspace.
-- `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
-
 **Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+1. Exercise solution
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Add a third, deliberately wrong model artifact and show why the...
+# Exercise solution
 bad_validation = sum(...)  # TODO: compute bad_validation
 assert bad_validation  # TODO: complete assertion check
 print('Wrong zero model validation MSE:',bad_validation)
@@ -319,7 +304,7 @@ print('Wrong zero model validation MSE:',bad_validation)
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Add a third, deliberately wrong model artifact and show why the...
+# Exercise solution
 bad_validation = sum((0. * t + 0. - (2*t+1))**2 for t in [-1.5,-.5,.5,1.5])/4
 assert bad_validation > min(validation)
 print('Wrong zero model validation MSE:',bad_validation)
@@ -341,14 +326,9 @@ Hash the same input bytes plus changed target bytes.
 
 ### How to write: Change a data value — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `value(...)` — Call `value` with your updated parameters or inputs from this lesson's workspace.
-- `np.asarray(...)` — Call `np.asarray` with your updated parameters or inputs from this lesson's workspace.
-- `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
-
 **Step-by-step implementation plan:**
 1. Change a data value (transfer): Identical filenames or shapes do not imply identical data.
-2. Convert `changed_hash` to a host NumPy array for inspection or verification.
+2. Transfer the device result to the host for an independent NumPy comparison.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -356,7 +336,7 @@ Hash the same input bytes plus changed target bytes.
 # Change a data value (transfer): Identical filenames or shapes do not imply identical data.
 changed_y = np.asarray(...)  # TODO: compute changed_y
 changed_y[0]+=.1
-# Convert `changed_hash` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 changed_hash = hashlib.sha256(...)  # TODO: compute changed_hash
 assert changed_hash  # TODO: complete assertion check
 print('Changed target changes dataset identity.')
@@ -368,7 +348,7 @@ print('Changed target changes dataset identity.')
 # Change a data value (transfer): Identical filenames or shapes do not imply identical data.
 changed_y=np.asarray(y).copy()
 changed_y[0]+=.1
-# Convert `changed_hash` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 changed_hash=hashlib.sha256(np.asarray(x).tobytes()+changed_y.tobytes()).hexdigest()
 assert changed_hash != data_hash
 print('Changed target changes dataset identity.')

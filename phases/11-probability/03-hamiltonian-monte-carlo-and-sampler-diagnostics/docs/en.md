@@ -2,6 +2,8 @@
 
 Phase 11: Probabilistic modeling · about 140 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Implement leapfrog with the correct half-step boundaries
@@ -64,7 +66,7 @@ Here the exact mean, variance and covariance are known. Check all of them: getti
 Create a fresh main.py. This correlated Gaussian is an exact test target for an inference algorithm, not a new unknown statistical model.
 
 ```python
-# Step 1 — 1. Write a known target and its gradient: Potential energy is the negative log-density up to a constant,...
+# Step 1 — 1. Write a known target and its gradient
 import numpy as np
 import jax
 import jax.numpy as jnp
@@ -74,7 +76,6 @@ precision = jnp.linalg.solve(target_cov,jnp.eye(2))
 def potential(q):
     delta=q-target_mean
     return .5*delta@precision@delta
-# Differentiate the objective to obtain `force` via automatic differentiation.
 force=jax.grad(potential)
 assert jnp.allclose(force(jnp.array([0.,0.])),precision@(-target_mean))
 ```
@@ -92,7 +93,6 @@ def leapfrog(q,p,step_size,steps):
     def step(i,state):
         q,p=state
         q=q+step_size*p
-        # Combine or mask array elements to form `p`.
         p=p-jnp.where(i<steps-1,step_size,.5*step_size)*force(q)
         return q,p
     return jax.lax.fori_loop(0,steps,step,(q,p))
@@ -107,12 +107,9 @@ def chain(key,initial,step_size=.25,leapfrog_steps=7,draws=1600):
         p=jax.random.normal(kp,q.shape)
         proposal,new_p=leapfrog(q,p,step_size,leapfrog_steps)
         error=potential(proposal)+.5*jnp.sum(new_p**2)-potential(q)-.5*jnp.sum(p**2)
-        # Draw pseudorandom samples for `accept` using the explicit RNG state.
         accept=jnp.isfinite(error)&(jnp.log(jax.random.uniform(ku)) < -error)
-        # Combine or mask array elements to form `next_q`.
         next_q=jnp.where(accept,proposal,q)
         return (next_q,key),(next_q,accept,error)
-    # Run compiled structured control flow via `jax.lax` (`(_, record)`).
     _,record=jax.lax.scan(transition,(initial,key),None,length=draws)
     return record
 ```
@@ -132,7 +129,6 @@ samples=records[0][:,400:,:]
 def split_rhat(values):
     # Classical split R-hat for one scalar coordinate; not rank-normalized.
     half=values.shape[1]//2
-    # Combine or mask array elements to form `split`.
     split=jnp.concatenate([values[:,:half],values[:,-half:]],axis=0)
     # Reduce along axis=1 to compute `within`.
     within=jnp.var(split,axis=1,ddof=1).mean()
@@ -141,7 +137,6 @@ def split_rhat(values):
     return jnp.sqrt(((half-1)*within/half+between/half)/within)
 # Vectorize across the batch dimension with `jax.vmap` (`rhats`).
 rhats=jax.vmap(split_rhat,in_axes=2)(samples)
-# Construct and reshape `pooled` into the target tensor dimensions.
 pooled=samples.reshape(-1,2)
 assert jnp.max(jnp.abs(pooled.mean(0)-target_mean))<.15
 assert jnp.max(jnp.abs(jnp.cov(pooled.T)-target_cov))<.2
@@ -155,7 +150,7 @@ The tolerances test this seeded Gaussian fixture only. Agreement with a known po
 ## Run the example
 
 ```python
-# Step 1 — 1. Write a known target and its gradient: Potential energy is the negative log-density up to a constant,...
+# Step 1 — 1. Write a known target and its gradient
 import numpy as np
 import jax
 import jax.numpy as jnp
@@ -165,7 +160,6 @@ precision = jnp.linalg.solve(target_cov,jnp.eye(2))
 def potential(q):
     delta=q-target_mean
     return .5*delta@precision@delta
-# Differentiate the objective to obtain `force` via automatic differentiation.
 force=jax.grad(potential)
 assert jnp.allclose(force(jnp.array([0.,0.])),precision@(-target_mean))
 
@@ -175,7 +169,6 @@ def leapfrog(q,p,step_size,steps):
     def step(i,state):
         q,p=state
         q=q+step_size*p
-        # Combine or mask array elements to form `p`.
         p=p-jnp.where(i<steps-1,step_size,.5*step_size)*force(q)
         return q,p
     return jax.lax.fori_loop(0,steps,step,(q,p))
@@ -190,12 +183,9 @@ def chain(key,initial,step_size=.25,leapfrog_steps=7,draws=1600):
         p=jax.random.normal(kp,q.shape)
         proposal,new_p=leapfrog(q,p,step_size,leapfrog_steps)
         error=potential(proposal)+.5*jnp.sum(new_p**2)-potential(q)-.5*jnp.sum(p**2)
-        # Draw pseudorandom samples for `accept` using the explicit RNG state.
         accept=jnp.isfinite(error)&(jnp.log(jax.random.uniform(ku)) < -error)
-        # Combine or mask array elements to form `next_q`.
         next_q=jnp.where(accept,proposal,q)
         return (next_q,key),(next_q,accept,error)
-    # Run compiled structured control flow via `jax.lax` (`(_, record)`).
     _,record=jax.lax.scan(transition,(initial,key),None,length=draws)
     return record
 
@@ -207,16 +197,14 @@ samples=records[0][:,400:,:]
 def split_rhat(values):
     # Classical split R-hat for one scalar coordinate; not rank-normalized.
     half=values.shape[1]//2
-    # Combine or mask array elements to form `split`.
     split=jnp.concatenate([values[:,:half],values[:,-half:]],axis=0)
-    # Reduce along axis=1 to compute `within`.
+    # Average the sample variance within each split chain.
     within=jnp.var(split,axis=1,ddof=1).mean()
-    # Reduce along axis=1 to compute `between`.
+    # Measure how far split-chain means vary from one another, scaled by half the draws.
     between=half*jnp.var(split.mean(axis=1),ddof=1)
     return jnp.sqrt(((half-1)*within/half+between/half)/within)
 # Vectorize across the batch dimension with `jax.vmap` (`rhats`).
 rhats=jax.vmap(split_rhat,in_axes=2)(samples)
-# Construct and reshape `pooled` into the target tensor dimensions.
 pooled=samples.reshape(-1,2)
 assert jnp.max(jnp.abs(pooled.mean(0)-target_mean))<.15
 assert jnp.max(jnp.abs(jnp.cov(pooled.T)-target_cov))<.2
@@ -244,16 +232,14 @@ The horizontal axis counts retained transitions after discarding the initial $40
 This trace is one piece of the evidence. The code also checks the two-dimensional covariance, which a single-coordinate trace cannot show, and prints classical split R-hat and acceptance. A smooth-looking trace or repeated crossings of the mean is distinct from exploration of modes absent from this single-Gaussian fixture.
 
 ```python
-# Compute figure data for: Four HMC traces around a known posterior mean
-# Create evenly spaced index values in `indices`.
 indices=np.arange(0,400,10)
-# Convert `visual_data` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 visual_data={"kind":"line","x":indices.tolist(),"xlabel":"retained transition (after fixed discard)","ylabel":"first parameter coordinate","series":[{"label":"chain "+str(i+1),"y":np.asarray(samples[i,indices,0]).tolist()} for i in range(4)]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:48:50.098468+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:23:11.359092+00:00. JAX 0.9.2.
 
 ```text
 mean: [ 0.98358583 -1.0185838 ] covariance: [[0.98042357 0.7727629 ]
@@ -272,7 +258,7 @@ PASS: probability-03
 **Predict before running:** If we reverse momentum after a trajectory, should the integrator return to the starting position?
 
 ```python
-# Experiment — Reverse one trajectory: Reversibility is an integrator invariant, independent of whether...
+# Experiment — Reverse one trajectory
 q0=jnp.array([.2,-.4])
 p0=jnp.array([.3,.7])
 q1,p1=leapfrog(q0,p0,.15,9)
@@ -313,7 +299,7 @@ Increase the step size to 1.2 with the same leapfrog count. Record acceptance an
 
 **Key functions & syntax to use:**
 - `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jax.random.PRNGKey(seed) & jax.random.split(key)` — Manages explicit, stateless PRNG keys—always split a key before passing subkeys into independent random draws.
+- `jax.random.PRNGKey(seed) & jax.random.split(key)` — Uses explicit PRNG keys. Split a key when you need independent random draws; reusing a key repeats its random stream.
 
 **Step-by-step implementation plan:**
 1. Create or split explicit PRNG key(s) (`bad`) for reproducible randomness.
@@ -358,7 +344,7 @@ Use independent small noise around four different constants.
 
 **Key functions & syntax to use:**
 - `jnp.arange(n, dtype=...)` — Creates a 1-D JAX array of evenly spaced values `[0, 1, ..., n-1]` on the target device.
-- `jax.random.PRNGKey(seed) & jax.random.split(key)` — Manages explicit, stateless PRNG keys—always split a key before passing subkeys into independent random draws.
+- `jax.random.PRNGKey(seed) & jax.random.split(key)` — Uses explicit PRNG keys. Split a key when you need independent random draws; reusing a key repeats its random stream.
 
 **Step-by-step implementation plan:**
 1. Create or split explicit PRNG key(s) (`fake`) for reproducible randomness.
@@ -366,7 +352,7 @@ Use independent small noise around four different constants.
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Catch chains trapped at different levels (Transfer / diagnosis): Between-chain variation dominates within-chain variation, so...
+# Catch chains trapped at different levels (Transfer / diagnosis)
 # Create or split explicit PRNG key(s) (`fake`) for reproducible randomness.
 fake = jax.random.normal(...)  # TODO: compute fake
 assert split_rhat(fake)  # TODO: complete assertion check
@@ -375,7 +361,7 @@ assert split_rhat(fake)  # TODO: complete assertion check
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Catch chains trapped at different levels (Transfer / diagnosis): Between-chain variation dominates within-chain variation, so...
+# Catch chains trapped at different levels (Transfer / diagnosis)
 # Create or split explicit PRNG key(s) (`fake`) for reproducible randomness.
 fake=jax.random.normal(jax.random.key(4),(4,600))*.1+jnp.arange(4)[:,None]*4
 assert split_rhat(fake)>5
@@ -404,19 +390,17 @@ Use the same direction and a moderate float32 finite-difference step.
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Perform matrix / vector contraction (`@`) to compute `analytic`.
-2. Perform matrix / vector contraction (`@`) to compute `auto`.
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Verify a directional derivative (Transfer / diagnosis): A sign error in potential or a transposed geometry can be...
+# Verify a directional derivative (Transfer / diagnosis)
 q = jnp.array(...)  # TODO: compute q
 v = jnp.array(...)  # TODO: compute v
 eps = ...  # TODO: compute eps
-# Perform matrix / vector contraction (`@`) to compute `analytic`.
 analytic = ...  # TODO: compute analytic
-# Perform matrix / vector contraction (`@`) to compute `auto`.
 auto = force(...)  # TODO: compute auto
 finite = ...  # TODO: compute finite
 np.testing.assert_allclose(auto,analytic,rtol = ...  # TODO: compute np.testing.assert_allclose(auto,analytic,rtol
@@ -426,13 +410,11 @@ np.testing.assert_allclose(finite,analytic,rtol = ...  # TODO: compute np.testin
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Verify a directional derivative (Transfer / diagnosis): A sign error in potential or a transposed geometry can be...
+# Verify a directional derivative (Transfer / diagnosis)
 q=jnp.array([.4,.8])
 v=jnp.array([.7,-.2])
 eps=.001
-# Perform matrix / vector contraction (`@`) to compute `analytic`.
 analytic=(precision@(q-target_mean))@v
-# Perform matrix / vector contraction (`@`) to compute `auto`.
 auto=force(q)@v
 finite=(potential(q+eps*v)-potential(q-eps*v))/(2*eps)
 np.testing.assert_allclose(auto,analytic,rtol=1e-6)

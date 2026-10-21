@@ -84,6 +84,13 @@ Monitor p50/p95/p99 latency, error/timeout rates, saturation, index freshness, f
 
 Supply versioned corpus/qrels, independent metric oracles, exact and lexical baselines, ANN tradeoffs, hybrid/reranker ablations, interpreted error cases, service load results, cold rebuild, compatibility rejection, deletion and rollback tests. Author progressive starter/reference/check files for those stages before registration as runnable. Production claims require measured quality and service gates on the actual target corpus/runtime.
 
+
+## Implementation gate and real-data lineage
+
+Do not promote until a real corpus, query set and relevance judgments have versioned source/rights records and leakage-controlled splits. Keep exact, lexical, ANN and reranking runs tied to the same corpus/index/model snapshot; synthetic rankings only test index mechanics.
+
+Before this plan can change from **planned** to **authored**, provide independently checkable dataset/recipe manifests, staged parent-to-child checkpoint records with full resume state, real held-out evaluation outputs, and runnable plan-specific starter/reference/checks. Keep small CPU fixtures labeled as correctness evidence; they do not establish target-scale training, quality or production readiness.
+
 ## Primary references
 
 - [BEIR evaluation toolkit](https://github.com/beir-cellar/beir): retrieval evaluation protocols and baseline integrations.

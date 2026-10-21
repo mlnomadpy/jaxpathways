@@ -7,7 +7,7 @@ Copy this template into your own portfolio and fill it after running your modifi
 Keep the ridge gradient/solve comparison, penalty sweep with separate train/validation losses, duplication check and bias-mask repair.
 
 - Command: `python3 phases/04-optimization/10-regularization-and-validation/code/main.py`
-- Working directory: repository root
+- Working directory: Repository root
 - Python / JAX / NumPy versions: 
 - Hardware and device: 
 - My prediction before running: 

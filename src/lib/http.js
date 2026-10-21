@@ -4,8 +4,9 @@
 
 /** Fetch JSON with a bounded wait, including while reading its response body.
  * @param {string} path
- * @param {JsonRequestOptions} [options]
- * @returns {Promise<unknown>}
+ * @template [T=unknown]
+ * @param {Omit<JsonRequestOptions, 'parse'> & {parse?: (value: unknown) => T}} [options]
+ * @returns {Promise<T>}
  */
 export async function fetchJson(
   path,
@@ -13,7 +14,7 @@ export async function fetchJson(
     fetcher = globalThis.fetch,
     timeoutMs = 10000,
     cache = 'default',
-    parse = (value) => value,
+    parse = /** @type {(value: unknown) => T} */ ((value) => value),
   } = {},
 ) {
   if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) throw new Error('Invalid request timeout');
@@ -41,20 +42,21 @@ export async function fetchJson(
 /** Cache successful page resources; failed requests may be retried.
  * Fetchers are separate cache scopes, allowing injected clients in tests.
  * @param {string} path
- * @param {JsonRequestOptions} [options]
+ * @template [T=unknown]
+ * @param {Omit<JsonRequestOptions, 'parse'> & {parse?: (value: unknown) => T}} [options]
+ * @returns {(fetcher?: typeof fetch) => Promise<T>}
  */
 export function createJsonResource(path, options = {}) {
-  /** @type {WeakMap<typeof fetch, Promise<unknown>>} */
+  /** @type {WeakMap<typeof fetch, Promise<T>>} */
   const requests = new WeakMap();
-  return (fetcher = options.fetcher || globalThis.fetch) => {
-    let pending = requests.get(fetcher);
-    if (!pending) {
-      pending = fetchJson(path, { ...options, fetcher }).catch((error) => {
-        requests.delete(fetcher);
-        throw error;
-      });
-      requests.set(fetcher, pending);
-    }
+  return async (fetcher = options.fetcher || globalThis.fetch) => {
+    const cached = requests.get(fetcher);
+    if (cached) return cached;
+    const pending = fetchJson(path, { ...options, fetcher }).catch((error) => {
+      requests.delete(fetcher);
+      throw error;
+    });
+    requests.set(fetcher, pending);
     return pending;
   };
 }

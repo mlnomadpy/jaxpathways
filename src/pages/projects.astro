@@ -13,6 +13,45 @@ import projectPlans from '../../curriculum/project-plans.json';
 import { course } from '../lib/course-data.js';
 import { siteUrl } from '../lib/urls.js';
 const planned = course.phases.filter((phase) => !phase.projectId);
+const projectGroups = [
+  {
+    id: 'foundations',
+    title: 'Start with foundations',
+    paths: ['foundations'],
+    note: 'Small audits and shared tools for arrays, transformations and optimization.',
+  },
+  {
+    id: 'models',
+    title: 'Train and adapt models',
+    paths: ['models'],
+    note: 'Training, recovery, experiment lineage and modality harnesses.',
+  },
+  {
+    id: 'research',
+    title: 'Explore research domains',
+    paths: ['science', 'probability', 'rl', 'internals'],
+    note: 'Scientific computing, uncertainty, reinforcement learning and JAX internals.',
+  },
+  {
+    id: 'delivery',
+    title: 'Ship and operate workloads',
+    paths: ['ship', 'ops'],
+    note: 'Interoperability, serving, release controls and operational recovery.',
+  },
+  {
+    id: 'systems',
+    title: 'Scale and qualify systems',
+    paths: ['scale', 'tpu'],
+    note: 'Distributed training, kernels and TPU workflow audits.',
+  },
+];
+const groupedProjects = projectGroups.map((group) => ({
+  ...group,
+  projects: registry.projects.filter((project) => group.paths.includes(project.pathwayId)),
+}));
+const ungroupedProjects = registry.projects.filter(
+  (project) => !projectGroups.some((group) => group.paths.includes(project.pathwayId)),
+);
 ---
 
 <SiteLayout {...pages.projects}>
@@ -24,20 +63,16 @@ const planned = course.phases.filter((phase) => !phase.projectId);
       intro="Choose a project, work through its stages, and keep the evidence. Every available project includes starter code, a reference solution, and checks you can run on CPU."
     >
       <p>
-        Starting a new repository?{' '}
-        <a href={siteUrl('project-workflow.html')}>
-          Set up your folders, experiment records and CLI.
-        </a>
-      </p>
-      <p>
-        Running experiments?{' '}
-        <a href={siteUrl('project-guides/reproducible-experiments.html')}>
-          Build a reproducible JAX/Flax experiment, compare runs and write a research notebook.
-        </a>
+        <strong>Recommended first project:</strong> the regression audit. It starts with a small CPU
+        fit and independent numerical checks; work at your own pace and keep the outputs as
+        evidence.
       </p>
       <div class="actions">
         <a class="button primary" href="#available">
           Available projects
+        </a>
+        <a class="button" href="#project-regression-audit">
+          Start with the regression audit
         </a>
         <a class="button" href="#alignment-retrieval">
           Model lifecycle plans
@@ -49,17 +84,56 @@ const planned = course.phases.filter((phase) => !phase.projectId);
         )}
       </div>
     </PageIntro>
+    <ModalityTracks />
     <section id="available" aria-labelledby="available-heading">
       <h2 id="available-heading">Ready to build</h2>
-      {registry.projects.map((project) => (
-        <ProjectEntryCard project={project} />
+      <p>
+        Choose a learning stage below. Setup details stay with each project and open when requested.
+      </p>
+      <nav class="project-filters" aria-label="Filter projects by learning stage">
+        <button type="button" data-project-filter="all" aria-pressed="true">
+          All ({registry.projects.length})
+        </button>
+        {groupedProjects
+          .filter((group) => group.projects.length)
+          .map((group) => (
+            <button type="button" data-project-filter={group.id} aria-pressed="false">
+              {group.title.replace(
+                /^(Start with |Train and adapt |Explore |Ship and operate |Scale and qualify )/,
+                '',
+              )}{' '}
+              ({group.projects.length})
+            </button>
+          ))}
+      </nav>
+      {groupedProjects.map(
+        (group) =>
+          group.projects.length > 0 && (
+            <section
+              class="project-group"
+              data-project-group-section={group.id}
+              aria-labelledby={`project-group-${group.id}`}
+            >
+              <h3 id={`project-group-${group.id}`}>{group.title}</h3>
+              <p>{group.note}</p>
+              {group.projects.map((project) => (
+                <ProjectEntryCard
+                  project={project}
+                  groupId={group.id}
+                  recommended={project.id === 'regression-audit'}
+                />
+              ))}
+            </section>
+          ),
+      )}
+      {ungroupedProjects.map((project) => (
+        <ProjectEntryCard project={project} groupId="other" />
       ))}
       <p class="projects-note">
         Passing the public checks is practice evidence. It is not an independently reviewed
         qualification.
       </p>
     </section>
-    <ModalityTracks />
     <section id="alignment-retrieval" class="project-roadmap" aria-labelledby="alignment-heading">
       <h2 id="alignment-heading">Next: complete model lifecycles</h2>
       <p>
@@ -110,6 +184,8 @@ const planned = course.phases.filter((phase) => !phase.projectId);
   </main>
   <script>
     import { initExperience } from '../scripts/experience.js';
+    import { initProjectCatalog } from '../scripts/catalog.js';
     initExperience();
+    initProjectCatalog();
   </script>
 </SiteLayout>

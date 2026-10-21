@@ -1,9 +1,9 @@
 """Differentiate through a solver: worked experiments and reference solutions. CPU checks."""
 
 # Rebuild the differentiable solver
-# Step 1 — Rebuild the differentiable solver: The solver remains a pure JAX function with a static number of...
+# Step 1 — Rebuild the differentiable solver
 import jax
-# Update state in place with the new values.
+# Enable 64-bit arithmetic before importing jax.numpy or creating arrays.
 jax.config.update("jax_enable_x64", True)
 import jax.numpy as jnp
 import numpy as np
@@ -20,7 +20,6 @@ def solve(rate, initial, steps=40, dt=0.05):
     def advance(value, unused):
         next_value = rk4_step(rate, value, dt)
         return next_value, next_value
-    # Run compiled structured control flow via `jax.lax` (`(_, tail)`).
     _, tail = jax.lax.scan(advance, initial, None, length=steps)
     return jnp.concatenate((jnp.atleast_1d(initial), tail))
 
@@ -28,7 +27,6 @@ def solve(rate, initial, steps=40, dt=0.05):
 # Step 2 — Check the derivative of the discrete endpoint: Autodiff gives the derivative of the actual RK4 program.
 rate, initial, steps, dt = 0.7, jnp.array(2.0), 40, 0.05
 endpoint = lambda k: solve(k,initial,steps,dt)[-1]
-# Differentiate the objective to obtain `autodiff` via automatic differentiation.
 autodiff = float(jax.grad(endpoint)(rate))
 z = -rate*dt
 r = 1+z+z*z/2+z**3/6+z**4/24
@@ -46,7 +44,6 @@ observations = 2.0*jnp.exp(-0.7*times)
 def objective(k):
     return jnp.mean((solve(k,initial,steps,dt)-observations)**2)
 probe = 1.0
-# Differentiate the objective to obtain `(value, derivative)` via automatic differentiation.
 value, derivative = jax.value_and_grad(objective)(probe)
 epsilon = 1e-4
 finite_difference = (float(objective(probe+epsilon))-float(objective(probe-epsilon)))/(2*epsilon)
@@ -55,9 +52,9 @@ assert float(derivative) > 0
 assert float(objective(probe-0.1*derivative)) < float(value)
 print("Loss:",float(value),"gradient:",float(derivative),"finite difference:",finite_difference)
 
-# Step 1 — Rebuild the differentiable solver: The solver remains a pure JAX function with a static number of...
+# Step 1 — Rebuild the differentiable solver
 import jax
-# Update state in place with the new values.
+# Enable 64-bit arithmetic before importing jax.numpy or creating arrays.
 jax.config.update("jax_enable_x64", True)
 import jax.numpy as jnp
 import numpy as np
@@ -74,14 +71,12 @@ def solve(rate, initial, steps=40, dt=0.05):
     def advance(value, unused):
         next_value = rk4_step(rate, value, dt)
         return next_value, next_value
-    # Run compiled structured control flow via `jax.lax` (`(_, tail)`).
     _, tail = jax.lax.scan(advance, initial, None, length=steps)
     return jnp.concatenate((jnp.atleast_1d(initial), tail))
 
 # Step 2 — Check the derivative of the discrete endpoint: Autodiff gives the derivative of the actual RK4 program.
 rate, initial, steps, dt = 0.7, jnp.array(2.0), 40, 0.05
 endpoint = lambda k: solve(k,initial,steps,dt)[-1]
-# Differentiate the objective to obtain `autodiff` via automatic differentiation.
 autodiff = float(jax.grad(endpoint)(rate))
 z = -rate*dt
 r = 1+z+z*z/2+z**3/6+z**4/24
@@ -98,7 +93,6 @@ observations = 2.0*jnp.exp(-0.7*times)
 def objective(k):
     return jnp.mean((solve(k,initial,steps,dt)-observations)**2)
 probe = 1.0
-# Differentiate the objective to obtain `(value, derivative)` via automatic differentiation.
 value, derivative = jax.value_and_grad(objective)(probe)
 epsilon = 1e-4
 finite_difference = (float(objective(probe+epsilon))-float(objective(probe-epsilon)))/(2*epsilon)
@@ -108,18 +102,15 @@ assert float(objective(probe-0.1*derivative)) < float(value)
 print("Loss:",float(value),"gradient:",float(derivative),"finite difference:",finite_difference)
 
 # Figure data experiment
-# Compute figure data for: A solver gradient converges toward the physical sensitivity
 counts=[5,10,20,40]
-# Create device-backed JAX array `errors`.
 errors=[abs(float(jax.grad(lambda k: solve(k,jnp.array(2.0),n,2.0/n)[-1])(0.7))+4*np.exp(-1.4)) for n in counts]
 visual_data={'kind':'line','x':counts,'xlabel':'RK4 steps over two seconds','ylabel':'absolute endpoint sensitivity error','yscale':'log','series':[{'label':'autodiff versus continuous derivative','y':errors}]}
 
 # Experiment: Watch derivative discretization error shrink
-# Experiment — Watch derivative discretization error shrink: Fourth-order convergence becomes visible as an error ratio near...
+# Experiment — Watch derivative discretization error shrink
 step_counts = np.array([5,10,20,40])
 gradient_errors = []
 for n in step_counts:
-    # Differentiate the objective to obtain `numerical` via automatic differentiation.
     numerical = jax.grad(lambda k: solve(k,jnp.array(2.0),int(n),2.0/int(n))[-1])(0.7)
     gradient_errors.append(abs(float(numerical)-continuous_gradient))
 assert np.all(np.diff(gradient_errors) < 0)
@@ -139,16 +130,14 @@ print("Finite-difference absolute errors:",fd_errors)
 # Reference solution. Try the exercise before reading this.
 # Exercise solution: Change the initial value to 3 and the rate to 0.4.
 changed_rate, changed_initial = 0.4, 3.0
-# Differentiate the objective to obtain `g_rate` via automatic differentiation.
 g_rate = jax.grad(lambda k: solve(k,jnp.array(changed_initial))[-1])(changed_rate)
-# Differentiate the objective to obtain `g_initial` via automatic differentiation.
 g_initial = jax.grad(lambda u: solve(changed_rate,u)[-1])(changed_initial)
 np.testing.assert_allclose(g_rate,-2*changed_initial*np.exp(-0.8),rtol=1e-7)
 np.testing.assert_allclose(g_initial,np.exp(-0.8),rtol=1e-8)
 print("Rate and initial-state sensitivities:",float(g_rate),float(g_initial))
 
 # Reference practice: Weight observations without losing normalization
-# Weight observations without losing normalization (Practice): The independent expression checks reduction normalization...
+# Weight observations without losing normalization (Practice)
 weights=np.linspace(0.2,2.0,41)
 def weighted_objective(k):
     residual=solve(k,jnp.array(2.0))-observations
@@ -161,15 +150,12 @@ r=1+z+z*z/2+z**3/6+z**4/24
 dr=-h*(1+z+z*z/2+z**3/6)
 u=2*r**n
 sensitivity=2*n*r**np.maximum(n-1,0)*dr
-# Aggregate array values to compute `reference`.
 reference=np.sum(2*weights*(u-np.asarray(observations))*sensitivity)/weights.sum()
-# Differentiate the objective to obtain gradients ``.
 np.testing.assert_allclose(jax.grad(weighted_objective)(k),reference,rtol=1e-11,atol=1e-12)
 print("Weighted derivative reference:",reference)
 
 # Reference practice: Diagnose a detached backward path
 # Diagnose a detached backward path (Challenge): A plausible forward curve does not validate backward behavior.
-# Define `detached_objective(k)` to evaluate the objective and its automatic derivatives:
 def detached_objective(k):
     prediction=jax.lax.stop_gradient(solve(k,jnp.array(2.0)))
     return jnp.mean((prediction-observations)**2)

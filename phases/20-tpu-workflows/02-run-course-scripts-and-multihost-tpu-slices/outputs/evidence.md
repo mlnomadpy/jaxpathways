@@ -1,13 +1,13 @@
-# Evidence: Run course scripts and multi-host TPU Pod slices
+# Evidence: Review scripts before TPU staging
 
 Copy this template into your own portfolio and fill it after running your modified exercise.
 
 ## Evidence required
 
-Keep the generated scp_in_cmd, ssh_run_cmd, and scp_out_cmd workflow for single-host and multi-host slices plus the process-0 checkpoint writer check.
+Keep the execution classification and rejected-route checks. For a target run, retain the exact source/environment hashes, selected backend and devices, data ownership, numerical check, and all worker receipts required by that target. A topology receipt alone is not a training result.
 
 - Command: `python3 phases/20-tpu-workflows/02-run-course-scripts-and-multihost-tpu-slices/code/main.py`
-- Working directory: repository root
+- Working directory: Repository root
 - Python / JAX / NumPy versions: 
 - Hardware and device: 
 - My prediction before running: 

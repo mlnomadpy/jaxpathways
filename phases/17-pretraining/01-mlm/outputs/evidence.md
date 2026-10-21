@@ -7,7 +7,7 @@ Copy this template into your own portfolio and fill it after running your modifi
 Keep corrupted inputs, selected-target counts, the log-vocabulary baseline, independent masked-loss checks, trained parameters and changed-mask results.
 
 - Command: `python3 phases/17-pretraining/01-mlm/code/main.py`
-- Working directory: repository root
+- Working directory: Repository root
 - Python / JAX / NumPy versions: 
 - Hardware and device: 
 - My prediction before running: 

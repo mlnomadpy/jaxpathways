@@ -7,7 +7,7 @@ Copy this template into your own portfolio and fill it after running your modifi
 Full geometric/exponential comparisons, fixed-horizon refinement table, unstable-step failure and repair. Keep the environment, observed outputs and your explanation of the figure.
 
 - Command: `python3 phases/10-science/01-a-functional-physical-simulation/code/main.py`
-- Working directory: repository root
+- Working directory: Repository root
 - Python / JAX / NumPy versions: 
 - Hardware and device: 
 - My prediction before running: 

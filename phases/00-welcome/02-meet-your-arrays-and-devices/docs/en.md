@@ -2,6 +2,8 @@
 
 Phase 00: Setup & first steps · about 45 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Read the table before using an API
@@ -79,7 +81,7 @@ Creating a NumPy copy brings values into host memory for inspection. Converting 
 Create main.py in your lesson workspace. Add this first block; use the environment from setup.
 
 ```python
-# Step 1 — Prepare the inputs: These explicit inputs define the case that the later checks will...
+# Step 1 — Prepare the inputs
 import jax
 import jax.numpy as jnp
 ```
@@ -92,7 +94,6 @@ Append this block below the inputs in the same file.
 
 ```python
 # Step 2 — Build the computation: x has two observations and three features.
-# Construct and reshape `x` into the target tensor dimensions.
 x = jnp.arange(6, dtype=jnp.float32).reshape(2, 3)
 ```
 
@@ -103,7 +104,7 @@ $x$ has two observations and three features. `axis=0` removes the observation di
 Append the checks, save main.py, and run python main.py from this folder using your course environment.
 
 ```python
-# Step 3 — Run and check the result: Compare the output to the expected result below before making the...
+# Step 3 — Run and check the result
 print("Shape:", x.shape)
 print("Dtype:", x.dtype)
 print("Devices:", x.devices())
@@ -118,13 +119,12 @@ Compare the output to the expected result below before making the exercise chang
 ## Run the example
 
 ```python
-# Step 1 — Prepare the inputs: These explicit inputs define the case that the later checks will...
+# Step 1 — Prepare the inputs
 import jax
 import jax.numpy as jnp
 # Step 2 — Build the computation: x has two observations and three features.
-# Construct and reshape `x` into the target tensor dimensions.
 x = jnp.arange(6, dtype=jnp.float32).reshape(2, 3)
-# Step 3 — Run and check the result: Compare the output to the expected result below before making the...
+# Step 3 — Run and check the result
 print("Shape:", x.shape)
 print("Dtype:", x.dtype)
 print("Devices:", x.devices())
@@ -157,13 +157,12 @@ Now connect the picture to a reduction. Summing the feature columns within each 
 The row labels are positions, not times or class labels. The darker lower row tells us its stored values are larger; it does not imply that the observation is more important.
 
 ```python
-# Compute figure data for: Rows are groups of observations
 visual_data = {'kind': 'heatmap', 'values': x.tolist(), 'rows': ['row 0', 'row 1'], 'columns': ['feature 0', 'feature 1', 'feature 2'], 'unit': 'array value'}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:45:06.782121+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:19:53.950321+00:00. JAX 0.9.2.
 
 ```text
 Shape: (2, 3)
@@ -210,11 +209,10 @@ The calculation reuses one mean per column. An explicit hand calculation verifie
 ```python
 # Experiment — Keep a host reference: The host reference is an inspection copy.
 import numpy as np
-# Convert `host` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 host=np.asarray(x)
 # Check tensor shape invariant: `host.shape==(2,3)`
 assert host.shape==(2,3)
-# Create evenly spaced index values in ``.
 np.testing.assert_array_equal(host,np.arange(6).reshape(2,3))
 print("Host dtype:",host.dtype)
 ```
@@ -283,13 +281,12 @@ Keep observation rows and measurement columns.
 - `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
 
 **Step-by-step implementation plan:**
-1. Construct and reshape `table` into the target tensor dimensions.
+1. Add a new observation (Practice)
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Add a new observation (Practice): Changing the observation count changes axis 0, while the...
-# Construct and reshape `table` into the target tensor dimensions.
+# Add a new observation (Practice)
 table = jnp.arange(...)  # TODO: compute table
 assert jnp.allclose(table.sum(axis=1),jnp.array([3.,12.,21.]))  # TODO: complete assertion check
 assert jnp.allclose(table.mean(axis=0),jnp.array([3.,4.,5.]))  # TODO: complete assertion check
@@ -298,8 +295,7 @@ assert jnp.allclose(table.mean(axis=0),jnp.array([3.,4.,5.]))  # TODO: complete 
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Add a new observation (Practice): Changing the observation count changes axis 0, while the...
-# Construct and reshape `table` into the target tensor dimensions.
+# Add a new observation (Practice)
 table=jnp.arange(9,dtype=jnp.float32).reshape(3,3)
 assert jnp.allclose(table.sum(axis=1),jnp.array([3.,12.,21.]))
 assert jnp.allclose(table.mean(axis=0),jnp.array([3.,4.,5.]))
@@ -327,13 +323,13 @@ Count required elements before changing the code.
 - `array.reshape(new_shape)` — Reorganizes tensor axes without changing the total element count (`array.size`).
 
 **Step-by-step implementation plan:**
-1. Run the boundary check and catch the expected exception:
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Diagnose an impossible reshape (Challenge): An incompatible reshape is an element-count error.
-# Run the boundary check and catch the expected exception:
 try:
     x.reshape(2,4)
 except TypeError:
@@ -347,7 +343,6 @@ assert x.reshape(2,3).size  # TODO: complete assertion check
 
 ```python
 # Diagnose an impossible reshape (Challenge): An incompatible reshape is an element-count error.
-# Run the boundary check and catch the expected exception:
 try:
     x.reshape(2,4)
 except TypeError:

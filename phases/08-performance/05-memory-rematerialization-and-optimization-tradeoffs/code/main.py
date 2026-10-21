@@ -1,7 +1,7 @@
 """Memory, rematerialization, and optimization tradeoffs: worked experiments and reference solutions. CPU checks."""
 
 # Define two differentiation policies
-# Step 1 — Define two differentiation policies: Both functions compute the same pure objective; only the...
+# Step 1 — Define two differentiation policies
 import contextlib
 import io
 import time
@@ -9,9 +9,7 @@ import numpy as np
 import jax
 import jax.numpy as jnp
 from jax.ad_checkpoint import print_saved_residuals
-# Draw pseudorandom samples for `rng` using the explicit RNG state.
 rng=np.random.default_rng(18)
-# Create device-backed JAX array `w`.
 w=jnp.asarray((rng.normal(size=(16,16))*.1).astype(np.float32))
 x=jnp.asarray(np.linspace(-.5,.5,16,dtype=np.float32))
 def layer(v):return jnp.tanh(w@v)
@@ -23,7 +21,6 @@ plain=lambda v:objective(v,False)
 remat=lambda v:objective(v,True)
 def residual_report(fn):
     stream=io.StringIO()
-    # Enter `contextlib.redirect_stdout(stream)` context block:
     with contextlib.redirect_stdout(stream):print_saved_residuals(fn,x)
     lines=[line for line in stream.getvalue().splitlines() if line.strip()]
     return lines
@@ -37,25 +34,22 @@ for _ in range(4):values.append(np.tanh(host_w@values[-1]))
 cotangent=2*values[-1]
 for i in range(4,0,-1):cotangent=host_w.T@(cotangent*(1-values[i]**2))
 for fn in (plain,remat):
-    # Differentiate the objective to obtain gradients ``.
     np.testing.assert_allclose(jax.grad(fn)(x),cotangent,rtol=3e-5,atol=1e-7)
-# Differentiate the objective to obtain gradients ``.
 np.testing.assert_allclose(jax.grad(plain)(x),jax.grad(remat)(x),rtol=1e-6,atol=1e-7)
-# Differentiate the objective to obtain `executables` via automatic differentiation.
 executables=[jax.jit(jax.grad(fn)).lower(x).compile() for fn in (plain,remat)]
 memory=[]
 times=[]
 for executable in executables:
     analysis=executable.memory_analysis()
     memory.append(None if analysis is None else {name:getattr(analysis,name) for name in ('argument_size_in_bytes','output_size_in_bytes','temp_size_in_bytes','alias_size_in_bytes')})
-    # Synchronize host execution until asynchronous device computation completes.
-    # Synchronize host execution until asynchronous device computation completes.
+    # Wait for device work to finish before timing it or comparing its result on the host.
+    # Wait for device work to finish before timing it or comparing its result on the host.
     executable(x).block_until_ready()
     samples=[]
     for _ in range(5):
-        # Synchronize host execution until asynchronous device computation completes.
-        # Synchronize host execution until asynchronous device computation completes.
-        # Synchronize host execution until asynchronous device computation completes.
+        # Wait for device work to finish before timing it or comparing its result on the host.
+        # Wait for device work to finish before timing it or comparing its result on the host.
+        # Wait for device work to finish before timing it or comparing its result on the host.
         start=time.perf_counter()
         executable(x).block_until_ready()
         samples.append(time.perf_counter()-start)
@@ -73,7 +67,7 @@ for name, lines in zip(["plain", "remat"], reports):
 print("Compiler memory estimates:", memory)
 print("Synchronized gradient samples:", times)
 
-# Step 1 — Define two differentiation policies: Both functions compute the same pure objective; only the...
+# Step 1 — Define two differentiation policies
 import contextlib
 import io
 import time
@@ -81,9 +75,7 @@ import numpy as np
 import jax
 import jax.numpy as jnp
 from jax.ad_checkpoint import print_saved_residuals
-# Draw pseudorandom samples for `rng` using the explicit RNG state.
 rng=np.random.default_rng(18)
-# Create device-backed JAX array `w`.
 w=jnp.asarray((rng.normal(size=(16,16))*.1).astype(np.float32))
 x=jnp.asarray(np.linspace(-.5,.5,16,dtype=np.float32))
 def layer(v):return jnp.tanh(w@v)
@@ -95,7 +87,6 @@ plain=lambda v:objective(v,False)
 remat=lambda v:objective(v,True)
 def residual_report(fn):
     stream=io.StringIO()
-    # Enter `contextlib.redirect_stdout(stream)` context block:
     with contextlib.redirect_stdout(stream):print_saved_residuals(fn,x)
     lines=[line for line in stream.getvalue().splitlines() if line.strip()]
     return lines
@@ -108,25 +99,22 @@ for _ in range(4):values.append(np.tanh(host_w@values[-1]))
 cotangent=2*values[-1]
 for i in range(4,0,-1):cotangent=host_w.T@(cotangent*(1-values[i]**2))
 for fn in (plain,remat):
-    # Differentiate the objective to obtain gradients ``.
     np.testing.assert_allclose(jax.grad(fn)(x),cotangent,rtol=3e-5,atol=1e-7)
-# Differentiate the objective to obtain gradients ``.
 np.testing.assert_allclose(jax.grad(plain)(x),jax.grad(remat)(x),rtol=1e-6,atol=1e-7)
-# Differentiate the objective to obtain `executables` via automatic differentiation.
 executables=[jax.jit(jax.grad(fn)).lower(x).compile() for fn in (plain,remat)]
 memory=[]
 times=[]
 for executable in executables:
     analysis=executable.memory_analysis()
     memory.append(None if analysis is None else {name:getattr(analysis,name) for name in ('argument_size_in_bytes','output_size_in_bytes','temp_size_in_bytes','alias_size_in_bytes')})
-    # Synchronize host execution until asynchronous device computation completes.
-    # Synchronize host execution until asynchronous device computation completes.
+    # Wait for device work to finish before timing it or comparing its result on the host.
+    # Wait for device work to finish before timing it or comparing its result on the host.
     executable(x).block_until_ready()
     samples=[]
     for _ in range(5):
-        # Synchronize host execution until asynchronous device computation completes.
-        # Synchronize host execution until asynchronous device computation completes.
-        # Synchronize host execution until asynchronous device computation completes.
+        # Wait for device work to finish before timing it or comparing its result on the host.
+        # Wait for device work to finish before timing it or comparing its result on the host.
+        # Wait for device work to finish before timing it or comparing its result on the host.
         start=time.perf_counter()
         executable(x).block_until_ready()
         samples.append(time.perf_counter()-start)
@@ -138,7 +126,6 @@ print('Synchronized gradient samples:',times)
 print('Independent reverse recurrence agrees with both gradients.')
 
 # Figure data experiment
-# Compute figure data for: Changed autodiff storage does not guarantee changed compiled buffers
 panels=[{'kind':'bar','title':'Autodiff residual descriptions','labels':['ordinary','layer remat'],'ylabel':'saved entries (not bytes)','series':[{'label':'residual descriptions','y':[len(r) for r in reports]}]}]
 if all(m is not None for m in memory):
     panels.append({'kind':'bar','title':'Compiler memory estimate','labels':['ordinary','layer remat'],'ylabel':'estimated temporary bytes','series':[{'label':'compiler temporaries','y':[m['temp_size_in_bytes'] for m in memory]}]})
@@ -149,32 +136,26 @@ visual_data={'kind':'panels','panels':panels}
 # Experiment: Move the boundary to the entire objective
 # Experiment — Move the boundary to the entire objective: Correctness is necessary but does not choose the best policy.
 whole=jax.checkpoint(plain)
-# Differentiate the objective to obtain gradients ``.
 np.testing.assert_allclose(jax.grad(whole)(x),cotangent,rtol=3e-5,atol=1e-7)
 print('Whole-objective residuals:',residual_report(whole))
-# Differentiate the objective to obtain `whole_executable` via automatic differentiation.
 whole_executable=jax.jit(jax.grad(whole)).lower(x).compile()
 print('Whole-objective memory estimate:',whole_executable.memory_analysis())
 
 # Reference solution. Try the exercise before reading this.
-# Exercise solution: Use the direction v=(1,\ldots,1) and central differences to...
+# Exercise solution
 direction=jnp.ones_like(x)
 eps=.001
 finite=(float(plain(x+eps*direction))-float(plain(x-eps*direction)))/(2*eps)
-# Differentiate the objective to obtain `automatic` via automatic differentiation.
 automatic=float(jnp.vdot(jax.grad(plain)(x),direction))
 np.testing.assert_allclose(finite,automatic,rtol=3e-3,atol=1e-6)
 print('Directional derivative finite/automatic:',finite,automatic,'epsilon',eps)
 
 # Reference practice: Check higher-order differentiation
-# Check higher-order differentiation (Transfer): Recomputation should preserve the differentiable function in...
+# Check higher-order differentiation (Transfer)
 direction=jnp.linspace(-1.,1.,len(x))
-# Differentiate the objective to obtain `(_, hvp_plain)` via automatic differentiation.
 _,hvp_plain=jax.jvp(jax.grad(plain),(x,),(direction,))
-# Differentiate the objective to obtain `(_, hvp_remat)` via automatic differentiation.
 _,hvp_remat=jax.jvp(jax.grad(remat),(x,),(direction,))
 np.testing.assert_allclose(hvp_plain,hvp_remat,rtol=3e-5,atol=1e-7)
-# Confirm that all computed values remain finite (no NaN or Inf).
 assert np.isfinite(np.asarray(hvp_plain)).all()
 print('Higher-order directional derivatives agree.')
 print("PASS: performance-05")

@@ -14,20 +14,17 @@ import jax.numpy as jnp
 # Read `trace_root` from environment configuration (with a default fallback).
 trace_root=Path(os.environ.get('JAX_COURSE_TRACE_DIR') or tempfile.mkdtemp(prefix='jax-course-trace-')).resolve()
 trace_root.mkdir(parents=True,exist_ok=True)
-# Draw pseudorandom samples for `rng` using the explicit RNG state.
 rng=np.random.default_rng(31)
 host=rng.normal(size=(48,32)).astype(np.float32)
 weights=rng.normal(size=(32,16)).astype(np.float32)
-# Create device-backed JAX array `(x, w)`.
 x,w=jnp.asarray(host),jnp.asarray(weights)
 # Wrap with `jax.jit` (`compiled`) so XLA traces and compiles the function.
 compiled=jax.jit(lambda a,b:jnp.tanh(a@b))
-# Synchronize host execution until asynchronous device computation completes.
+# Wait for device work to finish before timing it or comparing its result on the host.
 compiled(x,w).block_until_ready()
 
 # Capture named intervals
-# Step 2 — Capture named intervals: The outer annotation provides context, while two nonoverlapping...
-# Enter `jax.profiler.trace(trace_root, create_perfett` context block:
+# Step 2 — Capture named intervals
 with jax.profiler.trace(trace_root,create_perfetto_trace=True):
     for index in range(4):
         with jax.profiler.StepTraceAnnotation('learner_step',step_num=index):
@@ -35,7 +32,7 @@ with jax.profiler.trace(trace_root,create_perfetto_trace=True):
                 time.sleep(.001)  # injected host delay; not a measured real input pipeline
             with jax.profiler.TraceAnnotation('model_and_wait'):
                 result=compiled(x,w)
-                # Synchronize host execution until asynchronous device computation completes.
+                # Wait for device work to finish before timing it or comparing its result on the host.
                 result.block_until_ready()
 np.testing.assert_allclose(result,np.tanh(host@weights),rtol=2e-5,atol=2e-5)
 traces=sorted(trace_root.rglob('perfetto_trace.json.gz'),key=lambda p:p.stat().st_mtime_ns)
@@ -76,19 +73,16 @@ import jax.numpy as jnp
 # Read `trace_root` from environment configuration (with a default fallback).
 trace_root=Path(os.environ.get('JAX_COURSE_TRACE_DIR') or tempfile.mkdtemp(prefix='jax-course-trace-')).resolve()
 trace_root.mkdir(parents=True,exist_ok=True)
-# Draw pseudorandom samples for `rng` using the explicit RNG state.
 rng=np.random.default_rng(31)
 host=rng.normal(size=(48,32)).astype(np.float32)
 weights=rng.normal(size=(32,16)).astype(np.float32)
-# Create device-backed JAX array `(x, w)`.
 x,w=jnp.asarray(host),jnp.asarray(weights)
 # Wrap with `jax.jit` (`compiled`) so XLA traces and compiles the function.
 compiled=jax.jit(lambda a,b:jnp.tanh(a@b))
-# Synchronize host execution until asynchronous device computation completes.
+# Wait for device work to finish before timing it or comparing its result on the host.
 compiled(x,w).block_until_ready()
 
-# Step 2 — Capture named intervals: The outer annotation provides context, while two nonoverlapping...
-# Enter `jax.profiler.trace(trace_root, create_perfett` context block:
+# Step 2 — Capture named intervals
 with jax.profiler.trace(trace_root,create_perfetto_trace=True):
     for index in range(4):
         with jax.profiler.StepTraceAnnotation('learner_step',step_num=index):
@@ -96,7 +90,7 @@ with jax.profiler.trace(trace_root,create_perfetto_trace=True):
                 time.sleep(.001)  # injected host delay; not a measured real input pipeline
             with jax.profiler.TraceAnnotation('model_and_wait'):
                 result=compiled(x,w)
-                # Synchronize host execution until asynchronous device computation completes.
+                # Wait for device work to finish before timing it or comparing its result on the host.
                 result.block_until_ready()
 np.testing.assert_allclose(result,np.tanh(host@weights),rtol=2e-5,atol=2e-5)
 traces=sorted(trace_root.rglob('perfetto_trace.json.gz'),key=lambda p:p.stat().st_mtime_ns)
@@ -121,36 +115,31 @@ print(json.dumps({'input_wait_us':input_us,'model_and_wait_us':model_us,'step_us
 print('Four named steps verified; host annotations are not isolated device kernels.')
 
 # Figure data experiment
-# Compute figure data for: Where four annotated steps spent host time
 visual_data={'kind':'line','x':[0,1,2,3],'xlabel':'captured step','ylabel':'host annotation duration (microseconds)','series':[{'label':'injected input wait','y':input_us},{'label':'model call and completion wait','y':model_us}]}
 
 # Experiment: Account for the enclosing step
 # Experiment — Account for the enclosing step: Outer and child intervals describe nested boundaries.
 overhead=np.asarray(step_us)-np.asarray(input_us)-np.asarray(model_us)
 assert np.all(overhead>=-2)
-# Convert `wrong` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 wrong=np.asarray(step_us)+np.asarray(input_us)+np.asarray(model_us)
 assert np.all(wrong>=np.asarray(step_us))
 print('Unattributed outer time, microseconds:',overhead.tolist())
 print('Wrong double-counted totals:',wrong.tolist())
 
 # Reference solution. Try the exercise before reading this.
-# Exercise solution: Convert every model interval to milliseconds and summarize its...
+# Exercise solution
 model_ms=np.asarray(model_us)/1000
-# Aggregate array values to compute `summary`.
 summary={'minimum_ms':float(model_ms.min()),'median_ms':float(np.median(model_ms)),'maximum_ms':float(model_ms.max())}
 assert summary['minimum_ms']<=summary['median_ms']<=summary['maximum_ms']
-# Execute `np.testing.assert_allclose(model_ms*1000,model_us)`
 np.testing.assert_allclose(model_ms*1000,model_us)
 print(summary)
 
 # Reference practice: Compute a union instead of summing overlap
-# Compute a union instead of summing overlap (Transfer): A union describes time covered by any interval.
 def union_duration(intervals):
     total=0
     left=right=None
     for start,end in sorted(intervals):
-        # Guard input contract (`end < start`) and fail fast if violated.
         if end<start:raise ValueError('negative interval')
         if right is None:left,right=start,end
         elif start<=right:right=max(right,end)

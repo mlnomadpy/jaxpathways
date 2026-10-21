@@ -2,6 +2,8 @@
 
 Phase 18: Post-training: SFT, LoRA, reward models and RLHF · about 105 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Compare chosen and rejected response log probabilities
@@ -101,12 +103,11 @@ Reference caches must bind prompt text, chosen/rejected ordering, tokenizer, cha
 Create main.py in your activated course environment. Paste this block, then run python main.py; function definitions alone print nothing.
 
 ```python
-# Step 1 — 1. Define the reference-corrected pair objective: The reference correction is detached, while current policy log...
+# Step 1 — 1. Define the reference-corrected pair objective
 import jax
 import jax.numpy as jnp
 import numpy as np
 
-# Define `dpo_loss(policy_logps, reference_logps, chosen, rejected...)` to evaluate the objective and its automatic derivatives:
 def dpo_loss(policy_logps, reference_logps, chosen, rejected, beta=0.2):
     margin = (policy_logps[chosen] - policy_logps[rejected]) - jax.lax.stop_gradient(
         reference_logps[chosen] - reference_logps[rejected]
@@ -127,11 +128,9 @@ chosen = jnp.array([0, 0, 1])
 rejected = jnp.array([1, 2, 2])
 theta = jnp.array([0.2, 0.0, -0.2])
 history = []
-# Evaluate numerically stable log-space cross-entropy/likelihood (`loss`).
 loss = lambda theta: dpo_loss(
     jax.nn.log_softmax(theta), reference, chosen, rejected, 0.3
 )
-# Differentiate the objective to obtain `step` via automatic differentiation.
 step = jax.jit(jax.value_and_grad(loss))
 np.testing.assert_allclose(loss(theta), np.log(2), atol=1e-6)
 ```
@@ -150,14 +149,12 @@ for _ in range(120):
     theta = theta - 0.4 * g
 
 assert history[-1] < history[0] * 0.5
-# Evaluate numerically stable log-space cross-entropy/likelihood (`policy`).
 policy = jax.nn.log_softmax(theta)
-# Convert `margin` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 margin = np.asarray(
     (policy[chosen] - policy[rejected]) - (reference[chosen] - reference[rejected]),
     np.float64,
 )
-# Execute `np.testing.assert_allclose(`.
 np.testing.assert_allclose(
     loss(theta), np.mean(np.logaddexp(0, -0.3 * margin)), atol=1e-6
 )
@@ -177,12 +174,11 @@ The host stable-softplus calculation checks final margins. Adding a common logit
 ## Run the example
 
 ```python
-# Step 1 — 1. Define the reference-corrected pair objective: The reference correction is detached, while current policy log...
+# Step 1 — 1. Define the reference-corrected pair objective
 import jax
 import jax.numpy as jnp
 import numpy as np
 
-# Define `dpo_loss(policy_logps, reference_logps, chosen, rejected...)` to evaluate the objective and its automatic derivatives:
 def dpo_loss(policy_logps, reference_logps, chosen, rejected, beta=0.2):
     margin = (policy_logps[chosen] - policy_logps[rejected]) - jax.lax.stop_gradient(
         reference_logps[chosen] - reference_logps[rejected]
@@ -195,11 +191,9 @@ chosen = jnp.array([0, 0, 1])
 rejected = jnp.array([1, 2, 2])
 theta = jnp.array([0.2, 0.0, -0.2])
 history = []
-# Evaluate numerically stable log-space cross-entropy/likelihood (`loss`).
 loss = lambda theta: dpo_loss(
     jax.nn.log_softmax(theta), reference, chosen, rejected, 0.3
 )
-# Differentiate the objective to obtain `step` via automatic differentiation.
 step = jax.jit(jax.value_and_grad(loss))
 np.testing.assert_allclose(loss(theta), np.log(2), atol=1e-6)
 
@@ -210,14 +204,12 @@ for _ in range(120):
     theta = theta - 0.4 * g
 
 assert history[-1] < history[0] * 0.5
-# Evaluate numerically stable log-space cross-entropy/likelihood (`policy`).
 policy = jax.nn.log_softmax(theta)
-# Convert `margin` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 margin = np.asarray(
     (policy[chosen] - policy[rejected]) - (reference[chosen] - reference[rejected]),
     np.float64,
 )
-# Execute `np.testing.assert_allclose(`.
 np.testing.assert_allclose(
     loss(theta), np.mean(np.logaddexp(0, -0.3 * margin)), atol=1e-6
 )
@@ -253,7 +245,6 @@ The second panel shows final reference-corrected margins for each comparison. Al
 Positive final corrected margins mean the policy favors each chosen action more strongly relative to the reference. The independent host softplus calculation and reference-gradient check establish objective behavior; separate generation and human review would be needed for a language application.
 
 ```python
-# Compute figure data for: Direct preference optimization and reference-corrected margins — recorded experiment
 visual_data={'kind':'line','xlabel':'completed parameter updates before measurement','ylabel':'DPO preference loss (nats)','series':[{'label':'recorded CPU training loss','x':list(range(len(history))),'y':history}]}
 for panel in visual_data.get('panels',[visual_data]):
     panel['x']=panel['series'][0]['x']
@@ -264,7 +255,7 @@ visual_data={"panels":[*visual_data.get("panels",[visual_data]),extra_panel]}
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:52:21.092144+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:27:04.536354+00:00. JAX 0.9.2.
 
 ```text
 DPO initial/final: 0.6931471824645996 0.27227783203125 ; reference-corrected margins: [3.0890286  6.17805719 3.08902884]
@@ -286,7 +277,6 @@ PASS: posttraining-05
 # Experiment — Verify the reference cancellation: The initial policy is not uniform.
 initial = dpo_loss(reference, reference, chosen, rejected, 0.3)
 np.testing.assert_allclose(initial, np.log(2), atol=1e-6)
-# Aggregate array values to compute `uncorrected`.
 uncorrected = jnp.mean(
     jax.nn.softplus(-0.3 * (reference[chosen] - reference[rejected]))
 )
@@ -327,18 +317,13 @@ Swap chosen and rejected IDs after training and verify that the loss rises.
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `dpo_loss(...)` — Call `dpo_loss` with your updated parameters or inputs from this lesson's workspace.
-- `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
-
 **Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+1. Exercise solution
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Swap chosen and rejected IDs after training and verify that the loss...
+# Exercise solution
 reverse = float(...)  # TODO: compute reverse
 assert reverse  # TODO: complete assertion check
 print('Reversed-label loss:', reverse)
@@ -347,7 +332,7 @@ print('Reversed-label loss:', reverse)
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Swap chosen and rejected IDs after training and verify that the loss...
+# Exercise solution
 reverse = float(dpo_loss(policy, reference, rejected, chosen, 0.3))
 assert reverse > float(dpo_loss(policy, reference, chosen, rejected, 0.3))
 print('Reversed-label loss:', reverse)
@@ -373,18 +358,16 @@ The reference is an input to the objective but not an optimization variable.
 - `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
 
 **Step-by-step implementation plan:**
-1. Differentiate the objective to obtain `reference_grad` via automatic differentiation.
-2. Allocate initialized array `` with the specified shape and dtype.
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Freeze the reference numerically and in autodiff (Transfer): Also retain the actual reference checkpoint and tokenizer...
-# Differentiate the objective to obtain `reference_grad` via automatic differentiation.
+# Freeze the reference numerically and in autodiff (Transfer)
 reference_grad = jax.grad(...)  # TODO: compute reference_grad
     policy, reference, chosen, rejected, 0.3
 )
-# Allocate initialized array `` with the specified shape and dtype.
 np.testing.assert_array_equal(
     reference_grad, np.zeros(reference_grad.shape)
 )
@@ -394,12 +377,10 @@ print('Reference gradient is zero.')
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Freeze the reference numerically and in autodiff (Transfer): Also retain the actual reference checkpoint and tokenizer...
-# Differentiate the objective to obtain `reference_grad` via automatic differentiation.
+# Freeze the reference numerically and in autodiff (Transfer)
 reference_grad = jax.grad(dpo_loss, argnums=1)(
     policy, reference, chosen, rejected, 0.3
 )
-# Allocate initialized array `` with the specified shape and dtype.
 np.testing.assert_array_equal(
     reference_grad, np.zeros(reference_grad.shape)
 )
@@ -430,24 +411,21 @@ The log-softmax normalizer cancels in a log-probability difference. Shared model
 - `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
 
 **Step-by-step implementation plan:**
-1. Evaluate numerically stable log-space cross-entropy/likelihood (`one_pair`).
-2. Differentiate the objective to obtain gradients ``.
+1. Derive a one-pair categorical gradient (Challenge)
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Derive a one-pair categorical gradient (Challenge): The unpaired logit is absent from this categorical...
+# Derive a one-pair categorical gradient (Challenge)
 probe = jnp.array(...)  # TODO: compute probe
 choice = jnp.array(...)  # TODO: compute choice
 reject = jnp.array(...)  # TODO: compute reject
 beta = ...  # TODO: compute beta
-# Evaluate numerically stable log-space cross-entropy/likelihood (`one_pair`).
 one_pair = ...  # TODO: compute one_pair
     jax.nn.log_softmax(logits), reference, choice, reject, beta
 )
 margin_value = float(...)  # TODO: compute margin_value
 factor = ...  # TODO: compute factor
-# Differentiate the objective to obtain gradients ``.
 np.testing.assert_allclose(
     jax.grad(one_pair)(probe), [factor, -factor, 0.0], atol=1e-6
 )
@@ -457,18 +435,16 @@ print('One-pair logit gradient agrees with independent margin derivative.')
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Derive a one-pair categorical gradient (Challenge): The unpaired logit is absent from this categorical...
+# Derive a one-pair categorical gradient (Challenge)
 probe = jnp.array([0.6, -0.3, 0.1])
 choice = jnp.array([0])
 reject = jnp.array([1])
 beta = 0.3
-# Evaluate numerically stable log-space cross-entropy/likelihood (`one_pair`).
 one_pair = lambda logits: dpo_loss(
     jax.nn.log_softmax(logits), reference, choice, reject, beta
 )
 margin_value = float((probe[0] - probe[1]) - (reference[0] - reference[1]))
 factor = -beta / (1 + np.exp(beta * margin_value))
-# Differentiate the objective to obtain gradients ``.
 np.testing.assert_allclose(
     jax.grad(one_pair)(probe), [factor, -factor, 0.0], atol=1e-6
 )

@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "recovery-01",
-  "contentHash": "01efd384f4d1b167b7564b54c62321b1138e40d4d092dcc9975d133f0321e6ce",
-  "executedAt": "2026-10-20T10:46:29.735773+00:00",
+  "contentHash": "d29d2a038f4c10ad4dd40f280b7b8a5acd01d4e62a11367981b6e93bd6c94b88",
+  "executedAt": "2026-10-20T22:21:23.552163+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -11,18 +11,18 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Batch sizes: [4, 4, 3]\nExample order: [9, 10, 4, 1, 0, 7, 6, 8, 2, 5, 3]\nPreparation seconds (local observation only): 0.00836424995213747\nDataset SHA256: 1a81451a8fb32a1bf0ad6307ea19198153ab1603b37174c76c4d498e343e6892\nBatch sizes: [4, 4, 3]\nExample order: [9, 10, 4, 1, 0, 7, 6, 8, 2, 5, 3]\nPreparation seconds (local observation only): 1.874985173344612e-05\nDataset SHA256: 1a81451a8fb32a1bf0ad6307ea19198153ab1603b37174c76c4d498e343e6892\nEpoch one order: [4, 0, 5, 10, 6, 2, 1, 9, 7, 3, 8]\nOmitted IDs: [2, 3, 5]\nCopy preserves fingerprint; reordered source and edited labels invalidate it.\nPASS: recovery-01\n",
+  "stdout": "Batch sizes: [4, 4, 3]\nExample order: [9, 10, 4, 1, 0, 7, 6, 8, 2, 5, 3]\nPreparation seconds (local observation only): 0.01006391691043973\nDataset SHA256: 1a81451a8fb32a1bf0ad6307ea19198153ab1603b37174c76c4d498e343e6892\nBatch sizes: [4, 4, 3]\nExample order: [9, 10, 4, 1, 0, 7, 6, 8, 2, 5, 3]\nPreparation seconds (local observation only): 1.837499439716339e-05\nDataset SHA256: 1a81451a8fb32a1bf0ad6307ea19198153ab1603b37174c76c4d498e343e6892\nEpoch one order: [4, 0, 5, 10, 6, 2, 1, 9, 7, 3, 8]\nOmitted IDs: [2, 3, 5]\nCopy preserves fingerprint; reordered source and edited labels invalidate it.\nPASS: recovery-01\n",
   "notebookCells": [
     {
-      "sourceHash": "ae592378e5a1b47905d55008f1c3ff99e65092a62b3a06b43cae610a4b3e66e1",
+      "sourceHash": "e78ec54a582ee347617fb616386906ebc6dced452326308a2ddb63ff2dba9d7c",
       "outputs": []
     },
     {
-      "sourceHash": "dc3b420ad5e0959237f8174362412a7f60eda46ccd9b2283b4793306b761b90c",
+      "sourceHash": "d97dded3a548eedf7d9367a086cceea839e17ed17af54daafe4bacf5d113b5b3",
       "outputs": []
     },
     {
-      "sourceHash": "af9e312a3a7aeb218a692ebe47aed807f2f9406e9f141e4cb9baa073bd913aa4",
+      "sourceHash": "b779efb4edb7b8c59d229f298885677f580f187c2e29fbed9fb771940127fd60",
       "outputs": [
         {
           "output_type": "stream",
@@ -30,14 +30,14 @@
           "text": [
             "Batch sizes: [4, 4, 3]\n",
             "Example order: [9, 10, 4, 1, 0, 7, 6, 8, 2, 5, 3]\n",
-            "Preparation seconds (local observation only): 0.009738582652062178\n",
+            "Preparation seconds (local observation only): 0.009791667107492685\n",
             "Dataset SHA256: 1a81451a8fb32a1bf0ad6307ea19198153ab1603b37174c76c4d498e343e6892\n"
           ]
         }
       ]
     },
     {
-      "sourceHash": "ab623e1e8ecb0eaadd352c9b2684764b313bcbf47202da2b3f594644e66aba14",
+      "sourceHash": "256b1a98ac90212b42fd1cfb676fa5e7458358a4563d6b461fb32a16e7004731",
       "outputs": [
         {
           "output_type": "stream",
@@ -45,14 +45,14 @@
           "text": [
             "Batch sizes: [4, 4, 3]\n",
             "Example order: [9, 10, 4, 1, 0, 7, 6, 8, 2, 5, 3]\n",
-            "Preparation seconds (local observation only): 2.0582694560289383e-05\n",
+            "Preparation seconds (local observation only): 2.2124964743852615e-05\n",
             "Dataset SHA256: 1a81451a8fb32a1bf0ad6307ea19198153ab1603b37174c76c4d498e343e6892\n"
           ]
         }
       ]
     },
     {
-      "sourceHash": "0209c54f0c6c1e5c85d0ce4b7b1780589ad58bf53446a640dc72da9dfc983460",
+      "sourceHash": "a6c742d480c8e7dde12c0bb60eebaaabae72b2d6591c8f27e89cb21f34d10bc3",
       "outputs": []
     },
     {
@@ -71,7 +71,7 @@
       ]
     },
     {
-      "sourceHash": "ed0ff5cf0aea87c92e76a354e64ab01010e19fa00d9e762ef2e99f3a68acdd83",
+      "sourceHash": "32639bc0b25bb7ad495c4f2c151082658f26b48b51b318ab294e32338de66598",
       "outputs": [
         {
           "output_type": "stream",
@@ -83,7 +83,7 @@
       ]
     },
     {
-      "sourceHash": "d00a4f181c07186e3a196209b0331255f2890580e357772c77ace3895b60c020",
+      "sourceHash": "b56c8d6d26bef7c27b5758b12d280819a4e7edc9a81609fa5a1c7874d2d3caa4",
       "outputs": [
         {
           "output_type": "stream",
@@ -95,11 +95,11 @@
       ]
     },
     {
-      "sourceHash": "e694931ceea49d8ac5ff6868bea3bb8c3bf338f2eedfe87670ae38cfe40e4f96",
+      "sourceHash": "8de35abe6f3935524bbe19360502b6b117ab45932810d1b8d51341fc17e975bc",
       "outputs": []
     },
     {
-      "sourceHash": "a7c9f4a20bc58989096eea8ce03654baf58d7f3dc05288e72043d79508a7c6df",
+      "sourceHash": "4533f89a06f26236b7b0020fb6d5f0f3f7271c3702dbf347b030e25327d825fc",
       "outputs": []
     },
     {

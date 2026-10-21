@@ -2,6 +2,8 @@
 
 Phase 15: Deployment, interoperability & edge AI · about 110 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Compare FP32, FP16 and BF16 rounding without confusing storage with accumulation.
@@ -113,7 +115,6 @@ import numpy as np
 import jax.numpy as jnp
 x = np.array([[.3, -1.2, 2.1], [1.1, .2, -.8]], np.float32)
 w = np.array([[.11, -1.8], [.7, .2], [-.3, 2.4]], np.float32)
-# Perform matrix / vector contraction (`@`) to compute `reference`.
 reference = x @ w
 
 np.testing.assert_allclose(reference[0,0], -1.437, atol=1e-6)
@@ -126,18 +127,15 @@ The top-left output is $-1.437$. This anchors the error comparison to a named va
 Append this block to the same main.py and rerun the whole file. Compare FP32, FP16 and BF16 representations while returning to FP32 before multiplication.
 
 ```python
-# Step 2 — Round inputs and weights, then accumulate explicitly: The printed errors isolate the consequence of representational...
+# Step 2 — Round inputs and weights, then accumulate explicitly
 def mixed_forward(x, w, dtype):
     # Demonstrate rounding inputs/weights with explicit float32 accumulation.
     a = jnp.asarray(x, dtype).astype(jnp.float32)
-    # Create device-backed JAX array `b`.
     b = jnp.asarray(w, dtype).astype(jnp.float32)
     return np.asarray(a @ b)
 for dtype in (jnp.float32, jnp.float16, jnp.bfloat16):
     y = mixed_forward(x, w, dtype)
-    # Aggregate array values to compute `error`.
     error = float(np.max(np.abs(y-reference)))
-    # Confirm that all computed values remain finite (no NaN or Inf).
     assert np.isfinite(y).all() and error < .05
     print(str(dtype), "max absolute error", error)
 ```
@@ -149,24 +147,19 @@ The printed errors isolate the consequence of representational rounding in this 
 Append this block to the same main.py and rerun the whole file. Quantize per output channel and inspect the all-zero-channel case.
 
 ```python
-# Step 3 — Construct signed integer codes and channel scales: An all-zero channel uses scale 1 and zero codes, so reconstruction...
+# Step 3 — Construct signed integer codes and channel scales
 def quantize_weights(weights, bits):
-    # Guard input contract (`bits not in (4, 8)`) and fail fast if violated.
     if bits not in (4, 8):
         raise ValueError("use signed 4 or 8 bit symmetric quantization")
     limit = 2 ** (bits - 1) - 1
     # Reduce along axis=0 to compute `maxima`.
     maxima = np.max(np.abs(weights), axis=0, keepdims=True)
     scale = np.where(maxima == 0, 1., maxima / limit).astype(np.float32)
-    # Combine or mask array elements to form `q`.
     q = np.clip(np.rint(weights / scale), -limit, limit).astype(np.int8)
     return q, scale
 
-# Allocate initialized array `(zero_codes, zero_scales)` with the specified shape and dtype.
 zero_codes, zero_scales = quantize_weights(np.zeros((3,2),np.float32), 8)
-# Allocate initialized array `` with the specified shape and dtype.
 np.testing.assert_array_equal(zero_codes, np.zeros((3,2),np.int8))
-# Allocate initialized array `` with the specified shape and dtype.
 np.testing.assert_array_equal(zero_scales, np.ones((1,2),np.float32))
 ```
 
@@ -194,36 +187,30 @@ Every error must fit its stated bound. Move on to activation clipping and the af
 ## Run the example
 
 ```python
-# Choose weight, activation and accumulation precision: A precision policy specifies how weights, activations,...
+# Choose weight, activation and accumulation precision
 import numpy as np
 import jax.numpy as jnp
 x = np.array([[.3, -1.2, 2.1], [1.1, .2, -.8]], np.float32)
 w = np.array([[.11, -1.8], [.7, .2], [-.3, 2.4]], np.float32)
-# Perform matrix / vector contraction (`@`) to compute `reference`.
 reference = x @ w
 def mixed_forward(x, w, dtype):
     # Demonstrate rounding inputs/weights with explicit float32 accumulation.
     a = jnp.asarray(x, dtype).astype(jnp.float32)
-    # Create device-backed JAX array `b`.
     b = jnp.asarray(w, dtype).astype(jnp.float32)
     return np.asarray(a @ b)
 for dtype in (jnp.float32, jnp.float16, jnp.bfloat16):
     y = mixed_forward(x, w, dtype)
-    # Aggregate array values to compute `error`.
     error = float(np.max(np.abs(y-reference)))
-    # Confirm that all computed values remain finite (no NaN or Inf).
     assert np.isfinite(y).all() and error < .05
     print(str(dtype), "max absolute error", error)
 
 def quantize_weights(weights, bits):
-    # Guard input contract (`bits not in (4, 8)`) and fail fast if violated.
     if bits not in (4, 8):
         raise ValueError("use signed 4 or 8 bit symmetric quantization")
     limit = 2 ** (bits - 1) - 1
-    # Reduce along axis=0 to compute `maxima`.
+    # Find one maximum per output channel so each weight column gets its own quantization scale.
     maxima = np.max(np.abs(weights), axis=0, keepdims=True)
     scale = np.where(maxima == 0, 1., maxima / limit).astype(np.float32)
-    # Combine or mask array elements to form `q`.
     q = np.clip(np.rint(weights / scale), -limit, limit).astype(np.int8)
     return q, scale
 for bits in (8, 4):
@@ -264,7 +251,6 @@ Four-bit quantization uses fewer representable weight levels, so its larger roun
 Use the lower panel to decide what to inspect: zero-point subtraction and bias units for an offset mismatch; output range and clipping counts for saturation. The upper panel compares precision policies on the original fixture, while the lower panel isolates operator bookkeeping on a different fixture. Neither measures latency.
 
 ```python
-# Compute figure data for: Precision choices trade representation for output error
 names = []
 errors = []
 for name, dtype in [('FP32', jnp.float32), ('FP16 → FP32', jnp.float16), ('BF16 → FP32', jnp.bfloat16)]:
@@ -277,57 +263,48 @@ for bits_plot in (8, 4):
 visual_data = {'kind': 'bar', 'labels': names, 'ylabel': 'maximum absolute output error', 'series': [{'label': 'CPU reference error', 'y': errors}]}
 # Deliberately exact grid values make an independent hand calculation possible.
 a_sx, a_zx = .25, -3
-# Convert `a_sw` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 a_sw = np.array([.5, .25], np.float64)
-# Convert `a_qx` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 a_qx = np.array([[-3, 1, 5]], np.int8)
-# Convert `a_qw` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 a_qw = np.array([[2, -1], [-1, 2], [1, 1]], np.int8)
-# Convert `a_bias` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 a_bias = np.array([.125, -.0625], np.float64)
 a_bias_codes = np.rint(a_bias / (a_sx * a_sw)).astype(np.int64)
 # Check the wide result before representing it with an INT32 accumulator.
 a_wide = (a_qx.astype(np.int64) - a_zx) @ a_qw.astype(np.int64) + a_bias_codes
 assert np.all((a_wide >= np.iinfo(np.int32).min) & (a_wide <= np.iinfo(np.int32).max))
 a_acc = a_wide.astype(np.int32)
-# Execute `np.testing.assert_array_equal(a_acc, [[5, 15]])`
 np.testing.assert_array_equal(a_acc, [[5, 15]])
 a_real = a_acc.astype(np.float64) * a_sx * a_sw
 # Independent real-valued input/weights, written without decoding the codes.
 a_reference = np.array([[0., 1., 2.]]) @ np.array([[1., -.25], [-.5, .5], [.5, .25]]) + a_bias
-# Execute `np.testing.assert_array_equal(a_real, [[.625, .9375]])`
 np.testing.assert_array_equal(a_real, [[.625, .9375]])
 np.testing.assert_allclose(a_real, a_reference, atol=1e-12, rtol=0)
 def output_grid(real, scale, zero_point):
-    # Guard input contract (`not np.isfinite(scale) or scale <= 0`) and fail fast if violated.
     if not np.isfinite(scale) or scale <= 0:
         raise ValueError('positive finite output scale required')
-    # Guard input contract (`type(zero_point) is not int or not -128 <= zero_point <= 127`) and fail fast if violated.
     if type(zero_point) is not int or not -128 <= zero_point <= 127:
         raise ValueError('integer INT8 zero point required')
     unbounded = np.rint(real / scale) + zero_point
     clipped = (unbounded < -128) | (unbounded > 127)
-    # Combine or mask array elements to form `codes`.
     codes = np.clip(unbounded, -128, 127).astype(np.int8)
     return codes, (codes.astype(np.float64) - zero_point) * scale, clipped
 
 a_codes, a_restored, a_clipped = output_grid(a_real, .0625, -8)
-# Execute `np.testing.assert_array_equal(a_codes, [[2, 7]])`
 np.testing.assert_array_equal(a_codes, [[2, 7]])
 assert not a_clipped.any()
 np.testing.assert_allclose(a_restored, a_reference, atol=1e-12, rtol=0)
 a_wrong = (a_qx.astype(np.int64) @ a_qw.astype(np.int64) + a_bias_codes) * a_sx * a_sw
-# Execute `np.testing.assert_array_equal(a_wrong, [[-.125, .5625]])`
 np.testing.assert_array_equal(a_wrong, [[-.125, .5625]])
 _, a_saturated, a_small_clipped = output_grid(a_real, 1./256, -8)
 assert a_small_clipped.all()
-# Execute `np.testing.assert_array_equal(a_saturated, [[135./256, 135./`
 np.testing.assert_array_equal(a_saturated, [[135./256, 135./256]])
 print('Affine accumulators:', a_acc.tolist(), 'output codes:', a_codes.tolist())
 print('Correct / missing zero point / clipped:', a_restored.tolist(), a_wrong.tolist(), a_saturated.tolist())
 
 first_panel = visual_data
-# Combine or mask array elements to form `visual_data`.
 visual_data = {'panels': [first_panel, {'kind': 'bar', 'labels': ['output 0', 'output 1'], 'ylabel': 'output value', 'series': [
     {'label': 'correct affine / float reference', 'y': a_restored[0].tolist()},
     {'label': 'input zero point omitted', 'y': a_wrong[0].tolist()},
@@ -336,7 +313,7 @@ visual_data = {'panels': [first_panel, {'kind': 'bar', 'labels': ['output 0', 'o
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:50:41.243511+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:24:44.714005+00:00. JAX 0.9.2.
 
 ```text
 <class 'jax.numpy.float32'> max absolute error 0.0
@@ -370,10 +347,8 @@ PASS: deployment-05
 ```python
 # Experiment — Calibrate an activation range, then shift it: Do not recalibrate on the test set to hide this error.
 calibration = np.linspace(-1., 1., 101, dtype=np.float32)
-# Aggregate array values to compute `activation_scale`.
 activation_scale = float(np.max(np.abs(calibration))) / 127
 held_out = np.array([.2, .9, 4.], np.float32)
-# Combine or mask array elements to form `activation_codes`.
 activation_codes = np.clip(np.rint(held_out / activation_scale), -127, 127).astype(np.int8)
 restored_activations = activation_codes.astype(np.float32) * activation_scale
 clipped = np.count_nonzero(np.abs(held_out) > 127 * activation_scale)
@@ -401,38 +376,30 @@ a_bias_codes = np.rint(a_bias / (a_sx * a_sw)).astype(np.int64)
 a_wide = (a_qx.astype(np.int64) - a_zx) @ a_qw.astype(np.int64) + a_bias_codes
 assert np.all((a_wide >= np.iinfo(np.int32).min) & (a_wide <= np.iinfo(np.int32).max))
 a_acc = a_wide.astype(np.int32)
-# Execute `np.testing.assert_array_equal(a_acc, [[5, 15]])`
 np.testing.assert_array_equal(a_acc, [[5, 15]])
 a_real = a_acc.astype(np.float64) * a_sx * a_sw
 # Independent real-valued input/weights, written without decoding the codes.
 a_reference = np.array([[0., 1., 2.]]) @ np.array([[1., -.25], [-.5, .5], [.5, .25]]) + a_bias
-# Execute `np.testing.assert_array_equal(a_real, [[.625, .9375]])`
 np.testing.assert_array_equal(a_real, [[.625, .9375]])
 np.testing.assert_allclose(a_real, a_reference, atol=1e-12, rtol=0)
 def output_grid(real, scale, zero_point):
-    # Guard input contract (`not np.isfinite(scale) or scale <= 0`) and fail fast if violated.
     if not np.isfinite(scale) or scale <= 0:
         raise ValueError('positive finite output scale required')
-    # Guard input contract (`type(zero_point) is not int or not -128 <= zero_point <= 127`) and fail fast if violated.
     if type(zero_point) is not int or not -128 <= zero_point <= 127:
         raise ValueError('integer INT8 zero point required')
     unbounded = np.rint(real / scale) + zero_point
     clipped = (unbounded < -128) | (unbounded > 127)
-    # Combine or mask array elements to form `codes`.
     codes = np.clip(unbounded, -128, 127).astype(np.int8)
     return codes, (codes.astype(np.float64) - zero_point) * scale, clipped
 
 a_codes, a_restored, a_clipped = output_grid(a_real, .0625, -8)
-# Execute `np.testing.assert_array_equal(a_codes, [[2, 7]])`
 np.testing.assert_array_equal(a_codes, [[2, 7]])
 assert not a_clipped.any()
 np.testing.assert_allclose(a_restored, a_reference, atol=1e-12, rtol=0)
 a_wrong = (a_qx.astype(np.int64) @ a_qw.astype(np.int64) + a_bias_codes) * a_sx * a_sw
-# Execute `np.testing.assert_array_equal(a_wrong, [[-.125, .5625]])`
 np.testing.assert_array_equal(a_wrong, [[-.125, .5625]])
 _, a_saturated, a_small_clipped = output_grid(a_real, 1./256, -8)
 assert a_small_clipped.all()
-# Execute `np.testing.assert_array_equal(a_saturated, [[135./256, 135./`
 np.testing.assert_array_equal(a_saturated, [[135./256, 135./256]])
 print('Affine accumulators:', a_acc.tolist(), 'output codes:', a_codes.tolist())
 print('Correct / missing zero point / clipped:', a_restored.tolist(), a_wrong.tolist(), a_saturated.tolist())
@@ -451,7 +418,6 @@ The first grid represents both values exactly. With scale $1/256$, the highest o
 heterogeneous = np.array([[.01, 10.], [-.02, -5.], [.03, 2.]], np.float32)
 channel_codes, channel_scales = quantize_weights(heterogeneous, 8)
 per_channel = channel_codes.astype(np.float32) * channel_scales
-# Aggregate array values to compute `shared_scale`.
 shared_scale = np.max(np.abs(heterogeneous)) / 127
 shared = np.clip(np.rint(heterogeneous/shared_scale), -127, 127).astype(np.int8).astype(np.float32)*shared_scale
 assert np.all(shared[:,0] == 0)
@@ -474,21 +440,16 @@ Add a zero-valued output channel and verify that its quantization scale is finit
 - `jnp.isfinite(x)` — Returns a boolean mask verifying that no element is `NaN` or `Inf`.
 
 **Step-by-step implementation plan:**
-1. Confirm that all computed values remain finite (no NaN or Inf).
-2. Execute `np.testing.assert_array_equal(q[:, -1], 0)`
-3. Execute `np.testing.assert_array_equal((q * scale)[:, -1], 0)`
+1. Exercise solution
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Add a zero-valued output channel and verify that its quantization...
+# Exercise solution
 with_zero = np.column_stack(...)  # TODO: compute with_zero
 q, scale = quantize_weights(...)  # TODO: compute q, scale
-# Confirm that all computed values remain finite (no NaN or Inf).
 assert np.isfinite(scale).all()  # TODO: complete assertion check
-# Execute `np.testing.assert_array_equal(q[:, -1], 0)`
 np.testing.assert_array_equal(q[:, -1], 0)
-# Execute `np.testing.assert_array_equal((q * scale)[:, -1], 0)`
 np.testing.assert_array_equal((q * scale)[:, -1], 0)
 print("Zero channel handled")
 ```
@@ -496,14 +457,11 @@ print("Zero channel handled")
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Add a zero-valued output channel and verify that its quantization...
+# Exercise solution
 with_zero = np.column_stack((w, np.zeros(3, np.float32)))
 q, scale = quantize_weights(with_zero, 8)
-# Confirm that all computed values remain finite (no NaN or Inf).
 assert np.isfinite(scale).all()
-# Execute `np.testing.assert_array_equal(q[:, -1], 0)`
 np.testing.assert_array_equal(q[:, -1], 0)
-# Execute `np.testing.assert_array_equal((q * scale)[:, -1], 0)`
 np.testing.assert_array_equal((q * scale)[:, -1], 0)
 print("Zero channel handled")
 ```
@@ -528,20 +486,15 @@ Cast both integer-code arrays before multiplication. The real accumulator unit i
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Aggregate array values to compute `sx`.
-2. Combine or mask array elements to form `qx`.
-3. Perform matrix / vector contraction (`@`) to compute `accumulator`.
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Compute W8A8 with a wide accumulator (Transfer): This dense fixture uses zero points of zero and no bias.
-# Aggregate array values to compute `sx`.
 sx = float(...)  # TODO: compute sx
-# Combine or mask array elements to form `qx`.
 qx = np.clip(...)  # TODO: compute qx
 qw, sw = quantize_weights(...)  # TODO: compute qw, sw
-# Perform matrix / vector contraction (`@`) to compute `accumulator`.
 accumulator = qx.astype(...)  # TODO: compute accumulator
 y_integer = accumulator.astype(...)  # TODO: compute y_integer
 assert accumulator.dtype  # TODO: complete assertion check
@@ -552,13 +505,9 @@ print("W8A8 fixture error", float(np.max(np.abs(y_integer-reference))))
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Compute W8A8 with a wide accumulator (Transfer): This dense fixture uses zero points of zero and no bias.
-# Aggregate array values to compute `sx`.
 sx = float(np.max(np.abs(x))) / 127
-# Combine or mask array elements to form `qx`.
 qx = np.clip(np.rint(x / sx), -127, 127).astype(np.int8)
 qw, sw = quantize_weights(w, 8)
-# Perform matrix / vector contraction (`@`) to compute `accumulator`.
 accumulator = qx.astype(np.int32) @ qw.astype(np.int32)
 y_integer = accumulator.astype(np.float32) * sx * sw
 assert accumulator.dtype == np.int32
@@ -584,14 +533,9 @@ Shift the zero point and codes by the same amount before subtracting; verify rep
 
 ### How to write: Change the code origin without changing the values — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `values(...)` — Call `values` with your updated parameters or inputs from this lesson's workspace.
-- `a_qx.astype(...)` — Call `a_qx.astype` with your updated parameters or inputs from this lesson's workspace.
-- `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
-
 **Step-by-step implementation plan:**
-1. Execute `np.testing.assert_array_equal(shifted_acc, a_acc)`
-2. Execute `np.testing.assert_array_equal(zero_result, a_bias[None, :])`
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -602,11 +546,9 @@ shifted_codes_wide = a_qx.astype(...)  # TODO: compute shifted_codes_wide
 assert np.all((-128  # TODO: complete assertion check
 shifted_codes = shifted_codes_wide.astype(...)  # TODO: compute shifted_codes
 shifted_acc = ...  # TODO: compute shifted_acc
-# Execute `np.testing.assert_array_equal(shifted_acc, a_acc)`
 np.testing.assert_array_equal(shifted_acc, a_acc)
 zero_codes = np.full(...)  # TODO: compute zero_codes
 zero_result = ...  # TODO: compute zero_result
-# Execute `np.testing.assert_array_equal(zero_result, a_bias[None, :])`
 np.testing.assert_array_equal(zero_result, a_bias[None, :])
 for bad_scale in (0., -1., float('nan')):
     try:
@@ -627,11 +569,9 @@ shifted_codes_wide = a_qx.astype(np.int64) + (shifted_zx - a_zx)
 assert np.all((-128 <= shifted_codes_wide) & (shifted_codes_wide <= 127))
 shifted_codes = shifted_codes_wide.astype(np.int8)
 shifted_acc = (shifted_codes.astype(np.int64) - shifted_zx) @ a_qw.astype(np.int64) + a_bias_codes
-# Execute `np.testing.assert_array_equal(shifted_acc, a_acc)`
 np.testing.assert_array_equal(shifted_acc, a_acc)
 zero_codes = np.full((1, 3), shifted_zx, np.int8)
 zero_result = ((zero_codes.astype(np.int64) - shifted_zx) @ a_qw.astype(np.int64) + a_bias_codes) * a_sx * a_sw
-# Execute `np.testing.assert_array_equal(zero_result, a_bias[None, :])`
 np.testing.assert_array_equal(zero_result, a_bias[None, :])
 for bad_scale in (0., -1., float('nan')):
     try:
@@ -661,11 +601,6 @@ Use nbytes for actual arrays. Packing two signed four-bit codes into one byte is
 
 ### How to write: Account for actual low-bit storage — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `storage(...)` — Call `storage` with your updated parameters or inputs from this lesson's workspace.
-- `quantize_weights(...)` — Call `quantize_weights` with your updated parameters or inputs from this lesson's workspace.
-- `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
-
 **Step-by-step implementation plan:**
 1. Set up the changed input or configuration parameters requested in the prompt.
 2. Run the target function or transformation and assert that the output matches your prediction.
@@ -673,7 +608,7 @@ Use nbytes for actual arrays. Packing two signed four-bit codes into one byte is
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Account for actual low-bit storage (Transfer / diagnosis): The simulation uses 14 bytes for its codes and scales, not...
+# Account for actual low-bit storage (Transfer / diagnosis)
 q4, s4 = quantize_weights(...)  # TODO: compute q4, s4
 float_weight_bytes = ...  # TODO: compute float_weight_bytes
 simulated_weight_and_scale_bytes = ...  # TODO: compute simulated_weight_and_scale_bytes
@@ -685,7 +620,7 @@ print('Weight-plus-scale subtotals:', float_weight_bytes, simulated_weight_and_s
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Account for actual low-bit storage (Transfer / diagnosis): The simulation uses 14 bytes for its codes and scales, not...
+# Account for actual low-bit storage (Transfer / diagnosis)
 q4, s4 = quantize_weights(w, 4)
 float_weight_bytes = w.nbytes
 simulated_weight_and_scale_bytes = q4.nbytes + s4.nbytes

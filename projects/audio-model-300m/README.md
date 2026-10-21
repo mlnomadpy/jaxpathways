@@ -42,3 +42,9 @@ Explain waveforms/spectrograms, blank/token probability strips, edit alignments,
 Ship the complete processor/frontend, model/head, transcript tokenizer or class map, blank/decoding rules and any external decoder identity. Test raw waveform parity after framework conversion and precision changes, including resampling and silent/malformed/overlong inputs. Follow the [Hub publication workflow](../embedding-model-300m/RELEASE.md); a weights-only upload cannot reconstruct audio preprocessing or decoding.
 
 Qualify request duration bounds, concurrent streams, cancellation and recurrent/chunk state isolation where applicable. Roll back all processor/model/decoder components together. The portfolio includes an acoustic recipe decision, objective baseline, exact recovery, task failure analysis, measured runtime and clean consumer evidence. Target-scale training remains future work.
+
+## Implementation gate and real-data lineage
+
+Do not promote until waveform, transcript/event labels, speaker/recording groups, source rights, resampling and split manifests are frozen. Link the acoustic encoder and task-head checkpoints to their data and optimizer/RNG state; real held-out WER or event metrics and slice counts are required, while synthetic audio only checks the interface.
+
+Before this plan can change from **planned** to **authored**, provide independently checkable dataset/recipe manifests, staged parent-to-child checkpoint records with full resume state, real held-out evaluation outputs, and runnable plan-specific starter/reference/checks. Keep small CPU fixtures labeled as correctness evidence; they do not establish target-scale training, quality or production readiness.

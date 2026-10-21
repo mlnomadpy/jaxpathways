@@ -10,6 +10,20 @@ ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "public/downloads"
 OUT.mkdir(parents=True, exist_ok=True)
 reference_root = ROOT / "resources/tpu-gcp"
+# This portable bundle supports the standalone single-host target. The coordinated
+# multi-host target stays repository-only because it requires a shared GCS checkpoint
+# and a matching multi-worker launch contract.
+TPU_WORKSPACE_FILES = (
+    "resources/tpu-gcp/check.py",
+    "resources/tpu-gcp/check_precision.py",
+    "resources/tpu-gcp/launch.py",
+    "resources/tpu-gcp/precision_profile.py",
+    "resources/tpu-gcp/render_precision.py",
+    "resources/tpu-gcp/requirements-qualification.txt",
+    "resources/tpu-gcp/collectives_target.py",
+    "resources/tpu-gcp/check_collectives_target.py",
+    "phases/09-distributed/03-communication-efficient-algorithms/code/main.py",
+)
 provenance = json.loads((reference_root / "reference/provenance.json").read_text())
 for relative, expected in provenance['sha256'].items():
     observed = hashlib.sha256((reference_root / relative).read_bytes()).hexdigest()
@@ -32,12 +46,25 @@ for name in ['tpu-gcp', 'tpu-performance']:
     (OUT / f"{name}.md").write_text(guide)
     guides[name] = guide
 with ZipFile(OUT / "jax-tpu-gcp.zip", "w", ZIP_DEFLATED) as bundle:
-    for path in sorted(reference_root.glob("*.py")):
-        bundle.write(path, "jax-tpu-gcp/" + path.relative_to(ROOT).as_posix())
+    included = set()
+    for relative in TPU_WORKSPACE_FILES:
+        path = ROOT / relative
+        archive_name = "jax-tpu-gcp/" + path.relative_to(ROOT).as_posix()
+        assert archive_name not in included, f"duplicate TPU workspace path: {archive_name}"
+        bundle.write(path, archive_name)
+        included.add(archive_name)
     for path in sorted((reference_root / 'reference').glob('*')):
-        bundle.write(path, "jax-tpu-gcp/" + path.relative_to(ROOT).as_posix())
+        archive_name = "jax-tpu-gcp/" + path.relative_to(ROOT).as_posix()
+        assert archive_name not in included, f"duplicate TPU workspace path: {archive_name}"
+        bundle.write(path, archive_name)
+        included.add(archive_name)
     worker = Path("projects/workload-operations/solution/model.py")
-    bundle.write(ROOT / worker, "jax-tpu-gcp/" + worker.as_posix())
+    worker_name = "jax-tpu-gcp/" + worker.as_posix()
+    assert worker_name not in included, f"duplicate TPU workspace path: {worker_name}"
+    bundle.write(ROOT / worker, worker_name)
+    included.add(worker_name)
     bundle.writestr("jax-tpu-gcp/GUIDE.md", guides['tpu-gcp'])
+    included.add("jax-tpu-gcp/GUIDE.md")
     bundle.writestr("jax-tpu-gcp/PERFORMANCE.md", guides['tpu-performance'])
+    included.add("jax-tpu-gcp/PERFORMANCE.md")
 print("Built TPU/GCP guides, precision figures and practice bundle; no cloud resources created.")

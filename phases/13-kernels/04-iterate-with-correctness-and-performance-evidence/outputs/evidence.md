@@ -7,7 +7,7 @@ Copy this template into your own portfolio and fill it after running your modifi
 Shape/dtype reference checks, separate precision gaps, guarded target benchmark and a bounded end-to-end speedup argument. Keep the environment, observed outputs and your explanation of the figure.
 
 - Command: `python3 phases/13-kernels/04-iterate-with-correctness-and-performance-evidence/code/main.py`
-- Working directory: repository root
+- Working directory: Repository root
 - Python / JAX / NumPy versions: 
 - Hardware and device: 
 - My prediction before running: 

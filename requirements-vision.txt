@@ -1,0 +1,3 @@
+# Optional image decoding layer.
+-r requirements-figures.txt
+Pillow==12.2.0

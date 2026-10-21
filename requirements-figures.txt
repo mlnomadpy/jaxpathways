@@ -1,0 +1,3 @@
+# Optional plotting layer for projects that generate diagnostic figures.
+-r requirements-beginner.txt
+matplotlib==3.10.8

@@ -12,6 +12,11 @@
   padding-bottom: 60px;
 }
 
+#lesson-body {
+  grid-column: 2;
+  grid-row: 1;
+}
+
 .reader-sidebar,
 .reader-outline {
   position: sticky;
@@ -78,6 +83,8 @@
 }
 
 .reader-outline {
+  grid-column: 3;
+  grid-row: 1;
   max-height: calc(100vh - 50px);
   overflow-y: auto;
   padding-right: 8px;
@@ -211,8 +218,9 @@
   letter-spacing: -0.025em;
 }
 
-.reader h2[id] {
-  scroll-margin-top: 24px;
+.reader h2[id],
+.reader .lesson-stage[id] {
+  scroll-margin-top: var(--reader-anchor-offset, 180px);
   scroll-margin-bottom: 100px;
 }
 
@@ -1129,7 +1137,7 @@
     padding: 16px;
   }
   .reader-outline {
-    order: 3;
+    order: 1;
     position: static;
     width: 100%;
     padding: 16px 0;
@@ -1211,24 +1219,34 @@
     font-size: 13px;
   }
   #activity-bar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     border-radius: 0;
     gap: 8px;
     padding: 10px 6% calc(10px + env(safe-area-inset-bottom));
     font-size: 12px;
   }
   #activity-bar .button {
-    flex: 1 1 0;
     min-width: 0;
-    max-width: 130px;
+    max-width: none;
     padding: 10px 12px;
     font-size: 12px;
     text-align: center;
   }
   #activity-position {
-    flex: 1 1 auto;
+    grid-column: 1 / -1;
+    grid-row: 1;
     text-align: center;
     overflow-wrap: anywhere;
     font-weight: 600;
+  }
+  #previous-activity {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  #next-activity {
+    grid-column: 2;
+    grid-row: 2;
   }
 }
 

@@ -86,5 +86,13 @@
     }
   ],
   "referenceCommand": "python3 projects/audio-harness/tests/check.py --implementation solution --stage all",
-  "setupNote": "Run from the extracted ZIP top folder containing requirements-cpu.txt and projects/audio-harness. The README links executed plots, a connected reference runner and bundled synthesis/reviewer tasks. The fixture classifies synthetic sounds, not speech. Copy the starter scaffold `projects/audio-harness/starter/model.py` to `projects/audio-harness/my_model.py`, implement the stage functions in `projects/audio-harness/my_model.py`, and verify each stage with `python3 projects/audio-harness/tests/check.py --implementation projects/audio-harness/my_model.py --stage 1` (through `--stage 4`)."
+  "setupNote": "Run from the extracted ZIP top folder containing requirements-cpu.txt and projects/audio-harness. The README links executed plots, a connected reference runner and bundled synthesis/reviewer tasks. The fixture classifies synthetic sounds, not speech. Copy the starter scaffold `projects/audio-harness/starter/model.py` to `projects/audio-harness/my_model.py`, implement the stage functions in `projects/audio-harness/my_model.py`, and verify each stage with `python3 projects/audio-harness/tests/check.py --implementation projects/audio-harness/my_model.py --stage 1` (through `--stage 4`).",
+  "environment": {
+    "requirementsPath": "requirements-figures.txt",
+    "pythonCompatibility": ">=3.11,<3.15",
+    "setupCommands": {
+      "unix": "python3 -m venv .venv\nsource .venv/bin/activate\npython -m pip install -r requirements-figures.txt",
+      "windows": "py -3 -m venv .venv\n.\\.venv\\Scripts\\python.exe -m pip install -r requirements-figures.txt"
+    }
+  }
 }

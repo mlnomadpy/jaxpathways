@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "operations-07",
-  "contentHash": "43e1f34e84f93a58fe344a5357aee212ede59116f582807c39c167b4ae0f84a7",
-  "executedAt": "2026-10-20T10:51:53.818799+00:00",
+  "contentHash": "d07428d34939c68d2b07403a09e85dea8be1fca3dc8a05f3b582ffb4f9408d61",
+  "executedAt": "2026-10-20T22:26:31.002086+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -14,11 +14,11 @@
   "stdout": "Observed replay scores: [{'overall': 0.9, 'answerable': 1.0, 'unanswerable': 0.0}, {'overall': 1.0, 'answerable': 1.0, 'unanswerable': 1.0}]\nTwo real MLflow traces; no LLM API was called and no general model quality was evaluated.\nObserved replay scores: [{'overall': 0.9, 'answerable': 1.0, 'unanswerable': 0.0}, {'overall': 1.0, 'answerable': 1.0, 'unanswerable': 1.0}]\nTwo real MLflow traces; no LLM API was called and no general model quality was evaluated.\nRelease decisions: [False, True]\nComplete inventory: {'count': 10, 'passed': 9, 'fraction': 0.9} ; missing, duplicate and unknown responses rejected.\nUnrecognized citations rejected.\nAn abstention flag alone does not satisfy the output contract.\nFailed answerable work remains in denominator: {'count': 10, 'passed': 9, 'fraction': 0.9}\nPASS: operations-07\n",
   "notebookCells": [
     {
-      "sourceHash": "649769c1c54e070b7d4767e14a65cfabfe3712cf5a99be19fe8abc01e2a7d03f",
+      "sourceHash": "863fd60c994cd95f7b3845f5f481f7cdbfaf0caf75f09da4dab8fb3d1490b21e",
       "outputs": []
     },
     {
-      "sourceHash": "0dfba4ba6cc1982b4d817b478bb8dee7b41286555b71eb684837ba10d8915657",
+      "sourceHash": "13f88af6b0fdc5447bb5bae8ee037caa1e6e86928da2a0aec969cd450c596b31",
       "outputs": [
         {
           "output_type": "stream",
@@ -32,9 +32,9 @@
           "output_type": "stream",
           "name": "stderr",
           "text": [
-            "2026/10/20 03:51:52 INFO mlflow.store.db.utils: Creating initial MLflow database tables...\n",
-            "2026/10/20 03:51:52 INFO mlflow.store.db.utils: Updating database tables\n",
-            "/Users/tahabsn/Documents/ChatGPT/jaxpathways/phases/16-operations/07-llmops-prompts-evaluation-and-traces/notebooks/exercise.ipynb:cell-2:35: FutureWarning: Parameter 'experiment_ids' is deprecated. Please use 'locations' instead.\n"
+            "2026/10/20 15:26:28 INFO mlflow.store.db.utils: Creating initial MLflow database tables...\n",
+            "2026/10/20 15:26:28 INFO mlflow.store.db.utils: Updating database tables\n",
+            "/Users/tahabsn/Documents/ChatGPT/jaxpathways/phases/16-operations/07-llmops-prompts-evaluation-and-traces/notebooks/exercise.ipynb:cell-2:34: FutureWarning: Parameter 'experiment_ids' is deprecated. Please use 'locations' instead.\n"
           ]
         }
       ]
@@ -44,7 +44,7 @@
       "outputs": []
     },
     {
-      "sourceHash": "c905358810448a1648ef26cc14654084b28bd7fed27d09a01dfe55335ff22500",
+      "sourceHash": "5b5b6e811c1610d34874f47b53cfe1a6e48f9d5a342c4a3dbf3f7e911e091f1a",
       "outputs": [
         {
           "output_type": "stream",
@@ -58,15 +58,15 @@
           "output_type": "stream",
           "name": "stderr",
           "text": [
-            "2026/10/20 03:51:52 INFO mlflow.store.db.utils: Creating initial MLflow database tables...\n",
-            "2026/10/20 03:51:52 INFO mlflow.store.db.utils: Updating database tables\n",
-            "/Users/tahabsn/Documents/ChatGPT/jaxpathways/phases/16-operations/07-llmops-prompts-evaluation-and-traces/notebooks/exercise.ipynb:cell-4:49: FutureWarning: Parameter 'experiment_ids' is deprecated. Please use 'locations' instead.\n"
+            "2026/10/20 15:26:29 INFO mlflow.store.db.utils: Creating initial MLflow database tables...\n",
+            "2026/10/20 15:26:29 INFO mlflow.store.db.utils: Updating database tables\n",
+            "/Users/tahabsn/Documents/ChatGPT/jaxpathways/phases/16-operations/07-llmops-prompts-evaluation-and-traces/notebooks/exercise.ipynb:cell-4:47: FutureWarning: Parameter 'experiment_ids' is deprecated. Please use 'locations' instead.\n"
           ]
         }
       ]
     },
     {
-      "sourceHash": "917c08bd4f5fbf6ac3e258e355733e76d9d33405e06fcdee53f40787843b11bc",
+      "sourceHash": "095cf8793b4a6754e953dec7a46fa18847b0b2b0bf82c0838f55b938c390cc35",
       "outputs": []
     },
     {
@@ -85,7 +85,7 @@
       ]
     },
     {
-      "sourceHash": "d0da9513a894f50512d7fb5c2e33d823df4e7b5a72ea105a56451b1d8bcf41aa",
+      "sourceHash": "4defd167a733baea582e759df67ac934342eea9f8f1faf85a00b9844e098b7ee",
       "outputs": [
         {
           "output_type": "stream",
@@ -97,7 +97,7 @@
       ]
     },
     {
-      "sourceHash": "704122e566e69d78148a71e3d119bc99631db134b03bcce674ff5c84095d6a28",
+      "sourceHash": "96cc2e24ad69e6e305b4b93e65b22ba3541b18ed36aba6ae94d118068f9634ff",
       "outputs": [
         {
           "output_type": "stream",
@@ -109,11 +109,11 @@
       ]
     },
     {
-      "sourceHash": "64278ad5035044aa440acd6ca50dd5448e94eda116a59e4ac768a055145e96eb",
+      "sourceHash": "c192ac20f201125fc016cb1fa64d65625eede52764c3c5a84971f5075b7f1565",
       "outputs": []
     },
     {
-      "sourceHash": "f5675239ac33959a79302cd33ee4a4496e77d50294fc338ea32d836985663a4c",
+      "sourceHash": "0ae51660bf6b67cade7216b5d591beff53c32d8a248db1df9db1cbfbe9a5e393",
       "outputs": [
         {
           "output_type": "stream",
@@ -125,11 +125,11 @@
       ]
     },
     {
-      "sourceHash": "9628b09d1c566958581cd44ed3ddf625894e70d235bfa76fd80de6b7cec40180",
+      "sourceHash": "bf0500c4243b5dfe4ad8c8f1f9be1bd6a6b4b848693d88b09dcfe5a970f4e5b1",
       "outputs": []
     },
     {
-      "sourceHash": "bb339057af1f941eee45020cca5d32461f801b1ab77a88e0e28a06cea974dff0",
+      "sourceHash": "e67cae1688e7f6038b9cd01f535982503d9e10c24dd6ec3f72ffc446cd43d5c6",
       "outputs": [
         {
           "output_type": "stream",
@@ -141,11 +141,11 @@
       ]
     },
     {
-      "sourceHash": "fc6ead310be8994aae1e961a8c56a6c283317043f89f77b5e26bf3a144a8057a",
+      "sourceHash": "40f5613c8fbb96bb7bb04985eac5277a8257b443e8b16eb436130b9cda4f75f5",
       "outputs": []
     },
     {
-      "sourceHash": "e4cf538ec29536d02017fe041fa1e8acdc886e2dd68cba6a1936c5ea5f2b0ebb",
+      "sourceHash": "9e26b3845954df883d0890974eee5911aa4da6bdba8f9b10d394af888647a244",
       "outputs": [
         {
           "output_type": "stream",

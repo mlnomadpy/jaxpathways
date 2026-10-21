@@ -1,3 +1,4 @@
+import { executionScope } from '../lib/runtime.js';
 import { parseValidation } from '../lib/manifests.js';
 import { createJsonResource } from '../lib/http.js';
 
@@ -8,7 +9,6 @@ const loadValidation = createJsonResource('validation.json', {
 
 import { initRevisionNotices } from './release-notices.js';
 import { inlineMath } from '../lib/math.js';
-import { renderLesson } from '../lib/lesson-template.js';
 import {
   courseState,
   readingKey,
@@ -16,17 +16,45 @@ import {
   phaseById,
   lessonById,
 } from '../lib/course-state.js';
-import { $ } from '../lib/dom.js';
+import { $, requireElement } from '../lib/dom.js';
 import { escapeHtml } from '../lib/html.js';
-import { lessonLink } from '../lib/urls.js';
+import { lessonLink, legacyLessonUrl } from '../lib/urls.js';
 
 import { bindGradientFigure, bindAttentionMaskFigure } from './lesson-diagrams.js';
 
 import { bindCodeCopy } from './copy.js';
 
+/** @typedef {'Understand' | 'Build' | 'Experiment' | 'Practice' | 'Evidence'} ActivityGroup */
+
+/** @returns {import('../types/course').Course} */
+function currentCourse() {
+  if (!courseState.course) throw new Error('Course data has not loaded');
+  return courseState.course;
+}
+
+/** @param {string} id @returns {import('../types/course').Phase} */
+function requiredPhase(id) {
+  const phase = phaseById(id);
+  if (!phase) throw new Error(`Unknown course phase: ${id}`);
+  return phase;
+}
+
+/** @param {string} id @returns {{ phase: import('../types/course').Phase; lesson: import('../types/course').Lesson }} */
+function requiredLesson(id) {
+  const found = lessonById(id);
+  if (!found) throw new Error(`Unknown course lesson: ${id}`);
+  return found;
+}
+
+/** @param {string | null | undefined} value @returns {value is ActivityGroup} */
+function isActivityGroup(value) {
+  return ['Understand', 'Build', 'Experiment', 'Practice', 'Evidence'].includes(value || '');
+}
+
 function saveReading(sectionId = '') {
-  if (!courseState.standalone || !$('#lesson-body')?.dataset.lesson) return;
-  const lessonId = $('#lesson-body').dataset.lesson;
+  if (!courseState.standalone) return;
+  const lessonId = requireElement('#lesson-body').dataset.lesson;
+  if (!lessonId) return;
   if (
     courseState.readingState.lastLessonId === lessonId &&
     courseState.readingState.path === courseState.activePath &&
@@ -65,22 +93,30 @@ function closeLesson() {
   location.href = `course.html${courseState.activePath === 'all' ? '' : '?path=' + encodeURIComponent(courseState.activePath)}#curriculum`;
 }
 
+/** @param {import('../types/course').Phase} phase @param {import('../types/course').Lesson} lesson @param {{history?: boolean}} [options] */
 function showLesson(phase, lesson, options = {}) {
   if (!courseState.standalone) {
-    location.href = `lesson.html?lesson=${encodeURIComponent(lesson.id)}${courseState.activePath === 'all' ? '' : '&path=' + encodeURIComponent(courseState.activePath)}`;
+    location.replace(legacyLessonUrl(lesson.id, location.href));
     return;
   }
   const staticId = $('#lesson-page')?.dataset.staticLesson;
-  if (staticId && staticId !== lesson.id) {
-    location.href = `lesson-${encodeURIComponent(lesson.id)}.html${courseState.activePath === 'all' ? '' : '?path=' + encodeURIComponent(courseState.activePath)}`;
+  const body = requireElement('#lesson-body');
+  const renderedTitle = $('#lesson-title');
+  const hasMatchingServerRenderedLesson =
+    staticId === lesson.id && body.dataset.lesson === lesson.id && Boolean(renderedTitle);
+  if (!hasMatchingServerRenderedLesson) {
+    const destination = staticId
+      ? new URL(lessonLink(lesson.id, courseState.activePath), location.href)
+      : new URL(legacyLessonUrl(lesson.id, location.href));
+    location.replace(destination.href);
     return;
   }
   const authored = lesson.status === 'authored';
   const allLessons = (
     courseState.curriculum.find((r) => r.id === courseState.activePath)?.phaseIds ||
-    courseState.course.phases.map((p) => p.id)
+    currentCourse().phases.map((p) => p.id)
   )
-    .flatMap((id) => phaseById(id).lessons)
+    .flatMap((id) => requiredPhase(id).lessons)
     .filter((l) => (authored ? l.status === 'authored' : true));
   const index = allLessons.findIndex((l) => l.id === lesson.id);
   const lessonUrl = new URL(location.href),
@@ -90,17 +126,19 @@ function showLesson(phase, lesson, options = {}) {
   const prerequisite =
     lesson.id === 'welcome-01'
       ? 'No terminal or Git experience required'
-      : lesson.prerequisites.map((id) => lessonById(id).lesson.title).join('; ') ||
-        phase.prerequisitePhaseIds.map((id) => phaseById(id).title).join('; ') ||
+      : lesson.prerequisites.map((id) => requiredLesson(id).lesson.title).join('; ') ||
+        phase.prerequisitePhaseIds.map((id) => requiredPhase(id).title).join('; ') ||
         'Basic Python; begin with the setup phase';
   const c = lesson.content;
+  if (authored && !c) throw new Error(`Authored lesson has no content: ${lesson.id}`);
+  const exerciseScript = authored ? lesson.artifacts?.scriptSource : undefined;
   const prerequisiteLinks =
     lesson.id === 'welcome-01'
       ? escapeHtml(prerequisite)
       : lesson.prerequisites.length
         ? lesson.prerequisites
             .map((id) => {
-              const l = lessonById(id).lesson;
+              const l = requiredLesson(id).lesson;
               return `<a href="${lessonLink(id, courseState.activePath)}">${escapeHtml(l.title)}</a>`;
             })
             .join('; ')
@@ -108,58 +146,47 @@ function showLesson(phase, lesson, options = {}) {
           ? phase.prerequisitePhaseIds
               .map(
                 (id) =>
-                  `<a href="course.html?phase=${encodeURIComponent(id)}${courseState.activePath === 'all' ? '' : '&path=' + encodeURIComponent(courseState.activePath)}">${escapeHtml(phaseById(id).title)}</a>`,
+                  `<a href="course.html?phase=${encodeURIComponent(id)}${courseState.activePath === 'all' ? '' : '&path=' + encodeURIComponent(courseState.activePath)}">${escapeHtml(requiredPhase(id).title)}</a>`,
               )
               .join('; ')
           : escapeHtml(prerequisite);
-  const body = $('#lesson-body');
-  const hydrated = body?.dataset.staticRendered === lesson.id;
-  if (hydrated) {
-    delete body.dataset.staticRendered;
-    const before = body.querySelector('.before-start p.soft');
-    if (before) {
-      before.innerHTML = `<strong>Before this:</strong> ${prerequisiteLinks}<br><strong>Hardware:</strong> ${inlineMath(lesson.hardware || phase.hardware)}`;
-    }
-    const portfolioLink = body.querySelector('a[href^="notebook.html?lesson="]');
-    if (portfolioLink) {
-      portfolioLink.setAttribute(
-        'href',
-        `notebook.html?lesson=${encodeURIComponent(lesson.id)}${courseState.activePath === 'all' ? '' : '&path=' + encodeURIComponent(courseState.activePath)}#portfolio`,
-      );
-    }
-    const nav = body.querySelector('.lesson-nav');
-    if (nav) {
-      nav.innerHTML = `${index > 0 ? `<button id="previous">Previous: ${escapeHtml(allLessons[index - 1].title)}</button>` : '<span>First lesson in this route</span>'}${index >= 0 && index < allLessons.length - 1 ? `<button id="next">Next: ${escapeHtml(allLessons[index + 1].title)}</button>` : '<button id="phase-project">View the phase project</button>'}`;
-    }
-  } else {
-    body.innerHTML = renderLesson({
-      phase,
-      lesson,
-      prerequisiteLinks,
-      allLessons,
-      index,
-      activePath: courseState.activePath,
-    });
+  const before = body.querySelector('.before-start p.soft');
+  if (before) {
+    before.innerHTML = `<strong>Before this:</strong> ${prerequisiteLinks}<br><strong>Hardware:</strong> ${inlineMath(lesson.hardware || phase.hardware)}`;
+  }
+  const portfolioLink = body.querySelector('a[href^="notebook.html?lesson="]');
+  if (portfolioLink) {
+    portfolioLink.setAttribute(
+      'href',
+      `notebook.html?lesson=${encodeURIComponent(lesson.id)}${courseState.activePath === 'all' ? '' : '&path=' + encodeURIComponent(courseState.activePath)}#portfolio`,
+    );
+  }
+  const nav = body.querySelector('.lesson-nav');
+  if (nav) {
+    nav.innerHTML = `${index > 0 ? `<button id="previous">Previous: ${escapeHtml(allLessons[index - 1].title)}</button>` : '<span>First lesson in this route</span>'}${index >= 0 && index < allLessons.length - 1 ? `<button id="next">Next: ${escapeHtml(allLessons[index + 1].title)}</button>` : '<button id="phase-project">View the phase project</button>'}`;
   }
   if (authored) {
+    const content = /** @type {import('../types/course').LessonContent} */ (c);
     bindCodeCopy();
     bindPracticeDrawer();
-    if (c.figure === 'gradient') bindGradientFigure();
-    if (c.figure === 'attention-mask') bindAttentionMaskFigure();
-    if ($('#copy-run'))
-      $('#copy-run').onclick = async () => {
+    if (content.figure === 'gradient') bindGradientFigure();
+    if (content.figure === 'attention-mask') bindAttentionMaskFigure();
+    const copyRun = $('#copy-run');
+    if (copyRun)
+      copyRun.onclick = async () => {
         try {
-          await navigator.clipboard.writeText(`python3 ${lesson.artifacts.scriptSource}`);
-          $('#copy-run').textContent = 'Copied';
+          if (!exerciseScript) throw new Error('Exercise script is unavailable');
+          await navigator.clipboard.writeText(`python3 ${exerciseScript}`);
+          copyRun.textContent = 'Copied';
         } catch {
-          $('#copy-run').textContent = 'Select the command to copy';
+          copyRun.textContent = 'Select the command to copy';
         }
       };
     const entry = courseState.lessonProgress.lessons[lesson.id] || {
       checkpointPassed: false,
       evidenceSaved: false,
     };
-    const button = $('#exercise-complete');
+    const button = /** @type {HTMLButtonElement} */ (requireElement('#exercise-complete'));
     const label = () => {
       button.textContent = entry.evidenceSaved
         ? 'Mark exercise unfinished'
@@ -167,14 +194,15 @@ function showLesson(phase, lesson, options = {}) {
     };
     label();
     if (entry.checkpointPassed)
-      $('#checkpoint-result').textContent =
+      requireElement('#checkpoint-result').textContent =
         'Checkpoint previously passed in this browser. You can try it again.';
-    $('#lesson-checkpoint').onsubmit = (e) => {
+    const checkpointForm = /** @type {HTMLFormElement} */ (requireElement('#lesson-checkpoint'));
+    checkpointForm.onsubmit = (e) => {
       e.preventDefault();
-      const selected = Number(new FormData(e.target).get('answer'));
-      const passed = selected === c.answer;
-      $('#checkpoint-result').innerHTML = inlineMath(
-        (passed ? 'You’ve got it. ' : 'Let’s work through it. ') + c.explanation,
+      const selected = Number(new FormData(checkpointForm).get('answer'));
+      const passed = selected === content.answer;
+      requireElement('#checkpoint-result').innerHTML = inlineMath(
+        (passed ? 'You’ve got it. ' : 'Let’s work through it. ') + content.explanation,
       );
       if (passed) {
         entry.checkpointPassed = true;
@@ -182,13 +210,13 @@ function showLesson(phase, lesson, options = {}) {
         saveLessonProgress();
       }
     };
-    $('#reset-lesson').onclick = () => {
+    /** @type {HTMLButtonElement} */ (requireElement('#reset-lesson')).onclick = () => {
       entry.checkpointPassed = false;
       entry.evidenceSaved = false;
       courseState.lessonProgress.lessons[lesson.id] = entry;
       saveLessonProgress();
       label();
-      $('#checkpoint-result').textContent =
+      requireElement('#checkpoint-result').textContent =
         'Lesson progress reset. Your downloaded work is unchanged.';
     };
     button.onclick = () => {
@@ -199,36 +227,45 @@ function showLesson(phase, lesson, options = {}) {
     };
     loadValidation()
       .then((receipt) => {
-        const record = receipt?.lessons.find(
+        const record = receipt.lessons.find(
           (l) => l.lessonId === lesson.id && l.contentHash === lesson.contentHash,
         );
-        if ($('#runtime-status') && $('#lesson-body').dataset.lesson === lesson.id && record) {
-          const runtime =
-            record.runtime?.deviceCount > 1
-              ? `${record.runtime.deviceCount} logical CPU devices`
-              : 'CPU';
-          $('#runtime-status').textContent =
-            `Worked examples and reference solutions verified on ${runtime} (JAX ${receipt.jax}, NumPy ${receipt.numpy}, Python ${receipt.python}). Stage to a Cloud TPU VM via Phase 19–21 to run on physical TPU chips.`;
+        const runtimeStatus = $('#runtime-status');
+        if (
+          runtimeStatus &&
+          requireElement('#lesson-body').dataset.lesson === lesson.id &&
+          record
+        ) {
+          const deviceCount = record.runtime?.deviceCount || 0;
+          const runtime = deviceCount > 1 ? `${deviceCount} logical CPU devices` : 'CPU';
+          runtimeStatus.textContent = `Worked examples and reference solutions verified on ${runtime} (JAX ${receipt.jax}, NumPy ${receipt.numpy}, Python ${receipt.python}). ${executionScope(lesson).description} ${executionScope(lesson).target}`;
         }
       })
       .catch(() => {});
   }
-  $('#lesson-body').dataset.lesson = lesson.id;
-  initRevisionNotices($('#lesson-body'));
-  if ($('#previous'))
-    $('#previous').onclick = () => {
-      const found = lessonById(allLessons[index - 1].id);
+  body.dataset.lesson = lesson.id;
+  initRevisionNotices(body);
+  const previousButton = /** @type {HTMLButtonElement | null} */ ($('#previous'));
+  if (previousButton) {
+    previousButton.onclick = () => {
+      const previousLesson = allLessons[index - 1];
+      if (!previousLesson) return;
+      const found = requiredLesson(previousLesson.id);
       showLesson(found.phase, found.lesson);
     };
-  if ($('#next'))
-    $('#next').dataset.href = lessonLink(allLessons[index + 1].id, courseState.activePath);
-  if ($('#next'))
-    $('#next').onclick = () => {
-      const found = lessonById(allLessons[index + 1].id);
+  }
+  const nextButton = /** @type {HTMLButtonElement | null} */ ($('#next'));
+  const followingLesson = allLessons[index + 1];
+  if (nextButton && followingLesson)
+    nextButton.dataset.href = lessonLink(followingLesson.id, courseState.activePath);
+  if (nextButton && followingLesson)
+    nextButton.onclick = () => {
+      const found = requiredLesson(followingLesson.id);
       showLesson(found.phase, found.lesson);
     };
-  if ($('#phase-project'))
-    $('#phase-project').onclick = () => {
+  const phaseProjectButton = /** @type {HTMLButtonElement | null} */ ($('#phase-project'));
+  if (phaseProjectButton)
+    phaseProjectButton.onclick = () => {
       location.href = phase.projectId
         ? `project.html?id=${encodeURIComponent(phase.projectId)}`
         : `course.html?phase=${encodeURIComponent(phase.id)}${courseState.activePath === 'all' ? '' : '&path=' + encodeURIComponent(courseState.activePath)}#curriculum`;
@@ -245,6 +282,7 @@ function showLesson(phase, lesson, options = {}) {
     else history.replaceState(null, '', url);
   }
   renderReaderNavigation(phase, lesson);
+  observeStageBar();
   document.title = lesson.title + ' — JAX Pathways';
   const savedSection = priorSection;
   const findTerm = sameLesson ? lessonUrl.searchParams.get('find') : null;
@@ -262,45 +300,50 @@ function showLesson(phase, lesson, options = {}) {
     requestAnimationFrame(() => scrollToLessonSection(destination));
   } else {
     window.scrollTo({ top: 0, behavior: 'instant' });
-    $('#lesson-title').focus({ preventScroll: true });
+    requireElement('#lesson-title').focus({ preventScroll: true });
   }
   updateReadingPosition();
   saveReading(destination.replace(/^#/, ''));
 }
 
+/** @param {import('../types/course').Phase} phase @param {import('../types/course').Lesson} lesson */
 function renderReaderNavigation(phase, lesson) {
   const route = courseState.curriculum.find((r) => r.id === courseState.activePath);
-  $('#reader-route').textContent = route ? route.title : 'Shared JAX course';
-  const phaseIds = route?.phaseIds || courseState.course.phases.map((p) => p.id);
-  $('#reader-phase-title').textContent = phase.title;
-  $('#reader-phases').innerHTML = phaseIds
+  requireElement('#reader-route').textContent = route ? route.title : 'Shared JAX course';
+  const phaseIds = route?.phaseIds || currentCourse().phases.map((p) => p.id);
+  requireElement('#reader-phase-title').textContent = phase.title;
+  requireElement('#reader-phases').innerHTML = phaseIds
     .map(
       (id) =>
-        `<a href="course.html?phase=${encodeURIComponent(id)}${courseState.activePath === 'all' ? '' : '&path=' + encodeURIComponent(courseState.activePath)}">${escapeHtml(phaseById(id).title)}</a>`,
+        `<a href="course.html?phase=${encodeURIComponent(id)}${courseState.activePath === 'all' ? '' : '&path=' + encodeURIComponent(courseState.activePath)}">${escapeHtml(requiredPhase(id).title)}</a>`,
     )
     .join('');
+  /** @param {import('../types/course').Lesson} l */
   const href = (l) => lessonLink(l.id, courseState.activePath);
-  $('#reader-lessons').innerHTML = phase.lessons
+  requireElement('#reader-lessons').innerHTML = phase.lessons
     .filter((l) => l.status === 'authored' || l.id === lesson.id)
     .map(
       (l, i) =>
         `<a href="${href(l)}" ${l.id === lesson.id ? 'aria-current="page"' : ''}><span class="edition">${phase.number}.${String(i + 1).padStart(2, '0')} · ${l.status === 'authored' ? 'Draft' : 'Unwritten'}</span>${escapeHtml(l.title)}</a>`,
     )
     .join('');
-  const outline = $('#reader-outline-disclosure');
+  const outline = /** @type {HTMLDetailsElement | null} */ ($('#reader-outline-disclosure'));
   if (outline) outline.open = matchMedia('(min-width: 1101px)').matches;
-  $('#reader-sidebar').classList.remove('is-open');
-  $('#reader-menu').setAttribute('aria-expanded', 'false');
+  requireElement('#reader-sidebar').classList.remove('is-open');
+  requireElement('#reader-menu').setAttribute('aria-expanded', 'false');
   $('#activity-bar')?.remove();
-  const headings = Array.from($('#lesson-body').querySelectorAll('h2'));
+  const headings = Array.from(requireElement('#lesson-body').querySelectorAll('h2'));
+  /** @type {Record<ActivityGroup, string[]>} */
   const groups = { Understand: [], Build: [], Experiment: [], Practice: [], Evidence: [] };
+  /** @type {Partial<Record<ActivityGroup, string>>} */
   const firstHeadingByGroup = {};
   headings.forEach((h, i) => {
     h.id = `section-${i}`;
     const title = h.textContent.trim();
-    const stageEl = h.closest('[data-lesson-stage]');
-    const group = stageEl?.dataset.lessonStage
-      ? stageEl.dataset.lessonStage
+    const stageEl = /** @type {HTMLElement | null} */ (h.closest('[data-lesson-stage]'));
+    const requestedGroup = stageEl?.dataset.lessonStage;
+    const group = isActivityGroup(requestedGroup)
+      ? requestedGroup
       : h.closest('.build-step') || /^\d+[.)] |Run the example|Build a numerical/.test(title)
         ? 'Build'
         : h.closest('.worked-experiment')
@@ -316,9 +359,14 @@ function renderReaderNavigation(phase, lesson) {
     groups[group].push(`<a href="#${h.id}">${escapeHtml(title)}</a>`);
   });
   $('#lesson-stage-bar')
-    ?.querySelectorAll('[data-stage-pill]')
+    ?.querySelectorAll('a')
     .forEach((pill) => {
-      const stageName = pill.dataset.stagePill;
+      if (!pill.hasAttribute('data-stage-pill')) return;
+      const stageName = pill.getAttribute('data-stage-pill');
+      if (!isActivityGroup(stageName)) {
+        pill.hidden = true;
+        return;
+      }
       const targetId = firstHeadingByGroup[stageName];
       if (targetId) {
         pill.setAttribute('href', '#' + targetId);
@@ -333,21 +381,40 @@ function renderReaderNavigation(phase, lesson) {
     bar.setAttribute('aria-label', 'Lesson activities');
     bar.innerHTML =
       '<a class="button" id="previous-activity">Previous activity</a><span id="activity-position"></span><a class="button primary" id="next-activity">Next activity</a>';
-    $('#lesson-page').after(bar);
+    requireElement('#lesson-page').after(bar);
   }
-  $('#reader-toc').innerHTML = Object.entries(groups)
+  requireElement('#reader-toc').innerHTML = Object.entries(groups)
     .filter(([, links]) => links.length)
     .map(([name, links]) => `<div class="toc-group"><p>${name}</p>${links.join('')}</div>`)
     .join('');
 }
 
+/** @param {string} hash */
 function scrollToLessonSection(hash) {
   const id = String(hash || '').replace(/^#/, ''),
-    target = id ? document.getElementById(id) : $('#lesson-title');
+    target = id ? document.getElementById(id) : requireElement('#lesson-title');
   if (!target) return;
   target.scrollIntoView({ block: 'start', behavior: 'instant' });
   if (id) saveReading(id);
   updateReadingPosition();
+}
+
+/** @type {ResizeObserver | undefined} */
+let stageBarObserver;
+function observeStageBar() {
+  stageBarObserver?.disconnect();
+  const bar = $('#lesson-stage-bar');
+  const sync = () => {
+    $('#lesson-body')?.style.setProperty(
+      '--reader-anchor-offset',
+      `${(bar?.getBoundingClientRect().height || 0) + 30}px`,
+    );
+  };
+  sync();
+  if (bar && typeof ResizeObserver !== 'undefined') {
+    stageBarObserver = new ResizeObserver(sync);
+    stageBarObserver.observe(bar);
+  }
 }
 
 const stageDisplayNames = {
@@ -360,31 +427,51 @@ const stageDisplayNames = {
 
 function updateReadingPosition() {
   if (!courseState.standalone) return;
-  const headings = Array.from($('#lesson-body').querySelectorAll('h2[id]'));
+  const headings = Array.from(requireElement('#lesson-body').querySelectorAll('h2'));
   if (!headings.length) return;
+  const lessonBody = requireElement('#lesson-body');
+  const stageBar = $('#lesson-stage-bar');
+  const anchorOffset =
+    Number.parseFloat(getComputedStyle(lessonBody).getPropertyValue('--reader-anchor-offset')) || 0;
+  const scrollPadding =
+    Number.parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) ||
+    Number.parseFloat(getComputedStyle(document.body).scrollPaddingTop) ||
+    0;
+  const activationLine = Math.max(
+    (stageBar?.getBoundingClientRect().bottom || 0) + 16,
+    anchorOffset + scrollPadding + 1,
+  );
   const current =
-    headings.filter((h) => h.getBoundingClientRect().top <= 180).at(-1) || headings[0];
-  $('#reader-toc')
+    headings.filter((h) => h.getBoundingClientRect().top <= activationLine).at(-1) || headings[0];
+  if (!current) return;
+  requireElement('#reader-toc')
     .querySelectorAll('a')
     .forEach((a) => {
       if (a.getAttribute('href') === '#' + current.id) a.setAttribute('aria-current', 'location');
       else a.removeAttribute('aria-current');
     });
-  const group = current.dataset.activityGroup,
-    steps = [...new Set(headings.map((h) => h.dataset.activityGroup))],
+  const groupValue = current.getAttribute('data-activity-group');
+  if (!isActivityGroup(groupValue)) return;
+  const group = groupValue,
+    steps = [
+      ...new Set(
+        headings.map((h) => h.getAttribute('data-activity-group')).filter(isActivityGroup),
+      ),
+    ],
     index = steps.indexOf(group),
-    previous = $('#previous-activity'),
-    next = $('#next-activity'),
+    previous = /** @type {HTMLAnchorElement | null} */ ($('#previous-activity')),
+    next = /** @type {HTMLAnchorElement | null} */ ($('#next-activity')),
     stageLabel = `Stage ${index + 1} of ${steps.length} · ${stageDisplayNames[group] || group}`;
   $('#lesson-body')?.setAttribute('data-active-stage', group);
-  const stageBar = $('#lesson-stage-bar');
   if (stageBar) {
     stageBar.setAttribute('data-active-stage', group);
     const activeLabel = $('#stage-bar-active-label');
     if (activeLabel) activeLabel.textContent = stageLabel;
-    stageBar.querySelectorAll('[data-stage-pill]').forEach((pill) => {
-      const pillIndex = steps.indexOf(pill.dataset.stagePill);
-      if (pill.dataset.stagePill === group) {
+    stageBar.querySelectorAll('a').forEach((pill) => {
+      if (!pill.hasAttribute('data-stage-pill')) return;
+      const stage = pill.getAttribute('data-stage-pill');
+      const pillIndex = isActivityGroup(stage) ? steps.indexOf(stage) : -1;
+      if (stage === group) {
         pill.setAttribute('aria-current', 'step');
         pill.removeAttribute('data-stage-passed');
       } else {
@@ -394,20 +481,22 @@ function updateReadingPosition() {
       }
     });
   }
-  $('#lesson-body')
-    ?.querySelectorAll('.lesson-stage')
-    .forEach((stageEl) => {
-      if (stageEl.dataset.lessonStage === group) stageEl.setAttribute('data-stage-active', 'true');
-      else stageEl.removeAttribute('data-stage-active');
-    });
-  if (previous) {
+  /** @type {NodeListOf<HTMLElement>} */ (
+    requireElement('#lesson-body').querySelectorAll('.lesson-stage')
+  ).forEach((stageEl) => {
+    if (stageEl.getAttribute('data-lesson-stage') === group)
+      stageEl.setAttribute('data-stage-active', 'true');
+    else stageEl.removeAttribute('data-stage-active');
+  });
+  if (previous && next) {
     $('#activity-bar')?.setAttribute('data-active-stage', group);
     previous.hidden = index === 0;
     previous.textContent = index ? 'Previous: ' + steps[index - 1] : 'Previous';
-    previous.href = index
-      ? '#' + headings.find((h) => h.dataset.activityGroup === steps[index - 1]).id
-      : '#lesson-title';
-    $('#activity-position').textContent = stageLabel;
+    const previousHeading = headings.find(
+      (h) => h.getAttribute('data-activity-group') === steps[index - 1],
+    );
+    previous.href = index && previousHeading ? '#' + previousHeading.id : '#lesson-title';
+    requireElement('#activity-position').textContent = stageLabel;
     const nextLesson = $('#next');
     next.textContent =
       index < steps.length - 1
@@ -415,9 +504,12 @@ function updateReadingPosition() {
         : nextLesson
           ? 'Next lesson'
           : 'Course map';
+    const nextHeading = headings.find(
+      (h) => h.getAttribute('data-activity-group') === steps[index + 1],
+    );
     next.href =
-      index < steps.length - 1
-        ? '#' + headings.find((h) => h.dataset.activityGroup === steps[index + 1]).id
+      index < steps.length - 1 && nextHeading
+        ? '#' + nextHeading.id
         : nextLesson
           ? nextLesson.dataset.href || 'course.html'
           : 'course.html';
@@ -426,35 +518,37 @@ function updateReadingPosition() {
 }
 
 function bindPracticeDrawer() {
-  document.querySelectorAll('[data-practice-mode]').forEach(
-    (button) =>
-      (button.onclick = () => {
-        document
-          .querySelectorAll('[data-practice-mode]')
-          .forEach((b) => b.setAttribute('aria-pressed', String(b === button)));
-        document
-          .querySelectorAll('[data-practice-panel]')
-          .forEach(
-            (panel) => (panel.hidden = panel.dataset.practicePanel !== button.dataset.practiceMode),
-          );
-      }),
-  );
+  document.querySelectorAll('button').forEach((button) => {
+    if (!button.hasAttribute('data-practice-mode')) return;
+    button.onclick = () => {
+      const mode = button.dataset.practiceMode;
+      document.querySelectorAll('button').forEach((control) => {
+        if (control.hasAttribute('data-practice-mode'))
+          control.setAttribute('aria-pressed', String(control === button));
+      });
+      document.querySelectorAll('section').forEach((panel) => {
+        if (panel.hasAttribute('data-practice-panel'))
+          panel.hidden = panel.dataset.practicePanel !== mode;
+      });
+    };
+  });
 }
 
+/** @param {string} query */
 function findLessonSection(query) {
   const term = String(query).trim().toLowerCase();
   if (!term) return '';
   const section = Array.from(
-    $('#lesson-body').querySelectorAll(
+    requireElement('#lesson-body').querySelectorAll(
       '.concept-section,.worked-experiment,.build-step,.lesson-practice,.exercise-workbench',
     ),
-  ).find((node) => node.textContent.toLowerCase().includes(term));
+  ).find((node) => (node.textContent || '').toLowerCase().includes(term));
   if (section) return section.querySelector('h2')?.id || '';
   const paragraph = Array.from(
-    $('#lesson-body').querySelectorAll(
+    requireElement('#lesson-body').querySelectorAll(
       '.lesson-stage > p, .lesson-stage > ul, .lesson-stage > ol, :scope > p, :scope > ul, :scope > ol',
     ),
-  ).find((node) => node.textContent.toLowerCase().includes(term));
+  ).find((node) => (node.textContent || '').toLowerCase().includes(term));
   if (paragraph) {
     let previous = paragraph.previousElementSibling;
     while (previous && previous.tagName !== 'H2') previous = previous.previousElementSibling;
@@ -464,21 +558,25 @@ function findLessonSection(query) {
 }
 
 function initReaderEvents() {
-  if ($('.close')) $('.close').onclick = closeLesson;
+  const closeButton = /** @type {HTMLButtonElement | null} */ ($('.close'));
+  if (closeButton) closeButton.onclick = closeLesson;
   if (courseState.standalone)
     matchMedia('(min-width: 1101px)').addEventListener('change', (event) => {
-      const outline = $('#reader-outline-disclosure');
+      const outline = /** @type {HTMLDetailsElement | null} */ ($('#reader-outline-disclosure'));
       if (outline) outline.open = event.matches;
     });
   window.addEventListener('popstate', () => {
     if (!courseState.course) return;
-    const params = new URLSearchParams(location.search),
-      found = lessonById($('#lesson-page')?.dataset.staticLesson || params.get('lesson'));
+    const params = new URLSearchParams(location.search);
+    const lessonId = $('#lesson-page')?.dataset.staticLesson || params.get('lesson');
+    if (!lessonId) return;
+    const found = lessonById(lessonId);
     if (!found) return;
-    courseState.activePath = courseState.curriculum.some((r) => r.id === params.get('path'))
-      ? params.get('path')
+    const requestedPath = params.get('path');
+    courseState.activePath = courseState.curriculum.some((r) => r.id === requestedPath)
+      ? requestedPath || 'all'
       : 'all';
-    if ($('#lesson-body').dataset.lesson !== found.lesson.id)
+    if (requireElement('#lesson-body').dataset.lesson !== found.lesson.id)
       showLesson(found.phase, found.lesson, { history: false });
     else scrollToLessonSection(location.hash);
   });

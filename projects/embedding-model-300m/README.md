@@ -90,3 +90,9 @@ The final submission includes the learner's code and commands; data/recipe/token
 Build the tiny bidirectional encoder and independent checks first; connect the three objectives with full-state checkpoints; implement data/evaluation/monitoring manifests; qualify the smaller real-data pilot; then select the 300M recipe and compute budget. Implement release packaging and a local benchmark adapter before spending on the large run. Roll the proven pattern into each modality with its own objective and evaluation contract.
 
 This capstone reuses the roadmap's 61 lesson units and adds explicit project-stage teaching for data-mixture decisions, objective transitions, embedding diagnostics, benchmark governance, Hub publication and index lifecycle. Those stage tutorials are required project work; they are not silently counted as already authored lessons.
+
+## Implementation gate and real-data lineage
+
+Do not promote a pilot until its source-group split, tokenizer, MLM/contrastive/pair-stage checkpoint ancestry, complete training state and held-out retrieval protocol have receipts. The real-data pilot must disclose overlap, source exposure, permissions and a frozen test set; a synthetic fit only verifies code paths.
+
+Before this plan can change from **planned** to **authored**, provide independently checkable dataset/recipe manifests, staged parent-to-child checkpoint records with full resume state, real held-out evaluation outputs, and runnable plan-specific starter/reference/checks. Keep small CPU fixtures labeled as correctness evidence; they do not establish target-scale training, quality or production readiness.

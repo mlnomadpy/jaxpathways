@@ -1,14 +1,21 @@
+import releaseNotes from '../../curriculum/releases.json' with { type: 'json' };
 import snapshots from '../../curriculum/release-snapshots.json' with { type: 'json' };
 import { escapeHtml } from './html.js';
 import { siteUrl } from './urls.js';
 import repository from '../data/repository.json' with { type: 'json' };
+import { releaseKey, revisionKey } from './release-keys.js';
 export const currentRelease = snapshots[0];
-export const revisionKey = 'jaxpathways-revisions-v1';
-export const releaseKey = 'jaxpathways-release-v1';
+export const latestReleaseNote = releaseNotes[0];
+export { releaseKey, revisionKey };
 export const feedbackAccess =
   repository.visibility === 'public'
     ? ''
     : 'The repository is currently private; GitHub issue access is limited to collaborators.';
+
+/** @param {string} [version] */
+export function editionUrl(version = currentRelease.version) {
+  return `${siteUrl('updates.html')}#v${encodeURIComponent(version)}`;
+}
 
 /**
  * @param {'lessons' | 'phases'} kind
@@ -21,7 +28,7 @@ export function revisionMarkup(kind, id) {
     );
   const revision = collection?.[id];
   if (!revision) return '';
-  return `<p class="revision-stamp" data-revision-key="${escapeHtml(kind + ':' + id)}" data-revision-hash="${revision.hash}"><a href="${siteUrl('updates.html')}#v${revision.version}">Revision v${revision.version} · <time datetime="${revision.date}">${revision.date}</time></a><span data-revision-notice hidden>Updated since your last visit. Review the changes; your progress is saved.</span></p>`;
+  return `<p class="revision-stamp" data-revision-key="${escapeHtml(kind + ':' + id)}" data-revision-hash="${revision.hash}"><a href="${editionUrl(revision.version)}">Revision v${revision.version} · <time datetime="${revision.date}">${revision.date}</time></a><span data-revision-notice hidden>Updated since your last visit. Review the changes; your progress is saved.</span></p>`;
 }
 
 /**

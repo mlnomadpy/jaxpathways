@@ -7,7 +7,7 @@ Copy this template into your own portfolio and fill it after running your modifi
 Save the target alignment, uniform-loss derivation, training/held-out metrics with corpus limitations, snapshot continuation check, generated cycle and metadata/prompt rejection repairs.
 
 - Command: `python3 phases/07-transformers/04-train-checkpoint-and-generate/code/main.py`
-- Working directory: repository root
+- Working directory: Repository root
 - Python / JAX / NumPy versions: 
 - Hardware and device: 
 - My prediction before running: 

@@ -7,7 +7,7 @@ Copy this template into your own portfolio and fill it after running your modifi
 Keep the controlled call ledger, actual trace observations labeled as traces, static/dynamic explanation, observed host-consumption intervals, masked-versus-unmasked counterexample and reproduced/repaired tracing failure.
 
 - Command: `python3 phases/08-performance/02-diagnose-recompilation-and-host-synchronization/code/main.py`
-- Working directory: repository root
+- Working directory: Repository root
 - Python / JAX / NumPy versions: 
 - Hardware and device: 
 - My prediction before running: 

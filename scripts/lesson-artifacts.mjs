@@ -1,4 +1,5 @@
 import {figureNotebookCode} from './figure-artifacts.mjs';
+import {executionScope} from '../src/lib/runtime.js';
 import {buildStarterScaffold,extractCodeApis,extractCodingSteps} from '../src/lib/code-teaching.js';
 // Convert only prose fields for Markdown engines; executable code stays byte-for-byte intact.
 export function markdownText(text) {
@@ -46,6 +47,8 @@ function sectionMarkdown(s,lesson,notebook=false) {
 export function lessonMarkdown(lesson, phase) {
   const c=markdownContent(lesson.content);
   let out=`# ${lesson.title}\n\nPhase ${phase.number}: ${phase.title} · about ${lesson.minutes} minutes · ${c.runtime?.kind==='virtual-cpu'?`${c.runtime.deviceCount} logical CPU devices`:'CPU'}\n\n`;
+  const scope=executionScope(lesson);
+  out+=scope.description+' '+scope.target+'\n\n';
   if(c.setupBundle)out+=`${c.setupBundle.title}: public/${c.setupBundle.url}\n\nIn the lesson reader, use the beginner workspace download button. In a local checkout, the bundle is under public/downloads/.\n\n`;
   if(c.objectives)out+=paragraphs('What you will be able to do',c.objectives.map(o=>`- ${o}`).join('\n'));
   if(c.problem)out+=paragraphs('The problem',c.problem);
@@ -72,7 +75,8 @@ export function lessonScript(lesson){
 }
 export function lessonCells(lesson){
   const c=markdownContent(lesson.content);
-  const cells=[['markdown',`# ${lesson.title}\n\n${c.runtime?.kind==='virtual-cpu'?`Start a fresh kernel, then Run all: the first cell configures ${c.runtime.deviceCount} logical CPU devices before backend initialization so you can practice multi-device sharding locally.`:'Runnable locally on CPU or on a Cloud TPU VM.'}\n\n${c.objectives?c.objectives.map(o=>'- '+o).join('\n')+'\n\n':''}${c.problem||''}\n\n## The idea\n\n${c.idea}`]];
+  const scope=executionScope(lesson);
+  const cells=[['markdown',`# ${lesson.title}\n\n${c.runtime?.kind==='virtual-cpu'?`Start a fresh kernel, then Run all: the first cell configures ${c.runtime.deviceCount} logical CPU devices before backend initialization so you can practice multi-device sharding locally.\n\n`:''}${scope.description} ${scope.target}\n\n${c.objectives?c.objectives.map(o=>'- '+o).join('\n')+'\n\n':''}${c.problem||''}\n\n## The idea\n\n${c.idea}`]];
   for(const s of c.sections||[])cells.push(['markdown','## '+s.title+'\n\n'+sectionMarkdown(s,lesson,true)]);
   for(const step of c.buildSteps||[])cells.push(['markdown',`## ${step.title}\n\n${step.instruction}`],['code',step.code],['markdown',step.explanation]);
   if(c.buildCode)cells.push(['markdown','## Numerical estimate\n\n'+c.buildOutput],['code',c.buildCode]);

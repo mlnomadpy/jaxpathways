@@ -1,0 +1,24 @@
+{
+  "seed": 20261020,
+  "max_length": 48,
+  "width": 24,
+  "layers": 1,
+  "attention_heads": 2,
+  "mlp_width": 48,
+  "max_vocabulary": 1800,
+  "batch_size": 12,
+  "pretrain_updates": 24,
+  "adaptation_updates": 16,
+  "pretrain_learning_rate": 0.002,
+  "adaptation_learning_rate": 0.001,
+  "unigram_alpha": 0.1,
+  "instruction_context_tokens": 24,
+  "instruction_response_tokens": 16,
+  "claims": {
+    "model_scale": "tiny CPU educational pilot",
+    "held_out_perplexity_is_benchmark": false,
+    "human_instruction_following_claim": false,
+    "rlhf_or_preference_training_claim": false,
+    "300m_parameter_claim": false
+  }
+}

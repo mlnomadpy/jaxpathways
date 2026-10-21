@@ -2,6 +2,8 @@
 
 Phase 10: Scientific computing · about 100 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Construct and verify a fourth-order fixed-step transition.
@@ -76,7 +78,7 @@ Append this block to main.py in your CPU course environment; for the first block
 ```python
 # Step 1 — Use a higher-order scalar transition: Runge–Kutta uses four slopes inside one step.
 import jax
-# Update state in place with the new values.
+# Enable 64-bit arithmetic before importing jax.numpy or creating arrays.
 jax.config.update("jax_enable_x64", True)
 import jax.numpy as jnp
 import numpy as np
@@ -93,7 +95,6 @@ def solve(rate, initial, steps=40, dt=0.05):
     def advance(value, unused):
         next_value = rk4_step(rate, value, dt)
         return next_value, next_value
-    # Run compiled structured control flow via `jax.lax` (`(_, tail)`).
     _, tail = jax.lax.scan(advance, initial, None, length=steps)
     return jnp.concatenate((jnp.atleast_1d(initial), tail))
 ```
@@ -112,12 +113,12 @@ rate, dt, steps = 0.7, 0.05, 40
 simulate_batch = jax.jit(jax.vmap(lambda initial: solve(rate, initial, steps, dt)))
 trajectories = simulate_batch(initials)
 times = np.arange(steps+1)*dt
-# Convert `oracle` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 oracle = np.asarray(initials)[:,None]*np.exp(-rate*times[None,:])
 # Check tensor shape invariant: `trajectories.shape == (3, 41)`
 assert trajectories.shape == (3, 41)
 np.testing.assert_allclose(trajectories, oracle, rtol=3e-8, atol=1e-10)
-# Convert `` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 np.testing.assert_allclose(np.asarray(trajectories)[2], 4*np.asarray(trajectories)[0], rtol=1e-12)
 print("Shape:", trajectories.shape, "endpoints:", np.asarray(trajectories)[:,-1])
 ```
@@ -129,16 +130,14 @@ The batch axis is independent initial conditions, not time. The shared rate and 
 Append this block to main.py in your CPU course environment; for the first block create the file. Run blocks in order.
 
 ```python
-# Step 3 — Change composition and verify axis meaning: Array arithmetic applies the independent scalar dynamics to all...
+# Step 3 — Change composition and verify axis meaning
 # Define `scan_batch(rate, values, steps, dt)` to carry state across steps with `jax.lax.scan`:
 def scan_batch(rate, values, steps=40, dt=0.05):
     def advance(state, unused):
         updated = rk4_step(rate, state, dt)
         return updated, updated
-    # Run compiled structured control flow via `jax.lax` (`(_, tail)`).
     _, tail = jax.lax.scan(advance, values, None, length=steps)
     return jnp.concatenate((values[None,:], tail), axis=0)
-# Run compiled structured control flow via `jax.lax` (`time_major`).
 time_major = scan_batch(rate, initials)
 # Check tensor shape invariant: `time_major.shape == (41, 3)`
 assert time_major.shape == (41, 3)
@@ -153,7 +152,7 @@ Array arithmetic applies the independent scalar dynamics to all initial conditio
 ```python
 # Step 1 — Use a higher-order scalar transition: Runge–Kutta uses four slopes inside one step.
 import jax
-# Update state in place with the new values.
+# Enable 64-bit arithmetic before importing jax.numpy or creating arrays.
 jax.config.update("jax_enable_x64", True)
 import jax.numpy as jnp
 import numpy as np
@@ -170,7 +169,6 @@ def solve(rate, initial, steps=40, dt=0.05):
     def advance(value, unused):
         next_value = rk4_step(rate, value, dt)
         return next_value, next_value
-    # Run compiled structured control flow via `jax.lax` (`(_, tail)`).
     _, tail = jax.lax.scan(advance, initial, None, length=steps)
     return jnp.concatenate((jnp.atleast_1d(initial), tail))
 
@@ -181,25 +179,23 @@ rate, dt, steps = 0.7, 0.05, 40
 simulate_batch = jax.jit(jax.vmap(lambda initial: solve(rate, initial, steps, dt)))
 trajectories = simulate_batch(initials)
 times = np.arange(steps+1)*dt
-# Convert `oracle` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 oracle = np.asarray(initials)[:,None]*np.exp(-rate*times[None,:])
 # Check tensor shape invariant: `trajectories.shape == (3, 41)`
 assert trajectories.shape == (3, 41)
 np.testing.assert_allclose(trajectories, oracle, rtol=3e-8, atol=1e-10)
-# Convert `` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 np.testing.assert_allclose(np.asarray(trajectories)[2], 4*np.asarray(trajectories)[0], rtol=1e-12)
 print("Shape:", trajectories.shape, "endpoints:", np.asarray(trajectories)[:,-1])
 
-# Step 3 — Change composition and verify axis meaning: Array arithmetic applies the independent scalar dynamics to all...
+# Step 3 — Change composition and verify axis meaning
 # Define `scan_batch(rate, values, steps, dt)` to carry state across steps with `jax.lax.scan`:
 def scan_batch(rate, values, steps=40, dt=0.05):
     def advance(state, unused):
         updated = rk4_step(rate, state, dt)
         return updated, updated
-    # Run compiled structured control flow via `jax.lax` (`(_, tail)`).
     _, tail = jax.lax.scan(advance, values, None, length=steps)
     return jnp.concatenate((values[None,:], tail), axis=0)
-# Run compiled structured control flow via `jax.lax` (`time_major`).
 time_major = scan_batch(rate, initials)
 # Check tensor shape invariant: `time_major.shape == (41, 3)`
 assert time_major.shape == (41, 3)
@@ -230,14 +226,13 @@ The common rate produces that shared relative decay. vmap adds independent exper
 The plot has no runtime or memory axis. It establishes numerical behavior for this ensemble, not a speedup from vectorization. The last lesson adds synchronized measurements with their own limitations.
 
 ```python
-# Compute figure data for: Batching preserves independent physical trajectories
-# Convert `visual_data` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 visual_data={'kind':'line','x':times.tolist(),'xlabel':'time (seconds)','ylabel':'excess temperature','series':[{'label':f'initial {float(u):g}','y':np.asarray(trajectories)[i].tolist()} for i,u in enumerate(initials)]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:47:57.386723+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:22:32.553795+00:00. JAX 0.9.2.
 
 ```text
 Shape: (3, 41) endpoints: [0.12329848 0.24659697 0.49319394]
@@ -258,7 +253,7 @@ PASS: science-02
 **Predict before running:** If the step is correct, can a loop-free formula reproduce every saved state?
 
 ```python
-# Experiment — Compare RK4 with an independent polynomial: This checks the discrete algorithm independently of the...
+# Experiment — Compare RK4 with an independent polynomial
 z = -rate*dt
 multiplier = 1 + z + z*z/2 + z**3/6 + z**4/24
 polynomial = np.asarray(initials)[:,None]*multiplier**np.arange(steps+1)[None,:]
@@ -279,7 +274,7 @@ This checks the discrete algorithm independently of the continuous exponential. 
 rates = jnp.array([0.2, 0.7, 1.1])
 # Vectorize across the batch dimension with `jax.vmap` (`paired`).
 paired = jax.vmap(lambda k, u: solve(k,u), in_axes=(0,0))(rates,initials)
-# Convert `paired_reference` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 paired_reference = np.asarray(initials)[:,None]*np.exp(-np.asarray(rates)[:,None]*times)
 np.testing.assert_allclose(paired,paired_reference,rtol=2e-7,atol=1e-10)
 print("Paired-rate endpoints:", np.asarray(paired)[:,-1])
@@ -301,21 +296,22 @@ Add a fourth initial condition, verify the changed output shape and exponential 
 - `jax.vmap(fn, in_axes=..., out_axes=...)` — Vectorizes a single-example function across a batch axis without writing a Python loop.
 
 **Step-by-step implementation plan:**
-1. Vectorize across the batch dimension with `jax.vmap` (`changed`).
-2. Check tensor shape invariant: `changed.shape == (4,41)`
-3. Convert `` to a host NumPy array for inspection or verification.
-4. Vectorize across the batch dimension with `jax.vmap` (`reordered`).
+1. Exercise solution
+2. Vectorize across the batch dimension with `jax.vmap` (`changed`).
+3. Check tensor shape invariant: `changed.shape == (4,41)`
+4. Transfer the device result to the host for an independent NumPy comparison.
+5. Vectorize across the batch dimension with `jax.vmap` (`reordered`).
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Add a fourth initial condition, verify the changed output shape and...
+# Exercise solution
 changed_initials = jnp.array(...)  # TODO: compute changed_initials
 # Vectorize across the batch dimension with `jax.vmap` (`changed`).
 changed = jax.vmap(...)  # TODO: compute changed
 # Check tensor shape invariant: `changed.shape == (4,41)`
 assert changed.shape  # TODO: complete assertion check
-# Convert `` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 np.testing.assert_allclose(changed,np.asarray(changed_initials)[:,None]*np.exp(-0.7*times),rtol=3e-8)
 order = jnp.array(...)  # TODO: compute order
 # Vectorize across the batch dimension with `jax.vmap` (`reordered`).
@@ -327,13 +323,13 @@ print("Permutation preserves trajectory identity")
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Add a fourth initial condition, verify the changed output shape and...
+# Exercise solution
 changed_initials = jnp.array([0.5, 1.0, 2.0, 3.0])
 # Vectorize across the batch dimension with `jax.vmap` (`changed`).
 changed = jax.vmap(lambda u: solve(0.7,u))(changed_initials)
 # Check tensor shape invariant: `changed.shape == (4,41)`
 assert changed.shape == (4,41)
-# Convert `` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 np.testing.assert_allclose(changed,np.asarray(changed_initials)[:,None]*np.exp(-0.7*times),rtol=3e-8)
 order = jnp.array([3,0,2,1])
 # Vectorize across the batch dimension with `jax.vmap` (`reordered`).
@@ -423,7 +419,6 @@ Use nested vmap; identify the rate, initial-condition and time axes explicitly.
 **Step-by-step implementation plan:**
 1. Vectorize across the batch dimension with `jax.vmap` (`grid`).
 2. Check tensor shape invariant: `grid.shape == (3,3,41)`
-3. Create evenly spaced index values in ``.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -433,7 +428,6 @@ Use nested vmap; identify the rate, initial-condition and time axes explicitly.
 grid = jax.vmap(...)  # TODO: compute grid
 # Check tensor shape invariant: `grid.shape == (3,3,41)`
 assert grid.shape  # TODO: complete assertion check
-# Create evenly spaced index values in ``.
 np.testing.assert_allclose(grid[jnp.arange(3),jnp.arange(3)],paired,rtol = ...  # TODO: compute np.testing.assert_allclose(grid[jnp.arange(3),jnp.arange(3)],paired,rtol
 print("Grid axes: rate, initial condition, time", grid.shape)
 ```
@@ -446,7 +440,6 @@ print("Grid axes: rate, initial condition, time", grid.shape)
 grid = jax.vmap(lambda k: jax.vmap(lambda u: solve(k,u))(initials))(rates)
 # Check tensor shape invariant: `grid.shape == (3,3,41)`
 assert grid.shape == (3,3,41)
-# Create evenly spaced index values in ``.
 np.testing.assert_allclose(grid[jnp.arange(3),jnp.arange(3)],paired,rtol=1e-12)
 print("Grid axes: rate, initial condition, time", grid.shape)
 ```

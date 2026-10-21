@@ -1,7 +1,7 @@
 """Hamiltonian Monte Carlo and sampler diagnostics: worked experiments and reference solutions. CPU checks."""
 
 # 1. Write a known target and its gradient
-# Step 1 — 1. Write a known target and its gradient: Potential energy is the negative log-density up to a constant,...
+# Step 1 — 1. Write a known target and its gradient
 import numpy as np
 import jax
 import jax.numpy as jnp
@@ -11,7 +11,6 @@ precision = jnp.linalg.solve(target_cov,jnp.eye(2))
 def potential(q):
     delta=q-target_mean
     return .5*delta@precision@delta
-# Differentiate the objective to obtain `force` via automatic differentiation.
 force=jax.grad(potential)
 assert jnp.allclose(force(jnp.array([0.,0.])),precision@(-target_mean))
 
@@ -22,7 +21,6 @@ def leapfrog(q,p,step_size,steps):
     def step(i,state):
         q,p=state
         q=q+step_size*p
-        # Combine or mask array elements to form `p`.
         p=p-jnp.where(i<steps-1,step_size,.5*step_size)*force(q)
         return q,p
     return jax.lax.fori_loop(0,steps,step,(q,p))
@@ -37,12 +35,9 @@ def chain(key,initial,step_size=.25,leapfrog_steps=7,draws=1600):
         p=jax.random.normal(kp,q.shape)
         proposal,new_p=leapfrog(q,p,step_size,leapfrog_steps)
         error=potential(proposal)+.5*jnp.sum(new_p**2)-potential(q)-.5*jnp.sum(p**2)
-        # Draw pseudorandom samples for `accept` using the explicit RNG state.
         accept=jnp.isfinite(error)&(jnp.log(jax.random.uniform(ku)) < -error)
-        # Combine or mask array elements to form `next_q`.
         next_q=jnp.where(accept,proposal,q)
         return (next_q,key),(next_q,accept,error)
-    # Run compiled structured control flow via `jax.lax` (`(_, record)`).
     _,record=jax.lax.scan(transition,(initial,key),None,length=draws)
     return record
 
@@ -55,7 +50,6 @@ samples=records[0][:,400:,:]
 def split_rhat(values):
     # Classical split R-hat for one scalar coordinate; not rank-normalized.
     half=values.shape[1]//2
-    # Combine or mask array elements to form `split`.
     split=jnp.concatenate([values[:,:half],values[:,-half:]],axis=0)
     # Reduce along axis=1 to compute `within`.
     within=jnp.var(split,axis=1,ddof=1).mean()
@@ -64,7 +58,6 @@ def split_rhat(values):
     return jnp.sqrt(((half-1)*within/half+between/half)/within)
 # Vectorize across the batch dimension with `jax.vmap` (`rhats`).
 rhats=jax.vmap(split_rhat,in_axes=2)(samples)
-# Construct and reshape `pooled` into the target tensor dimensions.
 pooled=samples.reshape(-1,2)
 assert jnp.max(jnp.abs(pooled.mean(0)-target_mean))<.15
 assert jnp.max(jnp.abs(jnp.cov(pooled.T)-target_cov))<.2
@@ -72,7 +65,7 @@ assert jnp.all(rhats<1.05)
 print('mean:',pooled.mean(0),'covariance:',jnp.cov(pooled.T))
 print('classical split R-hat:',rhats,'acceptance:',records[1].mean(axis=1))
 
-# Step 1 — 1. Write a known target and its gradient: Potential energy is the negative log-density up to a constant,...
+# Step 1 — 1. Write a known target and its gradient
 import numpy as np
 import jax
 import jax.numpy as jnp
@@ -82,7 +75,6 @@ precision = jnp.linalg.solve(target_cov,jnp.eye(2))
 def potential(q):
     delta=q-target_mean
     return .5*delta@precision@delta
-# Differentiate the objective to obtain `force` via automatic differentiation.
 force=jax.grad(potential)
 assert jnp.allclose(force(jnp.array([0.,0.])),precision@(-target_mean))
 
@@ -92,7 +84,6 @@ def leapfrog(q,p,step_size,steps):
     def step(i,state):
         q,p=state
         q=q+step_size*p
-        # Combine or mask array elements to form `p`.
         p=p-jnp.where(i<steps-1,step_size,.5*step_size)*force(q)
         return q,p
     return jax.lax.fori_loop(0,steps,step,(q,p))
@@ -107,12 +98,9 @@ def chain(key,initial,step_size=.25,leapfrog_steps=7,draws=1600):
         p=jax.random.normal(kp,q.shape)
         proposal,new_p=leapfrog(q,p,step_size,leapfrog_steps)
         error=potential(proposal)+.5*jnp.sum(new_p**2)-potential(q)-.5*jnp.sum(p**2)
-        # Draw pseudorandom samples for `accept` using the explicit RNG state.
         accept=jnp.isfinite(error)&(jnp.log(jax.random.uniform(ku)) < -error)
-        # Combine or mask array elements to form `next_q`.
         next_q=jnp.where(accept,proposal,q)
         return (next_q,key),(next_q,accept,error)
-    # Run compiled structured control flow via `jax.lax` (`(_, record)`).
     _,record=jax.lax.scan(transition,(initial,key),None,length=draws)
     return record
 
@@ -124,16 +112,14 @@ samples=records[0][:,400:,:]
 def split_rhat(values):
     # Classical split R-hat for one scalar coordinate; not rank-normalized.
     half=values.shape[1]//2
-    # Combine or mask array elements to form `split`.
     split=jnp.concatenate([values[:,:half],values[:,-half:]],axis=0)
-    # Reduce along axis=1 to compute `within`.
+    # Average the sample variance within each split chain.
     within=jnp.var(split,axis=1,ddof=1).mean()
-    # Reduce along axis=1 to compute `between`.
+    # Measure how far split-chain means vary from one another, scaled by half the draws.
     between=half*jnp.var(split.mean(axis=1),ddof=1)
     return jnp.sqrt(((half-1)*within/half+between/half)/within)
 # Vectorize across the batch dimension with `jax.vmap` (`rhats`).
 rhats=jax.vmap(split_rhat,in_axes=2)(samples)
-# Construct and reshape `pooled` into the target tensor dimensions.
 pooled=samples.reshape(-1,2)
 assert jnp.max(jnp.abs(pooled.mean(0)-target_mean))<.15
 assert jnp.max(jnp.abs(jnp.cov(pooled.T)-target_cov))<.2
@@ -142,14 +128,12 @@ print('mean:',pooled.mean(0),'covariance:',jnp.cov(pooled.T))
 print('classical split R-hat:',rhats,'acceptance:',records[1].mean(axis=1))
 
 # Figure data experiment
-# Compute figure data for: Four HMC traces around a known posterior mean
-# Create evenly spaced index values in `indices`.
 indices=np.arange(0,400,10)
-# Convert `visual_data` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 visual_data={"kind":"line","x":indices.tolist(),"xlabel":"retained transition (after fixed discard)","ylabel":"first parameter coordinate","series":[{"label":"chain "+str(i+1),"y":np.asarray(samples[i,indices,0]).tolist()} for i in range(4)]}
 
 # Experiment: Reverse one trajectory
-# Experiment — Reverse one trajectory: Reversibility is an integrator invariant, independent of whether...
+# Experiment — Reverse one trajectory
 q0=jnp.array([.2,-.4])
 p0=jnp.array([.3,.7])
 q1,p1=leapfrog(q0,p0,.15,9)
@@ -177,19 +161,17 @@ assert jnp.max(bad[2])>100.
 print("bad acceptance:",float(bad[1].mean()),"maximum energy error:",float(jnp.max(bad[2])))
 
 # Reference practice: Catch chains trapped at different levels
-# Catch chains trapped at different levels (Transfer / diagnosis): Between-chain variation dominates within-chain variation, so...
+# Catch chains trapped at different levels (Transfer / diagnosis)
 # Create or split explicit PRNG key(s) (`fake`) for reproducible randomness.
 fake=jax.random.normal(jax.random.key(4),(4,600))*.1+jnp.arange(4)[:,None]*4
 assert split_rhat(fake)>5
 
 # Reference practice: Verify a directional derivative
-# Verify a directional derivative (Transfer / diagnosis): A sign error in potential or a transposed geometry can be...
+# Verify a directional derivative (Transfer / diagnosis)
 q=jnp.array([.4,.8])
 v=jnp.array([.7,-.2])
 eps=.001
-# Perform matrix / vector contraction (`@`) to compute `analytic`.
 analytic=(precision@(q-target_mean))@v
-# Perform matrix / vector contraction (`@`) to compute `auto`.
 auto=force(q)@v
 finite=(potential(q+eps*v)-potential(q-eps*v))/(2*eps)
 np.testing.assert_allclose(auto,analytic,rtol=1e-6)

@@ -1,0 +1,5 @@
+# Optional optimization, neural-network and plotting layer for research projects.
+-r requirements-beginner.txt
+optax==0.2.8
+flax==0.12.6
+matplotlib==3.10.8

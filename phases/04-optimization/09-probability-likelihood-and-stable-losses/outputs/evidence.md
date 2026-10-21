@@ -7,7 +7,7 @@ Copy this template into your own portfolio and fill it after running your modifi
 Keep the hand log-loss, analytic gradient, extreme-logit failure/repair, multiclass shift check and empirical-probability calculation.
 
 - Command: `python3 phases/04-optimization/09-probability-likelihood-and-stable-losses/code/main.py`
-- Working directory: repository root
+- Working directory: Repository root
 - Python / JAX / NumPy versions: 
 - Hardware and device: 
 - My prediction before running: 

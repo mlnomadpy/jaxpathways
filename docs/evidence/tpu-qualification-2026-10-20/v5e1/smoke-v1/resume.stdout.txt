@@ -1,0 +1,13 @@
+Starting tpu worker. Events are collected when the worker exits.
+{
+  "status": "completed",
+  "updates": 4,
+  "examples": 32,
+  "last_step": 8,
+  "checkpoint_step": 8,
+  "uncheckpointed_updates": 0,
+  "update_s": 0.0008758019999959288,
+  "update_examples_per_s": 36537.938940706634,
+  "job_examples_per_s": 12.096354195814879,
+  "update_duty_fraction": 0.00033106284991730675
+}

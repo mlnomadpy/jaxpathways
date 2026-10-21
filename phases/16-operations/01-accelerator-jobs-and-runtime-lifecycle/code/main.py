@@ -23,9 +23,7 @@ def atomic_json(path, value):
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     fd, temporary = tempfile.mkstemp(prefix=path.name+'.', suffix='.tmp', dir=path.parent)
-    # Run the boundary check and catch the expected exception:
     try:
-        # Enter `os.fdopen(fd, 'w')` context block:
         with os.fdopen(fd, 'w') as stream:
             json.dump(value, stream, sort_keys=True, allow_nan=False)
             stream.flush()
@@ -127,18 +125,16 @@ except Exception as error:
 '''
 
 # Add bounded launch and result collection
-# Step 3 — Add bounded launch and result collection: The supervisor owns the child handle, captures its output and...
+# Step 3 — Add bounded launch and result collection
 def default_config(**changes):
     cfg=dict(seed=3,learning_rate=.04,momentum=.8,batch_size=8,steps=8,
              checkpoint_every=2,backend='cpu',min_devices=1,resume=False,
              fail_after=None,stall_at=None,stall_seconds=10.)
-    # Update state in place with the new values.
+    # Apply configuration overrides before validating the resulting fields.
     cfg.update(changes)
     for name in ('steps','checkpoint_every','batch_size','min_devices'):
-        # Guard input contract (`not isinstance(cfg[name], int) or isinstance(cfg[name], bool) or cfg[name] < 1`) and fail fast if violated.
         if not isinstance(cfg[name],int) or isinstance(cfg[name],bool) or cfg[name] < 1:
             raise ValueError(name+' must be a positive integer')
-    # Guard input contract (`cfg['batch_size'] > 64 or not 0 <= cfg['momentum'] < 1 or (not 0 < cfg['learning_rate'] < 1)`) and fail fast if violated.
     if cfg['batch_size'] > 64 or not 0 <= cfg['momentum'] < 1 or not 0 < cfg['learning_rate'] < 1:
         raise ValueError('invalid training configuration')
     return cfg
@@ -148,13 +144,11 @@ def launch(root, config=None, timeout=10.):
     root=Path(root)
     root.mkdir(parents=True,exist_ok=True)
     cfg=default_config(**(config or {}))
-    # Guard input contract (`timeout <= 0`) and fail fast if violated.
     if timeout <= 0:
         raise ValueError('timeout must be positive')
     atomic_json(root/'config.json',cfg)
     worker=root/'worker.py'
     worker.write_text(WORKER)
-    # Configure environment variable before initializing the runtime.
     env=dict(os.environ,JAX_PLATFORMS=cfg['backend'],PYTHONUNBUFFERED='1')
     started=time.perf_counter()
     process=subprocess.Popen([sys.executable,str(worker),str(root)],stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,env=env)
@@ -183,7 +177,6 @@ def launch(root, config=None, timeout=10.):
         except (ValueError,TypeError):
             malformed.append(line)
     status='timed_out' if timed_out else 'completed' if process.returncode == 0 and not malformed and events and events[-1]['event']=='completed' else 'failed'
-    # Compute deterministic cryptographic digest `result` for provenance verification.
     result=dict(status=status,returncode=process.returncode,wall_s=wall,events=events,stderr=stderr,
                 worker_hash=hashlib.sha256(WORKER.encode()).hexdigest(),config=cfg,malformed_stdout=malformed)
     atomic_json(root/'run.json',result)
@@ -191,7 +184,7 @@ def launch(root, config=None, timeout=10.):
 
 # Exercise all three lifecycle outcomes
 # Step 4 — Exercise all three lifecycle outcomes: Each outcome comes from a real subprocess.
-# Create an isolated temporary directory to run and inspect artifacts safely:
+# Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory(prefix='ops-lifecycle-') as folder:
     base = Path(folder)
     successful = launch(base/'success')
@@ -226,9 +219,7 @@ def atomic_json(path, value):
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     fd, temporary = tempfile.mkstemp(prefix=path.name+'.', suffix='.tmp', dir=path.parent)
-    # Run the boundary check and catch the expected exception:
     try:
-        # Enter `os.fdopen(fd, 'w')` context block:
         with os.fdopen(fd, 'w') as stream:
             json.dump(value, stream, sort_keys=True, allow_nan=False)
             stream.flush()
@@ -328,18 +319,16 @@ except Exception as error:
     raise SystemExit(23)
 '''
 
-# Step 3 — Add bounded launch and result collection: The supervisor owns the child handle, captures its output and...
+# Step 3 — Add bounded launch and result collection
 def default_config(**changes):
     cfg=dict(seed=3,learning_rate=.04,momentum=.8,batch_size=8,steps=8,
              checkpoint_every=2,backend='cpu',min_devices=1,resume=False,
              fail_after=None,stall_at=None,stall_seconds=10.)
-    # Update state in place with the new values.
+    # Apply configuration overrides before validating the resulting fields.
     cfg.update(changes)
     for name in ('steps','checkpoint_every','batch_size','min_devices'):
-        # Guard input contract (`not isinstance(cfg[name], int) or isinstance(cfg[name], bool) or cfg[name] < 1`) and fail fast if violated.
         if not isinstance(cfg[name],int) or isinstance(cfg[name],bool) or cfg[name] < 1:
             raise ValueError(name+' must be a positive integer')
-    # Guard input contract (`cfg['batch_size'] > 64 or not 0 <= cfg['momentum'] < 1 or (not 0 < cfg['learning_rate'] < 1)`) and fail fast if violated.
     if cfg['batch_size'] > 64 or not 0 <= cfg['momentum'] < 1 or not 0 < cfg['learning_rate'] < 1:
         raise ValueError('invalid training configuration')
     return cfg
@@ -349,13 +338,11 @@ def launch(root, config=None, timeout=10.):
     root=Path(root)
     root.mkdir(parents=True,exist_ok=True)
     cfg=default_config(**(config or {}))
-    # Guard input contract (`timeout <= 0`) and fail fast if violated.
     if timeout <= 0:
         raise ValueError('timeout must be positive')
     atomic_json(root/'config.json',cfg)
     worker=root/'worker.py'
     worker.write_text(WORKER)
-    # Configure environment variable before initializing the runtime.
     env=dict(os.environ,JAX_PLATFORMS=cfg['backend'],PYTHONUNBUFFERED='1')
     started=time.perf_counter()
     process=subprocess.Popen([sys.executable,str(worker),str(root)],stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,env=env)
@@ -384,14 +371,13 @@ def launch(root, config=None, timeout=10.):
         except (ValueError,TypeError):
             malformed.append(line)
     status='timed_out' if timed_out else 'completed' if process.returncode == 0 and not malformed and events and events[-1]['event']=='completed' else 'failed'
-    # Compute deterministic cryptographic digest `result` for provenance verification.
     result=dict(status=status,returncode=process.returncode,wall_s=wall,events=events,stderr=stderr,
                 worker_hash=hashlib.sha256(WORKER.encode()).hexdigest(),config=cfg,malformed_stdout=malformed)
     atomic_json(root/'run.json',result)
     return result
 
 # Step 4 — Exercise all three lifecycle outcomes: Each outcome comes from a real subprocess.
-# Create an isolated temporary directory to run and inspect artifacts safely:
+# Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory(prefix='ops-lifecycle-') as folder:
     base = Path(folder)
     successful = launch(base/'success')
@@ -405,11 +391,10 @@ print('statuses:',successful['status'],rejected['status'],stalled['status'])
 print('actual exit codes:',successful['returncode'],rejected['returncode'],stalled['returncode'])
 
 # Figure data experiment
-# Compute figure data for: Three actual process lifetimes
 visual_data={'kind':'bar','labels':['completed','runtime rejected','timed out'],'xlabel':'observed outcome','ylabel':'supervisor wall time (seconds)','series':[{'label':'actual local process','y':[successful['wall_s'],rejected['wall_s'],stalled['wall_s']]}]}
 
 # Experiment: A child that fails before training
-# Experiment — A child that fails before training: This check links the failure classification to a concrete...
+# Experiment — A child that fails before training
 assert any(e['event']=='failed' and 'runtime' in e['message'] for e in rejected['events'])
 assert not any(e['event']=='progress' for e in rejected['events'])
 
@@ -422,7 +407,7 @@ print('timed-out worker events:',names)
 
 # Reference solution. Try the exercise before reading this.
 # Exercise solution: Launch a changed job with 3 updates and batch size 5.
-# Create an isolated temporary directory to run and inspect artifacts safely:
+# Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory() as folder:
     short=launch(folder,dict(steps=3,batch_size=5))
 assert short['status']=='completed'
@@ -430,7 +415,7 @@ assert [e['step'] for e in short['events'] if e['event']=='progress']==[1,2,3]
 assert short['events'][-1]['step']==3
 
 # Reference practice: Reject invalid work before spawning
-# Reject invalid work before spawning (Transfer / diagnosis): Validation makes an impossible workload fail at the caller...
+# Reject invalid work before spawning (Transfer / diagnosis)
 for values in [dict(steps=0),dict(batch_size=65)]:
     try:
         default_config(**values)
@@ -440,8 +425,8 @@ for values in [dict(steps=0),dict(batch_size=65)]:
         raise AssertionError('invalid work accepted')
 
 # Reference practice: Preserve a successful checkpoint
-# Preserve a successful checkpoint (Transfer / diagnosis): A status and a durable artifact should agree about what was...
-# Create an isolated temporary directory to run and inspect artifacts safely:
+# Preserve a successful checkpoint (Transfer / diagnosis)
+# Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory() as folder:
     result=launch(folder,dict(steps=4))
     saved=json.loads((Path(folder)/'checkpoint.json').read_text())

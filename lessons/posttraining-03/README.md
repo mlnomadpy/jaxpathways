@@ -2,6 +2,8 @@
 
 Phase 18: Post-training: SFT, LoRA, reward models and RLHF · about 105 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Represent a preference as a comparison
@@ -97,7 +99,6 @@ import jax.numpy as jnp
 import numpy as np
 
 def preference_loss(w, chosen, rejected):
-    # Perform matrix / vector contraction (`@`) to compute `margin`.
     margin = (chosen - rejected) @ w
     return jnp.mean(jax.nn.softplus(-margin))
 ```
@@ -109,13 +110,12 @@ The loss sees feature differences. Predict why adding a common score offset late
 Append this block to main.py and run python main.py again. Keep the earlier blocks above it.
 
 ```python
-# Step 2 — 2. Construct and inspect the three comparisons: Write the desired order before fitting: response zero above one,...
+# Step 2 — 2. Construct and inspect the three comparisons
 features = jnp.array([[1.0, 0.0], [0.0, 1.0], [-1.0, -1.0]])
 chosen = features[jnp.array([0, 0, 1])]
 rejected = features[jnp.array([1, 2, 2])]
 w = jnp.zeros(2)
 history = []
-# Differentiate the objective to obtain `step` via automatic differentiation.
 step = jax.jit(
     jax.value_and_grad(lambda w: preference_loss(w, chosen, rejected))
 )
@@ -134,14 +134,12 @@ for _ in range(100):
     history.append(float(value))
     w = w - 0.1 * g
 
-# Perform matrix / vector contraction (`@`) to compute `rewards`.
 rewards = features @ w
 assert rewards[0] > rewards[1] > rewards[2]
 np.testing.assert_allclose(history[0], np.log(2), atol=1e-6)
 assert history[-1] < 0.1
-# Convert `margins` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 margins = np.asarray((chosen - rejected) @ w, dtype=np.float64)
-# Execute `np.testing.assert_allclose(`.
 np.testing.assert_allclose(
     preference_loss(w, chosen, rejected),
     np.mean(np.logaddexp(0, -margins)),
@@ -173,17 +171,15 @@ import jax.numpy as jnp
 import numpy as np
 
 def preference_loss(w, chosen, rejected):
-    # Perform matrix / vector contraction (`@`) to compute `margin`.
     margin = (chosen - rejected) @ w
     return jnp.mean(jax.nn.softplus(-margin))
 
-# Step 2 — 2. Construct and inspect the three comparisons: Write the desired order before fitting: response zero above one,...
+# Step 2 — 2. Construct and inspect the three comparisons
 features = jnp.array([[1.0, 0.0], [0.0, 1.0], [-1.0, -1.0]])
 chosen = features[jnp.array([0, 0, 1])]
 rejected = features[jnp.array([1, 2, 2])]
 w = jnp.zeros(2)
 history = []
-# Differentiate the objective to obtain `step` via automatic differentiation.
 step = jax.jit(
     jax.value_and_grad(lambda w: preference_loss(w, chosen, rejected))
 )
@@ -194,14 +190,12 @@ for _ in range(100):
     history.append(float(value))
     w = w - 0.1 * g
 
-# Perform matrix / vector contraction (`@`) to compute `rewards`.
 rewards = features @ w
 assert rewards[0] > rewards[1] > rewards[2]
 np.testing.assert_allclose(history[0], np.log(2), atol=1e-6)
 assert history[-1] < 0.1
-# Convert `margins` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 margins = np.asarray((chosen - rejected) @ w, dtype=np.float64)
-# Execute `np.testing.assert_allclose(`.
 np.testing.assert_allclose(
     preference_loss(w, chosen, rejected),
     np.mean(np.logaddexp(0, -margins)),
@@ -243,19 +237,18 @@ The second panel reports final chosen-minus-rejected score margins for the three
 The initial zero weights tie all response scores. Training increases the chosen-minus-rejected margins. The offset and scaling exercises explain why reward values must be interpreted relative to their model and downstream objective.
 
 ```python
-# Compute figure data for: Learn a reward model from pairwise preferences — recorded experiment
 visual_data={'kind':'line','xlabel':'completed parameter updates before measurement','ylabel':'pairwise preference NLL (nats)','series':[{'label':'recorded CPU training loss','x':list(range(len(history))),'y':history}]}
 for panel in visual_data.get('panels',[visual_data]):
     panel['x']=panel['series'][0]['x']
 
-# Convert `extra_panel` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 extra_panel={'kind':'bar','x':[0,1,2],'labels':['0 preferred to 1','0 preferred to 2','1 preferred to 2'],'series':[{'label':'final score difference','y':np.asarray((chosen-rejected)@w).tolist()}],'xlabel':'synthetic comparison','ylabel':'chosen minus rejected reward','title':'Which comparisons the reward model fitted'}
 visual_data={"panels":[*visual_data.get("panels",[visual_data]),extra_panel]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:52:15.398245+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:26:58.074779+00:00. JAX 0.9.2.
 
 ```text
 Synthetic preference NLL initial/final: 0.6931471824645996 0.08669456839561462 ; rewards: [ 1.9811294  0.327278  -2.3084073]
@@ -290,15 +283,13 @@ This checks label direction. A decreasing incorrectly signed loss can train a co
 **Predict before running:** If a pair is labeled both ways equally often, should the best margin be positive, negative or zero?
 
 ```python
-# Experiment — Fit conflicting labels conceptually: Disagreement is not fixed by flipping labels until training...
+# Experiment — Fit conflicting labels conceptually
 conflict = lambda margin: 0.5 * (
     jax.nn.softplus(-margin) + jax.nn.softplus(margin)
 )
 np.testing.assert_allclose(conflict(0.0), np.log(2), atol=1e-6)
-# Differentiate the objective to obtain gradients ``.
 np.testing.assert_allclose(jax.grad(conflict)(0.0), 0.0, atol=1e-7)
 assert float(conflict(2.0)) > float(conflict(0.0))
-# Execute `np.testing.assert_allclose(conflict(2.0), conflict(-2.0))`
 np.testing.assert_allclose(conflict(2.0), conflict(-2.0))
 print('Balanced conflicting labels prefer a zero margin.')
 ```
@@ -318,13 +309,12 @@ Calculate the initial loss for tied reward scores independently and verify the t
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+1. Exercise solution
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Calculate the initial loss for tied reward scores independently and...
+# Exercise solution
 np.testing.assert_allclose(
     preference_loss(jnp.zeros(2), chosen, rejected), -np.log(0.5), atol=1e-6
 )
@@ -335,7 +325,7 @@ print('Tied baseline and preference directions verified.')
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Calculate the initial loss for tied reward scores independently and...
+# Exercise solution
 np.testing.assert_allclose(
     preference_loss(jnp.zeros(2), chosen, rejected), -np.log(0.5), atol=1e-6
 )
@@ -359,22 +349,15 @@ Positive scaling preserves ordering but sharpens probabilities.
 
 ### How to write: Show that feature scale can change scores without changing ranking — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `ranking(...)` — Call `ranking` with your updated parameters or inputs from this lesson's workspace.
-- `contraction(...)` — Call `contraction` with your updated parameters or inputs from this lesson's workspace.
-- `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
-
 **Step-by-step implementation plan:**
-1. Perform matrix / vector contraction (`@`) to compute `scaled_rewards`.
-2. Execute `np.testing.assert_array_equal(np.argsort(rewards), np.argsor`
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Show that feature scale can change scores without changing ranking (Transfer): A policy’s reward-versus-KL tradeoff depends on reward scale.
-# Perform matrix / vector contraction (`@`) to compute `scaled_rewards`.
 scaled_rewards = ...  # TODO: compute scaled_rewards
-# Execute `np.testing.assert_array_equal(np.argsort(rewards), np.argsor`
 np.testing.assert_array_equal(np.argsort(rewards), np.argsort(scaled_rewards))
 assert float(preference_loss(2 * w, chosen, rejected))  # TODO: complete assertion check
     preference_loss(w, chosen, rejected)
@@ -386,9 +369,7 @@ print('Ranking unchanged; confidence and downstream reward scale change.')
 
 ```python
 # Show that feature scale can change scores without changing ranking (Transfer): A policy’s reward-versus-KL tradeoff depends on reward scale.
-# Perform matrix / vector contraction (`@`) to compute `scaled_rewards`.
 scaled_rewards = features @ (2 * w)
-# Execute `np.testing.assert_array_equal(np.argsort(rewards), np.argsor`
 np.testing.assert_array_equal(np.argsort(rewards), np.argsort(scaled_rewards))
 assert float(preference_loss(2 * w, chosen, rejected)) < float(
     preference_loss(w, chosen, rejected)
@@ -421,26 +402,23 @@ Use NumPy sigmoid values for the independent calculation; reversing both feature
 - `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
 
 **Step-by-step implementation plan:**
-1. Convert `difference` to a host NumPy array for inspection or verification.
-2. Perform matrix / vector contraction (`@`) to compute `margin_host`.
+1. Derive the linear reward gradient (Challenge)
+2. Transfer the device result to the host for an independent NumPy comparison.
 3. Reduce along axis=0 to compute `analytic`.
-4. Differentiate the objective to obtain gradients ``.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Derive the linear reward gradient (Challenge): Checking both directions catches a sign error that a single...
+# Derive the linear reward gradient (Challenge)
 probe_w = jnp.array(...)  # TODO: compute probe_w
 for positive, negative in [(chosen, rejected), (rejected, chosen)]:
-    # Convert `difference` to a host NumPy array for inspection or verification.
+    # Transfer the device result to the host for an independent NumPy comparison.
     difference = np.asarray(...)  # TODO: compute difference
-    # Perform matrix / vector contraction (`@`) to compute `margin_host`.
     margin_host = ...  # TODO: compute margin_host
     # Reduce along axis=0 to compute `analytic`.
     analytic = np.mean(...)  # TODO: compute analytic
         (1 / (1 + np.exp(-margin_host)) - 1)[:, None] * difference, axis=0
     )
-    # Differentiate the objective to obtain gradients ``.
     np.testing.assert_allclose(
         jax.grad(preference_loss)(probe_w, positive, negative),
         analytic,
@@ -452,18 +430,16 @@ print('Independent reward gradients agree in both label directions.')
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Derive the linear reward gradient (Challenge): Checking both directions catches a sign error that a single...
+# Derive the linear reward gradient (Challenge)
 probe_w = jnp.array([0.2, -0.4])
 for positive, negative in [(chosen, rejected), (rejected, chosen)]:
-    # Convert `difference` to a host NumPy array for inspection or verification.
+    # Transfer the device result to the host for an independent NumPy comparison.
     difference = np.asarray(positive - negative, dtype=np.float64)
-    # Perform matrix / vector contraction (`@`) to compute `margin_host`.
     margin_host = difference @ np.asarray(probe_w)
     # Reduce along axis=0 to compute `analytic`.
     analytic = np.mean(
         (1 / (1 + np.exp(-margin_host)) - 1)[:, None] * difference, axis=0
     )
-    # Differentiate the objective to obtain gradients ``.
     np.testing.assert_allclose(
         jax.grad(preference_loss)(probe_w, positive, negative),
         analytic,

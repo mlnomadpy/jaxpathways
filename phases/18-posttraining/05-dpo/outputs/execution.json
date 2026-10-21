@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "posttraining-05",
-  "contentHash": "247b12d5db6bb478abfe606e2a31ed9fe445bee53ee43b39281b48654fdf44cc",
-  "executedAt": "2026-10-20T10:52:21.092144+00:00",
+  "contentHash": "9fad79b21a975beb939193f8c46fd858e858b640b4e9305c9e7832b1bd335299",
+  "executedAt": "2026-10-20T22:27:04.536354+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -14,15 +14,15 @@
   "stdout": "DPO initial/final: 0.6931471824645996 0.27227783203125 ; reference-corrected margins: [3.0890286  6.17805719 3.08902884]\nDPO initial/final: 0.6931471824645996 0.27227783203125 ; reference-corrected margins: [3.0890286  6.17805719 3.08902884]\nCorrected/unadjusted initial loss: 0.6931471824645996 0.6540467739105225\nLoss before/after: 0.6931471824645996 0.5418724417686462 ; chosen probability: 0.4 -> 0.3\nReversed-label loss: 1.5064733028411865\nReference gradient is zero.\nOne-pair logit gradient agrees with independent margin derivative.\nPASS: posttraining-05\n",
   "notebookCells": [
     {
-      "sourceHash": "89e9a194aca573294170920d5d46a46b5dcf28ee1d3591eee6a24deae2791a65",
+      "sourceHash": "40bee9694450ac4f164968d3c68ae1455e03981e6e2cea45cde775f1409f8f19",
       "outputs": []
     },
     {
-      "sourceHash": "a038c4713523dbf8cb75af64818151e6f1bd1e1e0400c7506876afed89459643",
+      "sourceHash": "b5ddfe53ba0b1c4bf21404c19668b6d99be005c5c0c4e66ccbed873e1bedd549",
       "outputs": []
     },
     {
-      "sourceHash": "b209d42f847fe185ea779806272b90e08961a57b81b1784e5f5834db6d7beb57",
+      "sourceHash": "12769b6fffbb230eaf92b0da1a9c7f491da4c8c9583ede4eacd5a0ab3a71572a",
       "outputs": [
         {
           "output_type": "stream",
@@ -34,7 +34,7 @@
       ]
     },
     {
-      "sourceHash": "0df6010f22215111b2b02f6aabc2e0d9c7dddc6e89fd82c5b6e19aee85f87a0b",
+      "sourceHash": "1fe419988b751616b692d5d6c6192390b4194b59659096e403e92bcd77461fdf",
       "outputs": [
         {
           "output_type": "stream",
@@ -46,7 +46,7 @@
       ]
     },
     {
-      "sourceHash": "fdf27274b81c532e6ae5c9cf020bfb108f19cae421e56af095c9b207754e8257",
+      "sourceHash": "cbec665789ed17e23a1eb839241816435b6d0fc9671abaf06f110f8142f93f79",
       "outputs": []
     },
     {
@@ -65,7 +65,7 @@
       ]
     },
     {
-      "sourceHash": "d10c26cf85281ef9512f691791d4584bb24bb87f5ee43ca7ed14988d9f0fb1fc",
+      "sourceHash": "b4ad4b6f603ea8114754bef9ec8d4d9cd48ff9097db2cdbd642b978e87f1cd14",
       "outputs": [
         {
           "output_type": "stream",
@@ -89,11 +89,11 @@
       ]
     },
     {
-      "sourceHash": "ef2c20999d04ebe4fb00e743092a3e5c6958703d9a98880f1a881906bf1989cf",
+      "sourceHash": "af6c777efb65c1886a5c023a15a0d9d4c8fd2cbbbd08490c747ba456dbaea186",
       "outputs": []
     },
     {
-      "sourceHash": "99812d613ed09b799f3ba9b9525e0c5124399097ddef3d93a41e6c6b55c8716a",
+      "sourceHash": "d6a8c576d99844e505f2fa764b388e32dc97deb4ea166e8406b86d14a38fa550",
       "outputs": [
         {
           "output_type": "stream",
@@ -105,11 +105,11 @@
       ]
     },
     {
-      "sourceHash": "4b421ee025aa53c3b93d6418cc59269e77a6409da48b4296130382e1d54a9421",
+      "sourceHash": "87f88be28329f870e7670553fc3454cb7ecd83c6d2c87c8d116927b57c0815c9",
       "outputs": []
     },
     {
-      "sourceHash": "cbbc8ecce608355ecc5d65763abada013e7b361e78c7c8c7f274a087769e4b42",
+      "sourceHash": "12c919340b24d4520873c3be8b65b6cc7115e9af0560e3c85da7b9c32cce7a2c",
       "outputs": [
         {
           "output_type": "stream",
@@ -121,11 +121,11 @@
       ]
     },
     {
-      "sourceHash": "cf9ca5f3980888dfcca009d3e68f149b59a22fee3d64e97cc6246d5cc1e91406",
+      "sourceHash": "9a472a0d3a049b5f784b2125aab4a66c4dea6b3cc40b1d3f42d3deaeed13aea7",
       "outputs": []
     },
     {
-      "sourceHash": "85ea214165fa9399c942233ad00b9abc8a92e92e07405fb98ade7b61d9151527",
+      "sourceHash": "2aa748a105d0ef2a0dd52e51ef8ecb42945a671a4c1434dabfecfe129e4e9e4d",
       "outputs": [
         {
           "output_type": "stream",

@@ -41,3 +41,9 @@ Package or pin the encoder, connector, causal decoder, tokenizer, image/audio pr
 Follow the [Hub publication procedure](../embedding-model-300m/RELEASE.md) with media canaries and a fresh complete-pipeline download. Service tests cover malformed/oversized media, missing modality, bounded media/token budgets, concurrent sessions, cancellation and resource exhaustion. Rollback restores all compatible component revisions and templates together.
 
 The final reviewer should be able to trace a raw media request through the released system, explain the grounding evidence, identify its unsupported cases and reproduce a repaired failure. Separate component receipts make this the visible integration of earlier learner projects rather than an opaque imported demo.
+
+## Implementation gate and real-data lineage
+
+Do not promote until every source image/audio item, caption/question/answer, teacher label, entity group, rights record and split is traceable. Pin encoder/decoder revisions and connector ancestry, and show correct/absent/swapped-media results on a real grounded holdout; synthetic media validates shape contracts only.
+
+Before this plan can change from **planned** to **authored**, provide independently checkable dataset/recipe manifests, staged parent-to-child checkpoint records with full resume state, real held-out evaluation outputs, and runnable plan-specific starter/reference/checks. Keep small CPU fixtures labeled as correctness evidence; they do not establish target-scale training, quality or production readiness.

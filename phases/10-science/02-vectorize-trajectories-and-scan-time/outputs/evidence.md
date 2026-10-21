@@ -7,7 +7,7 @@ Copy this template into your own portfolio and fill it after running your modifi
 Polynomial/exponential references, batch/time shape diagram, permutation and final-only checks. Keep the environment, observed outputs and your explanation of the figure.
 
 - Command: `python3 phases/10-science/02-vectorize-trajectories-and-scan-time/code/main.py`
-- Working directory: repository root
+- Working directory: Repository root
 - Python / JAX / NumPy versions: 
 - Hardware and device: 
 - My prediction before running: 

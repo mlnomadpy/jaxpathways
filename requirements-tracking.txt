@@ -1,0 +1,3 @@
+# Optional experiment tracking layer for the reproducible experiments workshop.
+-r projects/reproducible-experiments/requirements.txt
+mlflow==3.16.1

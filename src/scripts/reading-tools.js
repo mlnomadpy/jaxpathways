@@ -25,17 +25,19 @@ export function initReadingTools() {
       }
     }
   }
-  const project = document.querySelector('.project-stages');
+  const project = document.querySelector('#project .project-stages');
   if (project && !document.querySelector('.project-stage-links')) {
     const nav = document.createElement('nav');
     nav.className = 'project-stage-links';
     nav.setAttribute('aria-label', 'Project stages');
-    for (const stage of project.children) {
+    for (const stage of project.querySelectorAll('li[id]')) {
+      const label = stage.querySelector('h2')?.textContent?.trim();
+      if (!label || !stage.id) continue;
       const a = document.createElement('a');
       a.href = '#' + stage.id;
-      a.textContent = stage.querySelector('h2')?.textContent || stage.id;
+      a.textContent = label;
       nav.append(a);
     }
-    project.before(nav);
+    if (nav.childElementCount) project.before(nav);
   }
 }

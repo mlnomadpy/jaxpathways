@@ -57,5 +57,13 @@
   ],
   "setupNote": "Run stages 1 through 4 using the commands shown. Stage 3 writes persistent evidence under `runs/tpu-workflow-audit/` when using its documented `--evidence-dir`; without that option, evidence stays in a temporary directory. The untouched starter deliberately fails.",
   "workspaceFile": "projects/tpu-workflow-audit/starter/model.py",
-  "referenceCommand": "python3 projects/tpu-workflow-audit/tests/check.py --implementation solution --stage 4"
+  "referenceCommand": "python3 projects/tpu-workflow-audit/tests/check.py --implementation solution --stage 4",
+  "environment": {
+    "requirementsPath": "requirements-beginner.txt",
+    "pythonCompatibility": ">=3.11,<3.15",
+    "setupCommands": {
+      "unix": "python3 -m venv .venv\nsource .venv/bin/activate\npython -m pip install -r requirements-beginner.txt",
+      "windows": "py -3 -m venv .venv\n.\\.venv\\Scripts\\python.exe -m pip install -r requirements-beginner.txt"
+    }
+  }
 }

@@ -2,6 +2,8 @@
 
 Phase 18: Post-training: SFT, LoRA, reward models and RLHF · about 105 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Align predictions with their target tokens
@@ -99,9 +101,8 @@ def response_logps(logits, tokens, response_mask):
     return jnp.sum(jnp.where(response_mask[:, 1:], selected, 0.0), axis=-1)
 
 def validate_mask(selected, shape):
-    # Convert `a` to a host NumPy array for inspection or verification.
+    # Transfer the device result to the host for an independent NumPy comparison.
     a = np.asarray(selected)
-    # Guard input contract (`a.shape != shape or a.dtype != np.bool_ or (not a.any())`) and fail fast if violated.
     if a.shape != shape or a.dtype != np.bool_ or not a.any():
         raise ValueError('a nonempty Boolean mask of the target shape is required')
 ```
@@ -123,7 +124,6 @@ history = []
 def sft_objective(p):
     return -jnp.sum(response_logps(p[tokens], tokens, roles)) / jnp.sum(roles[:, 1:])
 
-# Differentiate the objective to obtain `step` via automatic differentiation.
 step = jax.jit(jax.value_and_grad(sft_objective))
 ```
 
@@ -146,7 +146,6 @@ assert np.array_equal(np.argmax(np.asarray(p)[[0, 1]], axis=1), [2, 3])
 # The final position predicts nothing and has no contribution.
 base_logits = p[tokens]
 changed = base_logits.at[:, -1, :].set(100.0)
-# Execute `np.testing.assert_allclose(`
 np.testing.assert_allclose(
     response_logps(changed, tokens, roles),
     response_logps(base_logits, tokens, roles),
@@ -171,9 +170,8 @@ def response_logps(logits, tokens, response_mask):
     return jnp.sum(jnp.where(response_mask[:, 1:], selected, 0.0), axis=-1)
 
 def validate_mask(selected, shape):
-    # Convert `a` to a host NumPy array for inspection or verification.
+    # Transfer the device result to the host for an independent NumPy comparison.
     a = np.asarray(selected)
-    # Guard input contract (`a.shape != shape or a.dtype != np.bool_ or (not a.any())`) and fail fast if violated.
     if a.shape != shape or a.dtype != np.bool_ or not a.any():
         raise ValueError('a nonempty Boolean mask of the target shape is required')
 
@@ -187,7 +185,6 @@ history = []
 def sft_objective(p):
     return -jnp.sum(response_logps(p[tokens], tokens, roles)) / jnp.sum(roles[:, 1:])
 
-# Differentiate the objective to obtain `step` via automatic differentiation.
 step = jax.jit(jax.value_and_grad(sft_objective))
 
 # Step 3 — 3. Fit the transition table and check the final position: The table learns only local transitions.
@@ -202,7 +199,6 @@ assert np.array_equal(np.argmax(np.asarray(p)[[0, 1]], axis=1), [2, 3])
 # The final position predicts nothing and has no contribution.
 base_logits = p[tokens]
 changed = base_logits.at[:, -1, :].set(100.0)
-# Execute `np.testing.assert_allclose(`
 np.testing.assert_allclose(
     response_logps(changed, tokens, roles),
     response_logps(base_logits, tokens, roles),
@@ -231,21 +227,19 @@ The second panel is an initial-gradient audit, not another training curve. Rows 
 The table learns prompt-to-answer and answer-to-end transitions. The independent gradient check confirms the intended target shift, and the mask exercise changes which target positions count without removing prompt context.
 
 ```python
-# Compute figure data for: Supervised fine-tuning with response-only token loss — recorded experiment
 visual_data={'kind':'line','xlabel':'completed parameter updates before measurement','ylabel':'response-token NLL (nats)','series':[{'label':'recorded CPU training loss','x':list(range(len(history))),'y':history}]}
 for panel in visual_data.get('panels',[visual_data]):
     panel['x']=panel['series'][0]['x']
 
-# Allocate initialized array `initial_output_grads` with the specified shape and dtype.
 initial_output_grads=jax.grad(lambda values:-jnp.sum(response_logps(values,tokens,roles))/jnp.sum(roles[:,1:]))(jnp.zeros((2,3,5)))
-# Convert `extra_panel` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 extra_panel={'kind':'heatmap','values':np.asarray(jnp.linalg.norm(initial_output_grads,axis=-1)).tolist(),'rows':['prompt 0 / answer 2','prompt 1 / answer 3'],'columns':['input position 0','input position 1','input position 2'],'unit':'output-logit gradient L2 norm','xlabel':'position producing the prediction','ylabel':'sequence','title':'Initial supervised gradient by output position'}
 visual_data={"panels":[*visual_data.get("panels",[visual_data]),extra_panel]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:52:09.960042+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:26:52.206662+00:00. JAX 0.9.2.
 
 ```text
 Response-only token NLL initial/final: 1.6094379425048828 0.07985548675060272
@@ -264,11 +258,10 @@ PASS: posttraining-01
 **Predict before running:** Which table rows should get gradients when only answer and end tokens are supervised?
 
 ```python
-# Experiment — Prove the target-mask shift: The prediction made at the prompt position is supervised because...
-# Differentiate the objective to obtain `g` via automatic differentiation.
+# Experiment — Prove the target-mask shift
 g = jax.grad(sft_objective)(jnp.zeros((5, 5)))
 assert np.linalg.norm(np.asarray(g)[0]) > 0 and np.linalg.norm(np.asarray(g)[1]) > 0
-# Convert `` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 np.testing.assert_array_equal(np.asarray(g)[4], 0.0)
 print('Prompt rows learn to predict first answers; the final end-token row has no target.')
 ```
@@ -285,10 +278,9 @@ The prediction made at the prompt position is supervised because its target is a
 # Experiment — Check a ragged batch against a scalar loop: Padding and role masks affect the target after shifting.
 ragged_tokens = jnp.array([[0, 2, 4, 4], [1, 3, 2, 4]])
 ragged_roles = jnp.array([[False, True, True, False], [False, True, True, True]])
-# Construct and reshape `ragged_logits` into the target tensor dimensions.
 ragged_logits = jnp.arange(2 * 4 * 5, dtype=jnp.float32).reshape(2, 4, 5) / 19
 observed = response_logps(ragged_logits, ragged_tokens, ragged_roles)
-# Convert `arr` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 arr = np.asarray(ragged_logits, dtype=np.float64)
 expected = []
 for row in range(2):
@@ -318,15 +310,14 @@ Score only the first response token in each sequence and compare the resulting c
 - `jnp.isfinite(x)` — Returns a boolean mask verifying that no element is `NaN` or `Inf`.
 
 **Step-by-step implementation plan:**
-1. Aggregate array values to compute `value`.
+1. Exercise solution
 2. Ensure all array elements remain finite: `np.isfinite(float(value))`
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Score only the first response token in each sequence and compare the...
+# Exercise solution
 first_only = ...  # TODO: compute first_only
-# Aggregate array values to compute `value`.
 value = ...  # TODO: compute value
     first_only[:, 1:]
 )
@@ -339,9 +330,8 @@ print('Two first-response targets:', float(value))
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Score only the first response token in each sequence and compare the...
+# Exercise solution
 first_only = roles.at[:, 2].set(False)
-# Aggregate array values to compute `value`.
 value = -jnp.sum(response_logps(p[tokens], tokens, first_only)) / jnp.sum(
     first_only[:, 1:]
 )
@@ -367,18 +357,14 @@ Use the shifted target mask, not the unshifted input mask.
 
 ### How to write: Reject a batch with no answer targets — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `targets(...)` — Call `targets` with your updated parameters or inputs from this lesson's workspace.
-- `validate_mask(...)` — Call `validate_mask` with your updated parameters or inputs from this lesson's workspace.
-
 **Step-by-step implementation plan:**
-1. Run the boundary check and catch the expected exception:
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Reject a batch with no answer targets (Transfer): An empty answer mask should trigger a clear skip/rejection...
-# Run the boundary check and catch the expected exception:
+# Reject a batch with no answer targets (Transfer)
 try:
     validate_mask(jnp.zeros_like(roles[:, 1:]), tokens[:, 1:].shape)
 except ValueError:
@@ -390,8 +376,7 @@ else:
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Reject a batch with no answer targets (Transfer): An empty answer mask should trigger a clear skip/rejection...
-# Run the boundary check and catch the expected exception:
+# Reject a batch with no answer targets (Transfer)
 try:
     validate_mask(jnp.zeros_like(roles[:, 1:]), tokens[:, 1:].shape)
 except ValueError:
@@ -422,15 +407,14 @@ Keep the final input token equal and change an earlier token.
 - `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
 
 **Step-by-step implementation plan:**
-1. Execute `np.testing.assert_array_equal(last_logits[0], last_logits[1]`
+1. Create a failure this model cannot fix (Challenge)
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Create a failure this model cannot fix (Challenge): A model that conditions on the earlier context can represent...
+# Create a failure this model cannot fix (Challenge)
 contexts = jnp.array(...)  # TODO: compute contexts
 last_logits = ...  # TODO: compute last_logits
-# Execute `np.testing.assert_array_equal(last_logits[0], last_logits[1]`
 np.testing.assert_array_equal(last_logits[0], last_logits[1])
 conflicting_targets = jnp.array(...)  # TODO: compute conflicting_targets
 assert conflicting_targets[0]  # TODO: complete assertion check
@@ -440,10 +424,9 @@ print('Identical final tokens force identical table predictions despite differen
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Create a failure this model cannot fix (Challenge): A model that conditions on the earlier context can represent...
+# Create a failure this model cannot fix (Challenge)
 contexts = jnp.array([[1, 0], [3, 0]])
 last_logits = p[contexts[:, -1]]
-# Execute `np.testing.assert_array_equal(last_logits[0], last_logits[1]`
 np.testing.assert_array_equal(last_logits[0], last_logits[1])
 conflicting_targets = jnp.array([2, 3])
 assert conflicting_targets[0] != conflicting_targets[1]

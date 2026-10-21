@@ -91,5 +91,13 @@
   ],
   "referenceCommand": "python3 projects/text-harness/tests/check.py --implementation solution --stage all",
   "setupNote": "Use the extracted ZIP top folder containing requirements-cpu.txt and projects/text-harness. The README explains the full connected runner and actual plots/profile artifacts. Linked TPU/distributed phase commands require the full course workspace and an existing supported target environment. Copy the starter scaffold `projects/text-harness/starter/model.py` to `projects/text-harness/my_model.py`, implement the stage functions in `projects/text-harness/my_model.py`, and verify each stage with `python3 projects/text-harness/tests/check.py --implementation projects/text-harness/my_model.py --stage 1` (through `--stage 4`).",
-  "assessmentId": "tpu"
+  "assessmentId": "tpu",
+  "environment": {
+    "requirementsPath": "requirements-figures.txt",
+    "pythonCompatibility": ">=3.11,<3.15",
+    "setupCommands": {
+      "unix": "python3 -m venv .venv\nsource .venv/bin/activate\npython -m pip install -r requirements-figures.txt",
+      "windows": "py -3 -m venv .venv\n.\\.venv\\Scripts\\python.exe -m pip install -r requirements-figures.txt"
+    }
+  }
 }

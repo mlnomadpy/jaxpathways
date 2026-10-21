@@ -20,6 +20,8 @@ const textFields = (value, keys) =>
  * @returns {value is import('../types/manifests').ProjectManifest}
  */
 function project(value) {
+  const environment = record(value) ? value.environment : undefined;
+  const environmentIsValid = validEnvironment(environment);
   return (
     record(value) &&
     typeof value.schemaVersion === 'number' &&
@@ -48,7 +50,38 @@ function project(value) {
     (value.assessmentId === undefined || typeof value.assessmentId === 'string') &&
     (value.prepare === undefined ||
       (Array.isArray(value.prepare) &&
-        value.prepare.every((item) => textFields(item, ['command', 'label']))))
+        value.prepare.every((item) => textFields(item, ['command', 'label'])))) &&
+    environmentIsValid
+  );
+}
+
+/** @param {unknown} value */
+function validEnvironment(value) {
+  if (
+    !record(value) ||
+    typeof value.requirementsPath !== 'string' ||
+    typeof value.pythonCompatibility !== 'string'
+  ) {
+    return false;
+  }
+  const requirementsPath = value.requirementsPath;
+  if (
+    !/^(?:requirements-[a-z0-9-]+\.txt|projects\/[a-z0-9-]+\/requirements\.txt)$/.test(
+      requirementsPath,
+    ) ||
+    value.pythonCompatibility !== '>=3.11,<3.15' ||
+    !record(value.setupCommands) ||
+    typeof value.setupCommands.unix !== 'string' ||
+    typeof value.setupCommands.windows !== 'string'
+  ) {
+    return false;
+  }
+  const { unix, windows } = value.setupCommands;
+  return (
+    unix.includes(requirementsPath) &&
+    windows.includes(requirementsPath) &&
+    unix.includes('source .venv/bin/activate') &&
+    windows.includes('.venv\\Scripts\\python.exe')
   );
 }
 
@@ -80,7 +113,7 @@ function receipt(value) {
   );
 }
 
-/** @param {unknown} value */
+/** @param {unknown} value @returns {import('../types/manifests').ValidationReceipt} */
 export function parseValidation(value) {
   if (!receipt(value)) throw new Error('Unsupported validation receipt');
   return value;

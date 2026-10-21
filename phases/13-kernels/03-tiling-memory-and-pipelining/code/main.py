@@ -1,7 +1,7 @@
 """Tiling, memory, and pipelining: worked experiments and reference solutions. CPU checks."""
 
 # Reuse the checked arithmetic and add a real pipeline
-# Step 1 — Reuse the checked arithmetic and add a real pipeline: The outer kernel receives global-memory references and emits an...
+# Step 1 — Reuse the checked arithmetic and add a real pipeline
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -9,13 +9,10 @@ from jax.experimental import pallas as pl
 from jax.experimental.pallas import tpu as pltpu
 
 def validate_pair(x,y,block):
-    # Guard input contract (`x.ndim != 2 or x.shape != y.shape or min(x.shape) < 1`) and fail fast if violated.
     if x.ndim!=2 or x.shape!=y.shape or min(x.shape)<1:
         raise ValueError("inputs must be nonempty matrices with identical shapes")
-    # Guard input contract (`x.dtype != y.dtype or x.dtype not in (jnp.float32, jnp.bfloat16)`) and fail fast if violated.
     if x.dtype!=y.dtype or x.dtype not in (jnp.float32,jnp.bfloat16):
         raise ValueError("matching float32 or bfloat16 inputs required")
-    # Guard input contract (`len(block) != 2 or any((not isinstance(n, int) or n < 1 for n in block))`) and fail fast if violated.
     if len(block)!=2 or any(not isinstance(n,int) or n<1 for n in block):
         raise ValueError("two positive integer block dimensions required")
 
@@ -24,7 +21,6 @@ def pad_pair(x,y,block):
     m,n=x.shape
     bm,bn=block
     padded=((m+bm-1)//bm*bm,(n+bn-1)//bn*bn)
-    # Combine or mask array elements to form `pads`.
     pads=((0,padded[0]-m),(0,padded[1]-n))
     return jnp.pad(x,pads),jnp.pad(y,pads),padded
 
@@ -33,12 +29,9 @@ def axpy_body(x_ref,y_ref,out_ref):
     out_ref[...]=result.astype(out_ref.dtype)
 
 def blocked_axpy(x,y,block=(2,4)):
-    # Combine or mask array elements to form `(px, py, padded)`.
     px,py,padded=pad_pair(x,y,block)
     bm,bn=block
-    # Invoke custom Pallas kernel or tile specification (`spec`).
     spec=pl.BlockSpec(block,lambda i,j:(i,j))
-    # Combine or mask array elements to form `out`.
     out=pl.pallas_call(axpy_body,
         out_shape=jax.ShapeDtypeStruct(padded,x.dtype),
         grid=(padded[0]//bm,padded[1]//bn),
@@ -46,34 +39,24 @@ def blocked_axpy(x,y,block=(2,4)):
     return out[:x.shape[0],:x.shape[1]]
 
 def pipelined_axpy(x,y,block=(8,128),buffers=2,no_pipelining=False,mode="simulate"):
-    # Combine or mask array elements to form `(px, py, padded)`.
     px,py,padded=pad_pair(x,y,block)
     bm,bn=block
-    # Guard input contract (`bm % 8 or bn % 128`) and fail fast if violated.
     if bm%8 or bn%128:
         raise ValueError("pipeline blocks must be multiples of (8,128)")
-    # Guard input contract (`buffers not in (2, 3)`) and fail fast if violated.
     if buffers not in (2,3):
         raise ValueError("this lab supports two or three buffers")
-    # Guard input contract (`mode not in ('simulate', 'tpu')`) and fail fast if violated.
     if mode not in ("simulate","tpu"):
         raise ValueError("mode must explicitly be simulate or tpu")
-    # Guard input contract (`mode == 'tpu' and (jax.default_backend() != 'tpu' or any((not isinstance(a, jax.core.Tracer) and any((d.platform != 'tpu' for d in a.devices())) for a in (x, y))))`) and fail fast if violated.
     if mode=="tpu" and (jax.default_backend()!="tpu" or any(not isinstance(a,jax.core.Tracer) and any(d.platform!="tpu" for d in a.devices()) for a in (x,y))):
         raise RuntimeError("Real TPU inputs/backend required; simulation fallback is disabled")
-    # Invoke custom Pallas kernel or tile specification (`spec`).
     spec=pl.BlockSpec(block,lambda i,j:(i,j),pipeline_mode=pl.Buffered(buffer_count=buffers))
-    # Invoke custom Pallas kernel or tile specification (`output_spec`).
     output_spec=pl.BlockSpec(block,lambda i,j:(i,j),pipeline_mode=pl.Buffered(buffer_count=2))
     def outer(x_hbm,y_hbm,out_hbm):
-        # Combine or mask array elements to form ``.
         pltpu.emit_pipeline(axpy_body,grid=(padded[0]//bm,padded[1]//bn),
             in_specs=(spec,spec),out_specs=output_spec,
             no_pipelining=no_pipelining)(x_hbm,y_hbm,out_hbm)
-    # Invoke custom Pallas kernel or tile specification (`whole`).
     whole=pl.BlockSpec(memory_space=pl.ANY)
     interpretation=pltpu.InterpretParams(detect_races=True) if mode=="simulate" else False
-    # Combine or mask array elements to form `call`.
     call=pl.pallas_call(outer,out_shape=jax.ShapeDtypeStruct(padded,x.dtype),
         in_specs=(whole,whole),out_specs=whole,interpret=interpretation)
     if mode=="simulate":
@@ -88,16 +71,14 @@ def pipelined_axpy(x,y,block=(8,128),buffers=2,no_pipelining=False,mode="simulat
 
 # Compare synchronous and buffered pipeline semantics
 # Step 2 — Compare synchronous and buffered pipeline semantics: Both schedules execute real pipeline semantics under CPU simulation.
-# Construct and reshape `x` into the target tensor dimensions.
 x=jnp.linspace(-1,1,17*257,dtype=jnp.float32).reshape(17,257)
 y=jnp.full_like(x,.25)
-# Convert `reference` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 reference=2*np.asarray(x)+np.asarray(y)
 synchronous=pipelined_axpy(x,y,no_pipelining=True)
 buffered=pipelined_axpy(x,y,no_pipelining=False)
 np.testing.assert_allclose(synchronous,reference,rtol=1e-6,atol=1e-6)
 np.testing.assert_allclose(buffered,reference,rtol=1e-6,atol=1e-6)
-# Execute `np.testing.assert_array_equal(synchronous,buffered)`
 np.testing.assert_array_equal(synchronous,buffered)
 print("Actual backend:",jax.default_backend(),"simulated layout: TPU v5 lite")
 print("Synchronous/buffered endpoints:",float(buffered[0,0]),float(buffered[-1,-1]))
@@ -113,13 +94,12 @@ for bm,bn in configurations:
     padded_elements=programs*bm*bn
     # Two input buffers and one output buffer, each double buffered, FP32.
     modeled_buffer_bytes=3*2*bm*bn*4
-    # Combine or mask array elements to form ``.
     metadata.append((programs,padded_elements,modeled_buffer_bytes))
     result=pipelined_axpy(x,y,(bm,bn))
     np.testing.assert_allclose(result,reference,rtol=1e-6,atol=1e-6)
 print("programs, padded elements, modeled data-buffer bytes:",metadata)
 
-# Step 1 — Reuse the checked arithmetic and add a real pipeline: The outer kernel receives global-memory references and emits an...
+# Step 1 — Reuse the checked arithmetic and add a real pipeline
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -127,13 +107,10 @@ from jax.experimental import pallas as pl
 from jax.experimental.pallas import tpu as pltpu
 
 def validate_pair(x,y,block):
-    # Guard input contract (`x.ndim != 2 or x.shape != y.shape or min(x.shape) < 1`) and fail fast if violated.
     if x.ndim!=2 or x.shape!=y.shape or min(x.shape)<1:
         raise ValueError("inputs must be nonempty matrices with identical shapes")
-    # Guard input contract (`x.dtype != y.dtype or x.dtype not in (jnp.float32, jnp.bfloat16)`) and fail fast if violated.
     if x.dtype!=y.dtype or x.dtype not in (jnp.float32,jnp.bfloat16):
         raise ValueError("matching float32 or bfloat16 inputs required")
-    # Guard input contract (`len(block) != 2 or any((not isinstance(n, int) or n < 1 for n in block))`) and fail fast if violated.
     if len(block)!=2 or any(not isinstance(n,int) or n<1 for n in block):
         raise ValueError("two positive integer block dimensions required")
 
@@ -142,7 +119,6 @@ def pad_pair(x,y,block):
     m,n=x.shape
     bm,bn=block
     padded=((m+bm-1)//bm*bm,(n+bn-1)//bn*bn)
-    # Combine or mask array elements to form `pads`.
     pads=((0,padded[0]-m),(0,padded[1]-n))
     return jnp.pad(x,pads),jnp.pad(y,pads),padded
 
@@ -151,12 +127,9 @@ def axpy_body(x_ref,y_ref,out_ref):
     out_ref[...]=result.astype(out_ref.dtype)
 
 def blocked_axpy(x,y,block=(2,4)):
-    # Combine or mask array elements to form `(px, py, padded)`.
     px,py,padded=pad_pair(x,y,block)
     bm,bn=block
-    # Invoke custom Pallas kernel or tile specification (`spec`).
     spec=pl.BlockSpec(block,lambda i,j:(i,j))
-    # Combine or mask array elements to form `out`.
     out=pl.pallas_call(axpy_body,
         out_shape=jax.ShapeDtypeStruct(padded,x.dtype),
         grid=(padded[0]//bm,padded[1]//bn),
@@ -164,34 +137,24 @@ def blocked_axpy(x,y,block=(2,4)):
     return out[:x.shape[0],:x.shape[1]]
 
 def pipelined_axpy(x,y,block=(8,128),buffers=2,no_pipelining=False,mode="simulate"):
-    # Combine or mask array elements to form `(px, py, padded)`.
     px,py,padded=pad_pair(x,y,block)
     bm,bn=block
-    # Guard input contract (`bm % 8 or bn % 128`) and fail fast if violated.
     if bm%8 or bn%128:
         raise ValueError("pipeline blocks must be multiples of (8,128)")
-    # Guard input contract (`buffers not in (2, 3)`) and fail fast if violated.
     if buffers not in (2,3):
         raise ValueError("this lab supports two or three buffers")
-    # Guard input contract (`mode not in ('simulate', 'tpu')`) and fail fast if violated.
     if mode not in ("simulate","tpu"):
         raise ValueError("mode must explicitly be simulate or tpu")
-    # Guard input contract (`mode == 'tpu' and (jax.default_backend() != 'tpu' or any((not isinstance(a, jax.core.Tracer) and any((d.platform != 'tpu' for d in a.devices())) for a in (x, y))))`) and fail fast if violated.
     if mode=="tpu" and (jax.default_backend()!="tpu" or any(not isinstance(a,jax.core.Tracer) and any(d.platform!="tpu" for d in a.devices()) for a in (x,y))):
         raise RuntimeError("Real TPU inputs/backend required; simulation fallback is disabled")
-    # Invoke custom Pallas kernel or tile specification (`spec`).
     spec=pl.BlockSpec(block,lambda i,j:(i,j),pipeline_mode=pl.Buffered(buffer_count=buffers))
-    # Invoke custom Pallas kernel or tile specification (`output_spec`).
     output_spec=pl.BlockSpec(block,lambda i,j:(i,j),pipeline_mode=pl.Buffered(buffer_count=2))
     def outer(x_hbm,y_hbm,out_hbm):
-        # Combine or mask array elements to form ``.
         pltpu.emit_pipeline(axpy_body,grid=(padded[0]//bm,padded[1]//bn),
             in_specs=(spec,spec),out_specs=output_spec,
             no_pipelining=no_pipelining)(x_hbm,y_hbm,out_hbm)
-    # Invoke custom Pallas kernel or tile specification (`whole`).
     whole=pl.BlockSpec(memory_space=pl.ANY)
     interpretation=pltpu.InterpretParams(detect_races=True) if mode=="simulate" else False
-    # Combine or mask array elements to form `call`.
     call=pl.pallas_call(outer,out_shape=jax.ShapeDtypeStruct(padded,x.dtype),
         in_specs=(whole,whole),out_specs=whole,interpret=interpretation)
     if mode=="simulate":
@@ -205,16 +168,14 @@ def pipelined_axpy(x,y,block=(8,128),buffers=2,no_pipelining=False,mode="simulat
     return output[:x.shape[0],:x.shape[1]]
 
 # Step 2 — Compare synchronous and buffered pipeline semantics: Both schedules execute real pipeline semantics under CPU simulation.
-# Construct and reshape `x` into the target tensor dimensions.
 x=jnp.linspace(-1,1,17*257,dtype=jnp.float32).reshape(17,257)
 y=jnp.full_like(x,.25)
-# Convert `reference` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 reference=2*np.asarray(x)+np.asarray(y)
 synchronous=pipelined_axpy(x,y,no_pipelining=True)
 buffered=pipelined_axpy(x,y,no_pipelining=False)
 np.testing.assert_allclose(synchronous,reference,rtol=1e-6,atol=1e-6)
 np.testing.assert_allclose(buffered,reference,rtol=1e-6,atol=1e-6)
-# Execute `np.testing.assert_array_equal(synchronous,buffered)`
 np.testing.assert_array_equal(synchronous,buffered)
 print("Actual backend:",jax.default_backend(),"simulated layout: TPU v5 lite")
 print("Synchronous/buffered endpoints:",float(buffered[0,0]),float(buffered[-1,-1]))
@@ -229,61 +190,54 @@ for bm,bn in configurations:
     padded_elements=programs*bm*bn
     # Two input buffers and one output buffer, each double buffered, FP32.
     modeled_buffer_bytes=3*2*bm*bn*4
-    # Combine or mask array elements to form ``.
     metadata.append((programs,padded_elements,modeled_buffer_bytes))
     result=pipelined_axpy(x,y,(bm,bn))
     np.testing.assert_allclose(result,reference,rtol=1e-6,atol=1e-6)
 print("programs, padded elements, modeled data-buffer bytes:",metadata)
 
 # Figure data experiment
-# Compute figure data for: Fewer tile programs can require more work and local storage
 labels=['8 x 128','16 x 128','16 x 256']
 visual_data={'panels':[{'kind':'bar','labels':labels,'ylabel':'program count (configuration-derived)','series':[{'label':'grid programs','y':[row[0] for row in metadata]}]},{'kind':'bar','labels':labels,'ylabel':'modeled data buffers (KiB)','series':[{'label':'double-buffered inputs and output','y':[row[2]/1024 for row in metadata]}]}]}
 
 # Experiment: Change input buffer count without changing the result
-# Experiment — Change input buffer count without changing the result: More input buffering changes potential overlap and storage, not...
+# Experiment — Change input buffer count without changing the result
 three=pipelined_axpy(x,y,buffers=3)
 np.testing.assert_allclose(three,reference,rtol=1e-6,atol=1e-6)
-# Execute `np.testing.assert_array_equal(three,buffered)`
 np.testing.assert_array_equal(three,buffered)
 print("Three-buffer schedule matches the two-buffer result")
 
 # Experiment: Check a one-tile pipeline
-# Experiment — Check a one-tile pipeline: A one-tile pipeline has no next tile with which to overlap its...
-# Construct and reshape `small_x` into the target tensor dimensions.
+# Experiment — Check a one-tile pipeline
 small_x=jnp.arange(8*128,dtype=jnp.float32).reshape(8,128)/100
 small_y=jnp.ones_like(small_x)
 small=pipelined_axpy(small_x,small_y)
-# Convert `` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 np.testing.assert_allclose(small,2*np.asarray(small_x)+1,rtol=1e-6,atol=1e-6)
 print("Single-tile pipeline checked")
 
 # Reference solution. Try the exercise before reading this.
-# Exercise solution: Use a (9,129) random fixture and verify synchronous,...
+# Exercise solution
 rng=np.random.default_rng(23)
 for dtype in (jnp.float32,jnp.bfloat16):
-    # Create device-backed JAX array `a`.
     a=jnp.asarray(rng.normal(size=(9,129)),dtype=dtype)
-    # Create device-backed JAX array `b`.
     b=jnp.asarray(rng.normal(size=(9,129)),dtype=dtype)
     expected=(2*a.astype(jnp.float32)+b.astype(jnp.float32)).astype(dtype)
     for buffers,sync in [(2,True),(2,False),(3,False)]:
         result=pipelined_axpy(a,b,buffers=buffers,no_pipelining=sync)
-        # Convert `` to a host NumPy array for inspection or verification.
+        # Transfer the device result to the host for an independent NumPy comparison.
         np.testing.assert_array_equal(np.asarray(result),np.asarray(expected))
 print("Changed shape, dtype and schedules verified")
 
 # Reference practice: Reject an unsupported pipeline tile
 # Reject an unsupported pipeline tile (Practice): Different wrappers may expose different supported contracts.
 rejected=False
-# Run the boundary check and catch the expected exception:
 try:pipelined_axpy(x,y,(3,5))
 except ValueError:rejected=True
 assert rejected
 print("Unsupported pipeline tile rejected")
 
 # Reference practice: Estimate the price of a third input buffer
-# Estimate the price of a third input buffer (Challenge): A third slot for each input increases this limited...
+# Estimate the price of a third input buffer (Challenge)
 for bm,bn in configurations:
     two=(2*2+2)*bm*bn*4
     three=(2*3+2)*bm*bn*4

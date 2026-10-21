@@ -2,6 +2,8 @@
 
 Phase 01: Arrays & pure functions · about 45 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Translate a feature-wise NumPy calculation to `jax.numpy.`
@@ -77,46 +79,46 @@ Compare a tiny JAX calculation with NumPy using explicitly matching float32 data
 
 The output of a `jax.numpy` operation is a JAX array with its own device behavior. We will explore devices and compilation elsewhere. At this point, focus on matching values, preserving shapes, and keeping preprocessing semantics explicit.
 
-## Step 1: Set up imports and input tensors
+## Create a three-example, two-feature array
 
-Import the required JAX modules and define the initial inputs for from numpy to jax.numpy.
+Import jax.numpy and store three observations as rows and two features as columns.
 
 ```python
 import jax.numpy as jnp
 x = jnp.array([[1., 10.], [3., 14.], [5., 18.]])
 ```
 
-Establishing explicit input shapes and dtypes first makes the downstream transformation contract deterministic.
+The row axis indexes examples and the column axis indexes features; keeping that meaning explicit makes the reduction axis interpretable.
 
-## Step 2: Apply the core JAX transformation
+## Center each feature using its column mean
 
-Write the core computation and transformation step over the initialized inputs.
+Reduce over the example axis, then subtract the resulting two feature means from every row.
 
 ```python
 mean = x.mean(axis=0)
 centered = x - mean
 ```
 
-This stage executes the primary numerical transformation and binds the intermediate outputs.
+For these values the means are [3, 14]. Broadcasting subtracts each feature mean from its column, so each centered feature has mean zero.
 
-## Step 3: Verify shapes and numerical invariants
+## Check the hand-computed means and centering invariant
 
-Check that the resulting arrays satisfy the expected shape, dtype, and numerical tolerances.
+Compare the mean with [3, 14] and verify that the centered columns average to zero.
 
 ```python
 assert jnp.allclose(mean, jnp.array([3., 14.]))
 assert jnp.allclose(centered.mean(axis=0), jnp.zeros(2))
 ```
 
-These assertions lock in the exact numerical contract before you run the full experiment and variations.
+The first check catches a wrong reduction axis; the second checks the defining property of mean-centering.
 
 ## Run the example
 
 ```python
-# From NumPy to jax.numpy: Feature preprocessing answers a specific question: how does each...
+# From NumPy to jax.numpy
 import jax.numpy as jnp
 x = jnp.array([[1., 10.], [3., 14.], [5., 18.]])
-# Reduce along axis=0 to compute `mean`.
+# Average across examples, leaving one mean for each feature column.
 mean = x.mean(axis=0)
 centered = x - mean
 print("Mean:", mean)
@@ -148,13 +150,12 @@ Those shifts are the separate column means. Subtracting a mean moves a whole fea
 Centering makes each column’s mean zero, but does not give the columns the same spread. The wider range of centered feature $1$ remains visible. To check your axis choice, add the centered entries in each column: each sum should be zero.
 
 ```python
-# Compute figure data for: Center each feature around its own mean
 visual_data = {'kind': 'line', 'x': [0, 1, 2], 'xlabel': 'observation index', 'ylabel': 'feature value', 'series': [{'label': 'original feature 0', 'y': x[:, 0].tolist()}, {'label': 'centered feature 0', 'y': centered[:, 0].tolist()}, {'label': 'original feature 1', 'y': x[:, 1].tolist()}, {'label': 'centered feature 1', 'y': centered[:, 1].tolist()}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:45:10.892111+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:19:58.088865+00:00. JAX 0.9.2.
 
 ```text
 Mean: [ 3. 14.]
@@ -172,7 +173,7 @@ PASS: arrays-01
 **Predict before running:** Predict the feature standard deviations and centered rows before comparing with NumPy.
 
 ```python
-# Experiment — Check the normalization arithmetic: Matching dtype and statistic definition makes this a useful...
+# Experiment — Check the normalization arithmetic
 import numpy as np
 reference_data = np.array([[1., 10.], [3., 14.], [5., 18.]], dtype=np.float32)
 # Reduce along axis=0 to compute `reference_mean`.
@@ -199,7 +200,6 @@ def fit_standardizer(training_data):
     fitted_mean = training_data.mean(axis=0)
     # Reduce along axis=0 to compute `fitted_std`.
     fitted_std = training_data.std(axis=0)
-    # Combine or mask array elements to form `fitted_scale`.
     fitted_scale = jnp.where(fitted_std == 0., 1., fitted_std)
     return fitted_mean, fitted_scale
 def apply_standardizer(data, statistics):
@@ -227,12 +227,13 @@ Foundation · Standardize the original data using its standard deviation plus ep
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Reduce along axis=0 to compute `standardized`.
+1. Exercise solution
+2. Reduce along axis=0 to compute `standardized`.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Foundation · Standardize the original data using its standard...
+# Exercise solution
 # Reduce along axis=0 to compute `standardized`.
 standardized = ...  # TODO: compute standardized
 assert jnp.allclose(standardized.mean(axis=0), 0., atol=1e-6)  # TODO: complete assertion check
@@ -242,7 +243,7 @@ assert jnp.allclose(standardized.std(axis=0), 1., atol=1e-5)  # TODO: complete a
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Foundation · Standardize the original data using its standard...
+# Exercise solution
 # Reduce along axis=0 to compute `standardized`.
 standardized = centered / (x.std(axis=0) + 1e-6)
 assert jnp.allclose(standardized.mean(axis=0), 0., atol=1e-6)
@@ -271,16 +272,15 @@ Fit uses scale $1$ for a constant training feature. Applying statistics does not
 - `jnp.isfinite(x)` — Returns a boolean mask verifying that no element is `NaN` or `Inf`.
 
 **Step-by-step implementation plan:**
-1. Confirm that all computed values remain finite (no NaN or Inf).
+1. Test the constant-feature policy (Practice)
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Test the constant-feature policy (Practice): The training feature is constant but the new value differs...
+# Test the constant-feature policy (Practice)
 constant_data = jnp.array(...)  # TODO: compute constant_data
 constant_statistics = fit_standardizer(...)  # TODO: compute constant_statistics
 constant_transformed = apply_standardizer(...)  # TODO: compute constant_transformed
-# Confirm that all computed values remain finite (no NaN or Inf).
 assert jnp.all(jnp.isfinite(constant_transformed))  # TODO: complete assertion check
 assert jnp.allclose(constant_transformed[:, 1], 0.)  # TODO: complete assertion check
 assert jnp.allclose(apply_standardizer(jnp.array([[7., 6.]]), constant_statistics)[0, 1], 1.)  # TODO: complete assertion check
@@ -289,11 +289,10 @@ assert jnp.allclose(apply_standardizer(jnp.array([[7., 6.]]), constant_statistic
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Test the constant-feature policy (Practice): The training feature is constant but the new value differs...
+# Test the constant-feature policy (Practice)
 constant_data = jnp.array([[1., 5.], [3., 5.], [5., 5.]])
 constant_statistics = fit_standardizer(constant_data)
 constant_transformed = apply_standardizer(constant_data, constant_statistics)
-# Confirm that all computed values remain finite (no NaN or Inf).
 assert jnp.all(jnp.isfinite(constant_transformed))
 assert jnp.allclose(constant_transformed[:, 1], 0.)
 assert jnp.allclose(apply_standardizer(jnp.array([[7., 6.]]), constant_statistics)[0, 1], 1.)
@@ -322,15 +321,14 @@ The application function should depend on each row and fixed statistics, not on 
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Combine or mask array elements to form `separately`.
+1. Detect accidental batch-dependent preprocessing (Challenge)
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Detect accidental batch-dependent preprocessing (Challenge): This consistency test expresses an inference boundary: a...
+# Detect accidental batch-dependent preprocessing (Challenge)
 new_rows = jnp.array(...)  # TODO: compute new_rows
 together = apply_standardizer(...)  # TODO: compute together
-# Combine or mask array elements to form `separately`.
 separately = jnp.concatenate(...)  # TODO: compute separately
 assert jnp.allclose(together, separately)  # TODO: complete assertion check
 refitted = apply_standardizer(...)  # TODO: compute refitted
@@ -340,10 +338,9 @@ assert not jnp.allclose(together, refitted)  # TODO: complete assertion check
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Detect accidental batch-dependent preprocessing (Challenge): This consistency test expresses an inference boundary: a...
+# Detect accidental batch-dependent preprocessing (Challenge)
 new_rows = jnp.array([[7., 22.], [9., 26.]])
 together = apply_standardizer(new_rows, statistics)
-# Combine or mask array elements to form `separately`.
 separately = jnp.concatenate([apply_standardizer(new_rows[i:i+1], statistics) for i in range(2)])
 assert jnp.allclose(together, separately)
 refitted = apply_standardizer(new_rows, fit_standardizer(new_rows))

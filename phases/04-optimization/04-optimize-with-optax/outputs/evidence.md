@@ -7,7 +7,7 @@ Copy this template into your own portfolio and fill it after running your modifi
 Save the analytic first update, manual/Optax equivalence, retained/reset momentum comparison, continuation replay and double-subtraction repair. Include the zero-gradient momentum step and explain why retained state still moves the parameter.
 
 - Command: `python3 phases/04-optimization/04-optimize-with-optax/code/main.py`
-- Working directory: repository root
+- Working directory: Repository root
 - Python / JAX / NumPy versions: 
 - Hardware and device: 
 - My prediction before running: 

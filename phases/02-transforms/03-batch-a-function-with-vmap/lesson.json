@@ -4,10 +4,10 @@
   "minutes": 60,
   "content": {
     "idea": "Vectorization lets us describe one example clearly and then apply that rule across an axis. The crucial decision is which arguments vary by example and which are shared. `vmap` expresses that decision; it does not require us to write a Python loop or assign hardware threads.",
-    "code": "# Batch a function with vmap: Vectorization lets us describe one example clearly and then...\nimport jax\nimport jax.numpy as jnp\ndef predict(weight, x):\n    return jnp.dot(weight, x)\nweight = jnp.array([2., -1.])\nbatch = jnp.array([[1., 1.], [2., 3.], [4., 0.]])\n# Vectorize across the batch dimension with `jax.vmap` (`batched`).\nbatched = jax.vmap(predict, in_axes=(None, 0))\nprint(batched(weight, batch))\nassert jnp.allclose(batched(weight, batch), jnp.array([1.,1.,8.]))",
+    "code": "# Batch a function with vmap\nimport jax\nimport jax.numpy as jnp\ndef predict(weight, x):\n    return jnp.dot(weight, x)\nweight = jnp.array([2., -1.])\nbatch = jnp.array([[1., 1.], [2., 3.], [4., 0.]])\n# Vectorize across the batch dimension with `jax.vmap` (`batched`).\nbatched = jax.vmap(predict, in_axes=(None, 0))\nprint(batched(weight, batch))\nassert jnp.allclose(batched(weight, batch), jnp.array([1.,1.,8.]))",
     "output": "[\\(1\\). \\(1\\). \\(8\\).]",
     "exercise": "Foundation · Compute each prediction gradient with respect to the shared weight. Predict the shape and the derivative of the dot product, then verify against the input batch.",
-    "solution": "# Exercise solution: Foundation · Compute each prediction gradient with respect to the...\n# Differentiate the objective to obtain `per_example_gradient` via automatic differentiation.\nper_example_gradient = jax.vmap(jax.grad(predict), in_axes=(None, 0))(weight, batch)\n# Check tensor shape invariant: `per_example_gradient.shape == (3, 2)`\nassert per_example_gradient.shape == (3, 2)\nassert jnp.allclose(per_example_gradient, batch)",
+    "solution": "# Exercise solution\nper_example_gradient = jax.vmap(jax.grad(predict), in_axes=(None, 0))(weight, batch)\n# Check tensor shape invariant: `per_example_gradient.shape == (3, 2)`\nassert per_example_gradient.shape == (3, 2)\nassert jnp.allclose(per_example_gradient, batch)",
     "question": "For \\(B\\) examples and \\(D\\) shared parameters, what shapes do per-example loss gradients and the mean-loss gradient have?",
     "options": [
       "Both have shape \\((B, D)\\).",
@@ -64,7 +64,7 @@
       {
         "title": "Verify against a loop and a matrix product",
         "prediction": "Predict the values and output shape. Which reference will catch an incorrectly mapped parameter axis?",
-        "code": "# Experiment — Verify against a loop and a matrix product: The loop makes example selection explicit; the matrix product...\nloop_predictions = jnp.stack([predict(weight, row) for row in batch])\nvector_predictions = batched(weight, batch)\n# Perform matrix / vector contraction (`@`) to compute `matrix_predictions`.\nmatrix_predictions = batch @ weight\n# Check tensor shape invariant: `vector_predictions.shape == (3,)`\nassert vector_predictions.shape == (3,)\nassert jnp.allclose(vector_predictions, loop_predictions)\nassert jnp.allclose(vector_predictions, matrix_predictions)\nprint(\"loop / vmap / matmul:\", loop_predictions, vector_predictions, matrix_predictions)",
+        "code": "# Experiment — Verify against a loop and a matrix product\nloop_predictions = jnp.stack([predict(weight, row) for row in batch])\nvector_predictions = batched(weight, batch)\nmatrix_predictions = batch @ weight\n# Check tensor shape invariant: `vector_predictions.shape == (3,)`\nassert vector_predictions.shape == (3,)\nassert jnp.allclose(vector_predictions, loop_predictions)\nassert jnp.allclose(vector_predictions, matrix_predictions)\nprint(\"loop / vmap / matmul:\", loop_predictions, vector_predictions, matrix_predictions)",
         "output": "All three formulations produce \\([1, 1, 8]\\).",
         "explanation": "The loop makes example selection explicit; the matrix product checks an independent formulation. Keep both as bounded checks of this linear case."
       },
@@ -82,7 +82,7 @@
         "difficulty": "Practice",
         "prompt": "Use targets \\([0, 2, 7]\\). Define a scalar squared-error function for one example. Compute all per-example parameter gradients and derive the first row independently.",
         "hint": "The per-example squared-loss gradient is \\(2(\\hat y-y)x\\): twice the residual times the input. A prediction gradient by itself is not a loss gradient.",
-        "solution": "# Turn sensitivities into training gradients (Practice): The first residual is 1, so the first loss gradient is [2, 2].\ntargets = jnp.array([0., 2., 7.])\ndef single_loss(parameters, row, target):\n    return (predict(parameters, row) - target) ** 2\n# Differentiate the objective to obtain `individual_grads` via automatic differentiation.\nindividual_grads = jax.vmap(jax.grad(single_loss), in_axes=(None, 0, 0))(weight, batch, targets)\nmanual_grads = 2. * (batch @ weight - targets)[:, None] * batch\n# Check tensor shape invariant: `individual_grads.shape == (3, 2)`\nassert individual_grads.shape == (3, 2)\nassert jnp.allclose(individual_grads, manual_grads)\nassert jnp.allclose(individual_grads[0], jnp.array([2., 2.]))",
+        "solution": "# Turn sensitivities into training gradients (Practice): The first residual is 1, so the first loss gradient is [2, 2].\ntargets = jnp.array([0., 2., 7.])\ndef single_loss(parameters, row, target):\n    return (predict(parameters, row) - target) ** 2\nindividual_grads = jax.vmap(jax.grad(single_loss), in_axes=(None, 0, 0))(weight, batch, targets)\nmanual_grads = 2. * (batch @ weight - targets)[:, None] * batch\n# Check tensor shape invariant: `individual_grads.shape == (3, 2)`\nassert individual_grads.shape == (3, 2)\nassert jnp.allclose(individual_grads, manual_grads)\nassert jnp.allclose(individual_grads[0], jnp.array([2., 2.]))",
         "explanation": "The first residual is \\(1\\), so the first loss gradient is \\([2, 2]\\). The batch axis records three separate contributions."
       },
       {
@@ -90,7 +90,7 @@
         "difficulty": "Challenge",
         "prompt": "Define the mean loss from the mapped single loss. Compare its parameter gradient with the mean of individual_grads. Repeat after changing targets and explain why a sum changes the relationship.",
         "hint": "Differentiation is linear over these independent sums. Ensure your function actually averages over the example axis.",
-        "solution": "# Prove the mean-gradient identity with an experiment (Challenge): The aggregate has parameter shape, while per-example...\ndef batch_mean_loss(parameters, rows, labels):\n    return jnp.mean(jax.vmap(single_loss, in_axes=(None, 0, 0))(parameters, rows, labels))\nfor labels in (targets, targets + 0.5):\n    # Differentiate the objective to obtain `each` via automatic differentiation.\n    each = jax.vmap(jax.grad(single_loss), in_axes=(None, 0, 0))(weight, batch, labels)\n    # Differentiate the objective to obtain `aggregate` via automatic differentiation.\n    aggregate = jax.grad(batch_mean_loss)(weight, batch, labels)\n    # Check tensor shape invariant: `aggregate.shape == weight.shape`\n    assert aggregate.shape == weight.shape\n    assert jnp.allclose(aggregate, jnp.mean(each, axis=0))",
+        "solution": "# Prove the mean-gradient identity with an experiment (Challenge)\ndef batch_mean_loss(parameters, rows, labels):\n    return jnp.mean(jax.vmap(single_loss, in_axes=(None, 0, 0))(parameters, rows, labels))\nfor labels in (targets, targets + 0.5):\n    each = jax.vmap(jax.grad(single_loss), in_axes=(None, 0, 0))(weight, batch, labels)\n    aggregate = jax.grad(batch_mean_loss)(weight, batch, labels)\n    # Check tensor shape invariant: `aggregate.shape == weight.shape`\n    assert aggregate.shape == weight.shape\n    assert jnp.allclose(aggregate, jnp.mean(each, axis=0))",
         "explanation": "The aggregate has parameter shape, while per-example gradients add an examples axis. This identity relies on the stated independent-example loss and mean reduction, not on every model that has a batch dimension."
       }
     ],
@@ -118,7 +118,7 @@
       "reading": "Each bar belongs to one input row, and its height is that row’s scalar prediction. Reading left to right gives \\(1\\), \\(1\\), and \\(8\\). The horizontal positions are row labels, not successive training steps.\n\nThe same weights \\((2,-1)\\) are used for every row. The first input \\((1,1)\\) gives \\(2-1=1\\); the second \\((2,3)\\) gives \\(4-3=1\\); the third \\((4,0)\\) gives \\(8-0=8\\).",
       "connection": "`vmap` applies the single-example dot product across the batch and keeps one answer per row. Equal heights for the first two bars do not mean those inputs were equal; different inputs can have the same dot product.\n\nThere are three outputs because there are three observations. Summing across the whole batch would instead collapse these answers into one scalar. The figure verifies what vectorization computes; the bar heights say nothing about how long it takes.",
       "alt": "Vectorization keeps one result per row. Each bar belongs to one input row, and its height is that row’s scalar prediction. Reading left to right gives \\(1\\), \\(1\\), and \\(8\\). The horizontal positions are row labels, not successive training steps. The same weights \\((2,-1)\\) are used for every row. The first input \\((1,1)\\) gives \\(2-1=1\\); the second \\((2,3)\\) gives \\(4-3=1\\); the third \\((4,0)\\) gives \\(8-0=8\\).",
-      "code": "# Compute figure data for: Vectorization keeps one result per row\nvisual_data = {'kind': 'bar', 'labels': ['row 0', 'row 1', 'row 2'], 'ylabel': 'prediction', 'series': [{'label': 'vmap output', 'y': batched(weight, batch).tolist()}]}"
+      "code": "visual_data = {'kind': 'bar', 'labels': ['row 0', 'row 1', 'row 2'], 'ylabel': 'prediction', 'series': [{'label': 'vmap output', 'y': batched(weight, batch).tolist()}]}"
     },
     "diagram": {
       "title": "Mapped rows and shared weights",
@@ -160,22 +160,22 @@
     },
     "buildSteps": [
       {
-        "title": "Step 1: Set up imports and input tensors",
-        "instruction": "Import the required JAX modules and define the initial inputs for batch a function with vmap.",
+        "title": "Import JAX array and transformation APIs",
+        "instruction": "Import jax for vmap and jax.numpy for vectors and batches.",
         "code": "import jax\nimport jax.numpy as jnp",
-        "explanation": "Establishing explicit input shapes and dtypes first makes the downstream transformation contract deterministic."
+        "explanation": "The predictor will handle one feature vector; vmap will supply the batch axis."
       },
       {
-        "title": "Step 2: Apply the core JAX transformation",
-        "instruction": "Write the core computation and transformation step over the initialized inputs.",
+        "title": "Write a single-example dot-product predictor",
+        "instruction": "Define a function that contracts a length-two weight with one length-two input.",
         "code": "def predict(weight, x):\n    return jnp.dot(weight, x)\nweight = jnp.array([2., -1.])",
-        "explanation": "This stage executes the primary numerical transformation and binds the intermediate outputs."
+        "explanation": "For one example, the two products are summed to produce one scalar prediction."
       },
       {
-        "title": "Step 3: Verify shapes and numerical invariants",
-        "instruction": "Check that the resulting arrays satisfy the expected shape, dtype, and numerical tolerances.",
+        "title": "Map the predictor over three input rows",
+        "instruction": "Create a batch of three feature vectors, map over input axis 0 while sharing weights, and check the predictions.",
         "code": "batch = jnp.array([[1., 1.], [2., 3.], [4., 0.]])\n# Vectorize across the batch dimension with `jax.vmap` (`batched`).\nbatched = jax.vmap(predict, in_axes=(None, 0))\nassert jnp.allclose(batched(weight, batch), jnp.array([1.,1.,8.]))",
-        "explanation": "These assertions lock in the exact numerical contract before you run the full experiment and variations."
+        "explanation": "The expected outputs [1, 1, 8] are hand-computed row by row. The leading output axis corresponds to the three input examples."
       }
     ]
   }

@@ -2,6 +2,8 @@
 
 Phase 02: JAX transformations · about 55 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Explain tracing, compilation, dispatch, and synchronization as separate work.
@@ -80,9 +82,9 @@ A long compilation can be worthwhile if a computation runs many times. A one-off
 
 This lesson does not measure TPU execution, multi-device scaling, or a model training speedup. Its artifact is a reproducible correctness/timing report that records the backend, shapes, dtype, synchronization policy, warmup, repeat count, and observed durations.
 
-## Step 1: Set up imports and input tensors
+## Define mean squared error and a four-example input matrix
 
-Import the required JAX modules and define the initial inputs for compile a function with jit.
+Import timing and JAX tools, define the loss, and create a (4, 3) feature matrix.
 
 ```python
 import time
@@ -90,15 +92,14 @@ import jax
 import jax.numpy as jnp
 def loss(w, x, y):
     return jnp.mean((x @ w - y) ** 2)
-# Construct and reshape `x` into the target tensor dimensions.
 x = jnp.arange(12, dtype=jnp.float32).reshape(4, 3) / 10.
 ```
 
-Establishing explicit input shapes and dtypes first makes the downstream transformation contract deterministic.
+Each row is one example, so x @ w produces four predictions and the mean reduces their squared errors to one scalar.
 
-## Step 2: Apply the core JAX transformation
+## Compile the loss and run its first synchronized call
 
-Write the core computation and transformation step over the initialized inputs.
+Add the weight and targets, wrap loss with jax.jit, then wait for the first result to finish.
 
 ```python
 w = jnp.array([1., 2., -1.])
@@ -106,49 +107,48 @@ y = jnp.ones(4)
 # Wrap with `jax.jit` (`compiled`) so XLA traces and compiles the function.
 compiled = jax.jit(loss)
 t0 = time.perf_counter()
-# Synchronize host execution until asynchronous device computation completes.
+# Wait for device work to finish before timing it or comparing its result on the host.
 first = compiled(w, x, y).block_until_ready()
 ```
 
-This stage executes the primary numerical transformation and binds the intermediate outputs.
+The first call includes tracing and compilation as well as execution. block_until_ready prevents asynchronous dispatch from making the measured interval end too early.
 
-## Step 3: Verify shapes and numerical invariants
+## Measure a repeat call and compare numerical results
 
-Check that the resulting arrays satisfy the expected shape, dtype, and numerical tolerances.
+Record the first-call duration, run the same compiled function again, and compare both outputs with the eager loss.
 
 ```python
 first_seconds = time.perf_counter() - t0
 t0 = time.perf_counter()
-# Synchronize host execution until asynchronous device computation completes.
+# Wait for device work to finish before timing it or comparing its result on the host.
 second = compiled(w, x, y).block_until_ready()
 repeat_seconds = time.perf_counter() - t0
 assert jnp.allclose(first, loss(w, x, y))
 assert jnp.allclose(second, first)
 ```
 
-These assertions lock in the exact numerical contract before you run the full experiment and variations.
+The repeated call can reuse the compiled executable for matching shapes and dtypes. These timings are observations for this run, not a portable speed claim.
 
 ## Run the example
 
 ```python
-# Compile a function with jit: Compilation prepares a program that can be reused for compatible...
+# Compile a function with jit
 import time
 import jax
 import jax.numpy as jnp
 def loss(w, x, y):
     return jnp.mean((x @ w - y) ** 2)
-# Construct and reshape `x` into the target tensor dimensions.
 x = jnp.arange(12, dtype=jnp.float32).reshape(4, 3) / 10.
 w = jnp.array([1., 2., -1.])
 y = jnp.ones(4)
 # Wrap with `jax.jit` (`compiled`) so XLA traces and compiles the function.
 compiled = jax.jit(loss)
 t0 = time.perf_counter()
-# Synchronize host execution until asynchronous device computation completes.
+# Wait for device work to finish before timing it or comparing its result on the host.
 first = compiled(w, x, y).block_until_ready()
 first_seconds = time.perf_counter() - t0
 t0 = time.perf_counter()
-# Synchronize host execution until asynchronous device computation completes.
+# Wait for device work to finish before timing it or comparing its result on the host.
 second = compiled(w, x, y).block_until_ready()
 repeat_seconds = time.perf_counter() - t0
 print("Loss:", float(second))
@@ -180,21 +180,20 @@ Compilation changes how the computation runs while preserving its intended resul
 To measure speed, you need a time axis, synchronization, warm-up, and repeated measurements. None of those can be inferred from these loss bars. A useful next check is to change the input values and confirm that eager and compiled results still agree.
 
 ```python
-# Compute figure data for: Compilation preserves the result
 visual_data = {'kind': 'bar', 'labels': ['eager', 'first compiled', 'repeat compiled'], 'ylabel': 'mean squared loss', 'series': [{'label': 'evaluated loss', 'y': [float(loss(w, x, y)), float(first), float(second)]}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:45:23.194590+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:20:10.581450+00:00. JAX 0.9.2.
 
 ```text
 Loss: 0.46000000834465027
-First/repeat seconds: 0.013900000136345625 1.920759677886963e-05
-eager median / min / max seconds: 2.6375288143754005e-05 2.3334287106990814e-05 7.895799353718758e-05
-compiled median / min / max seconds: 4.312489181756973e-06 3.874767571687698e-06 5.416106432676315e-06
+First/repeat seconds: 0.014060375280678272 1.7832964658737183e-05
+eager median / min / max seconds: 2.3916596546769142e-05 2.150004729628563e-05 3.854092210531235e-05
+compiled median / min / max seconds: 3.5830307751893997e-06 3.375113010406494e-06 5.084089934825897e-06
 backend / shapes / dtype: cpu (4, 3) (3,) (4,) float32
-compiled value-and-grad median seconds: 6.770249456167221e-06
+compiled value-and-grad median seconds: 7.062684744596481e-06
 PASS: transforms-04
 
 ```
@@ -204,13 +203,11 @@ PASS: transforms-04
 **Predict before running:** Predict the loss $0.46$ and derive $\frac{2}{N}X^\mathsf{T}(Xw-y)$. Does the compiled result match both independent quantities?
 
 ```python
-# Experiment — Derive predictions and gradients outside the transform: The analytic value check detects mistakes that...
+# Experiment — Derive predictions and gradients outside the transform
 expected_predictions = jnp.array([0., 0.6, 1.2, 1.8])
 assert jnp.allclose(x @ w, expected_predictions, atol=1e-6)
 assert jnp.allclose(compiled(w, x, y), 0.46, atol=1e-6)
-# Perform matrix / vector contraction (`@`) to compute `manual_gradient`.
 manual_gradient = (2. / len(y)) * x.T @ (x @ w - y)
-# Differentiate the objective to obtain `compiled_value_gradient` via automatic differentiation.
 compiled_value_gradient = jax.jit(jax.value_and_grad(loss))
 checked_value, checked_gradient = compiled_value_gradient(w, x, y)
 assert jnp.allclose(checked_gradient, manual_gradient, rtol=1e-5, atol=1e-6)
@@ -225,15 +222,15 @@ The analytic value check detects mistakes that eager-versus-compiled equality al
 **Predict before running:** Which costs are included in these measurements? Predict whether the tiny compiled loss must be faster, then report what you actually observe.
 
 ```python
-# Experiment — Collect a synchronized latency sample: The report includes Python invocation and completed numerical...
+# Experiment — Collect a synchronized latency sample
 import statistics
 def completed_samples(function, repeats=20):
-    # Synchronize host execution until asynchronous device computation completes.
+    # Wait for device work to finish before timing it or comparing its result on the host.
     function(w, x, y).block_until_ready()
     durations = []
     for _ in range(repeats):
         start = time.perf_counter()
-        # Synchronize host execution until asynchronous device computation completes.
+        # Wait for device work to finish before timing it or comparing its result on the host.
         function(w, x, y).block_until_ready()
         durations.append(time.perf_counter() - start)
     return durations
@@ -256,20 +253,17 @@ Foundation · Compile `value_and_grad(loss)`, check the loss and gradient agains
 **Key functions & syntax to use:**
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 - `jax.value_and_grad(loss_fn)(params, ...)` — Evaluates both the scalar loss and its gradient PyTree `(loss_val, grads)` in a single forward+backward pass.
-- `jax.jit(fn) / @jax.jit` — Traces `fn` with abstract shapes and compiles a fused XLA executable cached by input shape and dtype.
+- `jax.jit(fn) / @jax.jit` — Traces `fn` for its input signatures and compiles an executable. Changed shapes, dtypes or static arguments can trigger another compilation.
 
 **Step-by-step implementation plan:**
-1. Differentiate the objective to obtain `compiled_step` via automatic differentiation.
-2. Differentiate the objective to obtain `(expected_v, expected_g)` via automatic differentiation.
+1. Exercise solution
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Foundation · Compile value_and_grad(loss), check the loss and gradient...
-# Differentiate the objective to obtain `compiled_step` via automatic differentiation.
+# Exercise solution
 compiled_step = jax.jit(...)  # TODO: compute compiled_step
 v, g = compiled_step(...)  # TODO: compute v, g
-# Differentiate the objective to obtain `(expected_v, expected_g)` via automatic differentiation.
 expected_v, expected_g = jax.value_and_grad(...)  # TODO: compute expected_v, expected_g
 assert jnp.allclose(v, expected_v)  # TODO: complete assertion check
 assert jnp.allclose(g, expected_g)  # TODO: complete assertion check
@@ -278,11 +272,9 @@ assert jnp.allclose(g, expected_g)  # TODO: complete assertion check
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Foundation · Compile value_and_grad(loss), check the loss and gradient...
-# Differentiate the objective to obtain `compiled_step` via automatic differentiation.
+# Exercise solution
 compiled_step = jax.jit(jax.value_and_grad(loss))
 v, g = compiled_step(w, x, y)
-# Differentiate the objective to obtain `(expected_v, expected_g)` via automatic differentiation.
 expected_v, expected_g = jax.value_and_grad(loss)(w, x, y)
 assert jnp.allclose(v, expected_v)
 assert jnp.allclose(g, expected_g)
@@ -309,14 +301,14 @@ Compilation specializes to relevant properties, not each ordinary array element 
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Aggregate array values to compute `expected`.
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Check that a new value remains runtime data (Practice): The same computation accepts different runtime values.
 for new_w in (w, w + 0.25):
-    # Aggregate array values to compute `expected`.
     expected = jnp.mean(...)  # TODO: compute expected
     observed = compiled(...)  # TODO: compute observed
     assert jnp.allclose(observed, expected, rtol=1e-5, atol=1e-6)  # TODO: complete assertion check
@@ -327,7 +319,6 @@ for new_w in (w, w + 0.25):
 ```python
 # Check that a new value remains runtime data (Practice): The same computation accepts different runtime values.
 for new_w in (w, w + 0.25):
-    # Aggregate array values to compute `expected`.
     expected = jnp.mean((x @ new_w - y) ** 2)
     observed = compiled(new_w, x, y)
     assert jnp.allclose(observed, expected, rtol=1e-5, atol=1e-6)
@@ -356,13 +347,12 @@ Use `jax.tree.map` to block on every returned array, then stop the timer.
 - `jax.block_until_ready(output)` — Synchronizes with the accelerator/CPU device so asynchronous dispatch finishes before wall-clock timing.
 
 **Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+1. Build a report whose timing claim can be checked (Challenge)
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Build a report whose timing claim can be checked (Challenge): The measurement excludes input construction and first...
+# Build a report whose timing claim can be checked (Challenge)
 def wait_for_outputs(outputs):
     return ...  # TODO: return computed result
 wait_for_outputs(compiled_value_gradient(w, x, y))
@@ -378,7 +368,7 @@ assert len(gradient_times)  # TODO: complete assertion check
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Build a report whose timing claim can be checked (Challenge): The measurement excludes input construction and first...
+# Build a report whose timing claim can be checked (Challenge)
 def wait_for_outputs(outputs):
     return jax.tree.map(lambda array: array.block_until_ready(), outputs)
 wait_for_outputs(compiled_value_gradient(w, x, y))

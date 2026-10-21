@@ -1,4 +1,6 @@
-import { $ } from '../../lib/dom.js';
+// @ts-check
+
+import { $, requireElement } from '../../lib/dom.js';
 import {
   normalizeLearnerBackup,
   mergeLearnerBackup,
@@ -6,8 +8,9 @@ import {
 } from '../../lib/learner-records.js';
 import { downloadText as download, setStatus as status } from '../browser-actions.js';
 
+/** @param {import('../../types/learner-records').NotebookBackupParams} options */
 export function setupBackup({ context, getBackup, applyBackup }) {
-  $('#export').onclick = () => {
+  requireElement('#export').onclick = () => {
     try {
       const outgoing = normalizeLearnerBackup(getBackup(), context);
       download(
@@ -26,9 +29,11 @@ export function setupBackup({ context, getBackup, applyBackup }) {
       );
     }
   };
-  $('#import-button').onclick = () => $('#import').click();
-  $('#import').onchange = async (e) => {
-    const file = e.target.files[0];
+  const importButton = requireElement('#import-button');
+  const importInput = /** @type {HTMLInputElement} */ (requireElement('#import'));
+  importButton.onclick = () => importInput.click();
+  importInput.onchange = async () => {
+    const file = importInput.files?.[0];
     if (!file) return;
     const preview = $('#restore-preview');
     if (preview) {
@@ -83,7 +88,7 @@ export function setupBackup({ context, getBackup, applyBackup }) {
       cancel.onclick = () => {
         preview.hidden = true;
         preview.replaceChildren();
-        $('#import-button').focus();
+        importButton.focus();
       };
       preview.append(heading, description, restore, cancel);
       heading.focus();
@@ -94,7 +99,7 @@ export function setupBackup({ context, getBackup, applyBackup }) {
         'This file is not a supported JAX Pathways backup, or could not be read. Your current workspace was not changed. Choose the original JSON backup and try again.',
       );
     } finally {
-      e.target.value = '';
+      importInput.value = '';
     }
   };
 }

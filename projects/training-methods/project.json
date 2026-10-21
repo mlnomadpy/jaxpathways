@@ -128,5 +128,13 @@
     }
   ],
   "referenceCommand": "python3 projects/training-methods/tests/check.py --implementation solution --stage all",
-  "setupNote": "Run from the course workspace root after installing requirements-cpu.txt in your Python environment. CPU fixtures require no external datasets, credentials or cloud services. Checks are cumulative public practice, not independent learner review. Copy the starter scaffold `projects/training-methods/starter/methods.py` to `projects/training-methods/my_methods.py`, implement the stage functions in `projects/training-methods/my_methods.py`, and verify each stage with `python3 projects/training-methods/tests/check.py --implementation projects/training-methods/my_methods.py --stage 1` (through `--stage 8`)."
+  "setupNote": "Run from the course workspace root after installing requirements-cpu.txt in your Python environment. CPU fixtures require no external datasets, credentials or cloud services. Checks are cumulative public practice, not independent learner review. Copy the starter scaffold `projects/training-methods/starter/methods.py` to `projects/training-methods/my_methods.py`, implement the stage functions in `projects/training-methods/my_methods.py`, and verify each stage with `python3 projects/training-methods/tests/check.py --implementation projects/training-methods/my_methods.py --stage 1` (through `--stage 8`).",
+  "environment": {
+    "requirementsPath": "requirements-beginner.txt",
+    "pythonCompatibility": ">=3.11,<3.15",
+    "setupCommands": {
+      "unix": "python3 -m venv .venv\nsource .venv/bin/activate\npython -m pip install -r requirements-beginner.txt",
+      "windows": "py -3 -m venv .venv\n.\\.venv\\Scripts\\python.exe -m pip install -r requirements-beginner.txt"
+    }
+  }
 }

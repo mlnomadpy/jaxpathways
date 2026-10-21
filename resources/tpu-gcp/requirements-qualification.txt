@@ -1,0 +1,6 @@
+# Minimal Linux TPU stack for the launcher, precision, Pallas and collective targets.
+# Qualified with Python 3.12.13; full Flax/Orbax lesson environments are separate.
+jax[tpu]==0.9.2
+libtpu==0.0.37
+numpy==2.4.4
+absl-py==2.4.0

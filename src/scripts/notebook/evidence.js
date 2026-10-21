@@ -1,5 +1,7 @@
+// @ts-check
+
 import { setSelectValue } from '../browser-actions.js';
-import { $ } from '../../lib/dom.js';
+import { $, requireElement } from '../../lib/dom.js';
 import { courseState } from '../../lib/course-state.js';
 import { evidenceReviewPacket } from '../../lib/evidence.js';
 import { lessonLink } from '../../lib/urls.js';
@@ -9,21 +11,57 @@ import {
   populateSelect as populate,
 } from '../browser-actions.js';
 
+/** @param {import('../../types/learner-records').NotebookEvidenceParams} options */
 export function setupEvidence({ routes, projects, allLessons, context, getState, save, backup }) {
-  let editingId = null,
-    removed = null;
-  const stageSelect = $('#evidence-stage');
+  /** @type {string | null} */
+  let editingId = null;
+  /** @type {{ entry: import('../../types/learner-records').EvidenceEntry; index: number } | null} */
+  let removed = null;
+  /** @param {string} selector @returns {HTMLSelectElement} */
+  const select = (selector) => {
+    const element = requireElement(selector);
+    if (element.tagName !== 'SELECT') throw new Error(`Expected a select: ${selector}`);
+    return /** @type {HTMLSelectElement} */ (element);
+  };
+  /** @param {string} selector @returns {HTMLInputElement} */
+  const input = (selector) => {
+    const element = requireElement(selector);
+    if (element.tagName !== 'INPUT') throw new Error(`Expected an input: ${selector}`);
+    return /** @type {HTMLInputElement} */ (element);
+  };
+  /** @param {string} selector @returns {HTMLTextAreaElement} */
+  const textarea = (selector) => {
+    const element = requireElement(selector);
+    if (element.tagName !== 'TEXTAREA') throw new Error(`Expected a textarea: ${selector}`);
+    return /** @type {HTMLTextAreaElement} */ (element);
+  };
+  /** @param {string} selector @returns {HTMLButtonElement} */
+  const button = (selector) => {
+    const element = requireElement(selector);
+    if (element.tagName !== 'BUTTON') throw new Error(`Expected a button: ${selector}`);
+    return /** @type {HTMLButtonElement} */ (element);
+  };
+  /** @param {string} selector @returns {HTMLFormElement} */
+  const form = (selector) => {
+    const element = requireElement(selector);
+    if (element.tagName !== 'FORM') throw new Error(`Expected a form: ${selector}`);
+    return /** @type {HTMLFormElement} */ (element);
+  };
+  const stageElement = $('#evidence-stage');
+  const stageSelect =
+    stageElement?.tagName === 'SELECT' ? /** @type {HTMLSelectElement} */ (stageElement) : null;
+  const contextFields = [
+    '#evidence-route',
+    '#evidence-lesson',
+    '#evidence-project',
+    ...(stageSelect ? ['#evidence-stage'] : []),
+  ];
   function updateWorkContext() {
     const target = $('#work-context');
     if (target)
-      target.textContent = [
-        '#evidence-route',
-        '#evidence-lesson',
-        '#evidence-project',
-        '#evidence-stage',
-      ]
+      target.textContent = contextFields
         .map((selector) => {
-          const select = $(selector);
+          const select = /** @type {HTMLSelectElement} */ ($(selector));
           return select.value
             ? [...select.options].find((option) => option.value === select.value)?.textContent
             : '';
@@ -31,28 +69,24 @@ export function setupEvidence({ routes, projects, allLessons, context, getState,
         .filter(Boolean)
         .join(' / ');
   }
-  for (const selector of [
-    '#evidence-route',
-    '#evidence-lesson',
-    '#evidence-project',
-    '#evidence-stage',
-  ]) {
-    $(selector).addEventListener('change', updateWorkContext);
+  for (const selector of contextFields) {
+    select(selector).addEventListener('change', updateWorkContext);
   }
 
   function updateContexts() {
-    const route = routes.find((r) => r.id === $('#evidence-route').value);
+    const route = routes.find((r) => r.id === select('#evidence-route').value);
+    if (!route) return;
     populate(
-      $('#evidence-lesson'),
+      select('#evidence-lesson'),
       route.lessons.filter((l) => l.status === 'authored'),
       'No lesson association',
     );
-    populate($('#evidence-project'), projects, 'No project association');
+    populate(select('#evidence-project'), projects, 'No project association');
     populate(stageSelect, [], 'Whole project / no stage');
     updateWorkContext();
   }
   function updateStages() {
-    const project = projects.find((p) => p.id === $('#evidence-project').value);
+    const project = projects.find((p) => p.id === select('#evidence-project').value);
     populate(
       stageSelect,
       (project?.stages || []).map((s) => ({ id: s.id, title: s.title })),
@@ -60,27 +94,28 @@ export function setupEvidence({ routes, projects, allLessons, context, getState,
     );
     updateWorkContext();
   }
-  setSelectValue($('#evidence-route'), getState().route);
+  setSelectValue(select('#evidence-route'), getState().route);
   updateContexts();
-  $('#evidence-route').onchange = updateContexts;
-  $('#evidence-project').onchange = updateStages;
-  $('#evidence-lesson').onchange = () => {
-    if (!$('#evidence-title').value)
-      $('#evidence-title').value =
-        allLessons.find((l) => l.id === $('#evidence-lesson').value)?.title || '';
+  select('#evidence-route').onchange = updateContexts;
+  select('#evidence-project').onchange = updateStages;
+  select('#evidence-lesson').onchange = () => {
+    if (!input('#evidence-title').value)
+      input('#evidence-title').value =
+        allLessons.find((l) => l.id === select('#evidence-lesson').value)?.title || '';
   };
   function clearForm() {
     editingId = null;
-    $('#evidence-form').reset();
-    setSelectValue($('#evidence-route'), getState().route);
+    form('#evidence-form').reset();
+    setSelectValue(select('#evidence-route'), getState().route);
     updateContexts();
-    $('#evidence-submit').textContent = 'Save artifact';
-    $('#cancel-edit').hidden = true;
+    button('#evidence-submit').textContent = 'Save artifact';
+    button('#cancel-edit').hidden = true;
   }
-  $('#cancel-edit').onclick = () => {
+  button('#cancel-edit').onclick = () => {
     clearForm();
     status('#evidence-status', 'Edit cancelled. The saved artifact was kept.');
   };
+  /** @param {import('../../types/learner-records').EvidenceEntry} entry */
   function association(entry) {
     const pieces = [];
     if (entry.lessonId)
@@ -97,9 +132,10 @@ export function setupEvidence({ routes, projects, allLessons, context, getState,
     }
     return pieces.join(' · ');
   }
+  /** @returns {import('../../types/learner-records').EvidenceEntry[]} */
   function filteredEvidence() {
-    const route = $('#evidence-filter-route').value,
-      type = $('#evidence-filter-type').value;
+    const route = select('#evidence-filter-route').value,
+      type = select('#evidence-filter-type').value;
     return getState().evidence.filter(
       (e) =>
         (!route || e.route === route) &&
@@ -111,13 +147,17 @@ export function setupEvidence({ routes, projects, allLessons, context, getState,
               : !e.lessonId && !e.projectId)),
     );
   }
+  /** @param {import('../../types/learner-records').EvidenceEntry[]} entries */
   function exportReview(entries) {
     try {
       const packet = evidenceReviewPacket(entries, {
         routes,
         lessons: allLessons,
         projects,
-        lessonProgress: courseState.lessonProgress,
+        // course-state validates the saved value against version 1 before it is exposed.
+        lessonProgress: /** @type {import('../../types/learner-records').LessonProgressState} */ (
+          courseState.lessonProgress
+        ),
         projectProgress: backup().projects,
         baseUrl: location.href,
         generatedAt: new Date().toISOString(),
@@ -134,24 +174,26 @@ export function setupEvidence({ routes, projects, allLessons, context, getState,
       );
     }
   }
-  if ($('#review-export')) $('#review-export').onclick = () => exportReview(filteredEvidence());
+  const reviewExport = $('#review-export');
+  if (reviewExport) reviewExport.onclick = () => exportReview(filteredEvidence());
   function renderEvidence() {
     const entries = filteredEvidence();
-    if ($('#review-count'))
-      $('#review-count').textContent =
-        `${entries.length} artifact${entries.length === 1 ? '' : 's'} will be included using the filters above.`;
-    $('#evidence-count').textContent =
+    const reviewCount = $('#review-count');
+    if (reviewCount)
+      reviewCount.textContent = `${entries.length} artifact${entries.length === 1 ? '' : 's'} will be included using the filters above.`;
+    requireElement('#evidence-count').textContent =
       `${getState().evidence.length} artifact${getState().evidence.length === 1 ? '' : 's'} saved in local portfolio`;
-    $('#evidence-results').textContent =
+    requireElement('#evidence-results').textContent =
       `${entries.length} shown. Saving an artifact does not tick lesson exercises or project stages.`;
-    $('#evidence-list').replaceChildren();
+    const list = requireElement('#evidence-list');
+    list.replaceChildren();
     if (!entries.length) {
       const p = document.createElement('p');
       p.className = 'empty-state';
       p.textContent = getState().evidence.length
         ? 'No saved work in this group.'
         : 'No work saved yet. You can keep learning without adding notes here.';
-      $('#evidence-list').append(p);
+      list.append(p);
     }
     for (const entry of entries.slice().reverse()) {
       const article = document.createElement('article');
@@ -196,21 +238,23 @@ export function setupEvidence({ routes, projects, allLessons, context, getState,
       edit.textContent = 'Edit';
       edit.setAttribute('aria-label', 'Edit ' + entry.title);
       edit.onclick = () => {
-        if ($('#save-work')) $('#save-work').open = true;
+        const saveWork = $('#save-work');
+        if (saveWork?.tagName === 'DETAILS')
+          /** @type {HTMLDetailsElement} */ (saveWork).open = true;
         editingId = entry.id;
-        setSelectValue($('#evidence-route'), entry.route);
+        setSelectValue(select('#evidence-route'), entry.route);
         updateContexts();
-        setSelectValue($('#evidence-lesson'), entry.lessonId || '');
-        setSelectValue($('#evidence-project'), entry.projectId || '');
+        setSelectValue(select('#evidence-lesson'), entry.lessonId || '');
+        setSelectValue(select('#evidence-project'), entry.projectId || '');
         updateStages();
         setSelectValue(stageSelect, entry.stageId || '');
         updateWorkContext();
-        $('#evidence-title').value = entry.title;
-        $('#evidence-url').value = entry.url;
-        $('#evidence-note').value = entry.note;
-        $('#evidence-submit').textContent = 'Save changes';
-        $('#cancel-edit').hidden = false;
-        $('#evidence-title').focus();
+        input('#evidence-title').value = entry.title;
+        input('#evidence-url').value = entry.url;
+        input('#evidence-note').value = entry.note;
+        button('#evidence-submit').textContent = 'Save changes';
+        button('#cancel-edit').hidden = false;
+        input('#evidence-title').focus();
         status('#evidence-status', 'Editing ' + entry.title + '.');
       };
       const remove = document.createElement('button');
@@ -221,8 +265,8 @@ export function setupEvidence({ routes, projects, allLessons, context, getState,
         getState().evidence = getState().evidence.filter((e) => e.id !== entry.id);
         const persisted = save();
         renderEvidence();
-        $('#undo-remove').hidden = false;
-        $('#undo-remove').focus();
+        button('#undo-remove').hidden = false;
+        button('#undo-remove').focus();
         status(
           '#evidence-status',
           persisted
@@ -232,12 +276,12 @@ export function setupEvidence({ routes, projects, allLessons, context, getState,
       };
       actions.append(edit, remove);
       article.append(actions);
-      $('#evidence-list').append(article);
+      list.append(article);
     }
   }
-  $('#evidence-filter-route').onchange = renderEvidence;
-  $('#evidence-filter-type').onchange = renderEvidence;
-  $('#undo-remove').onclick = () => {
+  select('#evidence-filter-route').onchange = renderEvidence;
+  select('#evidence-filter-type').onchange = renderEvidence;
+  button('#undo-remove').onclick = () => {
     if (!removed) return;
     getState().evidence.splice(
       Math.min(removed.index, getState().evidence.length),
@@ -247,17 +291,17 @@ export function setupEvidence({ routes, projects, allLessons, context, getState,
     removed = null;
     const persisted = save();
     renderEvidence();
-    $('#undo-remove').hidden = true;
+    button('#undo-remove').hidden = true;
     status(
       '#evidence-status',
       persisted ? 'Artifact restored.' : 'Artifact restored in memory only. Export before closing.',
     );
   };
-  $('#evidence-form').onsubmit = (e) => {
+  form('#evidence-form').onsubmit = (e) => {
     e.preventDefault();
-    const title = $('#evidence-title').value.trim(),
-      note = $('#evidence-note').value.trim(),
-      url = $('#evidence-url').value.trim();
+    const title = input('#evidence-title').value.trim(),
+      note = textarea('#evidence-note').value.trim(),
+      url = input('#evidence-url').value.trim();
     if (!title || !note) {
       status('#evidence-status', 'Add a title and describe what you verified.');
       return;
@@ -277,15 +321,15 @@ export function setupEvidence({ routes, projects, allLessons, context, getState,
     const now = new Date().toISOString();
     const entry = {
       id: editingId || crypto.randomUUID(),
-      route: $('#evidence-route').value,
+      route: select('#evidence-route').value,
       title,
       url,
       note,
       date: previous?.date || now.slice(0, 10),
       updatedAt: now,
-      lessonId: $('#evidence-lesson').value,
-      projectId: $('#evidence-project').value,
-      stageId: stageSelect.value,
+      lessonId: select('#evidence-lesson').value,
+      projectId: select('#evidence-project').value,
+      stageId: stageSelect?.value || '',
     };
     if (previous) getState().evidence[getState().evidence.indexOf(previous)] = entry;
     else getState().evidence.push(entry);
@@ -296,8 +340,8 @@ export function setupEvidence({ routes, projects, allLessons, context, getState,
       status('#evidence-status', 'Artifact saved on this device in your local portfolio.');
     } else {
       editingId = entry.id;
-      $('#evidence-submit').textContent = 'Retry saving';
-      $('#cancel-edit').hidden = false;
+      button('#evidence-submit').textContent = 'Retry saving';
+      button('#cancel-edit').hidden = false;
       status(
         '#evidence-status',
         'Saving to device storage failed. Your inputs are retained and the artifact is in this page only. Retry or export a backup before closing.',
@@ -306,18 +350,21 @@ export function setupEvidence({ routes, projects, allLessons, context, getState,
   };
   const params = new URLSearchParams(location.search);
   const contextRoute = params.get('path') || params.get('route');
-  if (context.routeIds.includes(contextRoute)) setSelectValue($('#evidence-route'), contextRoute);
+  if (contextRoute && context.routeIds.includes(contextRoute))
+    setSelectValue(select('#evidence-route'), contextRoute);
   updateContexts();
-  if (context.lessonIds.includes(params.get('lesson'))) {
-    setSelectValue($('#evidence-lesson'), params.get('lesson'));
-    $('#evidence-title').value = allLessons.find((l) => l.id === params.get('lesson')).title;
+  const lessonId = params.get('lesson');
+  if (lessonId && context.lessonIds.includes(lessonId)) {
+    setSelectValue(select('#evidence-lesson'), lessonId);
+    input('#evidence-title').value = allLessons.find((l) => l.id === lessonId)?.title || '';
   }
-  if (projects.some((p) => p.id === params.get('project'))) {
-    setSelectValue($('#evidence-project'), params.get('project'));
+  const projectId = params.get('project');
+  if (projectId && projects.some((p) => p.id === projectId)) {
+    setSelectValue(select('#evidence-project'), projectId);
     updateStages();
     setSelectValue(stageSelect, params.get('stage') || '');
-    if (!$('#evidence-title').value)
-      $('#evidence-title').value = projects.find((p) => p.id === params.get('project')).title;
+    if (!input('#evidence-title').value)
+      input('#evidence-title').value = projects.find((p) => p.id === projectId)?.title || '';
   }
   updateWorkContext();
   renderEvidence();

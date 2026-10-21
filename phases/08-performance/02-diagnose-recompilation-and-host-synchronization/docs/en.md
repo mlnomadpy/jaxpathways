@@ -2,6 +2,8 @@
 
 Phase 08: Performance diagnosis · about 80 minutes · CPU
 
+This reference explicitly selects CPU. Uploading the same file or setting JAX_PLATFORMS does not adapt it to TPU. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Record shapes, dtypes and dynamic/static choices beside observed tracing.
@@ -93,13 +95,12 @@ The exercise compares six dependent updates with host consumption after each ste
 Create diagnosis.py in your activated course environment and add this block.
 
 ```python
-# Step 1 — Prepare a trace ledger: This CPU experiment deliberately keeps the trace ledger outside...
+# Step 1 — Prepare a trace ledger
 import json
 import time
 import numpy as np
 import jax
 import jax.numpy as jnp
-# Query the active JAX devices into `cpu`.
 cpu = jax.devices("cpu")[0]
 trace_events = []
 def score(x, gain):
@@ -111,7 +112,7 @@ def score(x, gain):
 compiled_score = jax.jit(score)
 x8 = jax.device_put(np.arange(8, dtype=np.float32), cpu)
 x12 = jax.device_put(np.arange(12, dtype=np.float32), cpu)
-# Synchronize host execution until asynchronous device computation completes.
+# Wait for device work to finish before timing it or comparing its result on the host.
 jax.block_until_ready((x8, x12))
 ```
 
@@ -122,17 +123,17 @@ This CPU experiment deliberately keeps the trace ledger outside numerical state.
 Append this block to the same file. Run the assembled file with python diagnosis.py.
 
 ```python
-# Step 2 — Record call signatures and observed traces: The ledger relates each controlled signature change to the...
+# Step 2 — Record call signatures and observed traces
 call_rows = []
 def observed_call(label, x, gain):
     before = len(trace_events)
     # Place `result` explicitly onto the target JAX device.
     result = compiled_score(x, jax.device_put(np.float32(gain), cpu))
-    # Synchronize host execution until asynchronous device computation completes.
+    # Wait for device work to finish before timing it or comparing its result on the host.
     result.block_until_ready()
-    # Convert `expected` to a host NumPy array for inspection or verification.
+    # Transfer the device result to the host for an independent NumPy comparison.
     expected = np.sum((np.asarray(x) * np.float32(gain))**2)
-    # Convert `` to a host NumPy array for inspection or verification.
+    # Transfer the device result to the host for an independent NumPy comparison.
     np.testing.assert_allclose(np.asarray(result), expected, rtol=2e-5, atol=2e-5)
     call_rows.append({"label": label, "shape": list(x.shape), "dtype": str(x.dtype),
                       "observed_trace_delta": len(trace_events) - before,
@@ -164,13 +165,12 @@ Inspect the event deltas on your own environment. The required outputs are check
 ## Run the example
 
 ```python
-# Step 1 — Prepare a trace ledger: This CPU experiment deliberately keeps the trace ledger outside...
+# Step 1 — Prepare a trace ledger
 import json
 import time
 import numpy as np
 import jax
 import jax.numpy as jnp
-# Query the active JAX devices into `cpu`.
 cpu = jax.devices("cpu")[0]
 trace_events = []
 def score(x, gain):
@@ -182,19 +182,19 @@ def score(x, gain):
 compiled_score = jax.jit(score)
 x8 = jax.device_put(np.arange(8, dtype=np.float32), cpu)
 x12 = jax.device_put(np.arange(12, dtype=np.float32), cpu)
-# Synchronize host execution until asynchronous device computation completes.
+# Wait for device work to finish before timing it or comparing its result on the host.
 jax.block_until_ready((x8, x12))
-# Step 2 — Record call signatures and observed traces: The ledger relates each controlled signature change to the...
+# Step 2 — Record call signatures and observed traces
 call_rows = []
 def observed_call(label, x, gain):
     before = len(trace_events)
     # Place `result` explicitly onto the target JAX device.
     result = compiled_score(x, jax.device_put(np.float32(gain), cpu))
-    # Synchronize host execution until asynchronous device computation completes.
+    # Wait for device work to finish before timing it or comparing its result on the host.
     result.block_until_ready()
-    # Convert `expected` to a host NumPy array for inspection or verification.
+    # Transfer the device result to the host for an independent NumPy comparison.
     expected = np.sum((np.asarray(x) * np.float32(gain))**2)
-    # Convert `` to a host NumPy array for inspection or verification.
+    # Transfer the device result to the host for an independent NumPy comparison.
     np.testing.assert_allclose(np.asarray(result), expected, rtol=2e-5, atol=2e-5)
     call_rows.append({"label": label, "shape": list(x.shape), "dtype": str(x.dtype),
                       "observed_trace_delta": len(trace_events) - before,
@@ -235,13 +235,12 @@ The existing specialization can accept compatible dynamic values without rerunni
 The vertical axis counts Python traces, not seconds, device kernels, or an exact count of backend compilations. To diagnose runtime overhead, combine this kind of counter with synchronized measurements or a profiler. A changed answer alone is not evidence of retracing.
 
 ```python
-# Compute figure data for: A new value is not necessarily a new trace
 visual_data = {'kind': 'bar', 'labels': ['initial', 'new values', 'new gain', 'new shape'], 'ylabel': 'observed Python trace events', 'series': [{'label': 'trace delta', 'y': [r['observed_trace_delta'] for r in call_rows]}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:47:35.719968+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:22:12.954258+00:00. JAX 0.9.2.
 
 ```text
 {
@@ -357,8 +356,8 @@ CPU run: 2026-10-20T10:47:35.719968+00:00. JAX 0.9.2.
   ]
 }
 Static branch trace observations: [{'shape': [8], 'square': True}, {'shape': [8], 'square': False}]
-Per-step host reads seconds: 0.00012137508019804955
-Final-only wait seconds: 3.5999808460474014e-05
+Per-step host reads seconds: 8.750008419156075e-05
+Final-only wait seconds: 2.1750107407569885e-05
 Added ledger row: {'label': 'new length sixteen', 'shape': [16], 'dtype': 'float32', 'observed_trace_delta': 1, 'result': 1240.0}
 Masked versus unmasked padded objective: 55.0 58.0
 Observed runtime-Python-branch tracing failure
@@ -380,7 +379,7 @@ def branch_score(x, square):
 static_score = jax.jit(branch_score, static_argnames=("square",))
 for square in [True, True, False]:
     out = static_score(x8, square=square)
-    # Convert `` to a host NumPy array for inspection or verification.
+    # Transfer the device result to the host for an independent NumPy comparison.
     np.testing.assert_allclose(np.asarray(out), 140. if square else 28.)
 print("Static branch trace observations:", branch_events)
 ```
@@ -399,7 +398,7 @@ The static Boolean controls Python program structure. The earlier numerical gain
 update = jax.jit(lambda value: 0.9 * value + 1.)
 # Place `initial` explicitly onto the target JAX device.
 initial = jax.device_put(np.float32(0.), cpu)
-# Synchronize host execution until asynchronous device computation completes.
+# Wait for device work to finish before timing it or comparing its result on the host.
 update(initial).block_until_ready()
 def metric_run(read_each):
     value = initial
@@ -409,16 +408,16 @@ def metric_run(read_each):
         value = update(value)
         if read_each:
             observed.append(float(value))
-    # Synchronize host execution until asynchronous device computation completes.
+    # Wait for device work to finish before timing it or comparing its result on the host.
     value.block_until_ready()
     elapsed = time.perf_counter() - start
     return value, elapsed, observed
 read_result, read_seconds, metrics = metric_run(True)
 final_result, final_seconds, _ = metric_run(False)
 reference_value = 10. * (1. - 0.9**6)
-# Convert `` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 np.testing.assert_allclose(np.asarray(read_result), reference_value, rtol=2e-5)
-# Convert `` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 np.testing.assert_allclose(np.asarray(final_result), reference_value, rtol=2e-5)
 assert len(metrics) == 6
 print("Per-step host reads seconds:", read_seconds)
@@ -481,15 +480,13 @@ Use a fixed-size input and mask; compute the offset transformation before maskin
 **Key functions & syntax to use:**
 - `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.jit(fn) / @jax.jit` — Traces `fn` with abstract shapes and compiles a fused XLA executable cached by input shape and dtype.
+- `jax.jit(fn) / @jax.jit` — Traces `fn` for its input signatures and compiles an executable. Changed shapes, dtypes or static arguments can trigger another compilation.
 - `Mesh + PartitionSpec + NamedSharding` — Maps logical tensor axes onto physical device mesh axes for SPMD data, tensor, or pipeline parallelism.
 
 **Step-by-step implementation plan:**
 1. Wrap with `jax.jit` (`masked_score`) so XLA traces and compiles the function.
 2. Place `padded` explicitly onto the target JAX device.
-3. Combine or mask array elements to form `masked`.
-4. Convert `` to a host NumPy array for inspection or verification.
-5. Aggregate array values to compute `wrong`.
+3. Transfer the device result to the host for an independent NumPy comparison.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -501,11 +498,9 @@ five = np.arange(...)  # TODO: compute five
 # Place `padded` explicitly onto the target JAX device.
 padded = jax.device_put(...)  # TODO: compute padded
 mask = jax.device_put(...)  # TODO: compute mask
-# Combine or mask array elements to form `masked`.
 masked = masked_score(...)  # TODO: compute masked
-# Convert `` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 np.testing.assert_allclose(np.asarray(masked), sum((i+1)**2 for i in range(5)))
-# Aggregate array values to compute `wrong`.
 wrong = jnp.sum(...)  # TODO: compute wrong
 assert float(wrong)  # TODO: complete assertion check
 print("Masked versus unmasked padded objective:", float(masked), float(wrong))
@@ -521,11 +516,9 @@ five = np.arange(5, dtype=np.float32)
 # Place `padded` explicitly onto the target JAX device.
 padded = jax.device_put(np.pad(five, (0, 3)), cpu)
 mask = jax.device_put(np.arange(8) < 5, cpu)
-# Combine or mask array elements to form `masked`.
 masked = masked_score(padded, mask)
-# Convert `` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 np.testing.assert_allclose(np.asarray(masked), sum((i+1)**2 for i in range(5)))
-# Aggregate array values to compute `wrong`.
 wrong = jnp.sum((padded + 1.)**2)
 assert float(wrong) == float(masked) + 3.
 print("Masked versus unmasked padded objective:", float(masked), float(wrong))
@@ -552,25 +545,23 @@ A runtime scalar predicate is a tracer, so Python cannot decide its truth value 
 **Key functions & syntax to use:**
 - `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.jit(fn) / @jax.jit` — Traces `fn` with abstract shapes and compiles a fused XLA executable cached by input shape and dtype.
+- `jax.jit(fn) / @jax.jit` — Traces `fn` for its input signatures and compiles an executable. Changed shapes, dtypes or static arguments can trigger another compilation.
 - `Mesh + PartitionSpec + NamedSharding` — Maps logical tensor axes onto physical device mesh axes for SPMD data, tensor, or pipeline parallelism.
 
 **Step-by-step implementation plan:**
-1. Reproduce and repair runtime Python branching (Diagnosis): The failure identifies a mismatch between Python control...
-2. Run the boundary check and catch the expected exception:
-3. Wrap with `jax.jit` (`repaired`) so XLA traces and compiles the function.
-4. Place `result` explicitly onto the target JAX device.
-5. Convert `` to a host NumPy array for inspection or verification.
+1. Reproduce and repair runtime Python branching (Diagnosis)
+2. Wrap with `jax.jit` (`repaired`) so XLA traces and compiles the function.
+3. Place `result` explicitly onto the target JAX device.
+4. Transfer the device result to the host for an independent NumPy comparison.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Reproduce and repair runtime Python branching (Diagnosis): The failure identifies a mismatch between Python control...
+# Reproduce and repair runtime Python branching (Diagnosis)
 def broken_branch(values, gain):
     if gain > 1.:
         return ...  # TODO: return computed result
     return ...  # TODO: return computed result
-# Run the boundary check and catch the expected exception:
 try:
     jax.jit(broken_branch)(x8, jax.device_put(np.float32(2.), cpu))
 except jax.errors.TracerBoolConversionError:
@@ -582,19 +573,18 @@ repaired = jax.jit(...)  # TODO: compute repaired
 for gain, expected in [(0.5, 28.), (2., 140.)]:
     # Place `result` explicitly onto the target JAX device.
     result = repaired(...)  # TODO: compute result
-    # Convert `` to a host NumPy array for inspection or verification.
+    # Transfer the device result to the host for an independent NumPy comparison.
     np.testing.assert_allclose(np.asarray(result), expected)
 ```
 
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Reproduce and repair runtime Python branching (Diagnosis): The failure identifies a mismatch between Python control...
+# Reproduce and repair runtime Python branching (Diagnosis)
 def broken_branch(values, gain):
     if gain > 1.:
         return jnp.sum(values**2)
     return jnp.sum(values)
-# Run the boundary check and catch the expected exception:
 try:
     jax.jit(broken_branch)(x8, jax.device_put(np.float32(2.), cpu))
 except jax.errors.TracerBoolConversionError:
@@ -606,7 +596,7 @@ repaired = jax.jit(lambda values, gain: jax.lax.cond(gain > 1., lambda v:jnp.sum
 for gain, expected in [(0.5, 28.), (2., 140.)]:
     # Place `result` explicitly onto the target JAX device.
     result = repaired(x8, jax.device_put(np.float32(gain), cpu))
-    # Convert `` to a host NumPy array for inspection or verification.
+    # Transfer the device result to the host for an independent NumPy comparison.
     np.testing.assert_allclose(np.asarray(result), expected)
 ```
 

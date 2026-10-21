@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "executedAt": "2026-10-20T23:11:08.151785+00:00",
+  "executionMode": "real-tpu-single-host-four-device",
+  "backend": "tpu",
+  "processCount": 1,
+  "globalDeviceCount": 4,
+  "localDeviceCount": 4,
+  "devices": [
+    {
+      "platform": "tpu",
+      "kind": "TPU v5 lite",
+      "id": 0
+    },
+    {
+      "platform": "tpu",
+      "kind": "TPU v5 lite",
+      "id": 1
+    },
+    {
+      "platform": "tpu",
+      "kind": "TPU v5 lite",
+      "id": 2
+    },
+    {
+      "platform": "tpu",
+      "kind": "TPU v5 lite",
+      "id": 3
+    }
+  ],
+  "pythonVersion": "3.12.13",
+  "jaxVersion": "0.9.2",
+  "numpyVersion": "2.4.4",
+  "sourceSha256": "4d51220153bd50d52b131c3c15451ff6a47ca3a4e7fa2a815ebde1e3409ef744",
+  "baseLesson": "phases/09-distributed/03-communication-efficient-algorithms/code/main.py",
+  "baseLessonSha256": "8ed8e3a66f908c06d0f14bf9531a6eda71cb4c6687bd553f33f4d84415a158f5",
+  "fixtureSha256": "49754fb6d7f832bc7e60e27015ef6776507ddee2aa168341e0f94a53e9bbb81d",
+  "collectives": {
+    "psum": {
+      "stablehloOperation": "all_reduce",
+      "stablehloFile": "psum.stablehlo.txt"
+    },
+    "psum_scatter": {
+      "stablehloOperation": "reduce_scatter",
+      "stablehloFile": "psum_scatter.stablehlo.txt"
+    },
+    "all_gather": {
+      "stablehloOperation": "all_gather",
+      "stablehloFile": "all_gather.stablehlo.txt"
+    }
+  },
+  "placement": {
+    "meshAxis": "data",
+    "meshShape": [
+      4
+    ],
+    "inputRowsPerDevice": 4,
+    "allReduceResult": "replicated length-8 vector",
+    "reduceScatterResult": "length-2 vector per device",
+    "allGatherResult": "replicated length-8 vector"
+  },
+  "numericalChecks": {
+    "dotPrecision": "HIGHEST",
+    "independentReference": "NumPy float32 fixture; full-batch gradient formula from distributed-03",
+    "absoluteTolerance": 2e-06,
+    "relativeTolerance": 2e-06,
+    "allReduceMatchesReference": true,
+    "reduceScatterThenAllGatherMatchesReference": true
+  },
+  "timingScope": "warmed synchronized collective calls; excludes compilation, host-to-device placement, and trace overhead",
+  "repeats": 7,
+  "timings": {
+    "psum": {
+      "samples_ms": [
+        0.2607700000112345,
+        0.25543999998944855,
+        0.2606600000092385,
+        0.2636500000221531,
+        0.24659999999698812,
+        0.25284000000169726,
+        0.24032000001739107
+      ],
+      "median_ms": 0.25543999998944855
+    },
+    "psum_scatter": {
+      "samples_ms": [
+        0.24605999999494088,
+        0.25852999999642634,
+        0.23357000000601147,
+        0.240689999998267,
+        0.2165900000079546,
+        0.2524599999844668,
+        0.24657000000161133
+      ],
+      "median_ms": 0.24605999999494088
+    },
+    "all_gather": {
+      "samples_ms": [
+        0.2217699999960132,
+        0.22670999999263586,
+        0.21421999997528474,
+        0.22604000000114866,
+        0.21738000000937063,
+        0.21950999999376108,
+        0.21393000000102802
+      ],
+      "median_ms": 0.21950999999376108
+    }
+  },
+  "trace": "trace/",
+  "limits": "One four-device host and this deterministic small fixture; no multi-host, scaling, or general performance claim."
+}

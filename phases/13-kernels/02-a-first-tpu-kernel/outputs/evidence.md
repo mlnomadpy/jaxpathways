@@ -7,7 +7,7 @@ Copy this template into your own portfolio and fill it after running your modifi
 Broadcast/boundary checks, represented-input precision oracle and a tested no-fallback TPU guard; target execution remains separately unverified. Keep the environment, observed outputs and your explanation of the figure.
 
 - Command: `python3 phases/13-kernels/02-a-first-tpu-kernel/code/main.py`
-- Working directory: repository root
+- Working directory: Repository root
 - Python / JAX / NumPy versions: 
 - Hardware and device: 
 - My prediction before running: 

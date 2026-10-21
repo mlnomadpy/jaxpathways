@@ -11,6 +11,7 @@ test('rerunning execution receipts preserves a release while canonical source ch
     for (const name of ['curriculum', 'learning-paths', 'projects']) mkdirSync(path.join(directory, name));
     const write = (name, value) => writeFileSync(path.join(directory, name), JSON.stringify(value));
     writeFileSync(path.join(directory, 'release.mjs'), readFileSync('scripts/release.mjs'));
+    writeFileSync(path.join(directory, 'portable-path.mjs'), readFileSync('scripts/portable-path.mjs'));
     write('package.json', { version: '1.0.0' });
     write('curriculum/releases.json', [{ version: '1.0.0', date: '2026-10-13', title: 'Fixture' }]);
     write('curriculum/course.json', { phases: [] });

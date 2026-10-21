@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "qualifications": [
+    {
+      "id": "v5e1-training-recovery-precision-20261020",
+      "status": "current",
+      "kind": "single-host-training-recovery-precision",
+      "sourceCommit": "c0e927650147232ef28b2a1cb5b22a11145862d2",
+      "evidence": "docs/evidence/tpu-qualification-2026-10-20/v5e1/smoke-v1/execution-tpu.json",
+      "environment": "docs/evidence/tpu-qualification-2026-10-20/v5e1/environment.txt",
+      "sources": {
+        "scripts/smoke-tpu.py": "2e3a52dbb125a428d1660e9c3798af2719a94b7c6a1df3ed300c3dccc1961c5b",
+        "resources/tpu-gcp/launch.py": "3fd9ba84dd01ea2e24229778563b76ddfd3d9371d91b9c42edefb20aef63e3f9",
+        "resources/tpu-gcp/precision_profile.py": "5697a00fd1fe569e7aa5a6103eee37b45862803ec20e4eabdf2b57cdf1f1a39d",
+        "projects/workload-operations/solution/model.py": "9334cf6252c8b0f7c554fc6753354c5c2df6c9bf9a6e0e54d260d4ea90ad2c63"
+      },
+      "scope": "One v5e chip: bounded training, resume and single-device dot/precision checks; no multi-host or model-quality qualification."
+    },
+    {
+      "id": "v5e1-pallas-20261020",
+      "status": "current",
+      "kind": "single-device-pallas",
+      "sourceCommit": "c0e927650147232ef28b2a1cb5b22a11145862d2",
+      "evidence": [
+        "docs/evidence/tpu-qualification-2026-10-20/v5e1/pallas-v2/fused-float32.json",
+        "docs/evidence/tpu-qualification-2026-10-20/v5e1/pallas-v2/fused-bfloat16.json",
+        "docs/evidence/tpu-qualification-2026-10-20/v5e1/pallas-v2/pipeline-float32.json",
+        "docs/evidence/tpu-qualification-2026-10-20/v5e1/pallas-v2/pipeline-bfloat16.json"
+      ],
+      "environment": "docs/evidence/tpu-qualification-2026-10-20/v5e1/pallas-v2/environment.txt",
+      "sources": {
+        "projects/kernel-audit/target_tpu.py": "3f6817d3e8fc7c25006421a127483143b35f0e711f70403d580dbc6913c82e82",
+        "projects/kernel-audit/solution/model.py": "c4bdea0fb499528ece29dded13b5a0ab5e7a43f6eb79da191c46b5d800d728aa"
+      },
+      "scope": "One v5e chip, two kernels, FP32/BF16, logical shape257x513 and five timing samples; not a general speed or scaling claim."
+    },
+    {
+      "id": "v5e4-collectives-20261020",
+      "status": "current",
+      "kind": "single-host-four-device-collectives",
+      "sourceCommit": "53f1be134a94858400bdf8331c628e66db6fa26b",
+      "evidence": "docs/evidence/tpu-qualification-2026-10-20/v5e4/collectives-v1/execution-collectives.json",
+      "environment": "docs/evidence/tpu-qualification-2026-10-20/v5e4/environment.txt",
+      "sources": {
+        "resources/tpu-gcp/collectives_target.py": "4d51220153bd50d52b131c3c15451ff6a47ca3a4e7fa2a815ebde1e3409ef744",
+        "phases/09-distributed/03-communication-efficient-algorithms/code/main.py": "8ed8e3a66f908c06d0f14bf9531a6eda71cb4c6687bd553f33f4d84415a158f5"
+      },
+      "scope": "One v5e host with four devices: deterministic psum, reduce-scatter and all-gather numerical, placement, StableHLO and trace checks; not multi-host or scaling qualification."
+    },
+    {
+      "id": "v5e16-multihost-checkpoint-20261020",
+      "status": "current",
+      "kind": "multi-host-training-recovery",
+      "sourceCommit": "b71fe83679327da4df0bcc397796cd3d17ba44dc",
+      "evidence": [
+        "docs/evidence/tpu-qualification-2026-10-20/v5e16/worker-0/multihost-v4/process-000/execution-multihost.json",
+        "docs/evidence/tpu-qualification-2026-10-20/v5e16/worker-1/multihost-v4/process-002/execution-multihost.json",
+        "docs/evidence/tpu-qualification-2026-10-20/v5e16/worker-2/multihost-v4/process-001/execution-multihost.json",
+        "docs/evidence/tpu-qualification-2026-10-20/v5e16/worker-3/multihost-v4/process-003/execution-multihost.json"
+      ],
+      "environment": "docs/evidence/tpu-qualification-2026-10-20/v5e16/worker-0/attempt-v4/environment.txt",
+      "environments": [
+        "docs/evidence/tpu-qualification-2026-10-20/v5e16/worker-0/attempt-v4/environment.txt",
+        "docs/evidence/tpu-qualification-2026-10-20/v5e16/worker-1/attempt-v4/environment.txt",
+        "docs/evidence/tpu-qualification-2026-10-20/v5e16/worker-2/attempt-v4/environment.txt",
+        "docs/evidence/tpu-qualification-2026-10-20/v5e16/worker-3/attempt-v4/environment.txt"
+      ],
+      "sources": {
+        "resources/tpu-gcp/multihost_target.py": "d8dc46e58f869a94c9f0fc3c18b4098427cd44c9fa35ab864f4507270c726820",
+        "resources/tpu-gcp/requirements-multihost.txt": "82f402c2a155240c84e14971fba9601ab674f4eb1f34fbfbe46af4701a814272",
+        "resources/tpu-gcp/requirements-qualification.txt": "aeef2ff7d74ebd3da1b06e60ddd1ea8630e0aa94aac3fe6fb92873f4ca061e6b",
+        "phases/09-distributed/04-resilient-distributed-training/code/main.py": "ab65a94c7b71fc4f4e22c278ee37d3ae942018ee4bdd328689fd8ef27c9ae4d9"
+      },
+      "scope": "Four VM controllers and sixteen v5e devices: process-local synthetic data, global updates, Orbax GCS save at step4, same-process abstract sharded restore and replay through step8. No worker failure, fresh-process restart, elastic recovery, production quality or scaling measurement."
+    }
+  ]
+}

@@ -2,6 +2,8 @@
 
 Phase 14: Autodiff & JAX internals · about 130 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Interpret literals, captured constants and variables in a supported flat jaxpr.
@@ -70,7 +72,7 @@ Create main.py for the first block, then append subsequent blocks in order using
 ```python
 # Step 1 — Define a deliberately small derivative interpreter: Each environment entry stores a primal and its tangent.
 import jax
-# Update state in place with the new values.
+# Enable 64-bit arithmetic before importing jax.numpy or creating arrays.
 jax.config.update("jax_enable_x64", True)
 import jax.numpy as jnp
 import numpy as np
@@ -80,10 +82,8 @@ from jax.extend import core
 def tiny_jvp(closed,primals,tangents):
     """Interpret a pure flat jaxpr with floating inputs and explicit tangent rules."""
     program=closed.jaxpr
-    # Guard input contract (`program.effects`) and fail fast if violated.
     if program.effects:
         raise NotImplementedError("effects are outside this interpreter")
-    # Guard input contract (`len(primals) != len(program.invars) or len(tangents) != len(primals)`) and fail fast if violated.
     if len(primals)!=len(program.invars) or len(tangents)!=len(primals):
         raise ValueError("one primal and tangent per input variable required")
     values={}
@@ -92,16 +92,12 @@ def tiny_jvp(closed,primals,tangents):
         values[var]=value
         directions[var]=tangent
     for var,constant in zip(program.constvars,closed.consts):
-        # Allocate initialized array `` with the specified shape and dtype.
         put(var,constant,jnp.zeros_like(constant))
     for var,value,tangent in zip(program.invars,primals,tangents):
-        # Guard input contract (`value.shape != var.aval.shape or value.dtype != var.aval.dtype`) and fail fast if violated.
         if value.shape!=var.aval.shape or value.dtype!=var.aval.dtype:
             raise ValueError("primal shape/dtype differs from traced signature")
-        # Guard input contract (`tangent.shape != value.shape or tangent.dtype != value.dtype`) and fail fast if violated.
         if tangent.shape!=value.shape or tangent.dtype!=value.dtype:
             raise ValueError("tangent shape/dtype must match its primal")
-        # Guard input contract (`not jnp.issubdtype(value.dtype, jnp.floating)`) and fail fast if violated.
         if not jnp.issubdtype(value.dtype,jnp.floating):
             raise ValueError("this teaching interpreter requires real floating inputs")
         put(var,value,tangent)
@@ -111,10 +107,8 @@ def tiny_jvp(closed,primals,tangents):
         return values[atom],directions[atom]
     for equation in program.eqns:
         name=equation.primitive.name
-        # Guard input contract (`name not in {'add', 'mul', 'neg', 'sin', 'reduce_sum'}`) and fail fast if violated.
         if name not in {"add","mul","neg","sin","reduce_sum"}:
             raise NotImplementedError("unsupported primitive: "+name)
-        # Guard input contract (`len(equation.outvars) != 1`) and fail fast if violated.
         if len(equation.outvars)!=1:
             raise NotImplementedError("multiple-result primitives are outside this interpreter")
         operands=[read(atom) for atom in equation.invars]
@@ -144,7 +138,7 @@ Each environment entry stores a primal and its tangent. Constants and literals r
 Create main.py for the first block, then append subsequent blocks in order using your course CPU environment.
 
 ```python
-# Step 2 — Trace a program and verify the transformed result: The traced closed constant contributes to the primal but not the...
+# Step 2 — Trace a program and verify the transformed result
 offset=jnp.array([0.1,0.2,0.3])
 def program(x):
     return jnp.sum(jnp.sin(x)*x+offset)
@@ -153,9 +147,8 @@ direction=jnp.array([0.3,-0.2,0.7])
 # Trace or lower the function to inspect its compiler representation (`closed`).
 closed=jax.make_jaxpr(program)(x)
 primal_outputs,tangent_outputs=tiny_jvp(closed,(x,),(direction,))
-# Aggregate array values to compute `reference_value`.
 reference_value=np.sum(np.sin(np.asarray(x))*np.asarray(x)+np.asarray(offset))
-# Convert `reference_tangent` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 reference_tangent=np.dot(np.sin(np.asarray(x))+np.asarray(x)*np.cos(np.asarray(x)),np.asarray(direction))
 np.testing.assert_allclose(primal_outputs[0],reference_value,rtol=1e-12)
 np.testing.assert_allclose(tangent_outputs[0],reference_tangent,rtol=1e-12)
@@ -171,7 +164,7 @@ The traced closed constant contributes to the primal but not the input derivativ
 Create main.py for the first block, then append subsequent blocks in order using your course CPU environment.
 
 ```python
-# Step 3 — Lower and compile the transformation itself: The Python interpreter runs while tracing the transformed...
+# Step 3 — Lower and compile the transformation itself
 transformed=lambda value,tangent:tiny_jvp(closed,(value,),(tangent,))
 # Wrap with `jax.jit` (`lowered`) so XLA traces and compiles the function.
 lowered=jax.jit(transformed).lower(x,direction)
@@ -184,7 +177,6 @@ compiled_primal,compiled_tangent=compiled(x,direction)
 np.testing.assert_allclose(compiled_primal[0],reference_value,rtol=1e-12)
 np.testing.assert_allclose(compiled_tangent[0],reference_tangent,rtol=1e-12)
 shape_rejected=False
-# Run the boundary check and catch the expected exception:
 try:
     compiled(jnp.ones(4),jnp.ones(4))
 except TypeError:
@@ -201,7 +193,7 @@ The Python interpreter runs while tracing the transformed function; its JAX arit
 ```python
 # Step 1 — Define a deliberately small derivative interpreter: Each environment entry stores a primal and its tangent.
 import jax
-# Update state in place with the new values.
+# Enable 64-bit arithmetic before importing jax.numpy or creating arrays.
 jax.config.update("jax_enable_x64", True)
 import jax.numpy as jnp
 import numpy as np
@@ -211,10 +203,8 @@ from jax.extend import core
 def tiny_jvp(closed,primals,tangents):
     """Interpret a pure flat jaxpr with floating inputs and explicit tangent rules."""
     program=closed.jaxpr
-    # Guard input contract (`program.effects`) and fail fast if violated.
     if program.effects:
         raise NotImplementedError("effects are outside this interpreter")
-    # Guard input contract (`len(primals) != len(program.invars) or len(tangents) != len(primals)`) and fail fast if violated.
     if len(primals)!=len(program.invars) or len(tangents)!=len(primals):
         raise ValueError("one primal and tangent per input variable required")
     values={}
@@ -223,16 +213,12 @@ def tiny_jvp(closed,primals,tangents):
         values[var]=value
         directions[var]=tangent
     for var,constant in zip(program.constvars,closed.consts):
-        # Allocate initialized array `` with the specified shape and dtype.
         put(var,constant,jnp.zeros_like(constant))
     for var,value,tangent in zip(program.invars,primals,tangents):
-        # Guard input contract (`value.shape != var.aval.shape or value.dtype != var.aval.dtype`) and fail fast if violated.
         if value.shape!=var.aval.shape or value.dtype!=var.aval.dtype:
             raise ValueError("primal shape/dtype differs from traced signature")
-        # Guard input contract (`tangent.shape != value.shape or tangent.dtype != value.dtype`) and fail fast if violated.
         if tangent.shape!=value.shape or tangent.dtype!=value.dtype:
             raise ValueError("tangent shape/dtype must match its primal")
-        # Guard input contract (`not jnp.issubdtype(value.dtype, jnp.floating)`) and fail fast if violated.
         if not jnp.issubdtype(value.dtype,jnp.floating):
             raise ValueError("this teaching interpreter requires real floating inputs")
         put(var,value,tangent)
@@ -242,10 +228,8 @@ def tiny_jvp(closed,primals,tangents):
         return values[atom],directions[atom]
     for equation in program.eqns:
         name=equation.primitive.name
-        # Guard input contract (`name not in {'add', 'mul', 'neg', 'sin', 'reduce_sum'}`) and fail fast if violated.
         if name not in {"add","mul","neg","sin","reduce_sum"}:
             raise NotImplementedError("unsupported primitive: "+name)
-        # Guard input contract (`len(equation.outvars) != 1`) and fail fast if violated.
         if len(equation.outvars)!=1:
             raise NotImplementedError("multiple-result primitives are outside this interpreter")
         operands=[read(atom) for atom in equation.invars]
@@ -267,7 +251,7 @@ def tiny_jvp(closed,primals,tangents):
     output=[read(var) for var in program.outvars]
     return tuple(v for v,_ in output),tuple(t for _,t in output)
 
-# Step 2 — Trace a program and verify the transformed result: The traced closed constant contributes to the primal but not the...
+# Step 2 — Trace a program and verify the transformed result
 offset=jnp.array([0.1,0.2,0.3])
 def program(x):
     return jnp.sum(jnp.sin(x)*x+offset)
@@ -276,9 +260,8 @@ direction=jnp.array([0.3,-0.2,0.7])
 # Trace or lower the function to inspect its compiler representation (`closed`).
 closed=jax.make_jaxpr(program)(x)
 primal_outputs,tangent_outputs=tiny_jvp(closed,(x,),(direction,))
-# Aggregate array values to compute `reference_value`.
 reference_value=np.sum(np.sin(np.asarray(x))*np.asarray(x)+np.asarray(offset))
-# Convert `reference_tangent` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 reference_tangent=np.dot(np.sin(np.asarray(x))+np.asarray(x)*np.cos(np.asarray(x)),np.asarray(direction))
 np.testing.assert_allclose(primal_outputs[0],reference_value,rtol=1e-12)
 np.testing.assert_allclose(tangent_outputs[0],reference_tangent,rtol=1e-12)
@@ -286,7 +269,7 @@ np.testing.assert_allclose(tangent_outputs[0],jax.jvp(program,(x,),(direction,))
 print("Supported primitives:",[e.primitive.name for e in closed.jaxpr.eqns])
 print("Interpreted primal and tangent:",float(primal_outputs[0]),float(tangent_outputs[0]))
 
-# Step 3 — Lower and compile the transformation itself: The Python interpreter runs while tracing the transformed...
+# Step 3 — Lower and compile the transformation itself
 transformed=lambda value,tangent:tiny_jvp(closed,(value,),(tangent,))
 # Wrap with `jax.jit` (`lowered`) so XLA traces and compiles the function.
 lowered=jax.jit(transformed).lower(x,direction)
@@ -299,7 +282,6 @@ compiled_primal,compiled_tangent=compiled(x,direction)
 np.testing.assert_allclose(compiled_primal[0],reference_value,rtol=1e-12)
 np.testing.assert_allclose(compiled_tangent[0],reference_tangent,rtol=1e-12)
 shape_rejected=False
-# Run the boundary check and catch the expected exception:
 try:
     compiled(jnp.ones(4),jnp.ones(4))
 except TypeError:
@@ -332,24 +314,22 @@ The interpreter obtains each value by composing local tangent rules; the referen
 Agreement applies to this primitive subset and tested inputs. It does not validate an unsupported operation, nested control flow, compiler performance or device portability. Those require new rules and new evidence rather than extrapolation from this plot.
 
 ```python
-# Compute figure data for: A composed interpreter tracks the analytic directional derivative
-# Generate a uniform grid of points in `alphas`.
 alphas=np.linspace(-1,1,9)
 interpreted=[]
 analytic=[]
 for alpha in alphas:
     point=x+alpha*direction
     interpreted.append(float(tiny_jvp(closed,(point,),(direction,))[1][0]))
-    # Convert `host` to a host NumPy array for inspection or verification.
+    # Transfer the device result to the host for an independent NumPy comparison.
     host=np.asarray(point)
-    # Convert `` to a host NumPy array for inspection or verification.
+    # Transfer the device result to the host for an independent NumPy comparison.
     analytic.append(float(np.dot(np.sin(host)+host*np.cos(host),np.asarray(direction))))
 visual_data={'kind':'line','x':alphas.tolist(),'xlabel':'base-point displacement alpha','ylabel':'directional derivative','series':[{'label':'tiny interpreted tangent','y':interpreted},{'label':'whole-expression analytic reference','y':analytic}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:50:16.810777+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:24:16.467113+00:00. JAX 0.9.2.
 
 ```text
 Supported primitives: ['sin', 'mul', 'add', 'reduce_sum']
@@ -374,11 +354,10 @@ PASS: internals-04
 **Predict before running:** If a new function uses exp, should the interpreter guess a derivative or stop?
 
 ```python
-# Experiment — Exercise an unsupported primitive: A numerical result without a supported tangent rule would...
+# Experiment — Exercise an unsupported primitive
 # Trace or lower the function to inspect its compiler representation (`unsupported`).
 unsupported=jax.make_jaxpr(lambda z:jnp.sum(jnp.exp(z)))(x)
 rejected=False
-# Run the boundary check and catch the expected exception:
 try:
     tiny_jvp(unsupported,(x,),(direction,))
 except NotImplementedError as error:
@@ -400,9 +379,8 @@ A numerical result without a supported tangent rule would falsely advertise deri
 # Experiment — Change values while preserving the compiled signature: Specialization constrains abstract shape/dtype contracts.
 changed=x+jnp.array([0.1,-0.4,0.2])
 cp,ct=compiled(changed,direction)
-# Aggregate array values to compute `expected`.
 expected=np.sum(np.sin(np.asarray(changed))*np.asarray(changed)+np.asarray(offset))
-# Convert `expected_d` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 expected_d=np.dot(np.sin(np.asarray(changed))+np.asarray(changed)*np.cos(np.asarray(changed)),np.asarray(direction))
 np.testing.assert_allclose(cp[0],expected,rtol=1e-12)
 np.testing.assert_allclose(ct[0],expected_d,rtol=1e-12)
@@ -422,18 +400,19 @@ Trace a new polynomial using only supported primitives, verify its interpreted d
 **Key functions & syntax to use:**
 - `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.jit(fn) / @jax.jit` — Traces `fn` with abstract shapes and compiles a fused XLA executable cached by input shape and dtype.
+- `jax.jit(fn) / @jax.jit` — Traces `fn` for its input signatures and compiles an executable. Changed shapes, dtypes or static arguments can trigger another compilation.
 
 **Step-by-step implementation plan:**
-1. Trace or lower the function to inspect its compiler representation (`poly_closed`).
-2. Wrap with `jax.jit` (`poly_transform`) so XLA traces and compiles the function.
-3. Convert `` to a host NumPy array for inspection or verification.
-4. Convert `` to a host NumPy array for inspection or verification.
+1. Exercise solution
+2. Trace or lower the function to inspect its compiler representation (`poly_closed`).
+3. Wrap with `jax.jit` (`poly_transform`) so XLA traces and compiles the function.
+4. Transfer the device result to the host for an independent NumPy comparison.
+5. Transfer the device result to the host for an independent NumPy comparison.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Trace a new polynomial using only supported primitives, verify its...
+# Exercise solution
 def polynomial(z):
     return ...  # TODO: return computed result
 # Trace or lower the function to inspect its compiler representation (`poly_closed`).
@@ -442,9 +421,9 @@ poly_closed = jax.make_jaxpr(...)  # TODO: compute poly_closed
 poly_transform = jax.jit(...)  # TODO: compute poly_transform
 for point in (x,x+0.6):
     pv,pt = poly_transform(...)  # TODO: compute pv,pt
-    # Convert `` to a host NumPy array for inspection or verification.
+    # Transfer the device result to the host for an independent NumPy comparison.
     np.testing.assert_allclose(pv[0],np.sum(np.asarray(point)**2-2*np.asarray(point)),rtol=1e-12)
-    # Convert `` to a host NumPy array for inspection or verification.
+    # Transfer the device result to the host for an independent NumPy comparison.
     np.testing.assert_allclose(pt[0],np.dot(2*np.asarray(point)-2,np.asarray(direction)),rtol=1e-12)
 print("Changed polynomial transformed and compiled")
 ```
@@ -452,7 +431,7 @@ print("Changed polynomial transformed and compiled")
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Trace a new polynomial using only supported primitives, verify its...
+# Exercise solution
 def polynomial(z):
     return jnp.sum(z*z+(-2.0)*z)
 # Trace or lower the function to inspect its compiler representation (`poly_closed`).
@@ -461,9 +440,9 @@ poly_closed=jax.make_jaxpr(polynomial)(x)
 poly_transform=jax.jit(lambda point,seed:tiny_jvp(poly_closed,(point,),(seed,)))
 for point in (x,x+0.6):
     pv,pt=poly_transform(point,direction)
-    # Convert `` to a host NumPy array for inspection or verification.
+    # Transfer the device result to the host for an independent NumPy comparison.
     np.testing.assert_allclose(pv[0],np.sum(np.asarray(point)**2-2*np.asarray(point)),rtol=1e-12)
-    # Convert `` to a host NumPy array for inspection or verification.
+    # Transfer the device result to the host for an independent NumPy comparison.
     np.testing.assert_allclose(pt[0],np.dot(2*np.asarray(point)-2,np.asarray(direction)),rtol=1e-12)
 print("Changed polynomial transformed and compiled")
 ```
@@ -490,20 +469,21 @@ The new program has two input variables and needs two tangent arguments.
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Trace or lower the function to inspect its compiler representation (`explicit_closed`).
-2. Convert `` to a host NumPy array for inspection or verification.
+1. Make a constant into a differentiable input (Practice)
+2. Trace or lower the function to inspect its compiler representation (`explicit_closed`).
+3. Transfer the device result to the host for an independent NumPy comparison.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Make a constant into a differentiable input (Practice): Zero tangent belonged to a captured constant relative to the...
+# Make a constant into a differentiable input (Practice)
 def explicit(z,c):
     return ...  # TODO: return computed result
 # Trace or lower the function to inspect its compiler representation (`explicit_closed`).
 explicit_closed = jax.make_jaxpr(...)  # TODO: compute explicit_closed
 constant_direction = jnp.array(...)  # TODO: compute constant_direction
 ev,et = tiny_jvp(...)  # TODO: compute ev,et
-# Convert `` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 np.testing.assert_allclose(et[0],reference_tangent+np.sum(np.asarray(constant_direction)),rtol=1e-12)
 print("Explicit offset tangent contribution:",float(jnp.sum(constant_direction)))
 ```
@@ -511,14 +491,14 @@ print("Explicit offset tangent contribution:",float(jnp.sum(constant_direction))
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Make a constant into a differentiable input (Practice): Zero tangent belonged to a captured constant relative to the...
+# Make a constant into a differentiable input (Practice)
 def explicit(z,c):
     return jnp.sum(jnp.sin(z)*z+c)
 # Trace or lower the function to inspect its compiler representation (`explicit_closed`).
 explicit_closed=jax.make_jaxpr(explicit)(x,offset)
 constant_direction=jnp.array([.2,.1,-.4])
 ev,et=tiny_jvp(explicit_closed,(x,offset),(direction,constant_direction))
-# Convert `` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 np.testing.assert_allclose(et[0],reference_tangent+np.sum(np.asarray(constant_direction)),rtol=1e-12)
 print("Explicit offset tangent contribution:",float(jnp.sum(constant_direction)))
 ```
@@ -547,31 +527,29 @@ Multiple program outputs are supported even though each supported primitive retu
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Aggregate array values to compute `multi`.
-2. Trace or lower the function to inspect its compiler representation (`multi_closed`).
-3. Convert `` to a host NumPy array for inspection or verification.
-4. Convert `` to a host NumPy array for inspection or verification.
-5. Convert `` to a host NumPy array for inspection or verification.
+1. Trace or lower the function to inspect its compiler representation (`multi_closed`).
+2. Transfer the device result to the host for an independent NumPy comparison.
+3. Transfer the device result to the host for an independent NumPy comparison.
+4. Transfer the device result to the host for an independent NumPy comparison.
+5. Transfer the device result to the host for an independent NumPy comparison.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Verify multiple outputs and negation (Challenge): Output structure and primitive result structure are distinct.
-# Aggregate array values to compute `multi`.
 multi = ...  # TODO: compute multi
 # Trace or lower the function to inspect its compiler representation (`multi_closed`).
 multi_closed = jax.make_jaxpr(...)  # TODO: compute multi_closed
 mp,mt = tiny_jvp(...)  # TODO: compute mp,mt
-# Convert `` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 np.testing.assert_allclose(mp[0],np.sum(np.asarray(x)**2),rtol=1e-12)
-# Convert `` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 np.testing.assert_allclose(mp[1],-np.asarray(x),rtol=1e-12)
-# Convert `` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 np.testing.assert_allclose(mt[0],2*np.dot(np.asarray(x),np.asarray(direction)),rtol=1e-12)
-# Convert `` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 np.testing.assert_allclose(mt[1],-np.asarray(direction),rtol=1e-12)
 rejected = ...  # TODO: compute rejected
-# Run the boundary check and catch the expected exception:
 try:tiny_jvp(multi_closed,(x,),(jnp.ones(2),))
 except ValueError:rejected=True
 assert rejected  # TODO: complete assertion check
@@ -582,21 +560,19 @@ print("Multiple output contract and malformed tangent rejection verified")
 
 ```python
 # Verify multiple outputs and negation (Challenge): Output structure and primitive result structure are distinct.
-# Aggregate array values to compute `multi`.
 multi=lambda z:(jnp.sum(z*z),-z)
 # Trace or lower the function to inspect its compiler representation (`multi_closed`).
 multi_closed=jax.make_jaxpr(multi)(x)
 mp,mt=tiny_jvp(multi_closed,(x,),(direction,))
-# Convert `` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 np.testing.assert_allclose(mp[0],np.sum(np.asarray(x)**2),rtol=1e-12)
-# Convert `` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 np.testing.assert_allclose(mp[1],-np.asarray(x),rtol=1e-12)
-# Convert `` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 np.testing.assert_allclose(mt[0],2*np.dot(np.asarray(x),np.asarray(direction)),rtol=1e-12)
-# Convert `` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 np.testing.assert_allclose(mt[1],-np.asarray(direction),rtol=1e-12)
 rejected=False
-# Run the boundary check and catch the expected exception:
 try:tiny_jvp(multi_closed,(x,),(jnp.ones(2),))
 except ValueError:rejected=True
 assert rejected

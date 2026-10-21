@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "executionMode": "real-tpu",
+  "targetValidated": true,
+  "implementationSha256": "c4bdea0fb499528ece29dded13b5a0ab5e7a43f6eb79da191c46b5d800d728aa",
+  "python": "3.12.13",
+  "jax": "0.9.2",
+  "numpy": "2.4.4",
+  "devices": [
+    {
+      "platform": "tpu",
+      "kind": "TPU v5 lite",
+      "id": 0
+    }
+  ],
+  "configuration": {
+    "kernel": "fused",
+    "implementation": "solution",
+    "shape": [
+      257,
+      513
+    ],
+    "block": [
+      8,
+      128
+    ],
+    "buffers": 2,
+    "synchronous": false,
+    "dtype": "bfloat16",
+    "repeats": 5
+  },
+  "max_abs_error_vs_represented_numpy_oracle": 0.0,
+  "measurement": {
+    "candidate": {
+      "compile_seconds": 0.057758837999983825,
+      "samples_ms": [
+        0.15012000000069747,
+        0.15193000001545443,
+        0.15226000004986417,
+        0.1736899999968955,
+        0.15754000003198598
+      ],
+      "median_ms": 0.15226000004986417,
+      "p90_ms": 0.1672300000109317
+    },
+    "baseline": {
+      "compile_seconds": 0.05157790800001294,
+      "samples_ms": [
+        0.12215000003834575,
+        0.11734999998225248,
+        0.11788999995587801,
+        0.1162300000032701,
+        0.11987999999973908
+      ],
+      "median_ms": 0.11788999995587801,
+      "p90_ms": 0.12124200002290308
+    },
+    "actual_backend": "tpu",
+    "device_kind": "TPU v5 lite",
+    "boundary": "already-placed logical inputs; complete padded/cropped wrapper output; warm synchronized execution"
+  },
+  "limits": "One target workload/device/configuration; no claim of general superiority or multi-host scaling."
+}

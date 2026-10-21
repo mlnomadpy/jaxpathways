@@ -7,6 +7,7 @@ import { inlineMath } from '../../lib/math.js';
 import { bookGuide } from '../../lib/server/book-guides.js';
 import { pageSeo, bookSchema, bookDescription } from '../../lib/server/seo.js';
 import { siteUrl } from '../../lib/urls.js';
+import { editionUrl } from '../../lib/releases.js';
 import releaseNotes from '../../../curriculum/releases.json';
 const release = releaseNotes[0];
 const bookUrl = new URL(siteUrl('book.html'), Astro.site);
@@ -89,7 +90,7 @@ const chapterIndex = new Map(authoredLessons.map((lesson, index) => [lesson.id, 
       completion and reviewed competency are separate. Try each task before opening its answer.
     </p>
     <p>
-      <a href={online(`releases.html#${release.version}`)}>Read this edition’s changes online</a>
+      <a href={editionUrl(release.version)}>Read this edition’s changes online</a>
     </p>
     <nav aria-label="Choose a learning route">
       <h2>Choose a route</h2>

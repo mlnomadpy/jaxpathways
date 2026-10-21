@@ -107,6 +107,12 @@ const schema = lesson
       </p>
       <button class="close">Back to course</button>
     </aside>
+    <aside class="reader-outline">
+      <details id="reader-outline-disclosure" open>
+        <summary>On this page</summary>
+        <nav id="reader-toc" aria-label="On this page"></nav>
+      </details>
+    </aside>
     <article
       id="lesson-body"
       data-lesson={lessonId}
@@ -124,12 +130,13 @@ const schema = lesson
         </Fragment>
       )}
     </article>
-    <aside class="reader-outline">
-      <details id="reader-outline-disclosure" open>
-        <summary>On this page</summary>
-        <nav id="reader-toc" aria-label="On this page"></nav>
-      </details>
-    </aside>
+    {lesson && phase && (
+      <script
+        id="current-lesson-data"
+        type="application/json"
+        set:html={JSON.stringify({ phaseId: phase.id, lesson }).replace(/</g, '\\u003c')}
+      />
+    )}
   </main>
   <SiteFooter />
   <script>

@@ -2,6 +2,8 @@
 
 Phase 02: JAX transformations · about 55 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Predict the sign and magnitude of a derivative from a local change.
@@ -75,40 +77,39 @@ Both $x^2$ and $x^3$ have derivative zero at $x=0$. The square has a minimum the
 
 When a model produces a surprising zero gradient, ask whether the loss actually depends on the parameter, whether you differentiated the intended argument, and whether the chosen point is stationary. Checking nearby points and a simple analytic case is often more informative than immediately changing the optimizer.
 
-## Step 1: Set up imports and input tensors
+## Import JAX automatic differentiation
 
-Import the required JAX modules and define the initial inputs for your first gradient.
+Import jax and jax.numpy for the scalar function and derivative.
 
 ```python
 import jax
 import jax.numpy as jnp
 ```
 
-Establishing explicit input shapes and dtypes first makes the downstream transformation contract deterministic.
+The differentiation API will operate on the function defined in the next block.
 
-## Step 2: Apply the core JAX transformation
+## Define the square and differentiate it
 
-Write the core computation and transformation step over the initialized inputs.
+Write $f(x) = x^2$ and create a callable derivative with `jax.grad`.
 
 ```python
 def f(x):
     return x ** 2
-# Differentiate the objective to obtain `derivative` via automatic differentiation.
 derivative = jax.grad(f)
 ```
 
-This stage executes the primary numerical transformation and binds the intermediate outputs.
+The derivative is $2x$. `jax.grad` transforms the scalar-output function, so `derivative(3)` should return $6$.
 
-## Step 3: Verify shapes and numerical invariants
+## Check the derivative at two points
 
-Check that the resulting arrays satisfy the expected shape, dtype, and numerical tolerances.
+Evaluate the derivative at 3 and at the minimum x=0.
 
 ```python
 assert jnp.allclose(derivative(3.0), 6.)
 assert jnp.allclose(derivative(0.0), 0.)
 ```
 
-These assertions lock in the exact numerical contract before you run the full experiment and variations.
+The values 6 and 0 test the rule at a nonzero point and at the stationary point.
 
 ## Build a numerical estimate
 
@@ -135,7 +136,6 @@ import jax
 import jax.numpy as jnp
 def f(x):
     return x ** 2
-# Differentiate the objective to obtain `derivative` via automatic differentiation.
 derivative = jax.grad(f)
 print(float(derivative(3.0)))
 assert jnp.allclose(derivative(3.0), 6.)
@@ -165,8 +165,6 @@ The derivative at $x=3$ is $6$, so the local prediction is $f(3+\Delta x)\approx
 The negative part of the dashed line does not mean a square became negative. It means a local linear approximation was extended beyond the neighborhood where it is useful. A gradient describes local change, not the complete function.
 
 ```python
-# Compute figure data for: A tangent describes local change
-# Generate a uniform grid of points in `grid`.
 grid = jnp.linspace(-4.0, 4.0, 81)
 point = 3.0
 slope = derivative(point)
@@ -177,7 +175,7 @@ visual_data['markers'] = [{'x': point, 'y': float(f(point)), 'label': 'selected 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:45:17.292166+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:20:04.704196+00:00. JAX 0.9.2.
 
 ```text
 Finite-difference estimate: 5.999999999999339
@@ -203,7 +201,6 @@ PASS: first-gradient
 def composed(x):
     return (3. * x + 1.) ** 2
 for point in (-1., 0., 2.):
-    # Differentiate the objective to obtain `observed` via automatic differentiation.
     observed = jax.grad(composed)(point)
     expected = 6. * (3. * point + 1.)
     print("chain rule:", point, float(observed))
@@ -219,7 +216,7 @@ The inner derivative contributes a factor of $3$. Omitting that factor is a chai
 **Predict before running:** For the float32 function $x^3$ at $x=3$, will shrinking $h$ forever keep improving the estimate? Run the sweep and compare with $27$.
 
 ```python
-# Experiment — Choose a finite-difference scale: A central difference has truncation error at larger h and...
+# Experiment — Choose a finite-difference scale
 def cubic32(x):
     return x ** 3
 point = jnp.array(3., dtype=jnp.float32)
@@ -290,13 +287,12 @@ grad defaults to `argnums=0.` The other input remains an input to the transforme
 - `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
 
 **Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+1. Differentiate the parameter you intended (Practice)
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Differentiate the parameter you intended (Practice): A parameter gradient and an input sensitivity answer...
+# Differentiate the parameter you intended (Practice)
 def scalar_prediction(weight, x):
     return ...  # TODO: return computed result
 assert jnp.allclose(jax.grad(scalar_prediction, argnums=0)(2., 3.), 3.)  # TODO: complete assertion check
@@ -306,7 +302,7 @@ assert jnp.allclose(jax.grad(scalar_prediction, argnums=1)(2., 3.), 2.)  # TODO:
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Differentiate the parameter you intended (Practice): A parameter gradient and an input sensitivity answer...
+# Differentiate the parameter you intended (Practice)
 def scalar_prediction(weight, x):
     return weight * x
 assert jnp.allclose(jax.grad(scalar_prediction, argnums=0)(2., 3.), 3.)
@@ -338,13 +334,12 @@ Write the reduction as a mathematical function first: its mean is $x^2-2x+2$.
 - `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
 
 **Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+1. Repair an objective without hiding its meaning (Challenge)
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Repair an objective without hiding its meaning (Challenge): Mean and sum agree on the minimizer here but differ by a...
+# Repair an objective without hiding its meaning (Challenge)
 def two_costs(x):
     return ...  # TODO: return computed result
 def mean_cost(x):
@@ -357,7 +352,7 @@ for point in (0., 1., 2.):
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Repair an objective without hiding its meaning (Challenge): Mean and sum agree on the minimizer here but differ by a...
+# Repair an objective without hiding its meaning (Challenge)
 def two_costs(x):
     return jnp.array([x ** 2, (x - 2.) ** 2])
 def mean_cost(x):

@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "science-04",
-  "contentHash": "bb80ff68a6e9f9b6cf42f0a888fc8bd47dd6ac73b99118ee76dcfd9e4baad8e2",
+  "contentHash": "5fa01774c3b43a21ed659b87d192b100883f4db5bf0fe76ef41669fa452dd669",
   "rendererHash": "a1bd5b648f4731ae5d5f0a24811c2540d1a0a132149ce589d17c4113509cbedf",
   "kind": "executed",
-  "generatedAt": "2026-10-20T10:46:15.322632+00:00",
+  "generatedAt": "2026-10-20T22:28:48.009694+00:00",
   "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",

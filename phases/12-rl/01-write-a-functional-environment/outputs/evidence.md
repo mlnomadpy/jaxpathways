@@ -7,7 +7,7 @@ Copy this template into your own portfolio and fill it after running your modifi
 Keep independent transition enumeration, reward/terminal checks and the absorbing-state diagnosis. Explain the state and observation contract.
 
 - Command: `python3 phases/12-rl/01-write-a-functional-environment/code/main.py`
-- Working directory: repository root
+- Working directory: Repository root
 - Python / JAX / NumPy versions: 
 - Hardware and device: 
 - My prediction before running: 

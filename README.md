@@ -15,9 +15,13 @@ Learn JAX through a shared course, then follow the work you want to do.
 
 **Setup → arrays and functions → transformations → state and loops → optimization.**
 
-Then build **models → data and recovery → Transformers → performance**, or branch into scientific computing, probabilistic modeling, RL, distributed systems, kernels, internals, inference, or operations. Each route maps its prerequisites, implemented final project and synthesis assessment review draft. Nineteen staged projects connect every phase, including four complete CPU modality harnesses.
+Then build **models → data and recovery → Transformers → performance**, or branch into scientific computing, probabilistic modeling, RL, distributed systems, kernels, internals, inference, or operations. Each route maps its prerequisites, project and synthesis assessment. Registered projects provide staged practice across foundations, research domains, model training, deployment and systems work.
 
-Read the [curriculum](CURRICULUM.md): **20 phases, 97 lesson entries, 10 pathways, four domains and seven career routes**. All 97 entries now have authored teaching, runnable CPU reference companions, exercises and explained figures. The [whole-content audit](docs/content-audit.md) and source-bound execution receipts distinguish authored material, numerical checks and review status.
+<!-- COURSE-STATUS:START -->
+Current registry: **22 phases, 103 authored lessons, 10 pathways, 7 career routes, 31 registered practice projects, 11 synthesis assessments, and 10 planned model-lifecycle capstones.** Read the [curriculum](CURRICULUM.md) and [current status](docs/course-status.md) for scope and evidence boundaries.
+<!-- COURSE-STATUS:END -->
+
+The [whole-content audit](docs/content-audit.md) and source-bound execution receipts distinguish authored material, numerical checks and review status.
 
 Two connected phases now cover [masked and contrastive pretraining](phases/17-pretraining/README.md) and [SFT, LoRA, reward models, RLHF mechanics and DPO](phases/18-posttraining/README.md). The [weight-conversion project](projects/weight-conversion/README.md) executes actual PyTorch-to-Flax mapping with layerwise errors, gradient checks and fresh-process artifact inference. See [scope and validation](docs/pretraining-posttraining-expansion.md).
 
@@ -140,7 +144,7 @@ The [regression audit project](projects/regression-audit/README.md) connects arr
 
 ## Read offline or learn with a tutor
 
-`npm run build` creates the printable HTML reader in `dist/downloads/` through Astro. Python generates EPUB, project ZIPs and tutor bundles in `public/downloads/`, which Astro copies into `dist/downloads/`. Find them on the Resources page. Books contain all 97 authored lessons. Project guides are readable on the website and included with their workspaces; assessments remain review drafts.
+`npm run build` creates the printable HTML reader in `dist/downloads/` through Astro. Python generates EPUB, project ZIPs and tutor bundles in `public/downloads/`, which Astro copies into `dist/downloads/`. Find them on the Resources page. Books contain the authored lessons in the current registry. Project guides are readable on the website and included with their workspaces; assessments remain review drafts.
 
 The landing page leads with agent tutoring. Download `public/downloads/jax-course-workspace.zip`, extract it, open its `jaxpathways` folder in your agent and run the local `npx` command below. This portable workspace includes the current canonical lessons, projects and skills; it is not a Git checkout or website build environment. Ask “Use start-learning to help me learn JAX from this workspace” to begin.
 
@@ -164,13 +168,11 @@ The [course-authoring skill](skills/create-jax-course/SKILL.md) guides contribut
 
 ## Content depth
 
-The four array lessons and five transformation lessons now include worked reasoning, prediction-led experiments, foundation/practice/challenge exercises, diagnosis, and specific evidence requirements. Authored counts describe availability, not editorial quality. All 97 lessons now have teaching sources; the remaining priorities are realistic data, connected model lifecycles and independent learner transfer. See the [current curriculum audit](docs/full-course-audit-2026-10-06.md) and [content quality standards](docs/content-quality.md).
+The four array lessons and five transformation lessons now include worked reasoning, prediction-led experiments, foundation/practice/challenge exercises, diagnosis, and specific evidence requirements. Authored counts describe availability, not editorial quality. All authored lessons have teaching sources; remaining priorities include realistic data, connected model lifecycles and independent learner transfer. See the [curriculum audit](docs/full-course-audit-2026-10-06.md) and [content quality standards](docs/content-quality.md).
 
 ## Continue into neural networks
 
 The [classifier project](projects/mlp-classifier/README.md) connects the neural-network lessons with shape contracts, independent objective/gradient checks, untouched evaluation data, weighted metric aggregation and replay. Run `python3 projects/mlp-classifier/tests/check.py --implementation solution --stage 3` to verify the reference. The starter deliberately fails until you implement it. Public synthetic tests are formative practice, not a reviewed pathway exam.
-
-
 ## Connect lessons into a model system
 
 Start from [the four modality guides](curriculum/modality-tracks.json), also available from Projects and Learning paths. Each guide gives eight stages, modality-specific failure checks, evidence requirements and links to real preparation lessons. Downloadable Markdown travels with the tutor workspace.

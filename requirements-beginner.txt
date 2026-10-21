@@ -1,0 +1,4 @@
+# Minimal local environment for the first array exercises.
+# Python compatibility: >=3.11,<3.15. Accelerator wheels require separate instructions.
+jax==0.9.2
+numpy==2.4.4

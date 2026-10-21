@@ -7,7 +7,7 @@ Copy this template into your own portfolio and fill it after running your modifi
 Keep both MLflow run IDs, source/data hashes, complete loss histories, the selection metric and predictions independently recomputed from the downloaded artifact.
 
 - Command: `python3 phases/06-recovery/06-track-experiments-and-lineage-with-mlflow/code/main.py`
-- Working directory: repository root
+- Working directory: Repository root
 - Python / JAX / NumPy versions: 
 - Hardware and device: 
 - My prediction before running: 

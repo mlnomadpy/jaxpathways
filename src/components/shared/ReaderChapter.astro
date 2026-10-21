@@ -1,5 +1,6 @@
 ---
 import { inlineMath, renderMath } from '../../lib/math.js';
+import { executionScope } from '../../lib/runtime.js';
 import Prose from './Prose.astro';
 import { renderBuildStepCodeBreakdown } from '../../lib/code-teaching.js';
 import { codePanel as sharedCodePanel } from '../../lib/lesson-content.js';
@@ -13,6 +14,7 @@ interface Props {
 }
 const { lesson, index } = Astro.props;
 const c = lesson.content!;
+const scope = executionScope(lesson);
 const codePanel = (source: string, label: string) =>
   sharedCodePanel(source, label).replace(
     '<pre ',
@@ -27,6 +29,19 @@ const { offline = false } = Astro.props;
   </p>
   <h1>{lesson.title}</h1>
   <p set:html={inlineMath(lesson.objective)} />
+  {c.setupBundle && (
+    <p>
+      <a href={new URL(c.setupBundle.url, 'https://www.tahabouhsine.com/jaxpathways/').href}>
+        {c.setupBundle.title}
+      </a>
+      . Extract the archive and work in its <code>jax-start-here</code> folder. The setup
+      instructions below refer to <code>first_experiment.py</code> in that folder.
+    </p>
+  )}
+  <aside class="runtime-note">
+    <p>{scope.description}</p>
+    <p>{scope.target}</p>
+  </aside>
   {c.objectives && (
     <>
       <h2>What you will be able to do</h2>

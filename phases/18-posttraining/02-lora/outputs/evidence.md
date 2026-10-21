@@ -7,7 +7,7 @@ Copy this template into your own portfolio and fill it after running your modifi
 Keep base-training evidence, unchanged base arrays, adapter factors/rank/alpha, initial-gradient checks and reloaded/new-input merge parity.
 
 - Command: `python3 phases/18-posttraining/02-lora/code/main.py`
-- Working directory: repository root
+- Working directory: Repository root
 - Python / JAX / NumPy versions: 
 - Hardware and device: 
 - My prediction before running: 

@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "deployment-04",
-  "contentHash": "caf11b7c04e394c5eda2ab681d76adb0d11b51fbf9641b519177c99b2d175b3a",
+  "contentHash": "3b122fa9b09545b8f09f1c5bb5ff9c2dfe950341ad1502cb25bbf3aa4ed9798a",
   "rendererHash": "a1bd5b648f4731ae5d5f0a24811c2540d1a0a132149ce589d17c4113509cbedf",
   "kind": "executed",
-  "generatedAt": "2026-10-20T10:46:53.337823+00:00",
+  "generatedAt": "2026-10-20T22:29:26.171874+00:00",
   "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",
@@ -13,7 +13,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "{'batch': 1, 'first_call_ms': 38.80516579374671, 'p50_ms': 0.01108366996049881, 'p95_ms': 0.014412146992981415, 'steady_examples_per_second': 90222.82362826653}\n{'batch': 8, 'first_call_ms': 23.322083987295628, 'p50_ms': 0.024020439013838768, 'p95_ms': 0.05706308875232933, 'steady_examples_per_second': 333049.6996907926}\n{'batch': 32, 'first_call_ms': 24.79766681790352, 'p50_ms': 0.03983359783887863, 'p95_ms': 0.05824349354952572, 'steady_examples_per_second': 803341.9458979215}\nmeasured batch-one service proxy (ms): 0.01108366996049881\nsimulated last stable/overloaded response (ms): 0.01108366996049881 0.2726582810282707\n",
+  "stdout": "{'batch': 1, 'first_call_ms': 36.794790998101234, 'p50_ms': 0.011125346645712852, 'p95_ms': 0.035493192262947545, 'steady_examples_per_second': 89884.83971286859}\n{'batch': 8, 'first_call_ms': 22.464375011622906, 'p50_ms': 0.015666475519537926, 'p95_ms': 0.049443729221820824, 'steady_examples_per_second': 510644.5281852364}\n{'batch': 32, 'first_call_ms': 23.113916162401438, 'p50_ms': 0.03337510861456394, 'p95_ms': 0.05580864381045101, 'steady_examples_per_second': 958798.3778436639}\nmeasured batch-one service proxy (ms): 0.011125346645712852\nsimulated last stable/overloaded response (ms): 0.011125346645712852 0.27368352748453617\n",
   "data": {
     "kind": "panels",
     "panels": [
@@ -35,17 +35,17 @@
           {
             "label": "warm p50",
             "y": [
-              0.01108366996049881,
-              0.024020439013838768,
-              0.03983359783887863
+              0.011125346645712852,
+              0.015666475519537926,
+              0.03337510861456394
             ]
           },
           {
             "label": "warm p95",
             "y": [
-              0.014412146992981415,
-              0.05706308875232933,
-              0.05824349354952572
+              0.035493192262947545,
+              0.049443729221820824,
+              0.05580864381045101
             ]
           }
         ]

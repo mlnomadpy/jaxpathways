@@ -2,6 +2,8 @@
 
 Phase 11: Probabilistic modeling · about 110 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - State the prior, likelihood and observation-noise assumptions
@@ -88,7 +90,7 @@ The design has three rows and two columns. The weight vector contains intercept 
 Append the conjugate update. Use a linear solve rather than writing an explicit matrix inverse for the mean.
 
 ```python
-# Step 2 — 2. Solve the posterior system: The independent fractions follow because centered inputs make the...
+# Step 2 — 2. Solve the posterior system
 def posterior(X,y,sigma,prior_scale):
     precision = jnp.eye(X.shape[1])/prior_scale**2 + X.T@X/sigma**2
     mean = jnp.linalg.solve(precision,X.T@y/sigma**2)
@@ -106,9 +108,8 @@ The independent fractions follow because centered inputs make the precision matr
 Append the prediction calculation, then run python main.py. Retain the two variance components separately.
 
 ```python
-# Step 3 — 3. Predict both the latent mean and a new observation: The variance at the extrapolation input is larger because slope...
+# Step 3 — 3. Predict both the latent mean and a new observation
 def predictive(design,mean,cov,sigma):
-    # Perform matrix / vector contraction (`@`) to compute `center`.
     center = design@mean
     latent_variance = jnp.einsum('ni,ij,nj->n',design,cov,design)
     return center,latent_variance,latent_variance+sigma**2
@@ -133,7 +134,7 @@ X = jnp.array([[1.,-1.],[1.,0.],[1.,1.]])
 y = jnp.array([-1.,1.,3.])
 sigma, prior_scale = 1., 2.
 
-# Step 2 — 2. Solve the posterior system: The independent fractions follow because centered inputs make the...
+# Step 2 — 2. Solve the posterior system
 def posterior(X,y,sigma,prior_scale):
     precision = jnp.eye(X.shape[1])/prior_scale**2 + X.T@X/sigma**2
     mean = jnp.linalg.solve(precision,X.T@y/sigma**2)
@@ -143,9 +144,8 @@ mean,cov = posterior(X,y,sigma,prior_scale)
 assert jnp.allclose(mean,jnp.array([12/13,16/9]),atol=1e-6)
 assert jnp.allclose(cov,jnp.diag(jnp.array([4/13,4/9])),atol=1e-6)
 
-# Step 3 — 3. Predict both the latent mean and a new observation: The variance at the extrapolation input is larger because slope...
+# Step 3 — 3. Predict both the latent mean and a new observation
 def predictive(design,mean,cov,sigma):
-    # Perform matrix / vector contraction (`@`) to compute `center`.
     center = design@mean
     latent_variance = jnp.einsum('ni,ij,nj->n',design,cov,design)
     return center,latent_variance,latent_variance+sigma**2
@@ -176,17 +176,14 @@ The horizontal axis is the input value. The vertical axis is predictive standard
 The gap is not a fixed standard deviation of one: variances add, then we take the square root. The lower curve is narrowest near the observed center and grows under extrapolation. These are exact Gaussian-model standard deviations, not measured error bars or empirical coverage on a real test set.
 
 ```python
-# Compute figure data for: Prediction uncertainty grows away from the observed center
-# Generate a uniform grid of points in `grid`.
 grid=jnp.linspace(-3,3,61)
-# Allocate initialized array `(_, lv, ov)` with the specified shape and dtype.
 _,lv,ov=predictive(jnp.stack([jnp.ones_like(grid),grid],axis=1),mean,cov,sigma)
 visual_data={"kind":"line","x":grid.tolist(),"xlabel":"input value","ylabel":"predictive standard deviation (target units)","series":[{"label":"latent line","y":jnp.sqrt(lv).tolist()},{"label":"new observation","y":jnp.sqrt(ov).tolist()}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:48:42.156598+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:23:04.706399+00:00. JAX 0.9.2.
 
 ```text
 posterior mean: [0.923077  1.7777778] covariance: [[0.30769232 0.        ]
@@ -220,7 +217,7 @@ The calculation treats rows as independent new evidence. Duplicating a stored fi
 **Predict before running:** With no observations, what should the posterior return?
 
 ```python
-# Experiment — Check the prior-only boundary: The posterior recovers the prior when no likelihood information...
+# Experiment — Check the prior-only boundary
 empty_mean,empty_cov = posterior(jnp.empty((0,2)),jnp.empty((0,)),sigma,prior_scale)
 assert jnp.allclose(empty_mean,0.)
 assert jnp.allclose(empty_cov,4*jnp.eye(2))
@@ -235,11 +232,6 @@ The posterior recovers the prior when no likelihood information is present.
 Strengthen the prior by changing its scale from two to one half. Predict the direction of change in the weight norm and check it. Explain why a tighter posterior need not mean a better model.
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
-
-**Key functions & syntax to use:**
-- `posterior(...)` — Call `posterior` with your updated parameters or inputs from this lesson's workspace.
-- `linalg.norm(...)` — Call `linalg.norm` with your updated parameters or inputs from this lesson's workspace.
-- `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
 
 **Step-by-step implementation plan:**
 1. Set up the changed input or configuration parameters requested in the prompt.
@@ -284,21 +276,19 @@ The intercept and slope can compensate for each other when features are not cent
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Convert `host_X` to a host NumPy array for inspection or verification.
-2. Construct an identity matrix `host_P`.
-3. Convert `` to a host NumPy array for inspection or verification.
+1. Transfer the device result to the host for an independent NumPy comparison.
+2. Transfer the device result to the host for an independent NumPy comparison.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Move away from centered inputs (Transfer / diagnosis): Nonzero covariance affects prediction uncertainty; keeping...
+# Move away from centered inputs (Transfer / diagnosis)
 shift_X = jnp.array(...)  # TODO: compute shift_X
 shift_m,shift_c = posterior(...)  # TODO: compute shift_m,shift_c
-# Convert `host_X` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 host_X = np.asarray(...)  # TODO: compute host_X
-# Construct an identity matrix `host_P`.
 host_P = np.eye(...)  # TODO: compute host_P
-# Convert `` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 np.testing.assert_allclose(shift_m,np.linalg.solve(host_P,host_X.T@np.asarray(y)),rtol=1e-5,atol=1e-6)
 assert shift_c[0,1]  # TODO: complete assertion check
 ```
@@ -306,14 +296,13 @@ assert shift_c[0,1]  # TODO: complete assertion check
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Move away from centered inputs (Transfer / diagnosis): Nonzero covariance affects prediction uncertainty; keeping...
+# Move away from centered inputs (Transfer / diagnosis)
 shift_X = jnp.array([[1.,0.],[1.,1.],[1.,2.]])
 shift_m,shift_c = posterior(shift_X,y,sigma,prior_scale)
-# Convert `host_X` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 host_X=np.asarray(shift_X,dtype=np.float64)
-# Construct an identity matrix `host_P`.
 host_P=np.eye(2)/4+host_X.T@host_X
-# Convert `` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 np.testing.assert_allclose(shift_m,np.linalg.solve(host_P,host_X.T@np.asarray(y)),rtol=1e-5,atol=1e-6)
 assert shift_c[0,1]<0
 ```
@@ -337,7 +326,7 @@ Use separate keys for weights and noise; sample with a Cholesky factor.
 ### How to write: Verify total predictive variance — Step-by-step recipe & starter scaffold
 
 **Key functions & syntax to use:**
-- `jax.random.PRNGKey(seed) & jax.random.split(key)` — Manages explicit, stateless PRNG keys—always split a key before passing subkeys into independent random draws.
+- `jax.random.PRNGKey(seed) & jax.random.split(key)` — Uses explicit PRNG keys. Split a key when you need independent random draws; reusing a key repeats its random stream.
 
 **Step-by-step implementation plan:**
 1. Create or split explicit PRNG key(s) (`(kw, kn)`) for reproducible randomness.
@@ -347,7 +336,7 @@ Use separate keys for weights and noise; sample with a Cholesky factor.
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Verify total predictive variance (Transfer / diagnosis): A simulation verifies that the independent noise term...
+# Verify total predictive variance (Transfer / diagnosis)
 # Create or split explicit PRNG key(s) (`(kw, kn)`) for reproducible randomness.
 kw,kn = jax.random.split(...)  # TODO: compute kw,kn
 # Sample deterministic random values into `weights` using an explicit PRNG key.
@@ -360,7 +349,7 @@ assert abs(float(replicated.var())-float(observation_var[0]))  # TODO: complete 
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Verify total predictive variance (Transfer / diagnosis): A simulation verifies that the independent noise term...
+# Verify total predictive variance (Transfer / diagnosis)
 # Create or split explicit PRNG key(s) (`(kw, kn)`) for reproducible randomness.
 kw,kn=jax.random.split(jax.random.key(37))
 # Sample deterministic random values into `weights` using an explicit PRNG key.

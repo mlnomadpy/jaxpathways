@@ -1,10 +1,10 @@
 """Tracing, static arguments, and recompilation: worked experiments and reference solutions. CPU checks."""
 
-# Step 1: Set up imports and input tensors
+# Import JAX tracing and array operations
 import jax
 import jax.numpy as jnp
 
-# Step 2: Apply the core JAX transformation
+# Make the reduction mode static during tracing
 def reduce_values(x, mode):
     if mode == "sum":
         return x.sum()
@@ -14,12 +14,12 @@ def reduce_values(x, mode):
 # Wrap with `jax.jit` (`compiled`) so XLA traces and compiles the function.
 compiled = jax.jit(reduce_values, static_argnames=("mode",))
 
-# Step 3: Verify shapes and numerical invariants
+# Run and check both compiled specializations
 x = jnp.array([1., 2., 3.])
 assert jnp.allclose(compiled(x, mode="sum"), 6.)
 assert jnp.allclose(compiled(x, mode="mean"), 2.)
 
-# Tracing, static arguments, and recompilation: Tracing observes how Python builds an array computation from...
+# Tracing, static arguments, and recompilation
 import jax
 import jax.numpy as jnp
 def reduce_values(x, mode):
@@ -54,13 +54,12 @@ assert jnp.allclose(staged_squares(x), 14.)
 assert jnp.allclose(staged_squares(x + 1.), 29.)
 
 # Experiment: Reproduce and repair a dynamic branch
-# Experiment — Reproduce and repair a dynamic branch: The test expects a particular category of error and confirms the...
+# Experiment — Reproduce and repair a dynamic branch
 def python_branch(value):
     if value > 0.:
         return value ** 2
     return -value
 assert python_branch(-2.) == 2.
-# Run the boundary check and catch the expected exception:
 try:
     jax.jit(python_branch)(jnp.array(-2.))
 except jax.errors.TracerBoolConversionError:
@@ -75,7 +74,7 @@ assert jnp.allclose(compiled_branch(jnp.array(-2.)), 2.)
 assert jnp.allclose(compiled_branch(jnp.array(3.)), 9.)
 
 # Reference solution. Try the exercise before reading this.
-# Exercise solution: Foundation · Extend reduce_values with a static max mode while...
+# Exercise solution
 def choose_reduction(values, mode):
     if mode == "sum":
         return values.sum()
@@ -89,7 +88,6 @@ choose = jax.jit(choose_reduction, static_argnames=("mode",))
 for values in (x, jnp.array([-4., -1., -2.])):
     for mode, reference in (("sum", jnp.sum), ("mean", jnp.mean), ("max", jnp.max)):
         assert jnp.allclose(choose(values, mode=mode), reference(values))
-# Run the boundary check and catch the expected exception:
 try:
     choose(x, mode="typo")
 except ValueError:
@@ -107,14 +105,13 @@ for values in (jnp.array([-2., 0., 3.]), jnp.array([5., -4., -1.])):
     assert jnp.allclose(compiled_absolute(values), jnp.abs(values))
 
 # Reference practice: Audit a shape-dependent specialization
-# Audit a shape-dependent specialization (Challenge): Changing the length changes shape metadata and can need a...
+# Audit a shape-dependent specialization (Challenge)
 def plain_sum_squares(values):
     return jnp.sum(values ** 2)
 # Wrap with `jax.jit` (`compiled_squares`) so XLA traces and compiles the function.
 compiled_squares = jax.jit(plain_sum_squares)
 for length in (3, 5):
     for shift in (0., 1.):
-        # Create evenly spaced index values in `values`.
         values = jnp.arange(length, dtype=jnp.float32) + shift
         expected = sum(float(v) ** 2 for v in values)
         assert jnp.allclose(compiled_squares(values), expected)

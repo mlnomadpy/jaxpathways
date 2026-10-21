@@ -47,13 +47,13 @@
         "math": "\\begin{aligned}S&=\\frac{QK^\\mathsf{T}}{\\sqrt{d_k}}\\\\A_{ij}&=\\frac{\\exp(S_{ij}-m_i)}{\\sum_t\\exp(S_{it}-m_i)},\\quad m_i=\\max_t S_{it}\\\\O&=AV\\end{aligned}"
       }
     ],
-    "code": "# Step 1 — 1. Prepare the experiment: These imports provide JAX array transformations and NumPy...\nimport jax\nimport jax.numpy as jnp\nimport numpy as np\n\n# Step 2 — 2. Implement the mechanism: Multiplying Q\\in\\mathbb{R}^{T_q\\times D_k} by...\ndef attend(q, k, v):\n    scores = q @ k.T / jnp.sqrt(q.shape[-1])\n    # Apply nonlinear activation or probability normalization to compute `weights`.\n    weights = jax.nn.softmax(scores, axis=-1)\n    return weights @ v, weights\n\n# Step 3 — 3. Run and check: Uniform weights 1/3; both output rows [2, 2].\nq = jnp.zeros((2, 2))\nk = jnp.array([[1., 0.], [0., 1.], [1., 1.]])\nv = jnp.array([[2., 0.], [0., 4.], [4., 2.]])\noutput, weights = attend(q, k, v)\nprint(\"Weights / output:\", weights, output)\nassert jnp.allclose(weights, jnp.full((2, 3), 1/3))\nassert jnp.allclose(output, jnp.array([[2., 2.], [2., 2.]]))\nassert jnp.allclose(jnp.sum(weights, axis=-1), 1.)",
+    "code": "# Step 1 — 1. Prepare the experiment\nimport jax\nimport jax.numpy as jnp\nimport numpy as np\n\n# Step 2 — 2. Implement the mechanism\ndef attend(q, k, v):\n    scores = q @ k.T / jnp.sqrt(q.shape[-1])\n    weights = jax.nn.softmax(scores, axis=-1)\n    return weights @ v, weights\n\n# Step 3 — 3. Run and check: Uniform weights 1/3; both output rows [2, 2].\nq = jnp.zeros((2, 2))\nk = jnp.array([[1., 0.], [0., 1.], [1., 1.]])\nv = jnp.array([[2., 0.], [0., 4.], [4., 2.]])\noutput, weights = attend(q, k, v)\nprint(\"Weights / output:\", weights, output)\nassert jnp.allclose(weights, jnp.full((2, 3), 1/3))\nassert jnp.allclose(output, jnp.array([[2., 2.], [2., 2.]]))\nassert jnp.allclose(jnp.sum(weights, axis=-1), 1.)",
     "output": "Uniform weights \\(1/3\\); both output rows \\([2, 2]\\).",
     "experiments": [
       {
         "title": "Compare a nonzero query with NumPy",
         "prediction": "Which keys become more relevant for query \\([2, 0]\\)?",
-        "code": "# Experiment — Compare a nonzero query with NumPy: A separate NumPy calculation checks nonuniform weighting and the...\nq_new = jnp.array([[2., 0.]])\nactual, w_new = attend(q_new, k, v)\n# Convert `scores_np` to a host NumPy array for inspection or verification.\nscores_np = np.asarray(q_new) @ np.asarray(k).T / np.sqrt(2)\n# Reduce along axis=-1 to compute `raw`.\nraw = np.exp(scores_np - scores_np.max(axis=-1, keepdims=True))\n# Reduce along axis=-1 to compute `reference_w`.\nreference_w = raw / raw.sum(axis=-1, keepdims=True)\nnp.testing.assert_allclose(w_new, reference_w, rtol=1e-6, atol=1e-6)\n# Convert `` to a host NumPy array for inspection or verification.\nnp.testing.assert_allclose(actual, reference_w @ np.asarray(v), rtol=1e-6, atol=1e-6)",
+        "code": "# Experiment — Compare a nonzero query with NumPy\nq_new = jnp.array([[2., 0.]])\nactual, w_new = attend(q_new, k, v)\n# Transfer the device result to the host for an independent NumPy comparison.\nscores_np = np.asarray(q_new) @ np.asarray(k).T / np.sqrt(2)\n# Reduce along axis=-1 to compute `raw`.\nraw = np.exp(scores_np - scores_np.max(axis=-1, keepdims=True))\n# Reduce along axis=-1 to compute `reference_w`.\nreference_w = raw / raw.sum(axis=-1, keepdims=True)\nnp.testing.assert_allclose(w_new, reference_w, rtol=1e-6, atol=1e-6)\n# Transfer the device result to the host for an independent NumPy comparison.\nnp.testing.assert_allclose(actual, reference_w @ np.asarray(v), rtol=1e-6, atol=1e-6)",
         "output": "Keys \\(0\\) and \\(2\\) receive equal larger weights than key \\(1\\).",
         "explanation": "A separate NumPy calculation checks nonuniform weighting and the output axis."
       },
@@ -73,7 +73,7 @@
         "difficulty": "Transfer / diagnosis",
         "prompt": "Make each value a single scalar \\([3, 6, 9]\\). Check the output shape and zero-query mean.",
         "hint": "The score matrix does not depend on Dv.",
-        "solution": "# Use a different value dimension (Transfer / diagnosis): Queries and keys share Dk; values may have an independent...\nscalar_v = jnp.array([[3.], [6.], [9.]])\nscalar_out, _ = attend(q, k, scalar_v)\n# Check tensor shape invariant: `scalar_out.shape == (2, 1)`\nassert scalar_out.shape == (2, 1)\nassert jnp.allclose(scalar_out, 6.)",
+        "solution": "# Use a different value dimension (Transfer / diagnosis)\nscalar_v = jnp.array([[3.], [6.], [9.]])\nscalar_out, _ = attend(q, k, scalar_v)\n# Check tensor shape invariant: `scalar_out.shape == (2, 1)`\nassert scalar_out.shape == (2, 1)\nassert jnp.allclose(scalar_out, 6.)",
         "explanation": "Queries and keys share \\(Dk\\); values may have an independent feature dimension."
       },
       {
@@ -116,13 +116,13 @@
       {
         "title": "1. Prepare the experiment",
         "instruction": "In the CPU environment from setup, create main.py and add this block. Write down the dimensions and the known result before continuing.",
-        "code": "# Step 1 — 1. Prepare the experiment: These imports provide JAX array transformations and NumPy...\nimport jax\nimport jax.numpy as jnp\nimport numpy as np",
+        "code": "# Step 1 — 1. Prepare the experiment\nimport jax\nimport jax.numpy as jnp\nimport numpy as np",
         "explanation": "These imports provide JAX array transformations and NumPy reference calculations. Define the numerical functions next; the final build block supplies the concrete fixture and checks."
       },
       {
         "title": "2. Implement the mechanism",
         "instruction": "Append this block in the same file. Follow the shape diagram above and identify each reduction or state transition.",
-        "code": "# Step 2 — 2. Implement the mechanism: Multiplying Q\\in\\mathbb{R}^{T_q\\times D_k} by...\ndef attend(q, k, v):\n    scores = q @ k.T / jnp.sqrt(q.shape[-1])\n    # Apply nonlinear activation or probability normalization to compute `weights`.\n    weights = jax.nn.softmax(scores, axis=-1)\n    return weights @ v, weights",
+        "code": "# Step 2 — 2. Implement the mechanism\ndef attend(q, k, v):\n    scores = q @ k.T / jnp.sqrt(q.shape[-1])\n    weights = jax.nn.softmax(scores, axis=-1)\n    return weights @ v, weights",
         "explanation": "Multiplying \\(Q\\in\\mathbb{R}^{T_q\\times D_k}\\) by \\(K^\\mathsf{T}\\in\\mathbb{R}^{D_k\\times T_k}\\) gives scores of shape \\((T_q,T_k)\\). Softmax normalizes each query’s weights across the \\(T_k\\) keys. Multiplying by \\(V\\in\\mathbb{R}^{T_k\\times D_v}\\) then gives an output of shape \\((T_q,D_v)\\)."
       },
       {
@@ -139,7 +139,7 @@
       "reading": "Rows are queries and columns are keys. Each cell gives the attention weight assigned to that key by that query. Both panels use the same color range from \\(0\\) to \\(1\\), so their shades are directly comparable. Read across one row at a time; its weights sum to \\(1\\).\n\nWith zero queries, all scores are equal and every key receives weight \\(1/3\\). With changed queries, the first row becomes approximately \\((0.472,0.0565,0.472)\\), while the second becomes \\((0.0565,0.472,0.472)\\). Each row favors two tied keys, not a single winning key.",
       "connection": "The changed queries are \\((3,0)\\) and \\((0,3)\\); the keys are \\((1,0)\\), \\((0,1)\\), and \\((1,1)\\). The third key matches the active coordinate of either query, explaining why it ties for the highest weight in both rows. Softmax converts these relative scores into normalized, positive weights.\n\nThe weights mix the value vectors; they are not the output vectors themselves. In the uniform panel, averaging the values \\((2,0)\\), \\((0,4)\\), and \\((4,2)\\) produces \\((2,2)\\) for each query. To understand a changed output, first read its row of weights, then form that weighted sum.",
       "alt": "Each query distributes one unit of attention. Rows are queries and columns are keys. Each cell gives the attention weight assigned to that key by that query. Both panels use the same color range from \\(0\\) to \\(1\\), so their shades are directly comparable. Read across one row at a time; its weights sum to \\(1\\). With zero queries, all scores are equal and every key receives weight \\(1/3\\). With changed queries, the first row becomes approximately \\((0.472,0.0565,0.472)\\), while the second becomes \\((0.0565,0.472,0.472)\\). Each row favors two tied keys, not a single winning key.",
-      "code": "# Compute figure data for: Each query distributes one unit of attention\n# Create device-backed JAX array `changed_q`.\nchanged_q = jnp.array([[3.0, 0.0], [0.0, 3.0]])\n_, focused = attend(changed_q, k, v)\nvisual_data = {'kind': 'panels', 'panels': [{'kind': 'heatmap', 'title': 'Zero queries', 'values': weights.tolist(), 'rows': ['query 0', 'query 1'], 'columns': ['key 0', 'key 1', 'key 2'], 'unit': 'attention weight'}, {'kind': 'heatmap', 'title': 'Changed queries', 'values': focused.tolist(), 'rows': ['query 0', 'query 1'], 'columns': ['key 0', 'key 1', 'key 2'], 'unit': 'attention weight'}]}"
+      "code": "changed_q = jnp.array([[3.0, 0.0], [0.0, 3.0]])\n_, focused = attend(changed_q, k, v)\nvisual_data = {'kind': 'panels', 'panels': [{'kind': 'heatmap', 'title': 'Zero queries', 'values': weights.tolist(), 'rows': ['query 0', 'query 1'], 'columns': ['key 0', 'key 1', 'key 2'], 'unit': 'attention weight'}, {'kind': 'heatmap', 'title': 'Changed queries', 'values': focused.tolist(), 'rows': ['query 0', 'query 1'], 'columns': ['key 0', 'key 1', 'key 2'], 'unit': 'attention weight'}]}"
     }
   }
 }

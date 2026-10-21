@@ -2,12 +2,14 @@
 
 Phase 00: Setup & first steps · about 45 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
-- Verify the device of a completed prediction and its independent numerical reference.
-- Provision a hosted TPU notebook or single-host Google Cloud TPU VM and verify device discovery.
-- Launch an explicit TPU target path over SSH that fails when TPU is unavailable, then clean up the resource.
-- Run subsequent course lessons and companion labs on TPU in parallel with local CPU practice.
+- Verify the requested platform, observed device, completed prediction, and independent numerical reference.
+- Provision a single-host Cloud TPU VM for a named qualification target and verify device discovery without treating it as workload evidence.
+- Run the downloadable launcher or precision target with the pinned qualification environment and retain its observed TPU-backend receipt.
+- Review each additional program’s source, dependencies, topology, and data ownership before considering a TPU run.
 
 ## The problem
 
@@ -52,92 +54,105 @@ The tolerance allows small floating-point differences; a successful comparison m
 **Run the CPU reference**
 
 ```bash
-# Run run the cpu reference using the course Python environment
+# Run the CPU reference using the course Python environment
 python main.py
 ```
 
 **Expected:** The report names cpu, shape [8], float32, a completed output device and a small maximum absolute error. The first prediction is 0.34375.
 
-## Get a TPU running: hosted notebook or Google Cloud TPU VM
+## Set up a single-host TPU VM for reviewed targets
 
-You do not need to wait until the end of the course to use a TPU. There are two practical ways to get a TPU running right now so you can run experiments alongside the course:
+For the first physical TPU practice, use only the qualification targets in the [downloadable TPU qualification workspace](https://www.tahabouhsine.com/jaxpathways/downloads/jax-tpu-gcp.zip) (`jax-tpu-gcp.zip`) on a single-host v5e1 TPU VM. This lesson’s `main.py` is a CPU-validated reference; its recorded output is not a physical TPU result. Other course scripts need their own source, dependency, topology, and data-ownership review before target execution.
 
-1. Hosted notebook TPU (Google Colab or Kaggle): open Runtime -> Change runtime type, select a TPU accelerator (such as TPU v5e-1 or v6e-1), and restart the kernel before importing JAX so the process does not lock in a CPU backend.
+A Cloud TPU VM is billable and stays active after Python exits. Choose an approved project and zone, verify access and quota, and set a bounded lifetime before provisioning. Follow the same cleanup steps after collecting the target receipts.
 
-2. Google Cloud single-host TPU VM: install the Google Cloud CLI on your laptop, authenticate with `gcloud auth login`, and create a single-host TPU VM (such as `v5litepod-1`, `v5litepod-4` or `v6e-1`) in an approved project and zone. Wait until the VM state is `READY`. Remember that a Cloud TPU VM is a billable machine whose lifetime is separate from your Python process: when Python exits, the VM keeps running until you delete it or its bounded max-run-duration expires.
-
-**From your laptop: provision a single-host Cloud TPU VM and check READY state**
+**From your laptop: request a bounded Flex Start TPU and inspect the queue**
 
 ```bash
-# From your laptop: provision a single-host Cloud TPU VM and check READY state
+# Use your approved project; this recorded v5e setup uses us-west4-a.
 export PROJECT_ID="REPLACE_WITH_YOUR_PROJECT"
-export ZONE="us-central1-a"
+export ZONE="us-west4-a"
 export TPU_NAME="jax-course-tpu-01"
-gcloud compute tpus tpu-vm create "$TPU_NAME" \
-  --project="$PROJECT_ID" --zone="$ZONE" \
-  --accelerator-type="v5litepod-1" --version="v2-alpha-tpuv5-lite"
+gcloud alpha compute tpus queued-resources create "$TPU_NAME" \
+  --project="$PROJECT_ID" --zone="$ZONE" --node-id="$TPU_NAME" \
+  --accelerator-type=v5litepod-1 --runtime-version=v2-alpha-tpuv5-lite \
+  --provisioning-model=FLEX_START --max-run-duration=1h \
+  --valid-until-duration=30m --scopes=https://www.googleapis.com/auth/devstorage.read_only --async
+gcloud alpha compute tpus queued-resources describe "$TPU_NAME" \
+  --project="$PROJECT_ID" --zone="$ZONE" --format="value(state.state)"
+# Only after the queue reports ACTIVE:
 gcloud compute tpus tpu-vm describe "$TPU_NAME" \
   --project="$PROJECT_ID" --zone="$ZONE" --format="value(state)"
 ```
 
-**Expected:** The Cloud TPU VM is created in your project/zone and describe prints READY. For bounded Flex-start templates or queued resources, see the TPU and Google Cloud practical guide.
+**Expected:** The asynchronous request may report WAITING_FOR_RESOURCES or PROVISIONING before ACTIVE. Repeat describe and wait for ACTIVE and a READY VM before uploading or connecting. The request has a 30-minute queue window and a one-hour run cap. If it expires or fails, inspect its status and delete your queued request using the cleanup command below, even if no VM became active.
 
-**Inside the TPU VM or hosted TPU runtime: install JAX for TPU and verify devices**
-
-```bash
-# Run inside the tpu vm or hosted tpu runtime: install jax for tpu and verify devices using the course Python environment
-python3 -m venv .venv
-.venv/bin/python -m pip install --upgrade "jax[tpu]" numpy
-.venv/bin/python -c "import jax; print(jax.default_backend(), jax.devices('tpu'))"
-```
-
-**Expected:** The TPU environment installs compatible JAX and libtpu packages and prints tpu with the visible TpuDevice list. Record the resolved versions; installation alone is not the execution check.
-
-## Launch the experiment on TPU, retrieve the receipt, and delete the VM
-
-Once your TPU environment is ready, copy `main.py` to the TPU host, launch it in a fresh process with `COURSE_EXPECT_PLATFORM=tpu` and `JAX_PLATFORMS=tpu`, and copy the output report back to your laptop. The call to `jax.devices(expected)` requests TPU explicitly and fails immediately if the TPU backend is unavailable.
-
-This is a single-controller, single-device placement check even if the runtime exposes four or eight chips. Multi-chip sharding on one host and multi-host launches with `jax.distributed.initialize()` are covered in the virtual-CPU and distributed lessons. As soon as you copy your evidence back to your laptop, delete the Cloud TPU VM and verify that the instance list is empty.
-
-**Require TPU execution inside an active TPU session**
+**From your laptop: upload the qualification workspace and connect**
 
 ```bash
-# Require TPU execution inside an active TPU session
-COURSE_EXPECT_PLATFORM=tpu JAX_PLATFORMS=tpu python main.py
+# From the folder containing the downloaded jax-tpu-gcp.zip
+gcloud compute tpus tpu-vm scp jax-tpu-gcp.zip "$TPU_NAME:~/jax-tpu-gcp.zip" --project="$PROJECT_ID" --zone="$ZONE"
+gcloud compute tpus tpu-vm ssh "$TPU_NAME" --project="$PROJECT_ID" --zone="$ZONE"
 ```
 
-**Expected:** On a functioning TPU runtime the report names tpu and all assertions pass. An unavailable TPU must raise an error instead of producing a CPU success report.
+**Expected:** Copy the ZIP from the folder containing the downloaded workspace, then SSH into the TPU VM and keep the session open for the following extraction and installation commands.
 
-**From your laptop: copy main.py, launch over SSH, copy back evidence, and delete the TPU VM**
+**Inside the TPU VM: extract the workspace and install the pinned qualification environment**
 
 ```bash
-# From your laptop: copy main.py, launch over SSH, copy back evidence, and delete the TPU VM
-gcloud compute tpus tpu-vm scp main.py "$TPU_NAME:~/main.py" --project="$PROJECT_ID" --zone="$ZONE"
-gcloud compute tpus tpu-vm ssh "$TPU_NAME" --project="$PROJECT_ID" --zone="$ZONE" \
-  --command="COURSE_EXPECT_PLATFORM=tpu JAX_PLATFORMS=tpu .venv/bin/python ~/main.py | tee ~/tpu-report.txt"
-gcloud compute tpus tpu-vm scp "$TPU_NAME:~/tpu-report.txt" ./tpu-report.txt --project="$PROJECT_ID" --zone="$ZONE"
-gcloud compute tpus tpu-vm delete "$TPU_NAME" --project="$PROJECT_ID" --zone="$ZONE" --quiet
-gcloud compute tpus tpu-vm list --project="$PROJECT_ID" --zone="$ZONE"
+# Run inside the TPU VM after uploading jax-tpu-gcp.zip.
+python3 -m zipfile -e ~/jax-tpu-gcp.zip ~/
+cd ~/jax-tpu-gcp
+python3 -m pip install --user 'uv==0.11.11'
+~/.local/bin/uv venv --python 3.12.13 --managed-python .venv
+~/.local/bin/uv pip install --python .venv/bin/python \
+  -r resources/tpu-gcp/requirements-qualification.txt \
+  --find-links https://storage.googleapis.com/jax-releases/libtpu_releases.html
+~/.local/bin/uv pip freeze --python .venv/bin/python > tpu-environment.txt
+.venv/bin/python --version
+JAX_PLATFORMS=tpu .venv/bin/python -c "import jax; devices=jax.devices(); assert jax.default_backend() == 'tpu' and devices and all(d.platform == 'tpu' for d in devices); print(jax.__version__, jax.local_device_count(), devices)"
 ```
 
-**Expected:** The remote command runs on the TPU VM, writes tpu-report.txt locally, deletes the TPU VM, and confirms no running TPU VM remains.
+**Expected:** The base image Python extracts the ZIP and installs uv. uv creates the tested Python 3.12.13 environment and installs the pinned qualification packages. Keep tpu-environment.txt. Device discovery asserts the active backend is TPU; discovery alone is not a workload receipt.
 
-## Run the rest of the course on TPU in parallel
+## Run reviewed TPU targets, retrieve receipts, and delete the queued resource
 
-Use this same launch pattern in parallel with every phase that follows. Every authored lesson in the course provides a standalone script under `exercises/<lesson-id>.py` (and a notebook under `exercises/<lesson-id>.ipynb`). As you work through Arrays (Phase 01), Transforms (Phase 02), State (Phase 03), Optimization (Phase 04), Networks (Phase 05) and Recovery (Phase 06), run the CPU reference locally first, then upload the workspace or script to your TPU runtime and run it with `JAX_PLATFORMS=tpu`.
+The lesson’s `main.py` remains a CPU reference; do not use it as evidence of physical TPU execution. For the reviewed first target run, upload and extract the ZIP workspace, install `resources/tpu-gcp/requirements-qualification.txt`, then run its launcher and precision target with the TPU backend explicitly required. The launcher receipt should show a `started` event with backend `tpu`, a completed run and checkpoint; the precision report should record `platform: tpu` and its one-device scope. These receipts apply only to the named targets and configurations. They do not qualify another lesson script, a multi-chip collective, a multi-host job, or production model quality.
 
-In parallel with the early phases, work through the two standalone TPU guides included in the course workspace (`jax-tpu-gcp.zip`): use `resources/tpu-gcp/launch.py` to practice supervised TPU job lifecycles and checkpoint recovery, and use `resources/tpu-gcp/precision_profile.py` to measure BF16/INT8 numerical error and capture XProf device traces before you scale up to full Transformers and distributed training.
-
-**Run any course lesson script and the companion TPU labs on a TPU host**
+**Inside the TPU VM: run the reviewed launcher and precision targets**
 
 ```bash
-# Run any course lesson script and the companion TPU labs on a TPU host
-JAX_PLATFORMS=tpu .venv/bin/python exercises/arrays-01.py
-.venv/bin/python resources/tpu-gcp/launch.py --platform tpu --run-dir runs/tpu-first --steps 8 --timeout 180
-.venv/bin/python resources/tpu-gcp/precision_profile.py --platform tpu --run-dir runs/precision-tpu --steps 20 --trace
+# Run inside the TPU VM from ~/jax-tpu-gcp after installing the pinned requirements
+set -o pipefail
+.venv/bin/python resources/tpu-gcp/launch.py --platform tpu --run-dir runs/tpu-first --steps 4 --timeout 180
+.venv/bin/python resources/tpu-gcp/launch.py --platform tpu --run-dir runs/tpu-first --steps 8 --timeout 180 --resume
+.venv/bin/python resources/tpu-gcp/precision_profile.py --platform tpu --run-dir runs/precision-tpu --steps 5 --trace
 ```
 
-**Expected:** The lesson script and companion TPU labs run on the TPU backend, writing verifiable device receipts, checkpoints, numerical error reports and XProf trace files.
+**Expected:** Inspect `runs/tpu-first/events.jsonl` and verify the started event names `backend: tpu`; the final summary should be completed at step 8, with the first attempt retained under history. Inspect `runs/precision-tpu/report.json` and verify `platform` is `tpu`, `local_device_count` is 1, and the five synchronized samples are present. Copy the evidence and `tpu-environment.txt` to your laptop before deleting the VM.
+
+**From your laptop: retrieve receipts and delete your queued resource**
+
+```bash
+# Run from your laptop after the target commands finish
+mkdir -p evidence/tpu-first
+gcloud compute tpus tpu-vm scp --recurse "$TPU_NAME:~/jax-tpu-gcp/runs/tpu-first" evidence/tpu-first/ --project="$PROJECT_ID" --zone="$ZONE"
+gcloud compute tpus tpu-vm scp --recurse "$TPU_NAME:~/jax-tpu-gcp/runs/precision-tpu" evidence/tpu-first/ --project="$PROJECT_ID" --zone="$ZONE"
+gcloud compute tpus tpu-vm scp "$TPU_NAME:~/jax-tpu-gcp/tpu-environment.txt" evidence/tpu-first/ --project="$PROJECT_ID" --zone="$ZONE"
+# Delete this request and its VM, including after a failed or expired attempt.
+gcloud alpha compute tpus queued-resources delete "$TPU_NAME" \
+  --project="$PROJECT_ID" --zone="$ZONE" --force --quiet
+gcloud alpha compute tpus queued-resources list --project="$PROJECT_ID" --zone="$ZONE" \
+  --filter="name~'(^|/)${TPU_NAME}$'" --format="value(name)"
+gcloud compute tpus tpu-vm list --project="$PROJECT_ID" --zone="$ZONE" \
+  --filter="name~'(^|/)${TPU_NAME}$'" --format="value(name)"
+```
+
+**Expected:** Both target folders and the resolved environment are copied locally before cleanup. The forced queued-resource deletion removes this request and its VM. Both name-filtered lists should be empty; repeat the checks if deletion is still in progress. Other workloads in your project may remain active.
+
+## Keep CPU lessons separate from reviewed TPU targets
+
+Continue the course using its recorded CPU references. The ZIP launcher and precision target provide bounded physical TPU practice with pinned dependencies and explicit backend receipts; use only the exact programs and configurations described by those receipts. Do not upload arbitrary lesson scripts or infer compatibility from a successful CPU run. Before another TPU workload, review its source, dependencies, backend assertion, topology, and input ownership, then collect target-specific evidence.
 
 ## Diagnose the boundary that failed
 
@@ -150,7 +165,7 @@ An old notebook kernel may retain an initialized CPU backend or stale variables.
 Add this block to main.py after the preceding block. Run the assembled file in a fresh process.
 
 ```python
-# Step 1 — Choose the requested platform: Keep the requested backend, observed output placement and...
+# Step 1 — Choose the requested platform
 import os
 import json
 import platform
@@ -166,15 +181,13 @@ Keep the requested backend, observed output placement and independent arithmetic
 Add this block to main.py after the preceding block. Run the assembled file in a fresh process.
 
 ```python
-# Step 2 — Place inputs and compare a completed prediction: Keep the requested backend, observed output placement and...
+# Step 2 — Place inputs and compare a completed prediction
 expected = os.environ.get('COURSE_EXPECT_PLATFORM', 'cpu')
-# Guard input contract (`expected not in {'cpu', 'tpu'}`) and fail fast if violated.
 if expected not in {'cpu', 'tpu'}:
     raise ValueError('COURSE_EXPECT_PLATFORM must be cpu or tpu')
 # Selecting a requested backend must fail when it is unavailable.
 devices = jax.devices(expected)
 assert devices and all(d.platform == expected for d in devices)
-# Construct and reshape `x_host` into the target tensor dimensions.
 x_host = np.arange(24, dtype=np.float32).reshape(8, 3) / 8
 w_host = np.array([0.5, -0.25, 1.0], dtype=np.float32)
 # Place `x` explicitly onto the target JAX device.
@@ -184,13 +197,13 @@ w = jax.device_put(w_host, devices[0])
 # Wrap with `jax.jit` (`predict`) so XLA traces and compiles the function.
 predict = jax.jit(lambda a, b: a @ b + jnp.float32(0.125))
 y = predict(x, w)
-# Synchronize host execution until asynchronous device computation completes.
+# Wait for device work to finish before timing it or comparing its result on the host.
 y.block_until_ready()
 reference = x_host @ w_host + np.float32(0.125)
-# Convert `` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 np.testing.assert_allclose(np.asarray(y), reference, rtol=1e-5, atol=1e-5)
 assert {d.platform for d in y.devices()} == {expected}
-# Convert `report` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 report = dict(expected=expected, output_devices=[str(d) for d in y.devices()],
               platform=next(iter(y.devices())).platform, jax=jax.__version__,
               python=platform.python_version(), shape=list(y.shape), dtype=str(y.dtype),
@@ -218,7 +231,7 @@ Checking these invariants confirms the computation is ready for the full worked 
 ## Run the example
 
 ```python
-# Step 1 — Choose the requested platform: Keep the requested backend, observed output placement and...
+# Step 1 — Choose the requested platform
 import os
 import json
 import platform
@@ -226,15 +239,13 @@ import numpy as np
 import jax
 import jax.numpy as jnp
 
-# Step 2 — Place inputs and compare a completed prediction: Keep the requested backend, observed output placement and...
+# Step 2 — Place inputs and compare a completed prediction
 expected = os.environ.get('COURSE_EXPECT_PLATFORM', 'cpu')
-# Guard input contract (`expected not in {'cpu', 'tpu'}`) and fail fast if violated.
 if expected not in {'cpu', 'tpu'}:
     raise ValueError('COURSE_EXPECT_PLATFORM must be cpu or tpu')
 # Selecting a requested backend must fail when it is unavailable.
 devices = jax.devices(expected)
 assert devices and all(d.platform == expected for d in devices)
-# Construct and reshape `x_host` into the target tensor dimensions.
 x_host = np.arange(24, dtype=np.float32).reshape(8, 3) / 8
 w_host = np.array([0.5, -0.25, 1.0], dtype=np.float32)
 # Place `x` explicitly onto the target JAX device.
@@ -244,13 +255,13 @@ w = jax.device_put(w_host, devices[0])
 # Wrap with `jax.jit` (`predict`) so XLA traces and compiles the function.
 predict = jax.jit(lambda a, b: a @ b + jnp.float32(0.125))
 y = predict(x, w)
-# Synchronize host execution until asynchronous device computation completes.
+# Wait for device work to finish before timing it or comparing its result on the host.
 y.block_until_ready()
 reference = x_host @ w_host + np.float32(0.125)
-# Convert `` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 np.testing.assert_allclose(np.asarray(y), reference, rtol=1e-5, atol=1e-5)
 assert {d.platform for d in y.devices()} == {expected}
-# Convert `report` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 report = dict(expected=expected, output_devices=[str(d) for d in y.devices()],
               platform=next(iter(y.devices())).platform, jax=jax.__version__,
               python=platform.python_version(), shape=list(y.shape), dtype=str(y.dtype),
@@ -279,14 +290,13 @@ The horizontal axis is the observation row index, starting at $0$. The vertical 
 The line is a check of arithmetic and ordering for these eight observations. Read the printed platform report to determine placement; a curve cannot identify the device that produced it. The changed-bias exercise translates this line downward, while row reversal changes the order. This recorded figure comes from the CPU path and carries no TPU timing or correctness claim.
 
 ```python
-# Compute figure data for: The same prediction checked two ways
-# Convert `visual_data` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 visual_data={'kind':'line','x':list(range(8)),'xlabel':'observation row','ylabel':'prediction','series':[{'label':'JAX: '+expected,'y':np.asarray(y).tolist()},{'label':'NumPy reference','y':reference.tolist()}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:45:09.080862+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T00:07:49.331943+00:00. JAX 0.9.2.
 
 ```text
 {
@@ -352,18 +362,15 @@ PASS: welcome-03
 **Predict before running:** Would a correct numeric answer be enough if the report says CPU but the requested target is TPU?
 
 ```python
-# Experiment — Reject a mismatched report: Numerical agreement and requested placement are separate...
+# Experiment — Reject a mismatched report
 def verify_report(record, required):
-    # Guard input contract (`record['platform'] != required or record['expected'] != required`) and fail fast if violated.
     if record['platform'] != required or record['expected'] != required:
         raise ValueError('requested and observed platform disagree')
-    # Guard input contract (`record['shape'] != [8] or record['dtype'] != 'float32'`) and fail fast if violated.
     if record['shape'] != [8] or record['dtype'] != 'float32':
         raise ValueError('prediction contract changed')
     return True
 assert verify_report(report, expected)
 wrong = {**report, 'platform': 'cpu' if expected == 'tpu' else 'tpu'}
-# Run the boundary check and catch the expected exception:
 try:
     verify_report(wrong, expected)
 except ValueError:
@@ -384,14 +391,14 @@ Predict the effect of replacing the bias by minus one quarter. Run a second comp
 
 **Key functions & syntax to use:**
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.jit(fn) / @jax.jit` — Traces `fn` with abstract shapes and compiles a fused XLA executable cached by input shape and dtype.
+- `jax.jit(fn) / @jax.jit` — Traces `fn` for its input signatures and compiles an executable. Changed shapes, dtypes or static arguments can trigger another compilation.
 - `jax.block_until_ready(output)` — Synchronizes with the accelerator/CPU device so asynchronous dispatch finishes before wall-clock timing.
 
 **Step-by-step implementation plan:**
 1. Wrap with `jax.jit` (`changed_predict`) so XLA traces and compiles the function.
-2. Synchronize host execution until asynchronous device computation completes.
-3. Convert `` to a host NumPy array for inspection or verification.
-4. Convert `` to a host NumPy array for inspection or verification.
+2. Wait for device work to finish before timing it or comparing its result on the host.
+3. Transfer the device result to the host for an independent NumPy comparison.
+4. Transfer the device result to the host for an independent NumPy comparison.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -400,11 +407,11 @@ Predict the effect of replacing the bias by minus one quarter. Run a second comp
 # Wrap with `jax.jit` (`changed_predict`) so XLA traces and compiles the function.
 changed_predict = jax.jit(...)  # TODO: compute changed_predict
 changed = changed_predict(...)  # TODO: compute changed
-# Synchronize host execution until asynchronous device computation completes.
+# Wait for device work to finish before timing it or comparing its result on the host.
 changed.block_until_ready()
-# Convert `` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 np.testing.assert_allclose(np.asarray(changed), reference - 0.375, atol=1e-5, rtol=1e-5)
-# Convert `` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 np.testing.assert_allclose(np.asarray(changed), x_host @ w_host - 0.25, atol=1e-5, rtol=1e-5)
 assert {d.platform for d  # TODO: complete assertion check
 print('Changed bias, first prediction:', float(changed[0]))
@@ -417,11 +424,11 @@ print('Changed bias, first prediction:', float(changed[0]))
 # Wrap with `jax.jit` (`changed_predict`) so XLA traces and compiles the function.
 changed_predict = jax.jit(lambda a, b: a @ b - jnp.float32(0.25))
 changed = changed_predict(x, w)
-# Synchronize host execution until asynchronous device computation completes.
+# Wait for device work to finish before timing it or comparing its result on the host.
 changed.block_until_ready()
-# Convert `` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 np.testing.assert_allclose(np.asarray(changed), reference - 0.375, atol=1e-5, rtol=1e-5)
-# Convert `` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 np.testing.assert_allclose(np.asarray(changed), x_host @ w_host - 0.25, atol=1e-5, rtol=1e-5)
 assert {d.platform for d in changed.devices()} == {expected}
 print('Changed bias, first prediction:', float(changed[0]))
@@ -449,18 +456,18 @@ A row-wise affine prediction commutes with row permutation. A sum would conceal 
 - `jax.block_until_ready(output)` — Synchronizes with the accelerator/CPU device so asynchronous dispatch finishes before wall-clock timing.
 
 **Step-by-step implementation plan:**
-1. Synchronize host execution until asynchronous device computation completes.
-2. Convert `` to a host NumPy array for inspection or verification.
+1. Wait for device work to finish before timing it or comparing its result on the host.
+2. Transfer the device result to the host for an independent NumPy comparison.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Test row order without changing the model (Transfer): Reversing rows should reverse predictions because each...
+# Test row order without changing the model (Transfer)
 reversed_x = jax.device_put(...)  # TODO: compute reversed_x
 reversed_y = predict(...)  # TODO: compute reversed_y
-# Synchronize host execution until asynchronous device computation completes.
+# Wait for device work to finish before timing it or comparing its result on the host.
 reversed_y.block_until_ready()
-# Convert `` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 np.testing.assert_allclose(np.asarray(reversed_y), reference[::-1], atol=1e-5, rtol=1e-5)
 assert {d.platform for d  # TODO: complete assertion check
 assert np.isclose(float(reversed_y[0]), 3.625)  # TODO: complete assertion check
@@ -471,12 +478,12 @@ print('Row reversal preserved values and requested placement.')
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Test row order without changing the model (Transfer): Reversing rows should reverse predictions because each...
+# Test row order without changing the model (Transfer)
 reversed_x = jax.device_put(x_host[::-1].copy(), devices[0])
 reversed_y = predict(reversed_x, w)
-# Synchronize host execution until asynchronous device computation completes.
+# Wait for device work to finish before timing it or comparing its result on the host.
 reversed_y.block_until_ready()
-# Convert `` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 np.testing.assert_allclose(np.asarray(reversed_y), reference[::-1], atol=1e-5, rtol=1e-5)
 assert {d.platform for d in reversed_y.devices()} == {expected}
 assert np.isclose(float(reversed_y[0]), 3.625)
@@ -510,13 +517,13 @@ Read the first failing boundary: interpreter/import, explicit backend discovery,
 
 ## Carry forward
 
-- Provision a hosted TPU runtime or single-host Cloud TPU VM early and run course experiments in parallel with your CPU baseline.
+- Keep the recorded CPU baseline separate from physical TPU evidence. For first TPU practice, use the pinned downloadable launcher and precision targets; review other programs before a target run.
 - Check an actual completed array, not only the installed package.
 - Request TPU explicitly so its absence produces an error, and delete Cloud TPU VMs after copying your evidence.
 
 ## Keep your evidence
 
-Keep separate CPU and TPU reports with requested/observed platform, package versions, completed predictions, NumPy error and changed-bias and row-permutation checks. Until the target command succeeds, TPU execution remains unverified.
+Keep the lesson’s CPU output separate from physical TPU evidence. For TPU practice, retain the launcher events/checkpoint, precision report/trace, and resolved environment from the downloadable qualification workspace. The lesson’s recorded `main.py` output is CPU-only evidence.
 
 Save your predictions, modified code, terminal outputs, and reasoning in your engineering portfolio.
 

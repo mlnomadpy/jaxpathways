@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "internals-02",
-  "contentHash": "b4c3b8720c5f59e80a50216fbd223c61ea013199a86108a3d73205efb94fc75a",
-  "executedAt": "2026-10-20T10:50:09.725259+00:00",
+  "contentHash": "f4f338a6363e91aead0de90f4a94c243ed6575e7bbca0a1d42397536147f4a61",
+  "executedAt": "2026-10-20T22:24:09.478062+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -14,11 +14,11 @@
   "stdout": "Jacobian: [[-0.7         0.4       ]\n [ 0.92106099 -1.4       ]]\nJVP: [-0.96        1.52527319] VJP: [ 1.49212199 -2.6       ] adjoint pair: 2.570546385606924 2.570546385606924\nHessian-vector product: [ 1.74991568 -3.38303348]\nJacobian: [[-0.7         0.4       ]\n [ 0.92106099 -1.4       ]]\nJVP: [-0.96        1.52527319] VJP: [ 1.49212199 -2.6       ] adjoint pair: 2.570546385606924 2.570546385606924\nHessian-vector product: [ 1.74991568 -3.38303348]\nForward columns and reverse rows agree\nExact HVP: [ 1.74991568 -3.38303348] Gauss-Newton product: [ 2.07686964 -2.51938247]\nChanged-point adjoint verified\nDirection linearity holds; the Jacobian changes with the base point\nBilinear Hessian symmetry and finite-difference product verified\nPASS: internals-02\n",
   "notebookCells": [
     {
-      "sourceHash": "26930fcce005548ffadf077d9a760bc955f778e4aa0b364f78b49ab352f65f36",
+      "sourceHash": "83a7943ed4b76cb2121359b5ceaef3f77b0e3441604706dcac48a2506975ff0a",
       "outputs": []
     },
     {
-      "sourceHash": "53c8b9d33f90e049d200074d12354242b296d1d17c4e4ac843d911a5e2c0362e",
+      "sourceHash": "1d4854ebe8fc7d019672b0ba3f56aeb5cb46191bb45522dc63b3d9501accd0b6",
       "outputs": [
         {
           "output_type": "stream",
@@ -32,7 +32,7 @@
       ]
     },
     {
-      "sourceHash": "61bd143423b05dcdead7d5d30272c9aabc850916010504dd051022b5c443ce01",
+      "sourceHash": "0c118056d5787a3aabebfadd3c395e22aecf56a24bef0e544c80a62225e25500",
       "outputs": [
         {
           "output_type": "stream",
@@ -44,7 +44,7 @@
       ]
     },
     {
-      "sourceHash": "0f61a54e9f5fb6e1ff910fa44d2fc5b32b3155cf78d09567fb6a0451202aff3c",
+      "sourceHash": "7e07c2fd30ef4270c3cf584aa937c74e8cfc48c98a5ce2b596312c75778cb406",
       "outputs": [
         {
           "output_type": "stream",
@@ -59,7 +59,7 @@
       ]
     },
     {
-      "sourceHash": "a15b15540d2b831957c84138342fe2efe2d94d2670cf850ce339e1a92956e6a9",
+      "sourceHash": "eb85d85c78ebbe69e915fcefbfbff3d5a00bda105263aed5c19290b9a08e564a",
       "outputs": []
     },
     {
@@ -78,7 +78,7 @@
       ]
     },
     {
-      "sourceHash": "c93a0b857496ac96bc88842b60d7d62b37dc652dc0216fda545f556fa4bacc6e",
+      "sourceHash": "0b97249661d0d1d472778dc192080245ff20d34a46ed294dd10ab5f3734b15fa",
       "outputs": [
         {
           "output_type": "stream",
@@ -90,7 +90,7 @@
       ]
     },
     {
-      "sourceHash": "9afe791ac7c07f1e5e86c70b1670ea77677ef9c438dccd1d67002415df92585d",
+      "sourceHash": "e060d5c1a6dab76bd95da12664ea0a34ad3f4b4f07e5d005db5e8e0b72cf0f5f",
       "outputs": [
         {
           "output_type": "stream",
@@ -102,11 +102,11 @@
       ]
     },
     {
-      "sourceHash": "47dd0d4a6c4602230854f961ed660d59244978d8ba49af044593ef728ea66754",
+      "sourceHash": "45609f3a4aefc3ca21d45aacf0a2301dd3fa6fd2297b9c553a3e6f98af9fdd11",
       "outputs": []
     },
     {
-      "sourceHash": "7b3265d5c4d4f3a347bdc3539f7183fe30e5c8c018dc36b3392d36981b2cbda2",
+      "sourceHash": "fdfdff447718be1ecd2e6e7eb9c7477c149ba9dc4b2b2a9452fda05ee5dd1aad",
       "outputs": [
         {
           "output_type": "stream",
@@ -118,11 +118,11 @@
       ]
     },
     {
-      "sourceHash": "86ac12ac4c46fc64ce3d53a485dcc50ccab53a749c541472c519fe785728731f",
+      "sourceHash": "ef62ef46f867320b7560c775db55b67016ce4ec41eabfdd0fcff028896eabaef",
       "outputs": []
     },
     {
-      "sourceHash": "f259868362260f7a94af770fb4192ec2a2f1b3a1f99f778856d503e168f0a14b",
+      "sourceHash": "2984368ec698b0d4fc01def1f5807a562a50743358c51c74dfd90efe1b92cb90",
       "outputs": [
         {
           "output_type": "stream",
@@ -134,11 +134,11 @@
       ]
     },
     {
-      "sourceHash": "46b3fff7ef0216531b349ddb1225cc72069495d97a34d4f2bb2c7af19b6e8a46",
+      "sourceHash": "716835ebb5f0b07fcb77883e1b3ee4e3e147db80a039da17320662d4fabe1dbc",
       "outputs": []
     },
     {
-      "sourceHash": "94fa7af34f35883bf094f730fa52f9fbc058cdff3f5c37be6d6ce4c8d2ac0556",
+      "sourceHash": "7657ea90acb63b7f7134ed476961c0d1c732c5387f306864a40512d18e6098d8",
       "outputs": [
         {
           "output_type": "stream",

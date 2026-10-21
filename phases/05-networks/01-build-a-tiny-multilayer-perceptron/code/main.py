@@ -21,12 +21,10 @@ def logits(p, batch):
     return (jnp.tanh(batch@p['w1']+p['b1'])@p['w2']+p['b2']).squeeze(-1)
 def loss(p, batch, labels):
     return jnp.mean(optax.sigmoid_binary_cross_entropy(logits(p,batch),labels))
-# Convert `scores` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 scores = np.asarray(logits(params,x))
-# Aggregate array values to compute `expected`.
 expected = np.mean(np.logaddexp(0.,scores)-np.asarray(y)*scores)
 np.testing.assert_allclose(loss(params,x,y), expected, rtol=1e-6)
-# Transform every leaf of the parameter PyTree (`zeros`).
 zeros = jax.tree.map(jnp.zeros_like, params)
 np.testing.assert_allclose(loss(zeros,x,y),np.log(2.),rtol=1e-6)
 # Check tensor shape invariant: `logits(params,jnp.ones((1,2))).shape == (1,)`
@@ -34,25 +32,21 @@ assert logits(params,jnp.ones((1,2))).shape == (1,)
 
 # 3. Train and evaluate untouched points
 # Step 3 — 3. Train and evaluate untouched points: The independent held-out seed changes input coordinates.
-# Configure or step the Optax optimizer state (`tx`).
 tx = optax.adam(.03)
 state = tx.init(params)
 # Define and JIT-compile `step(p, s)` so XLA traces and fuses the operations:
 @jax.jit
 def step(p,s):
-    # Differentiate the objective to obtain `(value, grads)` via automatic differentiation.
     value,grads = jax.value_and_grad(loss)(p,x,y)
     updates,s = tx.update(grads,s,p)
     return optax.apply_updates(p,updates),s,value
 initial = float(loss(params,x,y))
 for _ in range(200): params,state,_ = step(params,state)
-# Draw pseudorandom samples for `rng` using the explicit RNG state.
 rng = np.random.default_rng(12)
-# Convert `held_x` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 held_x = np.repeat(np.asarray(x),8,axis=0)+rng.normal(0,.12,(32,2))
 held_y = (held_x[:,0]*held_x[:,1]<0).astype(np.float32)
 held_scores = np.asarray(logits(params,jnp.array(held_x)))
-# Aggregate array values to compute `accuracy`.
 accuracy = np.mean((held_scores>0)==held_y)
 final = float(loss(params,x,y))
 assert final < .03 and accuracy >= .95
@@ -77,48 +71,39 @@ def logits(p, batch):
     return (jnp.tanh(batch@p['w1']+p['b1'])@p['w2']+p['b2']).squeeze(-1)
 def loss(p, batch, labels):
     return jnp.mean(optax.sigmoid_binary_cross_entropy(logits(p,batch),labels))
-# Convert `scores` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 scores = np.asarray(logits(params,x))
-# Aggregate array values to compute `expected`.
 expected = np.mean(np.logaddexp(0.,scores)-np.asarray(y)*scores)
 np.testing.assert_allclose(loss(params,x,y), expected, rtol=1e-6)
-# Transform every leaf of the parameter PyTree (`zeros`).
 zeros = jax.tree.map(jnp.zeros_like, params)
 np.testing.assert_allclose(loss(zeros,x,y),np.log(2.),rtol=1e-6)
 # Check tensor shape invariant: `logits(params,jnp.ones((1,2))).shape == (1,)`
 assert logits(params,jnp.ones((1,2))).shape == (1,)
 
 # Step 3 — 3. Train and evaluate untouched points: The independent held-out seed changes input coordinates.
-# Configure or step the Optax optimizer state (`tx`).
 tx = optax.adam(.03)
 state = tx.init(params)
 # Define and JIT-compile `step(p, s)` so XLA traces and fuses the operations:
 @jax.jit
 def step(p,s):
-    # Differentiate the objective to obtain `(value, grads)` via automatic differentiation.
     value,grads = jax.value_and_grad(loss)(p,x,y)
     updates,s = tx.update(grads,s,p)
     return optax.apply_updates(p,updates),s,value
 initial = float(loss(params,x,y))
 for _ in range(200): params,state,_ = step(params,state)
-# Draw pseudorandom samples for `rng` using the explicit RNG state.
 rng = np.random.default_rng(12)
-# Convert `held_x` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 held_x = np.repeat(np.asarray(x),8,axis=0)+rng.normal(0,.12,(32,2))
 held_y = (held_x[:,0]*held_x[:,1]<0).astype(np.float32)
 held_scores = np.asarray(logits(params,jnp.array(held_x)))
-# Aggregate array values to compute `accuracy`.
 accuracy = np.mean((held_scores>0)==held_y)
 final = float(loss(params,x,y))
 assert final < .03 and accuracy >= .95
 print('Training loss:', initial, '->', final, 'held-out accuracy:', accuracy)
 
 # Figure data experiment
-# Compute figure data for: A tiny MLP separates the XOR regions
-# Generate a uniform grid of points in `axis`.
 axis = jnp.linspace(-1.6, 1.6, 61)
 gx, gy = jnp.meshgrid(axis, axis)
-# Combine or mask array elements to form `grid`.
 grid = jnp.stack([gx.ravel(), gy.ravel()], axis=-1)
 # Rearrange tensor axes to match the required layout for `prob`.
 prob = jax.nn.sigmoid(logits(params, grid)).reshape(gx.shape)
@@ -129,18 +114,16 @@ visual_data = {'kind': 'field', 'values': prob.tolist(), 'extent': [-1.6, 1.6, -
 repeated_x=jnp.repeat(x,3,axis=0)
 repeated_y=jnp.repeat(y,3)
 np.testing.assert_allclose(loss(params,repeated_x,repeated_y),loss(params,x,y),rtol=1e-5)
-# Differentiate the objective to obtain `original_g` via automatic differentiation.
 original_g=jax.grad(loss)(params,x,y)
 repeated_g=jax.grad(loss)(params,repeated_x,repeated_y)
 for a,b in zip(jax.tree.leaves(original_g),jax.tree.leaves(repeated_g)):
     np.testing.assert_allclose(a,b,rtol=1e-4,atol=1e-7)
 
 # Experiment: An affine stack stays affine
-# Experiment — An affine stack stays affine: This exact affine identity explains why removing the...
+# Experiment — An affine stack stays affine
 def affine_stack(batch):return (batch@params['w1']+params['b1'])@params['w2']+params['b2']
 midpoint=jnp.array([[.2,-.3]])
 delta=jnp.array([[.4,.1]])
-# Combine or mask array elements to form ``.
 np.testing.assert_allclose(affine_stack(midpoint),.5*(affine_stack(midpoint+delta)+affine_stack(midpoint-delta)),atol=1e-6)
 
 # Reference solution. Try the exercise before reading this.
@@ -148,7 +131,7 @@ np.testing.assert_allclose(affine_stack(midpoint),.5*(affine_stack(midpoint+delt
 complemented=dict(params,w2=-params['w2'],b2=-params['b2'])
 changed_x=jnp.array([[-.8,.7],[.7,.9],[-1.1,-.8]])
 np.testing.assert_allclose(logits(complemented,changed_x),-logits(params,changed_x),atol=1e-6)
-# Convert `expected_labels` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 expected_labels=(np.asarray(changed_x)[:,0]*np.asarray(changed_x)[:,1]>0)
 assert np.array_equal(np.asarray(logits(complemented,changed_x)>0),expected_labels)
 
@@ -163,12 +146,10 @@ assert not np.allclose(logits(broken,probe),logits(params,probe),atol=1e-5)
 print('Consistent hidden permutation preserves logits; one-sided permutation changes them.')
 
 # Reference practice: Diagnose accidental pairwise broadcasting
-# Diagnose accidental pairwise broadcasting (Intermediate): The incorrect scalar still looks plausible, but it compares...
-# Configure or step the Optax optimizer state (`bad`).
+# Diagnose accidental pairwise broadcasting (Intermediate)
 bad=optax.sigmoid_binary_cross_entropy(logits(params,x),y[:,None])
 # Check tensor shape invariant: `bad.shape==(4,4)`
 assert bad.shape==(4,4)
-# Configure or step the Optax optimizer state (`good`).
 good=optax.sigmoid_binary_cross_entropy(logits(params,x),y)
 # Check tensor shape invariant: `good.shape==(4,)`
 assert good.shape==(4,)

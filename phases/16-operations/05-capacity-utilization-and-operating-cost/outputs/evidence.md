@@ -7,7 +7,7 @@ Copy this template into your own portfolio and fill it after running your modifi
 Keep measured job/update samples and independent unit calculations. Label demand, reserve and price assumptions as hypothetical before deriving a resource plan.
 
 - Command: `python3 phases/16-operations/05-capacity-utilization-and-operating-cost/code/main.py`
-- Working directory: repository root
+- Working directory: Repository root
 - Python / JAX / NumPy versions: 
 - Hardware and device: 
 - My prediction before running: 

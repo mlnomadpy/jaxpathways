@@ -1,0 +1,1 @@
+TPU_RUNTIME:{"backend": "tpu", "devices": ["TPU_0(process=0,(0,0,0,0))"], "deviceKinds": ["TPU v5 lite"], "jax": "0.9.2"}

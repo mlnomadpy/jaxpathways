@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "welcome-03",
-  "contentHash": "c635ba5492b7276fae2ed1af1cbef264ceb432ae40c49d9b40291f8eb84821ac",
-  "executedAt": "2026-10-20T10:45:09.080862+00:00",
+  "contentHash": "577ebf51bb2c464cf12996eccc1a348642d9d51e234e36fd19077f6816e96156",
+  "executedAt": "2026-10-21T00:07:49.331943+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -14,11 +14,11 @@
   "stdout": "{\n  \"expected\": \"cpu\",\n  \"output_devices\": [\n    \"TFRT_CPU_0\"\n  ],\n  \"platform\": \"cpu\",\n  \"jax\": \"0.9.2\",\n  \"python\": \"3.14.3\",\n  \"shape\": [\n    8\n  ],\n  \"dtype\": \"float32\",\n  \"max_absolute_error\": 0.0,\n  \"process_index\": 0,\n  \"process_count\": 1\n}\nCompleted prediction: [0.34375, 0.8125, 1.28125, 1.75, 2.21875, 2.6875, 3.15625, 3.625]\n{\n  \"expected\": \"cpu\",\n  \"output_devices\": [\n    \"TFRT_CPU_0\"\n  ],\n  \"platform\": \"cpu\",\n  \"jax\": \"0.9.2\",\n  \"python\": \"3.14.3\",\n  \"shape\": [\n    8\n  ],\n  \"dtype\": \"float32\",\n  \"max_absolute_error\": 0.0,\n  \"process_index\": 0,\n  \"process_count\": 1\n}\nCompleted prediction: [0.34375, 0.8125, 1.28125, 1.75, 2.21875, 2.6875, 3.15625, 3.625]\n{\n  \"expected\": \"cpu\",\n  \"output_devices\": [\n    \"TFRT_CPU_0\"\n  ],\n  \"platform\": \"cpu\",\n  \"jax\": \"0.9.2\",\n  \"python\": \"3.14.3\",\n  \"shape\": [\n    8\n  ],\n  \"dtype\": \"float32\",\n  \"max_absolute_error\": 0.0,\n  \"process_index\": 0,\n  \"process_count\": 1\n}\nCompleted prediction: [0.34375, 0.8125, 1.28125, 1.75, 2.21875, 2.6875, 3.15625, 3.625]\nMismatched platform report rejected.\nChanged bias, first prediction: -0.03125\nRow reversal preserved values and requested placement.\nPASS: welcome-03\n",
   "notebookCells": [
     {
-      "sourceHash": "a9527639b019311aba343e37bad9eeab6f7717d0a7ec2a9bfef64808233a19fc",
+      "sourceHash": "5f4f95f18b758761c2410288ee9006280bf73b986083949cd412bb7220ce8f7a",
       "outputs": []
     },
     {
-      "sourceHash": "f3b5abacd425e8f20953376183f97ffa3ec831659e21f99e3befad1438d2e2e4",
+      "sourceHash": "82f9145fd13297fc1f537d377722a6d35cdcd27a88eaa11cb6bfb5da2432edee",
       "outputs": [
         {
           "output_type": "stream",
@@ -74,7 +74,7 @@
       ]
     },
     {
-      "sourceHash": "bd6afdc638e32d4cb6a57cd20d6a34bebf2dd4f03fb73da78ec56c11403e8b03",
+      "sourceHash": "1f82ea38c4ca34e5408265aee363601f5c7699be4b717ea3e4a43e4d3a09686c",
       "outputs": [
         {
           "output_type": "stream",
@@ -102,7 +102,7 @@
       ]
     },
     {
-      "sourceHash": "947fcfa65f76da524661c4479374536a017be807e4f151e939f3abf6bd8cf5c7",
+      "sourceHash": "6d40da81b7cb90a29022f37bd799a7dd15fc5159feac65059af6bc6a00022548",
       "outputs": []
     },
     {
@@ -121,7 +121,7 @@
       ]
     },
     {
-      "sourceHash": "c9f492d55b7285a60519ac9b18c9516b60a244b26c0fd25fee4dff541c703b74",
+      "sourceHash": "ef02ba21b265912cf788cab00ea12c8ac106f7d7444c624d94b18fd691421a75",
       "outputs": [
         {
           "output_type": "stream",
@@ -133,11 +133,11 @@
       ]
     },
     {
-      "sourceHash": "36edade5b52a166821b2bffe86bb81a796da916d9f24156c2aafcc02e90539f0",
+      "sourceHash": "eb3dd219f3b0aef6bf7176a131c377eccf5e62551a6432d73a34eedd213ad43e",
       "outputs": []
     },
     {
-      "sourceHash": "5928abcfbe86379bad0d18395152b8a5fed7c6beefed78a9872cce4fd9a1980b",
+      "sourceHash": "a5d03c50f52517da2e3e6e99547addfa6f71cccc9fda41d8108340da9456faf9",
       "outputs": [
         {
           "output_type": "stream",
@@ -149,11 +149,11 @@
       ]
     },
     {
-      "sourceHash": "dead4e3ad9739fa16823b441600ea75cf9f141b4d14a0d861b1d42f305402530",
+      "sourceHash": "14bcbb038a1fc0a2d490082fda9d06746b742064c2091e69782d5d8dc32f5335",
       "outputs": []
     },
     {
-      "sourceHash": "c2f04dd9582bc746b4db8942e103939c8d7423be945a6b4a3942fa3bb239b71c",
+      "sourceHash": "5a7e4d43005a6cddf961298c9166ba5188f69afbba2b20a93a487ab691c38ffe",
       "outputs": [
         {
           "output_type": "stream",

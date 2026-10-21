@@ -23,9 +23,7 @@ def atomic_json(path, value):
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     fd, temporary = tempfile.mkstemp(prefix=path.name+'.', suffix='.tmp', dir=path.parent)
-    # Run the boundary check and catch the expected exception:
     try:
-        # Enter `os.fdopen(fd, 'w')` context block:
         with os.fdopen(fd, 'w') as stream:
             json.dump(value, stream, sort_keys=True, allow_nan=False)
             stream.flush()
@@ -127,18 +125,16 @@ except Exception as error:
 '''
 
 # Add bounded launch and result collection
-# Step 3 — Add bounded launch and result collection: The supervisor owns the child handle, captures its output and...
+# Step 3 — Add bounded launch and result collection
 def default_config(**changes):
     cfg=dict(seed=3,learning_rate=.04,momentum=.8,batch_size=8,steps=8,
              checkpoint_every=2,backend='cpu',min_devices=1,resume=False,
              fail_after=None,stall_at=None,stall_seconds=10.)
-    # Update state in place with the new values.
+    # Apply configuration overrides before validating the resulting fields.
     cfg.update(changes)
     for name in ('steps','checkpoint_every','batch_size','min_devices'):
-        # Guard input contract (`not isinstance(cfg[name], int) or isinstance(cfg[name], bool) or cfg[name] < 1`) and fail fast if violated.
         if not isinstance(cfg[name],int) or isinstance(cfg[name],bool) or cfg[name] < 1:
             raise ValueError(name+' must be a positive integer')
-    # Guard input contract (`cfg['batch_size'] > 64 or not 0 <= cfg['momentum'] < 1 or (not 0 < cfg['learning_rate'] < 1)`) and fail fast if violated.
     if cfg['batch_size'] > 64 or not 0 <= cfg['momentum'] < 1 or not 0 < cfg['learning_rate'] < 1:
         raise ValueError('invalid training configuration')
     return cfg
@@ -148,13 +144,11 @@ def launch(root, config=None, timeout=10.):
     root=Path(root)
     root.mkdir(parents=True,exist_ok=True)
     cfg=default_config(**(config or {}))
-    # Guard input contract (`timeout <= 0`) and fail fast if violated.
     if timeout <= 0:
         raise ValueError('timeout must be positive')
     atomic_json(root/'config.json',cfg)
     worker=root/'worker.py'
     worker.write_text(WORKER)
-    # Configure environment variable before initializing the runtime.
     env=dict(os.environ,JAX_PLATFORMS=cfg['backend'],PYTHONUNBUFFERED='1')
     started=time.perf_counter()
     process=subprocess.Popen([sys.executable,str(worker),str(root)],stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,env=env)
@@ -183,14 +177,13 @@ def launch(root, config=None, timeout=10.):
         except (ValueError,TypeError):
             malformed.append(line)
     status='timed_out' if timed_out else 'completed' if process.returncode == 0 and not malformed and events and events[-1]['event']=='completed' else 'failed'
-    # Compute deterministic cryptographic digest `result` for provenance verification.
     result=dict(status=status,returncode=process.returncode,wall_s=wall,events=events,stderr=stderr,
                 worker_hash=hashlib.sha256(WORKER.encode()).hexdigest(),config=cfg,malformed_stdout=malformed)
     atomic_json(root/'run.json',result)
     return result
 
 # Add content-addressed publication and selection
-# Step 4 — Add content-addressed publication and selection: Publication and activation are separate; rollback uses the same...
+# Step 4 — Add content-addressed publication and selection
 def publish(store, artifact):
     """Content-address one JSON artifact. Publishing does not activate it."""
     store=Path(store)
@@ -200,11 +193,9 @@ def publish(store, artifact):
 
 
 def read_artifact(store, identifier):
-    # Guard input contract (`len(identifier) != 64 or any((c not in '0123456789abcdef' for c in identifier))`) and fail fast if violated.
     if len(identifier) != 64 or any(c not in '0123456789abcdef' for c in identifier):
         raise ValueError('invalid artifact identifier')
     artifact=json.loads((Path(store)/'artifacts'/(identifier+'.json')).read_text())
-    # Guard input contract (`digest(artifact) != identifier`) and fail fast if violated.
     if digest(artifact) != identifier:
         raise ValueError('artifact digest mismatch')
     return artifact
@@ -213,7 +204,6 @@ def read_artifact(store, identifier):
 def artifact_metrics(artifact):
     """Independent held-out arithmetic for this fixed linear-model release contract."""
     params=artifact.get('state',{}).get('params',[])
-    # Guard input contract (`len(params) != 2 or any((not math.isfinite(float(v)) for v in params))`) and fail fast if violated.
     if len(params)!=2 or any(not math.isfinite(float(v)) for v in params):
         raise ValueError('invalid model parameters')
     inputs=(-1.5,-.37,.22,1.5)
@@ -223,14 +213,11 @@ def artifact_metrics(artifact):
 
 def activate(store, identifier):
     artifact=read_artifact(store,identifier)
-    # Guard input contract (`artifact.get('validation', {}).get('passed') is not True`) and fail fast if violated.
     if artifact.get('validation',{}).get('passed') is not True:
         raise ValueError('artifact has no passing validation evidence')
     required=['worker_hash','config_hash','data_hash','state']
-    # Guard input contract (`any((name not in artifact for name in required))`) and fail fast if violated.
     if any(name not in artifact for name in required):
         raise ValueError('artifact provenance incomplete')
-    # Guard input contract (`not artifact_metrics(artifact)['passed']`) and fail fast if violated.
     if not artifact_metrics(artifact)['passed']:
         raise ValueError('held-out model validation failed')
     previous=None
@@ -242,13 +229,12 @@ def activate(store, identifier):
 
 def rollback(store):
     pointer=json.loads((Path(store)/'active.json').read_text())
-    # Guard input contract (`not pointer.get('previous')`) and fail fast if violated.
     if not pointer.get('previous'):raise ValueError('no previous version')
     return activate(store,pointer['previous'])
 
 # Rehearse a local release and rollback
 # Step 5 — Rehearse a local release and rollback: The artifact contains a checkpoint from an actual successful JAX job.
-# Create an isolated temporary directory to run and inspect artifacts safely:
+# Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory(prefix='ops-release-') as folder:
     base=Path(folder)
     run=launch(base/'run')
@@ -297,9 +283,7 @@ def atomic_json(path, value):
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     fd, temporary = tempfile.mkstemp(prefix=path.name+'.', suffix='.tmp', dir=path.parent)
-    # Run the boundary check and catch the expected exception:
     try:
-        # Enter `os.fdopen(fd, 'w')` context block:
         with os.fdopen(fd, 'w') as stream:
             json.dump(value, stream, sort_keys=True, allow_nan=False)
             stream.flush()
@@ -399,18 +383,16 @@ except Exception as error:
     raise SystemExit(23)
 '''
 
-# Step 3 — Add bounded launch and result collection: The supervisor owns the child handle, captures its output and...
+# Step 3 — Add bounded launch and result collection
 def default_config(**changes):
     cfg=dict(seed=3,learning_rate=.04,momentum=.8,batch_size=8,steps=8,
              checkpoint_every=2,backend='cpu',min_devices=1,resume=False,
              fail_after=None,stall_at=None,stall_seconds=10.)
-    # Update state in place with the new values.
+    # Apply configuration overrides before validating the resulting fields.
     cfg.update(changes)
     for name in ('steps','checkpoint_every','batch_size','min_devices'):
-        # Guard input contract (`not isinstance(cfg[name], int) or isinstance(cfg[name], bool) or cfg[name] < 1`) and fail fast if violated.
         if not isinstance(cfg[name],int) or isinstance(cfg[name],bool) or cfg[name] < 1:
             raise ValueError(name+' must be a positive integer')
-    # Guard input contract (`cfg['batch_size'] > 64 or not 0 <= cfg['momentum'] < 1 or (not 0 < cfg['learning_rate'] < 1)`) and fail fast if violated.
     if cfg['batch_size'] > 64 or not 0 <= cfg['momentum'] < 1 or not 0 < cfg['learning_rate'] < 1:
         raise ValueError('invalid training configuration')
     return cfg
@@ -420,13 +402,11 @@ def launch(root, config=None, timeout=10.):
     root=Path(root)
     root.mkdir(parents=True,exist_ok=True)
     cfg=default_config(**(config or {}))
-    # Guard input contract (`timeout <= 0`) and fail fast if violated.
     if timeout <= 0:
         raise ValueError('timeout must be positive')
     atomic_json(root/'config.json',cfg)
     worker=root/'worker.py'
     worker.write_text(WORKER)
-    # Configure environment variable before initializing the runtime.
     env=dict(os.environ,JAX_PLATFORMS=cfg['backend'],PYTHONUNBUFFERED='1')
     started=time.perf_counter()
     process=subprocess.Popen([sys.executable,str(worker),str(root)],stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,env=env)
@@ -455,13 +435,12 @@ def launch(root, config=None, timeout=10.):
         except (ValueError,TypeError):
             malformed.append(line)
     status='timed_out' if timed_out else 'completed' if process.returncode == 0 and not malformed and events and events[-1]['event']=='completed' else 'failed'
-    # Compute deterministic cryptographic digest `result` for provenance verification.
     result=dict(status=status,returncode=process.returncode,wall_s=wall,events=events,stderr=stderr,
                 worker_hash=hashlib.sha256(WORKER.encode()).hexdigest(),config=cfg,malformed_stdout=malformed)
     atomic_json(root/'run.json',result)
     return result
 
-# Step 4 — Add content-addressed publication and selection: Publication and activation are separate; rollback uses the same...
+# Step 4 — Add content-addressed publication and selection
 def publish(store, artifact):
     """Content-address one JSON artifact. Publishing does not activate it."""
     store=Path(store)
@@ -471,11 +450,9 @@ def publish(store, artifact):
 
 
 def read_artifact(store, identifier):
-    # Guard input contract (`len(identifier) != 64 or any((c not in '0123456789abcdef' for c in identifier))`) and fail fast if violated.
     if len(identifier) != 64 or any(c not in '0123456789abcdef' for c in identifier):
         raise ValueError('invalid artifact identifier')
     artifact=json.loads((Path(store)/'artifacts'/(identifier+'.json')).read_text())
-    # Guard input contract (`digest(artifact) != identifier`) and fail fast if violated.
     if digest(artifact) != identifier:
         raise ValueError('artifact digest mismatch')
     return artifact
@@ -484,7 +461,6 @@ def read_artifact(store, identifier):
 def artifact_metrics(artifact):
     """Independent held-out arithmetic for this fixed linear-model release contract."""
     params=artifact.get('state',{}).get('params',[])
-    # Guard input contract (`len(params) != 2 or any((not math.isfinite(float(v)) for v in params))`) and fail fast if violated.
     if len(params)!=2 or any(not math.isfinite(float(v)) for v in params):
         raise ValueError('invalid model parameters')
     inputs=(-1.5,-.37,.22,1.5)
@@ -494,14 +470,11 @@ def artifact_metrics(artifact):
 
 def activate(store, identifier):
     artifact=read_artifact(store,identifier)
-    # Guard input contract (`artifact.get('validation', {}).get('passed') is not True`) and fail fast if violated.
     if artifact.get('validation',{}).get('passed') is not True:
         raise ValueError('artifact has no passing validation evidence')
     required=['worker_hash','config_hash','data_hash','state']
-    # Guard input contract (`any((name not in artifact for name in required))`) and fail fast if violated.
     if any(name not in artifact for name in required):
         raise ValueError('artifact provenance incomplete')
-    # Guard input contract (`not artifact_metrics(artifact)['passed']`) and fail fast if violated.
     if not artifact_metrics(artifact)['passed']:
         raise ValueError('held-out model validation failed')
     previous=None
@@ -513,12 +486,11 @@ def activate(store, identifier):
 
 def rollback(store):
     pointer=json.loads((Path(store)/'active.json').read_text())
-    # Guard input contract (`not pointer.get('previous')`) and fail fast if violated.
     if not pointer.get('previous'):raise ValueError('no previous version')
     return activate(store,pointer['previous'])
 
 # Step 5 — Rehearse a local release and rollback: The artifact contains a checkpoint from an actual successful JAX job.
-# Create an isolated temporary directory to run and inspect artifacts safely:
+# Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory(prefix='ops-release-') as folder:
     base=Path(folder)
     run=launch(base/'run')
@@ -546,39 +518,35 @@ print('first / second content IDs:',version_a,version_b)
 print('failed gate kept selection:',rejected_without_change,'rollback restored first:',chosen['current']==version_a)
 
 # Figure data experiment
-# Compute figure data for: The selected artifact changes only after a passing gate
 with tempfile.TemporaryDirectory() as folder:
     a=publish(folder,artifact)
     activate(folder,a)
     values=[1]
     b=publish(folder,dict(artifact,release_note='B'))
     values.append(1 if json.loads((Path(folder)/'active.json').read_text())['current']==a else 2)
-    # Execute `activate(folder,b)`.
     activate(folder,b)
     values.append(2 if json.loads((Path(folder)/'active.json').read_text())['current']==b else 1)
     bad=publish(folder,dict(artifact,validation={'passed':False}))
     try:activate(folder,bad)
     except ValueError:pass
     values.append(2 if json.loads((Path(folder)/'active.json').read_text())['current']==b else 1)
-    # Execute `rollback(folder)`.
     rollback(folder)
     values.append(1 if json.loads((Path(folder)/'active.json').read_text())['current']==a else 2)
 assert values==[1,1,2,2,1]
 visual_data={'kind':'bar','labels':['activate A','publish B','activate B','reject candidate','rollback'],'xlabel':'executed local operation','ylabel':'selected artifact code: 1=A, 2=B','series':[{'label':'observed active pointer','y':values}]}
 
 # Experiment: Identity follows content rather than key insertion order
-# Experiment — Identity follows content rather than key insertion order: Canonical encoding removes an incidental representation...
+# Experiment — Identity follows content rather than key insertion order
 assert digest({'a':1,'b':2})==digest({'b':2,'a':1})
 assert digest({'a':1,'b':2})!=digest({'a':1,'b':3})
 
 # Experiment: Detect corruption before activation
-# Experiment — Detect corruption before activation: A filename containing a hash is not enough: the reader must...
-# Create an isolated temporary directory to run and inspect artifacts safely:
+# Experiment — Detect corruption before activation
+# Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory() as folder:
     identifier=publish(folder,artifact)
     # Write the serialized artifact payload to disk.
     (Path(folder)/'artifacts'/(identifier+'.json')).write_text('{}')
-    # Run the boundary check and catch the expected exception:
     try:
         activate(folder,identifier)
     except ValueError as error:
@@ -589,7 +557,7 @@ with tempfile.TemporaryDirectory() as folder:
 
 # Experiment: Reject an actually degraded model
 # Experiment — Reject an actually degraded model: Measured validation and claimed validation are distinct.
-# Create an isolated temporary directory to run and inspect artifacts safely:
+# Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory() as folder:
     stable=publish(folder,artifact)
     activate(folder,stable)
@@ -603,8 +571,8 @@ with tempfile.TemporaryDirectory() as folder:
     assert before==(Path(folder)/'active.json').read_bytes()
 
 # Reference solution. Try the exercise before reading this.
-# Exercise solution: Publish two compatible validated artifacts that differ in an explicit...
-# Create an isolated temporary directory to run and inspect artifacts safely:
+# Exercise solution
+# Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory() as folder:
     one=publish(folder,dict(artifact,release_note='candidate one'))
     two=publish(folder,dict(artifact,release_note='candidate two'))
@@ -614,13 +582,12 @@ with tempfile.TemporaryDirectory() as folder:
     assert read_artifact(folder,one)['release_note']=='candidate one'
 
 # Reference practice: Reject an incomplete provenance record
-# Reject an incomplete provenance record (Transfer / diagnosis): The gate establishes only the declared local contract; it...
-# Create an isolated temporary directory to run and inspect artifacts safely:
+# Reject an incomplete provenance record (Transfer / diagnosis)
+# Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory() as folder:
     incomplete=dict(artifact)
     del incomplete['worker_hash']
     identifier=publish(folder,incomplete)
-    # Run the boundary check and catch the expected exception:
     try:
         activate(folder,identifier)
     except ValueError:
@@ -629,13 +596,12 @@ with tempfile.TemporaryDirectory() as folder:
         raise AssertionError('missing provenance accepted')
 
 # Reference practice: Check rollback without history
-# Check rollback without history (Transfer / diagnosis): A runbook needs a defined failure path when no compatible...
-# Create an isolated temporary directory to run and inspect artifacts safely:
+# Check rollback without history (Transfer / diagnosis)
+# Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory() as folder:
     identifier=publish(folder,artifact)
     activate(folder,identifier)
     before=(Path(folder)/'active.json').read_bytes()
-    # Run the boundary check and catch the expected exception:
     try:
         rollback(folder)
     except ValueError:

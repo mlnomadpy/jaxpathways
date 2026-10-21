@@ -2,6 +2,8 @@
 
 Phase 17: Self-supervised pretraining: masked and contrastive learning · about 105 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Separate the clean targets from the corrupted input
@@ -101,7 +103,7 @@ Evaluate a fixed held-out corpus with a documented mask schedule and an aggregat
 Create main.py in your activated course environment. Paste this block, then run python main.py; function definitions alone print nothing.
 
 ```python
-# Step 1 — 1. Define corruption and the selected-token objective: The functions separate the input boundary from the differentiable...
+# Step 1 — 1. Define corruption and the selected-token objective
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -113,9 +115,8 @@ def masked_ce(logits, targets, selected):
     return jnp.sum(jnp.where(selected, nll, 0.0)) / jnp.sum(selected)
 
 def validate_mask(selected, shape):
-    # Convert `a` to a host NumPy array for inspection or verification.
+    # Transfer the device result to the host for an independent NumPy comparison.
     a = np.asarray(selected)
-    # Guard input contract (`a.shape != shape or a.dtype != np.bool_ or (not a.any())`) and fail fast if violated.
     if a.shape != shape or a.dtype != np.bool_ or not a.any():
         raise ValueError('a nonempty Boolean mask of the target shape is required')
 
@@ -127,7 +128,6 @@ def mlm_logits(p, corrupted):
     h = p['embedding'][corrupted]
     # Bidirectional single-head attention, deliberately no causal mask.
     scores = h @ jnp.swapaxes(h, -1, -2) / jnp.sqrt(h.shape[-1])
-    # Perform matrix / vector contraction (`@`) to compute `context`.
     context = jax.nn.softmax(scores, axis=-1) @ h
     return context @ p['head']
 ```
@@ -139,7 +139,7 @@ The functions separate the input boundary from the differentiable objective. Rea
 Append this block to main.py and run python main.py again. Keep the earlier blocks above it.
 
 ```python
-# Step 2 — 2. Construct a batch whose answers you can inspect: Before continuing, inspect corrupted: each row must contain mask...
+# Step 2 — 2. Construct a batch whose answers you can inspect
 tokens = jnp.array([[0, 0, 0, 0], [1, 1, 1, 1], [2, 2, 2, 2]], jnp.int32)
 selected = jnp.array([[False, True, False, False]] * 3)
 corrupted = corrupt_tokens(tokens, selected, 3)
@@ -151,7 +151,6 @@ p = {
     'head': jnp.zeros((6, 3)),
 }
 loss = lambda p: masked_ce(mlm_logits(p, corrupted), tokens, selected)
-# Differentiate the objective to obtain `step` via automatic differentiation.
 step = jax.jit(jax.value_and_grad(loss))
 history = []
 ```
@@ -167,7 +166,6 @@ Append this block to main.py and run python main.py again. Keep the earlier bloc
 for _ in range(100):
     value, g = step(p)
     history.append(float(value))
-    # Transform every leaf of the parameter PyTree (`p`).
     p = jax.tree.map(lambda a, b: a - 0.4 * b, p, g)
 
 assert history[-1] < history[0] * 0.15
@@ -191,7 +189,7 @@ The loop measures loss before each update. The final held-mask test uses the upd
 ## Run the example
 
 ```python
-# Step 1 — 1. Define corruption and the selected-token objective: The functions separate the input boundary from the differentiable...
+# Step 1 — 1. Define corruption and the selected-token objective
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -203,9 +201,8 @@ def masked_ce(logits, targets, selected):
     return jnp.sum(jnp.where(selected, nll, 0.0)) / jnp.sum(selected)
 
 def validate_mask(selected, shape):
-    # Convert `a` to a host NumPy array for inspection or verification.
+    # Transfer the device result to the host for an independent NumPy comparison.
     a = np.asarray(selected)
-    # Guard input contract (`a.shape != shape or a.dtype != np.bool_ or (not a.any())`) and fail fast if violated.
     if a.shape != shape or a.dtype != np.bool_ or not a.any():
         raise ValueError('a nonempty Boolean mask of the target shape is required')
 
@@ -217,11 +214,10 @@ def mlm_logits(p, corrupted):
     h = p['embedding'][corrupted]
     # Bidirectional single-head attention, deliberately no causal mask.
     scores = h @ jnp.swapaxes(h, -1, -2) / jnp.sqrt(h.shape[-1])
-    # Perform matrix / vector contraction (`@`) to compute `context`.
     context = jax.nn.softmax(scores, axis=-1) @ h
     return context @ p['head']
 
-# Step 2 — 2. Construct a batch whose answers you can inspect: Before continuing, inspect corrupted: each row must contain mask...
+# Step 2 — 2. Construct a batch whose answers you can inspect
 tokens = jnp.array([[0, 0, 0, 0], [1, 1, 1, 1], [2, 2, 2, 2]], jnp.int32)
 selected = jnp.array([[False, True, False, False]] * 3)
 corrupted = corrupt_tokens(tokens, selected, 3)
@@ -233,7 +229,6 @@ p = {
     'head': jnp.zeros((6, 3)),
 }
 loss = lambda p: masked_ce(mlm_logits(p, corrupted), tokens, selected)
-# Differentiate the objective to obtain `step` via automatic differentiation.
 step = jax.jit(jax.value_and_grad(loss))
 history = []
 
@@ -241,7 +236,6 @@ history = []
 for _ in range(100):
     value, g = step(p)
     history.append(float(value))
-    # Transform every leaf of the parameter PyTree (`p`).
     p = jax.tree.map(lambda a, b: a - 0.4 * b, p, g)
 
 assert history[-1] < history[0] * 0.15
@@ -281,12 +275,11 @@ The second panel shows final class probabilities at the hidden position: rows ar
 The zero vocabulary head makes initial predictions uniform. Falling loss shows the trained attention/embedding/head system can use the remaining repeated tokens. A held mask position is checked separately; the plot does not show a held-out corpus or establish transfer quality.
 
 ```python
-# Compute figure data for: Masked language modeling: predict hidden tokens — recorded experiment
 visual_data={'kind':'line','xlabel':'completed parameter updates before measurement','ylabel':'selected-token cross-entropy (nats)','series':[{'label':'recorded CPU training loss','x':list(range(len(history))),'y':history}]}
 for panel in visual_data.get('panels',[visual_data]):
     panel['x']=panel['series'][0]['x']
 
-# Convert `final_probabilities` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 final_probabilities=np.asarray(jax.nn.softmax(mlm_logits(p,corrupted)[:,1,:],axis=-1))
 extra_panel={'kind':'heatmap','values':final_probabilities.tolist(),'rows':['target 0','target 1','target 2'],'columns':['class 0','class 1','class 2'],'unit':'masked-token probability','xlabel':'predicted vocabulary class','ylabel':'masked example','title':'Final predictions at the selected position'}
 visual_data={"panels":[*visual_data.get("panels",[visual_data]),extra_panel]}
@@ -294,7 +287,7 @@ visual_data={"panels":[*visual_data.get("panels",[visual_data]),extra_panel]}
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:51:59.021149+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:26:40.595336+00:00. JAX 0.9.2.
 
 ```text
 MLM initial/final/changed-mask: 1.0986123085021973 0.010633035562932491 0.010457751341164112
@@ -313,20 +306,18 @@ PASS: pretraining-01
 **Predict before running:** If we change logits only where the selection mask is false, does this masked objective change?
 
 ```python
-# Experiment — Show that unsupervised positions have no direct loss gradient: Visible input tokens can still influence selected predictions...
+# Experiment — Show that unsupervised positions have no direct loss gradient
 logits = mlm_logits(p, corrupted)
 changed_logits = jnp.where(
     selected[..., None], logits, logits + jnp.array([100.0, -50.0, 7.0])
 )
-# Execute `np.testing.assert_allclose(`
 np.testing.assert_allclose(
     masked_ce(changed_logits, tokens, selected),
     masked_ce(logits, tokens, selected),
     atol=1e-6,
 )
-# Differentiate the objective to obtain `grad_logits` via automatic differentiation.
 grad_logits = jax.grad(masked_ce)(logits, tokens, selected)
-# Convert `` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 np.testing.assert_array_equal(np.asarray(grad_logits)[~np.asarray(selected)], 0.0)
 print('Unselected output logits have zero direct loss gradient.')
 ```
@@ -353,11 +344,9 @@ host_losses = -np.log(
         np.arange(2)[:, None], np.arange(3)[None, :], np.asarray(audit_targets)
     ]
 )
-# Aggregate array values to compute `expected`.
 expected = host_losses[np.asarray(audit_mask)].mean()
 observed = float(masked_ce(audit_logits, audit_targets, audit_mask))
 np.testing.assert_allclose(observed, expected, atol=1e-6)
-# Aggregate array values to compute `sequence_mean`.
 sequence_mean = np.mean(
     [host_losses[i][np.asarray(audit_mask[i])].mean() for i in range(2)]
 )
@@ -379,13 +368,12 @@ Select the first position instead of the second and evaluate the trained model w
 - `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
 
 **Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+1. Exercise solution
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Select the first position instead of the second and evaluate the...
+# Exercise solution
 first_mask = jnp.array(...)  # TODO: compute first_mask
 first_loss = float(...)  # TODO: compute first_loss
     masked_ce(mlm_logits(p, corrupt_tokens(tokens, first_mask, 3)), tokens, first_mask)
@@ -397,7 +385,7 @@ print('Changed position loss:', first_loss)
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Select the first position instead of the second and evaluate the...
+# Exercise solution
 first_mask = jnp.array([[True, False, False, False]] * 3)
 first_loss = float(
     masked_ce(mlm_logits(p, corrupt_tokens(tokens, first_mask, 3)), tokens, first_mask)
@@ -422,18 +410,14 @@ Validate outside the transformed objective before dividing by a count.
 
 ### How to write: Reject a missing learning signal — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `signal(...)` — Call `signal` with your updated parameters or inputs from this lesson's workspace.
-- `corrupt_tokens(...)` — Call `corrupt_tokens` with your updated parameters or inputs from this lesson's workspace.
-
 **Step-by-step implementation plan:**
-1. Run the boundary check and catch the expected exception:
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Reject a missing learning signal (Transfer): A skipped batch requires an explicit training policy.
-# Run the boundary check and catch the expected exception:
 try:
     corrupt_tokens(tokens, jnp.zeros_like(tokens, dtype = ...  # TODO: compute corrupt_tokens(tokens, jnp.zeros_like(tokens, dtype
 except ValueError:
@@ -446,7 +430,6 @@ else:
 
 ```python
 # Reject a missing learning signal (Transfer): A skipped batch requires an explicit training policy.
-# Run the boundary check and catch the expected exception:
 try:
     corrupt_tokens(tokens, jnp.zeros_like(tokens, dtype=bool), 3)
 except ValueError:
@@ -479,20 +462,19 @@ Broadcast the mask over vocabulary and divide by the selected count, not the bat
 - `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
 
 **Step-by-step implementation plan:**
-1. Reduce along axis=-1 to compute `analytic`.
-2. Differentiate the objective to obtain gradients ``.
+1. Derive the output gradient without autodiff (Challenge)
+2. Reduce along axis=-1 to compute `analytic`.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Derive the output gradient without autodiff (Challenge): This verifies the entire derivative tensor, including zeros...
+# Derive the output gradient without autodiff (Challenge)
 # Reduce along axis=-1 to compute `analytic`.
 analytic = ...  # TODO: compute analytic
     (jax.nn.softmax(audit_logits, axis=-1) - jax.nn.one_hot(audit_targets, 3))
     * audit_mask[..., None]
     / audit_mask.sum()
 )
-# Differentiate the objective to obtain gradients ``.
 np.testing.assert_allclose(
     jax.grad(masked_ce)(audit_logits, audit_targets, audit_mask),
     analytic,
@@ -504,14 +486,13 @@ print('Independent masked softmax gradient agrees.')
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Derive the output gradient without autodiff (Challenge): This verifies the entire derivative tensor, including zeros...
+# Derive the output gradient without autodiff (Challenge)
 # Reduce along axis=-1 to compute `analytic`.
 analytic = (
     (jax.nn.softmax(audit_logits, axis=-1) - jax.nn.one_hot(audit_targets, 3))
     * audit_mask[..., None]
     / audit_mask.sum()
 )
-# Differentiate the objective to obtain gradients ``.
 np.testing.assert_allclose(
     jax.grad(masked_ce)(audit_logits, audit_targets, audit_mask),
     analytic,

@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "kernels-04",
-  "contentHash": "502f1d93126e5e86a2e224f8d494da3faadd751606503d415c9d3c37d2f1b7d0",
-  "executedAt": "2026-10-20T10:50:03.077466+00:00",
+  "contentHash": "f47f1d3e6629f5974b36e14f957442c2c4e638d57105dd5f9484c260ebad714d",
+  "executedAt": "2026-10-20T22:24:03.072730+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -14,11 +14,11 @@
   "stdout": "Kernel errors versus represented-input oracle: [[0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0]]\nGaps versus original float32 data: [[0.0, 0.000862419605255127], [0.0, 0.025217056274414062], [0.0, 0.030788421630859375], [0.0, 0.0292205810546875]]\nExpected benchmark refusal: TPU benchmark requires real TPU inputs; interpretation timings are not accepted\nCPU correctness audit complete; no TPU latency or speedup measured\nKernel errors versus represented-input oracle: [[0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0]]\nGaps versus original float32 data: [[0.0, 0.000862419605255127], [0.0, 0.025217056274414062], [0.0, 0.030788421630859375], [0.0, 0.0292205810546875]]\nExpected benchmark refusal: TPU benchmark requires real TPU inputs; interpretation timings are not accepted\nCPU correctness audit complete; no TPU latency or speedup measured\nJoint row permutation preserves output identity\nEarly/final-only rounding: 1.0 1.0078125\nConfiguration, padded elements: (8, 128) 2 4096\nConfiguration, padded elements: (8, 128) 3 4096\nConfiguration, padded elements: (16, 256) 2 4096\nConfiguration, padded elements: (16, 256) 3 4096\nMixed and integer dtypes rejected\nModeled twofold-local speedup and zero-cost limit: 1.1764705882352942 1.4285714285714286\nPASS: kernels-04\n",
   "notebookCells": [
     {
-      "sourceHash": "bd9bea5eebb0e6a296c23ddd61b0654571c7b41bd198d049e8c667536d1beb4d",
+      "sourceHash": "c25d89398274bcf96e77b45f91fc19c27e7afbe221c87f6b8d3a7c79d23a2aa7",
       "outputs": []
     },
     {
-      "sourceHash": "616f8f9ced903f3cf1bbdc0b8c5139aae8ba73378901e96feab33dfe2000590b",
+      "sourceHash": "1f88acb38ff1ce5e44e8edf80b08a6a35151912cc19ea9c454f8aacd9add8c83",
       "outputs": [
         {
           "output_type": "stream",
@@ -44,7 +44,7 @@
       ]
     },
     {
-      "sourceHash": "d3caf6da98fc4af020c09e9c542401c1f2598ac91f2960cff9b5fbf39b4202f4",
+      "sourceHash": "c297afc5144e34e44fc8d84ca8f85f69fc47ed6c962f51745b32eac8d2a4b48b",
       "outputs": [
         {
           "output_type": "stream",
@@ -59,7 +59,7 @@
       ]
     },
     {
-      "sourceHash": "33282c863bb473f53ccabc48d0d5d794e2d19cabbcaaf355012007bc8bc75ee6",
+      "sourceHash": "ce836887b294232d03600f12ee27a826a48446acdac5be71ed0b04f2ff366d1a",
       "outputs": []
     },
     {
@@ -78,7 +78,7 @@
       ]
     },
     {
-      "sourceHash": "1a0c4c332f298e5b21ba701eed9dc898281584ff9f98b0197092374d5aee36be",
+      "sourceHash": "047f2e54ea3ff66be8c6c8c207e0c62e0441bc6f887bc14ea41daa77c32591ee",
       "outputs": [
         {
           "output_type": "stream",
@@ -90,7 +90,7 @@
       ]
     },
     {
-      "sourceHash": "726e85aea810f2548c50e8ac7e93233e0f1faf1c7c1872c9b7776ee151bd1eb4",
+      "sourceHash": "95d0e5a84cc4b5bd935a3aaebf5cc1a1be7cd30a40c6af4e50f003e233da8862",
       "outputs": [
         {
           "output_type": "stream",
@@ -102,11 +102,11 @@
       ]
     },
     {
-      "sourceHash": "eddfa2188b9fa7b5fcb2d1308225d52663c48ef53e0eeb1516bfb74d8abf6b3f",
+      "sourceHash": "79cee00c6a3662ff2b0299705a50f226876766eb89c677b9fc7bd4f4596318cb",
       "outputs": []
     },
     {
-      "sourceHash": "834879b1e3bef806ce9f6db1c7f8a5f64d16b896dc6028b7819cc974de76d856",
+      "sourceHash": "924dbe0d252a97ed06929b3e25d97094a48b843f5174f5d6a55016d80a3bc747",
       "outputs": [
         {
           "output_type": "stream",
@@ -121,11 +121,11 @@
       ]
     },
     {
-      "sourceHash": "00323d8374e8b38c6c44d0a42c0882b4534f080e90004a78e2bc2b5eb9e31b3a",
+      "sourceHash": "6e8d7b9dce2b73de37bdfe6f0ebb9b5e73efc8df7491a3d9058c74591030b26f",
       "outputs": []
     },
     {
-      "sourceHash": "a5927e4b4704362b6a7b95f709a45b9ef0a0f629c02b1d9c5b86d62ed94344cd",
+      "sourceHash": "ec67ff998cf403b81311fc3fc57f15c20fbe156dc0e9ecc652499635086164a6",
       "outputs": [
         {
           "output_type": "stream",
@@ -137,11 +137,11 @@
       ]
     },
     {
-      "sourceHash": "b3db56a99edaaf6ef2783e9e407ec676ac452e80ca1a2249e24315c01ffa3877",
+      "sourceHash": "d35682cd2a61ee26bcd7ce1e5f86644c173de5d9cc5bba1ecc5022b68259c3a4",
       "outputs": []
     },
     {
-      "sourceHash": "2ef5f396236935fd26d23a29bb0e41b3a6057c87bc7ee62802f23c73ee088aa6",
+      "sourceHash": "b8c6d782d632f44da50cf89d41d2a02503b17302885ca741790b56ca06b1fa12",
       "outputs": [
         {
           "output_type": "stream",

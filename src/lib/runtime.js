@@ -14,6 +14,34 @@ function runtimeLabel(lesson) {
   return practiceKind(lesson) === 'virtual-cpu' ? 'Logical CPU devices' : 'CPU practice';
 }
 
+/** Classify the reference separately from optional target-specific programs.
+ * CPU execution receipts never qualify a target runner.
+ * @param {import('../types/course').Lesson} lesson
+ */
+function executionScope(lesson) {
+  const logical = practiceKind(lesson) === 'virtual-cpu';
+  const source = lesson.content?.code || '';
+  const cpuOnly =
+    logical || /JAX_PLATFORMS[\s\S]{0,30}cpu|jax\.devices\(["']cpu["']\)/.test(source);
+  const targetRunners = {
+    'tpu-04': 'runtime receipt collector',
+    'tpu-06': 'precision and profiling runner',
+    'kernels-02': 'Pallas TPU kernel',
+  };
+  const targetRunner = targetRunners[/** @type {keyof typeof targetRunners} */ (lesson.id)];
+  return {
+    reference: logical ? 'logical-cpu' : cpuOnly ? 'cpu-only' : 'cpu-reference',
+    description: logical
+      ? 'This reference configures logical CPU devices to practice placement and sharding. Logical devices do not measure TPU performance.'
+      : cpuOnly
+        ? 'This reference explicitly selects CPU. Uploading the same file or setting JAX_PLATFORMS does not adapt it to TPU.'
+        : 'This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt.',
+    target: targetRunner
+      ? `A separate ${targetRunner} is implemented in the target instructions. Bounded hardware receipts cover v5e1 launch, resume and precision checks; four single-device Pallas cases; and a four-device v5e collective fixture. Each receipt applies only to its recorded source, environment, cases and hardware. Other lessons and TPU configurations require separate qualification.`
+      : 'Use the execution matrix to review device selection and data ownership before adapting a separate target program.',
+  };
+}
+
 /**
  * Derive visual course-type cues, hardware badges, pacing, and curriculum era metadata for a phase.
  * @param {import('../types/course').Phase} phase
@@ -36,7 +64,7 @@ function courseTypeCue(phase) {
       eraTitle: 'Start Here · CPU Setup & Optional TPU Track',
       eraSubtitle:
         'Start with the local CPU environment. Add the optional TPU specialization when you need to qualify accelerator execution.',
-      hardwareBadge: 'Laptop CPU + TPU bridge',
+      hardwareBadge: 'Laptop CPU',
       paceLabel,
     };
   }
@@ -107,4 +135,4 @@ function courseTypeCue(phase) {
   };
 }
 
-export { practiceKind, runtimeLabel, courseTypeCue };
+export { practiceKind, runtimeLabel, courseTypeCue, executionScope };

@@ -2,6 +2,8 @@
 
 Phase 04: Math & optimization · about 75 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Explain an unbiased minibatch gradient and verify how sampling and reduction affect its variance.
@@ -73,9 +75,7 @@ w = jnp.array(0.0)
 
 def example_loss(w, y):
     return 0.5 * (w - y) ** 2
-# Differentiate the objective to obtain `per` via automatic differentiation.
 per = jax.vmap(jax.grad(example_loss), in_axes=(None, 0))(w, y)
-# Differentiate the objective to obtain `full` via automatic differentiation.
 full = jax.grad(lambda w: jnp.mean(jax.vmap(example_loss, in_axes=(None, 0))(w, y)))(w)
 assert jnp.allclose(per, jnp.array([-1.0, -2.0, -3.0, -4.0]))
 assert jnp.allclose(full, -2.5)
@@ -129,9 +129,7 @@ w = jnp.array(0.0)
 
 def example_loss(w, y):
     return 0.5 * (w - y) ** 2
-# Differentiate the objective to obtain `per` via automatic differentiation.
 per = jax.vmap(jax.grad(example_loss), in_axes=(None, 0))(w, y)
-# Differentiate the objective to obtain `full` via automatic differentiation.
 full = jax.grad(lambda w: jnp.mean(jax.vmap(example_loss, in_axes=(None, 0))(w, y)))(w)
 assert jnp.allclose(per, jnp.array([-1.0, -2.0, -3.0, -4.0]))
 assert jnp.allclose(full, -2.5)
@@ -179,14 +177,13 @@ Each batch averages independent, uniformly sampled per-example gradients with re
 The bar heights are squared gradient units, not loss or gradient magnitude. A shorter bar does not mean a smaller learning rate or a faster overall training run. Sampling without replacement, correlated examples, and changing parameters require a different variance analysis.
 
 ```python
-# Compute figure data for: Averaging independent gradients reduces variance
 triples = (per[:, None, None] + per[None, :, None] + per[None, None, :]) / 3
 visual_data = {'kind': 'bar', 'labels': ['batch 1', 'batch 2', 'batch 3'], 'ylabel': 'gradient variance', 'series': [{'label': 'exact enumeration', 'y': [float(jnp.var(per)), float(jnp.var(pairs)), float(jnp.var(triples))]}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:45:58.425895+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:20:46.848107+00:00. JAX 0.9.2.
 
 ```text
 full gradient / single variance / pair variance: -2.5 1.25 0.625
@@ -203,9 +200,7 @@ PASS: optimization-11
 
 ```python
 # Experiment — Combine unequal batches: Batch means require example-count weights when batch sizes differ.
-# Aggregate array values to compute `first`.
 first = jnp.mean(per[:3])
-# Aggregate array values to compute `last`.
 last = jnp.mean(per[3:])
 wrong = (first + last) / 2
 correct = (3 * first + last) / 4
@@ -222,11 +217,9 @@ Batch means require example-count weights when batch sizes differ.
 **Predict before running:** At the full-data optimum $w=2.5$, does a step toward target $1$ improve the full loss?
 
 ```python
-# Experiment — Take a noisy step at the full optimum: A noisy gradient may point away from the full optimum on a...
-# Aggregate array values to compute `full_loss`.
+# Experiment — Take a noisy step at the full optimum
 full_loss = lambda w: jnp.mean(0.5 * (w - y) ** 2)
 optimum = jnp.array(2.5)
-# Differentiate the objective to obtain `noisy` via automatic differentiation.
 noisy = optimum - 0.1 * jax.grad(example_loss)(optimum, y[0])
 assert jnp.allclose(jax.grad(full_loss)(optimum), 0.0)
 assert full_loss(noisy) > full_loss(optimum)
@@ -292,16 +285,14 @@ Do not update parameters between microbatches. Weight each mean by its sample co
 - `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
 
 **Step-by-step implementation plan:**
-1. Differentiate the objective to obtain `g1` via automatic differentiation.
-2. Differentiate the objective to obtain `g2` via automatic differentiation.
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Accumulate before updating (Transfer / diagnosis): Exact accumulation matches the full mean gradient only when...
-# Differentiate the objective to obtain `g1` via automatic differentiation.
+# Accumulate before updating (Transfer / diagnosis)
 g1 = jax.grad(...)  # TODO: compute g1
-# Differentiate the objective to obtain `g2` via automatic differentiation.
 g2 = jax.grad(...)  # TODO: compute g2
 accumulated = ...  # TODO: compute accumulated
 assert jnp.allclose(w - 0.1 * accumulated, w - 0.1 * full)  # TODO: complete assertion check
@@ -310,10 +301,8 @@ assert jnp.allclose(w - 0.1 * accumulated, w - 0.1 * full)  # TODO: complete ass
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Accumulate before updating (Transfer / diagnosis): Exact accumulation matches the full mean gradient only when...
-# Differentiate the objective to obtain `g1` via automatic differentiation.
+# Accumulate before updating (Transfer / diagnosis)
 g1 = jax.grad(lambda z: jnp.mean(0.5 * (z - y[:3]) ** 2))(w)
-# Differentiate the objective to obtain `g2` via automatic differentiation.
 g2 = jax.grad(lambda z: jnp.mean(0.5 * (z - y[3:]) ** 2))(w)
 accumulated = (3 * g1 + g2) / 4
 assert jnp.allclose(w - 0.1 * accumulated, w - 0.1 * full)
@@ -347,7 +336,7 @@ Use the sampling probabilities as weights. Missing examples cannot be recovered 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Detect a biased sampler (Transfer / diagnosis): Uniform mean-gradient claims require the corresponding...
+# Detect a biased sampler (Transfer / diagnosis)
 biased = ...  # TODO: compute biased
 assert jnp.allclose(biased, -1.3)  # TODO: complete assertion check
 assert not jnp.allclose(biased, full)  # TODO: complete assertion check
@@ -356,7 +345,7 @@ assert not jnp.allclose(biased, full)  # TODO: complete assertion check
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Detect a biased sampler (Transfer / diagnosis): Uniform mean-gradient claims require the corresponding...
+# Detect a biased sampler (Transfer / diagnosis)
 biased = 0.9 * per[0] + 0.1 * per[3]
 assert jnp.allclose(biased, -1.3)
 assert not jnp.allclose(biased, full)

@@ -9,9 +9,7 @@ w = jnp.array(0.0)
 
 def example_loss(w, y):
     return 0.5 * (w - y) ** 2
-# Differentiate the objective to obtain `per` via automatic differentiation.
 per = jax.vmap(jax.grad(example_loss), in_axes=(None, 0))(w, y)
-# Differentiate the objective to obtain `full` via automatic differentiation.
 full = jax.grad(lambda w: jnp.mean(jax.vmap(example_loss, in_axes=(None, 0))(w, y)))(w)
 assert jnp.allclose(per, jnp.array([-1.0, -2.0, -3.0, -4.0]))
 assert jnp.allclose(full, -2.5)
@@ -45,9 +43,7 @@ w = jnp.array(0.0)
 
 def example_loss(w, y):
     return 0.5 * (w - y) ** 2
-# Differentiate the objective to obtain `per` via automatic differentiation.
 per = jax.vmap(jax.grad(example_loss), in_axes=(None, 0))(w, y)
-# Differentiate the objective to obtain `full` via automatic differentiation.
 full = jax.grad(lambda w: jnp.mean(jax.vmap(example_loss, in_axes=(None, 0))(w, y)))(w)
 assert jnp.allclose(per, jnp.array([-1.0, -2.0, -3.0, -4.0]))
 assert jnp.allclose(full, -2.5)
@@ -72,15 +68,12 @@ print('full gradient / single variance / pair variance:', full, jnp.var(per), jn
 print('sample indices / sample gradient:', indices, jnp.mean(per[indices]))
 
 # Figure data experiment
-# Compute figure data for: Averaging independent gradients reduces variance
 triples = (per[:, None, None] + per[None, :, None] + per[None, None, :]) / 3
 visual_data = {'kind': 'bar', 'labels': ['batch 1', 'batch 2', 'batch 3'], 'ylabel': 'gradient variance', 'series': [{'label': 'exact enumeration', 'y': [float(jnp.var(per)), float(jnp.var(pairs)), float(jnp.var(triples))]}]}
 
 # Experiment: Combine unequal batches
 # Experiment — Combine unequal batches: Batch means require example-count weights when batch sizes differ.
-# Aggregate array values to compute `first`.
 first = jnp.mean(per[:3])
-# Aggregate array values to compute `last`.
 last = jnp.mean(per[3:])
 wrong = (first + last) / 2
 correct = (3 * first + last) / 4
@@ -88,11 +81,9 @@ assert jnp.allclose(wrong, -3.0)
 assert jnp.allclose(correct, full)
 
 # Experiment: Take a noisy step at the full optimum
-# Experiment — Take a noisy step at the full optimum: A noisy gradient may point away from the full optimum on a...
-# Aggregate array values to compute `full_loss`.
+# Experiment — Take a noisy step at the full optimum
 full_loss = lambda w: jnp.mean(0.5 * (w - y) ** 2)
 optimum = jnp.array(2.5)
-# Differentiate the objective to obtain `noisy` via automatic differentiation.
 noisy = optimum - 0.1 * jax.grad(example_loss)(optimum, y[0])
 assert jnp.allclose(jax.grad(full_loss)(optimum), 0.0)
 assert full_loss(noisy) > full_loss(optimum)
@@ -105,16 +96,14 @@ assert jnp.allclose(jnp.mean(triples), full, atol=1e-06)
 assert jnp.allclose(jnp.var(triples), 1.25 / 3, atol=1e-06)
 
 # Reference practice: Accumulate before updating
-# Accumulate before updating (Transfer / diagnosis): Exact accumulation matches the full mean gradient only when...
-# Differentiate the objective to obtain `g1` via automatic differentiation.
+# Accumulate before updating (Transfer / diagnosis)
 g1 = jax.grad(lambda z: jnp.mean(0.5 * (z - y[:3]) ** 2))(w)
-# Differentiate the objective to obtain `g2` via automatic differentiation.
 g2 = jax.grad(lambda z: jnp.mean(0.5 * (z - y[3:]) ** 2))(w)
 accumulated = (3 * g1 + g2) / 4
 assert jnp.allclose(w - 0.1 * accumulated, w - 0.1 * full)
 
 # Reference practice: Detect a biased sampler
-# Detect a biased sampler (Transfer / diagnosis): Uniform mean-gradient claims require the corresponding...
+# Detect a biased sampler (Transfer / diagnosis)
 biased = 0.9 * per[0] + 0.1 * per[3]
 assert jnp.allclose(biased, -1.3)
 assert not jnp.allclose(biased, full)

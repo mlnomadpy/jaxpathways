@@ -2,6 +2,8 @@
 
 Phase 12: Reinforcement learning · about 90 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Separate training seeds, evaluation streams and individual episodes.
@@ -78,11 +80,8 @@ import numpy as np
 
 # Define `State` module / container with explicit state and forward pass:
 class State(NamedTuple):
-    # Execute `position: jax.Array`
     position: jax.Array
-    # Execute `elapsed: jax.Array`
     elapsed: jax.Array
-    # Execute `done: jax.Array`
     done: jax.Array
 
 
@@ -98,14 +97,11 @@ def step(state, action, horizon=8):
     states absorb without more rewards/events. No implicit reset or lost final observation.
     """
     active = ~state.done
-    # Combine or mask array elements to form `proposed`.
     proposed = jnp.clip(state.position + 2 * action - 1, 0, 3)
-    # Combine or mask array elements to form `position`.
     position = jnp.where(active, proposed, state.position)
     elapsed = state.elapsed + active.astype(jnp.int32)
     terminated = active & (position == 3)
     truncated = active & ~terminated & (elapsed >= horizon)
-    # Combine or mask array elements to form `reward`.
     reward = jnp.where(active, jnp.where(terminated, 1., -.01), 0.)
     return State(position, elapsed, state.done | terminated | truncated), reward, terminated, truncated
 
@@ -128,7 +124,6 @@ def rollout(theta, key, batch_size=256, horizon=8):
         # Split the PRNG key deterministically into independent subkeys (`keys`).
         keys = jax.random.split(time_key, batch_size)
         probabilities = jax.nn.sigmoid(theta[jnp.minimum(observations, 2)])
-        # Draw pseudorandom samples for `actions` using the explicit RNG state.
         actions = jax.vmap(jax.random.bernoulli)(keys, probabilities).astype(jnp.int32)
         # Vectorize across the batch dimension without a Python loop (`(next_states, rewards, terminated, truncated)`).
         next_states, rewards, terminated, truncated = jax.vmap(
@@ -137,7 +132,6 @@ def rollout(theta, key, batch_size=256, horizon=8):
                       active=~states.done, terminated=terminated, truncated=truncated,
                       old_logp=log_probability(theta, observations, actions))
         return next_states, record
-    # Run a compiled sequential scan over the time/step axis (`(final, records)`).
     final, records = jax.lax.scan(body, states, time_keys)
     return final, records
 
@@ -146,7 +140,6 @@ def returns_to_go(rewards):
     """Undiscounted finite-episode objective; rewards after done are already zero."""
     return jnp.cumsum(rewards[::-1], axis=0)[::-1]
 
-# Define `policy_loss(theta, records, method, clip)` to evaluate the objective and its automatic derivatives:
 def policy_loss(theta, records, method='ppo', clip=.2):
     """Normalize by episodes, not live transitions. Freeze behavior data/returns."""
     advantage = jax.lax.stop_gradient(returns_to_go(records['reward']))
@@ -172,10 +165,8 @@ def exact_return(theta, horizon=8):
     right = states+1
     def backup(_, values):
         q_left = -.01 + values[left]
-        # Combine or mask array elements to form `q_right`.
         q_right = jnp.where(right == 3, 1., -.01 + values[right])
         return jnp.concatenate(((1-p)*q_left+p*q_right, jnp.zeros(1)))
-    # Allocate initialized array `values` with the specified shape and dtype.
     values = jax.lax.fori_loop(0, horizon, backup, jnp.zeros(4))
     return jnp.mean(values[:2])
 
@@ -186,32 +177,25 @@ def _train(seed, updates, batch_size, horizon, method, epochs, learning_rate):
     # Create or split explicit PRNG key(s) (`key`) for reproducible randomness.
     key = jax.random.key(seed)
     theta = jnp.zeros(3)
-    # Define `update(carry, _)` to evaluate the objective and its automatic derivatives:
     def update(carry, _):
         theta, key = carry
         # Create or split explicit PRNG key(s) (`(key, sample_key)`) for reproducible randomness.
         key, sample_key = jax.random.split(key)
         _, records = rollout(theta, sample_key, batch_size, horizon)
-        # Define `epoch(_, candidate)` to evaluate the objective and its automatic derivatives:
         def epoch(_, candidate):
-            # Differentiate the objective to obtain `grad` via automatic differentiation.
             grad = jax.grad(policy_loss)(candidate, records, method)
             return candidate - learning_rate * grad
         theta = jax.lax.fori_loop(0, epochs, epoch, theta)
         return (theta, key), exact_return(theta, horizon)
-    # Run a compiled sequential scan over the time/step axis (`((theta, _), history)`).
     (theta, _), history = jax.lax.scan(update, (theta, key), None, length=updates)
     return theta, jnp.concatenate((exact_return(jnp.zeros(3), horizon)[None], history))
 
 
 def train(seed=0, updates=40, batch_size=256, horizon=8, method='ppo', epochs=3, learning_rate=.5):
-    # Guard input contract (`updates < 1 or batch_size < 1 or horizon < 1 or (epochs < 1) or (learning_rate <= 0)`) and fail fast if violated.
     if updates < 1 or batch_size < 1 or horizon < 1 or epochs < 1 or learning_rate <= 0:
         raise ValueError('positive updates, batch_size, horizon, epochs and learning_rate required')
-    # Guard input contract (`method not in ('ppo', 'reinforce')`) and fail fast if violated.
     if method not in ('ppo', 'reinforce'):
         raise ValueError('unknown method')
-    # Guard input contract (`method == 'reinforce' and epochs != 1`) and fail fast if violated.
     if method == 'reinforce' and epochs != 1:
         raise ValueError('REINFORCE uses one update per fresh on-policy rollout')
     return _train(seed, updates, batch_size, horizon, method, epochs, learning_rate)
@@ -224,16 +208,13 @@ Use the same training protocol for every seed. Changing budgets between agents w
 Append this block to main.py. Run python3 main.py in the course CPU environment.
 
 ```python
-# Step 2 — Add a read-only evaluator: The evaluator retains raw returns, reports its seed set and...
+# Step 2 — Add a read-only evaluator
 def evaluate(theta, seeds, batch_size=512, horizon=8):
     """One mean per evaluation stream; preserve raw episode returns too."""
-    # Create device-backed JAX array `theta`.
     theta = jnp.asarray(theta)
-    # Guard input contract (`theta.shape != (3,) or not bool(jnp.all(jnp.isfinite(theta)))`) and fail fast if violated.
     if theta.shape != (3,) or not bool(jnp.all(jnp.isfinite(theta))):
         raise ValueError('theta must contain three finite logits')
     seeds = tuple(seeds)
-    # Guard input contract (`len(seeds) < 2 or len(set(seeds)) != len(seeds) or batch_size < 1 or (horizon < 1)`) and fail fast if violated.
     if len(seeds) < 2 or len(set(seeds)) != len(seeds) or batch_size < 1 or horizon < 1:
         raise ValueError('provide at least two distinct evaluation seeds and positive sizes')
     # Create or split explicit PRNG key(s) (`returns`) for reproducible randomness.
@@ -249,7 +230,7 @@ The evaluator retains raw returns, reports its seed set and rejects malformed po
 Append this block to main.py. Run python3 main.py in the course CPU environment.
 
 ```python
-# Step 3 — Train several agents and retain every result: Each agent receives a separate training key; all use the declared...
+# Step 3 — Train several agents and retain every result
 training_seeds = [0,7,23,41,59]
 evaluation_seeds = [1000,1001,1002,1003]
 policies, histories, reports = [], [], []
@@ -286,11 +267,8 @@ import numpy as np
 
 # Define `State` module / container with explicit state and forward pass:
 class State(NamedTuple):
-    # Execute `position: jax.Array`
     position: jax.Array
-    # Execute `elapsed: jax.Array`
     elapsed: jax.Array
-    # Execute `done: jax.Array`
     done: jax.Array
 
 
@@ -306,14 +284,11 @@ def step(state, action, horizon=8):
     states absorb without more rewards/events. No implicit reset or lost final observation.
     """
     active = ~state.done
-    # Combine or mask array elements to form `proposed`.
     proposed = jnp.clip(state.position + 2 * action - 1, 0, 3)
-    # Combine or mask array elements to form `position`.
     position = jnp.where(active, proposed, state.position)
     elapsed = state.elapsed + active.astype(jnp.int32)
     terminated = active & (position == 3)
     truncated = active & ~terminated & (elapsed >= horizon)
-    # Combine or mask array elements to form `reward`.
     reward = jnp.where(active, jnp.where(terminated, 1., -.01), 0.)
     return State(position, elapsed, state.done | terminated | truncated), reward, terminated, truncated
 
@@ -336,7 +311,6 @@ def rollout(theta, key, batch_size=256, horizon=8):
         # Split the PRNG key deterministically into independent subkeys (`keys`).
         keys = jax.random.split(time_key, batch_size)
         probabilities = jax.nn.sigmoid(theta[jnp.minimum(observations, 2)])
-        # Draw pseudorandom samples for `actions` using the explicit RNG state.
         actions = jax.vmap(jax.random.bernoulli)(keys, probabilities).astype(jnp.int32)
         # Vectorize across the batch dimension without a Python loop (`(next_states, rewards, terminated, truncated)`).
         next_states, rewards, terminated, truncated = jax.vmap(
@@ -345,7 +319,6 @@ def rollout(theta, key, batch_size=256, horizon=8):
                       active=~states.done, terminated=terminated, truncated=truncated,
                       old_logp=log_probability(theta, observations, actions))
         return next_states, record
-    # Run a compiled sequential scan over the time/step axis (`(final, records)`).
     final, records = jax.lax.scan(body, states, time_keys)
     return final, records
 
@@ -354,7 +327,6 @@ def returns_to_go(rewards):
     """Undiscounted finite-episode objective; rewards after done are already zero."""
     return jnp.cumsum(rewards[::-1], axis=0)[::-1]
 
-# Define `policy_loss(theta, records, method, clip)` to evaluate the objective and its automatic derivatives:
 def policy_loss(theta, records, method='ppo', clip=.2):
     """Normalize by episodes, not live transitions. Freeze behavior data/returns."""
     advantage = jax.lax.stop_gradient(returns_to_go(records['reward']))
@@ -380,10 +352,8 @@ def exact_return(theta, horizon=8):
     right = states+1
     def backup(_, values):
         q_left = -.01 + values[left]
-        # Combine or mask array elements to form `q_right`.
         q_right = jnp.where(right == 3, 1., -.01 + values[right])
         return jnp.concatenate(((1-p)*q_left+p*q_right, jnp.zeros(1)))
-    # Allocate initialized array `values` with the specified shape and dtype.
     values = jax.lax.fori_loop(0, horizon, backup, jnp.zeros(4))
     return jnp.mean(values[:2])
 
@@ -394,46 +364,36 @@ def _train(seed, updates, batch_size, horizon, method, epochs, learning_rate):
     # Create or split explicit PRNG key(s) (`key`) for reproducible randomness.
     key = jax.random.key(seed)
     theta = jnp.zeros(3)
-    # Define `update(carry, _)` to evaluate the objective and its automatic derivatives:
     def update(carry, _):
         theta, key = carry
         # Create or split explicit PRNG key(s) (`(key, sample_key)`) for reproducible randomness.
         key, sample_key = jax.random.split(key)
         _, records = rollout(theta, sample_key, batch_size, horizon)
-        # Define `epoch(_, candidate)` to evaluate the objective and its automatic derivatives:
         def epoch(_, candidate):
-            # Differentiate the objective to obtain `grad` via automatic differentiation.
             grad = jax.grad(policy_loss)(candidate, records, method)
             return candidate - learning_rate * grad
         theta = jax.lax.fori_loop(0, epochs, epoch, theta)
         return (theta, key), exact_return(theta, horizon)
-    # Run a compiled sequential scan over the time/step axis (`((theta, _), history)`).
     (theta, _), history = jax.lax.scan(update, (theta, key), None, length=updates)
     return theta, jnp.concatenate((exact_return(jnp.zeros(3), horizon)[None], history))
 
 
 def train(seed=0, updates=40, batch_size=256, horizon=8, method='ppo', epochs=3, learning_rate=.5):
-    # Guard input contract (`updates < 1 or batch_size < 1 or horizon < 1 or (epochs < 1) or (learning_rate <= 0)`) and fail fast if violated.
     if updates < 1 or batch_size < 1 or horizon < 1 or epochs < 1 or learning_rate <= 0:
         raise ValueError('positive updates, batch_size, horizon, epochs and learning_rate required')
-    # Guard input contract (`method not in ('ppo', 'reinforce')`) and fail fast if violated.
     if method not in ('ppo', 'reinforce'):
         raise ValueError('unknown method')
-    # Guard input contract (`method == 'reinforce' and epochs != 1`) and fail fast if violated.
     if method == 'reinforce' and epochs != 1:
         raise ValueError('REINFORCE uses one update per fresh on-policy rollout')
     return _train(seed, updates, batch_size, horizon, method, epochs, learning_rate)
 
-# Step 2 — Add a read-only evaluator: The evaluator retains raw returns, reports its seed set and...
+# Step 2 — Add a read-only evaluator
 def evaluate(theta, seeds, batch_size=512, horizon=8):
     """One mean per evaluation stream; preserve raw episode returns too."""
-    # Create device-backed JAX array `theta`.
     theta = jnp.asarray(theta)
-    # Guard input contract (`theta.shape != (3,) or not bool(jnp.all(jnp.isfinite(theta)))`) and fail fast if violated.
     if theta.shape != (3,) or not bool(jnp.all(jnp.isfinite(theta))):
         raise ValueError('theta must contain three finite logits')
     seeds = tuple(seeds)
-    # Guard input contract (`len(seeds) < 2 or len(set(seeds)) != len(seeds) or batch_size < 1 or (horizon < 1)`) and fail fast if violated.
     if len(seeds) < 2 or len(set(seeds)) != len(seeds) or batch_size < 1 or horizon < 1:
         raise ValueError('provide at least two distinct evaluation seeds and positive sizes')
     # Create or split explicit PRNG key(s) (`returns`) for reproducible randomness.
@@ -441,7 +401,7 @@ def evaluate(theta, seeds, batch_size=512, horizon=8):
     return {'seeds': list(seeds), 'episode_returns': returns, 'stream_means': returns.mean(1),
             'mean': float(returns.mean()), 'exact': float(exact_return(theta, horizon))}
 
-# Step 3 — Train several agents and retain every result: Each agent receives a separate training key; all use the declared...
+# Step 3 — Train several agents and retain every result
 training_seeds = [0,7,23,41,59]
 evaluation_seeds = [1000,1001,1002,1003]
 policies, histories, reports = [], [], []
@@ -481,13 +441,12 @@ The horizontal categories identify the five training seeds. Each group compares 
 The trained policies cluster close to the always-right limit of $0.985$, while the uniform baseline remains around $0.47$. Small gaps between sampled and exact bars are evaluation noise. Differences among exact bars reflect differences in the trained policies. The plot has no confidence intervals: five training runs and shared evaluation streams support a descriptive comparison here, not a broad claim about PPO.
 
 ```python
-# Compute figure data for: Held-out returns for independently trained agents
 visual_data = {'kind':'bar','labels':[str(s) for s in training_seeds],'xlabel':'training seed','ylabel':'mean episode return','series':[{'label':'held-out sampled','y':trained_means.tolist()},{'label':'exact expectation','y':exact_means.tolist()},{'label':'uniform baseline (shared)','y':[baseline['mean']]*5}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:49:26.500487+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:23:33.386062+00:00. JAX 0.9.2.
 
 ```text
 training seeds: [0, 7, 23, 41, 59]
@@ -513,7 +472,7 @@ PASS: rl-04
 **Predict before running:** Which policy should have the highest mean, and by how much?
 
 ```python
-# Experiment — Check baselines with known returns: The baseline check can fail an evaluator even when the learned...
+# Experiment — Check baselines with known returns
 left = evaluate(jnp.full(3,-100.),evaluation_seeds)
 right = evaluate(jnp.full(3,100.),evaluation_seeds)
 assert abs(left['mean']+.08) < 1e-6
@@ -536,9 +495,7 @@ The baseline check can fail an evaluator even when the learned policy appears su
 before = np.array(policies[0],copy=True)
 a = evaluate(policies[0],evaluation_seeds)
 b = evaluate(policies[0],evaluation_seeds)
-# Execute `np.testing.assert_array_equal(before,policies[0])`
 np.testing.assert_array_equal(before,policies[0])
-# Execute `np.testing.assert_array_equal(a['episode_returns'],b['episod`
 np.testing.assert_array_equal(a['episode_returns'],b['episode_returns'])
 c = evaluate(policies[0],[2000,2001,2002,2003])
 assert not np.array_equal(a['episode_returns'],c['episode_returns'])
@@ -558,12 +515,13 @@ Compute the paired held-out improvement over the uniform baseline for each train
 - `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
 
 **Step-by-step implementation plan:**
-1. Check tensor shape invariant: `deltas.shape == (5,)`
+1. Exercise solution
+2. Check tensor shape invariant: `deltas.shape == (5,)`
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Compute the paired held-out improvement over the uniform baseline for...
+# Exercise solution
 deltas = ...  # TODO: compute deltas
 # Check tensor shape invariant: `deltas.shape == (5,)`
 assert deltas.shape  # TODO: complete assertion check
@@ -575,7 +533,7 @@ print('mean improvement across trained agents:', deltas.mean())
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Compute the paired held-out improvement over the uniform baseline for...
+# Exercise solution
 deltas = trained_means - baseline['mean']
 # Check tensor shape invariant: `deltas.shape == (5,)`
 assert deltas.shape == (5,)
@@ -604,7 +562,8 @@ Weight each shard mean by its episode count.
 - `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
 
 **Step-by-step implementation plan:**
-1. Aggregate array values to compute `wrong`.
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -612,7 +571,6 @@ Weight each shard mean by its episode count.
 # Expose an unequal-batch averaging bug (Transfer / diagnosis): Equal shard weighting changes the unit from episode to shard.
 means = np.array(...)  # TODO: compute means
 counts = np.array(...)  # TODO: compute counts
-# Aggregate array values to compute `wrong`.
 wrong = means.mean(...)  # TODO: compute wrong
 right = np.average(...)  # TODO: compute right
 assert wrong  # TODO: complete assertion check
@@ -624,7 +582,6 @@ assert wrong  # TODO: complete assertion check
 # Expose an unequal-batch averaging bug (Transfer / diagnosis): Equal shard weighting changes the unit from episode to shard.
 means = np.array([1.,0.])
 counts = np.array([1,9])
-# Aggregate array values to compute `wrong`.
 wrong = means.mean()
 right = np.average(means,weights=counts)
 assert wrong == .5 and right == .1
@@ -648,20 +605,15 @@ Use sample standard deviation with ddof=1; a standard error divides by the squar
 
 ### How to write: Distinguish spread from standard error — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `error(...)` — Call `error` with your updated parameters or inputs from this lesson's workspace.
-- `np.array(...)` — Call `np.array` with your updated parameters or inputs from this lesson's workspace.
-- `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
-
 **Step-by-step implementation plan:**
-1. Aggregate array values to compute `sd`.
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Distinguish spread from standard error (Transfer / diagnosis): The numerical formula is separate from its sampling...
+# Distinguish spread from standard error (Transfer / diagnosis)
 values = np.array(...)  # TODO: compute values
-# Aggregate array values to compute `sd`.
 sd = values.std(...)  # TODO: compute sd
 naive_se = ...  # TODO: compute naive_se
 assert abs(sd-.1)  # TODO: complete assertion check
@@ -672,9 +624,8 @@ print('sample sd / independence-assuming SE:',sd,naive_se)
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Distinguish spread from standard error (Transfer / diagnosis): The numerical formula is separate from its sampling...
+# Distinguish spread from standard error (Transfer / diagnosis)
 values = np.array([.8,.9,1.])
-# Aggregate array values to compute `sd`.
 sd = values.std(ddof=1)
 naive_se = sd/np.sqrt(3)
 assert abs(sd-.1) < 1e-12

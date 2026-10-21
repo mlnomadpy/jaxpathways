@@ -1,0 +1,1 @@
+Saved /home/tahabsn/jaxpathways-qualification/runs/smoke-v1/precision/report.json on tpu TPU v5 lite

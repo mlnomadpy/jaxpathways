@@ -7,7 +7,7 @@ Copy this template into your own portfolio and fill it after running your modifi
 Save the Q/K/V axis diagram, uniform hand calculation, NumPy nonuniform reference, paired permutation check, and wrong-axis repair.
 
 - Command: `python3 phases/07-transformers/01-attention-from-small-pieces/code/main.py`
-- Working directory: repository root
+- Working directory: Repository root
 - Python / JAX / NumPy versions: 
 - Hardware and device: 
 - My prediction before running: 

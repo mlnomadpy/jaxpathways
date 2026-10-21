@@ -2,6 +2,8 @@
 
 Phase 18: Post-training: SFT, LoRA, reward models and RLHF · about 105 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Keep three identities separate
@@ -113,19 +115,15 @@ import jax.numpy as jnp
 import numpy as np
 
 def preference_loss(w, chosen, rejected):
-    # Perform matrix / vector contraction (`@`) to compute `margin`.
     margin = (chosen - rejected) @ w
     return jnp.mean(jax.nn.softplus(-margin))
 
-# Define `ppo_loss(logits, old_logps, actions, advantages...)` to evaluate the objective and its automatic derivatives:
 def ppo_loss(
     logits, old_logps, actions, advantages, reference_logps, beta=0.1, clip=0.2
 ):
-    # Evaluate numerically stable log-space cross-entropy/likelihood (`logp`).
     logp = jax.nn.log_softmax(logits)
     ratios = jnp.exp(logp[actions] - jax.lax.stop_gradient(old_logps))
     advantages = jax.lax.stop_gradient(advantages)
-    # Combine or mask array elements to form `clipped`.
     clipped = jnp.clip(ratios, 1.0 - clip, 1.0 + clip)
     surrogate = jnp.mean(jnp.minimum(ratios * advantages, clipped * advantages))
     # Exact categorical KL in this one-prompt, one-action teaching environment.
@@ -147,7 +145,6 @@ features = jnp.array([[1.0, 0.0], [0.0, 1.0], [-1.0, -1.0]])
 chosen = features[jnp.array([0, 0, 1])]
 rejected = features[jnp.array([1, 2, 2])]
 reward_w = jnp.zeros(2)
-# Differentiate the objective to obtain `reward_step` via automatic differentiation.
 reward_step = jax.jit(jax.grad(lambda w: preference_loss(w, chosen, rejected)))
 for _ in range(100):
     reward_w = reward_w - 0.1 * reward_step(reward_w)
@@ -155,13 +152,12 @@ rewards = jax.lax.stop_gradient(features @ reward_w)
 # A fixed reference policy and a learned reward, with one terminal response action.
 reference = jax.nn.log_softmax(jnp.array([0.2, 0.0, -0.2]))
 theta = jnp.array([0.2, 0.0, -0.2])
-# Convert `reference_copy` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 reference_copy = np.asarray(reference).copy()
 # Create or split explicit PRNG key(s) (`key`) for reproducible randomness.
 key = jax.random.key(11)
 history = []
 kl_history = []
-# Evaluate both scalar loss and parameter gradients in one pass (`step`).
 step = jax.jit(jax.value_and_grad(ppo_loss))
 ```
 
@@ -172,14 +168,12 @@ The reference is stored before policy updates. This step also creates the sampli
 Append this block to main.py and run python main.py again. Keep the earlier blocks above it.
 
 ```python
-# Step 3 — 3. Collect rollouts and reuse each batch correctly: Each outer iteration collects a fresh batch; each inner step...
+# Step 3 — 3. Collect rollouts and reuse each batch correctly
 for iteration in range(40):
-    # Evaluate numerically stable log-space cross-entropy/likelihood (`old`).
     old = jax.nn.log_softmax(theta)
     probs = jnp.exp(old)
     # Create or split explicit PRNG key(s) (`(key, draw)`) for reproducible randomness.
     key, draw = jax.random.split(key)
-    # Draw pseudorandom samples for `actions` using the explicit RNG state.
     actions = jax.random.categorical(draw, old, shape=(128,))
     old_selected = jax.lax.stop_gradient(old[actions])
     advantage = jax.lax.stop_gradient(
@@ -190,14 +184,11 @@ for iteration in range(40):
             theta, old_selected, actions, advantage, reference, 0.2, 0.2
         )
         theta = theta - 0.15 * g
-    # Evaluate numerically stable log-space cross-entropy/likelihood (`logp`).
     logp = jax.nn.log_softmax(theta)
     history.append(float(jnp.sum(jnp.exp(logp) * rewards)))
     kl_history.append(float(jnp.sum(jnp.exp(logp) * (logp - reference))))
 
-# Execute `np.testing.assert_array_equal(reference, reference_copy)`
 np.testing.assert_array_equal(reference, reference_copy)
-# Aggregate array values to compute `initial_reward`.
 initial_reward = float(jnp.sum(jnp.exp(reference) * rewards))
 assert history[-1] > initial_reward and kl_history[-1] > 0
 # Independent finite-action expectation: no evaluation sampling error here.
@@ -228,19 +219,15 @@ import jax.numpy as jnp
 import numpy as np
 
 def preference_loss(w, chosen, rejected):
-    # Perform matrix / vector contraction (`@`) to compute `margin`.
     margin = (chosen - rejected) @ w
     return jnp.mean(jax.nn.softplus(-margin))
 
-# Define `ppo_loss(logits, old_logps, actions, advantages...)` to evaluate the objective and its automatic derivatives:
 def ppo_loss(
     logits, old_logps, actions, advantages, reference_logps, beta=0.1, clip=0.2
 ):
-    # Evaluate numerically stable log-space cross-entropy/likelihood (`logp`).
     logp = jax.nn.log_softmax(logits)
     ratios = jnp.exp(logp[actions] - jax.lax.stop_gradient(old_logps))
     advantages = jax.lax.stop_gradient(advantages)
-    # Combine or mask array elements to form `clipped`.
     clipped = jnp.clip(ratios, 1.0 - clip, 1.0 + clip)
     surrogate = jnp.mean(jnp.minimum(ratios * advantages, clipped * advantages))
     # Exact categorical KL in this one-prompt, one-action teaching environment.
@@ -254,7 +241,6 @@ features = jnp.array([[1.0, 0.0], [0.0, 1.0], [-1.0, -1.0]])
 chosen = features[jnp.array([0, 0, 1])]
 rejected = features[jnp.array([1, 2, 2])]
 reward_w = jnp.zeros(2)
-# Differentiate the objective to obtain `reward_step` via automatic differentiation.
 reward_step = jax.jit(jax.grad(lambda w: preference_loss(w, chosen, rejected)))
 for _ in range(100):
     reward_w = reward_w - 0.1 * reward_step(reward_w)
@@ -262,23 +248,20 @@ rewards = jax.lax.stop_gradient(features @ reward_w)
 # A fixed reference policy and a learned reward, with one terminal response action.
 reference = jax.nn.log_softmax(jnp.array([0.2, 0.0, -0.2]))
 theta = jnp.array([0.2, 0.0, -0.2])
-# Convert `reference_copy` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 reference_copy = np.asarray(reference).copy()
 # Create or split explicit PRNG key(s) (`key`) for reproducible randomness.
 key = jax.random.key(11)
 history = []
 kl_history = []
-# Evaluate both scalar loss and parameter gradients in one pass (`step`).
 step = jax.jit(jax.value_and_grad(ppo_loss))
 
-# Step 3 — 3. Collect rollouts and reuse each batch correctly: Each outer iteration collects a fresh batch; each inner step...
+# Step 3 — 3. Collect rollouts and reuse each batch correctly
 for iteration in range(40):
-    # Evaluate numerically stable log-space cross-entropy/likelihood (`old`).
     old = jax.nn.log_softmax(theta)
     probs = jnp.exp(old)
     # Create or split explicit PRNG key(s) (`(key, draw)`) for reproducible randomness.
     key, draw = jax.random.split(key)
-    # Draw pseudorandom samples for `actions` using the explicit RNG state.
     actions = jax.random.categorical(draw, old, shape=(128,))
     old_selected = jax.lax.stop_gradient(old[actions])
     advantage = jax.lax.stop_gradient(
@@ -289,14 +272,11 @@ for iteration in range(40):
             theta, old_selected, actions, advantage, reference, 0.2, 0.2
         )
         theta = theta - 0.15 * g
-    # Evaluate numerically stable log-space cross-entropy/likelihood (`logp`).
     logp = jax.nn.log_softmax(theta)
     history.append(float(jnp.sum(jnp.exp(logp) * rewards)))
     kl_history.append(float(jnp.sum(jnp.exp(logp) * (logp - reference))))
 
-# Execute `np.testing.assert_array_equal(reference, reference_copy)`
 np.testing.assert_array_equal(reference, reference_copy)
-# Aggregate array values to compute `initial_reward`.
 initial_reward = float(jnp.sum(jnp.exp(reference) * rewards))
 assert history[-1] > initial_reward and kl_history[-1] > 0
 # Independent finite-action expectation: no evaluation sampling error here.
@@ -337,19 +317,18 @@ The third panel compares reference and final action probabilities; each series s
 The policy concentrates on the action favored by the learned reward, which also moves it away from the reference. These deterministic expectation measurements evaluate a policy trained from random rollouts; they are not sampled human preference scores or a safety assessment.
 
 ```python
-# Compute figure data for: RLHF mechanics: a frozen reward and PPO policy updates — recorded experiment
 visual_data={'panels':[{'kind':'line','xlabel':'completed PPO rollout batches','ylabel':'expected learned reward','series':[{'label':'exact policy expectation','x':list(range(1,len(history)+1)),'y':history}]},{'kind':'line','xlabel':'completed PPO rollout batches','ylabel':'KL to fixed reference (nats)','series':[{'label':'exact categorical KL','x':list(range(1,len(kl_history)+1)),'y':kl_history}]}]}
 for panel in visual_data.get('panels',[visual_data]):
     panel['x']=panel['series'][0]['x']
 
-# Convert `extra_panel` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 extra_panel={'kind':'bar','x':[0,1,2],'labels':['action 0','action 1','action 2'],'series':[{'label':'fixed reference','y':np.asarray(jnp.exp(reference)).tolist()},{'label':'trained policy','y':np.asarray(jnp.exp(logp)).tolist()}],'xlabel':'terminal response action','ylabel':'probability','title':'How increased reward redistributes action probability'}
 visual_data={"panels":[*visual_data.get("panels",[visual_data]),extra_panel]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:52:18.834855+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:27:02.074382+00:00. JAX 0.9.2.
 
 ```text
 Reward initial/final and final KL: 0.28191882371902466 1.9185447692871094 0.7824773192405701
@@ -376,7 +355,6 @@ advantages = np.array([2.0, -2.0])
 terms = np.minimum(
     ratios * advantages, np.clip(ratios, 0.8, 1.2) * advantages
 )
-# Execute `np.testing.assert_allclose(terms, [2.4, -1.6])`
 np.testing.assert_allclose(terms, [2.4, -1.6])
 print('Clipped surrogate terms:', terms)
 ```
@@ -392,18 +370,14 @@ The negative-advantage case selects the more negative product. This is why clipp
 ```python
 # Experiment — Enumerate the baseline cancellation: Enumeration removes sampling error.
 probe = jnp.array([0.3, -0.2, 0.1])
-# Apply nonlinear activation or probability normalization to compute `probe_probs`.
 probe_probs = jax.nn.softmax(probe)
-# Aggregate array values to compute `constant`.
 constant = float(jnp.sum(probe_probs * rewards))
-# Compute exact directional derivative / Jacobian / Hessian (`score_jacobian`).
 score_jacobian = jax.jacrev(jax.nn.log_softmax)(probe)
 # Reduce along axis=0 to compute `enumerated`.
 enumerated = jnp.sum(
     probe_probs[:, None] * (rewards - constant)[:, None] * score_jacobian,
     axis=0,
 )
-# Differentiate the objective to obtain `exact` via automatic differentiation.
 exact = jax.grad(lambda logits: jnp.sum(jax.nn.softmax(logits) * rewards))(
     probe
 )
@@ -425,13 +399,12 @@ Check the KL at the fixed reference and compare it with the final policy’s exa
 - `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
 
 **Step-by-step implementation plan:**
-1. Aggregate array values to compute `zero_kl`.
+1. Exercise solution
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Check the KL at the fixed reference and compare it with the final...
-# Aggregate array values to compute `zero_kl`.
+# Exercise solution
 zero_kl = float(...)  # TODO: compute zero_kl
 assert zero_kl  # TODO: complete assertion check
 print('Reference/final KL:', zero_kl, kl_history[-1])
@@ -440,8 +413,7 @@ print('Reference/final KL:', zero_kl, kl_history[-1])
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Check the KL at the fixed reference and compare it with the final...
-# Aggregate array values to compute `zero_kl`.
+# Exercise solution
 zero_kl = float(jnp.sum(jnp.exp(reference) * (reference - reference)))
 assert zero_kl == 0.0 and kl_history[-1] > zero_kl
 print('Reference/final KL:', zero_kl, kl_history[-1])
@@ -467,21 +439,17 @@ Use argnums to inspect only those two inputs.
 - `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
 
 **Step-by-step implementation plan:**
-1. Differentiate the objective to obtain `(old_grad, adv_grad)` via automatic differentiation.
-2. Allocate initialized array `` with the specified shape and dtype.
-3. Allocate initialized array `` with the specified shape and dtype.
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Verify detached behavior information (Transfer): Detaching is not enough if you recompute old probabilities...
-# Differentiate the objective to obtain `(old_grad, adv_grad)` via automatic differentiation.
+# Verify detached behavior information (Transfer)
 old_grad, adv_grad = jax.grad(...)  # TODO: compute old_grad, adv_grad
     theta, old_selected, actions, advantage, reference, 0.2, 0.2
 )
-# Allocate initialized array `` with the specified shape and dtype.
 np.testing.assert_array_equal(old_grad, np.zeros(old_grad.shape))
-# Allocate initialized array `` with the specified shape and dtype.
 np.testing.assert_array_equal(adv_grad, np.zeros(adv_grad.shape))
 print('Behavior log probabilities and advantages are detached.')
 ```
@@ -489,14 +457,11 @@ print('Behavior log probabilities and advantages are detached.')
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Verify detached behavior information (Transfer): Detaching is not enough if you recompute old probabilities...
-# Differentiate the objective to obtain `(old_grad, adv_grad)` via automatic differentiation.
+# Verify detached behavior information (Transfer)
 old_grad, adv_grad = jax.grad(ppo_loss, argnums=(1, 3))(
     theta, old_selected, actions, advantage, reference, 0.2, 0.2
 )
-# Allocate initialized array `` with the specified shape and dtype.
 np.testing.assert_array_equal(old_grad, np.zeros(old_grad.shape))
-# Allocate initialized array `` with the specified shape and dtype.
 np.testing.assert_array_equal(adv_grad, np.zeros(adv_grad.shape))
 print('Behavior log probabilities and advantages are detached.')
 ```
@@ -523,14 +488,13 @@ Evaluate expected reward minus beta times KL for all three policies, and compute
 - `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
 
 **Step-by-step implementation plan:**
-1. Evaluate numerically stable log-space cross-entropy/likelihood (`optimal_logp`).
+1. Compare with the finite-action regularized optimum (Challenge)
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Compare with the finite-action regularized optimum (Challenge): An independently derived optimum bounds this finite-action...
+# Compare with the finite-action regularized optimum (Challenge)
 beta = ...  # TODO: compute beta
-# Evaluate numerically stable log-space cross-entropy/likelihood (`optimal_logp`).
 optimal_logp = jax.nn.log_softmax(...)  # TODO: compute optimal_logp
 
 def regularized(logp):
@@ -553,9 +517,8 @@ print(
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Compare with the finite-action regularized optimum (Challenge): An independently derived optimum bounds this finite-action...
+# Compare with the finite-action regularized optimum (Challenge)
 beta = 0.2
-# Evaluate numerically stable log-space cross-entropy/likelihood (`optimal_logp`).
 optimal_logp = jax.nn.log_softmax(reference + rewards / beta)
 
 def regularized(logp):

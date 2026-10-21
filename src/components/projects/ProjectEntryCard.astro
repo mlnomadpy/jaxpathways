@@ -7,9 +7,11 @@ import type { ProjectManifest } from '../../types/manifests';
 
 interface Props {
   project: ProjectManifest;
+  groupId: string;
+  recommended?: boolean;
 }
 
-const { project } = Astro.props;
+const { project, groupId, recommended = false } = Astro.props;
 const layout = projectFileLayout(project);
 const pathwayTitle = course.pathways.find((path) => path.id === project.pathwayId)?.title;
 const prerequisitePhases = course.phases.filter((phase) =>
@@ -17,66 +19,68 @@ const prerequisitePhases = course.phases.filter((phase) =>
 );
 ---
 
-<article class="project-entry" data-project-id={project.id}>
+<article
+  class="project-entry"
+  id={`project-${project.id}`}
+  data-project-id={project.id}
+  data-project-group={groupId}
+>
   <div class="project-overview">
+    {recommended && <p class="project-recommendation">Recommended first project</p>}
     <p class="project-context">
-      {pathwayTitle} / {project.hardware} · {project.stages.length} stages
+      {pathwayTitle} · {project.hardware}
     </p>
     <h3>{project.title}</h3>
-    <p set:html={inlineMath(project.setupNote)} />
-    <p set:html={inlineMath(project.rubric.slice(0, 2).join('. ') + '.')} />
-    <div class="project-code-target">
-      <p>
-        <strong>Where to put your code:</strong>{' '}
-        {layout.copiesStarter ? (
-          <Fragment>
-            Copy <code>{layout.starterFile}</code> to <code>{layout.workspaceFile}</code> and edit{' '}
-            <code>{layout.workspaceFile}</code>.
-          </Fragment>
-        ) : (
-          <Fragment>
-            Edit <code>{layout.workspaceFile}</code> directly.
-          </Fragment>
-        )}
-      </p>
-      <p>
-        <strong>Verify each stage:</strong> <code>{layout.checkerFile}</code>
-      </p>
-    </div>
+    <p class="project-outcome" set:html={inlineMath(project.rubric[0] || project.setupNote)} />
+    <p class="project-effort">
+      {prerequisitePhases.length} preparation {prerequisitePhases.length === 1 ? 'phase' : 'phases'}
+      · {project.stages.length} stages · self-paced (completion time not measured)
+    </p>
     <div class="actions">
       <a class="button primary" href={siteUrl(`project.html?id=${project.id}`)}>
         Open project
       </a>
-      <a class="button" href={siteUrl(`project-guides/${project.id}.html`)}>
-        Read guide and figures
-      </a>
-      <a class="button" href={siteUrl(`downloads/${project.id}.zip`)} download>
-        Download ZIP
-      </a>
     </div>
   </div>
-  <div class="project-stages">
-    <h4>Your stages</h4>
-    <ol>
-      {project.stages.map((stage) => (
-        <li set:html={inlineMath(stage.title)} />
-      ))}
-    </ol>
-  </div>
-  <div class="project-prerequisites">
-    <h4>Before you start</h4>
-    <ul>
-      {prerequisitePhases.map((phase) => (
-        <li>
-          <a
-            href={siteUrl(
-              `course.html?path=${project.pathwayId}&phase=${phase.id}#phase-${phase.id}`,
-            )}
-          >
-            {phase.title}
-          </a>
-        </li>
-      ))}
-    </ul>
-  </div>
+  <details class="project-details">
+    <summary>Setup, stages and preparation</summary>
+    <div class="project-detail-content">
+      <p set:html={inlineMath(project.setupNote)} />
+      <p set:html={inlineMath(project.rubric.slice(1, 2).join('. '))} />
+      <div class="project-code-target">
+        <p>
+          <strong>Where to put your code:</strong>{' '}
+          {layout.copiesStarter ? (
+            <Fragment>
+              Copy <code>{layout.starterFile}</code> to <code>{layout.workspaceFile}</code> and edit{' '}
+              <code>{layout.workspaceFile}</code>.
+            </Fragment>
+          ) : (
+            <Fragment>
+              Edit <code>{layout.workspaceFile}</code> directly.
+            </Fragment>
+          )}
+        </p>
+        <p><strong>Verify each stage:</strong> <code>{layout.checkerFile}</code></p>
+      </div>
+      <div class="actions">
+        <a class="button" href={siteUrl(`project-guides/${project.id}.html`)}>Read guide and figures</a>
+        <a class="button" href={siteUrl(`downloads/${project.id}.zip`)} download>Download ZIP</a>
+      </div>
+      <div class="project-stages">
+        <h4>Your stages</h4>
+        <ol>
+          {project.stages.map((stage) => <li set:html={inlineMath(stage.title)} />)}
+        </ol>
+      </div>
+      <div class="project-prerequisites">
+        <h4>Before you start</h4>
+        <ul>
+          {prerequisitePhases.map((phase) => (
+            <li><a href={siteUrl(`course.html?path=${project.pathwayId}&phase=${phase.id}#phase-${phase.id}`)}>{phase.title}</a></li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </details>
 </article>

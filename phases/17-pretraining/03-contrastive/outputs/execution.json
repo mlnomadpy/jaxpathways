@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "pretraining-03",
-  "contentHash": "f831dc2fce1ef37c4dd173016bbc86e0579d06d729ff6ff7c5989e9cffadba28",
-  "executedAt": "2026-10-20T10:52:06.547124+00:00",
+  "contentHash": "89a798a25c2ff1ea24131280c7f2d7d37a29c9b5d6dc7e4d1e7c0fa0daeb9692",
+  "executedAt": "2026-10-20T22:26:48.912284+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -14,15 +14,15 @@
   "stdout": "Paired contrastive initial/final: 0.564157247543335 0.013556718826293945 ; all four nearest pairs correct\nPaired contrastive initial/final: 0.564157247543335 0.013556718826293945 ; all four nearest pairs correct\nCollapsed baseline: 1.3862943649291992\nTemperature/loss: 0.2 0.006715348921716213\nTemperature/loss: 1.0 0.31326162815093994\nTemperature/loss: 2.0 0.4740769863128662\nIncorrect pair mapping loss: 7.493563652038574\nDuplicated diagonal-only penalty: 0.6931472215801477\nStep / finite difference / autodiff: 0.001 -1.3803242444992065 -1.3803226947784424\nStep / finite difference / autodiff: 0.0005 -1.3802646398544312 -1.3803226947784424\nPASS: pretraining-03\n",
   "notebookCells": [
     {
-      "sourceHash": "4ed9bb2f313d664b96b77a69414f57257f583497ed9ab5a2e949975e857d1df7",
+      "sourceHash": "b905b07c177ffe4b807fdab434f77219cea083a9b31dbb60d9a2a91278a96ee5",
       "outputs": []
     },
     {
-      "sourceHash": "5ecee555f7d4e4751d190ae825b4d8b365c52bd1112a99023998863eb39e06a5",
+      "sourceHash": "f5e6a17ba5b108b06b06d3886355a606c1760c5cbc96dcb640f6623fe5a4a57b",
       "outputs": []
     },
     {
-      "sourceHash": "878167ebdf57a262299484698a1f06f61665e36a74e7a942ee08b28c37fc78f1",
+      "sourceHash": "dc3d0e7ec090a53de7ae7c5a02c079d3a79b4d41ee532f38c46ac64b69635581",
       "outputs": [
         {
           "output_type": "stream",
@@ -34,7 +34,7 @@
       ]
     },
     {
-      "sourceHash": "50a11cbabad2b51b323e50b2acd3989bbfb3534f5156a7eccdb9a904f1ffbd77",
+      "sourceHash": "958e214cd54077f1684158d505b63732a67d0c93a523216adb7a9715e2f29b73",
       "outputs": [
         {
           "output_type": "stream",
@@ -46,7 +46,7 @@
       ]
     },
     {
-      "sourceHash": "d9739a5b04ec6ad5533cb5996b986405196698a16d91ddb4eb8b526df9ccc1c9",
+      "sourceHash": "29800599db6c79de08e0de683acca2e91fe1c40be4f252f72ab2a8b1716f85a9",
       "outputs": []
     },
     {
@@ -77,7 +77,7 @@
       ]
     },
     {
-      "sourceHash": "057ab226d29b83e2d6cc58d0b0690d2070d0e0404b1e75535bb3f0472524b929",
+      "sourceHash": "3f4ba29f7d9f10d87a47cc9ef82bc83daa0f4a6ce358096b1830e17001c38cda",
       "outputs": [
         {
           "output_type": "stream",
@@ -91,11 +91,11 @@
       ]
     },
     {
-      "sourceHash": "e494766cd16b52549c6b6002cbcfcd8872a1525910e36fcec2853598f4897f47",
+      "sourceHash": "90bdc2447720fc0675eda3c3f04d242e1908d9e55b8e45f2444fd138c07a70f7",
       "outputs": []
     },
     {
-      "sourceHash": "5527d77b8833aedecfd1b5767d4e3e0275d9f36c3e011e3930aa9b94fe2ce20f",
+      "sourceHash": "7dd8337f4c502778f49fb3980110eefaebb77098e58607ee3b6403eec1e2019e",
       "outputs": [
         {
           "output_type": "stream",
@@ -107,11 +107,11 @@
       ]
     },
     {
-      "sourceHash": "1a9bbf76fde5d189726babcc00c3a2408fa8a52e54e8ca869386ee0de4c83a76",
+      "sourceHash": "a4b571595b581390db522855e16d237bb5f0ded6ec8c77a0ab23e9464d08580f",
       "outputs": []
     },
     {
-      "sourceHash": "aa8bcb98d14c590568c549a375daf7e45d8e6ab1c5c42a53d94fe1598c00ab07",
+      "sourceHash": "bdace5e33603c3bf8a4d83187ab108d653913685c9df2a5669cce82e9c361165",
       "outputs": [
         {
           "output_type": "stream",
@@ -123,11 +123,11 @@
       ]
     },
     {
-      "sourceHash": "e8564e55f483eb943abf5b851cb2356a0e0aa1566df8c3f5ea8d8a9612c80627",
+      "sourceHash": "a9934353ad007c51da074d035faaa09f4c656ee04fa2dbc3e676fe3271e55cd2",
       "outputs": []
     },
     {
-      "sourceHash": "97b8f32c42419c22b572e783c0d6f3e55b778eb87e614ed57c8384d7f8c1167c",
+      "sourceHash": "14f27bfdb3d67adb60dcf3c470abbc592cdf8ca017e0d75fae0f78266cf4458c",
       "outputs": [
         {
           "output_type": "stream",

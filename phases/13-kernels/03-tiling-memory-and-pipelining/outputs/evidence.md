@@ -7,7 +7,7 @@ Copy this template into your own portfolio and fill it after running your modifi
 Synchronous/buffered CPU simulation agreement, two/three input slots, unchanged output buffering, correctness across tiles and modeled footprint counts. Keep the environment, observed outputs and your explanation of the figure.
 
 - Command: `python3 phases/13-kernels/03-tiling-memory-and-pipelining/code/main.py`
-- Working directory: repository root
+- Working directory: Repository root
 - Python / JAX / NumPy versions: 
 - Hardware and device: 
 - My prediction before running: 

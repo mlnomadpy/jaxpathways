@@ -2,6 +2,8 @@
 
 Phase 04: Math & optimization · about 75 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Fit a linear model with a direct solver and diagnose nonunique or sensitive coefficients.
@@ -65,7 +67,7 @@ $$
 Create main.py and add this small matrix and target. Work out the proposed weights on paper.
 
 ```python
-# Step 1 — Construct an imperfect fit: No weights can match all three targets, so a nonzero residual is...
+# Step 1 — Construct an imperfect fit
 import jax.numpy as jnp
 import numpy as np
 X = jnp.array([[1.0, 0.0], [0.0, 1.0], [1.0, 1.0]])
@@ -80,7 +82,7 @@ No weights can match all three targets, so a nonzero residual is expected.
 Append the direct solve and compute the error from the actual predictions.
 
 ```python
-# Step 2 — Solve and inspect the residual: Perpendicular residuals verify optimality for this unconstrained...
+# Step 2 — Solve and inspect the residual
 w, _, rank, singular = jnp.linalg.lstsq(X, y, rcond=None)
 r = X @ w - y
 assert int(rank) == 2
@@ -95,9 +97,9 @@ Perpendicular residuals verify optimality for this unconstrained least-squares p
 Append the mean loss and a NumPy float64 solve; run python main.py.
 
 ```python
-# Step 3 — Compare independent references: The hand result and a separate numerical implementation agree...
+# Step 3 — Compare independent references
 assert jnp.allclose(jnp.mean(r * r), 1 / 9, atol=2e-06)
-# Convert `np_w` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 np_w = np.linalg.lstsq(np.asarray(X, dtype=np.float64), np.asarray(y, dtype=np.float64), rcond=None)[0]
 assert np.allclose(np.asarray(w), np_w, atol=2e-06)
 print('weights / rank / MSE:', w, rank, jnp.mean(r * r))
@@ -108,23 +110,23 @@ The hand result and a separate numerical implementation agree within float32 tol
 ## Run the example
 
 ```python
-# Step 1 — Construct an imperfect fit: No weights can match all three targets, so a nonzero residual is...
+# Step 1 — Construct an imperfect fit
 import jax.numpy as jnp
 import numpy as np
 X = jnp.array([[1.0, 0.0], [0.0, 1.0], [1.0, 1.0]])
 y = jnp.array([1.0, 2.0, 2.0])
 expected = jnp.array([2 / 3, 5 / 3])
 
-# Step 2 — Solve and inspect the residual: Perpendicular residuals verify optimality for this unconstrained...
+# Step 2 — Solve and inspect the residual
 w, _, rank, singular = jnp.linalg.lstsq(X, y, rcond=None)
 r = X @ w - y
 assert int(rank) == 2
 assert jnp.allclose(w, expected, atol=2e-06)
 assert jnp.allclose(X.T @ r, jnp.zeros(2), atol=2e-06)
 
-# Step 3 — Compare independent references: The hand result and a separate numerical implementation agree...
+# Step 3 — Compare independent references
 assert jnp.allclose(jnp.mean(r * r), 1 / 9, atol=2e-06)
-# Convert `np_w` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 np_w = np.linalg.lstsq(np.asarray(X, dtype=np.float64), np.asarray(y, dtype=np.float64), rcond=None)[0]
 assert np.allclose(np.asarray(w), np_w, atol=2e-06)
 print('weights / rank / MSE:', w, rank, jnp.mean(r * r))
@@ -153,13 +155,12 @@ The feature matrix makes the third prediction equal the sum of the first two. Ma
 Least squares balances this conflict. For each feature column, the residual contributions cancel, giving $X^{\mathsf T}r=0$. That orthogonality, rather than zero residual on every row, is the optimality condition. The unequal bar heights are an unavoidable limitation of this model, not evidence that the solver failed.
 
 ```python
-# Compute figure data for: Least squares balances unavoidable residuals
 visual_data = {'kind': 'bar', 'labels': ['row 0', 'row 1', 'row 2'], 'ylabel': 'target / prediction', 'series': [{'label': 'target', 'y': y.tolist()}, {'label': 'least-squares fit', 'y': (X @ w).tolist()}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:45:37.409448+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:20:24.836317+00:00. JAX 0.9.2.
 
 ```text
 weights / rank / MSE: [0.6666669 1.6666665] 2 0.11111113
@@ -176,7 +177,6 @@ PASS: optimization-06
 ```python
 # Experiment — Duplicate a feature: Fit quality and coefficient uniqueness are different questions.
 a = jnp.array([1.0, 2.0, 3.0])
-# Combine or mask array elements to form `duplicate`.
 duplicate = jnp.stack([a, a], axis=1)
 w_dup, _, rank_dup, _ = jnp.linalg.lstsq(duplicate, 3 * a, rcond=None)
 assert int(rank_dup) == 1
@@ -193,7 +193,7 @@ Fit quality and coefficient uniqueness are different questions.
 **Predict before running:** If two columns differ by only $0.01$ in one row, can a target change of $0.001$ move a weight by much more?
 
 ```python
-# Experiment — Perturb a weak direction: Nearly dependent columns can amplify target perturbations while...
+# Experiment — Perturb a weak direction
 near = jnp.array([[1.0, 1.0], [0.0, 0.01], [0.0, 0.0]])
 base = near @ jnp.array([1.0, 1.0])
 changed = base + jnp.array([0.0, 0.001, 0.0])

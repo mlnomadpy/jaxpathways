@@ -2,6 +2,8 @@
 
 Phase 13: Pallas kernels · about 95 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Implement an actual Pallas Ref-writing kernel with grid and BlockSpecs.
@@ -82,13 +84,10 @@ from jax.experimental import pallas as pl
 from jax.experimental.pallas import tpu as pltpu
 
 def validate_pair(x,y,block):
-    # Guard input contract (`x.ndim != 2 or x.shape != y.shape or min(x.shape) < 1`) and fail fast if violated.
     if x.ndim!=2 or x.shape!=y.shape or min(x.shape)<1:
         raise ValueError("inputs must be nonempty matrices with identical shapes")
-    # Guard input contract (`x.dtype != y.dtype or x.dtype not in (jnp.float32, jnp.bfloat16)`) and fail fast if violated.
     if x.dtype!=y.dtype or x.dtype not in (jnp.float32,jnp.bfloat16):
         raise ValueError("matching float32 or bfloat16 inputs required")
-    # Guard input contract (`len(block) != 2 or any((not isinstance(n, int) or n < 1 for n in block))`) and fail fast if violated.
     if len(block)!=2 or any(not isinstance(n,int) or n<1 for n in block):
         raise ValueError("two positive integer block dimensions required")
 
@@ -97,7 +96,6 @@ def pad_pair(x,y,block):
     m,n=x.shape
     bm,bn=block
     padded=((m+bm-1)//bm*bm,(n+bn-1)//bn*bn)
-    # Combine or mask array elements to form `pads`.
     pads=((0,padded[0]-m),(0,padded[1]-n))
     return jnp.pad(x,pads),jnp.pad(y,pads),padded
 
@@ -106,12 +104,9 @@ def axpy_body(x_ref,y_ref,out_ref):
     out_ref[...]=result.astype(out_ref.dtype)
 
 def blocked_axpy(x,y,block=(2,4)):
-    # Combine or mask array elements to form `(px, py, padded)`.
     px,py,padded=pad_pair(x,y,block)
     bm,bn=block
-    # Invoke custom Pallas kernel or tile specification (`spec`).
     spec=pl.BlockSpec(block,lambda i,j:(i,j))
-    # Combine or mask array elements to form `out`.
     out=pl.pallas_call(axpy_body,
         out_shape=jax.ShapeDtypeStruct(padded,x.dtype),
         grid=(padded[0]//bm,padded[1]//bn),
@@ -127,11 +122,10 @@ Create main.py for the first block, then append each block in order in your cour
 
 ```python
 # Step 2 — Check every logical element against NumPy: The last row and column belong to partial logical tiles.
-# Construct and reshape `x` into the target tensor dimensions.
 x=jnp.arange(55,dtype=jnp.float32).reshape(5,11)/10-2
 y=jnp.full_like(x,0.25)
 actual=blocked_axpy(x,y)
-# Convert `reference` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 reference=2*np.asarray(x)+np.asarray(y)
 # Check tensor shape invariant: `actual.shape==(5,11)`
 assert actual.shape==(5,11)
@@ -170,13 +164,10 @@ from jax.experimental import pallas as pl
 from jax.experimental.pallas import tpu as pltpu
 
 def validate_pair(x,y,block):
-    # Guard input contract (`x.ndim != 2 or x.shape != y.shape or min(x.shape) < 1`) and fail fast if violated.
     if x.ndim!=2 or x.shape!=y.shape or min(x.shape)<1:
         raise ValueError("inputs must be nonempty matrices with identical shapes")
-    # Guard input contract (`x.dtype != y.dtype or x.dtype not in (jnp.float32, jnp.bfloat16)`) and fail fast if violated.
     if x.dtype!=y.dtype or x.dtype not in (jnp.float32,jnp.bfloat16):
         raise ValueError("matching float32 or bfloat16 inputs required")
-    # Guard input contract (`len(block) != 2 or any((not isinstance(n, int) or n < 1 for n in block))`) and fail fast if violated.
     if len(block)!=2 or any(not isinstance(n,int) or n<1 for n in block):
         raise ValueError("two positive integer block dimensions required")
 
@@ -185,7 +176,6 @@ def pad_pair(x,y,block):
     m,n=x.shape
     bm,bn=block
     padded=((m+bm-1)//bm*bm,(n+bn-1)//bn*bn)
-    # Combine or mask array elements to form `pads`.
     pads=((0,padded[0]-m),(0,padded[1]-n))
     return jnp.pad(x,pads),jnp.pad(y,pads),padded
 
@@ -194,12 +184,9 @@ def axpy_body(x_ref,y_ref,out_ref):
     out_ref[...]=result.astype(out_ref.dtype)
 
 def blocked_axpy(x,y,block=(2,4)):
-    # Combine or mask array elements to form `(px, py, padded)`.
     px,py,padded=pad_pair(x,y,block)
     bm,bn=block
-    # Invoke custom Pallas kernel or tile specification (`spec`).
     spec=pl.BlockSpec(block,lambda i,j:(i,j))
-    # Combine or mask array elements to form `out`.
     out=pl.pallas_call(axpy_body,
         out_shape=jax.ShapeDtypeStruct(padded,x.dtype),
         grid=(padded[0]//bm,padded[1]//bn),
@@ -207,11 +194,10 @@ def blocked_axpy(x,y,block=(2,4)):
     return out[:x.shape[0],:x.shape[1]]
 
 # Step 2 — Check every logical element against NumPy: The last row and column belong to partial logical tiles.
-# Construct and reshape `x` into the target tensor dimensions.
 x=jnp.arange(55,dtype=jnp.float32).reshape(5,11)/10-2
 y=jnp.full_like(x,0.25)
 actual=blocked_axpy(x,y)
-# Convert `reference` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 reference=2*np.asarray(x)+np.asarray(y)
 # Check tensor shape invariant: `actual.shape==(5,11)`
 assert actual.shape==(5,11)
@@ -252,13 +238,12 @@ The independent ownership arithmetic agrees with a $(3,3)$ grid over a padded $(
 Color differences do not imply parallel execution or different speeds. This CPU interpretation figure explains mapping and boundaries; TPU scheduling and layout constraints need their own target-specific evidence.
 
 ```python
-# Compute figure data for: Nine programs cover a matrix with partial boundary tiles
 visual_data={'kind':'heatmap','values':owner.tolist(),'unit':'program ID (categorical label)','rows':[str(i) for i in range(5)],'columns':[str(i) for i in range(11)],'xlabel':'logical column','ylabel':'logical row'}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:49:31.979818+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:23:35.944346+00:00. JAX 0.9.2.
 
 ```text
 Shape and boundary: (5, 11) -3.75 7.050000190734863
@@ -282,7 +267,7 @@ PASS: kernels-01
 **Predict before running:** Will blocks of $(3,5)$ change the logical answer?
 
 ```python
-# Experiment — Change block geometry without changing values: Grid geometry is an implementation choice for this independent...
+# Experiment — Change block geometry without changing values
 changed=blocked_axpy(x,y,(3,5))
 np.testing.assert_allclose(changed,reference,rtol=1e-6,atol=1e-6)
 print("Changed grid:",(2,3),"same numerical result")
@@ -297,7 +282,7 @@ Grid geometry is an implementation choice for this independent elementwise opera
 **Predict before running:** How many logical cells would a grid built with floor division cover?
 
 ```python
-# Experiment — Expose the floor-division omission: This diagnostic models the ownership bug without reading...
+# Experiment — Expose the floor-division omission
 covered=np.zeros((5,11),dtype=bool)
 for i in range(5//2):
     for j in range(11//4):
@@ -321,25 +306,22 @@ Test a singleton row and a changed nondivisible matrix with negative values. Ver
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Create device-backed JAX array `a`.
-2. Create device-backed JAX array `b`.
-3. Check tensor shape invariant: `result.shape==shape`
-4. Convert `` to a host NumPy array for inspection or verification.
+1. Exercise solution
+2. Check tensor shape invariant: `result.shape==shape`
+3. Transfer the device result to the host for an independent NumPy comparison.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Test a singleton row and a changed nondivisible matrix with negative...
+# Exercise solution
 for shape in [(1,7),(7,9)]:
-    # Create device-backed JAX array `a`.
     a = jnp.asarray(...)  # TODO: compute a
-    # Create device-backed JAX array `b`.
     b = jnp.asarray(...)  # TODO: compute b
     for block in [(2,4),(3,5)]:
         result = blocked_axpy(...)  # TODO: compute result
         # Check tensor shape invariant: `result.shape==shape`
         assert result.shape  # TODO: complete assertion check
-        # Convert `` to a host NumPy array for inspection or verification.
+        # Transfer the device result to the host for an independent NumPy comparison.
         np.testing.assert_allclose(result,2*np.asarray(a)+np.asarray(b),rtol=1e-6,atol=1e-6)
 print("Singleton and changed tails verified")
 ```
@@ -347,17 +329,15 @@ print("Singleton and changed tails verified")
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Test a singleton row and a changed nondivisible matrix with negative...
+# Exercise solution
 for shape in [(1,7),(7,9)]:
-    # Create device-backed JAX array `a`.
     a=jnp.asarray(np.random.default_rng(11).normal(size=shape),dtype=jnp.float32)
-    # Create device-backed JAX array `b`.
     b=jnp.asarray(np.random.default_rng(12).normal(size=shape),dtype=jnp.float32)
     for block in [(2,4),(3,5)]:
         result=blocked_axpy(a,b,block)
         # Check tensor shape invariant: `result.shape==shape`
         assert result.shape==shape
-        # Convert `` to a host NumPy array for inspection or verification.
+        # Transfer the device result to the host for an independent NumPy comparison.
         np.testing.assert_allclose(result,2*np.asarray(a)+np.asarray(b),rtol=1e-6,atol=1e-6)
 print("Singleton and changed tails verified")
 ```
@@ -382,14 +362,14 @@ Require identical matrix shapes, not merely broadcast-compatible shapes.
 - `jnp.zeros / jnp.ones(shape, dtype=...)` — Allocates a tensor of the given `shape` initialized with constants.
 
 **Step-by-step implementation plan:**
-1. Run the boundary check and catch the expected exception:
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Reject a broadcast that changes the contract (Practice): The operation promises paired matrices.
 rejected = ...  # TODO: compute rejected
-# Run the boundary check and catch the expected exception:
 try:blocked_axpy(x,jnp.ones((5,1),dtype=jnp.float32))
 except ValueError:rejected=True
 assert rejected  # TODO: complete assertion check
@@ -401,7 +381,6 @@ print("Mismatched global shape rejected")
 ```python
 # Reject a broadcast that changes the contract (Practice): The operation promises paired matrices.
 rejected=False
-# Run the boundary check and catch the expected exception:
 try:blocked_axpy(x,jnp.ones((5,1),dtype=jnp.float32))
 except ValueError:rejected=True
 assert rejected
@@ -425,11 +404,6 @@ Use integer ceiling division; do not time interpretation as accelerator performa
 </details>
 
 ### How to write: Measure padding overhead without claiming runtime — Step-by-step recipe & starter scaffold
-
-**Key functions & syntax to use:**
-- `runtime(...)` — Call `runtime` with your updated parameters or inputs from this lesson's workspace.
-- `counts.append(...)` — Call `counts.append` with your updated parameters or inputs from this lesson's workspace.
-- `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
 
 **Step-by-step implementation plan:**
 1. Set up the changed input or configuration parameters requested in the prompt.

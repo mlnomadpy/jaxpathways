@@ -2,6 +2,8 @@
 
 Phase 06: Data & checkpoint recovery · about 110 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Persist model/optimizer/key and Grain iterator position at one boundary.
@@ -92,7 +94,7 @@ Create main.py in your course workspace. Use the tested course environment and a
 ```python
 # Step 1 — Prepare the data and state: This setup makes the dataset and software assumptions explicit.
 import jax
-# Update state in place with the new values.
+# Select the CPU backend and virtual device count before initializing JAX.
 jax.config.update("jax_platforms","cpu")
 import jax.numpy as jnp
 import numpy as np
@@ -102,7 +104,6 @@ import tempfile
 import json
 import hashlib
 from pathlib import Path
-# Configure or step the Optax optimizer state (`tx`).
 tx = optax.adam(0.05)
 def initial_state():
     params = {"weight":jnp.array(0.,jnp.float32),"bias":jnp.array(0.,jnp.float32)}
@@ -110,23 +111,20 @@ def initial_state():
             "key_data":jax.random.key_data(jax.random.key(7,impl="threefry2x32")),
             "step":jnp.array(0,jnp.int32)}
 def pack_bytes(raw,capacity=4096):
-    # Guard input contract (`len(raw) > capacity`) and fail fast if violated.
     if len(raw)>capacity:
         raise ValueError("Snapshot exceeds tutorial fixed-byte capacity")
-    # Allocate initialized array `buffer` with the specified shape and dtype.
     buffer = np.zeros(capacity,dtype=np.uint8)
     buffer[:len(raw)] = np.frombuffer(raw,dtype=np.uint8)
     return {"buffer":buffer,"length":np.array(len(raw),dtype=np.int32)}
 def unpack_bytes(packed):
     length = int(packed["length"])
-    # Guard input contract (`not 0 <= length <= len(packed['buffer'])`) and fail fast if violated.
     if not 0 <= length <= len(packed["buffer"]):
         raise ValueError("Invalid snapshot length")
     return np.asarray(packed["buffer"],dtype=np.uint8)[:length].tobytes()
 def same_tree(left,right):
     assert jax.tree.structure(left)==jax.tree.structure(right)
     for a,b in zip(jax.tree.leaves(left),jax.tree.leaves(right)):
-        # Convert `(host_a, host_b)` to a host NumPy array for inspection or verification.
+        # Transfer the device result to the host for an independent NumPy comparison.
         host_a,host_b = np.asarray(a),np.asarray(b)
         # Check tensor shape invariant: `host_a.shape==host_b.shape and host_a.dtype==host_b.dtype`
         assert host_a.shape==host_b.shape and host_a.dtype==host_b.dtype
@@ -134,7 +132,6 @@ def same_tree(left,right):
             np.testing.assert_array_equal(host_a,host_b)
         else:
             np.testing.assert_allclose(host_a,host_b,rtol=1e-6,atol=1e-7)
-# Define `step(state, x, y)` to evaluate the objective and its automatic derivatives:
 def step(state,x,y):
     # Sample deterministic random values into `key` using an explicit PRNG key.
     key = jax.random.wrap_key_data(state["key_data"],impl="threefry2x32")
@@ -145,10 +142,8 @@ def step(state,x,y):
     def objective(params):
         residual = params["weight"]*x+params["bias"]-(y+target_noise)
         return jnp.mean(residual**2)
-    # Evaluate both scalar loss and parameter gradients in one pass (`(value, gradient)`).
     value,gradient = jax.value_and_grad(objective)(state["params"])
     updates,opt_state = tx.update(gradient,state["optimizer"],state["params"])
-    # Initialize explicit deterministic PRNG key `next_state`.
     next_state = {"params":optax.apply_updates(state["params"],updates),
                   "optimizer":opt_state,"key_data":jax.random.key_data(next_key),
                   "step":state["step"]+1}
@@ -160,13 +155,11 @@ def encode_contract(contract):
     return pack_bytes(json.dumps(contract,sort_keys=True).encode())
 def validate_contract(saved,expected):
     actual = json.loads(unpack_bytes(saved))
-    # Guard input contract (`actual != expected`) and fail fast if violated.
     if actual != expected:
         raise ValueError("Checkpoint contract differs: verify dataset, optimizer configuration, key implementation and package versions")
 workspace = tempfile.TemporaryDirectory()
 root = Path(workspace.name)
 
-# Import required JAX, NumPy, and standard-library modules.
 import numpy as np
 import grain.python as grain
 # Module/container class `TutorialSource` encapsulating model parameters and forward pass:
@@ -195,7 +188,7 @@ This setup makes the dataset and software assumptions explicit. No external data
 Append this block to the same file; follow the named state objects through each function.
 
 ```python
-# Step 2 — Build the pipeline or state transition: The function boundaries expose which inputs determine the next...
+# Step 2 — Build the pipeline or state transition
 def data_contract(seed=42):
     source = TutorialSource()
     values = np.array([[source[i]["x"],source[i]["y"]] for i in range(len(source))],dtype=np.float32)
@@ -209,7 +202,6 @@ def consume(state,iterator,count):
     for _ in range(count):
         batch = next(iterator)
         orders.append(batch["id"].copy())
-        # Create device-backed JAX array `(state, value)`.
         state,value = step(state,jnp.asarray(batch["x"]),jnp.asarray(batch["y"]))
         losses.append(float(value))
     return state,np.array(losses),orders
@@ -218,7 +210,6 @@ reference_iterator = iter(make_loader())
 reference_state,_,_ = consume(initial_state(),reference_iterator,2)
 payload = {"training":reference_state,"pipeline":pack_bytes(reference_iterator.get_state()),"contract":encode_contract(contract)}
 resume_path = root/"completed_step_2"
-# Enter `ocp.StandardCheckpointer()` context block:
 with ocp.StandardCheckpointer() as cp:
     cp.save(resume_path,payload)
     cp.wait_until_finished()
@@ -235,7 +226,7 @@ The function boundaries expose which inputs determine the next output and which 
 Append the checks, save main.py and run python main.py. Predict what should agree before running.
 
 ```python
-# Step 3 — Run the comparison: The comparison checks the next behavior, not merely whether a save...
+# Step 3 — Run the comparison
 reference_final,reference_losses,reference_ids = consume(reference_state,reference_iterator,4)
 resumed_final,resumed_losses,resumed_ids = consume(restored_payload["training"],resumed_iterator,4)
 for a,b in zip(reference_ids,resumed_ids):np.testing.assert_array_equal(a,b)
@@ -254,7 +245,7 @@ The comparison checks the next behavior, not merely whether a save call succeede
 ```python
 # Step 1 — Prepare the data and state: This setup makes the dataset and software assumptions explicit.
 import jax
-# Update state in place with the new values.
+# Select the CPU backend and virtual device count before initializing JAX.
 jax.config.update("jax_platforms","cpu")
 import jax.numpy as jnp
 import numpy as np
@@ -264,7 +255,6 @@ import tempfile
 import json
 import hashlib
 from pathlib import Path
-# Configure or step the Optax optimizer state (`tx`).
 tx = optax.adam(0.05)
 def initial_state():
     params = {"weight":jnp.array(0.,jnp.float32),"bias":jnp.array(0.,jnp.float32)}
@@ -272,23 +262,20 @@ def initial_state():
             "key_data":jax.random.key_data(jax.random.key(7,impl="threefry2x32")),
             "step":jnp.array(0,jnp.int32)}
 def pack_bytes(raw,capacity=4096):
-    # Guard input contract (`len(raw) > capacity`) and fail fast if violated.
     if len(raw)>capacity:
         raise ValueError("Snapshot exceeds tutorial fixed-byte capacity")
-    # Allocate initialized array `buffer` with the specified shape and dtype.
     buffer = np.zeros(capacity,dtype=np.uint8)
     buffer[:len(raw)] = np.frombuffer(raw,dtype=np.uint8)
     return {"buffer":buffer,"length":np.array(len(raw),dtype=np.int32)}
 def unpack_bytes(packed):
     length = int(packed["length"])
-    # Guard input contract (`not 0 <= length <= len(packed['buffer'])`) and fail fast if violated.
     if not 0 <= length <= len(packed["buffer"]):
         raise ValueError("Invalid snapshot length")
     return np.asarray(packed["buffer"],dtype=np.uint8)[:length].tobytes()
 def same_tree(left,right):
     assert jax.tree.structure(left)==jax.tree.structure(right)
     for a,b in zip(jax.tree.leaves(left),jax.tree.leaves(right)):
-        # Convert `(host_a, host_b)` to a host NumPy array for inspection or verification.
+        # Transfer the device result to the host for an independent NumPy comparison.
         host_a,host_b = np.asarray(a),np.asarray(b)
         # Check tensor shape invariant: `host_a.shape==host_b.shape and host_a.dtype==host_b.dtype`
         assert host_a.shape==host_b.shape and host_a.dtype==host_b.dtype
@@ -296,7 +283,6 @@ def same_tree(left,right):
             np.testing.assert_array_equal(host_a,host_b)
         else:
             np.testing.assert_allclose(host_a,host_b,rtol=1e-6,atol=1e-7)
-# Define `step(state, x, y)` to evaluate the objective and its automatic derivatives:
 def step(state,x,y):
     # Sample deterministic random values into `key` using an explicit PRNG key.
     key = jax.random.wrap_key_data(state["key_data"],impl="threefry2x32")
@@ -307,10 +293,8 @@ def step(state,x,y):
     def objective(params):
         residual = params["weight"]*x+params["bias"]-(y+target_noise)
         return jnp.mean(residual**2)
-    # Evaluate both scalar loss and parameter gradients in one pass (`(value, gradient)`).
     value,gradient = jax.value_and_grad(objective)(state["params"])
     updates,opt_state = tx.update(gradient,state["optimizer"],state["params"])
-    # Initialize explicit deterministic PRNG key `next_state`.
     next_state = {"params":optax.apply_updates(state["params"],updates),
                   "optimizer":opt_state,"key_data":jax.random.key_data(next_key),
                   "step":state["step"]+1}
@@ -322,13 +306,11 @@ def encode_contract(contract):
     return pack_bytes(json.dumps(contract,sort_keys=True).encode())
 def validate_contract(saved,expected):
     actual = json.loads(unpack_bytes(saved))
-    # Guard input contract (`actual != expected`) and fail fast if violated.
     if actual != expected:
         raise ValueError("Checkpoint contract differs: verify dataset, optimizer configuration, key implementation and package versions")
 workspace = tempfile.TemporaryDirectory()
 root = Path(workspace.name)
 
-# Import required JAX, NumPy, and standard-library modules.
 import numpy as np
 import grain.python as grain
 # Module/container class `TutorialSource` encapsulating model parameters and forward pass:
@@ -349,7 +331,7 @@ def make_loader(seed=42,batch_size=4,count=12,drop_remainder=False):
         operations=[grain.Batch(batch_size,drop_remainder=drop_remainder)],
         worker_count=0)
 
-# Step 2 — Build the pipeline or state transition: The function boundaries expose which inputs determine the next...
+# Step 2 — Build the pipeline or state transition
 def data_contract(seed=42):
     source = TutorialSource()
     values = np.array([[source[i]["x"],source[i]["y"]] for i in range(len(source))],dtype=np.float32)
@@ -363,7 +345,6 @@ def consume(state,iterator,count):
     for _ in range(count):
         batch = next(iterator)
         orders.append(batch["id"].copy())
-        # Create device-backed JAX array `(state, value)`.
         state,value = step(state,jnp.asarray(batch["x"]),jnp.asarray(batch["y"]))
         losses.append(float(value))
     return state,np.array(losses),orders
@@ -372,7 +353,6 @@ reference_iterator = iter(make_loader())
 reference_state,_,_ = consume(initial_state(),reference_iterator,2)
 payload = {"training":reference_state,"pipeline":pack_bytes(reference_iterator.get_state()),"contract":encode_contract(contract)}
 resume_path = root/"completed_step_2"
-# Enter `ocp.StandardCheckpointer()` context block:
 with ocp.StandardCheckpointer() as cp:
     cp.save(resume_path,payload)
     cp.wait_until_finished()
@@ -381,7 +361,7 @@ validate_contract(restored_payload["contract"],contract)
 resumed_iterator = iter(make_loader())
 resumed_iterator.set_state(unpack_bytes(restored_payload["pipeline"]))
 
-# Step 3 — Run the comparison: The comparison checks the next behavior, not merely whether a save...
+# Step 3 — Run the comparison
 reference_final,reference_losses,reference_ids = consume(reference_state,reference_iterator,4)
 resumed_final,resumed_losses,resumed_ids = consume(restored_payload["training"],resumed_iterator,4)
 for a,b in zip(reference_ids,resumed_ids):np.testing.assert_array_equal(a,b)
@@ -418,7 +398,7 @@ visual_data = {'kind': 'line', 'x': [3, 4, 5, 6], 'xlabel': 'training step after
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:46:51.862987+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:21:40.677925+00:00. JAX 0.9.2.
 
 ```text
 Restored next four ID batches: [[4, 10, 11, 3], [2, 0, 11, 1], [5, 7, 6, 8], [4, 3, 10, 9]]
@@ -459,11 +439,10 @@ A model step counter does not automatically seek a data iterator.
 **Predict before running:** Replay the correct IDs but initialize model/optimizer/key from scratch. Will losses match?
 
 ```python
-# Experiment — Restore only the reader: Input replay and model-state replay are complementary...
+# Experiment — Restore only the reader
 reader_only = iter(make_loader())
 reader_only.set_state(unpack_bytes(restored_payload["pipeline"]))
 wrong_model,wrong_model_losses,correct_ids = consume(initial_state(),reader_only,1)
-# Execute `np.testing.assert_array_equal(correct_ids[0],reference_ids[0`
 np.testing.assert_array_equal(correct_ids[0],reference_ids[0])
 assert not np.isclose(wrong_model_losses[0],reference_losses[0],rtol=1e-6,atol=1e-7)
 assert int(wrong_model["step"])==1
@@ -484,16 +463,15 @@ Repeat the protocol after one batch and compare the next five batches through st
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Enter `ocp.StandardCheckpointer()` context block:
+1. Exercise solution
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Repeat the protocol after one batch and compare the next five batches...
+# Exercise solution
 other_iterator = iter(...)  # TODO: compute other_iterator
 other_state,_,_ = consume(...)  # TODO: compute other_state,_,_
 other_payload = ...  # TODO: compute other_payload
-# Enter `ocp.StandardCheckpointer()` context block:
 with ocp.StandardCheckpointer() as cp:
     other_path = Path(...)  # TODO: compute other_path
     cp.save(other_path,other_payload)
@@ -512,11 +490,10 @@ assert int(b["step"])  # TODO: complete assertion check
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Repeat the protocol after one batch and compare the next five batches...
+# Exercise solution
 other_iterator = iter(make_loader())
 other_state,_,_ = consume(initial_state(),other_iterator,1)
 other_payload = {"training":other_state,"pipeline":pack_bytes(other_iterator.get_state()),"contract":encode_contract(contract)}
-# Enter `ocp.StandardCheckpointer()` context block:
 with ocp.StandardCheckpointer() as cp:
     other_path = Path(tempfile.mkdtemp(dir=root))/"completed_step_1"
     cp.save(other_path,other_payload)
@@ -548,20 +525,16 @@ Use validate_contract on copies of the expected contract; do not rewrite the sav
 
 ### How to write: Reject an incompatible resume before consuming data — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `data(...)` — Call `data` with your updated parameters or inputs from this lesson's workspace.
-- `validate_contract(...)` — Call `validate_contract` with your updated parameters or inputs from this lesson's workspace.
-
 **Step-by-step implementation plan:**
-1. Run the boundary check and catch the expected exception:
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Reject an incompatible resume before consuming data (Transfer): Exact state replay only makes sense under a compatible data...
+# Reject an incompatible resume before consuming data (Transfer)
 for field,value in [('seed',43),('sha256','different-dataset')]:
     incompatible = dict(...)  # TODO: compute incompatible
-    # Run the boundary check and catch the expected exception:
     try:validate_contract(restored_payload['contract'],incompatible)
     except ValueError:print('Rejected incompatible',field)
     else:raise AssertionError('Incompatible resume was accepted')
@@ -572,10 +545,9 @@ print('Original run contract remains valid.')
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Reject an incompatible resume before consuming data (Transfer): Exact state replay only makes sense under a compatible data...
+# Reject an incompatible resume before consuming data (Transfer)
 for field,value in [('seed',43),('sha256','different-dataset')]:
     incompatible=dict(contract,**{field:value})
-    # Run the boundary check and catch the expected exception:
     try:validate_contract(restored_payload['contract'],incompatible)
     except ValueError:print('Rejected incompatible',field)
     else:raise AssertionError('Incompatible resume was accepted')
@@ -601,20 +573,15 @@ The stored cursor is interpreted in a particular pipeline configuration.
 
 ### How to write: Reject changed batch size before consuming — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `consuming(...)` — Call `consuming` with your updated parameters or inputs from this lesson's workspace.
-- `validate_contract(...)` — Call `validate_contract` with your updated parameters or inputs from this lesson's workspace.
-
 **Step-by-step implementation plan:**
-1. Run the boundary check and catch the expected exception:
-2. Execute `np.testing.assert_array_equal(next(fixed_reader)["id"],refer`
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Reject changed batch size before consuming (Challenge): Changing batching changes consumption semantics.
 changed = dict(...)  # TODO: compute changed
-# Run the boundary check and catch the expected exception:
 try:
     validate_contract(restored_payload["contract"],changed)
 except ValueError:
@@ -624,7 +591,6 @@ else:
 validate_contract(restored_payload["contract"],contract)
 fixed_reader = iter(...)  # TODO: compute fixed_reader
 fixed_reader.set_state(unpack_bytes(restored_payload["pipeline"]))
-# Execute `np.testing.assert_array_equal(next(fixed_reader)["id"],refer`
 np.testing.assert_array_equal(next(fixed_reader)["id"],reference_ids[0])
 ```
 
@@ -633,7 +599,6 @@ np.testing.assert_array_equal(next(fixed_reader)["id"],reference_ids[0])
 ```python
 # Reject changed batch size before consuming (Challenge): Changing batching changes consumption semantics.
 changed = dict(contract,batch_size=3)
-# Run the boundary check and catch the expected exception:
 try:
     validate_contract(restored_payload["contract"],changed)
 except ValueError:
@@ -643,7 +608,6 @@ else:
 validate_contract(restored_payload["contract"],contract)
 fixed_reader = iter(make_loader())
 fixed_reader.set_state(unpack_bytes(restored_payload["pipeline"]))
-# Execute `np.testing.assert_array_equal(next(fixed_reader)["id"],refer`
 np.testing.assert_array_equal(next(fixed_reader)["id"],reference_ids[0])
 ```
 

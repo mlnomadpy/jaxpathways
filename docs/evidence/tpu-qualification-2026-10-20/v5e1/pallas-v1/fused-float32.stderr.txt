@@ -1,0 +1,14 @@
+Traceback (most recent call last):
+  File "/home/tahabsn/jaxpathways-qualification/projects/kernel-audit/target_tpu.py", line 32, in <module>
+    spec.loader.exec_module(m)
+  File "<frozen importlib._bootstrap_external>", line 999, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "/home/tahabsn/jaxpathways-qualification/projects/kernel-audit/solution/model.py", line 7, in <module>
+    from jax.experimental.pallas import tpu as pltpu
+  File "/home/tahabsn/jaxpathways-qualification-env/lib/python3.12/site-packages/jax/experimental/pallas/tpu.py", line 32, in <module>
+    from jax._src.pallas.mosaic.interpret.interpret_pallas_call import InterpretParams as InterpretParams
+  File "/home/tahabsn/jaxpathways-qualification-env/lib/python3.12/site-packages/jax/_src/pallas/mosaic/interpret/interpret_pallas_call.py", line 39, in <module>
+    from jax._src.pallas.mosaic.interpret import shared_memory as memory
+  File "/home/tahabsn/jaxpathways-qualification-env/lib/python3.12/site-packages/jax/_src/pallas/mosaic/interpret/shared_memory.py", line 24, in <module>
+    from absl import logging
+ModuleNotFoundError: No module named 'absl'

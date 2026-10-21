@@ -7,7 +7,7 @@ Copy this template into your own portfolio and fill it after running your modifi
 Keep package/device reports, global and local shapes, shard index/value tables, NumPy comparisons, changed-shape predictions, and the five-row failure/repair. State that the run uses one host and does not validate TPU performance.
 
 - Command: `python3 phases/00-welcome/03-virtual-cpu-devices/code/main.py`
-- Working directory: repository root
+- Working directory: Repository root
 - Python / JAX / NumPy versions: 
 - Hardware and device: 
 - My prediction before running: 

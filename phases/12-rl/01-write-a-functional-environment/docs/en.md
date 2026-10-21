@@ -2,6 +2,8 @@
 
 Phase 12: Reinforcement learning · about 75 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Implement reset and step as pure functions with explicit state.
@@ -78,11 +80,8 @@ import numpy as np
 
 # Define `State` module / container with explicit state and forward pass:
 class State(NamedTuple):
-    # Execute `position: jax.Array`
     position: jax.Array
-    # Execute `elapsed: jax.Array`
     elapsed: jax.Array
-    # Execute `done: jax.Array`
     done: jax.Array
 
 
@@ -98,14 +97,11 @@ def step(state, action, horizon=8):
     states absorb without more rewards/events. No implicit reset or lost final observation.
     """
     active = ~state.done
-    # Combine or mask array elements to form `proposed`.
     proposed = jnp.clip(state.position + 2 * action - 1, 0, 3)
-    # Combine or mask array elements to form `position`.
     position = jnp.where(active, proposed, state.position)
     elapsed = state.elapsed + active.astype(jnp.int32)
     terminated = active & (position == 3)
     truncated = active & ~terminated & (elapsed >= horizon)
-    # Combine or mask array elements to form `reward`.
     reward = jnp.where(active, jnp.where(terminated, 1., -.01), 0.)
     return State(position, elapsed, state.done | terminated | truncated), reward, terminated, truncated
 ```
@@ -117,7 +113,7 @@ The function returns all information needed by the next call. No hidden counter 
 Append this block to main.py. Run python3 main.py in the course CPU environment.
 
 ```python
-# Step 2 — Check a complete episode: The known two-action path produces one terminal reward and then...
+# Step 2 — Check a complete episode
 s = State(jnp.int32(1), jnp.int32(0), jnp.bool_(False))
 positions, rewards = [int(s.position)], []
 for action in [1, 1, 0, 0]:
@@ -157,11 +153,8 @@ import numpy as np
 
 # Define `State` module / container with explicit state and forward pass:
 class State(NamedTuple):
-    # Execute `position: jax.Array`
     position: jax.Array
-    # Execute `elapsed: jax.Array`
     elapsed: jax.Array
-    # Execute `done: jax.Array`
     done: jax.Array
 
 
@@ -177,18 +170,15 @@ def step(state, action, horizon=8):
     states absorb without more rewards/events. No implicit reset or lost final observation.
     """
     active = ~state.done
-    # Combine or mask array elements to form `proposed`.
     proposed = jnp.clip(state.position + 2 * action - 1, 0, 3)
-    # Combine or mask array elements to form `position`.
     position = jnp.where(active, proposed, state.position)
     elapsed = state.elapsed + active.astype(jnp.int32)
     terminated = active & (position == 3)
     truncated = active & ~terminated & (elapsed >= horizon)
-    # Combine or mask array elements to form `reward`.
     reward = jnp.where(active, jnp.where(terminated, 1., -.01), 0.)
     return State(position, elapsed, state.done | terminated | truncated), reward, terminated, truncated
 
-# Step 2 — Check a complete episode: The known two-action path produces one terminal reward and then...
+# Step 2 — Check a complete episode
 s = State(jnp.int32(1), jnp.int32(0), jnp.bool_(False))
 positions, rewards = [int(s.position)], []
 for action in [1, 1, 0, 0]:
@@ -220,14 +210,12 @@ The horizontal axis counts transitions, starting with the first action. The vert
 The positions printed by the program are $(1,2,3,3,3)$. The sharp reward peak occurs only when entering the goal. Summing the four plotted rewards gives $0.99$, exactly the two-action return. A flat tail at $1$ would expose repeated terminal rewards; this zero tail demonstrates the absorbing-state contract, not learning.
 
 ```python
-# Compute figure data for: One goal reward, then absorbing padding
-# Combine or mask array elements to form `visual_data`.
 visual_data = {'kind':'line','x':[1,2,3,4],'xlabel':'transition index','ylabel':'reward per transition','series':[{'label':'right, right, padded, padded','y':rewards}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:48:59.683282+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:23:17.701210+00:00. JAX 0.9.2.
 
 ```text
 positions: [1, 2, 3, 3, 3] rewards: [-0.009999999776482582, 1.0, 0.0, 0.0]
@@ -243,7 +231,7 @@ PASS: rl-01
 **Predict before running:** Which event wins if the final permitted action reaches the goal?
 
 ```python
-# Experiment — A goal at the deadline: The goal transition defines a completed task, so the two flags...
+# Experiment — A goal at the deadline
 s = State(jnp.int32(2), jnp.int32(1), jnp.bool_(False))
 s, r, term, trunc = step(s, jnp.int32(1), horizon=2)
 assert bool(term) and not bool(trunc) and float(r) == 1.
@@ -259,7 +247,7 @@ The goal transition defines a completed task, so the two flags remain mutually e
 **Predict before running:** Will resetting twice with one key produce two independent trials?
 
 ```python
-# Experiment — The same key is the same start: This verifies the randomness contract, not a guarantee that...
+# Experiment — The same key is the same start
 # Create or split explicit PRNG key(s) (`key`) for reproducible randomness.
 key = jax.random.key(7)
 a, b = reset(key), reset(key)
@@ -280,18 +268,14 @@ Begin at position $0$, choose left for three actions with horizon $3$, and then 
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `State(...)` — Call `State` with your updated parameters or inputs from this lesson's workspace.
-- `jnp.int32(...)` — Call `jnp.int32` with your updated parameters or inputs from this lesson's workspace.
-- `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
-
 **Step-by-step implementation plan:**
-1. Accumulate the next contribution into `total`.
+1. Exercise solution
+2. Accumulate the next contribution into `total`.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Begin at position 0, choose left for three actions with horizon 3, and...
+# Exercise solution
 s = State(...)  # TODO: compute s
 total = ...  # TODO: compute total
 for i in range(3):
@@ -307,7 +291,7 @@ assert int(s2.position)  # TODO: complete assertion check
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Begin at position 0, choose left for three actions with horizon 3, and...
+# Exercise solution
 s = State(jnp.int32(0), jnp.int32(0), jnp.bool_(False))
 total = 0.
 for i in range(3):
@@ -335,11 +319,6 @@ Use the termination flag for the continuing task. The finite-horizon task assign
 </details>
 
 ### How to write: Separate the two target meanings — Step-by-step recipe & starter scaffold
-
-**Key functions & syntax to use:**
-- `meanings(...)` — Call `meanings` with your updated parameters or inputs from this lesson's workspace.
-- `abs(...)` — Call `abs` with your updated parameters or inputs from this lesson's workspace.
-- `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
 
 **Step-by-step implementation plan:**
 1. Set up the changed input or configuration parameters requested in the prompt.
@@ -388,7 +367,7 @@ Use ordinary min and max for the independent reference.
 ### How to write: Enumerate all one-step moves — Step-by-step recipe & starter scaffold
 
 **Key functions & syntax to use:**
-- `jax.jit(fn) / @jax.jit` — Traces `fn` with abstract shapes and compiles a fused XLA executable cached by input shape and dtype.
+- `jax.jit(fn) / @jax.jit` — Traces `fn` for its input signatures and compiles an executable. Changed shapes, dtypes or static arguments can trigger another compilation.
 
 **Step-by-step implementation plan:**
 1. Wrap with `jax.jit` (`compiled`) so XLA traces and compiles the function.
@@ -396,7 +375,7 @@ Use ordinary min and max for the independent reference.
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Enumerate all one-step moves (Transfer / diagnosis): Enumeration checks boundary behavior separately from the...
+# Enumerate all one-step moves (Transfer / diagnosis)
 # Wrap with `jax.jit` (`compiled`) so XLA traces and compiles the function.
 compiled = jax.jit(...)  # TODO: compute compiled
 for position in range(3):
@@ -412,7 +391,7 @@ for position in range(3):
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Enumerate all one-step moves (Transfer / diagnosis): Enumeration checks boundary behavior separately from the...
+# Enumerate all one-step moves (Transfer / diagnosis)
 # Wrap with `jax.jit` (`compiled`) so XLA traces and compiles the function.
 compiled = jax.jit(step)
 for position in range(3):

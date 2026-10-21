@@ -1,0 +1,1 @@
+{"array_metadatas": [{"array_metadata": {"param_name": "momentum", "write_shape": [8], "chunk_shape": [8], "ext_metadata": null}}, {"array_metadata": {"param_name": "step", "write_shape": [], "chunk_shape": [], "ext_metadata": null}}, {"array_metadata": {"param_name": "weights", "write_shape": [8], "chunk_shape": [8], "ext_metadata": null}}]}

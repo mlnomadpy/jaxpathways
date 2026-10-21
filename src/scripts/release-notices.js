@@ -1,5 +1,5 @@
 import { readStoredJson } from '../lib/storage.js';
-import { releaseKey, revisionKey } from '../lib/releases.js';
+import { releaseKey, revisionKey } from '../lib/release-keys.js';
 const changedThisVisit = new Set();
 
 export function initReleaseNotice() {

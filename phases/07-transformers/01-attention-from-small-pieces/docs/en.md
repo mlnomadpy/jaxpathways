@@ -2,6 +2,8 @@
 
 Phase 07: Transformers & language models · about 90 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Track query, key and value axes
@@ -78,7 +80,7 @@ $$
 In the CPU environment from setup, create main.py and add this block. Write down the dimensions and the known result before continuing.
 
 ```python
-# Step 1 — 1. Prepare the experiment: These imports provide JAX array transformations and NumPy...
+# Step 1 — 1. Prepare the experiment
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -91,10 +93,9 @@ These imports provide JAX array transformations and NumPy reference calculations
 Append this block in the same file. Follow the shape diagram above and identify each reduction or state transition.
 
 ```python
-# Step 2 — 2. Implement the mechanism: Multiplying Q\in\mathbb{R}^{T_q\times D_k} by...
+# Step 2 — 2. Implement the mechanism
 def attend(q, k, v):
     scores = q @ k.T / jnp.sqrt(q.shape[-1])
-    # Apply nonlinear activation or probability normalization to compute `weights`.
     weights = jax.nn.softmax(scores, axis=-1)
     return weights @ v, weights
 ```
@@ -122,15 +123,14 @@ Uniform weights $1/3$; both output rows $[2, 2]$.
 ## Run the example
 
 ```python
-# Step 1 — 1. Prepare the experiment: These imports provide JAX array transformations and NumPy...
+# Step 1 — 1. Prepare the experiment
 import jax
 import jax.numpy as jnp
 import numpy as np
 
-# Step 2 — 2. Implement the mechanism: Multiplying Q\in\mathbb{R}^{T_q\times D_k} by...
+# Step 2 — 2. Implement the mechanism
 def attend(q, k, v):
     scores = q @ k.T / jnp.sqrt(q.shape[-1])
-    # Apply nonlinear activation or probability normalization to compute `weights`.
     weights = jax.nn.softmax(scores, axis=-1)
     return weights @ v, weights
 
@@ -168,8 +168,6 @@ The changed queries are $(3,0)$ and $(0,3)$; the keys are $(1,0)$, $(0,1)$, and 
 The weights mix the value vectors; they are not the output vectors themselves. In the uniform panel, averaging the values $(2,0)$, $(0,4)$, and $(4,2)$ produces $(2,2)$ for each query. To understand a changed output, first read its row of weights, then form that weighted sum.
 
 ```python
-# Compute figure data for: Each query distributes one unit of attention
-# Create device-backed JAX array `changed_q`.
 changed_q = jnp.array([[3.0, 0.0], [0.0, 3.0]])
 _, focused = attend(changed_q, k, v)
 visual_data = {'kind': 'panels', 'panels': [{'kind': 'heatmap', 'title': 'Zero queries', 'values': weights.tolist(), 'rows': ['query 0', 'query 1'], 'columns': ['key 0', 'key 1', 'key 2'], 'unit': 'attention weight'}, {'kind': 'heatmap', 'title': 'Changed queries', 'values': focused.tolist(), 'rows': ['query 0', 'query 1'], 'columns': ['key 0', 'key 1', 'key 2'], 'unit': 'attention weight'}]}
@@ -177,7 +175,7 @@ visual_data = {'kind': 'panels', 'panels': [{'kind': 'heatmap', 'title': 'Zero q
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:47:04.943776+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:21:51.372649+00:00. JAX 0.9.2.
 
 ```text
 Weights / output: [[0.33333334 0.33333334 0.33333334]
@@ -195,17 +193,17 @@ PASS: transformers-01
 **Predict before running:** Which keys become more relevant for query $[2, 0]$?
 
 ```python
-# Experiment — Compare a nonzero query with NumPy: A separate NumPy calculation checks nonuniform weighting and the...
+# Experiment — Compare a nonzero query with NumPy
 q_new = jnp.array([[2., 0.]])
 actual, w_new = attend(q_new, k, v)
-# Convert `scores_np` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 scores_np = np.asarray(q_new) @ np.asarray(k).T / np.sqrt(2)
 # Reduce along axis=-1 to compute `raw`.
 raw = np.exp(scores_np - scores_np.max(axis=-1, keepdims=True))
 # Reduce along axis=-1 to compute `reference_w`.
 reference_w = raw / raw.sum(axis=-1, keepdims=True)
 np.testing.assert_allclose(w_new, reference_w, rtol=1e-6, atol=1e-6)
-# Convert `` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 np.testing.assert_allclose(actual, reference_w @ np.asarray(v), rtol=1e-6, atol=1e-6)
 ```
 
@@ -290,7 +288,7 @@ The score matrix does not depend on Dv.
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Use a different value dimension (Transfer / diagnosis): Queries and keys share Dk; values may have an independent...
+# Use a different value dimension (Transfer / diagnosis)
 scalar_v = jnp.array(...)  # TODO: compute scalar_v
 scalar_out, _ = attend(...)  # TODO: compute scalar_out, _
 # Check tensor shape invariant: `scalar_out.shape == (2, 1)`
@@ -301,7 +299,7 @@ assert jnp.allclose(scalar_out, 6.)  # TODO: complete assertion check
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Use a different value dimension (Transfer / diagnosis): Queries and keys share Dk; values may have an independent...
+# Use a different value dimension (Transfer / diagnosis)
 scalar_v = jnp.array([[3.], [6.], [9.]])
 scalar_out, _ = attend(q, k, scalar_v)
 # Check tensor shape invariant: `scalar_out.shape == (2, 1)`
