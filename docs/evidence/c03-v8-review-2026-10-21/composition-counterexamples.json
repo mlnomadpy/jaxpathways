@@ -1,0 +1,59 @@
+{
+  "recipe_sha256": "e232ce07a3439909c82fd5b9df15c14d37deb5a637bdf0881e70dd3ae4e550f8",
+  "simclr_actual_interleaved_positive_mask": [
+    [
+      false,
+      false,
+      true,
+      false
+    ],
+    [
+      false,
+      false,
+      false,
+      true
+    ],
+    [
+      true,
+      false,
+      false,
+      false
+    ],
+    [
+      false,
+      true,
+      false,
+      false
+    ]
+  ],
+  "simclr_expected_interleaved_positive_mask": [
+    [
+      false,
+      true,
+      false,
+      false
+    ],
+    [
+      true,
+      false,
+      false,
+      false
+    ],
+    [
+      false,
+      false,
+      false,
+      true
+    ],
+    [
+      false,
+      false,
+      true,
+      false
+    ]
+  ],
+  "simclr_actual_loss": 5.013385772705078,
+  "simclr_correct_paired_loss": 0.013385772705078125,
+  "non_mae_probe_reported_mae_target_values": 12288,
+  "flower_updates": 0
+}
