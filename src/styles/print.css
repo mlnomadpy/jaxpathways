@@ -98,6 +98,38 @@ pre code {
 .copy-snippet {
   display: none;
 }
+.learner-starter-contract {
+  margin-block: 1.25rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--mint);
+  border-radius: 8px;
+  background: var(--surface-soft);
+  font: 15px/1.65 var(--ui);
+}
+.learner-starter-contract > :first-child {
+  margin-top: 0;
+}
+.learner-starter-contract > :last-child {
+  margin-bottom: 0;
+}
+.learner-starter-contract h4 {
+  margin: 0.9rem 0 0.35rem;
+  font-size: 0.95rem;
+}
+.learner-starter-contract ul {
+  margin-block: 0.35rem 0.75rem;
+}
+.learner-starter-pending {
+  margin-block: 1rem;
+  padding: 0.8rem 1rem;
+  border-left: 3px solid var(--muted);
+  background: var(--surface-soft);
+}
+.print-solution-link,
+.print-solutions {
+  display: none;
+}
 html[data-reader-ready] .copy-snippet {
   display: inline-flex;
 }
@@ -166,6 +198,36 @@ figcaption {
   .copy-feedback {
     display: none;
   }
+  .solution-reveal {
+    display: none;
+  }
+  .print-solution-link,
+  .print-solutions {
+    display: block;
+  }
+  .print-solution-link {
+    margin-block: 0.7rem;
+    font-size: 9pt;
+  }
+  .print-solutions {
+    break-before: page;
+    page-break-before: always;
+  }
+  .print-solutions > h2:first-child {
+    margin-top: 0;
+  }
+  .printed-practice-solution,
+  .printed-checkpoint-reasoning,
+  .reasoning-check,
+  .learner-starter-contract,
+  .expected-output,
+  figure {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  details:not(.solution-reveal) > summary {
+    display: none;
+  }
   article {
     break-before: page;
     margin-top: 0;
@@ -176,6 +238,14 @@ figcaption {
   h3,
   .code-panel-heading {
     break-after: avoid;
+  }
+  article > h2:last-of-type {
+    break-after: avoid-page;
+    page-break-after: avoid;
+  }
+  article > h2:last-of-type + ul {
+    break-inside: avoid;
+    page-break-inside: avoid;
   }
   h1 {
     font-size: 24pt;
@@ -197,28 +267,25 @@ figcaption {
     background: #fff;
     color: #111;
   }
-  .code-panel-heading {
+  .code-panel > .code-panel-heading {
     background: #eee;
     color: #111;
     border-color: #aaa;
   }
-  pre code .syntax-keyword,
-  pre code .syntax-option {
-    color: #653a91;
-  }
-  pre code .syntax-string {
-    color: #205d43;
-  }
-  pre code .syntax-number,
-  pre code .syntax-variable {
-    color: #854318;
-  }
-  pre code .syntax-comment {
-    color: #545454;
-  }
-  pre code .syntax-function,
-  pre code .syntax-builtin {
-    color: #1e517b;
+  :is(.code-panel, .starter-scaffold)
+    pre
+    code
+    :is(
+      .syntax-keyword,
+      .syntax-option,
+      .syntax-string,
+      .syntax-number,
+      .syntax-variable,
+      .syntax-comment,
+      .syntax-function,
+      .syntax-builtin
+    ) {
+    color: #111;
   }
   a {
     color: inherit;

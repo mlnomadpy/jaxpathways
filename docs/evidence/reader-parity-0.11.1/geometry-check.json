@@ -1,0 +1,18 @@
+{
+  "book-samples-letter.pdf": {
+    "pages": 79,
+    "sameGlyphGeometryAsInspectedLayout": true,
+    "outside48ptTextBounds": 0,
+    "deadRevealControls": 0,
+    "checkpointReasoningGroups": 4,
+    "sha256": "cb3101063a804c532bb919359db6ead84f71c2f57b731689a9c11aa458c6ad03"
+  },
+  "book-samples-a4.pdf": {
+    "pages": 72,
+    "sameGlyphGeometryAsInspectedLayout": true,
+    "outside48ptTextBounds": 0,
+    "deadRevealControls": 0,
+    "checkpointReasoningGroups": 4,
+    "sha256": "b97ffa9264ce9f1b3bda7c6f58c279149e3c1bb39ab53210a011ea2cad877abb"
+  }
+}
