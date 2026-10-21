@@ -10,6 +10,12 @@ the frozen 0.13 review candidate or qualify the full causal capstone.
   condition and checkpoint identity matched the frozen final2 records. Every
   branch failed both predeclared QA floors. This audit did not independently
   regenerate the outputs or reconstruct held-out NLL logits.
+- A subsequent, separate replay preselected the first serialized final question
+  in each branch. Freshly loaded checkpoints reproduced all 32 saved tokens for
+  those six records. A NumPy full-prefix forward oracle independently selected
+  the same first four tokens in each record, including an explicit alpha-eight,
+  rank-four LoRA merge. This bounded replay does not cover every QA record or
+  corpus NLL and does not change the failed quality verdict.
 - The complete frozen exporter CLI rejected seven individually altered receipt
   bindings before creating an output directory: recipe, tokenizer, evaluator,
   scorer, checkpoint bytes, checkpoint identity and candidate identity. The
