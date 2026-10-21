@@ -1,4 +1,37 @@
-# Author review: 0.14.0
+# Author review: 0.14.1
+
+Start with the [frozen patch preview](http://127.0.0.1:4197/book.html).
+The patch is [draft PR #67](https://github.com/mlnomadpy/jaxpathways/pull/67),
+stacked on PR #66. The pinned verification packet is at commit
+`d34e1e4b82eb474a54fa2703dc92bca164bd7a94`; its exact tested source commit is
+`e6cd34698b1118727e168812a6a37a7dc302193f`. No merge or production deployment.
+
+Use the [patch review guide](https://github.com/mlnomadpy/jaxpathways/blob/d34e1e4b82eb474a54fa2703dc92bca164bd7a94/docs/review-guide-0.14.1.md),
+[feedback notes](review-notes-0.14.1.md), and
+[verification record](https://github.com/mlnomadpy/jaxpathways/blob/d34e1e4b82eb474a54fa2703dc92bca164bd7a94/docs/evidence/course-review-0.14.1/verification.json).
+This patch repairs the hosted Black failure and a formatting-sensitive checker
+mutation. The reference model AST and all 104 lesson bodies are unchanged.
+The 0.14 review guide below still describes the substantive course upgrade.
+
+Local checks pass: 163 automated tests, 49-file Black check, fresh complete
+recovery protocol, 46 desktop/mobile browser checks, root/Pages deployment and
+EPUBCheck with zero errors or warnings. Hosted checks for PR67 are pending and
+must be inspected independently of the earlier PR66 results.
+
+Native 0.14.0 browser and Apple Books samples show readable math, plot labels,
+code and working TOC navigation. The [compatibility matrix](book-compatibility.md)
+records the exact edition and limited sample. This is not a new all-reader
+qualification for the patch. Disclosure behavior, another EPUB engine, print and
+actual assistive-technology acceptance remain open.
+
+Thirteen phases remain In Development and all ten full capstones remain Planned.
+Image/audio and multi-controller work continue outside this frozen patch. Record
+confusing instructions and changed-input results in the notes before revealing
+worked references. Independent teaching and career calibration remain needed.
+
+---
+
+# Earlier review: 0.14.0
 
 Start with the [frozen book preview](http://127.0.0.1:4196/book.html).
 The candidate is [draft PR #66](https://github.com/mlnomadpy/jaxpathways/pull/66),
