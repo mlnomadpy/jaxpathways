@@ -1,0 +1,43 @@
+{
+  "candidate_sha256": "27646676c933653aba0555e443e9bd47d5de9b0b4f3f0c0515ec50cf235040b4",
+  "checker_sha256": "a3867129f43df1a1b6d8bf671d449488987e1339f7abfcae0caf35fc88c6d952",
+  "command": [
+    "/private/tmp/jaxpathways-embedding-c01-env/bin/python",
+    "/private/tmp/jaxpathways-reader-review-fix/projects/embedding-model-300m/tests/check.py",
+    "--stage",
+    "all",
+    "--data",
+    "/private/tmp/jaxpathways-scifact-c01-frozen-final",
+    "--baseline-snapshot",
+    "/private/tmp/jaxpathways-v013-c01-current-check/full-run/baseline_snapshot",
+    "--implementation",
+    "/private/tmp/jaxpathways-c01-root-mlm-probe/zero_mlm_logits.py",
+    "--output",
+    "/private/tmp/jaxpathways-c01-root-checker-repair2/zero-head"
+  ],
+  "exit_code": 1,
+  "log_sha256": "2a58ea70f5b4f648e8b93cc66ff79c332b23e3e08c445e213ccbe6e3fdeff7b7",
+  "reason": "Independent raw MLM logit comparison rejects the same constant-zero candidate previously accepted by the full checker.",
+  "rejected_before_optimization": true,
+  "source_files_sha256": {
+    "baseline.py": "9ae760fd52ed76acfac4131087fd25b09af0ad4b5b96b9594edc4e21d1f0749c",
+    "config.py": "e61e01ad3f56d2fbcdbed72874de727bd9038c042d0070c6b907f5d49fd06a49",
+    "data/LICENSES.md": "fe7d1ba6e253521377a66d0cfc9e5488b1f82545513050aa221fa248ba184625",
+    "data/RECIPE_AMENDMENTS.md": "d1383661680d17d8014c07a686574dd7cbf6ee95ee6873e573de0b417844af36",
+    "data/dataset.py": "de8a207682b9ce55a13868068df3854a50bc119d7a91ad754f1ed7662cdb797d",
+    "data/frozen_recipe.json": "70649244860d731f92d09e805b025e05a731dbef90463d62b0428d0cb7e21134",
+    "data/prepare.py": "533431a5f56ba51274e1f5169c4b7b9c51584698efa316fbb41ed6372b558f62",
+    "data/recipe-history/c01-original-pretraining-recipe.json": "c74bf0e06cc6dc6f8972c6fecae6c86ed03623f60cfa2b91cff9e141e002e5a3",
+    "evaluation.py": "ba3c22efb2eb0ea8ed8afef012c329eb185a39dda84c629b27b81308d3d2dced",
+    "model.py": "0d50093ea497730be48007265b3db25b9044fa13b88a4485cfce7e4c45266f90",
+    "objectives.py": "b6970a4015c6646b39b89f77c129e37b2c8ce0a6f612bdddd9074d86f3239738",
+    "package_runtime.py": "1ab45e32baa18b05af7c651a9c81001b0846e9c8ec5302c88390730a78f60f57",
+    "plots.py": "f131d705fbe3962cdce716990fbbc98642a59e77a64805bdc260671740d99927",
+    "requirements-embedding-lock.txt": "ca59464c7c5e6ef56b7a952d26d6d97de7612e378ab70876dac17d91f1f265d3",
+    "requirements-embedding.txt": "f83afe66ff40961b580b6c40cf19b35c1f222f037f4148d12b56c26111dd3008",
+    "run.py": "d00008fec0cc11170e5253e4285ed2c4d2412f429204e696430022896455e55e",
+    "tests/check.py": "a3867129f43df1a1b6d8bf671d449488987e1339f7abfcae0caf35fc88c6d952",
+    "tests/resume_worker.py": "8ee26a7370d73e9a982beae059f7f7d4a51efc9b6f419d8e1ffeaf52bbb5a562",
+    "trainer.py": "8b40db81209571d48e209d983e04879f502ce65031bc51152c978f7944608f90"
+  }
+}

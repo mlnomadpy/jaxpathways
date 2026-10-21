@@ -1,0 +1,260 @@
+{
+  "checker_sha256": "a3867129f43df1a1b6d8bf671d449488987e1339f7abfcae0caf35fc88c6d952",
+  "command": [
+    "/private/tmp/jaxpathways-embedding-c01-env/bin/python",
+    "/private/tmp/jaxpathways-reader-review-fix/projects/embedding-model-300m/tests/check.py",
+    "--stage",
+    "all",
+    "--data",
+    "/private/tmp/jaxpathways-scifact-c01-frozen-final",
+    "--baseline-snapshot",
+    "/private/tmp/jaxpathways-v013-c01-current-check/full-run/baseline_snapshot",
+    "--implementation",
+    "solution",
+    "--output",
+    "/private/tmp/jaxpathways-c01-root-checker-repair2/reference"
+  ],
+  "exit_code": 0,
+  "independent_check": {
+    "data": {
+      "archive_sha256": "11c621288d41ac144d29b13b0f8503b3820b7d6e8b1f6ff24dff335c196d76be",
+      "corpus_docs": 5183,
+      "final_claims": 300,
+      "final_judged_claims": 188,
+      "fit_claims": 478,
+      "recipe_development_claims": 53
+    },
+    "lifecycle": {
+      "bm25_scores_regenerated": true,
+      "candidate_stages_independently_ranked": [
+        "phase1_mlm",
+        "phase2_contrastive_only",
+        "phase2_contrastive_plus_retained_mlm",
+        "phase3_human_pairs",
+        "random_initialization"
+      ],
+      "external_baseline_revision": "1110a243fdf4706b3f48f1d95db1a4f5529b4d41",
+      "full_lifecycle": "pilot_executed_in_development",
+      "independent_exact_scores_and_metrics": true,
+      "matched_phase2_exposure": 32,
+      "phase3_fit_queries_covered": 281
+    },
+    "limitations": [
+      "CPU pilot is not 300M target training",
+      "one seed is insufficient for a training-variance claim",
+      "SciFact dev is the custom final evaluation because official test lacks public labels",
+      "MTEB and human review remain unrun"
+    ],
+    "model": {
+      "bidirectional_future_context": true,
+      "candidate": "/private/tmp/jaxpathways-reader-review-fix/projects/embedding-model-300m/model.py",
+      "constant_zero_head_mutation_rejected": true,
+      "mlm_expected_head_conventions": {
+        "activation": "tanh-approximate GELU (0.044715 cubic coefficient)",
+        "layer_norm_variance_epsilon": 1e-05
+      },
+      "mlm_numpy_oracle_and_full_gradient_fd": {
+        "derivatives": [
+          {
+            "candidate_autodiff": 0.003033989469186406,
+            "candidate_derivative_tolerance": 0.00015179169962076244,
+            "direction_norm": 0.9999999999999998,
+            "independent_fd_spread": 9.836961245568432e-07,
+            "independent_numpy_finite_differences": [
+              0.003034850296290692,
+              0.003035833992415249
+            ],
+            "path": [
+              "mlm",
+              "dense"
+            ]
+          },
+          {
+            "candidate_autodiff": -0.0023259580340666266,
+            "candidate_derivative_tolerance": 0.00011625683058458236,
+            "direction_norm": 1.0,
+            "independent_fd_spread": 1.201875710066247e-06,
+            "independent_numpy_finite_differences": [
+              -0.0023263384874017135,
+              -0.002325136611691647
+            ],
+            "path": [
+              "mlm",
+              "norm_scale"
+            ]
+          },
+          {
+            "candidate_autodiff": -0.02412412589155539,
+            "candidate_derivative_tolerance": 0.0012062114883804043,
+            "direction_norm": 1.0,
+            "independent_fd_spread": 3.427391703780813e-08,
+            "independent_numpy_finite_differences": [
+              -0.024124195493691047,
+              -0.024124229767608085
+            ],
+            "path": [
+              "mlm",
+              "norm_bias"
+            ]
+          },
+          {
+            "candidate_autodiff": -0.23234123902258186,
+            "candidate_derivative_tolerance": 0.011617014977216567,
+            "direction_norm": 0.9999999999999999,
+            "independent_fd_spread": 1.2708911700798353e-07,
+            "independent_numpy_finite_differences": [
+              -0.23234017245521432,
+              -0.23234029954433133
+            ],
+            "path": [
+              "mlm",
+              "vocab_bias"
+            ]
+          },
+          {
+            "candidate_autodiff": 0.0010533759186442224,
+            "candidate_derivative_tolerance": 5.26522193400325e-05,
+            "direction_norm": 0.9999999999999999,
+            "independent_fd_spread": 8.677238927390363e-07,
+            "independent_numpy_finite_differences": [
+              0.001053912110693389,
+              0.00105304438680065
+            ],
+            "path": [
+              "blocks",
+              0,
+              "q"
+            ]
+          },
+          {
+            "candidate_autodiff": -0.0005358330329739078,
+            "candidate_derivative_tolerance": 2.6863601798599035e-05,
+            "direction_norm": 1.0,
+            "independent_fd_spread": 4.966633770919771e-07,
+            "independent_numpy_finite_differences": [
+              -0.0005367753725948887,
+              -0.0005372720359719807
+            ],
+            "path": [
+              "blocks",
+              1,
+              "v"
+            ]
+          },
+          {
+            "candidate_autodiff": -0.005144967061392412,
+            "candidate_derivative_tolerance": 0.0002571942516182979,
+            "direction_norm": 0.9999999999999998,
+            "independent_fd_spread": 4.744569181980296e-07,
+            "independent_numpy_finite_differences": [
+              -0.005144359489284156,
+              -0.005143885032365958
+            ],
+            "path": [
+              "blocks",
+              0,
+              "up"
+            ]
+          },
+          {
+            "candidate_autodiff": -0.00013032742226647706,
+            "candidate_derivative_tolerance": 6.492016246806287e-06,
+            "direction_norm": 0.9999999999999999,
+            "independent_fd_spread": 7.764214826622151e-07,
+            "independent_numpy_finite_differences": [
+              -0.00013061674641878795,
+              -0.00012984032493612574
+            ],
+            "path": [
+              "blocks",
+              1,
+              "down"
+            ]
+          },
+          {
+            "candidate_autodiff": 0.4863940949015627,
+            "candidate_derivative_tolerance": 0.024319075886469754,
+            "direction_norm": 0.9999999999999999,
+            "independent_fd_spread": 3.116041336070907e-05,
+            "independent_numpy_finite_differences": [
+              0.4863503573160344,
+              0.4863815177293951
+            ],
+            "path": [
+              "token_embed"
+            ]
+          }
+        ],
+        "encoder_gradient_norm": 0.7210727149434095,
+        "head_activation": "tanh-approximate GELU (0.044715 cubic coefficient)",
+        "head_gradient_norm": 0.8074329798273973,
+        "layer_norm_variance_epsilon": 1e-05,
+        "raw_logits_match_independent_numpy": true,
+        "selected_count": 2,
+        "selected_loss_matches_independent_numpy": true
+      },
+      "multi_positive_numpy_oracle_and_gradient_fd": true,
+      "nonzero_dropout_responds_to_prng": true,
+      "numpy_encoder_attention_rope_mask_pooling_oracle": true,
+      "padding_and_batch_isolation": true,
+      "stopped_down_gradient_mutation_rejected": true,
+      "stopped_encoder_gradient_mutation_rejected": true,
+      "stopped_head_gradient_mutation_rejected": true,
+      "target_encoder_params": 302090240,
+      "target_with_mlm_params": 303191040,
+      "uniform_attention_mutation_rejected": true
+    },
+    "output": "/private/tmp/jaxpathways-c01-root-checker-repair2/reference",
+    "resume": {
+      "changed_identity_rejected": true,
+      "fresh_process_next_sample_and_dropout_keys_equal": true,
+      "fresh_process_next_update_exact": true,
+      "fresh_process_resume_stages": [
+        "phase1_mlm",
+        "phase2_contrastive_only",
+        "phase2_joint",
+        "phase3_human"
+      ],
+      "next_batch_indices": [
+        9,
+        0
+      ],
+      "partial_tail_coverage": [
+        4,
+        4,
+        2
+      ],
+      "rechecksummed_semantic_mutations_rejected": [
+        "cursor",
+        "moment_dtype",
+        "moment_nan",
+        "permutation"
+      ]
+    },
+    "stage": "all",
+    "status": "pass"
+  },
+  "independent_check_sha256": "2f2054321faa34005ffdbcee84418a2f144a2428d80c4a6e554fc541d8bdc346",
+  "log_sha256": "17cec1ff6cc9d5acc3c691bd1fdb2c8555d6ad853137fcde32e44b75e5c95899",
+  "source_files_sha256": {
+    "baseline.py": "9ae760fd52ed76acfac4131087fd25b09af0ad4b5b96b9594edc4e21d1f0749c",
+    "config.py": "e61e01ad3f56d2fbcdbed72874de727bd9038c042d0070c6b907f5d49fd06a49",
+    "data/LICENSES.md": "fe7d1ba6e253521377a66d0cfc9e5488b1f82545513050aa221fa248ba184625",
+    "data/RECIPE_AMENDMENTS.md": "d1383661680d17d8014c07a686574dd7cbf6ee95ee6873e573de0b417844af36",
+    "data/dataset.py": "de8a207682b9ce55a13868068df3854a50bc119d7a91ad754f1ed7662cdb797d",
+    "data/frozen_recipe.json": "70649244860d731f92d09e805b025e05a731dbef90463d62b0428d0cb7e21134",
+    "data/prepare.py": "533431a5f56ba51274e1f5169c4b7b9c51584698efa316fbb41ed6372b558f62",
+    "data/recipe-history/c01-original-pretraining-recipe.json": "c74bf0e06cc6dc6f8972c6fecae6c86ed03623f60cfa2b91cff9e141e002e5a3",
+    "evaluation.py": "ba3c22efb2eb0ea8ed8afef012c329eb185a39dda84c629b27b81308d3d2dced",
+    "model.py": "0d50093ea497730be48007265b3db25b9044fa13b88a4485cfce7e4c45266f90",
+    "objectives.py": "b6970a4015c6646b39b89f77c129e37b2c8ce0a6f612bdddd9074d86f3239738",
+    "package_runtime.py": "1ab45e32baa18b05af7c651a9c81001b0846e9c8ec5302c88390730a78f60f57",
+    "plots.py": "f131d705fbe3962cdce716990fbbc98642a59e77a64805bdc260671740d99927",
+    "requirements-embedding-lock.txt": "ca59464c7c5e6ef56b7a952d26d6d97de7612e378ab70876dac17d91f1f265d3",
+    "requirements-embedding.txt": "f83afe66ff40961b580b6c40cf19b35c1f222f037f4148d12b56c26111dd3008",
+    "run.py": "d00008fec0cc11170e5253e4285ed2c4d2412f429204e696430022896455e55e",
+    "tests/check.py": "a3867129f43df1a1b6d8bf671d449488987e1339f7abfcae0caf35fc88c6d952",
+    "tests/resume_worker.py": "8ee26a7370d73e9a982beae059f7f7d4a51efc9b6f419d8e1ffeaf52bbb5a562",
+    "trainer.py": "8b40db81209571d48e209d983e04879f502ce65031bc51152c978f7944608f90"
+  }
+}
