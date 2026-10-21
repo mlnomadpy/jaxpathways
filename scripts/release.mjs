@@ -35,7 +35,7 @@ for (const phase of course.phases) {
 const sources = {};
 for (const directory of ['curriculum', 'learning-paths', 'projects']) {
   for (const file of readdirSync(directory, { recursive: true }).map(portablePath).sort()) {
-    if (!file.endsWith('.json') || /(?:^|\/)(?:releases|release-snapshots|(?:project-)?validation)\.json$/.test(file) || file.includes('/outputs/')) continue;
+    if (!file.endsWith('.json') || /(?:^|\/)(?:releases|release-snapshots|(?:project-)?validation)\.json$/.test(file) || /(?:^|\/)(?:reference|outputs|runs|evidence)\//.test(file)) continue;
     sources[`${directory}/${file}`] = hash(read(`${directory}/${file}`));
   }
 }

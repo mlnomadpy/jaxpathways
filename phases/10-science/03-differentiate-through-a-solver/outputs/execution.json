@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "science-03",
-  "contentHash": "4d5f48d73db38bce05cca4b573a4b540c5a31339593ea8b6024266504cc1e92b",
-  "executedAt": "2026-10-21T16:07:06.549883+00:00",
+  "contentHash": "fd28c0b295d5ee89839630cd116c89ac4895d400950c633762496b9001864e63",
+  "executedAt": "2026-10-21T17:45:06.397716+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -144,6 +144,14 @@
           ]
         }
       ]
+    },
+    {
+      "sourceHash": "22d5d8896e54aecd8b70f9aafa0c68cf3475cdb9799648df8d1bbbd8b53d1ac8",
+      "outputs": []
+    },
+    {
+      "sourceHash": "a6dcaed3b6e3debe746bd948fe19b8d54be58b08fc0166bdc8a182de9cda5a0a",
+      "outputs": []
     }
   ],
   "scope": "Recorded instructor reference run; all script assertions and notebook code cells passed. No accelerator performance claim."

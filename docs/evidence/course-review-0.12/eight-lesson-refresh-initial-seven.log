@@ -1,0 +1,8 @@
+PASS transformers-01: script + notebook code
+PASS transformers-02: script + notebook code
+PASS transformers-03: script + notebook code
+PASS transformers-04: script + notebook code
+PASS science-03: script + notebook code
+PASS science-04: script + notebook code
+PASS tpu-06: script + notebook code
+OK: 7 executed (104 total CPU lessons); 14 executions

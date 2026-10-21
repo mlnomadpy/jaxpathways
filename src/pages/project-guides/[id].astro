@@ -16,6 +16,9 @@ export function getStaticPaths() {
 const { project } = Astro.props;
 const content = projectGuide(project, course);
 const layout = projectFileLayout(project);
+const introMatch = content.body.match(/^\s*<p(?:\s[^>]*)?>([\s\S]*?)<\/p>\s*/i);
+const introHtml = introMatch?.[1] ?? inlineMath(project.rubric[0] || project.setupNote);
+const guideBody = introMatch ? content.body.slice(introMatch[0].length) : content.body;
 ---
 
 <GuideLayout
@@ -32,7 +35,7 @@ const layout = projectFileLayout(project);
     edition={`Project guide · ${project.hardware}`}
   >
     <Fragment slot="title" set:html={content.heading} />
-    <p set:html={inlineMath(project.setupNote)} />
+    <p set:html={introHtml} />
     <div class="assessment-actions">
       <a class="button primary" href={siteUrl(`project.html?id=${project.id}`)}>
         Open stage workspace
@@ -68,7 +71,7 @@ const layout = projectFileLayout(project);
     </p>
   </aside>
   <GuideContents sections={content.sections} label="Project guide sections" title="In this guide" />
-  <article set:html={content.body} />
+  <article set:html={guideBody} />
   <a class="button primary" href={siteUrl(`project.html?id=${project.id}`)}>
     Build and check your implementation
   </a>

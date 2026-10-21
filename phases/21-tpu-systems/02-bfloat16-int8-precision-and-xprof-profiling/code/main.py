@@ -1,7 +1,7 @@
 """bfloat16, int8 precision, and XProf profiling on TPU: worked experiments and reference solutions. CPU checks."""
 
-# Compare BF16 (FP32 vs BF16 accumulation) and per-channel INT8 matmul errors
-# Step 1 — Compare BF16 (FP32 vs BF16 accumulation) and per-channel INT8 matmul errors
+# Compare BF16 operands with requested FP32 or BF16 dot result dtypes, plus per-column INT8 reference error
+# Step 1 — Compare BF16 operands with requested FP32 or BF16 dot result dtypes, plus per-column INT8 reference error
 from pathlib import Path
 import os
 import tempfile
@@ -20,33 +20,34 @@ def evaluate_precision_policies(seed=0):
     w = jax.random.normal(k2, (256, 64), dtype=jnp.float32) * 0.25
     # Cast or evaluate `ref_fp32` in explicit floating-point precision.
     ref_fp32 = jnp.dot(x, w, preferred_element_type=jnp.float32)
-    # Cast or evaluate `out_bf16_fp32acc` in explicit floating-point precision.
-    out_bf16_fp32acc = jnp.dot(
+    # Cast or evaluate `out_bf16_requested_fp32` in explicit floating-point precision.
+    out_bf16_requested_fp32 = jnp.dot(
         x.astype(jnp.bfloat16), w.astype(jnp.bfloat16), preferred_element_type=jnp.float32
     )
-    # Cast or evaluate `out_bf16_bf16acc` in explicit floating-point precision.
-    out_bf16_bf16acc = jnp.dot(
+    # Cast or evaluate `out_bf16_requested_bf16` in explicit floating-point precision.
+    out_bf16_requested_bf16 = jnp.dot(
         x.astype(jnp.bfloat16), w.astype(jnp.bfloat16), preferred_element_type=jnp.bfloat16
-    ).astype(jnp.float32)
+    )
     # Reduce across the target axis to summarize `scale`.
     column_max = jnp.max(jnp.abs(w), axis=0, keepdims=True)
     scale = jnp.where(column_max == 0, 1.0, column_max / 127.0)
     # The scale of 1 for a zero column avoids division by zero; its quantized values remain zero.
     w_int8 = jnp.clip(jnp.round(w / scale), -127, 127).astype(jnp.int8)
-    # Cast or evaluate `out_int8_fp32acc` in explicit floating-point precision.
-    out_int8_fp32acc = jnp.dot(x, w_int8.astype(jnp.float32) * scale, preferred_element_type=jnp.float32)
-    policies = [
-        ("bf16 (fp32 accum)", out_bf16_fp32acc),
-        ("bf16 (bf16 accum)", out_bf16_bf16acc),
-        ("int8 per-col (fp32 accum)", out_int8_fp32acc),
+    # Cast or evaluate `out_int8_dequant_requested_fp32` in explicit floating-point precision.
+    out_int8_dequant_requested_fp32 = jnp.dot(x, w_int8.astype(jnp.float32) * scale, preferred_element_type=jnp.float32)
+    result_dtype_cases = [
+        ("BF16 operands / requested FP32 result", out_bf16_requested_fp32),
+        ("BF16 operands / requested BF16 result", out_bf16_requested_bf16),
+        ("INT8 per-column / FP32 dequantized dot result", out_int8_dequant_requested_fp32),
     ]
     results = []
-    # Loop over `(label, tensor)` in `policies`:
-    for label, tensor in policies:
+    # Loop over each requested-result-dtype comparison:
+    for label, tensor in result_dtype_cases:
         diff = jnp.abs(tensor - ref_fp32)
         # Append the computed value via `results.append({`.
         results.append({
-            "policy": label,
+            "result_dtype_setting": label,
+            "returned_dtype": str(tensor.dtype),
             "max_abs_err": round(float(jnp.max(diff)), 5),
             "mean_abs_err": round(float(jnp.mean(diff)), 5),
             "weight_bytes": int(w_int8.size),
@@ -60,6 +61,7 @@ def evaluate_precision_policies(seed=0):
 def capture_warmed_trace(steps=4, trace_dir=None):
     x = jnp.ones((256, 256), dtype=jnp.bfloat16)
     # Wrap with `jax.jit` (`step_fn`) so XLA traces and compiles the function.
+    # Request an FP32 dot result, then explicitly cast the returned values to BF16.
     step_fn = jax.jit(lambda a: jnp.dot(a, a, preferred_element_type=jnp.float32).astype(jnp.bfloat16))
     t0 = time.perf_counter()
     # Wait for device work to finish before timing it or comparing its result on the host.
@@ -86,16 +88,19 @@ prec_table = evaluate_precision_policies()
 trace_info = capture_warmed_trace()
 # Assert invariant `trace_info["xplane_count"] >= 1` holds
 assert trace_info["xplane_count"] >= 1
-# Assert invariant `prec_table[0]["max_abs_err"] < prec_table[1]["max_abs_err"]` holds
-assert prec_table[0]["max_abs_err"] < prec_table[1]["max_abs_err"]
+assert prec_table[0]["returned_dtype"] == "float32"
+assert prec_table[1]["returned_dtype"] == "bfloat16"
+assert all(np.isfinite(row["max_abs_err"]) and np.isfinite(row["mean_abs_err"]) for row in prec_table)
 print("Precision comparison:", prec_table)
 print("Captured *.xplane.pb trace count:", trace_info["xplane_count"], "steady_ms:", round(trace_info["steady_ms"], 4))
 
 # Step 3: Verify invariants on the completed state
 assert trace_info["xplane_count"] >= 1
-assert prec_table[0]["max_abs_err"] < prec_table[1]["max_abs_err"]
+assert prec_table[0]["returned_dtype"] == "float32"
+assert prec_table[1]["returned_dtype"] == "bfloat16"
+assert all(np.isfinite(row["max_abs_err"]) and np.isfinite(row["mean_abs_err"]) for row in prec_table)
 
-# Step 1 — Compare BF16 (FP32 vs BF16 accumulation) and per-channel INT8 matmul errors
+# Step 1 — Compare BF16 operands with requested FP32 or BF16 dot result dtypes, plus per-column INT8 reference error
 from pathlib import Path
 import os
 import time
@@ -113,33 +118,34 @@ def evaluate_precision_policies(seed=0):
     w = jax.random.normal(k2, (256, 64), dtype=jnp.float32) * 0.25
     # Keep the reference matrix product in float32 for comparison.
     ref_fp32 = jnp.dot(x, w, preferred_element_type=jnp.float32)
-    # Round both inputs to BF16, but accumulate and return the dot product in float32.
-    out_bf16_fp32acc = jnp.dot(
+    # Round both operands to BF16, then request a float32 result dtype from the dot.
+    out_bf16_requested_fp32 = jnp.dot(
         x.astype(jnp.bfloat16), w.astype(jnp.bfloat16), preferred_element_type=jnp.float32
     )
-    # Accumulate this BF16 dot product in BF16, then cast back for a same-dtype comparison.
-    out_bf16_bf16acc = jnp.dot(
+    # Request a BF16 dot result, then widen returned values to FP32 for error measurement.
+    out_bf16_requested_bf16 = jnp.dot(
         x.astype(jnp.bfloat16), w.astype(jnp.bfloat16), preferred_element_type=jnp.bfloat16
-    ).astype(jnp.float32)
+    )
     # Take one maximum per output column so each column gets its own quantization scale.
     column_max = jnp.max(jnp.abs(w), axis=0, keepdims=True)
     scale = jnp.where(column_max == 0, 1.0, column_max / 127.0)
     # The scale of 1 for a zero column avoids division by zero; its quantized values remain zero.
     w_int8 = jnp.clip(jnp.round(w / scale), -127, 127).astype(jnp.int8)
-    # Dequantize the int8 weights before a float32-accumulation dot product.
-    out_int8_fp32acc = jnp.dot(x, w_int8.astype(jnp.float32) * scale, preferred_element_type=jnp.float32)
-    policies = [
-        ("bf16 (fp32 accum)", out_bf16_fp32acc),
-        ("bf16 (bf16 accum)", out_bf16_bf16acc),
-        ("int8 per-col (fp32 accum)", out_int8_fp32acc),
+    # Dequantize int8 weights to FP32, then request an FP32 result from the dot.
+    out_int8_dequant_requested_fp32 = jnp.dot(x, w_int8.astype(jnp.float32) * scale, preferred_element_type=jnp.float32)
+    result_dtype_cases = [
+        ("BF16 operands / requested FP32 result", out_bf16_requested_fp32),
+        ("BF16 operands / requested BF16 result", out_bf16_requested_bf16),
+        ("INT8 per-column / FP32 dequantized dot result", out_int8_dequant_requested_fp32),
     ]
     results = []
-    # Loop over `(label, tensor)` in `policies`:
-    for label, tensor in policies:
+    # Loop over each requested-result-dtype comparison:
+    for label, tensor in result_dtype_cases:
         diff = jnp.abs(tensor - ref_fp32)
         # Append the computed value via `results.append({`.
         results.append({
-            "policy": label,
+            "result_dtype_setting": label,
+            "returned_dtype": str(tensor.dtype),
             "max_abs_err": round(float(jnp.max(diff)), 5),
             "mean_abs_err": round(float(jnp.mean(diff)), 5),
             "weight_bytes": int(w_int8.size),
@@ -153,6 +159,7 @@ def evaluate_precision_policies(seed=0):
 def capture_warmed_trace(steps=4, trace_dir=None):
     x = jnp.ones((256, 256), dtype=jnp.bfloat16)
     # Wrap with `jax.jit` (`step_fn`) so XLA traces and compiles the function.
+    # Request an FP32 dot result, then explicitly cast the returned values to BF16.
     step_fn = jax.jit(lambda a: jnp.dot(a, a, preferred_element_type=jnp.float32).astype(jnp.bfloat16))
     t0 = time.perf_counter()
     # Wait for device work to finish before timing it or comparing its result on the host.
@@ -178,8 +185,9 @@ prec_table = evaluate_precision_policies()
 trace_info = capture_warmed_trace()
 # Assert invariant `trace_info["xplane_count"] >= 1` holds
 assert trace_info["xplane_count"] >= 1
-# Assert invariant `prec_table[0]["max_abs_err"] < prec_table[1]["max_abs_err"]` holds
-assert prec_table[0]["max_abs_err"] < prec_table[1]["max_abs_err"]
+assert prec_table[0]["returned_dtype"] == "float32"
+assert prec_table[1]["returned_dtype"] == "bfloat16"
+assert all(np.isfinite(row["max_abs_err"]) and np.isfinite(row["mean_abs_err"]) for row in prec_table)
 print("Precision comparison:", prec_table)
 print("Retained trace directory:", trace_info["trace_dir"])
 print("Captured *.xplane.pb trace count:", trace_info["xplane_count"], "steady_ms:", round(trace_info["steady_ms"], 4))
@@ -188,8 +196,8 @@ print("Captured *.xplane.pb trace count:", trace_info["xplane_count"], "steady_m
 # Perform matrix contraction / projection to compute `visual_data`.
 visual_data = {
     'kind': 'bar',
-    'labels': [r['policy'] for r in prec_table],
-    'xlabel': 'matmul precision policy',
+    'labels': ['BF16 inputs / FP32 result', 'BF16 inputs / BF16 result', 'INT8 weights / FP32 dequantized dot'],
+    'xlabel': 'requested result dtype / operand path',
     'ylabel': 'absolute error vs fp32 reference',
     'series': [
         {'label': 'max abs error', 'y': [float(r['max_abs_err']) for r in prec_table]},
@@ -197,14 +205,14 @@ visual_data = {
     ],
 }
 
-# Experiment: Compare FP32 accumulation vs BF16 accumulation error ratio
-# Experiment — Compare FP32 accumulation vs BF16 accumulation error ratio
-fp32_acc_err = prec_table[0]["max_abs_err"]
-bf16_acc_err = prec_table[1]["max_abs_err"]
-ratio = round(bf16_acc_err / fp32_acc_err, 2)
-print("BF16-accum / FP32-accum max error ratio:", ratio)
-# Assert invariant `ratio > 1.3` holds
-assert ratio > 1.3
+# Experiment: Compare requested FP32 vs BF16 result dtype error ratio
+# Experiment — Compare requested FP32 vs BF16 result dtype error ratio
+requested_fp32_err = prec_table[0]["max_abs_err"]
+requested_bf16_err = prec_table[1]["max_abs_err"]
+ratio = round(requested_bf16_err / requested_fp32_err, 2)
+print("Requested BF16 / FP32 result max-error ratio for seed 0:", ratio)
+# This reports the measured ratio for the current backend and fixed seed-zero fixture.
+assert np.isfinite(ratio)
 
 # Experiment: Compare warmup duration vs traced steady-state step duration
 # Experiment — Compare warmup duration vs traced steady-state step duration
@@ -216,8 +224,9 @@ assert trace_info["warmup_ms"] > trace_info["steady_ms"]
 # Exercise solution
 p42 = evaluate_precision_policies(seed=42)
 t3 = capture_warmed_trace(steps=3)
-print("Seed 42 mean errors:", {r["policy"]: r["mean_abs_err"] for r in p42}, "xplane files:", t3["xplane_count"])
-assert p42[0]["mean_abs_err"] < p42[1]["mean_abs_err"] and t3["xplane_count"] >= 1
+print("Seed 42 returned dtypes and mean errors:", {r["result_dtype_setting"]: {"returned_dtype": r["returned_dtype"], "mean_abs_err": r["mean_abs_err"]} for r in p42}, "xplane files:", t3["xplane_count"])
+assert p42[0]["returned_dtype"] == "float32" and p42[1]["returned_dtype"] == "bfloat16"
+assert t3["xplane_count"] >= 1
 
 # Reference practice: Compare per-channel vs per-tensor INT8 quantization error
 # Compare per-channel vs per-tensor INT8 quantization error (Foundations)

@@ -45,6 +45,10 @@
         "title": "Read attention as matching, then mixing",
         "body": "Let’s give each symbol a job. \\(Q\\) contains queries, \\(K\\) contains keys, and \\(V\\) contains the values we want to mix. The feature count \\(d_k\\) sets the score scale. Each row of \\(A\\) contains nonnegative weights that sum to one. For a zero query, all scores match, so three values each receive weight \\(1/3\\). Their average is the output. You can check that case before thinking about learned projections.",
         "math": "\\begin{aligned}S&=\\frac{QK^\\mathsf{T}}{\\sqrt{d_k}}\\\\A_{ij}&=\\frac{\\exp(S_{ij}-m_i)}{\\sum_t\\exp(S_{it}-m_i)},\\quad m_i=\\max_t S_{it}\\\\O&=AV\\end{aligned}"
+      },
+      {
+        "title": "From the attention head to a decoder stack",
+        "body": "The hand-sized Q/K/V exercise isolates one weighted mixture. The optional text foundations extends the same operation to learned projections, multiple heads, pre-layer normalization, a residual stream, a token embedding table and a configurable stack of causal blocks. Compare its independent NumPy attention row with the model output before interpreting a generated token. The small CPU pilot is in `projects/text-harness/foundations/README.md`; the original four-stage one-block harness remains its own workflow."
       }
     ],
     "code": "# Step 1 — 1. Prepare the experiment\nimport jax\nimport jax.numpy as jnp\nimport numpy as np\n\n# Step 2 — 2. Implement the mechanism\ndef attend(q, k, v):\n    scores = q @ k.T / jnp.sqrt(q.shape[-1])\n    weights = jax.nn.softmax(scores, axis=-1)\n    return weights @ v, weights\n\n# Step 3 — 3. Run and check: Uniform weights 1/3; both output rows [2, 2].\nq = jnp.zeros((2, 2))\nk = jnp.array([[1., 0.], [0., 1.], [1., 1.]])\nv = jnp.array([[2., 0.], [0., 4.], [4., 2.]])\noutput, weights = attend(q, k, v)\nprint(\"Weights / output:\", weights, output)\nassert jnp.allclose(weights, jnp.full((2, 3), 1/3))\nassert jnp.allclose(output, jnp.array([[2., 2.], [2., 2.]]))\nassert jnp.allclose(jnp.sum(weights, axis=-1), 1.)",

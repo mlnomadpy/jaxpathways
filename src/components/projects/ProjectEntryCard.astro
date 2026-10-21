@@ -42,6 +42,11 @@ const prerequisitePhases = course.phases.filter((phase) =>
       <a class="button primary" href={siteUrl(`project.html?id=${project.id}`)}>
         Open project
       </a>
+      {project.id === 'text-harness' && (
+        <a class="button" href={siteUrl('project-guides/text-harness-foundations.html')}>
+          Natural-text decoder workflow
+        </a>
+      )}
     </div>
   </div>
   <details class="project-details">

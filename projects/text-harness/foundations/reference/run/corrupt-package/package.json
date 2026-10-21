@@ -1,0 +1,34 @@
+{
+  "identity": {
+    "candidate_model_sha256": "94a88ae7fd6a251b5b190b4631496e04bb71a31c1bfe418511fdd37ffef034c9",
+    "code_sha256": {
+      "config.py": "5c05801a7ec1a15b3978c87c77ac4e64d1b056c60487cbcff3cdf72475c8bb64",
+      "data.py": "ff8ff698090866d46bc1f2b3540393b9a16db2121ad824110bd2ba53db645bd8",
+      "model.py": "94a88ae7fd6a251b5b190b4631496e04bb71a31c1bfe418511fdd37ffef034c9",
+      "train.py": "ee9f3bc73505ce8e00fe9680589d97805593e5c8c035cba4709b5f334eb27a2b"
+    },
+    "dataset_sha256": "23cf92f1eeff85d98a191e0fd08ff4e3d60249c68e15426837701fcbc00e6213",
+    "jax_version": "0.9.2",
+    "model_config_sha256": "698877ae9b4d74cf3a5aea8458c325a4ed2214f8b038ccbfa32f7e8ff5e83550",
+    "platform": "cpu",
+    "processor_sha256": "c92b534443cc6a1eacd5e78406b2c42e59553df704a07102a03c639d3694f586",
+    "source_sha256": "01b38ea4c710a84bc18d0bd41271a5a1a92b94e97b2812f4dece97d4a694725e",
+    "training_config_sha256": "8b3d4d857d809e7d4f393d0496945ce07c4c6f5f17acf9ad93e81444f5851b70"
+  },
+  "model_config": {
+    "context": 24,
+    "dropout": 0.1,
+    "heads": 4,
+    "layers": 2,
+    "mlp_width": 32,
+    "tied_embeddings": true,
+    "vocab_size": 384,
+    "width": 16
+  },
+  "model_config_sha256": "698877ae9b4d74cf3a5aea8458c325a4ed2214f8b038ccbfa32f7e8ff5e83550",
+  "parameter_count": 10880,
+  "params_sha256": "271cb6457de5da3f727c343c64b7bd350c00e503ea7ac847eecf51fbd5558802",
+  "processor_sha256": "c92b534443cc6a1eacd5e78406b2c42e59553df704a07102a03c639d3694f586",
+  "schema": 1,
+  "step": 6
+}

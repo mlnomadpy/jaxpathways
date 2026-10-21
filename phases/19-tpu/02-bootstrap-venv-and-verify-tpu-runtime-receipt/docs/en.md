@@ -496,7 +496,7 @@ If `pip install 'jax[tpu]'` fails to find `libtpu`, verify that `-f https://stor
 
 ## Keep your evidence
 
-Keep the JSON runtime receipt (observed_backend, device_count, pmap_sum_of_squares, receipt_sha256) and the 1-chip vs 4-chip vs 8-chip pmap reference values.
+Keep the JSON runtime receipt fields (backend, local_device_count, per_device_sums, observed_total, expected_total, verified, receipt_sha256). Label the 1-, 4-, and 8-device closed-form values as calculated expectations; only the receipt's local-device result is observed execution.
 
 Save your predictions, modified code, terminal outputs, and reasoning in your engineering portfolio.
 

@@ -19,6 +19,10 @@ test('rerunning execution receipts preserves a release while canonical source ch
     mkdirSync(path.join(directory, 'projects/fixture'));
     write('projects/fixture/project.json', {id:'fixture'});
     writeFileSync(path.join(directory, 'projects/fixture/model.py'), 'value = 1\n');
+    mkdirSync(path.join(directory, 'projects/fixture/foundations/reference/corrupt-package'), {recursive:true});
+    writeFileSync(path.join(directory, 'projects/fixture/foundations/reference/corrupt-package/tokenizer.json'), '{"intentional":"invalid"}corrupt');
+    mkdirSync(path.join(directory, 'projects/fixture/foundations/data'));
+    write('projects/fixture/foundations/data/manifest.json', {split:'train'});
     write('curriculum/project-plans.json', [{id:'planned', source:'projects/planned/README.md'}]);
     mkdirSync(path.join(directory, 'projects/planned'));
     mkdirSync(path.join(directory, 'assessments'));
@@ -30,6 +34,12 @@ test('rerunning execution receipts preserves a release while canonical source ch
     write('curriculum/project-validation.json', { executedAt: 'later run', projects: [{ status: 'passed' }] });
     write('curriculum/validation.json', { executedAt: 'later lesson run' });
     assert.equal(run().status, 0, 'Execution timestamps are not canonical course revisions');
+    writeFileSync(path.join(directory, 'projects/fixture/foundations/reference/corrupt-package/tokenizer.json'), 'another deliberately invalid corruption fixture');
+    assert.equal(run().status, 0, 'Nested retained failure fixtures are evidence, not canonical JSON');
+    write('projects/fixture/foundations/data/manifest.json', {split:'changed'});
+    assert.match(run().stderr, /Course sources changed/, 'Canonical nested data recipes still invalidate the snapshot');
+    write('projects/fixture/foundations/data/manifest.json', {split:'train'});
+    assert.equal(run().status, 0);
     for (const source of ['projects/planned/README.md', 'assessments/fixture.md']) {
       const filename=path.join(directory, source);
       const original=readFileSync(filename,'utf8');

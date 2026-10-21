@@ -77,6 +77,10 @@ $$
 \widetilde S_{ij}=\begin{cases}S_{ij}&\text{if key }j\text{ is allowed for query }i\\-\infty&\text{otherwise}\end{cases}
 $$
 
+## Carry token and segment identity into packed training
+
+The character IDs here are a small alignment fixture. The optional foundations workflow adds a reversible UTF-8 byte baseline and a train-only ByteLevel BPE processor with explicit PAD/BOS/EOS/UNK IDs and byte fallback. Its paragraph records are deduplicated and grouped by Project Gutenberg chapter before tokenization; chapters I–IV train, V validates, and VI–VIII remain the final test. Chunk packing records document IDs, preserves every selected text token, masks padding and blocks attention and next-token loss across document boundaries. Inspect `projects/text-harness/foundations/data.py` and the report counts before trusting a held-out metric.
+
 ## 1. Prepare the experiment
 
 In the CPU environment from setup, create main.py and add this block. Write down the dimensions and the known result before continuing.
@@ -187,7 +191,7 @@ visual_data = {'kind': 'heatmap', 'values': weights.tolist(), 'rows': ['query ' 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:05:59.541486+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T17:44:37.081260+00:00. JAX 0.9.2.
 
 ```text
 Causal means: [2.       3.       4.666667 7.5     ]

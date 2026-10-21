@@ -1,6 +1,6 @@
 # Current course status
 
-Generated from canonical registries for version 0.11.1 (2026-10-21). Historical audits describe their own inspected revisions.
+Generated from canonical registries for version 0.12.0 (2026-10-21). Historical audits describe their own inspected revisions.
 
 - 22 phases and 104 authored lessons.
 - 10 pathways and 7 career routes.

@@ -3,6 +3,7 @@ import {portablePath} from './portable-path.mjs';
 import {lessonMarkdown,lessonScript,lessonCells,learnerNotebookCells,learnerScript,learnerStarterCoverage,learnerStarterInventory,readyLearnerArtifactPaths} from './lesson-artifacts.mjs';
 import {createHash} from 'node:crypto';
 import {readFileSync,writeFileSync,mkdirSync,readdirSync} from 'node:fs';
+import path from 'node:path';
 const root=new URL('../',import.meta.url);
 mkdirSync(new URL('public/',root),{recursive:true});
 for(const name of ['validation.json','openapi.json'])writeFileSync(new URL('public/'+name,root),readFileSync(new URL('curriculum/'+name,root)));
@@ -140,9 +141,18 @@ json('public/api/v1/projects.json',{schemaVersion:1,projects:projects.map(path=>
 const projectPlans=JSON.parse(readFileSync(new URL('curriculum/project-plans.json',root)));
 for(const project of [...projects.map(manifest=>JSON.parse(readFileSync(new URL(manifest,root)))),...projectPlans]){
   const directory=`projects/${project.id}/`;
-  const guideSource=readFileSync(new URL(project.source,root),'utf8');
-  for(const file of readdirSync(new URL(directory,root),{recursive:true}).map(portablePath)){
-    const linkedData=/\.(json|csv)$/.test(file) && guideSource.includes(']('+file+')');
+  const files=readdirSync(new URL(directory,root),{recursive:true}).map(portablePath);
+  const linkedAssets=new Set();
+  for(const guide of files.filter(file=>file.endsWith('.md'))){
+    const source=readFileSync(new URL(directory+guide,root),'utf8');
+    for(const [,href] of source.matchAll(/\]\(([^)]+)\)/g)){
+      if(/^(?:https?:|#)/.test(href))continue;
+      const target=path.posix.normalize(path.posix.join(path.posix.dirname(guide),href.split('#')[0]));
+      if(!target.startsWith('../'))linkedAssets.add(target);
+    }
+  }
+  for(const file of files){
+    const linkedData=/\.(json|csv|txt)$/.test(file) && linkedAssets.has(file);
     if(!/\.(png|svg|wav|md)$/.test(file) && !(file.startsWith('reference/') && /\.(json|csv)$/.test(file)) && !linkedData)continue;
     const output=`public/project-assets/${project.id}/${file}`;
     mkdirSync(new URL(output.slice(0,output.lastIndexOf('/')+1),root),{recursive:true});

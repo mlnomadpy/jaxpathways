@@ -1,0 +1,33 @@
+HloModule jit__lambda, is_scheduled=true, entry_computation_layout={(bf16[64,256]{1,0}, bf16[256,64]{1,0})->f32[64,64]{1,0}}, allow_spmd_sharding_propagation_to_parameters={true,true}, allow_spmd_sharding_propagation_to_output={true}
+
+FileNames
+1 "/private/tmp/jaxpathways-reader-review-fix/phases/21-tpu-systems/02-bfloat16-int8-precision-and-xprof-profiling/labs/precision_contract_probe.py"
+
+FunctionNames
+1 "<module>"
+2 "main"
+3 "run"
+4 "retain_ir"
+5 "retain_ir.<locals>.<lambda>"
+
+FileLocations
+1 {file_name_id=1 function_name_id=1 line=267 end_line=267 column=4 end_column=10}
+2 {file_name_id=1 function_name_id=2 line=260 end_line=260 column=14 end_column=36}
+3 {file_name_id=1 function_name_id=3 line=197 end_line=197 column=28 end_column=55}
+4 {file_name_id=1 function_name_id=4 line=144 end_line=144 column=18 end_column=38}
+5 {file_name_id=1 function_name_id=5 line=141 end_line=141 column=40 end_column=83}
+
+StackFrames
+1 {file_location_id=1 parent_frame_id=1}
+2 {file_location_id=2 parent_frame_id=2}
+3 {file_location_id=3 parent_frame_id=3}
+4 {file_location_id=4 parent_frame_id=4}
+5 {file_location_id=5 parent_frame_id=5}
+
+
+ENTRY %main.1 (x.1: bf16[64,256], w.1: bf16[256,64]) -> f32[64,64] {
+  %x.1 = bf16[64,256]{1,0} parameter(0), metadata={op_name="x"}
+  %w.1 = bf16[256,64]{1,0} parameter(1), metadata={op_name="w"}
+  ROOT %dot_general.1 = f32[64,64]{1,0} dot(%x.1, %w.1), lhs_contracting_dims={1}, rhs_contracting_dims={0}, metadata={op_name="jit(<lambda>)/dot_general" stack_frame_id=5}
+}
+

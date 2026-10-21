@@ -163,4 +163,37 @@ assert float(jax.grad(detached_objective)(1.0)) == 0.0
 fd=(float(detached_objective(1.0001))-float(detached_objective(0.9999)))/0.0002
 assert abs(fd)>1e-3
 print("Detached autodiff is zero; actual value sensitivity:",fd)
+
+# Reference practice: Check adaptive log-rate sensitivity at multiple tolerances
+import numpy as np
+
+def compare_adaptive_sensitivities(log_rate_sensitivity, solve_forced_decay, rate, initial, times, tolerances):
+    times = np.asarray(times, dtype=np.float64)
+    if times.ndim != 1 or not np.isfinite(times).all():
+        raise ValueError("times must be a finite vector starting at zero")
+    analytic = -rate * times * (initial - 1.0) * np.exp(-rate * times)
+    epsilon = 2e-5
+    results = {}
+    for tolerance in tolerances:
+        values = np.asarray(log_rate_sensitivity(
+            np.log(rate), initial, times, rtol=tolerance, atol=tolerance * 1e-2
+        ))
+        plus = solve_forced_decay(
+            rate * np.exp(epsilon), initial, times, rtol=tolerance, atol=tolerance * 1e-2
+        )
+        minus = solve_forced_decay(
+            rate * np.exp(-epsilon), initial, times, rtol=tolerance, atol=tolerance * 1e-2
+        )
+        if not plus["success"] or not minus["success"]:
+            raise RuntimeError("finite-difference solve failed")
+        finite_difference = (plus["values"] - minus["values"]) / (2.0 * epsilon)
+        if values.shape != times.shape or not np.isfinite(values).all():
+            raise ValueError("sensitivity API returned invalid values")
+        results[float(tolerance)] = {
+            "values": values,
+            "continuous_max_error": float(np.max(np.abs(values - analytic))),
+            "finite_difference_max_error": float(np.max(np.abs(values - finite_difference))),
+        }
+    return {"analytic": analytic, "by_tolerance": results}
+
 print("PASS: science-03")

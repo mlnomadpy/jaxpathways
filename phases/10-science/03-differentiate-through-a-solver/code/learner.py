@@ -1,4 +1,4 @@
-"""Differentiate through a solver · learner-only exercises (3/3 contracts ready)"""
+"""Differentiate through a solver · learner-only exercises (4/4 contracts ready)"""
 
 # Exercise: Change the initial value to \(3\) and the rate to \(0.4\). Verify the endpoint gradient against the continuous derivative, then check the derivative with respect to the initial value as well.
 
@@ -82,3 +82,32 @@ import jax.numpy as jnp
 def diagnose_detached_path(solve, observations, parameter=1.0, initial=2.0, epsilon=1e-4):
     # TODO: compare attached and detached autodiff with a centered difference.
     raise NotImplementedError("Find the gradient path severed by stop_gradient")
+
+
+
+# Check adaptive log-rate sensitivity at multiple tolerances (Optional extension):
+# In the isolated Diffrax environment, evaluate the numerical derivative with respect to $\log k$ at $k=1.1$, $y_0=2.4$, and the stated observation grid. Compare all requested tolerances with the continuous derivative and a centered finite difference. Explain why agreement can improve as tolerances tighten without making the finite-tolerance solve identical to the continuous system.
+
+# Inputs:
+# - Rate 1.1, initial state 2.4, observation times from 0 to 2, and tolerances 1e-5, 1e-8, and 1e-10.
+# - The optional project API `log_rate_sensitivity(log_rate, initial, times, solver, rtol, atol)`.
+# - The optional project API `solve_forced_decay(rate, initial, times, solver, rtol, atol)` for numerical centered differences.
+
+# Outputs:
+# - Numerical dy/dlog(k) at each requested time for every tolerance.
+# - Maximum error against the continuous derivative and centered finite difference for each tolerance.
+
+# Invariants to check:
+# - The differentiated parameter is log(k), so the positive rate equals exp(log_rate).
+# - All evaluations return one finite sensitivity per requested time in the input order.
+# - The continuous reference is -k*t*(y0-1)*exp(-k*t) and is calculated independently of Diffrax.
+
+# Hints:
+# - Use the same observation grid for all tolerance settings.
+# - Use a symmetric perturbation in log(k) for the finite-difference check.
+
+import numpy as np
+
+def compare_adaptive_sensitivities(log_rate_sensitivity, solve_forced_decay, rate, initial, times, tolerances):
+    # TODO: evaluate the submitted sensitivity API and compare with independent references.
+    raise NotImplementedError("Compare numerical and continuous log-rate sensitivities")

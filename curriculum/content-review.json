@@ -64,7 +64,7 @@
         "tests/learner-starters.test.mjs",
         "docs/review-guide-0.11.md"
       ],
-      "action": "Review all 303 authored task contracts and pilot unseen transfer cases. Learner-only downloads omit reference solutions and checkpoint answers; this author revision does not establish independent learner success or calibrated grading.",
+      "action": "Review all 305 authored task contracts and pilot unseen transfer cases. Learner-only downloads omit reference solutions and checkpoint answers; this author revision does not establish independent learner success or calibrated grading.",
       "status": "partly-addressed"
     },
     {
@@ -151,8 +151,8 @@
     {
       "id": "transformers",
       "level": "in-development",
-      "strength": "Attention, packing and a small causal harness are runnable; natural-data pilots are separate projects.",
-      "contribution": "Connect tokenizer choices and a complete configurable Transformer to real-corpus evaluation, cache checks and saved phase handoffs."
+      "strength": "Attention and packing lessons connect to a separate configurable multi-layer decoder with train-only BPE, a measured natural-text CPU pilot, cache parity and fresh-process full-state recovery.",
+      "contribution": "Review tokenizer and length policies on broader licensed corpora, extend the measured short pilot into staged training and evaluate generation quality. Target-scale training and independent teaching review remain open."
     },
     {
       "id": "performance",
@@ -169,8 +169,8 @@
     {
       "id": "science",
       "level": "in-development",
-      "strength": "Scalar ODE, sensitivity and inverse-problem labs use discrete and continuous references.",
-      "contribution": "Add an adaptive or stiff-solver example, identifiable noisy observations and domain-expert review before claiming a general scientific-computing pathway."
+      "strength": "Fixed-grid ODE references connect to a separately pinned adaptive Diffrax extension with stiff solves, tolerance-sensitive gradients, noisy inversion and identifiable versus insensitive profiles.",
+      "contribution": "Review the solver and inference assumptions with a domain specialist, extend the synthetic fixture to real measurements and validate uncertainty or model misspecification before broader scientific claims."
     },
     {
       "id": "probability",
@@ -255,8 +255,8 @@
     {
       "id": "scientific-inverse",
       "level": "available-draft",
-      "strength": "Bounded physical simulation, sensitivities and parameter recovery.",
-      "contribution": "Add noisy observations, identifiability stress tests and domain-expert interpretation."
+      "strength": "Fixed-grid simulation plus an optional executed Diffrax workflow with adaptive/stiff solves, sensitivity refinement, same-data noisy fitting and explained identifiability figures.",
+      "contribution": "Add licensed real measurements, an explicit uncertainty or discrepancy model and domain-expert review. Existing evidence is synthetic CPU computation."
     },
     {
       "id": "policy-evaluation",
@@ -327,8 +327,8 @@
     {
       "id": "text-harness",
       "level": "available-draft",
-      "strength": "Tiny byte-level causal training, full recovery, KV cache and export.",
-      "contribution": "Add tokenizer/corpus studies and nonperiodic held-out generation before any language-quality claim."
+      "strength": "Tiny causal training, recovery, KV cache and export, plus a separate train-only BPE decoder workflow with natural chapter splits, measured short-run results and an explained baseline comparison.",
+      "contribution": "Broaden source and tokenizer studies, complete larger staged training and assess generation on genuinely unseen material. Repeatedly inspected Alice chapters are not a blind benchmark."
     },
     {
       "id": "optimizer-audit",

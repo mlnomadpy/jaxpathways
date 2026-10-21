@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "edition": "0.12.0",
+  "recordedAt": "2026-10-21T18:22:56.860303+00:00",
+  "status": "Author review candidate; no independent human acceptance or production publication.",
+  "baseCommit": "68b771f0e58cfe9f2495b1381118f6a439234f0e",
+  "releaseSnapshotHash": "07a083db8b59fd675865d9c641ed44c40ac328d861a4c278cde60cb41fbbec57",
+  "sourceAcceptance": {
+    "courseRegistrySha256": "1388a2121bce6ac87c7037d012d1193a91c0b16b74016caf3fcdd6581db46283",
+    "tpu01Sha256": "e10d8e17146489b7664fa1c3399ba751abc7b1a9aa70f2c158aa158ab3324752",
+    "tpuLessonCheckerSha256": "dae49b995618b65476d084f1c818198f272f5f56506ca58f72869e163e8fb454",
+    "review": "Internal independent numerical/source review by Sol of Luna implementations; not human teaching acceptance."
+  },
+  "coverage": {
+    "lessons": 104,
+    "phases": 22,
+    "materialEntries": 203,
+    "learnerContracts": 305,
+    "registeredProjectReferences": 31,
+    "plannedFullLifecycles": 10,
+    "developingPhases": 13
+  },
+  "checks": {
+    "automatedTests": 154,
+    "browserTests": 32,
+    "browserScope": "Desktop Chromium and emulated iPhone13 Chromium; selected workflows and figure keyboard navigation. Not native Safari or an actual screen reader.",
+    "tpuLessonTests": 9,
+    "hardwareBindingTests": 3,
+    "sourceMatchingCpuLessons": 104,
+    "freshLessonCompanionPairs": 8,
+    "freshLessonIds": [
+      "transformers-01",
+      "transformers-02",
+      "transformers-03",
+      "transformers-04",
+      "science-03",
+      "science-04",
+      "tpu-01",
+      "tpu-06"
+    ],
+    "metadataOnlyLessonRevisions": [
+      "tpu-03",
+      "tpu-04"
+    ],
+    "executionNote": "Eight final script/notebook pairs were refreshed; precision was rerun after shorter figure labels. Initial seven-lesson log is superseded for tpu-06 by its final execution receipt. Other 96 lesson content hashes are unchanged and retain their prior actual executions.",
+    "registeredProjectReferenceSuites": 31,
+    "pages": 217,
+    "canonicalSitemapUrls": 212,
+    "deploymentBases": [
+      "/",
+      "/jaxpathways/"
+    ],
+    "pythonFormattedFiles": 49,
+    "optionalWorkflows": "Separately pinned Diffrax and natural-text decoder implementations retain source-bound CPU receipts and independent checks. New hosted CI jobs are configured, not yet claimed as successful."
+  },
+  "book": {
+    "epubcheckVersion": "5.4.0",
+    "fatal": 0,
+    "errors": 0,
+    "warnings": 0,
+    "epubSha256": "66c48c655a3f13a9847a87f11d78129912829fb4539963fce285aa4aaf136737",
+    "standaloneHtmlSha256": "dd101620a9d363a2f3de5ff0cbc0851cb93b5a769972846ed4f7273fd2c8f2cd",
+    "nativeReaders": "Pending actual Apple Books, second EPUB engine and assistive-technology sessions. Desktop previously locked; no unlocked session has been performed.",
+    "print": "0.11.1 selected Chromium A4/Letter inspection remains historical evidence; no 0.12 full-book print inspection is claimed."
+  },
+  "preview": {
+    "url": "http://127.0.0.1:4194/book.html",
+    "directory": "/private/tmp/jaxpathways-review-0.12.0-final",
+    "bookSha256": "47412afc4e6eb32140646306c0c743130adb73d04578c50a9952346b465136a8"
+  },
+  "excludedWork": "Unfinished C01 SciFact embedding lifecycle remains in the original working tree and is excluded from this edition. Its low retrieval quality and remaining checker/consumer repairs do not qualify a model release.",
+  "evidenceFiles": {
+    "docs/evidence/course-review-0.12/browser.log": "fb9be925dbb437f50d9fb592d8fc8891bdd896f4fcaba0eb4858f253d6553931",
+    "docs/evidence/course-review-0.12/check.log": "02ffc6bddcddfb08b1c5901f9c060306ffa4e72ae5065c3122534b967fb0b91a",
+    "docs/evidence/course-review-0.12/decoder-mobile.png": "b18b565080cc9f5a066d088b9617116436acf36f375827faea18d1fe7bd579a9",
+    "docs/evidence/course-review-0.12/deployment.log": "ea8d731eb7abb33009af448db7012ff3587f4e5ec524f717fada669b9fe87eb8",
+    "docs/evidence/course-review-0.12/eight-lesson-refresh-initial-seven.log": "e4d5d07370913b0d3dad2904bf2e1cbd1f920b17f0148b0a41222b4ac2967d12",
+    "docs/evidence/course-review-0.12/epubcheck-report.json": "6518151310168f9f8968cd012b77310d63984ca90e3ca3ce0ee36ca98d24c2c9",
+    "docs/evidence/course-review-0.12/epubcheck.log": "7762882cc0e77ad791a4d3cbda6ae124ed8682e19906d72b6983987e55585d12",
+    "docs/evidence/course-review-0.12/hardware-bindings.log": "884942071f008390eaf6e62a4a92e5428ebf0edc318c30efd9269e815f0f3372",
+    "docs/evidence/course-review-0.12/precision-final-execution.log": "4837f571647a1462082540a48a78af64c1bdda327c85d265190dc8f6c470cfa5",
+    "docs/evidence/course-review-0.12/precision-intro.png": "cc65995bd34b08a9c493929773d4ac88c1e11abbefd4b623364bf8fb053bca43",
+    "docs/evidence/course-review-0.12/project-references.log": "b9942e98029d663036c91394a336c479792a44793e8a3fc00dae25a18c53a66d",
+    "docs/evidence/course-review-0.12/python-format.log": "12c7f682dc3513c131e5233a8b5dacd1d75040892cde9f8c5642f687c47dac9d",
+    "docs/evidence/course-review-0.12/science-intro.png": "681ad95a280dda5d5779c42ad44c1fbc999f8725de42a3b973ffa94444ff6268",
+    "docs/evidence/course-review-0.12/topology-final-execution.log": "1ba36f368acee4fe2f9696ed2ecfc760f7d899f8694bd943c75ee5c1d9df9ecd",
+    "docs/evidence/course-review-0.12/tpu-lessons.log": "abc1991f7e1a659c23b14ceefd4242f9a57cdf9af44c6c5bdf16b864a69c384b"
+  },
+  "knownFollowUps": [
+    "P2: duplicate lesson stage-navigation bars can overlap in a short viewport; consolidate and add a browser single-dock regression in the next wave.",
+    "Independent human and native-reader acceptance, target-scale models and remaining developing-phase requirements stay open."
+  ],
+  "gitByteFidelity": {
+    "filesCompared": 202,
+    "result": "All staged file bytes matched the tested working tree before commit.",
+    "corpusSha256": "01b38ea4c710a84bc18d0bd41271a5a1a92b94e97b2812f4dece97d4a694725e",
+    "policy": "Nested projects/**/data/source/** files bypass text normalization, preserving downloaded source bytes on each platform."
+  }
+}

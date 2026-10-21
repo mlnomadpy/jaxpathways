@@ -9,6 +9,9 @@ export function projectGuide(project, course, plannedIds = projectPlans.map((pla
   return assessmentContent(project.source, (href) => {
     if (/^(https?:|#)/.test(href)) return href;
     const target = path.posix.normalize(path.posix.join(path.posix.dirname(project.source), href));
+    if (target === 'projects/text-harness/foundations/README.md') {
+      return siteUrl('project-guides/text-harness-foundations.html');
+    }
     const projectReadme = /^projects\/([^/]+)\/README\.md$/.exec(target);
     if (projectReadme) {
       const directory = plannedIds.includes(projectReadme[1]) ? 'project-plans' : 'project-guides';

@@ -73,6 +73,24 @@ Compile and warm up each batch shape, place its inputs before the timed region, 
 
 The staged scientific-inverse project asks for a reusable simulation and fitting API with changed parameters, noisy observations, held-out checks and a reproducible report. For stiff or adaptive models, choose and validate a suitable solver before reusing the optimizer. Diffrax, Equinox and Lineax provide ecosystem building blocks, but this phase’s executed core intentionally uses the installed JAX environment; no optional library or target hardware execution is implied.
 
+## Optional adaptive solve: stiffness and rate identifiability
+
+The optional project uses a forced-decay equation with exact solution $y(t)=\cos t+(y_0-1)e^{-kt}$. Tsit5 is an adaptive explicit solver for the nonstiff fixture; Kvaerno3 and Kvaerno5 with a PID step-size controller handle the stiff fixture. Compare accepted/rejected step counts and analytic errors, and treat solver status as part of the result. For inference, early off-manifold observations can reveal the rate, while $y_0=1$ makes predictions exactly independent of $k$. Late observations can be practically insensitive because the transient $e^{-kt}$ has decayed.
+
+$$
+\ell(k)=\frac12\sum_i\left[\frac{y(t_i;k)-y_i}{\sigma}\right]^2,\qquad y_0=1\implies\frac{\partial y}{\partial k}=0\quad\text{for all }t,k>0
+$$
+
+### Pause and reason
+
+Can a low residual establish that the rate is identifiable?
+
+<details><summary>Compare your reasoning</summary>
+
+No. A parameter is structurally unidentifiable when changing it leaves predictions and the profile objective flat, even if an optimizer returns a particular value.
+
+</details>
+
 ## Define the simulator and immutable observations
 
 Append this block to main.py in your CPU course environment; for the first block create the file. Run blocks in order.
@@ -264,7 +282,7 @@ visual_data={'panels':[{'kind':'line','x':indices,'xlabel':'completed updates','
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:07:33.149207+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T17:45:35.092070+00:00. JAX 0.9.2.
 
 ```text
 Initial/fitted rate: 1.4 0.7000000090128304
@@ -276,7 +294,7 @@ Initial/final loss: 0.11676630453561089 1.9484774169068916e-32
 Held-out RMSE: 4.572895313141112e-16 finer-grid RMSE: 7.282689372293896e-09
 Initial-time-only gradient: 0.0
 True rate: 0.7 perfect coarse Euler rate: 0.5906238205625731
-batch, median milliseconds, milliseconds per trajectory: [(1, 0.006667338311672211, 0.006667338311672211), (16, 0.0063749030232429504, 0.0003984314389526844), (256, 0.06220769137144089, 0.00024299879441969097)]
+batch, median milliseconds, milliseconds per trajectory: [(1, 0.007791910320520401, 0.007791910320520401), (16, 0.02200016751885414, 0.0013750104699283838), (256, 0.05720788612961769, 0.0002234683051938191)]
 Changed true/recovered rate: 0.4 0.40000000054230433
 Recovered initial amplitude: 2.8000000000000003
 Noisy grid-search estimate: 0.7 residual MSE: 2.6000611439697964e-05
@@ -505,6 +523,100 @@ A noisy optimum need not equal the generating parameter exactly. One fixed-seed 
 
 </details>
 
+## Fit and independently audit an adaptive noisy rate estimate
+
+**Optional extension**
+
+Use the optional `fit_rate` API on early off-manifold observations with initial state $2.6$ and rate near $1.25$. Score the returned rate with an analytic NumPy profile over a positive candidate grid. Then calculate predictions for held-out initial states without using held-out values to select the fit. Independently inspect supplied on-manifold and late-time profiles.
+
+<details><summary>Hint</summary>
+
+Use the same known noise scale in fitting and profile scoring. A small residual alone is not evidence of identifiability; check whether predictions and the entire likelihood profile change across the candidate rates.
+
+</details>
+
+### How to write: Fit and independently audit an adaptive noisy rate estimate — Step-by-step recipe & starter scaffold
+
+**Inputs:**
+- Early off-manifold training observations at times from 0 to 1.2, initial state 2.6, known noise scale 0.025, and starting rate 0.45.
+- Separate observations for an on-manifold initial state 1.0 and late off-manifold times from 6 to 9, plus a positive rate grid.
+- Held-out initial states and times that are not used to choose a rate.
+
+**Outputs:**
+- Positive fitted rate and an analytic early-profile minimum with their objective difference.
+- Held-out predictions computed only after rate selection.
+- Likelihood-profile range and prediction spread for early, on-manifold, and late observation regimes.
+
+**Invariants to check:**
+- Rate selection uses training observations only.
+- Independent profiles use the closed-form solution and do not reuse the fitted solver.
+- A case is structurally unidentifiable only when predictions and profile remain flat over distinct positive rates.
+
+**Hints:**
+- Use a local seeded NumPy generator for any noise you create.
+- Report prediction spread across several rates as well as the profile range; optimization difficulty alone does not establish non-identifiability.
+
+**Starter code scaffold (fill in the TODOs):**
+
+```python
+import numpy as np
+
+def fit_and_audit_rate(fit_rate, times, observations, initial, noise_scale, candidate_rates,
+                       held_out_times, held_out_initials, on_times, on_observations,
+                       late_times, late_observations):
+    # TODO: fit from early training data and independently score all three profiles.
+    raise NotImplementedError("Separate fit selection, analytic profile audit, and held-out prediction")
+```
+
+<details><summary>Reference solution and reasoning</summary>
+
+```python
+import numpy as np
+
+def fit_and_audit_rate(fit_rate, times, observations, initial, noise_scale, candidate_rates,
+                       held_out_times, held_out_initials, on_times, on_observations,
+                       late_times, late_observations):
+    times = np.asarray(times, dtype=np.float64)
+    observations = np.asarray(observations, dtype=np.float64)
+    rates = np.asarray(candidate_rates, dtype=np.float64)
+    if rates.ndim != 1 or np.any(rates <= 0) or not np.isfinite(rates).all():
+        raise ValueError("candidate rates must be finite and positive")
+    fitted = float(fit_rate(times, observations, initial, initial_rate=0.45,
+                            noise_scale=noise_scale))
+
+    def profile(times_for_profile, values, y0):
+        times_for_profile = np.asarray(times_for_profile, dtype=np.float64)
+        values = np.asarray(values, dtype=np.float64)
+        prediction = np.cos(times_for_profile)[None, :] + (y0 - 1.0) * np.exp(
+            -rates[:, None] * times_for_profile[None, :]
+        )
+        nll = 0.5 * np.sum(((prediction - values[None, :]) / noise_scale) ** 2, axis=1)
+        return {"nll": nll, "nll_range": float(np.ptp(nll)),
+                "prediction_spread": float(np.max(np.ptp(prediction, axis=0)))}
+
+    early = profile(times, observations, initial)
+    on_manifold = profile(on_times, on_observations, 1.0)
+    late = profile(late_times, late_observations, initial)
+    fitted_nll = float(profile_nll(np.array([fitted]), times, observations, initial, noise_scale)[0])
+    early_minimum_rate = float(rates[np.argmin(early["nll"])])
+    early_minimum_nll = float(np.min(early["nll"]))
+    held_out = np.cos(np.asarray(held_out_times))[None, :] + (
+        np.asarray(held_out_initials)[:, None] - 1.0
+    ) * np.exp(-fitted * np.asarray(held_out_times)[None, :])
+    return {"fitted_rate": fitted, "early_profile": early,
+            "early_profile_minimum_rate": early_minimum_rate,
+            "early_profile_minimum_nll": early_minimum_nll,
+            "fitted_rate_nll": fitted_nll,
+            "fitted_delta_nll": fitted_nll - early_minimum_nll,
+            "on_manifold_profile": on_manifold, "late_profile": late,
+            "held_out_predictions": held_out}
+
+```
+
+This is a synthetic, known-noise inverse problem. The profile distinguishes structural non-identifiability from weak late-time sensitivity, but it is not a confidence interval or a scientific validation of field measurements.
+
+</details>
+
 ## Check your understanding
 
 You fit only observations at time zero and every rate gives zero loss. What is the problem?
@@ -555,4 +667,6 @@ Save your predictions, modified code, terminal outputs, and reasoning in your en
 - [JAX automatic vectorization](https://docs.jax.dev/en/latest/_autosummary/jax.vmap.html)
 - [JAX derivative checking and Jacobian products](https://docs.jax.dev/en/latest/notebooks/autodiff_cookbook.html)
 - [Diffrax solver terms, saved values and solution inspection](https://docs.kidger.site/diffrax/usage/getting-started/)
+- [Diffrax solver choice and adaptive solver families](https://docs.kidger.site/diffrax/usage/how-to-choose-a-solver/)
+- [Diffrax solution saving and status inspection](https://docs.kidger.site/diffrax/usage/getting-started/)
 

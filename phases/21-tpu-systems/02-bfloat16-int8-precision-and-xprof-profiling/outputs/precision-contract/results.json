@@ -1,0 +1,171 @@
+{
+  "fixtures": [
+    {
+      "seed": 0,
+      "shape": {
+        "x": [
+          64,
+          256
+        ],
+        "w": [
+          256,
+          64
+        ]
+      },
+      "dtypes": {
+        "x_fp32": "float32",
+        "w_fp32": "float32",
+        "x_bf16": "bfloat16",
+        "w_bf16": "bfloat16",
+        "reference_fp32": "float32",
+        "requested_fp32": "float32",
+        "requested_bf16": "bfloat16",
+        "requested_fp32_cast_bf16": "bfloat16"
+      },
+      "finite": {
+        "x_fp32": true,
+        "w_fp32": true,
+        "x_bf16": true,
+        "w_bf16": true,
+        "reference_fp32": true,
+        "requested_fp32": true,
+        "requested_bf16": true,
+        "requested_fp32_cast_bf16": true
+      },
+      "max_abs_error_vs_fp32_jax_reference": {
+        "bf16_operands_requested_fp32_result": 0.03717947006225586,
+        "bf16_operands_requested_bf16_result": 0.055446624755859375
+      },
+      "mean_abs_error_vs_fp32_jax_reference": {
+        "bf16_operands_requested_fp32_result": 0.007562834370475002,
+        "bf16_operands_requested_bf16_result": 0.009119870962678078
+      },
+      "requested_bf16_vs_same_operands_requested_fp32_result_cast_to_bf16": {
+        "equal_count": 4095,
+        "total_count": 4096,
+        "different_count": 1,
+        "different_positions_and_values": [
+          {
+            "index": [
+              34,
+              3
+            ],
+            "requested_bf16_value": -0.337890625,
+            "requested_fp32_then_bf16_value": -0.33984375
+          }
+        ]
+      }
+    },
+    {
+      "seed": 42,
+      "shape": {
+        "x": [
+          64,
+          256
+        ],
+        "w": [
+          256,
+          64
+        ]
+      },
+      "dtypes": {
+        "x_fp32": "float32",
+        "w_fp32": "float32",
+        "x_bf16": "bfloat16",
+        "w_bf16": "bfloat16",
+        "reference_fp32": "float32",
+        "requested_fp32": "float32",
+        "requested_bf16": "bfloat16",
+        "requested_fp32_cast_bf16": "bfloat16"
+      },
+      "finite": {
+        "x_fp32": true,
+        "w_fp32": true,
+        "x_bf16": true,
+        "w_bf16": true,
+        "reference_fp32": true,
+        "requested_fp32": true,
+        "requested_bf16": true,
+        "requested_fp32_cast_bf16": true
+      },
+      "max_abs_error_vs_fp32_jax_reference": {
+        "bf16_operands_requested_fp32_result": 0.0345073938369751,
+        "bf16_operands_requested_bf16_result": 0.04712963104248047
+      },
+      "mean_abs_error_vs_fp32_jax_reference": {
+        "bf16_operands_requested_fp32_result": 0.007504907594267252,
+        "bf16_operands_requested_bf16_result": 0.009024457679771558
+      },
+      "requested_bf16_vs_same_operands_requested_fp32_result_cast_to_bf16": {
+        "equal_count": 4096,
+        "total_count": 4096,
+        "different_count": 0,
+        "different_positions_and_values": []
+      }
+    },
+    {
+      "seed": 7,
+      "shape": {
+        "x": [
+          64,
+          256
+        ],
+        "w": [
+          256,
+          64
+        ]
+      },
+      "dtypes": {
+        "x_fp32": "float32",
+        "w_fp32": "float32",
+        "x_bf16": "bfloat16",
+        "w_bf16": "bfloat16",
+        "reference_fp32": "float32",
+        "requested_fp32": "float32",
+        "requested_bf16": "bfloat16",
+        "requested_fp32_cast_bf16": "bfloat16"
+      },
+      "finite": {
+        "x_fp32": true,
+        "w_fp32": true,
+        "x_bf16": true,
+        "w_bf16": true,
+        "reference_fp32": true,
+        "requested_fp32": true,
+        "requested_bf16": true,
+        "requested_fp32_cast_bf16": true
+      },
+      "max_abs_error_vs_fp32_jax_reference": {
+        "bf16_operands_requested_fp32_result": 0.03870439529418945,
+        "bf16_operands_requested_bf16_result": 0.04887676239013672
+      },
+      "mean_abs_error_vs_fp32_jax_reference": {
+        "bf16_operands_requested_fp32_result": 0.007399642642283766,
+        "bf16_operands_requested_bf16_result": 0.008965442737988383
+      },
+      "requested_bf16_vs_same_operands_requested_fp32_result_cast_to_bf16": {
+        "equal_count": 4094,
+        "total_count": 4096,
+        "different_count": 2,
+        "different_positions_and_values": [
+          {
+            "index": [
+              13,
+              26
+            ],
+            "requested_bf16_value": 0.0008544921875,
+            "requested_fp32_then_bf16_value": 0.000850677490234375
+          },
+          {
+            "index": [
+              47,
+              21
+            ],
+            "requested_bf16_value": -6.6875,
+            "requested_fp32_then_bf16_value": -6.71875
+          }
+        ]
+      }
+    }
+  ]
+}

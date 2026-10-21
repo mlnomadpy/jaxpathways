@@ -176,3 +176,51 @@ jobs:
           name: numpyro-cpu-evidence
           path: /tmp/numpyro-evidence
           if-no-files-found: ignore
+
+  diffrax:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.14'
+          cache: pip
+          cache-dependency-path: projects/scientific-inverse/requirements-science.txt
+      - run: python -m pip install -r projects/scientific-inverse/requirements-science.txt
+      - name: Verify adaptive solves, sensitivities and same-data inverse checks
+        run: python projects/scientific-inverse/tests/check_diffrax.py --implementation projects/scientific-inverse/solution/diffrax_workflow.py --evidence-dir /tmp/diffrax-evidence
+        env:
+          JAX_PLATFORMS: cpu
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: diffrax-cpu-evidence
+          path: /tmp/diffrax-evidence
+          if-no-files-found: ignore
+
+  decoder-foundations:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.14'
+          cache: pip
+          cache-dependency-path: projects/text-harness/foundations/requirements-foundations.txt
+      - run: python -m pip install -r projects/text-harness/foundations/requirements-foundations.txt
+      - name: Verify natural-text training, cache parity and fresh-process recovery
+        run: python projects/text-harness/foundations/tests/check_foundations.py --implementation projects/text-harness/foundations/model.py --output /tmp/decoder-foundations-evidence
+        env:
+          JAX_PLATFORMS: cpu
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: decoder-foundations-cpu-evidence
+          path: /tmp/decoder-foundations-evidence
+          if-no-files-found: ignore

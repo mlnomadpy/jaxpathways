@@ -193,8 +193,8 @@ test('distributed, science, kernels, and internals have complete authored learne
   );
   const inventory = learnerStarterInventory(lessons);
   assert.equal(lessons.length, 16);
-  assert.equal(inventory.totalContracts, 46);
-  assert.equal(inventory.readyContracts, 46);
+  assert.equal(inventory.totalContracts, 48);
+  assert.equal(inventory.readyContracts, 48);
   assert.equal(inventory.completeLessons, 16);
   assert.equal(inventory.incompleteLessons, 0);
   assert.deepEqual(inventory.lessons.flatMap((lesson) => lesson.missing), []);

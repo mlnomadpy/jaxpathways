@@ -36,3 +36,14 @@ projects/policy-evaluation/starter/model.py
 projects/bayesian-regression/starter/numpyro_workflow.py
 projects/bayesian-regression/solution/numpyro_workflow.py
 projects/bayesian-regression/tests/check_numpyro.py
+projects/scientific-inverse/solution/diffrax_workflow.py
+projects/scientific-inverse/starter/diffrax_workflow.py
+projects/scientific-inverse/tests/check_diffrax.py
+projects/text-harness/foundations/config.py
+projects/text-harness/foundations/data.py
+projects/text-harness/foundations/model.py
+projects/text-harness/foundations/reference/make_pilot_figure.py
+projects/text-harness/foundations/starter.py
+projects/text-harness/foundations/tests/check_foundations.py
+projects/text-harness/foundations/train.py
+phases/21-tpu-systems/02-bfloat16-int8-precision-and-xprof-profiling/labs/precision_contract_probe.py

@@ -1,24 +1,25 @@
 """Select a TPU slice and provision your Cloud TPU VM · learner-only exercises (3/3 contracts ready)"""
 
-# Exercise: Call `verify_runtime_contract` for the active backend with `min_devices=1`, then compute how many `v5litepod-4` chips and total GiB of HBM are available on that single-host slice and assert both values.
+# Exercise: Call `verify_runtime_contract` for the active backend with `min_devices=1`. Compute and verify the chip count and total HBM GiB for `v5litepod-4` and `v6e-4`, confirm both have `hosts == 1`, and list every supplied single-host slice with at least 64 GiB of HBM.
 
 # Inputs:
-# - The verify_runtime_contract callable, active backend expectation, minimum local device count, and named TPU slice catalog.
+# - The verify_runtime_contract callable, active backend expectation, minimum local device count, and topology rows with slice, hosts, chips_per_host, hbm_gib_per_chip, total_chips, and total_hbm_gib fields.
 
 # Outputs:
-# - A runtime receipt plus chip and aggregate HBM counts for v5litepod-4.
+# - The runtime receipt, verified host/chip/HBM rows for v5litepod-4 and v6e-4, and names of supplied single-host slices meeting the 64 GiB threshold.
 
 # Invariants to check:
-# - Runtime acceptance describes devices actually discovered by JAX; a CPU backend must not be reported as TPU qualification.
+# - Require hosts == 1 for both named rows and derive capacity from the supplied total fields.
+# - The qualifying list includes only single-host rows whose total_hbm_gib meets the inclusive threshold.
 
 # Hints:
 # - Call the verifier for the active backend with a minimum of one local device.
-# - Treat catalog capacity as descriptive and runtime discovery as observed evidence.
+# - Filter the topology catalog by both host count and total HBM; repeat the filter at a changed threshold to check the boundary.
 
 import jax
 
 def inspect_runtime_and_slice(verify_runtime_contract, expected_backend, min_devices, topologies):
-    # TODO: verify the active runtime and look up v5litepod-4 chip and HBM metadata.
+    # TODO: check the active runtime, audit both named slice rows, and filter the supplied catalog by host count and HBM threshold.
     raise NotImplementedError
 
 

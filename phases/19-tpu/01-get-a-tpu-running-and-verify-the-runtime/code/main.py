@@ -159,10 +159,39 @@ assert needs_multi_host["v5litepod-4"] is False and needs_multi_host["v5litepod-
 
 # Reference solution. Try the exercise before reading this.
 # Exercise solution
-checked = verify_runtime_contract(expected_backend=jax.default_backend(), min_devices=1)
-v5e4 = next(t for t in topologies if t["slice"] == "v5litepod-4")
-print("Checked receipt sha256:", checked["receipt_sha256"], "v5litepod-4 chips:", v5e4["total_chips"], "HBM GiB:", v5e4["total_hbm_gib"])
-assert checked["contract_ok"] is True and v5e4["total_chips"] == 4 and v5e4["total_hbm_gib"] == 64
+
+def inspect_runtime_and_slice(verify_runtime_contract, expected_backend, min_devices, topologies):
+    receipt = verify_runtime_contract(expected_backend=expected_backend, min_devices=min_devices)
+    if not receipt["contract_ok"]:
+        raise AssertionError("The active runtime did not satisfy its requested contract")
+    by_name = {row["slice"]: row for row in topologies}
+    summaries = []
+    for name, expected_chips, expected_hbm in [("v5litepod-4", 4, 64), ("v6e-4", 4, 128)]:
+        row = by_name[name]
+        chips = row["hosts"] * row["chips_per_host"]
+        hbm_gib = chips * row["hbm_gib_per_chip"]
+        assert row["hosts"] == 1
+        assert chips == expected_chips and hbm_gib == expected_hbm
+        assert row["total_chips"] == chips and row["total_hbm_gib"] == hbm_gib
+        summaries.append({"slice": name, "hosts": row["hosts"], "chips": chips, "total_hbm_gib": hbm_gib})
+    qualifying = [
+        row["slice"] for row in topologies
+        if row["hosts"] == 1 and row["hosts"] * row["chips_per_host"] * row["hbm_gib_per_chip"] >= 64
+    ]
+    at_128_gib = [
+        row["slice"] for row in topologies
+        if row["hosts"] == 1 and row["hosts"] * row["chips_per_host"] * row["hbm_gib_per_chip"] >= 128
+    ]
+    return {"receipt": receipt, "summaries": summaries, "at_least_64_gib": qualifying, "at_least_128_gib": at_128_gib}
+
+result = inspect_runtime_and_slice(verify_runtime_contract, jax.default_backend(), 1, topologies)
+print("Checked receipt sha256:", result["receipt"]["receipt_sha256"])
+for row in result["summaries"]:
+    print(row["slice"], "hosts:", row["hosts"], "chips:", row["chips"], "total HBM GiB:", row["total_hbm_gib"])
+print("Single-host slices with at least 64 GiB:", result["at_least_64_gib"])
+print("Single-host slices with at least 128 GiB:", result["at_least_128_gib"])
+assert result["at_least_64_gib"] == ["v5litepod-4", "v5litepod-8", "v6e-4"]
+assert result["at_least_128_gib"] == ["v5litepod-8", "v6e-4"]
 
 # Reference practice: Check whether a model state fits on a single-host TPU slice
 # Check whether a model state fits on a single-host TPU slice (Foundations)
