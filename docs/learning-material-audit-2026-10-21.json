@@ -123,15 +123,15 @@
       "in-development": 13
     },
     "itemLevels": {
-      "available-draft": 165,
-      "in-development": 28,
+      "available-draft": 164,
+      "in-development": 29,
       "planned": 10
     },
     "tasks": 539,
     "lessonTasks": 409,
     "projectStages": 130,
     "currentCpuLessons": 104,
-    "currentProjectReferences": 31,
+    "currentProjectReferences": 30,
     "expertReviewedLessons": 0,
     "novicePilotedLessons": 0,
     "choiceSpecificFeedbackLessons": 104,
@@ -3531,15 +3531,15 @@
       "title": "Resume a complete training stream across a process failure",
       "url": "project-guides/recovery-audit.html",
       "source": "projects/recovery-audit/README.md",
-      "level": "available-draft",
+      "level": "in-development",
       "summary": "Local checkpoint contract and independent continuation checks.",
       "contribution": "Inject incomplete writes, stale manifests and incompatible input state in separate processes.",
-      "validation": "CPU reference checker passed for current sources",
+      "validation": "Reference check pending for this source",
       "review": "Teaching review pending",
-      "sourceHash": "5676cfe301bc20b7e898aa9bdd1815312b11280c94210ed53842cf800b18e0c0",
+      "sourceHash": "047110d44f951407a191b3b3a8cd7a6b88fdb0af91aa6f4a24172f2d829d0a68",
       "metrics": {
         "stages": 7,
-        "currentReference": true,
+        "currentReference": false,
         "missingFiles": []
       }
     },
@@ -9439,8 +9439,8 @@
       "title": "Contract and independent calculation",
       "prompt": "Match the independent update, reject a wrong momentum shape, and compare two directions at two finite-difference step sizes.",
       "source": "projects/recovery-audit/README.md",
-      "level": "available-draft",
-      "validation": "Public reference stage checked; no independent learner assessment"
+      "level": "in-development",
+      "validation": "Current reference stage check pending"
     },
     {
       "id": "recovery-audit:stage-2",
@@ -9449,8 +9449,8 @@
       "title": "Changed condition and diagnosis",
       "prompt": "Compare uninterrupted training with a checkpointed resume at the next update.",
       "source": "projects/recovery-audit/README.md",
-      "level": "available-draft",
-      "validation": "Public reference stage checked; no independent learner assessment"
+      "level": "in-development",
+      "validation": "Current reference stage check pending"
     },
     {
       "id": "recovery-audit:stage-3",
@@ -9459,8 +9459,8 @@
       "title": "Retained evidence",
       "prompt": "Reject changed configuration and corrupted bytes through the compatible single-file API; generation schema and semantic controls run in stage 5.",
       "source": "projects/recovery-audit/README.md",
-      "level": "available-draft",
-      "validation": "Public reference stage checked; no independent learner assessment"
+      "level": "in-development",
+      "validation": "Current reference stage check pending"
     },
     {
       "id": "recovery-audit:stage-4",
@@ -9469,8 +9469,8 @@
       "title": "Integrated recovery protocol",
       "prompt": "Run all stages, including fresh-process replay, crash failpoints, writer arbitration, and owned negative controls.",
       "source": "projects/recovery-audit/README.md",
-      "level": "available-draft",
-      "validation": "Public reference stage checked; no independent learner assessment"
+      "level": "in-development",
+      "validation": "Current reference stage check pending"
     },
     {
       "id": "recovery-audit:stage-5",
@@ -9479,8 +9479,8 @@
       "title": "Fresh-process epoch-tail replay and semantic schema",
       "prompt": "Restore in a new process and reject wrong source/order identities, rechecksummed parameter/optimizer shape or rank forgeries, and impossible clocks.",
       "source": "projects/recovery-audit/README.md",
-      "level": "available-draft",
-      "validation": "Public reference stage checked; no independent learner assessment"
+      "level": "in-development",
+      "validation": "Current reference stage check pending"
     },
     {
       "id": "recovery-audit:stage-6",
@@ -9489,8 +9489,8 @@
       "title": "Crash-safe generation publication",
       "prompt": "Require POSIX fcntl failpoints to be reached exactly, independently inspect each expected partial/completed artifact, and confirm the committed pointer remains valid.",
       "source": "projects/recovery-audit/README.md",
-      "level": "available-draft",
-      "validation": "Public reference stage checked; no independent learner assessment"
+      "level": "in-development",
+      "validation": "Current reference stage check pending"
     },
     {
       "id": "recovery-audit:stage-7",
@@ -9499,8 +9499,8 @@
       "title": "Concurrent expected-parent arbitration",
       "prompt": "Release two separate processes that both expect the same parent generation.",
       "source": "projects/recovery-audit/README.md",
-      "level": "available-draft",
-      "validation": "Public reference stage checked; no independent learner assessment"
+      "level": "in-development",
+      "validation": "Current reference stage check pending"
     },
     {
       "id": "performance-audit:stage-1",

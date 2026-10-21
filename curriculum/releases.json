@@ -1,5 +1,17 @@
 [
   {
+    "version": "0.14.1",
+    "date": "2026-10-21",
+    "title": "Keep recovery checks stable across Python formatting",
+    "summary": "Repair the hosted formatter failure and retain source-bound recovery and native-reader review evidence without changing lesson bodies.",
+    "changes": [
+      "Formatted the recovery reference and checker with the pinned CI formatter. The reference model remains AST-identical to 0.14.0. Replaced a whitespace-sensitive wrong-batch mutation anchor with an AST-located expression and require the independent sample-order discrepancy.",
+      "Retained a fresh complete recovery protocol receipt for the exact formatted sources and preserved earlier receipts. Added the full CI Python-format check to this review qualification.",
+      "Recorded a bounded native browser and Apple Books 8.5 inspection of the 0.14.0 reader: TOC navigation, least-squares inline/display math, a labeled chart and wrapped Python code. Native disclosures, another EPUB engine, print and actual assistive-technology acceptance remain open.",
+      "Kept all 104 lesson bodies, pilot quality outcomes and maturity labels unchanged. The frozen 0.14.0 preview and its failed hosted site result remain separately identified; this patch requires its own hosted checks."
+    ]
+  },
+  {
     "version": "0.14.0",
     "date": "2026-10-21",
     "title": "Inspect causal training outcomes and recover complete training streams",
