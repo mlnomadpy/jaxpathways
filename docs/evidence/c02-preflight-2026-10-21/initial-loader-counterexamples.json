@@ -1,0 +1,25 @@
+{
+  "output": "/private/tmp/jaxpathways-c02-root-loader-probes-avwwo0du",
+  "findings": [
+    {
+      "mutation": "integer-first-moment",
+      "accepted": true,
+      "error": null
+    },
+    {
+      "mutation": "negative-second-moment",
+      "accepted": true,
+      "error": null
+    },
+    {
+      "mutation": "negative-epoch",
+      "accepted": true,
+      "error": null
+    },
+    {
+      "mutation": "past-horizon-step",
+      "accepted": true,
+      "error": null
+    }
+  ]
+}
