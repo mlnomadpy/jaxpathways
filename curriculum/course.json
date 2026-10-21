@@ -4008,7 +4008,7 @@
           "status": "authored",
           "objective": "Choose a single-host TPU topology, create a Cloud TPU VM with gcloud (or connect to a Colab TPU), verify SSH access, and rehearse clean VM deletion.",
           "prerequisites": [],
-          "exercise": "Compute the chip count and total HBM GiB for v5litepod-4 and v6e-4, verify both are single-host slices (hosts == 1), and list all single-host slices with at least 64 GiB of HBM.",
+          "exercise": "Call verify_runtime_contract for the active backend with min_devices=1. Compute and verify the chip count and total HBM GiB for v5litepod-4 and v6e-4, confirm both have hosts == 1, and list every supplied single-host slice with at least 64 GiB of HBM.",
           "evidence": "Keep the slice HBM capacity table, single-host vs Pod classification, and gcloud create/describe/delete command log.",
           "check": "Which command sequence proves that your Cloud TPU VM is READY when you start and no longer billing when you finish?",
           "path": "phases/19-tpu/01-get-a-tpu-running-and-verify-the-runtime",
@@ -4032,13 +4032,13 @@
           "id": "tpu-04",
           "title": "Bootstrap .venv and verify a TPU runtime receipt",
           "status": "authored",
-          "objective": "Create ~/jax-tpu-lab/.venv on the TPU VM, install jax[tpu], run a synchronized pmap runtime contract check, and download the signed JSON receipt before deleting the VM.",
+          "objective": "Create ~/jax-tpu-lab/.venv on the TPU VM, install jax[tpu], record the observed backend and local device count alongside a synchronized pmap reduction check, retrieve the JSON receipt, and then delete the VM.",
           "prerequisites": [
             "tpu-01"
           ],
-          "exercise": "Call verify_runtime_contract for the active backend with min_devices=1, verify contract_ok is True, and compute expected_pmap_sum_of_squares(4, 8) for a 4-chip v5litepod-4 slice.",
-          "evidence": "Keep the JSON runtime receipt (observed_backend, device_count, pmap_sum_of_squares, receipt_sha256) and the 1-chip vs 4-chip vs 8-chip pmap reference values.",
-          "check": "Why must verify_runtime_contract check both jax.default_backend() and a synchronized pmap reduction rather than only checking that import jax succeeds?",
+      "exercise": "Compute closed_form_sum_of_squares(4) and closed_form_sum_of_squares(8), verify that the results are 10416.0 and 85344.0, and assert receipt['verified'] is True.",
+          "evidence": "Keep the JSON runtime receipt fields (backend, local_device_count, per_device_sums, observed_total, expected_total, verified, receipt_sha256). Label the 1-, 4-, and 8-device closed-form values as calculated expectations; only the receipt's local-device result is observed execution.",
+          "check": "Why does build_runtime_receipt() synchronize the pmap reduction and compare observed_total with closed_form_sum_of_squares(local_device_count, 8)?",
           "path": "phases/19-tpu/02-bootstrap-venv-and-verify-tpu-runtime-receipt",
           "runtime": {
             "kind": "cpu"
@@ -4081,14 +4081,14 @@
               "tpu-01"
             ],
             "title": "Select a single-host TPU topology and provision the VM",
-            "task": "Compare v5litepod-1, v5litepod-4, v5litepod-8, and v6e-4 HBM totals, distinguish single-host VMs from multi-host Pod slices, and run gcloud create/describe/delete."
+            "task": "Use the runtime verifier for the active backend. Calculate and verify the chip count and total HBM for v5litepod-4 and v6e-4, confirm both are single-host slices, and list all supplied single-host slices with at least 64 GiB. Retain the target VM create/describe/delete log."
           },
           {
             "lessonIds": [
               "tpu-04"
             ],
             "title": "Bootstrap .venv and verify the runtime contract receipt",
-            "task": "Install jax[tpu] in ~/jax-tpu-lab/.venv, run verify_runtime_contract with a synchronized pmap sum of squares, and copy back the SHA-256 receipt."
+            "task": "Install jax[tpu] in ~/jax-tpu-lab/.venv, run build_runtime_receipt(), and verify its observed reduction against the closed-form result for its actual local_device_count. Then compute the separate theoretical totals for 4 and 8 devices. Copy back the JSON receipt; distinguish its SHA-256 field from a digital signature and calculated expectations from observed device execution."
           }
         ],
         "transfer": {
@@ -4233,7 +4233,7 @@
       ],
       "hardware": "CPU numerical & profiler harness; Cloud TPU VM for target XProf traces",
       "project": "Estimate optimizer-state bytes and calculate supplied-rate scaling efficiency",
-      "checkpoint": "Compare TPU v5e, v5p, and v6e ridge points, budget training and KV-cache HBM, measure BF16/INT8 matmul error with FP32 accumulation, and capture a warmed XProf trace.",
+      "checkpoint": "Compare published TPU roofline estimates, budget training and KV-cache HBM, compare BF16 result-dtype policies and an INT8 weight-dequantization reference, and retain a warmed profiler trace with its observed backend.",
       "source": "https://openxla.org/xprof",
       "lessons": [
         {
@@ -4244,7 +4244,7 @@
           "prerequisites": [],
           "exercise": "Compute estimate_memory_gib for a 1.5B parameter model with 4096 KV tokens and verify that its mixed-precision training state fits comfortably inside a single-host v5litepod-4 (64 GiB total HBM).",
           "evidence": "Keep the TPU ridge-point table, 7B and 1.5B training/KV-cache HBM budgets, and minimum chip count calculation at an 80% HBM ceiling.",
-          "check": "Why does mixed-precision Adam training still require ~12 bytes per parameter in HBM even when forward and backward matmuls use 2-byte bfloat16?",
+          "check": "Under this lesson's ledger, why does mixed-BF16 Adam training require 18 bytes per parameter before activations and temporary buffers are counted?",
           "path": "phases/21-tpu-systems/01-tpu-generations-and-hbm-memory-budgeting",
           "runtime": {
             "kind": "cpu"
@@ -4266,12 +4266,12 @@
           "id": "tpu-06",
           "title": "bfloat16, int8 precision, and XProf profiling on TPU",
           "status": "authored",
-          "objective": "Measure bfloat16 and symmetric int8 matrix multiplication error against float32, verify float32 accumulator precision, and capture a warmed XProf (*.xplane.pb) trace.",
+          "objective": "Measure BF16 operand and requested result-dtype error against a finite-precision FP32 JAX reference, inspect CPU dtype and compiler evidence, and retain a warmed XProf trace with its observed backend.",
           "prerequisites": [
             "tpu-03"
           ],
-          "exercise": "Run capture_warmed_xprof_trace for 4 steps of size 96 on the active backend, verify trace_file_count >= 1, and assert that bf16_max_abs_err is smaller than int8_max_abs_err.",
-          "evidence": "Keep the BF16 vs INT8 error summary, FP32-vs-BF16 accumulator drift comparison, and captured *.xplane.pb trace receipt.",
+          "exercise": "Run evaluate_precision_policies(seed=42) and capture_warmed_trace(steps=3) on CPU. Verify the returned FP32/BF16 dtypes, compare finite errors, and confirm xplane_count >= 1. Explain which conclusions are fixture-specific and which would need target evidence.",
+          "evidence": "Keep the returned-dtype/error table, seeded cast comparisons, source-bound CPU compiler IR and captured *.xplane.pb trace receipt. State the observed backend and the limits of each artifact.",
           "check": "Why should you run and synchronize at least one warmup step before entering with jax.profiler.trace(trace_dir): on a TPU VM?",
           "path": "phases/21-tpu-systems/02-bfloat16-int8-precision-and-xprof-profiling",
           "runtime": {
@@ -4303,10 +4303,10 @@
       "projectNote": "Work in projects/tpu-systems-audit/starter/model.py. Complete stages 1 and 2 for independent calculations and changed-condition diagnosis, then retain the stage 3 evidence with --evidence-dir runs/tpu-systems-audit. Stage 4 integrates the checks. Learner commands explicitly select the starter; --implementation solution is instructor reference execution. This bounded practice does not certify the entire phase or target hardware.",
       "studyGuide": {
         "question": "How do you size TPU HBM capacity, bound BF16/INT8 precision error, and capture a clean XProf trace?",
-        "why": "Provisioning a TPU slice without budgeting HBM wastes time on out-of-memory crashes, and profiling without warming up measures compiler overhead instead of MXU execution.",
+        "why": "Budgeting HBM helps reject workloads that exceed the declared training-state capacity before provisioning. Synchronized warmup reduces compilation and first-use work in the measured interval; inspect the trace for recompilation, transfers and host activity rather than assuming it contains only accelerator execution.",
         "readiness": {
           "prompt": "A matrix multiplication has arithmetic intensity 170 FLOP/byte on TPU v5e (ridge point 240.5 FLOP/byte). Is it compute-bound or HBM bandwidth-bound?",
-          "answer": "HBM bandwidth-bound, because its arithmetic intensity (170 FLOP/byte) is below the TPU v5e ridge point (240.5 FLOP/byte). Increasing batch size or sequence length raises operational intensity toward the MXU ceiling.",
+          "answer": "Under this ideal roofline model, 170 FLOP/byte is below the TPU v5e ridge of 240.5 FLOP/byte, so the HBM bandwidth ceiling is lower. Changing batch or sequence length can change data reuse and operational intensity; recompute the traffic assumptions and measure the actual workload before claiming a bottleneck or speedup.",
           "lessonId": "tpu-03"
         },
         "milestones": [
@@ -4322,7 +4322,7 @@
               "tpu-06"
             ],
             "title": "Audit BF16/INT8 precision and capture a warmed XProf trace",
-            "task": "Compare BF16 and symmetric INT8 matmul errors against FP32, verify FP32 accumulation inside jax.lax.dot_general, and capture a warmed *.xplane.pb trace."
+            "task": "Compare BF16 operand/requested-result policies and an INT8 weight-dequantization reference against FP32, inspect returned dtypes and retained CPU compiler IR, and capture a warmed *.xplane.pb trace with its backend recorded."
           }
         ],
         "transfer": {
@@ -4330,8 +4330,8 @@
           "approach": "The operation is above v5e’s ideal intersection and below v6e’s. That selects the lower of theoretical ceilings, not measured bottlenecks or a device ranking. Record actual precision, output bytes and traffic assumptions; validate the hypothesis with target timing and a trace before claiming a speedup."
         },
         "pitfall": {
-          "symptom": "Accumulating a long bfloat16 dot product directly in bfloat16 produces much larger drift than expected.",
-          "check": "Pass preferred_element_type=jnp.float32 to jax.lax.dot_general so the TPU MXU accumulates products in FP32 before any output cast."
+          "symptom": "A BF16 result differs from a requested FP32 result even when both dots receive the same BF16-rounded operands.",
+          "check": "Compare actual returned dtypes and an explicit FP32-result-to-BF16 cast, then inspect compiler evidence on the named backend. A result dtype or larger output error does not prove that every partial sum used that dtype."
         },
         "completion": "Retain the TPU ridge-point and HBM budget tables from tpu-03, plus the BF16/INT8 error summary and *.xplane.pb trace receipt from tpu-06.",
         "furtherWork": "Use the reviewed execution matrix before staging code on a TPU. CPU-only lesson companions stay on CPU; only source-reviewed targets with matching dependencies and topology should be launched. The retained v5e receipts qualify their named workloads, not every course script or a production model."

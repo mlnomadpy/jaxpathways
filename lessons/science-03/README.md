@@ -65,6 +65,24 @@ A central finite difference probes the change in the whole objective. If the per
 
 The grid is fixed and the output length is static. We have not implemented adaptive error control, event handling, stiffness detection or a custom adjoint. A Python integer controls scan length; a parameter-dependent early exit would introduce a different differentiation problem. For richer systems, Diffrax exposes solver choice, tolerances, saved times and adjoint strategies. Its optional extension belongs in a separately pinned and executed environment; these core CPU checks do not validate that library or an adaptive solver.
 
+## Optional extension: adaptive ODE sensitivities
+
+The project extension solves a forced decay equation with an adaptive Diffrax solver and saves values at requested observation times. Its closed-form solution is $y(t)=\cos t+(y_0-1)e^{-kt}$, so the continuous log-rate sensitivity is $\partial y/\partial\log k=-kt(y_0-1)e^{-kt}$. Reverse-mode autodiff through an adaptive solve differentiates the numerical computation; compare it with the continuous derivative at more than one tolerance. Diffrax defaults to RecursiveCheckpointAdjoint, which supports reverse-mode differentiation; use ForwardMode explicitly for forward-mode JVPs.
+
+$$
+y\prime=-k(y-\cos t)-\sin t,\qquad y(t)=\cos t+(y_0-1)e^{-kt},\qquad \frac{\partial y}{\partial\log k}=-kt(y_0-1)e^{-kt}
+$$
+
+### Pause and reason
+
+What changes when you tighten the adaptive solver tolerance?
+
+<details><summary>Compare your reasoning</summary>
+
+The sensitivity of the executed numerical solve can approach the continuous derivative as numerical error decreases, but finite tolerances and adaptive step choices still affect the computed derivative.
+
+</details>
+
 ## Rebuild the differentiable solver
 
 Append this block to main.py in your CPU course environment; for the first block create the file. Run blocks in order.
@@ -221,7 +239,7 @@ visual_data={'kind':'line','x':counts,'xlabel':'RK4 steps over two seconds','yla
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:07:06.549883+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T17:45:06.397716+00:00. JAX 0.9.2.
 
 ```text
 Autodiff: -0.9863878096749447 discrete oracle: -0.9863878096749429 continuous oracle: -0.9863878557664257
@@ -449,6 +467,88 @@ A plausible forward curve does not validate backward behavior. Remove an uninten
 
 </details>
 
+## Check adaptive log-rate sensitivity at multiple tolerances
+
+**Optional extension**
+
+In the isolated Diffrax environment, evaluate the numerical derivative with respect to $\log k$ at $k=1.1$, $y_0=2.4$, and the stated observation grid. Compare all requested tolerances with the continuous derivative and a centered finite difference. Explain why agreement can improve as tolerances tighten without making the finite-tolerance solve identical to the continuous system.
+
+<details><summary>Hint</summary>
+
+The chain rule gives $\partial y/\partial\log k=k\,\partial y/\partial k$. Differentiate the numerical solve at each tolerance; compute the analytic reference from the closed form, not from another solver call.
+
+</details>
+
+### How to write: Check adaptive log-rate sensitivity at multiple tolerances — Step-by-step recipe & starter scaffold
+
+**Inputs:**
+- Rate 1.1, initial state 2.4, observation times from 0 to 2, and tolerances 1e-5, 1e-8, and 1e-10.
+- The optional project API `log_rate_sensitivity(log_rate, initial, times, solver, rtol, atol)`.
+- The optional project API `solve_forced_decay(rate, initial, times, solver, rtol, atol)` for numerical centered differences.
+
+**Outputs:**
+- Numerical dy/dlog(k) at each requested time for every tolerance.
+- Maximum error against the continuous derivative and centered finite difference for each tolerance.
+
+**Invariants to check:**
+- The differentiated parameter is log(k), so the positive rate equals exp(log_rate).
+- All evaluations return one finite sensitivity per requested time in the input order.
+- The continuous reference is -k*t*(y0-1)*exp(-k*t) and is calculated independently of Diffrax.
+
+**Hints:**
+- Use the same observation grid for all tolerance settings.
+- Use a symmetric perturbation in log(k) for the finite-difference check.
+
+**Starter code scaffold (fill in the TODOs):**
+
+```python
+import numpy as np
+
+def compare_adaptive_sensitivities(log_rate_sensitivity, solve_forced_decay, rate, initial, times, tolerances):
+    # TODO: evaluate the submitted sensitivity API and compare with independent references.
+    raise NotImplementedError("Compare numerical and continuous log-rate sensitivities")
+```
+
+<details><summary>Reference solution and reasoning</summary>
+
+```python
+import numpy as np
+
+def compare_adaptive_sensitivities(log_rate_sensitivity, solve_forced_decay, rate, initial, times, tolerances):
+    times = np.asarray(times, dtype=np.float64)
+    if times.ndim != 1 or not np.isfinite(times).all():
+        raise ValueError("times must be a finite vector starting at zero")
+    analytic = -rate * times * (initial - 1.0) * np.exp(-rate * times)
+    epsilon = 2e-5
+    results = {}
+    for tolerance in tolerances:
+        values = np.asarray(log_rate_sensitivity(
+            np.log(rate), initial, times, rtol=tolerance, atol=tolerance * 1e-2
+        ))
+        plus = solve_forced_decay(
+            rate * np.exp(epsilon), initial, times, rtol=tolerance, atol=tolerance * 1e-2
+        )
+        minus = solve_forced_decay(
+            rate * np.exp(-epsilon), initial, times, rtol=tolerance, atol=tolerance * 1e-2
+        )
+        if not plus["success"] or not minus["success"]:
+            raise RuntimeError("finite-difference solve failed")
+        finite_difference = (plus["values"] - minus["values"]) / (2.0 * epsilon)
+        if values.shape != times.shape or not np.isfinite(values).all():
+            raise ValueError("sensitivity API returned invalid values")
+        results[float(tolerance)] = {
+            "values": values,
+            "continuous_max_error": float(np.max(np.abs(values - analytic))),
+            "finite_difference_max_error": float(np.max(np.abs(values - finite_difference))),
+        }
+    return {"analytic": analytic, "by_tolerance": results}
+
+```
+
+This extension uses adaptive Diffrax and requires its separate pinned environment. It does not change the fixed-grid RK4 contract or install packages into the course CPU environment.
+
+</details>
+
 ## Check your understanding
 
 An autodiff derivative matches the discrete RK4 formula, but both differ from the exact ODE derivative. What should you test next?
@@ -497,4 +597,6 @@ Save your predictions, modified code, terminal outputs, and reasoning in your en
 - [JAX automatic vectorization](https://docs.jax.dev/en/latest/_autosummary/jax.vmap.html)
 - [JAX derivative checking and Jacobian products](https://docs.jax.dev/en/latest/notebooks/autodiff_cookbook.html)
 - [Diffrax solver terms, saved values and solution inspection](https://docs.kidger.site/diffrax/usage/getting-started/)
+- [Diffrax solver choice: Tsit5 for nonstiff systems; Kvaerno methods for stiff systems](https://docs.kidger.site/diffrax/usage/how-to-choose-a-solver/)
+- [Diffrax adjoints: reverse-mode and forward-mode choices](https://docs.kidger.site/diffrax/api/adjoints/)
 

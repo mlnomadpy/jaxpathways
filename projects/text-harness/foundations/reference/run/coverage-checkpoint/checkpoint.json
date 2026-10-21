@@ -1,0 +1,354 @@
+{
+  "cursor": 3,
+  "epoch": 1,
+  "identity": {
+    "train_config_sha256": "523be21451f9d300c02b22dba0ab14eae224bee28f90346adf8bb1e6955f3114"
+  },
+  "leaves": [
+    {
+      "dtype": "int32",
+      "shape": []
+    },
+    {
+      "dtype": "int32",
+      "shape": [
+        3
+      ]
+    },
+    {
+      "dtype": "int32",
+      "shape": []
+    },
+    {
+      "dtype": "uint32",
+      "shape": [
+        2
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        4,
+        4
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        4
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        4,
+        4
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        4
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        4
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        4
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        4
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        4,
+        4
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        4,
+        4
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        4,
+        4
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        4
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        4,
+        4
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        4
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        4
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        4,
+        4
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        260,
+        4
+      ]
+    },
+    {
+      "dtype": "int32",
+      "shape": [
+        9
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        4,
+        4
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        4
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        4,
+        4
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        4
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        4
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        4
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        4
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        4,
+        4
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        4,
+        4
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        4,
+        4
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        4
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        4,
+        4
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        4
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        4
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        4,
+        4
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        260,
+        4
+      ]
+    },
+    {
+      "dtype": "int32",
+      "shape": []
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        4,
+        4
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        4
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        4,
+        4
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        4
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        4
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        4
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        4
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        4,
+        4
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        4,
+        4
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        4,
+        4
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        4
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        4,
+        4
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        4
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        4
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        4,
+        4
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        260,
+        4
+      ]
+    }
+  ],
+  "schema": 1,
+  "state_sha256": "884431d3f64f90c0de8015ff6492442104f3848af06f633c1948e7256af12b2a",
+  "step": 0
+}

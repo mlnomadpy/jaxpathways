@@ -1,19 +1,20 @@
 """bfloat16, int8 precision, and XProf profiling on TPU · learner-only exercises (3/3 contracts ready)"""
 
-# Exercise: Run `evaluate_precision_policies(seed=42)` and `capture_warmed_trace(steps=3)`, then verify that `bf16 (fp32 accum)` has strictly lower `mean_abs_err` than `bf16 (bf16 accum)` and that `xplane_count >= 1`.
+# Exercise: Run `evaluate_precision_policies(seed=42)` and `capture_warmed_trace(steps=3)`. Report the observed backend, each returned dtype and the two mean errors; do not infer the physical accumulation path from this comparison. Confirm that `xplane_count >= 1`.
 
 # Inputs:
 # - The seeded precision-policy evaluator and warmed trace capture helper.
 
 # Outputs:
-# - Seed-42 policy error measurements, trace receipt, and the observed backend.
+# - For seed 42, measured max and mean errors, requested-result labels, actual returned dtypes, and the trace receipt.
 
 # Invariants to check:
-# - The stated BF16 error ordering holds for this run, and the trace receipt records at least one XPlane file; report the backend that actually ran.
+# - Report the actual backend and returned dtypes; do not treat a requested result dtype or measured error as proof of internal partial-sum precision.
+# - Keep the error comparison tied to the seed-42 fixture and confirm the trace receipt contains an XPlane file.
 
 # Hints:
-# - Compare rows by policy name rather than relying on incidental table formatting.
-# - A CPU trace is a valid local exercise result; reserve TPU-performance claims for a TPU receipt.
+# - Compare rows by the literal requested-result-dtype labels, then inspect each output array dtype.
+# - A CPU trace is a valid local exercise result; reserve TPU implementation and performance claims for matching target evidence.
 
 import jax
 

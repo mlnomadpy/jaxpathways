@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "tpu-01",
-  "contentHash": "93529620832b4f8b3a7018ad6eeba09a73b6020cec23efb04f725fee73bd304e",
+  "contentHash": "e9c7cc39615bbbfe1b2053c73639c4d22792201ce735c828a8524b1e2dec1cde",
   "rendererHash": "a1bd5b648f4731ae5d5f0a24811c2540d1a0a132149ce589d17c4113509cbedf",
   "kind": "executed",
-  "generatedAt": "2026-10-21T16:06:28.199955+00:00",
+  "generatedAt": "2026-10-21T18:13:13.318427+00:00",
   "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",

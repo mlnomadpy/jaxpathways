@@ -1,0 +1,181 @@
+{
+  "evidence_dir": "/private/tmp/jaxpathways-science-w2-plots",
+  "environment": {
+    "python": "3.14.3",
+    "jax": "0.9.2",
+    "numpy": "2.4.4",
+    "diffrax": "0.7.2",
+    "backend": "cpu",
+    "dtype": "float64"
+  },
+  "configuration": {
+    "seed": 341,
+    "rtol": 1e-09,
+    "atol": 1e-11,
+    "max_steps": 100000,
+    "noise_scale": 0.025
+  },
+  "solver_cases": [
+    {
+      "title": "nonstiff Tsit5",
+      "method": "tsit5 adaptive",
+      "rate": 0.7,
+      "initial": 2.3,
+      "max_abs_error": 7.770062371292852e-09,
+      "status": "successful",
+      "success": true,
+      "num_steps": 25,
+      "num_accepted_steps": 19,
+      "num_rejected_steps": 6
+    },
+    {
+      "title": "nonstiff Kvaerno5",
+      "method": "kvaerno5 adaptive",
+      "rate": 0.7,
+      "initial": 2.3,
+      "max_abs_error": 3.956039336117101e-07,
+      "status": "successful",
+      "success": true,
+      "num_steps": 31,
+      "num_accepted_steps": 25,
+      "num_rejected_steps": 6
+    },
+    {
+      "title": "changed k/initial/grid",
+      "method": "tsit5 adaptive",
+      "rate": 2.4,
+      "initial": -0.4,
+      "max_abs_error": 7.401634860570994e-11,
+      "status": "successful",
+      "success": true,
+      "num_steps": 59,
+      "num_accepted_steps": 55,
+      "num_rejected_steps": 4
+    },
+    {
+      "title": "stiff Kvaerno3",
+      "method": "kvaerno3 adaptive",
+      "rate": 80.0,
+      "initial": 2.0,
+      "max_abs_error": 2.6881297188197095e-10,
+      "status": "successful",
+      "success": true,
+      "num_steps": 1649,
+      "num_accepted_steps": 1634,
+      "num_rejected_steps": 15
+    },
+    {
+      "title": "stiff Kvaerno5",
+      "method": "kvaerno5 adaptive",
+      "rate": 80.0,
+      "initial": 2.0,
+      "max_abs_error": 3.185918173720381e-08,
+      "status": "successful",
+      "success": true,
+      "num_steps": 127,
+      "num_accepted_steps": 119,
+      "num_rejected_steps": 8
+    }
+  ],
+  "sensitivity": {
+    "max_abs_error_by_rtol": {
+      "1e-05": 4.663998985959816e-05,
+      "1e-08": 2.1109358094850705e-08,
+      "1e-10": 2.1525567439617532e-10
+    },
+    "finite_difference_epsilon": 1e-05,
+    "finite_difference_max_abs_error": 2.0587698212892747e-11,
+    "formula": "-k*t*(y0-1)*exp(-k*t)"
+  },
+  "inverse_fit": {
+    "known_rate": 1.25,
+    "fitted_rate": 1.2453692350197612,
+    "initial": 2.6,
+    "training_times": [
+      0.0,
+      1.2
+    ],
+    "heldout_initials": [
+      0.7,
+      2.0
+    ],
+    "heldout_rmse_against_truth": [
+      0.0003275251956376674,
+      0.0010917507661681774
+    ],
+    "updates": 300,
+    "initial_objective": 153.61337653630204,
+    "final_objective": 0.6502529959077581,
+    "profile_nll_grid_min_rate": 1.2454875000000003,
+    "profile_nll_grid_minimum": 26.660444001869152,
+    "profile_nll_at_fitted_rate": 26.660371981194643,
+    "profile_nll_delta_from_grid_minimum": -7.20206745086216e-05,
+    "profile_grid": [
+      0.05,
+      3.0,
+      4001
+    ],
+    "profile_uses_fit_training_data": true,
+    "training_data_sha256": "2be5bb76ee7f5af6161ce185a15609e7518b9d38c127f53a442dc14d1a12edce",
+    "scope": "Synthetic observations with fixed known Gaussian noise; no instrument calibration claim."
+  },
+  "identifiability": {
+    "early_off_manifold": {
+      "profile_nll_range": 20684.143344980603,
+      "prediction_spread_across_rates": 1.230675369052078,
+      "identified_by_this_fixture": true
+    },
+    "on_manifold": {
+      "profile_nll_range": 0.0,
+      "prediction_spread_across_rates": 0.0,
+      "identified_by_this_fixture": false
+    },
+    "late_off_manifold": {
+      "profile_nll_range": 39508.02748987656,
+      "prediction_spread_across_rates": 0.48191071469155566,
+      "identified_by_this_fixture": false
+    }
+  },
+  "failure_controls": {
+    "explicit_euler_max_abs_error": 363461504.1647099,
+    "explicit_euler_max_abs_state": 363461503.62440765,
+    "insufficient_steps_success": false,
+    "insufficient_steps_status": "diffrax._solution.RESULTS<The maximum number of solver steps was reached. Try increasing `max_steps`.>",
+    "num_steps": 1,
+    "num_accepted_steps": 0,
+    "num_rejected_steps": 1
+  },
+  "figures": {
+    "trajectories": {
+      "file": "trajectories.svg",
+      "png_file": "trajectories.png",
+      "x": "time (s)",
+      "y": "state y",
+      "limits": "Five executed synthetic cases: two nonstiff solver comparisons, a changed-parameter/grid case, and stiff Kvaerno3/Kvaerno5. Each panel labels solver, rate, initial state, accepted/rejected step counts, and maximum error.",
+      "values": "actual executed solutions and independent analytic values at requested output times"
+    },
+    "sensitivity": {
+      "file": "sensitivity.svg",
+      "png_file": "sensitivity.png",
+      "x": "time (s)",
+      "y": "dy/d log(rate), then absolute error from continuous derivative",
+      "limits": "Left: three Diffrax tolerances and the continuous derivative. Right: linear absolute-error axis; exact zero for the analytic series is retained as zero, not replaced with a positive plotting value.",
+      "values": "Diffrax gradients, continuous derivative, and absolute errors computed from the retained gradient arrays"
+    },
+    "profiles": {
+      "file": "likelihood-profiles.svg",
+      "png_file": "likelihood-profiles.png",
+      "x": "positive rate k",
+      "y": "known-noise profile NLL minus minimum",
+      "limits": "Synthetic fixed-noise diagnostic. The on-manifold profile retains its exact all-zero values and is annotated; negative axis space only lifts the zero line from the frame edge.",
+      "values": "Analytic predictions compared with fixed-seed observations; the early panel reuses the exact fit observations."
+    },
+    "figure_data": {
+      "file": "figure-data.npz",
+      "values": "Time, trajectory, sensitivity, profile, and held-out arrays used to make the figures."
+    }
+  },
+  "sha256": {
+    "raw_evidence": "408927ea993377f903256a78eb2e7770db75fb2e51716abafec9d5f606727693"
+  }
+}

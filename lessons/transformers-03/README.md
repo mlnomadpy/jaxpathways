@@ -82,6 +82,10 @@ Casting every parameter and input to bfloat16 is a simple controlled low-precisi
 
 Record maximum absolute error for the supplied small input; do not require bitwise agreement. Precision affects both small denominators and accumulated dot products. If a comparison fails, inspect normalization and input scale before increasing the tolerance. Real models require workload-specific accuracy and performance qualification.
 
+## Configure depth without changing the block contract
+
+The worked block remains one self-contained eight-wide example. In the separate foundations implementation, `ModelConfig` varies width, layer count, head count, MLP width, context, dropout and tied-output policy; the parameter-count formula is checked against the actual parameter tree. Its CPU pilot uses a two-layer FP32 decoder. Padding rows are finite and excluded from loss, while each block keeps its own projected keys and values for cached decoding. A formula-only larger target is not an allocated model or a training result.
+
 ## 1. Prepare the experiment
 
 In the CPU environment from setup, create main.py and add this block. Write down the dimensions and the known result before continuing.
@@ -227,7 +231,7 @@ visual_data = {'kind': 'heatmap', 'values': (output - x).tolist(), 'rows': ['tok
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:06:09.539736+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T17:44:47.808602+00:00. JAX 0.9.2.
 
 ```text
 Block shape: (4, 8)

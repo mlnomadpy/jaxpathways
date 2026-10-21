@@ -1,4 +1,4 @@
-"""Fit parameters and scale the simulation · learner-only exercises (3/3 contracts ready)"""
+"""Fit parameters and scale the simulation · learner-only exercises (4/4 contracts ready)"""
 
 # Exercise: Repeat inference for a new true rate \(0.4\) using analytically generated observations, starting at \(0.9\). Show that the recovered parameter and held-out predictions change consistently.
 
@@ -76,3 +76,35 @@ import numpy as np
 def grid_search_noisy_rate(train_times, train_values, candidates, initial, held_out_times, held_out_values):
     # TODO: score candidates on training data, select, then report held-out error.
     raise NotImplementedError("Keep candidate selection independent of held-out labels")
+
+
+
+# Fit and independently audit an adaptive noisy rate estimate (Optional extension):
+# Use the optional `fit_rate` API on early off-manifold observations with initial state $2.6$ and rate near $1.25$. Score the returned rate with an analytic NumPy profile over a positive candidate grid. Then calculate predictions for held-out initial states without using held-out values to select the fit. Independently inspect supplied on-manifold and late-time profiles.
+
+# Inputs:
+# - Early off-manifold training observations at times from 0 to 1.2, initial state 2.6, known noise scale 0.025, and starting rate 0.45.
+# - Separate observations for an on-manifold initial state 1.0 and late off-manifold times from 6 to 9, plus a positive rate grid.
+# - Held-out initial states and times that are not used to choose a rate.
+
+# Outputs:
+# - Positive fitted rate and an analytic early-profile minimum with their objective difference.
+# - Held-out predictions computed only after rate selection.
+# - Likelihood-profile range and prediction spread for early, on-manifold, and late observation regimes.
+
+# Invariants to check:
+# - Rate selection uses training observations only.
+# - Independent profiles use the closed-form solution and do not reuse the fitted solver.
+# - A case is structurally unidentifiable only when predictions and profile remain flat over distinct positive rates.
+
+# Hints:
+# - Use a local seeded NumPy generator for any noise you create.
+# - Report prediction spread across several rates as well as the profile range; optimization difficulty alone does not establish non-identifiability.
+
+import numpy as np
+
+def fit_and_audit_rate(fit_rate, times, observations, initial, noise_scale, candidate_rates,
+                       held_out_times, held_out_initials, on_times, on_observations,
+                       late_times, late_observations):
+    # TODO: fit from early training data and independently score all three profiles.
+    raise NotImplementedError("Separate fit selection, analytic profile audit, and held-out prediction")

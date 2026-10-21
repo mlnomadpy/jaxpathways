@@ -321,7 +321,7 @@ print("Verified runtime receipt:", json.dumps(receipt, sort_keys=True))
 print("Single-host TPU slice HBM totals (GiB):", {t["slice"]: t["total_hbm_gib"] for t in topologies})
 ```
 
-Expected: Prints a JSON runtime receipt with contract_ok: true, observed_backend, device_count, pmap_sum_of_squares: 140.0 (on 1 local device), and the single-host TPU slice HBM totals.
+Expected: Prints a JSON runtime receipt and the supplied single-host slice HBM table. The exercise checks that v5litepod-4 has 4 chips and 64 GiB, v6e-4 has 4 chips and 128 GiB, and the supplied single-host entries at or above 64 GiB are v5litepod-4, v5litepod-8, and v6e-4. A 128 GiB threshold returns the latter two entries.
 
 ## Single-host Cloud TPU slice chip counts and total HBM capacity
 
@@ -354,7 +354,7 @@ visual_data = {
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:11:42.353442+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T18:13:16.112380+00:00. JAX 0.9.2.
 
 ```text
 Verified runtime receipt: {"contract_ok": true, "device_count": 1, "device_kinds": ["cpu"], "expected_backend": "cpu", "expected_sum_of_squares": 140.0, "jax": "0.9.2", "local_device_count": 1, "observed_backend": "cpu", "pmap_sum_of_squares": 140.0, "python": "3.14.3", "receipt_sha256": "4ddc0cbb323fe3bd"}
@@ -363,7 +363,11 @@ Verified runtime receipt: {"contract_ok": true, "device_count": 1, "device_kinds
 Single-host TPU slice HBM totals (GiB): {'v5litepod-1': 16, 'v5litepod-4': 64, 'v5litepod-8': 128, 'v6e-4': 128}
 Mismatch contract_ok: False observed: cpu devices: 1
 Requires --worker=all and jax.distributed.initialize(): {'v5litepod-1': False, 'v5litepod-4': False, 'v5litepod-8': False, 'v5litepod-16': True}
-Checked receipt sha256: 4ddc0cbb323fe3bd v5litepod-4 chips: 4 HBM GiB: 64
+Checked receipt sha256: 4ddc0cbb323fe3bd
+v5litepod-4 hosts: 1 chips: 4 total HBM GiB: 64
+v6e-4 hosts: 1 chips: 4 total HBM GiB: 128
+Single-host slices with at least 64 GiB: ['v5litepod-4', 'v5litepod-8', 'v6e-4']
+Single-host slices with at least 128 GiB: ['v5litepod-8', 'v6e-4']
 Slices fitting 48 GiB: ['v5litepod-4', 'v5litepod-8', 'v6e-4']
 Expected 4-device pmap sum of squares: 10416.0
 PASS: tpu-01
@@ -403,22 +407,23 @@ Single-host TPU VMs attach all chips to one Linux VM; multi-host slices attach c
 
 ## Make it yours
 
-Call `verify_runtime_contract` for the active backend with `min_devices=1`, then compute how many `v5litepod-4` chips and total GiB of HBM are available on that single-host slice and assert both values.
+Call `verify_runtime_contract` for the active backend with `min_devices=1`. Compute and verify the chip count and total HBM GiB for `v5litepod-4` and `v6e-4`, confirm both have `hosts == 1`, and list every supplied single-host slice with at least 64 GiB of HBM.
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
 **Inputs:**
-- The verify_runtime_contract callable, active backend expectation, minimum local device count, and named TPU slice catalog.
+- The verify_runtime_contract callable, active backend expectation, minimum local device count, and topology rows with slice, hosts, chips_per_host, hbm_gib_per_chip, total_chips, and total_hbm_gib fields.
 
 **Outputs:**
-- A runtime receipt plus chip and aggregate HBM counts for v5litepod-4.
+- The runtime receipt, verified host/chip/HBM rows for v5litepod-4 and v6e-4, and names of supplied single-host slices meeting the 64 GiB threshold.
 
 **Invariants to check:**
-- Runtime acceptance describes devices actually discovered by JAX; a CPU backend must not be reported as TPU qualification.
+- Require hosts == 1 for both named rows and derive capacity from the supplied total fields.
+- The qualifying list includes only single-host rows whose total_hbm_gib meets the inclusive threshold.
 
 **Hints:**
 - Call the verifier for the active backend with a minimum of one local device.
-- Treat catalog capacity as descriptive and runtime discovery as observed evidence.
+- Filter the topology catalog by both host count and total HBM; repeat the filter at a changed threshold to check the boundary.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -426,7 +431,7 @@ Call `verify_runtime_contract` for the active backend with `min_devices=1`, then
 import jax
 
 def inspect_runtime_and_slice(verify_runtime_contract, expected_backend, min_devices, topologies):
-    # TODO: verify the active runtime and look up v5litepod-4 chip and HBM metadata.
+    # TODO: check the active runtime, audit both named slice rows, and filter the supplied catalog by host count and HBM threshold.
     raise NotImplementedError
 ```
 
@@ -434,10 +439,39 @@ def inspect_runtime_and_slice(verify_runtime_contract, expected_backend, min_dev
 
 ```python
 # Exercise solution
-checked = verify_runtime_contract(expected_backend=jax.default_backend(), min_devices=1)
-v5e4 = next(t for t in topologies if t["slice"] == "v5litepod-4")
-print("Checked receipt sha256:", checked["receipt_sha256"], "v5litepod-4 chips:", v5e4["total_chips"], "HBM GiB:", v5e4["total_hbm_gib"])
-assert checked["contract_ok"] is True and v5e4["total_chips"] == 4 and v5e4["total_hbm_gib"] == 64
+
+def inspect_runtime_and_slice(verify_runtime_contract, expected_backend, min_devices, topologies):
+    receipt = verify_runtime_contract(expected_backend=expected_backend, min_devices=min_devices)
+    if not receipt["contract_ok"]:
+        raise AssertionError("The active runtime did not satisfy its requested contract")
+    by_name = {row["slice"]: row for row in topologies}
+    summaries = []
+    for name, expected_chips, expected_hbm in [("v5litepod-4", 4, 64), ("v6e-4", 4, 128)]:
+        row = by_name[name]
+        chips = row["hosts"] * row["chips_per_host"]
+        hbm_gib = chips * row["hbm_gib_per_chip"]
+        assert row["hosts"] == 1
+        assert chips == expected_chips and hbm_gib == expected_hbm
+        assert row["total_chips"] == chips and row["total_hbm_gib"] == hbm_gib
+        summaries.append({"slice": name, "hosts": row["hosts"], "chips": chips, "total_hbm_gib": hbm_gib})
+    qualifying = [
+        row["slice"] for row in topologies
+        if row["hosts"] == 1 and row["hosts"] * row["chips_per_host"] * row["hbm_gib_per_chip"] >= 64
+    ]
+    at_128_gib = [
+        row["slice"] for row in topologies
+        if row["hosts"] == 1 and row["hosts"] * row["chips_per_host"] * row["hbm_gib_per_chip"] >= 128
+    ]
+    return {"receipt": receipt, "summaries": summaries, "at_least_64_gib": qualifying, "at_least_128_gib": at_128_gib}
+
+result = inspect_runtime_and_slice(verify_runtime_contract, jax.default_backend(), 1, topologies)
+print("Checked receipt sha256:", result["receipt"]["receipt_sha256"])
+for row in result["summaries"]:
+    print(row["slice"], "hosts:", row["hosts"], "chips:", row["chips"], "total HBM GiB:", row["total_hbm_gib"])
+print("Single-host slices with at least 64 GiB:", result["at_least_64_gib"])
+print("Single-host slices with at least 128 GiB:", result["at_least_128_gib"])
+assert result["at_least_64_gib"] == ["v5litepod-4", "v5litepod-8", "v6e-4"]
+assert result["at_least_128_gib"] == ["v5litepod-8", "v6e-4"]
 ```
 
 </details>

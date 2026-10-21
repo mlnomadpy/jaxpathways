@@ -78,6 +78,10 @@ Zero logits should give `log(3)`; a future-token perturbation should not affect 
 
 Keep the corpus, vocabulary, context, model seed, optimizer settings, package versions and numeric outputs with your work. The deterministic fixture has no shuffled data position or dropout key after initialization; a production resume must preserve those additional states when present.
 
+## Optional natural-text decoder foundations
+
+Keep this periodic character workflow as the small self-contained baseline. For a separate real-text extension, run `python3 projects/text-harness/foundations/tests/check_foundations.py --implementation projects/text-harness/foundations/model.py --output runs/text-foundations`. It trains a configurable two-layer FP32 CPU decoder for a small measured pilot on the locally retained Alice source. The report records train/dev/test membership and token/byte counts, train-only tokenizer and unigram identities, dev measurements, and a final test score after the recipe is fixed. It compares cached decode with full recomputation after nonzero offsets, checks a deliberately corrupted second-layer cache, restores the next samples and Adam/dropout update in a fresh process, then reloads a parameter/tokenizer package in another process. Read the project README for source rights and metric denominators. This workflow makes no language-quality, accelerator, production or 300M-training claim; larger capstones stay open.
+
 ## 1. Prepare packages and the vocabulary
 
 Create main.py in the CPU environment. Add these imports and the vocabulary/context contract. Integer IDs must stay consistent with the output head.
@@ -483,7 +487,7 @@ visual_data = {'kind': 'heatmap', 'values': probs.tolist(), 'rows': ['position '
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:06:20.735929+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T17:44:59.521718+00:00. JAX 0.9.2.
 
 ```text
 Initial / held loss / held accuracy: 0.9807573556900024 0.0017881905660033226 1.0

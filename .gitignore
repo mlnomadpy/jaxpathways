@@ -33,3 +33,10 @@ test-results/
 # Optional NumPyro learning environment and learner working copy
 /.venv-numpyro/
 projects/bayesian-regression/my_numpyro_workflow.py
+
+# Local rendered print qualification artifacts
+/tmp/pdfs/
+/output/pdf/
+/.venv-science/
+/.venv-foundations/
+projects/scientific-inverse/my_diffrax_workflow.py

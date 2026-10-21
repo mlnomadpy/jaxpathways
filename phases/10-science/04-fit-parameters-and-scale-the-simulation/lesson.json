@@ -50,6 +50,15 @@
       {
         "title": "Move from this audit to a scientific workflow",
         "body": "The staged scientific-inverse project asks for a reusable simulation and fitting API with changed parameters, noisy observations, held-out checks and a reproducible report. For stiff or adaptive models, choose and validate a suitable solver before reusing the optimizer. Diffrax, Equinox and Lineax provide ecosystem building blocks, but this phase’s executed core intentionally uses the installed JAX environment; no optional library or target hardware execution is implied."
+      },
+      {
+        "title": "Optional adaptive solve: stiffness and rate identifiability",
+        "body": "The optional project uses a forced-decay equation with exact solution \\(y(t)=\\cos t+(y_0-1)e^{-kt}\\). Tsit5 is an adaptive explicit solver for the nonstiff fixture; Kvaerno3 and Kvaerno5 with a PID step-size controller handle the stiff fixture. Compare accepted/rejected step counts and analytic errors, and treat solver status as part of the result. For inference, early off-manifold observations can reveal the rate, while \\(y_0=1\\) makes predictions exactly independent of \\(k\\). Late observations can be practically insensitive because the transient \\(e^{-kt}\\) has decayed.",
+        "math": "\\ell(k)=\\frac12\\sum_i\\left[\\frac{y(t_i;k)-y_i}{\\sigma}\\right]^2,\\qquad y_0=1\\implies\\frac{\\partial y}{\\partial k}=0\\quad\\text{for all }t,k>0",
+        "check": {
+          "prompt": "Can a low residual establish that the rate is identifiable?",
+          "answer": "No. A parameter is structurally unidentifiable when changing it leaves predictions and the profile objective flat, even if an optimizer returns a particular value."
+        }
       }
     ],
     "experiments": [
@@ -121,6 +130,36 @@
           ],
           "code": "import numpy as np\n\ndef grid_search_noisy_rate(train_times, train_values, candidates, initial, held_out_times, held_out_values):\n    # TODO: score candidates on training data, select, then report held-out error.\n    raise NotImplementedError(\"Keep candidate selection independent of held-out labels\")"
         }
+      },
+      {
+        "difficulty": "Optional extension",
+        "title": "Fit and independently audit an adaptive noisy rate estimate",
+        "prompt": "Use the optional `fit_rate` API on early off-manifold observations with initial state $2.6$ and rate near $1.25$. Score the returned rate with an analytic NumPy profile over a positive candidate grid. Then calculate predictions for held-out initial states without using held-out values to select the fit. Independently inspect supplied on-manifold and late-time profiles.",
+        "hint": "Use the same known noise scale in fitting and profile scoring. A small residual alone is not evidence of identifiability; check whether predictions and the entire likelihood profile change across the candidate rates.",
+        "solution": "import numpy as np\n\ndef fit_and_audit_rate(fit_rate, times, observations, initial, noise_scale, candidate_rates,\n                       held_out_times, held_out_initials, on_times, on_observations,\n                       late_times, late_observations):\n    times = np.asarray(times, dtype=np.float64)\n    observations = np.asarray(observations, dtype=np.float64)\n    rates = np.asarray(candidate_rates, dtype=np.float64)\n    if rates.ndim != 1 or np.any(rates <= 0) or not np.isfinite(rates).all():\n        raise ValueError(\"candidate rates must be finite and positive\")\n    fitted = float(fit_rate(times, observations, initial, initial_rate=0.45,\n                            noise_scale=noise_scale))\n\n    def profile(times_for_profile, values, y0):\n        times_for_profile = np.asarray(times_for_profile, dtype=np.float64)\n        values = np.asarray(values, dtype=np.float64)\n        prediction = np.cos(times_for_profile)[None, :] + (y0 - 1.0) * np.exp(\n            -rates[:, None] * times_for_profile[None, :]\n        )\n        nll = 0.5 * np.sum(((prediction - values[None, :]) / noise_scale) ** 2, axis=1)\n        return {\"nll\": nll, \"nll_range\": float(np.ptp(nll)),\n                \"prediction_spread\": float(np.max(np.ptp(prediction, axis=0)))}\n\n    early = profile(times, observations, initial)\n    on_manifold = profile(on_times, on_observations, 1.0)\n    late = profile(late_times, late_observations, initial)\n    fitted_nll = float(profile_nll(np.array([fitted]), times, observations, initial, noise_scale)[0])\n    early_minimum_rate = float(rates[np.argmin(early[\"nll\"])])\n    early_minimum_nll = float(np.min(early[\"nll\"]))\n    held_out = np.cos(np.asarray(held_out_times))[None, :] + (\n        np.asarray(held_out_initials)[:, None] - 1.0\n    ) * np.exp(-fitted * np.asarray(held_out_times)[None, :])\n    return {\"fitted_rate\": fitted, \"early_profile\": early,\n            \"early_profile_minimum_rate\": early_minimum_rate,\n            \"early_profile_minimum_nll\": early_minimum_nll,\n            \"fitted_rate_nll\": fitted_nll,\n            \"fitted_delta_nll\": fitted_nll - early_minimum_nll,\n            \"on_manifold_profile\": on_manifold, \"late_profile\": late,\n            \"held_out_predictions\": held_out}\n",
+        "explanation": "This is a synthetic, known-noise inverse problem. The profile distinguishes structural non-identifiability from weak late-time sensitivity, but it is not a confidence interval or a scientific validation of field measurements.",
+        "learnerStarter": {
+          "inputs": [
+            "Early off-manifold training observations at times from 0 to 1.2, initial state 2.6, known noise scale 0.025, and starting rate 0.45.",
+            "Separate observations for an on-manifold initial state 1.0 and late off-manifold times from 6 to 9, plus a positive rate grid.",
+            "Held-out initial states and times that are not used to choose a rate."
+          ],
+          "outputs": [
+            "Positive fitted rate and an analytic early-profile minimum with their objective difference.",
+            "Held-out predictions computed only after rate selection.",
+            "Likelihood-profile range and prediction spread for early, on-manifold, and late observation regimes."
+          ],
+          "invariants": [
+            "Rate selection uses training observations only.",
+            "Independent profiles use the closed-form solution and do not reuse the fitted solver.",
+            "A case is structurally unidentifiable only when predictions and profile remain flat over distinct positive rates."
+          ],
+          "hints": [
+            "Use a local seeded NumPy generator for any noise you create.",
+            "Report prediction spread across several rates as well as the profile range; optimization difficulty alone does not establish non-identifiability."
+          ],
+          "code": "import numpy as np\n\ndef fit_and_audit_rate(fit_rate, times, observations, initial, noise_scale, candidate_rates,\n                       held_out_times, held_out_initials, on_times, on_observations,\n                       late_times, late_observations):\n    # TODO: fit from early training data and independently score all three profiles.\n    raise NotImplementedError(\"Separate fit selection, analytic profile audit, and held-out prediction\")"
+        }
       }
     ],
     "diagnosis": "If the training loss is tiny but the parameter changes with step size, suspect solver bias. If every candidate has zero derivative, inspect observation times and parameter dependence before adjusting the optimizer. If timing results are implausibly tiny, confirm synchronization and warmup. If test performance drove your learning-rate choice, the test set is no longer untouched.",
@@ -177,6 +216,14 @@
       },
       {
         "title": "Diffrax solver terms, saved values and solution inspection",
+        "url": "https://docs.kidger.site/diffrax/usage/getting-started/"
+      },
+      {
+        "title": "Diffrax solver choice and adaptive solver families",
+        "url": "https://docs.kidger.site/diffrax/usage/how-to-choose-a-solver/"
+      },
+      {
+        "title": "Diffrax solution saving and status inspection",
         "url": "https://docs.kidger.site/diffrax/usage/getting-started/"
       }
     ],

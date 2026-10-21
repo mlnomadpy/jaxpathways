@@ -13,7 +13,7 @@
       "correct": 1,
       "explanation": "Warming and synchronizing the same signature reduces initial compilation in the recorded window. Inspect the trace to confirm: new shapes or static arguments can still compile, and cache state can still affect timing. Record target latency outside profiler overhead too.",
       "optionFeedback": [
-        "Tracing should observe execution, not delete model state. Warmup prepares the tested executable before the recorded window.",
+        "Tracing observes execution and does not delete model state. Warmup prepares the tested executable before the recorded window.",
         "Warming and synchronizing the same signature reduces initial compilation in the recorded window. Inspect the trace to confirm: new shapes or static arguments can still compile, and cache state can still affect timing. Record target latency outside profiler overhead too.",
         "Profiling is not restricted to BF16. Record the precision used and the actual operations in the captured target workload."
       ]

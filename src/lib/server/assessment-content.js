@@ -48,7 +48,16 @@ export function assessmentContent(
         return `<a href="${escapeHtml(resolveLink(href))}">${this.parser.parseInline(tokens)}</a>`;
       },
       image({ href, text }) {
-        return `<img src="${escapeHtml(resolveLink(href))}" alt="${escapeHtml(text)}" loading="lazy" />`;
+        const resolvedHref = resolveLink(href);
+        const resolved = escapeHtml(resolvedHref);
+        const alt = escapeHtml(text);
+        if (/^data:/i.test(resolvedHref)) {
+          return `<img src="${resolved}" alt="${alt}" loading="lazy" />`;
+        }
+        const accessibleName = escapeHtml(
+          text ? `Open full-size figure: ${text}` : 'Open full-size image',
+        );
+        return `<a href="${resolved}" aria-label="${accessibleName}" title="${accessibleName}"><img src="${resolved}" alt="${alt}" loading="lazy" /></a>`;
       },
       html() {
         throw new Error('Raw HTML is not supported in assessment sources');

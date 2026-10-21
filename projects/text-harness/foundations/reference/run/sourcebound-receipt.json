@@ -1,0 +1,92 @@
+{
+  "artifacts": {
+    "candidate_model": {
+      "path": "/Users/tahabsn/Documents/ChatGPT/jaxpathways/projects/text-harness/foundations/model.py",
+      "sha256": "94a88ae7fd6a251b5b190b4631496e04bb71a31c1bfe418511fdd37ffef034c9"
+    },
+    "checker": {
+      "path": "/Users/tahabsn/Documents/ChatGPT/jaxpathways/projects/text-harness/foundations/tests/check_foundations.py",
+      "sha256": "dbd4f2714f18e020f2dde31fdc4704b167d9b7d7ec56048ac31285f88ae77bb4"
+    },
+    "config": {
+      "path": "/Users/tahabsn/Documents/ChatGPT/jaxpathways/projects/text-harness/foundations/config.py",
+      "sha256": "5c05801a7ec1a15b3978c87c77ac4e64d1b056c60487cbcff3cdf72475c8bb64"
+    },
+    "data_pipeline": {
+      "path": "/Users/tahabsn/Documents/ChatGPT/jaxpathways/projects/text-harness/foundations/data.py",
+      "sha256": "ff8ff698090866d46bc1f2b3540393b9a16db2121ad824110bd2ba53db645bd8"
+    },
+    "inference_package_manifest": {
+      "path": "/private/tmp/jaxpathways-text-foundations-w2-final/inference-package/package.json",
+      "sha256": "02b92a9f56325e5a38be2c40bf263d2ca91db6122ba84dd4df266339457bf278"
+    },
+    "inference_package_parameters": {
+      "path": "/private/tmp/jaxpathways-text-foundations-w2-final/inference-package/params.npz",
+      "sha256": "271cb6457de5da3f727c343c64b7bd350c00e503ea7ac847eecf51fbd5558802"
+    },
+    "inference_package_tokenizer": {
+      "path": "/private/tmp/jaxpathways-text-foundations-w2-final/inference-package/tokenizer.json",
+      "sha256": "c92b534443cc6a1eacd5e78406b2c42e59553df704a07102a03c639d3694f586"
+    },
+    "license": {
+      "path": "/Users/tahabsn/Documents/ChatGPT/jaxpathways/projects/text-harness/foundations/data/LICENSE.md",
+      "sha256": "001298ffd351f17c7f08541e185e1c7e3beff2a876fe004fa9176fda649e3c85"
+    },
+    "raw_metrics": {
+      "path": "/private/tmp/jaxpathways-text-foundations-w2-final/pilot-results.json",
+      "sha256": "a10b3148d1d0a667e793a5ef0ef00dacff1bda7ecfa68cf48e7329baf5abeee3"
+    },
+    "requirements": {
+      "path": "/Users/tahabsn/Documents/ChatGPT/jaxpathways/projects/text-harness/foundations/requirements-foundations.txt",
+      "sha256": "a486fbd8837a0b8c7e363e251e4231a96c11b2366eee79cc1b8b3f0745d53a4b"
+    },
+    "resume_checkpoint_manifest": {
+      "path": "/private/tmp/jaxpathways-text-foundations-w2-final/resume-input/checkpoint.json",
+      "sha256": "3786901e488f3eafd1176c3aab76790882833ffc1814fac33bb6c6f53e4c33f0"
+    },
+    "resume_checkpoint_state": {
+      "path": "/private/tmp/jaxpathways-text-foundations-w2-final/resume-input/state.npz",
+      "sha256": "b0c6c40a4b2b5d94b52347783ae57031ed30c61c183cceb6fc9979df270f2932"
+    },
+    "source": {
+      "path": "/Users/tahabsn/Documents/ChatGPT/jaxpathways/projects/text-harness/foundations/data/source/alice-pg11.txt",
+      "sha256": "01b38ea4c710a84bc18d0bd41271a5a1a92b94e97b2812f4dece97d4a694725e"
+    },
+    "source_manifest": {
+      "path": "/Users/tahabsn/Documents/ChatGPT/jaxpathways/projects/text-harness/foundations/data/manifest.json",
+      "sha256": "d6ec10ee2ccc11a08cec7947adfe8fc1098f83c6bf2015e64ea17c85efed2442"
+    },
+    "tokenizer": {
+      "path": "/private/tmp/jaxpathways-text-foundations-w2-final/tokenizer.json",
+      "sha256": "c92b534443cc6a1eacd5e78406b2c42e59553df704a07102a03c639d3694f586"
+    },
+    "tokenizer_info": {
+      "path": "/private/tmp/jaxpathways-text-foundations-w2-final/tokenizer-info.json",
+      "sha256": "77d42f8baf9999b64d3aa83e6a1eb83447eef77c49fef8cb820af0b2bad3a5c8"
+    },
+    "train": {
+      "path": "/Users/tahabsn/Documents/ChatGPT/jaxpathways/projects/text-harness/foundations/train.py",
+      "sha256": "ee9f3bc73505ce8e00fe9680589d97805593e5c8c035cba4709b5f334eb27a2b"
+    }
+  },
+  "candidate_model_path": "/Users/tahabsn/Documents/ChatGPT/jaxpathways/projects/text-harness/foundations/model.py",
+  "candidate_model_sha256": "94a88ae7fd6a251b5b190b4631496e04bb71a31c1bfe418511fdd37ffef034c9",
+  "experiment_identity": {
+    "candidate_model_sha256": "94a88ae7fd6a251b5b190b4631496e04bb71a31c1bfe418511fdd37ffef034c9",
+    "code_sha256": {
+      "config.py": "5c05801a7ec1a15b3978c87c77ac4e64d1b056c60487cbcff3cdf72475c8bb64",
+      "data.py": "ff8ff698090866d46bc1f2b3540393b9a16db2121ad824110bd2ba53db645bd8",
+      "model.py": "94a88ae7fd6a251b5b190b4631496e04bb71a31c1bfe418511fdd37ffef034c9",
+      "train.py": "ee9f3bc73505ce8e00fe9680589d97805593e5c8c035cba4709b5f334eb27a2b"
+    },
+    "dataset_sha256": "23cf92f1eeff85d98a191e0fd08ff4e3d60249c68e15426837701fcbc00e6213",
+    "jax_version": "0.9.2",
+    "model_config_sha256": "698877ae9b4d74cf3a5aea8458c325a4ed2214f8b038ccbfa32f7e8ff5e83550",
+    "platform": "cpu",
+    "processor_sha256": "c92b534443cc6a1eacd5e78406b2c42e59553df704a07102a03c639d3694f586",
+    "source_sha256": "01b38ea4c710a84bc18d0bd41271a5a1a92b94e97b2812f4dece97d4a694725e",
+    "training_config_sha256": "8b3d4d857d809e7d4f393d0496945ce07c4c6f5f17acf9ad93e81444f5851b70"
+  },
+  "normalized_byte_denominator": "UTF-8 bytes after collapsing whitespace runs to one ASCII space and trimming each selected paragraph; not raw Gutenberg file byte spans.",
+  "schema": 1
+}

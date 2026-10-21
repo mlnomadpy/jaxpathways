@@ -12,7 +12,7 @@
     "orbax-checkpoint": "0.11.34",
     "matplotlib": "3.10.8"
   },
-  "validatedAt": "2026-10-21T16:12:42.468127+00:00",
+  "validatedAt": "2026-10-21T18:13:16.454200+00:00",
   "scope": "Worked examples and reference solutions executed in fresh processes. No TPU validation or learner assessment.",
   "lessons": [
     {
@@ -417,7 +417,7 @@
     },
     {
       "lessonId": "transformers-01",
-      "contentHash": "39fcd1ca11222d1e67abd45bc92d39188253debb016f39efee8e3e1f9bd06c46",
+      "contentHash": "3ab73bd657c0baadfa04d466752d8fb6ced2ae7bd86e281ac1c9cb7f19aa21f8",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -427,7 +427,7 @@
     },
     {
       "lessonId": "transformers-02",
-      "contentHash": "4df868dfd6e73e87c43642aef43578f4bf6ca1693f8d032f379b47f4a0b688e0",
+      "contentHash": "6176c125be90a40dff10d19f1c292a68344a4c6ac7517d084957574352a68a9e",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -437,7 +437,7 @@
     },
     {
       "lessonId": "transformers-03",
-      "contentHash": "a704dc96cd5390e9fdbc72908206fb47cfa3ff8c5e63e637dcdd0c9ff92a734f",
+      "contentHash": "6db2d8e6d54e3239fce095454f482dfc64c1b14a421e812b88d52af269d16e2d",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -447,7 +447,7 @@
     },
     {
       "lessonId": "transformers-04",
-      "contentHash": "8d8b1cca9cbbfc463f1b3fe3e44100534ab07a47d1011428dea28a4e00c8efd9",
+      "contentHash": "e79fa23385832297129951beb2b18efb90c5031a2b2747cb1f0fab16b445d1ea",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -567,7 +567,7 @@
     },
     {
       "lessonId": "science-03",
-      "contentHash": "4d5f48d73db38bce05cca4b573a4b540c5a31339593ea8b6024266504cc1e92b",
+      "contentHash": "fd28c0b295d5ee89839630cd116c89ac4895d400950c633762496b9001864e63",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -577,7 +577,7 @@
     },
     {
       "lessonId": "science-04",
-      "contentHash": "31ffc184f76f483a8b607f5bf7118deb5921d625cf5a6699d1040488d7d81180",
+      "contentHash": "92fff53fdfac5022fae30d677d5ae582f2faa7d907d5bc38e8714d4ea58b8d62",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -997,7 +997,7 @@
     },
     {
       "lessonId": "tpu-01",
-      "contentHash": "93529620832b4f8b3a7018ad6eeba09a73b6020cec23efb04f725fee73bd304e",
+      "contentHash": "e9c7cc39615bbbfe1b2053c73639c4d22792201ce735c828a8524b1e2dec1cde",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -1047,7 +1047,7 @@
     },
     {
       "lessonId": "tpu-06",
-      "contentHash": "694ea9a2b1e1b702348cf837eab4f61c58c02361417965a65c1f19be6a2aebe2",
+      "contentHash": "d5b91d47b1f1b6ef8e207e5f742dcaca03caf58b1d9e79c1200ce98d362b96b7",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {

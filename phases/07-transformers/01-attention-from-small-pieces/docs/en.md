@@ -75,6 +75,10 @@ $$
 \begin{aligned}S&=\frac{QK^\mathsf{T}}{\sqrt{d_k}}\\A_{ij}&=\frac{\exp(S_{ij}-m_i)}{\sum_t\exp(S_{it}-m_i)},\quad m_i=\max_t S_{it}\\O&=AV\end{aligned}
 $$
 
+## From the attention head to a decoder stack
+
+The hand-sized Q/K/V exercise isolates one weighted mixture. The optional text foundations extends the same operation to learned projections, multiple heads, pre-layer normalization, a residual stream, a token embedding table and a configurable stack of causal blocks. Compare its independent NumPy attention row with the model output before interpreting a generated token. The small CPU pilot is in `projects/text-harness/foundations/README.md`; the original four-stage one-block harness remains its own workflow.
+
 ## 1. Prepare the experiment
 
 In the CPU environment from setup, create main.py and add this block. Write down the dimensions and the known result before continuing.
@@ -175,7 +179,7 @@ visual_data = {'kind': 'panels', 'panels': [{'kind': 'heatmap', 'title': 'Zero q
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:05:56.248528+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T17:44:33.527071+00:00. JAX 0.9.2.
 
 ```text
 Weights / output: [[0.33333334 0.33333334 0.33333334]

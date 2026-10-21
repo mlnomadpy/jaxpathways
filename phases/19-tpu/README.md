@@ -28,11 +28,11 @@ Review: [Select a TPU slice and provision your Cloud TPU VM](01-get-a-tpu-runnin
 
 ### Build in stages
 
-1. **Select a single-host TPU topology and provision the VM.** Compare v5litepod-1, v5litepod-4, v5litepod-8, and v6e-4 HBM totals, distinguish single-host VMs from multi-host Pod slices, and run gcloud create/describe/delete.
+1. **Select a single-host TPU topology and provision the VM.** Use the runtime verifier for the active backend. Calculate and verify the chip count and total HBM for v5litepod-4 and v6e-4, confirm both are single-host slices, and list all supplied single-host slices with at least 64 GiB. Retain the target VM create/describe/delete log.
 
    Lessons: [Select a TPU slice and provision your Cloud TPU VM](01-get-a-tpu-running-and-verify-the-runtime/docs/en.md).
 
-2. **Bootstrap .venv and verify the runtime contract receipt.** Install jax[tpu] in ~/jax-tpu-lab/.venv, run verify_runtime_contract with a synchronized pmap sum of squares, and copy back the SHA-256 receipt.
+2. **Bootstrap .venv and verify the runtime contract receipt.** Install jax[tpu] in ~/jax-tpu-lab/.venv, run build_runtime_receipt(), and verify its observed reduction against the closed-form result for its actual local_device_count. Then compute the separate theoretical totals for 4 and 8 devices. Copy back the JSON receipt; distinguish its SHA-256 field from a digital signature and calculated expectations from observed device execution.
 
    Lessons: [Bootstrap .venv and verify a TPU runtime receipt](02-bootstrap-venv-and-verify-tpu-runtime-receipt/docs/en.md).
 
@@ -78,11 +78,11 @@ Status: authored lesson with CPU exercise.
 
 Status: authored lesson with CPU exercise.
 
-**Intended outcome:** Create ~/jax-tpu-lab/.venv on the TPU VM, install jax[tpu], run a synchronized pmap runtime contract check, and download the signed JSON receipt before deleting the VM.
+**Intended outcome:** Create ~/jax-tpu-lab/.venv on the TPU VM, install jax[tpu], record the observed backend and local device count alongside a synchronized pmap reduction check, retrieve the JSON receipt, and then delete the VM.
 
-**Evidence:** Keep the JSON runtime receipt (observed_backend, device_count, pmap_sum_of_squares, receipt_sha256) and the 1-chip vs 4-chip vs 8-chip pmap reference values.
+**Evidence:** Keep the JSON runtime receipt fields (backend, local_device_count, per_device_sums, observed_total, expected_total, verified, receipt_sha256). Label the 1-, 4-, and 8-device closed-form values as calculated expectations; only the receipt's local-device result is observed execution.
 
-**Checkpoint:** Why must verify_runtime_contract check both jax.default_backend() and a synchronized pmap reduction rather than only checking that import jax succeeds?
+**Checkpoint:** Why does build_runtime_receipt() synchronize the pmap reduction and compare observed_total with closed_form_sum_of_squares(local_device_count, 8)?
 
 ## Phase project
 

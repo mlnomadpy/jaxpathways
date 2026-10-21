@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "tpu-01",
-  "contentHash": "93529620832b4f8b3a7018ad6eeba09a73b6020cec23efb04f725fee73bd304e",
-  "executedAt": "2026-10-21T16:11:42.353442+00:00",
+  "contentHash": "e9c7cc39615bbbfe1b2053c73639c4d22792201ce735c828a8524b1e2dec1cde",
+  "executedAt": "2026-10-21T18:13:16.112380+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -11,7 +11,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Verified runtime receipt: {\"contract_ok\": true, \"device_count\": 1, \"device_kinds\": [\"cpu\"], \"expected_backend\": \"cpu\", \"expected_sum_of_squares\": 140.0, \"jax\": \"0.9.2\", \"local_device_count\": 1, \"observed_backend\": \"cpu\", \"pmap_sum_of_squares\": 140.0, \"python\": \"3.14.3\", \"receipt_sha256\": \"4ddc0cbb323fe3bd\"}\nSingle-host TPU slice HBM totals (GiB): {'v5litepod-1': 16, 'v5litepod-4': 64, 'v5litepod-8': 128, 'v6e-4': 128}\nVerified runtime receipt: {\"contract_ok\": true, \"device_count\": 1, \"device_kinds\": [\"cpu\"], \"expected_backend\": \"cpu\", \"expected_sum_of_squares\": 140.0, \"jax\": \"0.9.2\", \"local_device_count\": 1, \"observed_backend\": \"cpu\", \"pmap_sum_of_squares\": 140.0, \"python\": \"3.14.3\", \"receipt_sha256\": \"4ddc0cbb323fe3bd\"}\nSingle-host TPU slice HBM totals (GiB): {'v5litepod-1': 16, 'v5litepod-4': 64, 'v5litepod-8': 128, 'v6e-4': 128}\nMismatch contract_ok: False observed: cpu devices: 1\nRequires --worker=all and jax.distributed.initialize(): {'v5litepod-1': False, 'v5litepod-4': False, 'v5litepod-8': False, 'v5litepod-16': True}\nChecked receipt sha256: 4ddc0cbb323fe3bd v5litepod-4 chips: 4 HBM GiB: 64\nSlices fitting 48 GiB: ['v5litepod-4', 'v5litepod-8', 'v6e-4']\nExpected 4-device pmap sum of squares: 10416.0\nPASS: tpu-01\n",
+  "stdout": "Verified runtime receipt: {\"contract_ok\": true, \"device_count\": 1, \"device_kinds\": [\"cpu\"], \"expected_backend\": \"cpu\", \"expected_sum_of_squares\": 140.0, \"jax\": \"0.9.2\", \"local_device_count\": 1, \"observed_backend\": \"cpu\", \"pmap_sum_of_squares\": 140.0, \"python\": \"3.14.3\", \"receipt_sha256\": \"4ddc0cbb323fe3bd\"}\nSingle-host TPU slice HBM totals (GiB): {'v5litepod-1': 16, 'v5litepod-4': 64, 'v5litepod-8': 128, 'v6e-4': 128}\nVerified runtime receipt: {\"contract_ok\": true, \"device_count\": 1, \"device_kinds\": [\"cpu\"], \"expected_backend\": \"cpu\", \"expected_sum_of_squares\": 140.0, \"jax\": \"0.9.2\", \"local_device_count\": 1, \"observed_backend\": \"cpu\", \"pmap_sum_of_squares\": 140.0, \"python\": \"3.14.3\", \"receipt_sha256\": \"4ddc0cbb323fe3bd\"}\nSingle-host TPU slice HBM totals (GiB): {'v5litepod-1': 16, 'v5litepod-4': 64, 'v5litepod-8': 128, 'v6e-4': 128}\nMismatch contract_ok: False observed: cpu devices: 1\nRequires --worker=all and jax.distributed.initialize(): {'v5litepod-1': False, 'v5litepod-4': False, 'v5litepod-8': False, 'v5litepod-16': True}\nChecked receipt sha256: 4ddc0cbb323fe3bd\nv5litepod-4 hosts: 1 chips: 4 total HBM GiB: 64\nv6e-4 hosts: 1 chips: 4 total HBM GiB: 128\nSingle-host slices with at least 64 GiB: ['v5litepod-4', 'v5litepod-8', 'v6e-4']\nSingle-host slices with at least 128 GiB: ['v5litepod-8', 'v6e-4']\nSlices fitting 48 GiB: ['v5litepod-4', 'v5litepod-8', 'v6e-4']\nExpected 4-device pmap sum of squares: 10416.0\nPASS: tpu-01\n",
   "notebookCells": [
     {
       "sourceHash": "127c7b4e51ca307261dd2404a227330e049b91ef9d75c2b8794ddf4100e5d156",
@@ -95,13 +95,17 @@
       "outputs": []
     },
     {
-      "sourceHash": "22ab5ff3b505426563e15ee9cf5ffb7a0c93e8ff99c5cfc7efb1fdd501910e32",
+      "sourceHash": "87ed8ed9c9012e12db7fb0f7f10afe484f53d676871f76d60afd1f8f44bde4c5",
       "outputs": [
         {
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "Checked receipt sha256: 4ddc0cbb323fe3bd v5litepod-4 chips: 4 HBM GiB: 64\n"
+            "Checked receipt sha256: 4ddc0cbb323fe3bd\n",
+            "v5litepod-4 hosts: 1 chips: 4 total HBM GiB: 64\n",
+            "v6e-4 hosts: 1 chips: 4 total HBM GiB: 128\n",
+            "Single-host slices with at least 64 GiB: ['v5litepod-4', 'v5litepod-8', 'v6e-4']\n",
+            "Single-host slices with at least 128 GiB: ['v5litepod-8', 'v6e-4']\n"
           ]
         }
       ]

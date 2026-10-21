@@ -1,5 +1,19 @@
 [
   {
+    "version": "0.12.0",
+    "date": "2026-10-21",
+    "title": "Adaptive solvers and natural-text decoder foundations",
+    "summary": "Connect the scientific and Transformer lessons to separately pinned workflows, explained measurements and independent recovery or numerical checks.",
+    "changes": [
+      "Added an optional Diffrax project extension with adaptive and stiff solves, reverse-mode sensitivity refinement, same-data noisy fitting and identifiable versus insensitive observation profiles. Retained arrays and explained figures keep solver steps distinct from measured speed.",
+      "Added a configurable multi-layer causal decoder, train-only BPE and byte baseline, frozen natural-text chapter splits, a measured six-update CPU pilot, cache parity and fresh-process recovery and package checks. Its larger configuration is count-only; no target-scale training or language-quality qualification is claimed.",
+      "Linked the decoder workflow from Projects and its parent guide, rendered its setup and measured plots as a dedicated page, and published explicitly linked source and evidence assets. Project guides now lead with their learning purpose, and ordinary figures open at full size with accessible links. Both optional environments have separate CI execution jobs.",
+      "Corrected the precision lesson to distinguish BF16 operands, requested and returned result dtypes, compiler evidence and actual accumulation semantics. Retained seeded raw arrays and CPU IR probes show why output error alone cannot establish a partial-sum accumulator policy. Historical physical TPU qualifications retain their original source bindings.",
+      "Aligned TPU setup and runtime prompts with their actual executable APIs and unsigned receipt fields. Extended the slice-comparison exercise to both advertised machines and inclusive capacity thresholds; separated calculated device-count expectations from observed execution.",
+      "Added two explicit optional scientific practice contracts, bringing the authored learner inventory to 305, and carried the reader and print-answer repairs forward. Larger model lifecycles, target qualification, independent teaching review and native-reader acceptance remain open."
+    ]
+  },
+  {
     "version": "0.11.1",
     "date": "2026-10-21",
     "title": "Practice and check answers in the offline reader",
@@ -68,7 +82,7 @@
     "title": "Distinct assessment summaries for search and sharing",
     "summary": "Give all eleven synthesis assessments accurate, individual descriptions across search metadata, social previews and page schema.",
     "changes": [
-      "Replaced the shared generic assessment description with a summary of each assessment\u2019s actual tasks in the canonical registry.",
+      "Replaced the shared generic assessment description with a summary of each assessment’s actual tasks in the canonical registry.",
       "Added site-wide duplicate-description checks and verified that search, Open Graph, Twitter and WebPage schema descriptions agree."
     ]
   },

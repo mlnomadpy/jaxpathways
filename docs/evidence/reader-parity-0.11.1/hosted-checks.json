@@ -1,0 +1,64 @@
+{
+  "observedAt": "2026-10-21T17:41:31.500451+00:00",
+  "repository": "mlnomadpy/jaxpathways",
+  "pullRequest": 63,
+  "headCommit": "68b771f0e58cfe9f2495b1381118f6a439234f0e",
+  "scope": "Hosted checks of the frozen 0.11.1 reader patch only. These checks do not validate later uncommitted 0.12 sources, native EPUB reading or human acceptance.",
+  "checks": [
+    {
+      "link": "https://github.com/mlnomadpy/jaxpathways/actions/runs/39643748770/job/119373769698",
+      "name": "tpu-dependencies",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/mlnomadpy/jaxpathways/actions/runs/39643748770/job/119373769898",
+      "name": "site",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/mlnomadpy/jaxpathways/actions/runs/39643748770/job/119373769715",
+      "name": "browser",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/mlnomadpy/jaxpathways/actions/runs/39643748770/job/119373769821",
+      "name": "lessons",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/mlnomadpy/jaxpathways/actions/runs/39643748770/job/119373769874",
+      "name": "projects (0)",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/mlnomadpy/jaxpathways/actions/runs/39643748770/job/119373769886",
+      "name": "projects (1)",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/mlnomadpy/jaxpathways/actions/runs/39643748770/job/119373769948",
+      "name": "projects (2)",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/mlnomadpy/jaxpathways/actions/runs/39643748770/job/119373770098",
+      "name": "projects (3)",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/mlnomadpy/jaxpathways/actions/runs/39643748770/job/119373769492",
+      "name": "loggers",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/mlnomadpy/jaxpathways/actions/runs/39643748770/job/119373770058",
+      "name": "numpyro",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/mlnomadpy/jaxpathways/actions/runs/39643748493/job/119373768643",
+      "name": "powershell",
+      "state": "SUCCESS"
+    }
+  ]
+}
