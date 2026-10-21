@@ -6,7 +6,8 @@
     "status": "active",
     "scope": "project-synthesis",
     "source": "assessments/foundations.md",
-    "url": "assessments/foundations.html"
+    "url": "assessments/foundations.html",
+    "description": "Defend a JAX regression experiment with independent gradient checks, reproducible training, learning-rate analysis and a repair for a broadcasting bug."
   },
   {
     "id": "models",
@@ -15,7 +16,8 @@
     "status": "active",
     "scope": "project-synthesis",
     "source": "assessments/models.md",
-    "url": "assessments/models.html"
+    "url": "assessments/models.html",
+    "description": "Assess a JAX image classifier through stable losses, preprocessing, checkpoint recovery, precision tradeoffs and verified exported inference."
   },
   {
     "id": "math",
@@ -26,7 +28,8 @@
     "source": "assessments/math.md",
     "url": "assessments/math.html",
     "pathwayId": "foundations",
-    "phaseId": "optimization"
+    "phaseId": "optimization",
+    "description": "Explain JAX optimizer behavior using least-squares geometry, Hessian eigenvalues, minibatch gradient noise, clipping and independent Adam update checks."
   },
   {
     "id": "science",
@@ -35,7 +38,8 @@
     "status": "active",
     "scope": "project-synthesis",
     "source": "assessments/science.md",
-    "url": "assessments/science.html"
+    "url": "assessments/science.html",
+    "description": "Defend a differentiable JAX inverse problem with conservation checks, sensitivity analysis, parameter recovery and explained numerical error."
   },
   {
     "id": "rl",
@@ -44,7 +48,8 @@
     "status": "active",
     "scope": "project-synthesis",
     "source": "assessments/rl.md",
-    "url": "assessments/rl.html"
+    "url": "assessments/rl.html",
+    "description": "Assess JAX reinforcement learning with episode-boundary tests, independent policy expectations, clipped updates and held-out evaluation."
   },
   {
     "id": "probability",
@@ -53,7 +58,8 @@
     "status": "active",
     "scope": "project-synthesis",
     "source": "assessments/probability.md",
-    "url": "assessments/probability.html"
+    "url": "assessments/probability.html",
+    "description": "Compare exact Bayesian regression with HMC and variational inference in JAX, then diagnose approximation error and posterior predictive behavior."
   },
   {
     "id": "internals",
@@ -62,7 +68,8 @@
     "status": "active",
     "scope": "project-synthesis",
     "source": "assessments/internals.md",
-    "url": "assessments/internals.html"
+    "url": "assessments/internals.html",
+    "description": "Defend JAX derivative transformations with rectangular Jacobians, custom VJP rules, primitive extensions and independent numerical comparisons."
   },
   {
     "id": "ship",
@@ -71,7 +78,8 @@
     "status": "active",
     "scope": "project-synthesis",
     "source": "assessments/ship.md",
-    "url": "assessments/ship.html"
+    "url": "assessments/ship.html",
+    "description": "Justify a JAX model release with adaptation comparisons, artifact checks, quantized inference measurements and transparent service capacity estimates."
   },
   {
     "id": "ops",
@@ -80,7 +88,8 @@
     "status": "active",
     "scope": "project-synthesis",
     "source": "assessments/ops.md",
-    "url": "assessments/ops.html"
+    "url": "assessments/ops.html",
+    "description": "Rehearse JAX workload incidents with process outcome checks, complete-state recovery, model validation, rollback drills and capacity reasoning."
   },
   {
     "id": "scale",
@@ -89,7 +98,8 @@
     "status": "active",
     "scope": "project-synthesis",
     "source": "assessments/scale.md",
-    "url": "assessments/scale.html"
+    "url": "assessments/scale.html",
+    "description": "Evaluate a sharded JAX workload with independent numerical checks, profiler evidence, partitioning analysis and a bounded Pallas kernel decision."
   },
   {
     "id": "tpu",
@@ -100,6 +110,7 @@
     "source": "assessments/tpu.md",
     "url": "assessments/tpu.html",
     "pathwayId": "tpu",
-    "phaseId": "transformers"
+    "phaseId": "transformers",
+    "description": "Assess a JAX causal training system through checkpoint recovery, cache precision, exported inference and a separate TPU runtime qualification plan."
   }
 ]

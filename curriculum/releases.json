@@ -1,5 +1,15 @@
 [
   {
+    "version": "0.8.1",
+    "date": "2026-10-21",
+    "title": "Distinct assessment summaries for search and sharing",
+    "summary": "Give all eleven synthesis assessments accurate, individual descriptions across search metadata, social previews and page schema.",
+    "changes": [
+      "Replaced the shared generic assessment description with a summary of each assessment’s actual tasks in the canonical registry.",
+      "Added site-wide duplicate-description checks and verified that search, Open Graph, Twitter and WebPage schema descriptions agree."
+    ]
+  },
+  {
     "version": "0.8.0",
     "date": "2026-10-20",
     "title": "A clearer course and traceable model projects",

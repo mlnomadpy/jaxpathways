@@ -36,13 +36,19 @@ for(const phase of course.phases)for(const lesson of phase.lessons.filter(l=>l.s
 assert(fs.readFileSync('dist/robots.txt','utf8').includes(site+base+'sitemap.xml'));
 assert(!locations.some(url=>/\/(lesson|notebook|project|organizer)\.html/.test(url)));
 // Every public destination must describe itself in initial HTML.
-const titles=new Set(), linksByPage=new Map();
+const titles=new Set(), descriptions=new Map(), linksByPage=new Map();
 for(const location of locations){
  const file=new URL(location).pathname.slice(base.length)||'index.html';
  const w=read(file),doc=w.document;
  assert(doc.title.trim(),`missing title: ${file}`);
  assert(!titles.has(doc.title),`duplicate title: ${file}`);titles.add(doc.title);
- assert(doc.querySelector('meta[name="description"]')?.content.trim(),`missing description: ${file}`);
+ const description=doc.querySelector('meta[name="description"]')?.content.trim();
+ assert(description,`missing description: ${file}`);
+ const descriptionKey=description.replace(/\s+/g,' ').toLowerCase();
+ assert(!descriptions.has(descriptionKey),`duplicate description: ${file} matches ${descriptions.get(descriptionKey)}`);
+ descriptions.set(descriptionKey,file);
+ for(const [attribute,name] of [['property','og:description'],['name','twitter:description']])
+  assert.equal(doc.querySelector(`meta[${attribute}="${name}"]`)?.content,description,`sharing description mismatch: ${file}`);
  assert.equal(doc.querySelectorAll('h1').length,1,`heading count: ${file}`);
  linksByPage.set(location,[...doc.querySelectorAll('a[href]')].map(anchor=>{const url=new URL(anchor.getAttribute('href'),location);url.hash='';url.search='';if(url.pathname.endsWith('/index.html'))url.pathname=url.pathname.slice(0,-10);return url.href;}).filter(url=>locations.includes(url)));
  const data=JSON.parse(doc.querySelector('script[type="application/ld+json"]')?.textContent||'null');
@@ -50,6 +56,11 @@ for(const location of locations){
  const graph=data['@graph'];assert(Array.isArray(graph),`missing schema graph: ${file}`);
  const page=graph.find(item=>['WebPage','CollectionPage'].includes(item['@type']));
  assert.equal(page?.url,location,`WebPage URL: ${file}`);
+ assert.equal(page.description,description,`WebPage schema description mismatch: ${file}`);
+ if(file.startsWith('assessments/')){
+  const assessment=JSON.parse(fs.readFileSync('curriculum/assessments.json','utf8')).find(item=>item.url===file);
+  assert.equal(description,assessment?.description,`assessment summary mismatch: ${file}`);
+ }
  const author=graph.find(item=>item['@type']==='Person');assert.equal(author?.name,'Taha Bouhsine');
  assert.equal(page.author['@id'],author['@id']);
  if(file!=='index.html'){
