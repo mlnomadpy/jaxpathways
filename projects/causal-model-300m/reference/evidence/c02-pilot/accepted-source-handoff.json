@@ -1,0 +1,123 @@
+{
+  "scope": "C02 I1-I5 bounded learner lifecycle repairs. Original training sources, frozen recipe, six-branch run, final2 QA and final6 diagnostic were preserved. No new optimization or quality promotion.",
+  "source_files_sha256": {
+    "projects/causal-model-300m/README.md": "ea9bd3050ed8c5650ac4ca4def709d6681705b6f0bcf48e65c79b48af348fcae",
+    "projects/causal-model-300m/config.py": "53e0990fcf6d8fb08486398097919a9430f768cda54540740b3a453a21ed1db9",
+    "projects/causal-model-300m/consumer.py": "1b0934337eb746c1c6e1039b13fbf006cc2acc4dd43ea505464b3a65734fbc9a",
+    "projects/causal-model-300m/data/RIGHTS.md": "9511283c1ba440b6b8416ba86d8cf40fdf4c740680134de78a3a74b6c0984af5",
+    "projects/causal-model-300m/data/foundation-reuse.json": "bfc1f2be67a8bf3bcf77f835fc5b238a3df5514259bf887208e5200e21b49297",
+    "projects/causal-model-300m/data/frozen_recipe.json": "fe81ffbca439f7fd2da791ba2d695aee349172ab214bbc95ac6202558963751c",
+    "projects/causal-model-300m/data/lm_eval_tasks/hellaswag/utils.py": "61a9347e30cd375161502aed3396c3a8d6ac1e7436d0b29683b662752948fd88",
+    "projects/causal-model-300m/data/prepare.py": "dc496fb8fb34f8e804b95ee2b383789bd5cbc919fe167bccf962dfd7238043f1",
+    "projects/causal-model-300m/evaluate_pilot.py": "48e57589b5319b18f7bca92e9084439eeef5e12e41037403b46eb487d5d6bf01",
+    "projects/causal-model-300m/evaluate_pythia_baseline.py": "42697688e4e0cfc9896664c1b69aa75ed19a39875251073e336da57e10623f88",
+    "projects/causal-model-300m/evaluate_pythia_qa.py": "2bfd093ac860127e6dca2900c0e87d420542b1feaa76e5af3f4dcc48c59ddf10",
+    "projects/causal-model-300m/evaluate_qa_diagnostics.py": "c4e265f8e2554bb69e2108836f03fc52d065cabf354c828f0849aaa88f1c13dd",
+    "projects/causal-model-300m/export_consumer.py": "5efb2f22108b7c8a8aef12ec77214779b9d7eb9298d1141f74584554a6596fcc",
+    "projects/causal-model-300m/fetch_pythia_baseline.py": "7f7d0cfd382e5cd2723911fdabca80f16c71fdde307f8b7140fb5a5b5e49bbc0",
+    "projects/causal-model-300m/lm_eval_adapter.py": "6968ebe1a71ce9f46bcdbff203f7465de0cb856bb71e1575c7534124747deb97",
+    "projects/causal-model-300m/model.py": "efec0774f84e19f870368f7965e3e779641935f4670140065226ec8a27e71932",
+    "projects/causal-model-300m/pythia_pin.py": "f866c000ecfc4b32040bfc6d4d726df6a00d19d0f931f903dd988289165b34c5",
+    "projects/causal-model-300m/render_c02_figures.py": "c224b8d3d5c11fdf99732fcff110267283273a9b14e94fa3d75986b1a3756bfd",
+    "projects/causal-model-300m/requirements-c02-baseline.txt": "4705ef545acce89923166a2a16d9d530e105a7f28f832f7b4c7af571601f805d",
+    "projects/causal-model-300m/requirements-c02-lm-eval.txt": "bc67b16f14d338d910cb3f654f7d6c0897ed6f22de4b86ef291927d781a2ea3e",
+    "projects/causal-model-300m/requirements-c02.txt": "f8ff69203fcf2610a0c23f10d1ac225adcadace61ec58c40e98d6b1bdef45b1d",
+    "projects/causal-model-300m/run_lm_eval.py": "2ac22a0f233760d1d125defd9f2e66154532e4b7f983c76a9f9e597a633e7324",
+    "projects/causal-model-300m/run_pilot.py": "ff570c4431c9fd326d0ee163b01d35d3354a2c8ec45b58ff280b73f3e9812303",
+    "projects/causal-model-300m/serve_local.py": "aa2923a37bdcf1b31ac074ea82368a0ded9b3b197b5128cb8c39430b84807335",
+    "projects/causal-model-300m/squad_scoring.py": "ec23c43c0909e5bd529f69b7c8a6f0c2157597e35c624c5d528360eaca76ece3",
+    "projects/causal-model-300m/starter/README.md": "8211dc7af6df6e2fa107fb4a8a3d447ed9c47513f983fba41bf0b526a4eb15ce",
+    "projects/causal-model-300m/starter/model.py": "40e3febf182c4aea52c841f53a36099f6caa3f73187c955d28589da2bb414e7e",
+    "projects/causal-model-300m/tests/check.py": "d130b08c5004e49afe2787a8b61fff4a24d50d9ba8d7ca4deb3896803d60889f",
+    "projects/causal-model-300m/tests/replay_branch.py": "8b0c0ec5bdd0c4140502ecd03569a622cc183c6a3f6b082885c60987adcb1ed3",
+    "projects/causal-model-300m/tests/resume_worker.py": "74f04c033bfdc6b21beb1908b3933a033e7b31e83fae433c3d5ca27ea34ee307",
+    "projects/causal-model-300m/tests/test_consumer.py": "e5b2a340d46342d4560ae9b3dffafd907e5d602ee67928ed22b21d0020bd4957",
+    "projects/causal-model-300m/tests/test_data_freeze.py": "0dcccca59f473a65bb265e3629bef747e1eaff9999dbb0e81ac38731f169377a",
+    "projects/causal-model-300m/tests/test_evaluation.py": "27d632a6b6c44da8f23aca5ca044d416f51c9bb1e6d75ac167e516096d4f49e2",
+    "projects/causal-model-300m/tests/test_evidence_reconstruction.py": "b0f7a5b3929b7fb115c7f02f32e7f389a584fa0671e65874d4c3c8ecd6659355",
+    "projects/causal-model-300m/tests/test_export_consumer.py": "b2e33881a6159291ba138e9c4d9a198b655f95523dd6802a44227fd7f5c5575d",
+    "projects/causal-model-300m/tests/test_lm_eval_adapter.py": "8f4254f8dda49b0a80d281448416f46687065beb3e6845afd891fa1222c12a91",
+    "projects/causal-model-300m/tests/test_model_math.py": "873a10984041978ff423f59989468befa8e73cb998fea94a5f7e14f026ca694b",
+    "projects/causal-model-300m/tests/test_pythia_baseline.py": "8e2e0ac815b09c7d2c1c0b0c1adc83503ca528dd2a6bd3dbc17bc39db4b2d14e",
+    "projects/causal-model-300m/tests/test_qa_diagnostics.py": "e6bfeaf20777fd0bffebe7f761ef0d452ecc246610cbcfda4220f4c08817e2db",
+    "projects/causal-model-300m/tests/test_runner_integrity.py": "0c76665d6ceaba14d56725b3ab2991e3ae5f74cec8af5cba64a1d44407b1016f",
+    "projects/causal-model-300m/tests/test_service_live.py": "21654d10230a2540e51366da6412412cd9c7612e7eee48f97b8b71274986893e",
+    "projects/causal-model-300m/tests/test_starter_contract.py": "bcc5335f1e73ece355b829571bc18bc17b39b396c10b13bd0a9764933aa9337e",
+    "projects/causal-model-300m/tests/test_training_recovery.py": "d8748e8bab325b057f5cda9b251b45e516f950beee0a278093e823e25ce1789e",
+    "projects/causal-model-300m/training.py": "87cd3754268552ed5ce4f3d95774591c57c3546afc352768324e459a86e5caf7"
+  },
+  "artifact_receipts": {
+    "stage_all_log": {
+      "path": "/private/tmp/c02-luna-I1-I5-stage-all.log",
+      "sha256": "41809e76731bec3cc68ed3d050876ee55d174c24cb12a54f1835f531a3f71623"
+    },
+    "pytest_log": {
+      "path": "/private/tmp/c02-luna-I1-I5-pytest.log",
+      "sha256": "61a79c2286e4cbcb208cbd4fccb917bbd7bb8edf6c12a449514b4bf62b58a293"
+    },
+    "final2_metrics": {
+      "path": "/private/tmp/jaxpathways-c02-evaluation-20261021-final2/metrics.json",
+      "sha256": "8c7b6441c289b33f8bd9fabd963944416ae5af442ed50fc3c4a1ba6527d9d9a1"
+    },
+    "final2_raw_qa": {
+      "path": "/private/tmp/jaxpathways-c02-evaluation-20261021-final2/qa-generations.jsonl",
+      "sha256": "6dbb21d19ab04f005b9d6058eca25def56abdd2541c76a49e801da8ebc7f6b82"
+    },
+    "candidate_package_manifest": {
+      "path": "/private/tmp/jaxpathways-c02-consumer-candidate-I1-I5-20261021/manifest.json",
+      "sha256": "74dd30790e8fb95293ed91a0f4e3aef56c45ddf9b18247abeca23bdd18ab088d"
+    },
+    "supplemental_final6": {
+      "path": "/private/tmp/jaxpathways-c02-qa-diagnostics-20261021-final6.json",
+      "sha256": "3a64103a5a216e4db0b1af3fc41567ce849bdb0b0cb6e82b4f6b5dac5ab6d2bf"
+    },
+    "figure_index_final6": {
+      "path": "/private/tmp/jaxpathways-c02-figures-20261021-final6/figure-index.json",
+      "sha256": "a9688d92213a3560d9f0210f3a829de6e2f7da6762120f66ab0721c6f200bc6a"
+    },
+    "pythia_baseline_I4": {
+      "path": "/private/tmp/jaxpathways-c02-evaluation-20261021-pythia-baseline-I4-v2.json",
+      "sha256": "0a100e52d9229289625423477543662e967114b096e7def97e82230dd4d899ed"
+    },
+    "pythia_qa_I4": {
+      "path": "/private/tmp/jaxpathways-c02-evaluation-20261021-pythia-qa-I4-v2.json",
+      "sha256": "9ee2143381e07a09143d1779f4970fd218ecc16e7741f59ebe13a6a1b8e7a445"
+    },
+    "lm_eval_I3": {
+      "path": "/private/tmp/jaxpathways-c02-lm-eval-I3-20261021.json",
+      "sha256": "85286f687723fe48d782d8eab64993a571a6af45939e7baf4b7866e356dee3a0"
+    },
+    "constant_generation_candidate": {
+      "path": "/private/tmp/c02-sol-constant-generation-candidate.py",
+      "sha256": "34a1375fde8672113aa3bf92613fdecbb595d9867fe051b20f8cf7079725f9d8"
+    },
+    "constant_generation_rejection": {
+      "path": "/private/tmp/c02-constant-generation-rejected-I1-I5.log",
+      "sha256": "972c71b87c9c3cf7d4afac12ede0a74607bd46e334c2354d7a3cac400338ae49"
+    },
+    "starter_expected_failure": {
+      "path": "/private/tmp/c02-untouched-starter-I1-I5.log",
+      "sha256": "04ee490d603a2f80b9b716ef16a7875f4ef9728aabcfbca61c878d4d678f7fcd"
+    },
+    "root_live_socket_tests": {
+      "path": "/private/tmp/jaxpathways-c02-repaired-live-tests.log",
+      "sha256": "6dbe1c9a546ea8a99736183b1a8d138ebb00be58d116366919b214b259234878"
+    },
+    "root_transport_probe_v3": {
+      "path": "/private/tmp/jaxpathways-c02-root-review-v2/transport-result.json",
+      "sha256": "d35eeb66b66fa9f71594a30f5d3cf00fc5cbe808d0cc402174b2d4490e9f5005"
+    }
+  },
+  "verification": {
+    "stage_all": "Passed all stages: independent model/cache/mask/candidate-routing oracles; strict prepared data; six-branch fresh-process replay; raw 6x128 QA reconstruction; candidate export and cold consumer generation.",
+    "pytest": "42 passed, 16 subtests passed, 2 upstream SWIG deprecation warnings. Five test_service_live cases were separately attempted but sandbox socket bind returned PermissionError; root independently ran socket tests and v3 real-TCP probes, receipts linked above.",
+    "format_and_syntax": "Black --check: 36 files unchanged; compileall succeeded.",
+    "native_harness": "8-example lm-eval smoke only: HellaSwag acc/norm 0.25/0.375; ARC-Easy 0.125/0.25. Not official benchmark qualification.",
+    "quality": "All six QA branches remain below frozen QA floors. Failed quality evidence and full-capstone/target/human gates remain open."
+  },
+  "revision": {
+    "parent_receipt": "/private/tmp/c02-luna-I1-I5-handoff.json",
+    "parent_receipt_sha256": "6c082cd8952b6e5ede4735e0332fa342770be569c46015b538c1abd4ffa8304a",
+    "change": "README command order corrected: frozen reloaded evaluation before selected-candidate export and native harness/consumer checks."
+  }
+}

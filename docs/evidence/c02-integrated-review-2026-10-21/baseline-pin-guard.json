@@ -1,0 +1,15 @@
+{
+  "original_pinned_snapshot_files": 7,
+  "original_snapshot_all_hashes_match": true,
+  "probe": "only tokenizer whitespace changed; loader sentinel must be unreachable after strict pin verification",
+  "results": {
+    "evaluate_pythia_baseline": {
+      "source_sha256": "7890b1bd2be2ea27911bd0fe7fbb384d49a9cef84b77f2f3e58f92ee739aec14",
+      "reached_model_loading_with_mismatched_tokenizer_hash": true
+    },
+    "evaluate_pythia_qa": {
+      "source_sha256": "cbb3755fc318878da6700e85492e215ef9f8cbc1f041620b9eafc64d19c626c4",
+      "reached_model_loading_with_mismatched_tokenizer_hash": true
+    }
+  }
+}

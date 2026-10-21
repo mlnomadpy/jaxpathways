@@ -1,0 +1,82 @@
+{
+  "status": "pass",
+  "scope": "Frozen reference tied MLM dense/GELU/norm/vocabulary forward and six independent NumPy loss finite differences across both encoder blocks, tied embeddings and head. Small deterministic inference fixture; does not establish every learner implementation, training quality or target scale.",
+  "model_sha256": "0d50093ea497730be48007265b3db25b9044fa13b88a4485cfce7e4c45266f90",
+  "max_logit_error": 9.383992752298731e-08,
+  "selected_derivatives": [
+    {
+      "path": [
+        "blocks",
+        0,
+        "q"
+      ],
+      "index": [
+        0,
+        0
+      ],
+      "jax_gradient": -0.0048005422577261925,
+      "independent_numpy_finite_difference": -0.004800525698289704
+    },
+    {
+      "path": [
+        "blocks",
+        1,
+        "v"
+      ],
+      "index": [
+        0,
+        0
+      ],
+      "jax_gradient": -0.00258824834600091,
+      "independent_numpy_finite_difference": -0.0025882454621761752
+    },
+    {
+      "path": [
+        "blocks",
+        0,
+        "up"
+      ],
+      "index": [
+        0,
+        0
+      ],
+      "jax_gradient": -0.002303327200934291,
+      "independent_numpy_finite_difference": -0.002303327429231672
+    },
+    {
+      "path": [
+        "mlm",
+        "dense"
+      ],
+      "index": [
+        0,
+        0
+      ],
+      "jax_gradient": 0.02804432064294815,
+      "independent_numpy_finite_difference": 0.02804429822766963
+    },
+    {
+      "path": [
+        "token_embed"
+      ],
+      "index": [
+        9,
+        0
+      ],
+      "jax_gradient": 0.1157563328742981,
+      "independent_numpy_finite_difference": 0.115787991639138
+    },
+    {
+      "path": [
+        "mlm",
+        "vocab_bias"
+      ],
+      "index": [
+        7
+      ],
+      "jax_gradient": -0.4710404872894287,
+      "independent_numpy_finite_difference": -0.47104048406509946
+    }
+  ],
+  "checker_sha256": "134b2c2d90e9ab1c9553a3694238ece995e1021f4aeb165b7c27d454dea9281d"
+}

@@ -1,0 +1,5 @@
+model: independent NumPy, masks, cache and candidate-routing checks passed
+data: strict raw-source, prepared-array, schedule and tokenizer lock passed
+resume: candidate-bound fresh-process final updates matched all 6 branches
+{"package": "/private/var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/c02-candidate-export-n0v4ogpp/package", "manifest_sha256": "74dd30790e8fb95293ed91a0f4e3aef56c45ddf9b18247abeca23bdd18ab088d", "parameters": 33088}
+evaluation/consumer: raw 6x128 scores, source/checkpoint bindings, retention arithmetic, selected-candidate export and cold generation passed

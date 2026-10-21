@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import ast
 import copy
 from dataclasses import replace
 import hashlib
@@ -139,6 +140,30 @@ def _numpy_encoder_oracle(params, ids, config):
     )
 
 
+def _numpy_mlm_logits(params, ids, config):
+    """Independent float64 tied-head forward pass over oracle encoder states."""
+    hidden = _numpy_encoder_oracle(params, ids, config)
+    head = params["mlm"]
+    transformed = hidden @ np.asarray(head["dense"], np.float64)
+    transformed += np.asarray(head["dense_bias"], np.float64)
+    transformed = (
+        0.5
+        * transformed
+        * (
+            1.0
+            + np.tanh(np.sqrt(2.0 / np.pi) * (transformed + 0.044715 * transformed**3))
+        )
+    )
+    transformed = _numpy_layer_norm(
+        transformed,
+        np.asarray(head["norm_scale"], np.float64),
+        np.asarray(head["norm_bias"], np.float64),
+    )
+    return transformed @ np.asarray(params["token_embed"], np.float64).T + np.asarray(
+        head["vocab_bias"], np.float64
+    )
+
+
 def _numpy_masked_loss(logits, labels, mask):
     logits = np.asarray(logits, np.float64)
     labels = np.asarray(labels, np.int64)
@@ -149,6 +174,164 @@ def _numpy_masked_loss(logits, labels, mask):
     losses = log_partition - chosen
     count = int(mask.sum())
     return float(losses[mask].sum() / count), float(losses[mask].sum()), count
+
+
+def _replace_tree_leaf(tree, path, value):
+    """Copy a nested dict/tuple parameter tree with one leaf replaced."""
+    if not path:
+        return value
+    key, *tail = path
+    if isinstance(tree, dict):
+        result = dict(tree)
+        result[key] = _replace_tree_leaf(tree[key], tail, value)
+        return result
+    if isinstance(tree, tuple):
+        result = list(tree)
+        result[key] = _replace_tree_leaf(tree[key], tail, value)
+        return tuple(result)
+    if isinstance(tree, list):
+        result = list(tree)
+        result[key] = _replace_tree_leaf(tree[key], tail, value)
+        return result
+    raise TypeError(f"cannot descend through parameter leaf at {path!r}")
+
+
+def _check_mlm_oracle_and_gradients(module, params, ids, labels, selected, config):
+    """Grade raw MLM outputs and gradients against independent NumPy math."""
+    raw_logits = np.asarray(module.mlm_logits(params, ids, config), np.float64)
+    oracle_logits = _numpy_mlm_logits(params, np.asarray(ids), config)
+    if not np.all(np.isfinite(raw_logits)):
+        raise AssertionError("candidate MLM logits are non-finite")
+    np.testing.assert_allclose(raw_logits, oracle_logits, rtol=3e-5, atol=3e-6)
+
+    expected_loss = _numpy_masked_loss(oracle_logits, labels, selected)
+    candidate_loss = module.masked_token_loss(params, ids, labels, selected, config)
+    np.testing.assert_allclose(
+        np.asarray(candidate_loss, np.float64),
+        np.asarray(expected_loss, np.float64),
+        rtol=3e-5,
+        atol=3e-6,
+    )
+
+    gradient = jax.grad(
+        lambda current: module.masked_token_loss(
+            current, ids, labels, selected, config
+        )[0]
+    )(params)
+    checks = []
+    paths = (
+        ("mlm", "dense"),
+        ("mlm", "norm_scale"),
+        ("mlm", "norm_bias"),
+        ("mlm", "vocab_bias"),
+        ("blocks", 0, "q"),
+        ("blocks", 1, "v"),
+        ("blocks", 0, "up"),
+        ("blocks", 1, "down"),
+        ("token_embed",),
+    )
+    epsilon_values = (2e-3, 1e-3)
+    for index, path in enumerate(paths):
+        leaf = params
+        grad_leaf = gradient
+        for part in path:
+            leaf = leaf[part]
+            grad_leaf = grad_leaf[part]
+        leaf_array = np.asarray(leaf, np.float64)
+        direction = np.random.default_rng(7301 + index).normal(size=leaf_array.shape)
+        direction /= np.linalg.norm(direction)
+
+        def independent_loss(offset):
+            changed = _replace_tree_leaf(
+                params,
+                path,
+                jnp.asarray(leaf_array + offset * direction, dtype=jnp.float32),
+            )
+            return _numpy_masked_loss(
+                _numpy_mlm_logits(changed, np.asarray(ids), config),
+                labels,
+                selected,
+            )[0]
+
+        finite_differences = [
+            (independent_loss(epsilon) - independent_loss(-epsilon)) / (2.0 * epsilon)
+            for epsilon in epsilon_values
+        ]
+        if not all(np.isfinite(finite_differences)):
+            raise AssertionError(f"non-finite independent MLM derivative for {path}")
+        if max(abs(value) for value in finite_differences) < 1e-4:
+            raise AssertionError(f"MLM fixture has no sensitivity for {path}")
+        fd_spread = abs(finite_differences[0] - finite_differences[1])
+        np.testing.assert_allclose(
+            finite_differences[0], finite_differences[1], rtol=0.02, atol=1e-7
+        )
+        candidate_derivative = float(
+            np.sum(np.asarray(grad_leaf, np.float64) * direction)
+        )
+        derivative_tolerance = max(
+            4.0 * fd_spread, 1e-6, 0.05 * abs(finite_differences[1])
+        )
+        if abs(candidate_derivative) < 0.5 * abs(finite_differences[1]):
+            raise AssertionError(
+                f"candidate MLM derivative is disconnected from {path}: "
+                f"{candidate_derivative} versus independent "
+                f"{finite_differences[1]}"
+            )
+        if abs(candidate_derivative - finite_differences[1]) > derivative_tolerance:
+            raise AssertionError(
+                f"candidate MLM derivative for {path} differs by "
+                f"{abs(candidate_derivative - finite_differences[1])}, "
+                f"exceeding finite-difference-aware tolerance "
+                f"{derivative_tolerance}"
+            )
+        checks.append(
+            {
+                "path": list(path),
+                "candidate_autodiff": candidate_derivative,
+                "independent_numpy_finite_differences": finite_differences,
+                "independent_fd_spread": fd_spread,
+                "candidate_derivative_tolerance": derivative_tolerance,
+                "direction_norm": float(np.linalg.norm(direction)),
+            }
+        )
+
+    head_norm = float(
+        np.sqrt(
+            sum(
+                np.sum(np.square(np.asarray(gradient["mlm"][name], np.float64)))
+                for name in (
+                    "dense",
+                    "dense_bias",
+                    "norm_scale",
+                    "norm_bias",
+                    "vocab_bias",
+                )
+            )
+        )
+    )
+    encoder_norm = float(
+        np.sqrt(
+            sum(
+                np.sum(np.square(np.asarray(leaf, np.float64)))
+                for leaf in jax.tree.leaves(gradient["blocks"])
+            )
+        )
+    )
+    if (
+        not np.isfinite(head_norm + encoder_norm)
+        or min(head_norm, encoder_norm) <= 1e-4
+    ):
+        raise AssertionError("MLM must have finite, nonzero head and encoder gradients")
+    return {
+        "selected_loss_matches_independent_numpy": True,
+        "raw_logits_match_independent_numpy": True,
+        "selected_count": int(expected_loss[2]),
+        "head_activation": "tanh-approximate GELU (0.044715 cubic coefficient)",
+        "layer_norm_variance_epsilon": 1e-5,
+        "head_gradient_norm": head_norm,
+        "encoder_gradient_norm": encoder_norm,
+        "derivatives": checks,
+    }
 
 
 def _independent_contrastive(
@@ -408,9 +591,7 @@ def _check_model(candidate):
     reference_module, _ = _load_candidate(reference_path)
     reference_params = reference_module.initialize(jax.random.key(17), config)
     reference_ids = np.asarray(ids)
-    reference_oracle = _numpy_encoder_oracle(
-        reference_params, reference_ids, config
-    )
+    reference_oracle = _numpy_encoder_oracle(reference_params, reference_ids, config)
     uniform_hidden = np.asarray(
         uniform_module.hidden_states(reference_params, ids, config)
     )
@@ -460,21 +641,22 @@ def _check_model(candidate):
     input_ids = jnp.asarray([[2, 4, 9, 3], [2, 6, 4, 3]], jnp.int32)
     labels = jnp.asarray([[2, 7, 9, 3], [2, 6, 8, 3]], jnp.int32)
     selected = jnp.asarray([[0, 1, 0, 0], [0, 0, 1, 0]], bool)
-    loss, total, count = module.masked_token_loss(
-        params, input_ids, labels, selected, config
+    mlm_params = copy.deepcopy(params)
+    mlm_params["mlm"]["dense_bias"] = jnp.linspace(-0.13, 0.17, config.width)
+    mlm_params["mlm"]["norm_scale"] = jnp.linspace(0.63, 1.37, config.width)
+    mlm_params["mlm"]["norm_bias"] = jnp.linspace(0.09, -0.11, config.width)
+    mlm_params["mlm"]["vocab_bias"] = jnp.linspace(-0.21, 0.24, config.vocab_size)
+    mlm_checks = _check_mlm_oracle_and_gradients(
+        module, mlm_params, input_ids, labels, selected, config
     )
-    oracle = _numpy_masked_loss(
-        np.asarray(module.mlm_logits(params, input_ids, config)), labels, selected
-    )
-    np.testing.assert_allclose([loss, total, count], oracle, rtol=2e-5, atol=2e-6)
     # BERT-style selected targets still contribute when corruption chooses a
     # random vocabulary token or leaves the input unchanged (the 10%/10% cases).
     unmasked_selected = input_ids.at[0, 1].set(12).at[1, 2].set(8)
     unmasked_loss, _, unmasked_count = module.masked_token_loss(
-        params, unmasked_selected, labels, selected, config
+        mlm_params, unmasked_selected, labels, selected, config
     )
     unmasked_oracle = _numpy_masked_loss(
-        np.asarray(module.mlm_logits(params, unmasked_selected, config)),
+        _numpy_mlm_logits(mlm_params, np.asarray(unmasked_selected), config),
         labels,
         selected,
     )
@@ -486,34 +668,146 @@ def _check_model(candidate):
     )
     try:
         module.masked_token_loss(
-            params, input_ids, labels, jnp.zeros_like(selected), config
+            mlm_params, input_ids, labels, jnp.zeros_like(selected), config
         )
     except ValueError:
         pass
     else:
         raise AssertionError("empty masked-token loss set was accepted")
 
-    def mlm_scalar(current):
-        return module.masked_token_loss(current, input_ids, labels, selected, config)[0]
+    # The false-pass mutations are derived from the owned implementation, not
+    # from source-string assumptions about a submitted learner implementation.
+    owned_zero, _ = _load_candidate(PROJECT / "model.py")
+    zero_params = owned_zero.initialize(jax.random.key(17), config)
+    zero_params["mlm"]["dense_bias"] = mlm_params["mlm"]["dense_bias"]
+    zero_params["mlm"]["norm_scale"] = mlm_params["mlm"]["norm_scale"]
+    zero_params["mlm"]["norm_bias"] = mlm_params["mlm"]["norm_bias"]
+    zero_params["mlm"]["vocab_bias"] = mlm_params["mlm"]["vocab_bias"]
+    owned_zero.mlm_logits = (
+        lambda p, token_ids, cfg, valid_mask=None, **kwargs: jnp.zeros(
+            (*jnp.asarray(token_ids).shape, cfg.vocab_size), dtype=jnp.float32
+        )
+    )
+    try:
+        _check_mlm_oracle_and_gradients(
+            owned_zero, zero_params, input_ids, labels, selected, config
+        )
+    except AssertionError:
+        pass
+    else:
+        raise AssertionError(
+            "owned constant-zero MLM head passed the independent oracle"
+        )
 
-    grad = jax.grad(mlm_scalar)(params)
-    index = (5,)
-    value = float(params["mlm"]["vocab_bias"][index[0]])
-    epsilon = 1e-3
-    plus, minus = copy.deepcopy(params), copy.deepcopy(params)
-    plus["mlm"]["vocab_bias"] = plus["mlm"]["vocab_bias"].at[index].set(value + epsilon)
-    minus["mlm"]["vocab_bias"] = (
-        minus["mlm"]["vocab_bias"].at[index].set(value - epsilon)
+    owned_stopped, _ = _load_candidate(PROJECT / "model.py")
+    stopped_hidden_states = owned_stopped.hidden_states
+    owned_stopped.hidden_states = lambda *args, **kwargs: jax.lax.stop_gradient(
+        stopped_hidden_states(*args, **kwargs)
     )
-    finite_difference = (float(mlm_scalar(plus)) - float(mlm_scalar(minus))) / (
-        2 * epsilon
+    stopped_params = owned_stopped.initialize(jax.random.key(17), config)
+    stopped_params["mlm"]["dense_bias"] = mlm_params["mlm"]["dense_bias"]
+    stopped_params["mlm"]["norm_scale"] = mlm_params["mlm"]["norm_scale"]
+    stopped_params["mlm"]["norm_bias"] = mlm_params["mlm"]["norm_bias"]
+    stopped_params["mlm"]["vocab_bias"] = mlm_params["mlm"]["vocab_bias"]
+    try:
+        _check_mlm_oracle_and_gradients(
+            owned_stopped, stopped_params, input_ids, labels, selected, config
+        )
+    except AssertionError:
+        pass
+    else:
+        raise AssertionError(
+            "owned forward-identical stopped-encoder-gradient mutation passed"
+        )
+
+    owned_stopped_head, _ = _load_candidate(PROJECT / "model.py")
+    original_mlm_logits = owned_stopped_head.mlm_logits
+    owned_stopped_head.mlm_logits = lambda *args, **kwargs: jax.lax.stop_gradient(
+        original_mlm_logits(*args, **kwargs)
     )
-    np.testing.assert_allclose(
-        float(grad["mlm"]["vocab_bias"][index[0]]),
-        finite_difference,
-        rtol=3e-2,
-        atol=3e-3,
+    stopped_head_params = owned_stopped_head.initialize(jax.random.key(17), config)
+    for name in ("dense_bias", "norm_scale", "norm_bias", "vocab_bias"):
+        stopped_head_params["mlm"][name] = mlm_params["mlm"][name]
+    try:
+        _check_mlm_oracle_and_gradients(
+            owned_stopped_head,
+            stopped_head_params,
+            input_ids,
+            labels,
+            selected,
+            config,
+        )
+    except AssertionError:
+        pass
+    else:
+        raise AssertionError("owned stopped-head-gradient mutation passed")
+
+    class StopDownProjection(ast.NodeTransformer):
+        def __init__(self):
+            self.changed = 0
+
+        def visit_FunctionDef(self, node):
+            if node.name != "hidden_states":
+                return node
+            return self.generic_visit(node)
+
+        def visit_Subscript(self, node):
+            self.generic_visit(node)
+            key = node.slice
+            if (
+                isinstance(node.value, ast.Name)
+                and node.value.id == "block"
+                and isinstance(key, ast.Constant)
+                and key.value == "down"
+            ):
+                self.changed += 1
+                return ast.Call(
+                    func=ast.Attribute(
+                        value=ast.Attribute(
+                            value=ast.Name(id="jax", ctx=ast.Load()),
+                            attr="lax",
+                            ctx=ast.Load(),
+                        ),
+                        attr="stop_gradient",
+                        ctx=ast.Load(),
+                    ),
+                    args=[node],
+                    keywords=[],
+                )
+            return node
+
+    stopped_down_tree = ast.parse(reference_path.read_text(encoding="utf-8"))
+    stop_down = StopDownProjection()
+    stopped_down_tree = stop_down.visit(stopped_down_tree)
+    if stop_down.changed != 1:
+        raise AssertionError(
+            "owned stopped-down fixture did not isolate one projection"
+        )
+    stopped_down_path = (
+        Path(tempfile.mkdtemp(prefix="jaxpathways-c01-stopped-down-"))
+        / "stopped_down.py"
     )
+    stopped_down_path.write_text(
+        ast.unparse(ast.fix_missing_locations(stopped_down_tree)) + "\n",
+        encoding="utf-8",
+    )
+    owned_stopped_down, _ = _load_candidate(stopped_down_path)
+    stopped_down_params = owned_stopped_down.initialize(jax.random.key(17), config)
+    for name in ("dense_bias", "norm_scale", "norm_bias", "vocab_bias"):
+        stopped_down_params["mlm"][name] = mlm_params["mlm"][name]
+    try:
+        _check_mlm_oracle_and_gradients(
+            owned_stopped_down,
+            stopped_down_params,
+            input_ids,
+            labels,
+            selected,
+            config,
+        )
+    except AssertionError:
+        pass
+    else:
+        raise AssertionError("owned stopped-down-gradient mutation passed")
 
     query_vectors = jnp.asarray([[0.8, 0.6], [0.6, 0.8]], jnp.float32)
     doc_vectors = jnp.asarray(
@@ -603,7 +897,15 @@ def _check_model(candidate):
         "uniform_attention_mutation_rejected": True,
         "padding_and_batch_isolation": True,
         "nonzero_dropout_responds_to_prng": True,
-        "mlm_numpy_oracle_and_gradient_fd": True,
+        "mlm_numpy_oracle_and_full_gradient_fd": mlm_checks,
+        "mlm_expected_head_conventions": {
+            "activation": "tanh-approximate GELU (0.044715 cubic coefficient)",
+            "layer_norm_variance_epsilon": 1e-5,
+        },
+        "constant_zero_head_mutation_rejected": True,
+        "stopped_encoder_gradient_mutation_rejected": True,
+        "stopped_head_gradient_mutation_rejected": True,
+        "stopped_down_gradient_mutation_rejected": True,
         "multi_positive_numpy_oracle_and_gradient_fd": True,
         "candidate": str(candidate_path),
     }

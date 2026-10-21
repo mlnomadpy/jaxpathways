@@ -41,6 +41,30 @@ contains 3 of them. Recipe-development claim text and human query/evidence pairs
 are excluded from training. Treat development retrieval metrics as document-text
 transductive; they are not a clean unseen-document estimate.
 
+### Numerical conventions for your implementation
+
+Use the same conventions when you compare your model with the reference.
+Both the encoder MLP and the masked-token head use the tanh approximation
+to GELU, with cubic coefficient 0.044715. Layer normalization uses the mean
+squared deviation across the final feature axis, then adds an epsilon of
+0.00001 to that variance before taking its square root. A different GELU
+approximation or epsilon can change a parity check even when shapes agree.
+
+The masked-token head applies a dense transform with bias, GELU and layer
+normalization to each encoder state. It then multiplies by the transpose of
+the input token embedding matrix and adds a vocabulary bias. The shared
+embedding must receive gradients from both its input and output uses.
+Compute cross entropy only at selected masked-token positions, retaining
+the loss sum and selected-token count before dividing. Padding positions
+must not contribute to that count.
+
+Before running a training phase, predict what should happen when you change
+one selected target, a valid input token or a head parameter. Check raw logits
+and selected loss values, then compare autodiff with finite differences of an
+independent forward calculation. Matching outputs alone cannot establish that
+gradients reach the encoder. Likewise, a finite-difference comparison with a
+zero reference sensitivity cannot establish that a parameter is connected.
+
 Create an isolated environment from the fully pinned lock before running the
 CPU workflow. The baseline weights are about 90.9 MB and download from a pinned
 public revision on first run. The offline option requires that exact snapshot

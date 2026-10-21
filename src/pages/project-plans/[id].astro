@@ -18,7 +18,7 @@ const pageTitle = project.pilot
   ? `${project.title}: CPU pilot and project plan`
   : `${project.title}: project plan`;
 const pageDescription = project.pilot
-  ? `${project.summary} A bounded SciFact CPU workflow is available; its retrieval floors failed and it does not qualify the full 300M capstone.`
+  ? `${project.summary} ${project.pilot.scope}`
   : project.summary;
 const harnessProject = registry.projects.find((item) => item.id === project.harnessId);
 const harnessLayout = harnessProject ? projectFileLayout(harnessProject) : null;
@@ -50,7 +50,8 @@ const content = projectGuide(
     {project.pilot ? (
       <p>
         The full capstone remains planned. A separately scoped CPU pilot is available for learning
-        the workflow and inspecting its measured results; its retrieval quality floors failed.
+        the workflow and inspecting its measured results. Read its scope and quality results before
+        starting.
       </p>
     ) : (
       <p>

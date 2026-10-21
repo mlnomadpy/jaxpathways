@@ -1,0 +1,233 @@
+{
+  "checker": "image-model-300m/tests/check.py",
+  "implementation": "solution",
+  "stage": "all",
+  "stages": {
+    "augmentation": {
+      "bounds": [
+        0,
+        1,
+        13,
+        12
+      ],
+      "crop_border_error": 7.512019237765344e-05,
+      "crop_ramp_error": 7.512019237765344e-05,
+      "ordered_view_error": 6.59269263403317e-07,
+      "status": "pass",
+      "supervised_flip_error": 0.0
+    },
+    "composition": {
+      "candidate_composed_loss": 0.011852900497615337,
+      "incorrect_interleaved_loss": 0.7353371903478578,
+      "independent_view_major_loss": 0.011852932383417189,
+      "known_neighbor_positive_pairs": 2,
+      "positive_relation_includes_known_neighbor": true,
+      "status": "pass"
+    },
+    "consumer": {
+      "bundle_contains_source_images": false,
+      "candidate_to_export_logits": "exact match",
+      "corruption_rejections": {
+        "altered_loader_source": "rejected by local bundle integrity/contract check",
+        "altered_model_source": "rejected by local bundle integrity/contract check",
+        "altered_pooling_config": "rejected by local bundle integrity/contract check",
+        "altered_weights": "rejected by local bundle integrity/contract check"
+      },
+      "offline_cold_process": "exact prediction match from unrelated working directory",
+      "raw_png_canary": "finite probabilities from alpha-composited letterbox input",
+      "selected_candidate_source": "/Users/tahabsn/Documents/ChatGPT/jaxpathways/projects/image-model-300m/solution/model.py",
+      "status": "pass",
+      "weight_rights_statement": "Private correctness bundle only; no standalone weight redistribution license is asserted."
+    },
+    "data": {
+      "archive_reconstructed": true,
+      "archive_sha256": "4c54ace7911aaffe13a365c34f650e71dd5bf1be0a58b464e5a7183e3e595d9c",
+      "changed_label_and_manifest_mutation": "rejected by frozen recipe hash",
+      "counts": {
+        "final": {
+          "components": 374,
+          "images": 547,
+          "per_class": {
+            "daisy": 95,
+            "dandelion": 134,
+            "roses": 95,
+            "sunflowers": 104,
+            "tulips": 119
+          }
+        },
+        "fit": {
+          "components": 794,
+          "images": 2562,
+          "per_class": {
+            "daisy": 443,
+            "dandelion": 627,
+            "roses": 446,
+            "sunflowers": 488,
+            "tulips": 558
+          }
+        },
+        "recipe_dev": {
+          "components": 360,
+          "images": 548,
+          "per_class": {
+            "daisy": 95,
+            "dandelion": 134,
+            "roses": 95,
+            "sunflowers": 104,
+            "tulips": 120
+          }
+        }
+      },
+      "membership_sha256": "1d2b7c42bdd43d1fd2c261ebe26d832c016c600403ca8fd285efa57c3aa58dca",
+      "source_files_verified": 27,
+      "source_manifest_sha256": "8dbba316320889596cecef1f06d58b479125f7c14d30bfba24aed5fe60a9b67c",
+      "split_row_identity_mutations": {
+        "forged_creator_metadata": "rejected after local manifest row hash was recomputed",
+        "same_class_row_swap": "rejected after local manifest row hash was recomputed"
+      },
+      "status": "pass"
+    },
+    "evaluation": {
+      "classification_count": 4,
+      "color_feature_error": 0.0,
+      "corruption_count": 6,
+      "ranked_ids_per_query": 4,
+      "retrieval_query_count": 5,
+      "status": "pass",
+      "temperature": {
+        "grid_count": 601,
+        "lower": 0.05,
+        "recipe_dev_nll": 2.0855865458141802e-07,
+        "temperature": 0.05000000000000001,
+        "upper": 20.0
+      }
+    },
+    "graph": {
+      "all_stage_checkpoints_reloaded": true,
+      "candidate_api_sentinel_changes_outputs": true,
+      "candidate_api_used_in_training_evaluation_and_export": true,
+      "candidate_model_source_sha256": "9e05878100bff098611c45146795fb4acd5478f734004ccd1baf7a5080fd3ab9",
+      "dev_and_final_metrics_reconstructed_from_raw_logits": 12,
+      "fresh_process_interruption_and_resume": [
+        "baseline-vit",
+        "mae-pretrain",
+        "simclr-pretrain",
+        "probe-random",
+        "partial-selected"
+      ],
+      "mutated_checkpoint_rejected": true,
+      "note": "This reduced checker-owned graph validates stage composition and resume mechanics only; it contains no flower photos, is not a quality estimate, and performs no authorized-corpus optimization.",
+      "offline_candidate_bundle_cold_process": "exact canary logits",
+      "output": "/private/tmp/c03-sol-v9-full/synthetic-complete-graph/run",
+      "retrieval_query_count": 10,
+      "stage_count": 11,
+      "status": "pass",
+      "synthetic_only": true
+    },
+    "model": {
+      "dropout": "same key replays exactly; changed key changes output",
+      "max_abs_errors": {
+        "changed_configuration": 3.767081799832539e-07,
+        "classification_logits": 6.037978241835162e-07,
+        "cnn_logits": 7.417276215448965e-08,
+        "head_gradient_fd": 4.440077638889761e-08,
+        "patch_order": 0.0,
+        "round_trip": 0.0,
+        "vit_features": 7.168839541993322e-07
+      },
+      "pilot_cnn_parameter_count": 5253,
+      "pilot_vit_parameter_count": 25440,
+      "status": "pass",
+      "uniform_attention_mutation": "rejected by independent NumPy oracle"
+    },
+    "objectives": {
+      "cross_entropy_error": 5.7334137437692334e-12,
+      "mae_hidden_loss_error": 3.790464869757315e-08,
+      "mae_hidden_perturbation": {
+        "prediction_max_delta": 0.0,
+        "target_loss_delta": 0.010519236326217651,
+        "visible_encoder_max_delta": 0.0
+      },
+      "nt_xent_gradient_fd_error": 1.369490547631358e-07,
+      "nt_xent_oracle_error": 7.467506280001146e-08,
+      "positive_mask_error": 0.0,
+      "similarity_error": 5.813783277019979e-07,
+      "status": "pass",
+      "training_gradient_norms_without_updates": {
+        "mae_decoder": 2.1264570052619716,
+        "mae_encoder": 0.39114870931127693,
+        "partial_encoder_inventory": 6.933105558280078,
+        "probe_head_only": 4.443554377506095,
+        "simclr_encoder": 4.234849960574362,
+        "simclr_projector": 1.4206740648779697,
+        "supervised_encoder": 21.097819415056076,
+        "supervised_head": 3.8438048483311626
+      }
+    },
+    "report": {
+      "dynamic_failed_and_passed_gate_wording": true,
+      "status": "pass"
+    },
+    "resume": {
+      "crossed_epoch_batch_spans": [
+        {
+          "count": 2,
+          "epoch": 0,
+          "start": 8
+        },
+        {
+          "count": 2,
+          "epoch": 1,
+          "start": 0
+        }
+      ],
+      "fresh_process_next_sample_and_update": "exact match",
+      "note": "The only applied update is a synthetic checker fixture; no flower image training was performed.",
+      "semantic_mutations": {
+        "changed_schedule_identity": "rejected",
+        "checkpoint_collision": "rejected without replacing existing files",
+        "duplicate_sampler_permutation": "rejected after recomputed NPZ digest",
+        "extra_state_leaf": "rejected after recomputed NPZ digest",
+        "forged_declared_dtype": "rejected against NPZ leaf dtype",
+        "missing_state_leaf": "rejected after recomputed NPZ digest",
+        "negative_sampler_cursor": "rejected",
+        "negative_second_moment": "rejected after recomputed NPZ digest",
+        "renamed_tree_leaf": "rejected against canonical tree names",
+        "same_shape_nonfinite_first_moment": "rejected after recomputed NPZ digest",
+        "same_shape_nonfinite_second_moment": "rejected after recomputed NPZ digest",
+        "step_cursor_mismatch": "rejected against optimizer step and consumed count",
+        "wrong_moment_dtype": "rejected after recomputed NPZ digest",
+        "wrong_sampler_seed": "rejected against source-bound seed",
+        "wrong_valid_permutation": "rejected after recomputed NPZ digest"
+      },
+      "status": "pass"
+    },
+    "runner": {
+      "epoch_boundary_spans": [
+        {
+          "count": 2,
+          "epoch": 0,
+          "start": 8
+        },
+        {
+          "count": 2,
+          "epoch": 1,
+          "start": 0
+        }
+      ],
+      "fresh_resume_matches_uninterrupted": true,
+      "note": "This checker fixture performs synthetic updates only; it does not load or optimize flower images.",
+      "objective_driven_exposure_control": {
+        "input_pixel_values": 98304,
+        "model_view_count": 8,
+        "selected_mae_target_values": 0,
+        "stage_name": "probe-mae-name-is-not-an-objective"
+      },
+      "per_update_checkpoint_count": 3,
+      "status": "pass",
+      "synthetic_only": true,
+      "updates": 3
+    }
+  },
+  "status": "pass"
+}

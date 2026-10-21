@@ -1,0 +1,271 @@
+{
+  "source_sha256": "c350571a8d3c0d2641a94235441468dc16e6e75e956548e92ff850b9081dd53b",
+  "cases": [
+    {
+      "valid": 1,
+      "target": [],
+      "loss_error": 2.6711613809737855e-08,
+      "max_gradient_error": 4.697583477764056e-08
+    },
+    {
+      "valid": 1,
+      "target": [
+        1
+      ],
+      "loss_error": 4.636454836726145e-08,
+      "max_gradient_error": 1.3641371365835653e-08
+    },
+    {
+      "valid": 1,
+      "target": [
+        2
+      ],
+      "loss_error": 5.229337984857807e-08,
+      "max_gradient_error": 1.629629231558738e-08
+    },
+    {
+      "valid": 1,
+      "target": [
+        1,
+        1
+      ],
+      "impossible": true
+    },
+    {
+      "valid": 1,
+      "target": [
+        1,
+        2
+      ],
+      "impossible": true
+    },
+    {
+      "valid": 1,
+      "target": [
+        2,
+        1,
+        2
+      ],
+      "impossible": true
+    },
+    {
+      "valid": 2,
+      "target": [],
+      "loss_error": 2.1433065100495696e-08,
+      "max_gradient_error": 1.326586485106418e-08
+    },
+    {
+      "valid": 2,
+      "target": [
+        1
+      ],
+      "loss_error": 3.1545078438277585e-08,
+      "max_gradient_error": 1.2518635017499946e-08
+    },
+    {
+      "valid": 2,
+      "target": [
+        2
+      ],
+      "loss_error": 5.400790858978155e-08,
+      "max_gradient_error": 2.0013445123368e-08
+    },
+    {
+      "valid": 2,
+      "target": [
+        1,
+        1
+      ],
+      "impossible": true
+    },
+    {
+      "valid": 2,
+      "target": [
+        1,
+        2
+      ],
+      "loss_error": 7.293098724936442e-08,
+      "max_gradient_error": 5.8986273643313325e-09
+    },
+    {
+      "valid": 2,
+      "target": [
+        2,
+        1,
+        2
+      ],
+      "impossible": true
+    },
+    {
+      "valid": 3,
+      "target": [],
+      "loss_error": 7.919725297789171e-08,
+      "max_gradient_error": 4.615836424193276e-08
+    },
+    {
+      "valid": 3,
+      "target": [
+        1
+      ],
+      "loss_error": 5.5881959282189086e-08,
+      "max_gradient_error": 9.703151171436275e-09
+    },
+    {
+      "valid": 3,
+      "target": [
+        2
+      ],
+      "loss_error": 1.4600686082388847e-07,
+      "max_gradient_error": 4.7119993240585245e-08
+    },
+    {
+      "valid": 3,
+      "target": [
+        1,
+        1
+      ],
+      "loss_error": 2.1619281875828733e-07,
+      "max_gradient_error": 8.716217081428113e-09
+    },
+    {
+      "valid": 3,
+      "target": [
+        1,
+        2
+      ],
+      "loss_error": 8.098672932277395e-08,
+      "max_gradient_error": 1.1597899529647293e-08
+    },
+    {
+      "valid": 3,
+      "target": [
+        2,
+        1,
+        2
+      ],
+      "loss_error": 2.004490307072615e-07,
+      "max_gradient_error": 1.5032973976758512e-08
+    },
+    {
+      "valid": 4,
+      "target": [],
+      "loss_error": 2.7634267585341377e-07,
+      "max_gradient_error": 1.3424845235476823e-08
+    },
+    {
+      "valid": 4,
+      "target": [
+        1
+      ],
+      "loss_error": 4.8709783762035386e-08,
+      "max_gradient_error": 5.9782188088775e-08
+    },
+    {
+      "valid": 4,
+      "target": [
+        2
+      ],
+      "loss_error": 4.019686383749388e-08,
+      "max_gradient_error": 4.286432542244256e-09
+    },
+    {
+      "valid": 4,
+      "target": [
+        1,
+        1
+      ],
+      "loss_error": 1.3977651169838623e-07,
+      "max_gradient_error": 8.603871748391612e-08
+    },
+    {
+      "valid": 4,
+      "target": [
+        1,
+        2
+      ],
+      "loss_error": 1.969604048746021e-07,
+      "max_gradient_error": 1.979643826643951e-08
+    },
+    {
+      "valid": 4,
+      "target": [
+        2,
+        1,
+        2
+      ],
+      "loss_error": 1.8897550457808165e-07,
+      "max_gradient_error": 2.084886219222426e-08
+    },
+    {
+      "valid": 5,
+      "target": [],
+      "loss_error": 7.948533795598678e-07,
+      "max_gradient_error": 2.5524670377308212e-08
+    },
+    {
+      "valid": 5,
+      "target": [
+        1
+      ],
+      "loss_error": 9.668994493949867e-10,
+      "max_gradient_error": 1.91278601846534e-08
+    },
+    {
+      "valid": 5,
+      "target": [
+        2
+      ],
+      "loss_error": 9.186273253192212e-08,
+      "max_gradient_error": 4.7592436658305814e-09
+    },
+    {
+      "valid": 5,
+      "target": [
+        1,
+        1
+      ],
+      "loss_error": 9.226974739817706e-08,
+      "max_gradient_error": 5.873668840195023e-08
+    },
+    {
+      "valid": 5,
+      "target": [
+        1,
+        2
+      ],
+      "loss_error": 4.9310132643753946e-08,
+      "max_gradient_error": 6.84316248111827e-08
+    },
+    {
+      "valid": 5,
+      "target": [
+        2,
+        1,
+        2
+      ],
+      "loss_error": 1.4157816963233927e-07,
+      "max_gradient_error": 2.967798806707833e-08
+    }
+  ],
+  "edge_cases": [
+    {
+      "valid": 0,
+      "label_width": 1,
+      "actual": 1.0986123085021973,
+      "expected": -0.0
+    },
+    {
+      "valid": 0,
+      "label_width": 0,
+      "error": "ValueError",
+      "message": "All input arrays must have the same shape."
+    },
+    {
+      "valid": 2,
+      "label_width": 0,
+      "error": "ValueError",
+      "message": "All input arrays must have the same shape."
+    }
+  ],
+  "scope": "Independent enumeration of every three-symbol path, positive valid frame lengths, repeated and empty targets, finite differences and padded-frame gradients. Edge probes are reported separately."
+}

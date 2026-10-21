@@ -11,6 +11,7 @@ ROOT = PROJECT.parent.parent
 INDEX = PROJECT / "reference/evidence-index.json"
 AMENDMENT = PROJECT / "reference/evidence/checker-attention-amendment.json"
 PLOT_AMENDMENT = PROJECT / "reference/evidence/objective-plot-amendment.json"
+GRADIENT_AMENDMENT = PROJECT / "reference/evidence/checker-mlm-gradient-amendment.json"
 PACKET = PROJECT / "reference/evidence/final8"
 TEACHING = PROJECT / "reference/teaching"
 
@@ -35,7 +36,37 @@ def main() -> None:
         "514287dcfd125d3127f93c43d0c20540b6325c9d4d39f4a803ea2fa57aa942b8"
     )
     assert amendment["full_checker_rerun_for_amended_hash"] is False
-    assert amendment["current_checker_sha256"] == sha256(PROJECT / "tests/check.py")
+    current_checker = amendment["current_checker_sha256"]
+    gradient_amendment = None
+    full_verification = None
+    current_verification_paths = []
+    if GRADIENT_AMENDMENT.is_file():
+        gradient_amendment = read_json(GRADIENT_AMENDMENT)["amendment"]
+        assert gradient_amendment["previous_checker_sha256"] == current_checker
+        assert gradient_amendment["full_checker_rerun_for_amended_hash"] is True
+        current_checker = gradient_amendment["current_checker_sha256"]
+        for key in ("full_checker_verification", "negative_verification"):
+            binding = gradient_amendment[key]
+            relative = Path(binding["path"])
+            assert not relative.is_absolute() and ".." not in relative.parts
+            assert relative.parts[:2] == ("reference", "evidence")
+            path = PROJECT / relative
+            assert sha256(path) == binding["sha256"]
+            record = read_json(path)
+            assert record["checker_sha256"] == current_checker
+            if key == "full_checker_verification":
+                full_verification = record
+                assert record["exit_code"] == 0
+                assert record["independent_check"]["status"] == "pass"
+                assert record["independent_check"]["stage"] == "all"
+                assert record["source_files_sha256"]["model.py"] == sha256(
+                    PROJECT / "model.py"
+                )
+            else:
+                assert record["rejected_before_optimization"] is True
+                assert record["exit_code"] != 0
+            current_verification_paths.append(path)
+    assert current_checker == sha256(PROJECT / "tests/check.py")
     assert plot_amendment["full_training_or_evaluation_rerun"] is False
     assert plot_amendment["historical_receipt"]["sha256"] == sha256(
         PACKET / "sourcebound-receipt.json"
@@ -45,13 +76,14 @@ def main() -> None:
     )
 
     # Current implementation identity is the historical 19-file inventory,
-    # with separately declared checker and plotting-only amendments.
+    # with separately declared checker and plotting-only amendments. Earlier
+    # receipts remain historical when a later checker has its own full rerun.
     source_files = {}
     for relative, historical_hash in receipt["source_files_sha256"].items():
         path = PROJECT / relative
         current_hash = sha256(path)
         if relative == "tests/check.py":
-            assert current_hash == amendment["current_checker_sha256"]
+            assert current_hash == current_checker
         elif relative == "plots.py":
             assert current_hash == plot_amendment["source_change"]["current_sha256"]
         else:
@@ -60,9 +92,17 @@ def main() -> None:
             ), f"source changed after final8: {relative}"
         source_files[f"projects/embedding-model-300m/{relative}"] = current_hash
     assert len(source_files) == 19
+    if full_verification is not None:
+        expected_sources = {
+            relative.removeprefix("projects/embedding-model-300m/"): digest
+            for relative, digest in source_files.items()
+        }
+        assert full_verification["source_files_sha256"] == expected_sources
 
     public_files = {}
     candidates = [PROJECT / "reference/README.md", AMENDMENT, PLOT_AMENDMENT]
+    if gradient_amendment is not None:
+        candidates.extend([GRADIENT_AMENDMENT, *current_verification_paths])
     candidates.extend(sorted(PACKET.rglob("*")))
     candidates.extend(sorted(TEACHING.rglob("*")))
     candidates.append(PROJECT / "reference/evidence/cold-load-validation.json")
@@ -117,6 +157,12 @@ def main() -> None:
             ],
         },
     }
+    if gradient_amendment is not None:
+        index["mlm_gradient_checker_amendment"] = {
+            "path": GRADIENT_AMENDMENT.relative_to(PROJECT).as_posix(),
+            "sha256": sha256(GRADIENT_AMENDMENT),
+            "current_checker_sha256": current_checker,
+        }
     INDEX.write_text(
         json.dumps(index, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )

@@ -52,6 +52,60 @@ C01_SOURCE_FILES = {
 }
 
 
+C02_SOURCE_FILES = {
+    'README.md',
+    'config.py',
+    'consumer.py',
+    'data/RIGHTS.md',
+    'data/foundation-reuse.json',
+    'data/frozen_recipe.json',
+    'data/lm_eval_tasks/LICENSE.md',
+    'data/lm_eval_tasks/NOTICE.md',
+    'data/lm_eval_tasks/arc_easy/arc_easy.yaml',
+    'data/lm_eval_tasks/hellaswag/hellaswag.yaml',
+    'data/lm_eval_tasks/hellaswag/utils.py',
+    'data/prepare.py',
+    'evaluate_pilot.py',
+    'evaluate_pythia_baseline.py',
+    'evaluate_pythia_qa.py',
+    'evaluate_qa_diagnostics.py',
+    'export_consumer.py',
+    'fetch_pythia_baseline.py',
+    'lm_eval_adapter.py',
+    'model.py',
+    'pythia_pin.py',
+    'render_c02_figures.py',
+    'requirements-c02-baseline.txt',
+    'requirements-c02-figures.txt',
+    'requirements-c02-lm-eval.txt',
+    'requirements-c02.txt',
+    'run_lm_eval.py',
+    'run_pilot.py',
+    'serve_local.py',
+    'squad_scoring.py',
+    'starter/README.md',
+    'starter/model.py',
+    'tests/check.py',
+    'tests/replay_branch.py',
+    'tests/resume_worker.py',
+    'tests/test_consumer.py',
+    'tests/test_data_freeze.py',
+    'tests/test_evaluation.py',
+    'tests/test_evidence_reconstruction.py',
+    'tests/test_export_consumer.py',
+    'tests/test_lm_eval_adapter.py',
+    'tests/test_model_math.py',
+    'tests/test_pythia_baseline.py',
+    'tests/test_qa_diagnostics.py',
+    'tests/test_runner_integrity.py',
+    'tests/test_service_live.py',
+    'tests/test_starter_contract.py',
+    'tests/test_training_recovery.py',
+    'tools/build_review_packet.py',
+    'training.py',
+}
+
+
 def c01_pilot_packet(root):
     """Return the explicitly allowlisted C01 source and public evidence files."""
     project = root / "projects" / "embedding-model-300m"
@@ -125,6 +179,36 @@ def c01_pilot_packet(root):
             raise ValueError(f"C01 source receipt names a file outside the package allowlist: {relative}")
     files.update(source_files_to_bundle)
     return project, index_path, index, files
+
+
+def c02_pilot_packet(root):
+    """Verify the complete C02 source set and its weights-free review evidence."""
+    project = root / "projects/causal-model-300m"
+    index_path = project / "reference/evidence-index.json"
+    index = json.loads(index_path.read_text())
+    expected_sources = {"projects/causal-model-300m/" + path for path in C02_SOURCE_FILES}
+    if set(index["source_files_sha256"]) != expected_sources:
+        raise ValueError("C02 source index differs from its complete package allowlist")
+    if not index.get("public_files"):
+        raise ValueError("C02 public evidence inventory is empty")
+    files = {index_path}
+    for entries, is_source in ((index["source_files_sha256"], True), (index["public_files"], False)):
+        for relative, digest in entries.items():
+            relative = relative.removeprefix("projects/causal-model-300m/") if is_source else relative
+            path = (project / relative).resolve()
+            if not path.is_relative_to(project.resolve()) or not path.is_file():
+                raise ValueError(f"C02 evidence is missing or unsafe: {relative}")
+            if not is_source:
+                if not relative.startswith("reference/") or path.suffix not in {".md", ".json", ".jsonl", ".svg", ".png", ".log"}:
+                    raise ValueError(f"C02 public evidence is outside the weights-free allowlist: {relative}")
+                if path.name in {"tokenizer.json", "tokenizer_config.json", "config.json", "weights.json"}:
+                    raise ValueError(f"C02 model/tokenizer payload is not public evidence: {relative}")
+            if not isinstance(digest, str) or len(digest) != 64 or hashlib.sha256(path.read_bytes()).hexdigest() != digest:
+                raise ValueError(f"C02 evidence hash mismatch: {relative}")
+            files.add(path)
+    return project, index_path, index, files
+
+
 course = json.loads((ROOT / 'public/curriculum.json').read_text())
 release = json.loads((ROOT / 'curriculum/releases.json').read_text())[0]
 lessons = [lesson for phase in course['phases'] for lesson in phase['lessons'] if lesson['status'] == 'authored']
@@ -307,6 +391,10 @@ c01_public_paths.add(c01_index_path.resolve())
 with ZipFile(OUT / "embedding-model-300m-pilot.zip", "w", compression=ZIP_DEFLATED) as bundle:
     for path in sorted(c01_files):
         bundle.write(path, path.relative_to(ROOT).as_posix())
+c02_root, c02_index_path, c02_index, c02_files = c02_pilot_packet(ROOT)
+with ZipFile(OUT / "causal-model-300m-pilot.zip", "w", compression=ZIP_DEFLATED) as bundle:
+    for path in sorted(c02_files):
+        bundle.write(path, path.relative_to(ROOT).as_posix())
 
 setup=next(l for l in lessons if l['id']=='welcome-01')
 with ZipFile(OUT/'jax-start-here.zip','w',compression=ZIP_DEFLATED) as bundle:
@@ -327,6 +415,7 @@ for directory in ('curriculum', 'learning-paths', 'phases', 'projects', 'skills'
     workspace_files.update(path for path in (ROOT/directory).rglob('*')
                            if path.is_file() and path.suffix in ('.md', '.json', '.py', '.ipynb', '.txt', '.svg', '.png')
                            and not (directory == 'projects' and path.is_relative_to(c01_root / 'reference'))
+                           and not (directory == 'projects' and path.is_relative_to(c02_root / 'reference'))
                            and '__pycache__' not in path.parts)
 # Keep the coordinated multi-host target repository-only. Its rendezvous and shared
 # GCS checkpoint setup are not part of the portable workspace contract.
@@ -340,6 +429,7 @@ for manifest in json.loads((ROOT/'curriculum/projects.json').read_text()):
                            if path.is_file() and '__pycache__' not in path.parts
                            and not (Path(manifest).parts[1] == 'embedding-model-300m' and path.is_relative_to(c01_root / 'reference')))
 workspace_files.update(c01_public_paths)
+workspace_files.update(c02_files)
 for directory in ('public/figures','public/executions','public/guides'):
     workspace_files.update(path for path in (ROOT/directory).glob('*') if path.is_file())
 start_guide = '''# Start JAX Pathways with your agent

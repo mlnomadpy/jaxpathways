@@ -27,6 +27,7 @@ test('rerunning execution receipts preserves a release while canonical source ch
     mkdirSync(path.join(directory, 'projects/planned'));
     mkdirSync(path.join(directory, 'assessments'));
     writeFileSync(path.join(directory, 'projects/planned/README.md'), 'Original planned recipe\n');
+    writeFileSync(path.join(directory, 'projects/planned/task.yaml'), 'task: frozen-task\n');
     writeFileSync(path.join(directory, 'assessments/fixture.md'), 'Original assessment\n');
     write('curriculum/project-validation.json', { executedAt: 'first run', projects: [] });
     const run = (...args) => spawnSync(process.execPath, ['release.mjs', ...args], { cwd: directory, encoding: 'utf8' });
@@ -40,7 +41,7 @@ test('rerunning execution receipts preserves a release while canonical source ch
     assert.match(run().stderr, /Course sources changed/, 'Canonical nested data recipes still invalidate the snapshot');
     write('projects/fixture/foundations/data/manifest.json', {split:'train'});
     assert.equal(run().status, 0);
-    for (const source of ['projects/planned/README.md', 'assessments/fixture.md']) {
+    for (const source of ['projects/planned/README.md', 'projects/planned/task.yaml', 'assessments/fixture.md']) {
       const filename=path.join(directory, source);
       const original=readFileSync(filename,'utf8');
       writeFileSync(filename,original+'A revised teaching contract\n');

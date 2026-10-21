@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "executedAt": "2026-10-21T17:51:12.794350+00:00",
+  "executedAt": "2026-10-21T21:34:41.369063+00:00",
   "scope": "Registered public reference checkers only; not learner assessment or accelerator validation.",
   "projects": [
     {
@@ -49,7 +49,7 @@
       "projectId": "deployment-audit",
       "sourceHash": "7bdff2e9c0502300d953a3c433796743ced8a63994050f475882c3177b9eb682",
       "command": "python3 projects/deployment-audit/tests/check.py --implementation solution --stage all",
-      "stdout": "PASS stage 1: independent objective gradient, genuine pretraining, checkpoint reload and changed-task adaptation\nPASS stage 2: six exported round trips, independent precision arithmetic, calibration provenance and corruption rejection\nPASS stage 3: real JSON request parity, timed batch requests, clipping, bad inputs and independent queue timelines\nActual CPU request p50/p95 milliseconds: [(1, 0.11945841833949089, 0.13556834310293198), (8, 0.13116654008626938, 0.27790358290076256)]\nAll requested stages passed. No network, autoscaler or edge device was measured.\n",
+      "stdout": "PASS stage 1: independent objective gradient, genuine pretraining, checkpoint reload and changed-task adaptation\nPASS stage 2: six exported round trips, independent precision arithmetic, calibration provenance and corruption rejection\nPASS stage 3: real JSON request parity, timed batch requests, clipping, bad inputs and independent queue timelines\nActual CPU request p50/p95 milliseconds: [(1, 0.17683394253253937, 0.3791706636548042), (8, 0.12241699732840061, 0.13212691992521286)]\nAll requested stages passed. No network, autoscaler or edge device was measured.\n",
       "status": "passed"
     },
     {
@@ -63,14 +63,14 @@
       "projectId": "audio-harness",
       "sourceHash": "0222a6be6a8d9f3eaddfac56ea6135f8226336ca699e9c0722cdc8dee83f5677",
       "command": "python3 projects/audio-harness/tests/check.py --implementation solution --stage all",
-      "stdout": "PASS stage 1: waveform contracts, independent STFT, silence, frequency bins, actual WAV provenance and split isolation\nPASS stage 2: gradient oracle, full fresh-process recovery, held-out aggregation, unchanged evaluation state and changed seed/data\nMeasured held/shifted/changed-seed/baseline accuracies: 0.9855072463768116 1.0 0.9855072463768116 0.6666666666666666\nPASS stage 3: training-only calibration, integer oracle, six complete exports, fresh-process reload and corruption rejection\nMeasured held-out W8A8 accuracy: 0.9855072463768116\nActual CPU timing: 1 0.18872972577810287 0.41636209934949875 milliseconds\nActual CPU timing: 4 0.22593745961785316 0.4327478818595409 milliseconds\nPASS stage 4: measured full preprocessing/inference boundary, malformed request drills and silence behavior\nAll requested audio stages passed. Synthetic sound classification and CPU evidence only.\n",
+      "stdout": "PASS stage 1: waveform contracts, independent STFT, silence, frequency bins, actual WAV provenance and split isolation\nPASS stage 2: gradient oracle, full fresh-process recovery, held-out aggregation, unchanged evaluation state and changed seed/data\nMeasured held/shifted/changed-seed/baseline accuracies: 0.9855072463768116 1.0 0.9855072463768116 0.6666666666666666\nPASS stage 3: training-only calibration, integer oracle, six complete exports, fresh-process reload and corruption rejection\nMeasured held-out W8A8 accuracy: 0.9855072463768116\nActual CPU timing: 1 0.3753958735615015 0.5100857932120562 milliseconds\nActual CPU timing: 4 0.4221871495246887 0.5795831326395273 milliseconds\nPASS stage 4: measured full preprocessing/inference boundary, malformed request drills and silence behavior\nAll requested audio stages passed. Synthetic sound classification and CPU evidence only.\n",
       "status": "passed"
     },
     {
       "projectId": "cross-modal-harness",
       "sourceHash": "f05421f09a0d853236fad35af47e2fcd8201b5f36fcd184c7340dbc010a3fcd6",
       "command": "python3 projects/cross-modal-harness/tests/check.py --implementation solution --stage all",
-      "stdout": "PASS stage 1: pair IDs, independent pixel/token contracts, leakage and malformed inputs\nPASS stage 2: independent symmetric multi-positive loss, changed-parameter finite differences, normalization\nClean/shifted image retrieval: 20 5 out of 20\nPASS stage 3: two training seeds, fixed held-out data, fresh-process complete replay, corruption/configuration rejection\nPASS stage 4: calibration provenance, int64 independent oracle, 12 real exports, fresh-process reload, singleton parity\nObserved local request milliseconds: 0.584916677325964 0.9656539186835289\nPASS stage 5: missing-modality/shape rejection, actual inference timing, measured release gate, rollback and corrupt artifact\nAll public stages passed; no real-data, semantic-language or target-device qualification.\n",
+      "stdout": "PASS stage 1: pair IDs, independent pixel/token contracts, leakage and malformed inputs\nPASS stage 2: independent symmetric multi-positive loss, changed-parameter finite differences, normalization\nClean/shifted image retrieval: 20 5 out of 20\nPASS stage 3: two training seeds, fixed held-out data, fresh-process complete replay, corruption/configuration rejection\nPASS stage 4: calibration provenance, int64 independent oracle, 12 real exports, fresh-process reload, singleton parity\nObserved local request milliseconds: 0.25045848451554775 0.47241868451237673\nPASS stage 5: missing-modality/shape rejection, actual inference timing, measured release gate, rollback and corrupt artifact\nAll public stages passed; no real-data, semantic-language or target-device qualification.\n",
       "status": "passed"
     },
     {
@@ -98,14 +98,14 @@
       "projectId": "sharded-training",
       "sourceHash": "5aa14b841e2f59083a303665cb970ad4ba71fc0cadbe57aada4b975d70a73a3f",
       "command": "python3 projects/sharded-training/tests/check.py --implementation solution --stage all",
-      "stdout": "PASS stage 1: immutable sampler, key progression, complete epochs, changed seeds and padded tails\nPASS stage 2: actual four-device collectives, independent NumPy gradients, unequal/empty partition counts and replicated momentum\nPASS stage 3: fresh-process complete replay, metadata/corruption rejection and observable momentum/cursor/key faults\nPASS stage 4: lowered/compiled equivalence, synchronized warm samples, actual XPlane/Perfetto trace and source-bound plotted evidence\nEvidence: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/sharded-training-audit-tfv51bik\n",
+      "stdout": "PASS stage 1: immutable sampler, key progression, complete epochs, changed seeds and padded tails\nPASS stage 2: actual four-device collectives, independent NumPy gradients, unequal/empty partition counts and replicated momentum\nPASS stage 3: fresh-process complete replay, metadata/corruption rejection and observable momentum/cursor/key faults\nPASS stage 4: lowered/compiled equivalence, synchronized warm samples, actual XPlane/Perfetto trace and source-bound plotted evidence\nEvidence: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/sharded-training-audit-6pxa63fg\n",
       "status": "passed"
     },
     {
       "projectId": "text-harness",
       "sourceHash": "2428e733543efaa1c8989fcbd27928562c2e23b4cc437248c907059a7e24238f",
       "command": "python3 projects/text-harness/tests/check.py --implementation solution --stage all",
-      "stdout": "PASS stage 1: UTF-8 bytes, split/content provenance, independent attention and masked token loss, causal invariance\nPASS stage 2: derivative check, full Adam/dropout/iterator fresh-process recovery, actual training and fixed token evaluation\nMeasured held-out token metrics: {'nll_sum': 295.5465774536133, 'valid_tokens': 276, 'nll': 1.0708209328029468, 'token_accuracy': 0.6014492753623188, 'perplexity': 2.91777381329227} changed-seed NLL: 1.0238872749218042\nPASS stage 3: actual FP32/BF16/INT8 KV storage, sequential cached/full parity, immutable prefix, overflow and independent integer arithmetic\nPASS stage 4: six serialized endpoints, fresh-process inference, corruption rejection, bounded generation and actual prefill/decode timing\nActual generated output: {'prompt': 'abc|', 'generated_token_ids': [102, 101, 102, 2], 'generated_text': 'cbc', 'finished_eos': True, 'policy': 'fp32'}\nMeasured CPU prefill/decode p50 milliseconds: 0.7045206148177385 0.5725829396396875\nAll requested text stages passed.\n",
+      "stdout": "PASS stage 1: UTF-8 bytes, split/content provenance, independent attention and masked token loss, causal invariance\nPASS stage 2: derivative check, full Adam/dropout/iterator fresh-process recovery, actual training and fixed token evaluation\nMeasured held-out token metrics: {'nll_sum': 295.5465774536133, 'valid_tokens': 276, 'nll': 1.0708209328029468, 'token_accuracy': 0.6014492753623188, 'perplexity': 2.91777381329227} changed-seed NLL: 1.0238872749218042\nPASS stage 3: actual FP32/BF16/INT8 KV storage, sequential cached/full parity, immutable prefix, overflow and independent integer arithmetic\nPASS stage 4: six serialized endpoints, fresh-process inference, corruption rejection, bounded generation and actual prefill/decode timing\nActual generated output: {'prompt': 'abc|', 'generated_token_ids': [102, 101, 102, 2], 'generated_text': 'cbc', 'finished_eos': True, 'policy': 'fp32'}\nMeasured CPU prefill/decode p50 milliseconds: 0.25808345526456833 0.21395785734057426\nAll requested text stages passed.\n",
       "status": "passed"
     },
     {
@@ -159,9 +159,9 @@
     },
     {
       "projectId": "recovery-audit",
-      "sourceHash": "92920bb6d62896ea563e2f2280be5f52bd39b18c14ccede1f073874c68494b8e",
-      "command": "python3 projects/recovery-audit/tests/check.py --implementation solution --stage 4",
-      "stdout": "PASS recovery-audit stage 4: optimizer/RNG continuation and checkpoint failure handling\n",
+      "sourceHash": "5676cfe301bc20b7e898aa9bdd1815312b11280c94210ed53842cf800b18e0c0",
+      "command": "python3 projects/recovery-audit/tests/check.py --implementation solution --stage all",
+      "stdout": "PASS recovery-audit stage all: complete-state stream, fresh-process restore, crash boundaries, and writer arbitration\n",
       "status": "passed"
     },
     {

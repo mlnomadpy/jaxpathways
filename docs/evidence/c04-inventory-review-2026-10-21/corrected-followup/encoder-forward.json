@@ -1,0 +1,72 @@
+{
+  "scope": "Pilot inference forward only: independent explicit-index NumPy convolution, affine normalization, GELU, sinusoidal positions, full attention and heads, with nonzero learned biases. No dropout/gradient, raw-audio frontend, recovery, corpus training, target architecture or task-quality acceptance.",
+  "source_sha256": {
+    "config.py": "116c79bdfab004da7e2fd00cd9e87c8d24b876d6c3e925da19d910ec933b6b61",
+    "model.py": "62591c9762a1249639550ce186fccd0fadc7fece92b5c523f00c71c1d808d260"
+  },
+  "cases": [
+    {
+      "padded_width": 11,
+      "batch_lengths": [
+        11,
+        7,
+        1
+      ],
+      "encoder_lengths": [
+        3,
+        2,
+        1
+      ],
+      "max_absolute_forward_error": 1.3817673929494845e-06
+    },
+    {
+      "padded_width": 19,
+      "batch_lengths": [
+        11,
+        7,
+        1
+      ],
+      "encoder_lengths": [
+        3,
+        2,
+        1
+      ],
+      "max_absolute_forward_error": 1.3088662353943903e-06
+    },
+    {
+      "padded_width": 20,
+      "batch_lengths": [
+        11,
+        7,
+        1
+      ],
+      "encoder_lengths": [
+        3,
+        2,
+        1
+      ],
+      "max_absolute_forward_error": 1.3088662353943903e-06
+    },
+    {
+      "padded_width": 21,
+      "batch_lengths": [
+        11,
+        7,
+        1
+      ],
+      "encoder_lengths": [
+        3,
+        2,
+        1
+      ],
+      "max_absolute_forward_error": 1.3088662353943903e-06
+    }
+  ],
+  "negative_control": {
+    "mutation": "Shape-dependent SAME padding replaces fixed alignment in memory only",
+    "max_valid_logit_delta": 1.2999896617407587,
+    "rejected": true
+  },
+  "status": "pass",
+  "checker_sha256": "881bf00f4e660d501495fba7a056181044daa2380fd378ef946339d2cbe15036"
+}

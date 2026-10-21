@@ -13,8 +13,24 @@ for (const figure of [
     asset: '/project-assets/scientific-inverse/reference/diffrax/sensitivity.png',
     type: 'image/png',
   },
+  {
+    guide: '/project-plans/causal-model-300m.html',
+    label:
+      'Training losses decrease overall, while all six pilot branches remain below both held-out QA floors',
+    asset:
+      '/project-assets/causal-model-300m/reference/evidence/c02-pilot/figures/c02-training-and-qa.svg',
+    type: 'image/svg+xml',
+  },
+  {
+    guide: '/project-plans/causal-model-300m.html',
+    label:
+      'Bits per normalized held-out byte for six pilot branches, Pythia-14M and a train-only unigram control',
+    asset:
+      '/project-assets/causal-model-300m/reference/evidence/c02-pilot/figures/c02-byte-rates.svg',
+    type: 'image/svg+xml',
+  },
 ]) {
-  test(`${figure.guide} opens the actual full-size figure with the keyboard`, async ({ page }) => {
+  test(`${figure.guide}: ${figure.label} opens the actual full-size figure with the keyboard`, async ({ page }) => {
     await page.goto(figure.guide);
     const link = page.getByRole('link', {
       name: `Open full-size figure: ${figure.label}`,

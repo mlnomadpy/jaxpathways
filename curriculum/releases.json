@@ -1,5 +1,19 @@
 [
   {
+    "version": "0.14.0",
+    "date": "2026-10-21",
+    "title": "Inspect causal training outcomes and recover complete training streams",
+    "summary": "Add an executable causal CPU lifecycle, repair masked-token grading and test recovery across separate processes while preserving failed quality results and open qualification gates.",
+    "changes": [
+      "Added a separately pinned 33,088-parameter causal CPU workflow connecting next-token pretraining, matched domain/general continuation, full SFT and Q/V LoRA, six complete branch checkpoints and fresh-process replay. Frozen data, target ownership, prompts, processors and source identities remain explicit.",
+      "Added independent generation/cache/mask oracles, raw reconstruction of all 768 generated-answer scores, pretrained snapshot guards and a native harness adapter with full-context window checks. All six QA quality floors failed. The native eight-record-per-task run is an execution smoke test, not benchmark qualification.",
+      "Added a source-only causal pilot download and public measurement packet, explained training/QA and normalized-byte plots, explicit learner contracts, local consumer limits, and a separate CPU CI workflow. The two optional pilots remain distinct from all ten Planned full model/retrieval capstones.",
+      "Repaired the embedding grader with an independent complete encoder/tied-head MLM oracle and nondegenerate finite-difference gradient checks. Reference and equivalent implementations pass; constant-output and disconnected-gradient controls fail. A fresh complete reference run passes the amended checker, with separate source-bound receipts preserving historical final8.",
+      "Expanded the recovery project with a complete sample/optimizer/PRNG stream, separate-process epoch-tail restore, crash failpoints and competing writer arbitration. Its integrated generation protocol is explicitly POSIX-only and does not establish power-loss, network-filesystem or multi-host durability.",
+      "Added YAML task definitions to release source tracking, preserved project-specific pilot descriptions in discovery and prepared a new author review packet. Thirteen developing phases, target-scale training, independent teaching review and native-reader/assistive-technology acceptance remain open."
+    ]
+  },
+  {
     "version": "0.13.0",
     "date": "2026-10-21",
     "title": "Inspect a staged embedding pilot and navigate lessons with one stage bar",
@@ -96,7 +110,7 @@
     "title": "Distinct assessment summaries for search and sharing",
     "summary": "Give all eleven synthesis assessments accurate, individual descriptions across search metadata, social previews and page schema.",
     "changes": [
-      "Replaced the shared generic assessment description with a summary of each assessment’s actual tasks in the canonical registry.",
+      "Replaced the shared generic assessment description with a summary of each assessment\u2019s actual tasks in the canonical registry.",
       "Added site-wide duplicate-description checks and verified that search, Open Graph, Twitter and WebPage schema descriptions agree."
     ]
   },

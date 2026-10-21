@@ -1,0 +1,11 @@
+{
+  "files": {
+    "config.py": {
+      "source_sha256": "5c05801a7ec1a15b3978c87c77ac4e64d1b056c60487cbcff3cdf72475c8bb64"
+    },
+    "model.py": {
+      "source_sha256": "94a88ae7fd6a251b5b190b4631496e04bb71a31c1bfe418511fdd37ffef034c9"
+    }
+  },
+  "origin": "projects/text-harness/foundations; accepted L05 decoder foundation, adapted locally for C02 RoPE and aligned target ownership"
+}

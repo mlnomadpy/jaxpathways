@@ -13,6 +13,11 @@
     "name": "final8",
     "result": "Historical final8 passed under the source versions in its immutable receipt. Later checker and plotting executions have separate edition verification records; this historical receipt does not qualify later code."
   },
+  "mlm_gradient_checker_amendment": {
+    "current_checker_sha256": "a3867129f43df1a1b6d8bf671d449488987e1339f7abfcae0caf35fc88c6d952",
+    "path": "reference/evidence/checker-mlm-gradient-amendment.json",
+    "sha256": "c628a706bcc9422d97d8efba7d491e683a515968d16332f4213e954ed2652a82"
+  },
   "omitted_files": {
     "historical-final8/__pycache__/candidate-pool-sentinel.cpython-314.pyc": {
       "reason": "Ephemeral interpreter or cold-process output; reproducible validation results and numeric canary vector are retained.",
@@ -838,6 +843,7 @@
   "public_files": {
     "reference/README.md": "5a852d664defd0b21688d566552e10bdc7771b13d7c6a354224f1ef1492515ff",
     "reference/evidence/checker-attention-amendment.json": "a62c94cc143b18e5d870c65663268cd8f2f724ad3f302af972abbf8161ac2601",
+    "reference/evidence/checker-mlm-gradient-amendment.json": "c628a706bcc9422d97d8efba7d491e683a515968d16332f4213e954ed2652a82",
     "reference/evidence/cold-load-validation.json": "60ca5b706ffbb6295a1f9401e674af4cc73b5347b7b43af6347d3922acb0a4eb",
     "reference/evidence/final8/baseline-receipt.json": "713ef55d822fc0b4942b7260385e1920afee324d96c4aaf7eb2ca3541b02a574",
     "reference/evidence/final8/checkpoints/phase1-mlm/checkpoint.json": "55d3cb7afcb4f051516e7e15195c246517cf7e224bfe8aa5019a6a81dfe76468",
@@ -881,6 +887,8 @@
     "reference/evidence/final8/tokenizer-info.json": "1fad886463f10f48e986a0bb460e0dbd910cab8729239c22245051911803b03a",
     "reference/evidence/final8/training-trace.json": "a9a8016bf4672083859daafe1a548c436bc5ebbbb7c463bf2ef265778917e5d1",
     "reference/evidence/final8/weak-pair-inventory.json": "d12b5cbc4de33a5cca3a01f67f9bb69997d921f44360d77356c1f24b687d860f",
+    "reference/evidence/mlm-gradient-full-verification.json": "b203140daf7c944e6a3094c257c81b96ac52444190ffeb561bf37ba14332fa06",
+    "reference/evidence/mlm-gradient-negative-verification.json": "72e8705976d3daf6780ccb57fdc3db056a2a3d24ed3185c6758a3eec87e70d6e",
     "reference/evidence/objective-plot-amendment.json": "eec63637b431de2fde9335fb4bf66d2eb250a9444306a7d01002a36703a7b1ee",
     "reference/teaching/manifest.json": "744fbc7e7889511dd5b16327381515c0075bd8af13ce8d01e027c46d8ab8fef1",
     "reference/teaching/objective-panels.svg": "6e86d755412a3943f6befa3b7f8524956679498e5f21e5dd86f2cd2f0edb8936"
@@ -996,7 +1004,7 @@
     "projects/embedding-model-300m/requirements-embedding-lock.txt": "ca59464c7c5e6ef56b7a952d26d6d97de7612e378ab70876dac17d91f1f265d3",
     "projects/embedding-model-300m/requirements-embedding.txt": "f83afe66ff40961b580b6c40cf19b35c1f222f037f4148d12b56c26111dd3008",
     "projects/embedding-model-300m/run.py": "d00008fec0cc11170e5253e4285ed2c4d2412f429204e696430022896455e55e",
-    "projects/embedding-model-300m/tests/check.py": "6f8f2b360f0a306508b6c658256cbac91195e4e665ad29741bafbcd7bc618aeb",
+    "projects/embedding-model-300m/tests/check.py": "a3867129f43df1a1b6d8bf671d449488987e1339f7abfcae0caf35fc88c6d952",
     "projects/embedding-model-300m/tests/resume_worker.py": "8ee26a7370d73e9a982beae059f7f7d4a51efc9b6f419d8e1ffeaf52bbb5a562",
     "projects/embedding-model-300m/trainer.py": "8b40db81209571d48e209d983e04879f502ce65031bc51152c978f7944608f90"
   },

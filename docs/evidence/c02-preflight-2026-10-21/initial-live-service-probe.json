@@ -1,0 +1,50 @@
+{
+  "package": "/private/tmp/jaxpathways-c02-evaluation-20261021-final2/consumer-sft-full-domain",
+  "port": 48127,
+  "sourceSha256": {
+    "serve_local.py": "60b4a5e1904c96264a1c7584418894ca3d0bb138359fe26711ad6008ccc3c059",
+    "consumer.py": "5e7f1255af26460760f60906c87d6a449dafd58ce68e43d7ba55b5e25ea0935e",
+    "model.py": "efec0774f84e19f870368f7965e3e779641935f4670140065226ec8a27e71932",
+    "config.py": "53e0990fcf6d8fb08486398097919a9430f768cda54540740b3a453a21ed1db9"
+  },
+  "scope": "Actual loopback listener smoke and one partial-header isolation probe; not production or target qualification.",
+  "ownedPid": 30029,
+  "health": {
+    "status": 200,
+    "body": {
+      "status": "ready",
+      "model_status": "bounded pilot consumer; not full capstone or release qualification"
+    }
+  },
+  "invalidType": {
+    "status": 400,
+    "body": {
+      "error": "max_new_tokens must be an integer from 0 through 32"
+    }
+  },
+  "valid": {
+    "status": 200,
+    "body": {
+      "text": "inin",
+      "token_ids": [
+        263,
+        263
+      ],
+      "finish_reason": "length",
+      "prompt_tokens": 43
+    }
+  },
+  "healthDuringPartialHeader": {
+    "errorType": "TimeoutError",
+    "error": "timed out"
+  },
+  "healthAfterRelease": {
+    "status": 200,
+    "body": {
+      "status": "ready",
+      "model_status": "bounded pilot consumer; not full capstone or release qualification"
+    }
+  },
+  "ownedServerStopped": true,
+  "sourceUnchanged": true
+}

@@ -1,0 +1,47 @@
+{
+  "status": "pass",
+  "scope": "Independent QA score aggregation and raw record/prompt/tokenizer/answers/checkpoint binding for 768 outputs. Does not independently replay generation or reconstruct NLL logits.",
+  "input_sha256": {
+    "metrics.json": "8c7b6441c289b33f8bd9fabd963944416ae5af442ed50fc3c4a1ba6527d9d9a1",
+    "qa-generations.jsonl": "6dbb21d19ab04f005b9d6058eca25def56abdd2541c76a49e801da8ebc7f6b82"
+  },
+  "checker_sha256": "96ea539006ee9894aa8bea52709cf3ec7271ecb61b12d2367e2de61631960f54",
+  "branches": {
+    "base": {
+      "questions": 128,
+      "exact_match": 0.0,
+      "token_f1": 0.0,
+      "passes_predeclared_qa_floors": false
+    },
+    "continuation_mixture": {
+      "questions": 128,
+      "exact_match": 0.0,
+      "token_f1": 0.0013020833333333333,
+      "passes_predeclared_qa_floors": false
+    },
+    "continuation_general_control": {
+      "questions": 128,
+      "exact_match": 0.0,
+      "token_f1": 0.0011160714285714285,
+      "passes_predeclared_qa_floors": false
+    },
+    "sft_full_from_domain": {
+      "questions": 128,
+      "exact_match": 0.0,
+      "token_f1": 0.0015625,
+      "passes_predeclared_qa_floors": false
+    },
+    "sft_lora_from_domain": {
+      "questions": 128,
+      "exact_match": 0.0,
+      "token_f1": 0.0013020833333333333,
+      "passes_predeclared_qa_floors": false
+    },
+    "sft_full_from_general": {
+      "questions": 128,
+      "exact_match": 0.0,
+      "token_f1": 0.001736111111111111,
+      "passes_predeclared_qa_floors": false
+    }
+  }
+}

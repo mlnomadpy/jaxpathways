@@ -1,0 +1,24 @@
+{
+  "checker": "image-model-300m/tests/check.py",
+  "implementation": "/private/tmp/c03-sol-v9-equivalent-candidate/model.py",
+  "stage": "model",
+  "stages": {
+    "model": {
+      "dropout": "same key replays exactly; changed key changes output",
+      "max_abs_errors": {
+        "changed_configuration": 3.767081799832539e-07,
+        "classification_logits": 6.037978241835162e-07,
+        "cnn_logits": 7.417276215448965e-08,
+        "head_gradient_fd": 4.440077638889761e-08,
+        "patch_order": 0.0,
+        "round_trip": 0.0,
+        "vit_features": 7.168839541993322e-07
+      },
+      "pilot_cnn_parameter_count": 5253,
+      "pilot_vit_parameter_count": 25440,
+      "status": "pass",
+      "uniform_attention_mutation": "rejected by independent NumPy oracle"
+    }
+  },
+  "status": "pass"
+}
