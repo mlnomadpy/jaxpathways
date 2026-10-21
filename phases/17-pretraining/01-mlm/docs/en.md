@@ -287,7 +287,7 @@ visual_data={"panels":[*visual_data.get("panels",[visual_data]),extra_panel]}
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:34:23.765406+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:11:10.763127+00:00. JAX 0.9.2.
 
 ```text
 MLM initial/final/changed-mask: 1.0986123085021973 0.010633035562932491 0.010457751341164112
@@ -364,22 +364,27 @@ Select the first position instead of the second and evaluate the trained model w
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
+**Inputs:**
+- A trained model apply function and parameters, token IDs, original target IDs, mask token ID, and a selection mask with the first position selected.
 
-**Step-by-step implementation plan:**
-1. Exercise solution
+**Outputs:**
+- Predictions and selected-token loss at the first position, evaluated without changing parameters.
+
+**Invariants to check:**
+- Only selected positions contribute to loss; clean target IDs are labels, not model inputs. Gradient from the selected loss may flow through shared attention into visible context representations.
+
+**Hints:**
+- Corrupt the selected input position while keeping its clean target separate.
+- Run the trained parameters in evaluation mode and do not apply an optimizer update.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-first_mask = jnp.array(...)  # TODO: compute first_mask
-first_loss = float(...)  # TODO: compute first_loss
-    masked_ce(mlm_logits(p, corrupt_tokens(tokens, first_mask, 3)), tokens, first_mask)
-)
-assert first_loss  # TODO: complete assertion check
-print('Changed position loss:', first_loss)
+import jax.numpy as jnp
+
+def evaluate_alternate_mask(apply_model, params, tokens, targets, mask_id, selected):
+    # TODO: corrupt the selected input, run the trained model, and score the selected clean target.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -410,20 +415,28 @@ Validate outside the transformed objective before dividing by a count.
 
 ### How to write: Reject a missing learning signal — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Inputs:**
+- A token batch and an all-false Boolean selection mask.
+
+**Outputs:**
+- A clear ValueError before any zero-count loss reduction.
+
+**Invariants to check:**
+- A batch with no selected targets cannot silently produce NaN or a zero training signal.
+
+**Hints:**
+- Validate the mask at the public corruption boundary.
+- Check shape and selected count before entering a transformed loss.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Reject a missing learning signal (Transfer): A skipped batch requires an explicit training policy.
-try:
-    corrupt_tokens(tokens, jnp.zeros_like(tokens, dtype = ...  # TODO: compute corrupt_tokens(tokens, jnp.zeros_like(tokens, dtype
-except ValueError:
-    print('Empty mask rejected')
-else:
-    raise AssertionError('empty mask accepted')
+import jax.numpy as jnp
+import numpy as np
+
+def require_selected_positions(tokens, selected, mask_id):
+    # TODO: validate the mask and return a corrupted token batch.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -456,31 +469,28 @@ Broadcast the mask over vocabulary and divide by the selected count, not the bat
 
 ### How to write: Derive the output gradient without autodiff — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
+**Inputs:**
+- One logits tensor, integer target IDs, and a nonuniform selected mask.
 
-**Step-by-step implementation plan:**
-1. Derive the output gradient without autodiff (Challenge)
-2. Reduce along axis=-1 to compute `analytic`.
+**Outputs:**
+- The analytical softmax-cross-entropy gradient and an autodiff comparison.
+
+**Invariants to check:**
+- Unselected token gradients are zero; selected token gradients sum to zero across vocabulary.
+
+**Hints:**
+- For each selected row, start from probability minus one-hot target.
+- Include the selected-count normalization and compare with autodiff.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Derive the output gradient without autodiff (Challenge)
-# Reduce along axis=-1 to compute `analytic`.
-analytic = ...  # TODO: compute analytic
-    (jax.nn.softmax(audit_logits, axis=-1) - jax.nn.one_hot(audit_targets, 3))
-    * audit_mask[..., None]
-    / audit_mask.sum()
-)
-np.testing.assert_allclose(
-    jax.grad(masked_ce)(audit_logits, audit_targets, audit_mask),
-    analytic,
-    atol = ...  # TODO: compute atol
-)
-print('Independent masked softmax gradient agrees.')
+import jax.numpy as jnp
+import numpy as np
+
+def compare_masked_logit_gradients(logits, targets, selected):
+    # TODO: derive the masked gradient and compare it elementwise with autodiff.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

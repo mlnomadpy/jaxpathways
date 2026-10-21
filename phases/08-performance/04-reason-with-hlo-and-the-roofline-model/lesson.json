@@ -64,7 +64,22 @@
         "prompt": "Change only the assumed element size from four bytes to two bytes. Calculate the resulting traffic and intensity, and explain why this is insufficient to predict an actual speedup.",
         "hint": "The model assumes both inputs and output use that element size; real accumulation and conversion may differ.",
         "solution": "# Keep the same shapes but change storage precision (Transfer)\nf32,b32,i32=contract(32,16,8,4)\nf16,b16,i16=contract(32,16,8,2)\nassert f32==f16 and b32==2*b16\nnp.testing.assert_allclose(i16,2*i32)\nprint('Arithmetic unchanged; modeled traffic halved and intensity doubled.')",
-        "explanation": "Changing storage bytes in an accounting model is separate from native arithmetic support, accumulation policy, quality preservation or measured runtime improvement."
+        "explanation": "Changing storage bytes in an accounting model is separate from native arithmetic support, accumulation policy, quality preservation or measured runtime improvement.",
+        "learnerStarter": {
+          "inputs": [
+            "Change only the assumed element size from four bytes to two bytes. Calculate the resulting traffic and intensity, and explain why this is insufficient to predict an actual speedup."
+          ],
+          "outputs": [
+            "Changed byte estimate and intensity under the explicit storage assumption."
+          ],
+          "invariants": [
+            "Only the bytes per element change; the operation count and shapes stay fixed."
+          ],
+          "hints": [
+            "The model assumes both inputs and output use that element size; real accumulation and conversion may differ."
+          ],
+          "code": "import numpy as np\n\ndef practice_keep_the_same_shapes_but_change_storage_precision(m, k, n, itemsize):\n    \"\"\"Implement the keep the same shapes but change storage precision check.\"\"\"\n    # TODO: Recompute minimum traffic and arithmetic intensity with two-byte elements while holding dimensions fixed.\n    raise NotImplementedError\n"
+        }
       }
     ],
     "question": "The lowered program contains a dot operation and a roofline model predicts a high ceiling. What is still needed before claiming high accelerator throughput?",
@@ -134,6 +149,22 @@
       "An HLO operation and a theoretical ceiling do not measure achieved throughput. Run the target workload with a defined synchronized boundary.",
       "A typed intermediate representation and an optimistic ceiling do not measure execution. Workload equivalence, synchronization, device evidence and appropriate model assumptions are still required.",
       "Source line counts do not describe data traffic or hardware utilization. Inspect operation shapes, precision and measured execution."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "Matrix dimensions, element storage size, and a declared hardware budget."
+      ],
+      "outputs": [
+        "FLOP count, minimum-byte estimate, arithmetic intensity, and hypothetical roofline ceiling."
+      ],
+      "invariants": [
+        "State the storage and traffic assumptions; a bound is not observed throughput."
+      ],
+      "hints": [
+        "Count multiply-add work and both input/output bytes independently.",
+        "Change only itemsize to isolate its effect on the estimate."
+      ],
+      "code": "import numpy as np\n\ndef roofline_contract(m, k, n, itemsize):\n    \"\"\"FLOP count, minimum-byte estimate, arithmetic intensity, and hypothetical roofline ceiling.\"\"\"\n    # TODO: Count matrix FLOPs and minimum bytes from the declared dimensions and element size.\n    raise NotImplementedError\n"
+    }
   }
 }

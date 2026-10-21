@@ -296,7 +296,7 @@ visual_data={'kind':'line','x':list(range(8)),'xlabel':'observation row','ylabel
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:26:42.232197+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:03:19.884116+00:00. JAX 0.9.2.
 
 ```text
 {
@@ -389,32 +389,34 @@ Predict the effect of replacing the bias by minus one quarter. Run a second comp
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.jit(fn) / @jax.jit` — Traces `fn` for its input signatures and compiles an executable. Changed shapes, dtypes or static arguments can trigger another compilation.
-- `jax.block_until_ready(output)` — Synchronizes with the accelerator/CPU device so asynchronous dispatch finishes before wall-clock timing.
+**Inputs:**
+- The original inputs, weights, prediction function, and selected device.
+- A compiled prediction path and changed bias.
 
-**Step-by-step implementation plan:**
-1. Wrap with `jax.jit` (`changed_predict`) so XLA traces and compiles the function.
-2. Wait for device work to finish before timing it or comparing its result on the host.
-3. Transfer the device result to the host for an independent NumPy comparison.
-4. Transfer the device result to the host for an independent NumPy comparison.
+**Outputs:**
+- The changed device result, an independent NumPy comparison, and device metadata.
+
+**Invariants to check:**
+- The observed result comes from the selected device.
+- Check against both a shift-based prediction and an independent calculation.
+- Unavailable requested hardware cannot silently pass as CPU evidence.
+
+**Hints:**
+- Keep the original model inputs fixed.
+- Wait for device work before transferring a result for comparison.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Predict the effect of replacing the bias by minus one quarter.
-# Wrap with `jax.jit` (`changed_predict`) so XLA traces and compiles the function.
-changed_predict = jax.jit(...)  # TODO: compute changed_predict
-changed = changed_predict(...)  # TODO: compute changed
-# Wait for device work to finish before timing it or comparing its result on the host.
-changed.block_until_ready()
-# Transfer the device result to the host for an independent NumPy comparison.
-np.testing.assert_allclose(np.asarray(changed), reference - 0.375, atol=1e-5, rtol=1e-5)
-# Transfer the device result to the host for an independent NumPy comparison.
-np.testing.assert_allclose(np.asarray(changed), x_host @ w_host - 0.25, atol=1e-5, rtol=1e-5)
-assert {d.platform for d  # TODO: complete assertion check
-print('Changed bias, first prediction:', float(changed[0]))
+import jax
+import jax.numpy as jnp
+import numpy as np
+
+def check_changed_bias(x, weight, predict, device):
+    # TODO: run the changed compiled prediction on the selected device
+    changed = ...
+    # TODO: compare with an independent host calculation
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -450,29 +452,31 @@ A row-wise affine prediction commutes with row permutation. A sum would conceal 
 
 ### How to write: Test row order without changing the model — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `Mesh + PartitionSpec + NamedSharding` — Maps logical tensor axes onto physical device mesh axes for SPMD data, tensor, or pipeline parallelism.
-- `jax.block_until_ready(output)` — Synchronizes with the accelerator/CPU device so asynchronous dispatch finishes before wall-clock timing.
+**Inputs:**
+- Observation rows, model weights, and the selected device.
+- A reversed copy of the input rows.
 
-**Step-by-step implementation plan:**
-1. Wait for device work to finish before timing it or comparing its result on the host.
-2. Transfer the device result to the host for an independent NumPy comparison.
+**Outputs:**
+- The reversed prediction vector and a NumPy reference.
+
+**Invariants to check:**
+- Output row order follows input row order.
+- Compare the full vector, not only its sum.
+- The result is placed on the selected device.
+
+**Hints:**
+- Reverse a host copy so the original stays unchanged.
+- Check endpoints and every value after execution completes.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Test row order without changing the model (Transfer)
-reversed_x = jax.device_put(...)  # TODO: compute reversed_x
-reversed_y = predict(...)  # TODO: compute reversed_y
-# Wait for device work to finish before timing it or comparing its result on the host.
-reversed_y.block_until_ready()
-# Transfer the device result to the host for an independent NumPy comparison.
-np.testing.assert_allclose(np.asarray(reversed_y), reference[::-1], atol=1e-5, rtol=1e-5)
-assert {d.platform for d  # TODO: complete assertion check
-assert np.isclose(float(reversed_y[0]), 3.625)  # TODO: complete assertion check
-assert np.isclose(float(reversed_y[-1]), 0.34375)  # TODO: complete assertion check
-print('Row reversal preserved values and requested placement.')
+import jax
+import numpy as np
+
+def check_reversed_rows(x_host, weights, device, predict):
+    # TODO: place reversed rows, predict, and compare the full result
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

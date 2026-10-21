@@ -87,7 +87,23 @@
         "prompt": "Transpose the first PyTorch weight before conversion and prove the boundary rejects it instead of transposing it a second time.",
         "hint": "The first weight is rectangular, so validate its source shape before applying the mapping.",
         "solution": "# Reject a plausible but wrong tensor layout (Transfer)\nbad_state=dict(state)\nbad_state['hidden.weight']=state['hidden.weight'].T\ntry:convert(bad_state)\nexcept ValueError:print('Wrong source layout rejected')\nelse:raise AssertionError('layout mismatch accepted')",
-        "explanation": "Asymmetric dimensions expose orientation errors that square test matrices can hide. Shape checks complement numerical checks rather than replacing them."
+        "explanation": "Asymmetric dimensions expose orientation errors that square test matrices can hide. Shape checks complement numerical checks rather than replacing them.",
+        "learnerStarter": {
+          "inputs": [
+            "Transpose the first PyTorch weight before conversion and prove the boundary rejects it instead of transposing it a second time."
+          ],
+          "outputs": [
+            "A rejection for the transposed source tensor and parity for the correct mapping."
+          ],
+          "invariants": [
+            "The converter performs one documented layout transform."
+          ],
+          "hints": [
+            "The first weight is rectangular, so validate its source shape before applying the mapping.",
+            "Compare asymmetric matrix dimensions so a mistaken second transpose is visible."
+          ],
+          "code": "import numpy as np\nimport jax\nimport jax.numpy as jnp\nimport torch\nfrom flax import nnx\n\ndef practice_reject_a_plausible_but_wrong_tensor_layout(source_weight, converted_weight, tolerance):\n    \"\"\"Complete the reject a plausible but wrong tensor layout check.\"\"\"\n    # TODO: ('Transpose the source first-layer weight before mapping and check that the parity boundary rejects it without a second transpose.', 'A failed wrong-layout parity check and an accepted correctly mapped matrix.', 'Each framework layout conversion is applied exactly once.')\n    raise NotImplementedError\n"
+        }
       },
       {
         "title": "Check a nonuniform output sensitivity",
@@ -95,7 +111,23 @@
         "prompt": "Compare the source and converted input gradients for an output cotangent that contains unequal positive and negative entries. Explain what this tests beyond summing the outputs.",
         "hint": "Form the same scalar weighted output in each framework. Create a fresh PyTorch input so earlier gradients do not accumulate.",
         "solution": "# Check a nonuniform output sensitivity (Transfer / diagnosis): This checks J^{\\mathsf T}v for a second, nonuniform direction.\nprobe_inputs = np.array([[.2, -.7, 1.1], [1., .4, -.5]], np.float32)\ncotangent = np.array([[1., -.5], [2., .25]], np.float32)\nprobe_torch = torch.tensor(probe_inputs, requires_grad=True)\nweighted_source = (source(probe_torch)['output'] * torch.tensor(cotangent)).sum()\nweighted_source.backward()\nweighted_target = jax.grad(lambda z: jnp.sum(target(z)['output'] * jnp.asarray(cotangent)))(jnp.asarray(probe_inputs))\nvjp_report = error_report(probe_torch.grad.numpy(), weighted_target, atol=5e-6, rtol=5e-5)\nassert vjp_report['passed'], vjp_report\nprint('Nonuniform cotangent input-gradient parity:', vjp_report)",
-        "explanation": "This checks \\(J^{\\mathsf T}v\\) for a second, nonuniform direction. It can reveal errors hidden by an all-ones sensitivity. The same activation, normalization and parameter mapping must support both forward and derivative agreement."
+        "explanation": "This checks \\(J^{\\mathsf T}v\\) for a second, nonuniform direction. It can reveal errors hidden by an all-ones sensitivity. The same activation, normalization and parameter mapping must support both forward and derivative agreement.",
+        "learnerStarter": {
+          "inputs": [
+            "Compare the source and converted input gradients for an output cotangent that contains unequal positive and negative entries. Explain what this tests beyond summing the outputs."
+          ],
+          "outputs": [
+            "Source and converted input-gradient vectors."
+          ],
+          "invariants": [
+            "Both paths receive the same mixed-sign output cotangent."
+          ],
+          "hints": [
+            "Form the same scalar weighted output in each framework. Create a fresh PyTorch input so earlier gradients do not accumulate.",
+            "Compare gradient entries with declared numerical tolerances."
+          ],
+          "code": "import numpy as np\nimport jax\nimport jax.numpy as jnp\nimport torch\nfrom flax import nnx\n\ndef practice_check_a_nonuniform_output_sensitivity(source_fn, converted_fn, inputs, cotangent):\n    \"\"\"Complete the check a nonuniform output sensitivity check.\"\"\"\n    # TODO: ('Use a mixed-sign output cotangent to compare source and converted input gradients.', 'Two input-gradient vectors with tolerance-based parity.', 'The same nonuniform cotangent is applied to both implementations.')\n    raise NotImplementedError\n"
+        }
       }
     ],
     "question": "The first linear layer agrees, but LayerNorm is the first mismatch. What should you inspect next?",
@@ -208,6 +240,22 @@
       "The earliest mismatch narrows the investigation. Downstream error is often the propagated effect of that first difference.",
       "A large early mismatch is diagnostic evidence. Check the normalization definition before changing tolerances.",
       "Successful loading only verifies a structural path. Compare intermediate activations to locate the first numerical divergence."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "A near-zero reference value, the two candidate values, and the declared absolute/relative tolerances."
+      ],
+      "outputs": [
+        "Whether rounding noise is accepted and whether the meaningful discrepancy is rejected."
+      ],
+      "invariants": [
+        "The absolute tolerance handles the near-zero rounding case; the larger discrepancy remains outside tolerance."
+      ],
+      "hints": [
+        "Evaluate each candidate against the same near-zero reference.",
+        "Include the absolute and relative tolerance terms in the comparison rule."
+      ],
+      "code": "import numpy as np\n\ndef check_near_zero_tolerance(reference, candidates, atol, rtol):\n    # TODO: Apply the declared tolerance to both candidate errors and report each acceptance result.\n    raise NotImplementedError\n"
+    }
   }
 }

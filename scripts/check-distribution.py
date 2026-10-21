@@ -194,6 +194,23 @@ with ZipFile(OUT/'jax-course-workspace.zip') as bundle:
         for source in (lesson['path']+'/lesson.json',lesson['artifacts']['source'],lesson['artifacts']['scriptSource'],lesson['artifacts']['notebookSource'],lesson['artifacts']['quizSource'],lesson['artifacts']['evidenceSource']):
             assert bundle.read('jaxpathways/'+source)==(ROOT/source).read_bytes()
     for lesson in authored:
+        artifacts = lesson['artifacts']
+        for kind in ('learnerScriptSource', 'learnerNotebookSource'):
+            if kind in artifacts:
+                assert bundle.read('jaxpathways/'+artifacts[kind]) == (ROOT/artifacts[kind]).read_bytes()
+        if 'learnerNotebook' not in artifacts:
+            continue
+        notebook = json.loads((ROOT/'public'/artifacts['learnerNotebook']).read_text())
+        contracts = [lesson['content']['learnerStarter']] + [task['learnerStarter'] for task in lesson['content'].get('practice', [])]
+        code_cells = [cell for cell in notebook['cells'] if cell['cell_type'] == 'code']
+        assert len(code_cells) == len(contracts), lesson['id']+': learner task coverage differs'
+        for cell, contract in zip(code_cells, contracts):
+            assert ''.join(cell['source']).strip() == contract['code'].strip(), lesson['id']+': learner code differs from authored contract'
+            assert cell['execution_count'] is None and cell['outputs'] == [], lesson['id']+': learner file includes reference execution'
+        learner_code = '\n\n'.join(''.join(cell['source']) for cell in code_cells)
+        references = [lesson['content']['code'], lesson['content']['solution']] + [task['solution'] for task in lesson['content'].get('practice', [])]
+        assert all(reference not in learner_code for reference in references if len(reference) > 100), lesson['id']+': learner file includes a completed reference'
+    for lesson in authored:
         for name in ('figure.svg','figure.png','visual.json','execution.json')+(('mechanism.svg','mechanism.png') if lesson['content'].get('diagram') else ()):
             source=lesson['path']+'/outputs/'+name
             assert bundle.read('jaxpathways/'+source)==(ROOT/source).read_bytes()

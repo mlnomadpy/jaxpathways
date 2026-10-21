@@ -304,7 +304,7 @@ visual_data={"kind":"bar","x":[0,1,2],"labels":names,"xlabel":"model after train
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:32:30.335131+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:09:08.192541+00:00. JAX 0.9.2.
 
 ```text
 {
@@ -387,18 +387,34 @@ Adapt for zero steps and verify that predictions exactly match the reloaded chec
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Exercise solution
+**Inputs:**
+- A reloaded base parameter vector, source and target datasets, and a declared adaptation budget.
+
+**Outputs:**
+- Two adapted candidates, source/target metrics, and a decision that may retain the base.
+
+**Invariants to check:**
+- Both objectives start from the same base state; checkpoint identity is preserved; the decision uses the same held-out criteria.
+
+**Hints:**
+- Measure source and target losses separately before selecting a candidate.
+- Keep the source artifact immutable and compare host float64 arithmetic on changed weights.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-unchanged,_ = train(...)  # TODO: compute unchanged,_
-np.testing.assert_array_equal(unchanged,restored)
-short,_ = train(...)  # TODO: compute short,_
-assert not jnp.array_equal(short,restored)  # TODO: complete assertion check
-np.testing.assert_array_equal(restored,frozen)
+import hashlib
+import json
+import tempfile
+from pathlib import Path
+import numpy as np
+import jax
+import jax.numpy as jnp
+
+def compare_adaptation_candidates(base_params, source_data, target_data, steps, retention_budget):
+    """Two adapted candidates, source/target metrics, and a decision that may retain the base."""
+    # TODO: Branch from one immutable base, compute target/source evidence for both objectives, and apply the declared retention rule.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -428,17 +444,34 @@ Report the actual values; target improvement is not a source-retention guarantee
 
 ### How to write: Keep source-task evidence — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Inputs:**
+- Measure source cross-entropy before and after both adaptation objectives. Explain any forgetting using the different source and target probability rules.
+
+**Outputs:**
+- Source and target metrics for both adaptation branches.
+
+**Invariants to check:**
+- Source cross-entropy uses the same source examples before and after adaptation.
+
+**Hints:**
+- Report the actual values; target improvement is not a source-retention guarantee.
+- Measure the base before adapting either candidate.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Keep source-task evidence (Transfer / diagnosis)
-retention = ...  # TODO: compute retention
-assert retention[1]  # TODO: complete assertion check
-print("source retention losses:",retention)
+import hashlib
+import json
+import tempfile
+from pathlib import Path
+import numpy as np
+import jax
+import jax.numpy as jnp
+
+def practice_keep_source_task_evidence(base_params, candidate_params, source_features, source_labels):
+    """Complete the keep source-task evidence check."""
+    # TODO: ('Compute source cross-entropy for the base and both adapted candidates using the same source rows.', 'Source metrics for both adaptation objectives alongside the shared target criterion.', 'Every candidate starts from the same base and uses the same source evaluation set.')
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -468,22 +501,34 @@ Use the same logits, reduction and targets; this check does not call the JAX los
 
 ### How to write: Check the loss without autodiff — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- Compare the soft-target loss with a host float64 logaddexp expression on new weights.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- JAX and host-float64 soft-target loss values on changed weights.
+
+**Invariants to check:**
+- Both calculations use the same soft labels and logits.
+
+**Hints:**
+- Use the same logits, reduction and targets; this check does not call the JAX loss as its oracle.
+- Use logaddexp in the host reference for numerical stability.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Check the loss without autodiff (Transfer / diagnosis)
-probe = np.array(...)  # TODO: compute probe
-z = ...  # TODO: compute z
-expected = np.mean(...)  # TODO: compute expected
-np.testing.assert_allclose(objective(jnp.asarray(probe),adapt_X,soft_targets),expected,rtol = ...  # TODO: compute np.testing.assert_allclose(objective(jnp.asarray(probe),adapt_X,soft_targets),expected,rtol
+import hashlib
+import json
+import tempfile
+from pathlib import Path
+import numpy as np
+import jax
+import jax.numpy as jnp
+
+def practice_check_the_loss_without_autodiff(weights, features, soft_targets):
+    """Complete the check the loss without autodiff check."""
+    # TODO: ('Evaluate the soft-target log loss with JAX and host float64 logaddexp on the changed weights.', 'Two scalar losses with a finite-precision parity check.', 'Both expressions consume identical logits and soft targets.')
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -514,26 +559,28 @@ Compare each source loss with the base source loss. Do not compare the two train
 
 ### How to write: Choose under a declared retention constraint — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Inputs:**
+- Before running, choose a source-loss increase budget of $0.3$ nats for this fixture. Evaluate both adapted candidates against the same target and source criteria; retain the base if neither qualifies.
+
+**Outputs:**
+- A candidate decision record or explicit keep-base decision.
+
+**Invariants to check:**
+- The source-loss budget is fixed before ranking candidates by the common target criterion.
+
+**Hints:**
+- Compare each source loss with the base source loss. Do not compare the two training objectives with each other.
+- Compute source increase relative to the unadapted base.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Choose under a declared retention constraint (Transfer / diagnosis): The gate separates optimization from acceptance.
-retention_budget = ...  # TODO: compute retention_budget
-eligible = ...  # TODO: compute eligible
-for name in ('supervised', 'teacher'):
-    delta = ...  # TODO: compute delta
-    improved = ...  # TODO: compute improved
-    accepted_candidate = ...  # TODO: compute accepted_candidate
-    print(name, 'source loss increase', delta, 'passes declared gate', accepted_candidate)
-    if accepted_candidate: eligible.append(name)
-selected = min(...)  # TODO: compute selected
-assert selected  # TODO: complete assertion check
-assert all(metrics[n]['source_cross_entropy']-metrics['pretrained']['source_cross_entropy']  # TODO: complete assertion check
-print('Candidate selected under the declared fixture budget:', selected)
+import numpy as np
+
+def practice_choose_under_a_declared_retention_constraint(base_metrics, candidate_metrics, retention_budget):
+    """Complete the choose under a declared retention constraint check."""
+    # TODO: ('Filter candidates by the source-loss increase budget, rank eligible candidates by the common target metric, and retain base if none qualify.', 'Decision table with source increase, target criterion, and selected candidate/base.', 'The 0.3-nat retention budget is fixed before comparing candidates.')
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

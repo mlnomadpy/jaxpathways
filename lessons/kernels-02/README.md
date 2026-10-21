@@ -246,7 +246,7 @@ visual_data={'kind':'line','x':list(range(129)),'xlabel':'logical column','ylabe
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:31:43.134289+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:08:21.222853+00:00. JAX 0.9.2.
 
 ```text
 Interpretation max error: 0.0
@@ -309,26 +309,28 @@ Change the activation shape to (17,257), freeze a NumPy random seed and compare 
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- A frozen-seed random matrix shaped (17,257), distinct per-column bias values, and two target-compatible tile choices.
 
-**Step-by-step implementation plan:**
-1. Exercise solution
-2. Transfer the device result to the host for an independent NumPy comparison.
+**Outputs:**
+- Interpreted outputs, exact shapes, and NumPy agreement for each tile.
+
+**Invariants to check:**
+- Both candidates consume identical inputs and bias values.
+- The final partial tiles do not change output shape or values.
+
+**Hints:**
+- Generate the fixture once from a local seeded generator.
+- Compare block choices with the same reference and tolerance.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-rng = np.random.default_rng(...)  # TODO: compute rng
-changed_x = jnp.asarray(...)  # TODO: compute changed_x
-changed_bias = jnp.asarray(...)  # TODO: compute changed_bias
-# Transfer the device result to the host for an independent NumPy comparison.
-expected = np.maximum(...)  # TODO: compute expected
-for block in [(8,128),(16,256)]:
-    result = fused_bias_relu(...)  # TODO: compute result
-    np.testing.assert_allclose(result,expected,rtol = ...  # TODO: compute np.testing.assert_allclose(result,expected,rtol
-print("Changed tails and two TPU-compatible blocks verified in interpretation")
+import numpy as np
+
+def compare_activation_tiles(interpreter, seed, block_choices):
+    # TODO: build one seeded (17,257) fixture with distinct column biases.
+    raise NotImplementedError("Compare target-compatible tiles on fixed inputs")
 ```
 
 <details><summary>Reference solution</summary>
@@ -362,22 +364,26 @@ A column bias is a vector with exactly one entry per matrix column.
 
 ### How to write: Reject hidden bias-axis broadcasting — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.zeros / jnp.ones(shape, dtype=...)` — Allocates a tensor of the given `shape` initialized with constants.
+**Inputs:**
+- The lesson wrapper and bias vectors with matrix-shaped and wrong-length variants.
 
-**Step-by-step implementation plan:**
-1. Reject hidden bias-axis broadcasting (Practice)
+**Outputs:**
+- Two captured validation failures before launch.
+
+**Invariants to check:**
+- Bias rank and length exactly match the column axis.
+- No implicit broadcasting is accepted by this kernel interface.
+
+**Hints:**
+- Test rank first, then the expected column length.
+- Assert the launch callback was not reached on invalid inputs.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Reject hidden bias-axis broadcasting (Practice)
-for malformed in (jnp.ones((1,129),dtype=jnp.float32),jnp.ones(9,dtype=jnp.float32)):
-    rejected = ...  # TODO: compute rejected
-    try:fused_bias_relu(x,malformed)
-    except ValueError:rejected=True
-    assert rejected  # TODO: complete assertion check
-print("Malformed bias axes rejected")
+def reject_invalid_bias(wrapper, matrix, bias_matrix, short_bias):
+    # TODO: exercise both malformed cases and confirm validation precedes launch.
+    raise NotImplementedError("Check rank and length for the per-column bias")
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -410,21 +416,28 @@ Use a deterministic reversed column order; do not permute the bias independently
 
 ### How to write: Check a permutation invariant — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.arange(n, dtype=...)` — Creates a 1-D JAX array of evenly spaced values `[0, 1, ..., n-1]` on the target device.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- A matrix, distinct per-column bias, and a nontrivial column permutation.
 
-**Step-by-step implementation plan:**
-1. Check a permutation invariant (Challenge)
+**Outputs:**
+- Original output, inverse-permuted output, and equality check.
+
+**Invariants to check:**
+- Matrix columns and bias entries move together.
+- Undoing the permutation restores the original output.
+
+**Hints:**
+- Apply the same permutation to columns and bias.
+- Invert the permutation only on the output column axis.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Check a permutation invariant (Challenge)
-order = jnp.arange(...)  # TODO: compute order
-permuted = fused_bias_relu(...)  # TODO: compute permuted
-np.testing.assert_allclose(permuted[:,order],actual,rtol=1e-6,atol=1e-6)
-print("Column/bias pairing survives a joint permutation")
+import numpy as np
+
+def check_column_permutation(kernel, matrix, bias, permutation):
+    # TODO: compare the original output with the restored permuted output.
+    raise NotImplementedError("Test equivariance under joint column and bias permutation")
 ```
 
 <details><summary>Reference solution and reasoning</summary>

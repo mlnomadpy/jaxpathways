@@ -86,7 +86,23 @@
         "prompt": "Try a response that claims to abstain but still returns an unsupported answer.",
         "hint": "The fixture contract requires both empty answer text and no citations.",
         "solution": "# Check abstention structure (transfer)\nbad=dict(answer='An unsupported claim',citations=[],abstain=True)\nassert not llm_case(cases[-1],bad,['course-v1'])\nprint('An abstention flag alone does not satisfy the output contract.')",
-        "explanation": "Validate the full response object; a boolean alone is distinct from that the application withheld an answer."
+        "explanation": "Validate the full response object; a boolean alone is distinct from that the application withheld an answer.",
+        "learnerStarter": {
+          "inputs": [
+            "Try a response that claims to abstain but still returns an unsupported answer."
+          ],
+          "outputs": [
+            "A failed evaluator result for abstention containing an unsupported answer."
+          ],
+          "invariants": [
+            "The case remains in results with a structured failure reason."
+          ],
+          "hints": [
+            "The fixture contract requires both empty answer text and no citations.",
+            "Validate response form and evidence support independently."
+          ],
+          "code": "import os\nimport tempfile\nfrom pathlib import Path\nimport mlflow\nfrom mlflow import MlflowClient\n\ndef practice_check_abstention_structure(response, allowed_evidence):\n    \"\"\"Complete the check abstention structure check.\"\"\"\n    # TODO: ('Parse an abstaining response that still contains an unsupported claim and fail the structured response check.', 'A rejected malformed abstention with its case ID retained.', 'An abstention response contains no answer claim unsupported by the evidence.')\n    raise NotImplementedError\n"
+        }
       },
       {
         "title": "Keep failed work in the evaluation inventory",
@@ -94,7 +110,23 @@
         "prompt": "Replace the answer for the first answerable case with an empty abstention. Keep the case ID and show how the complete-suite score changes.",
         "hint": "Use the contract-aware replies as the starting point. An empty abstention is correct for the unsupported case but wrong for the selected answerable case.",
         "solution": "# Keep failed work in the evaluation inventory (Transfer)\ntimeout_replies = [{'id': case['id'], 'response': dict(reply)} for case, reply in zip(cases, guarded)]\ntimeout_replies[0]['response'] = dict(answer='', citations=[], abstain=True)\ntimeout_summary = score_replay(cases, timeout_replies, ['course-v1'])\nassert timeout_summary == {'count': 10, 'passed': 9, 'fraction': .9}\nprint('Failed answerable work remains in denominator:', timeout_summary)",
-        "explanation": "The fixture represents an unsuccessful answer as an empty abstention. A real trace should additionally distinguish timeout, retrieval failure and deliberate abstention as causes, while retaining all cases in the predeclared metric."
+        "explanation": "The fixture represents an unsuccessful answer as an empty abstention. A real trace should additionally distinguish timeout, retrieval failure and deliberate abstention as causes, while retaining all cases in the predeclared metric.",
+        "learnerStarter": {
+          "inputs": [
+            "Replace the answer for the first answerable case with an empty abstention. Keep the case ID and show how the complete-suite score changes."
+          ],
+          "outputs": [
+            "Per-case result inventory and complete-suite score."
+          ],
+          "invariants": [
+            "The failed case ID remains in the denominator after its answer is replaced."
+          ],
+          "hints": [
+            "Use the contract-aware replies as the starting point. An empty abstention is correct for the unsupported case but wrong for the selected answerable case.",
+            "Do not drop failed or abstained responses."
+          ],
+          "code": "import os\nimport tempfile\nfrom pathlib import Path\nimport mlflow\nfrom mlflow import MlflowClient\n\ndef practice_keep_failed_work_in_the_evaluation_inventory(cases, responses):\n    \"\"\"Complete the keep failed work in the evaluation inventory check.\"\"\"\n    # TODO: ('Replace the first answerable case output with an empty abstention while retaining its ID, then recompute full-suite score.', 'Complete case inventory and changed full-suite score.', 'Failed and abstained cases remain in the denominator and cannot be dropped.')\n    raise NotImplementedError\n"
+        }
       }
     ],
     "question": "The controlled replay suite passes every case. What is established?",
@@ -154,6 +186,22 @@
       "Fixtures cover their specified cases, not every live prompt or attack. Preserve scope and add held-out adversarial cases.",
       "A passing fixture suite establishes that the evaluator accepts those declared cases. It does not establish live application safety, general quality or coverage of unseen prompts. Version the model, prompt, retrieval inputs, tools and evaluator, and keep independent held-out cases.",
       "Evaluator success does not remove the need to version prompts, data and models. Record those inputs to make the result reproducible."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "The lesson’s answerable case, its allowed citations, and a response containing an invented citation."
+      ],
+      "outputs": [
+        "The evaluator result showing that the unsupported citation fails the case."
+      ],
+      "invariants": [
+        "A citation absent from the case’s allowed evidence cannot pass the citation check."
+      ],
+      "hints": [
+        "Check citation support against the case evidence, not whether the citation string is well formed.",
+        "Keep the test response otherwise valid so the invented citation is the failure cause."
+      ],
+      "code": "def reject_invented_citation(case, response, allowed_citations):\n    # TODO: Evaluate the response and confirm its unsupported citation causes a failure.\n    raise NotImplementedError\n"
+    }
   }
 }

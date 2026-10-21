@@ -134,82 +134,71 @@ export function extractCodeApis(code) {
   return [];
 }
 
-/**
- * Build a commented starter scaffold with TODOs from a reference solution snippet.
- * @param {string} solutionCode
- */
-export function buildStarterScaffold(solutionCode) {
-  const lines = solutionCode.split('\n');
-  /** @type {string[]} */
-  const out = [];
-  for (const line of lines) {
-    const trimmed = line.trim();
-    const indent = (line.match(/^\s*/) || [''])[0];
-    if (!trimmed || trimmed.startsWith('#')) {
-      out.push(line);
-      continue;
-    }
-    if (/^(?:import|from)\s+/.test(trimmed)) {
-      out.push(line);
-      continue;
-    }
-    if (/^(?:with|for|while|try|except|else|finally|def|class)\b.*:\s*$/.test(trimmed)) {
-      out.push(line);
-      continue;
-    }
-    const assignMatch = line.match(/^(\s*)([a-zA-Z_][\w, ()[\]'".]*?)\s*=\s*(.+)$/);
-    if (assignMatch && !trimmed.startsWith('assert ')) {
-      const [, lead, lhs, rhs] = assignMatch;
-      const callMatch = rhs.match(/^([a-zA-Z_][\w.]*)\s*\(/);
-      const hint = callMatch ? `${callMatch[1]}(...)` : '...';
-      out.push(`${lead}${lhs.trim()} = ${hint}  # TODO: compute ${lhs.trim()}`);
-      continue;
-    }
-    if (trimmed.startsWith('assert ')) {
-      const expr = trimmed.slice(7).trim();
-      const lhs = expr.split(/==|!=|<=|>=|<|>|\band\b|\bor\b|\bin\b/)[0].trim();
-      out.push(`${indent}assert ${lhs || '...'}  # TODO: complete assertion check`);
-      continue;
-    }
-    if (trimmed.startsWith('return ')) {
-      out.push(`${indent}return ...  # TODO: return computed result`);
-      continue;
-    }
-    out.push(line);
-  }
-  return out.join('\n');
+/** @typedef {{ inputs: string[]; outputs: string[]; invariants: string[]; hints: string[]; code: string }} LearnerStarterContract */
+
+/** @param {unknown} value @returns {value is LearnerStarterContract} */
+export function isLearnerStarterContract(value) {
+  if (!value || typeof value !== 'object') return false;
+  const candidate = /** @type {Record<string, unknown>} */ (value);
+  return (
+    ['inputs', 'outputs', 'invariants', 'hints'].every((key) => {
+      const items = candidate[key];
+      return (
+        Array.isArray(items) &&
+        items.length > 0 &&
+        items.every((item) => typeof item === 'string' && item.trim())
+      );
+    }) &&
+    typeof candidate.code === 'string' &&
+    Boolean(candidate.code.trim())
+  );
 }
 
 /**
- * Extract step-by-step natural language coding steps from a commented solution block.
- * @param {string} solutionCode
+ * Return code from an authored learner contract. A legacy reference-code
+ * argument intentionally yields no scaffold: a missing contract is a content
+ * gap, not a reason to infer an answer-shaped starter.
+ * @param {string | LearnerStarterContract | undefined} source
  */
-export function extractCodingSteps(solutionCode) {
-  const lines = solutionCode.split('\n');
-  /** @type {string[]} */
-  const steps = [];
-  for (const line of lines) {
-    const trimmed = line.trim();
-    if (trimmed.startsWith('#')) {
-      const text = trimmed.replace(/^#+\s*/, '').trim();
-      if (
-        text &&
-        !text.startsWith('Exercise solution:') &&
-        !text.includes('(Practice):') &&
-        !text.includes('(Challenge):') &&
-        !text.includes('(Transfer')
-      ) {
-        steps.push(text);
-      }
-    }
+export function buildStarterScaffold(source) {
+  if (isLearnerStarterContract(source)) {
+    return String(source.code || '').trim();
   }
-  if (steps.length === 0) {
-    steps.push('Set up the changed input or configuration parameters requested in the prompt.');
-    steps.push(
-      'Run the target function or transformation and assert that the output matches your prediction.',
-    );
+  return '';
+}
+
+/**
+ * Render a learner-authored starter contract. This function deliberately does
+ * not accept or inspect the reference solution.
+ * @param {LearnerStarterContract | undefined} contract
+ * @param {string} title
+ * @returns {string}
+ */
+export function renderLearnerStarterContract(contract, title = 'Learner starter contract') {
+  if (!isLearnerStarterContract(contract)) {
+    return `<aside class="learner-starter-pending"><strong>Learner starter pending.</strong> This lesson does not yet provide a separate input/output contract, checks, hints, and TODO scaffold.</aside>`;
   }
-  return steps.slice(0, 5);
+  /** @param {string} heading @param {string[]} values */
+  const list = (heading, values) =>
+    values?.length
+      ? `<h4>${heading}</h4><ul>${values.map((value) => `<li>${inlineMath(escapeHtml(value))}</li>`).join('')}</ul>`
+      : '';
+  const code = buildStarterScaffold(contract);
+  return `<section class="learner-starter-contract"><p class="code-guide-kicker">${escapeHtml(title)}</p>
+    ${list('Inputs', contract.inputs)}${list('Outputs', contract.outputs)}${list('Invariants to check', contract.invariants)}${list('Hints', contract.hints)}
+    <div class="starter-scaffold"><div class="starter-scaffold-header"><span>Your attempt · complete the TODOs</span></div><pre data-language="python"><code>${CourseCode.highlight(code, 'python')}</code></pre></div>
+  </section>`;
+}
+
+/**
+ * Extract learner-facing steps from an authored contract, never from solution comments.
+ * @param {LearnerStarterContract | undefined} source
+ */
+export function extractCodingSteps(source) {
+  if (source && typeof source === 'object' && Array.isArray(source.hints)) {
+    return source.hints.slice(0, 5);
+  }
+  return [];
 }
 
 /**
@@ -229,15 +218,25 @@ export function renderBuildStepCodeBreakdown(code) {
 
 /**
  * Render a pre-exercise teaching walkthrough + starter code scaffold before the learner writes code.
- * @param {string} solutionCode
+ * @param {string} _solutionCode
  * @param {string} title
+ * @param {LearnerStarterContract | undefined} learnerStarter
  */
-export function renderExerciseCodeTeacher(solutionCode, title = 'How to write this code') {
-  const apis = extractCodeApis(solutionCode);
-  const steps = extractCodingSteps(solutionCode);
-  const scaffold = buildStarterScaffold(solutionCode);
+export function renderExerciseCodeTeacher(
+  _solutionCode,
+  title = 'How to write this code',
+  learnerStarter,
+) {
+  const starter = isLearnerStarterContract(learnerStarter) ? learnerStarter : undefined;
+  const scaffold = buildStarterScaffold(starter);
+  const apis = starter ? extractCodeApis(scaffold) : [];
+  const contract = renderLearnerStarterContract(
+    starter,
+    'Learner-only inputs, outputs, checks and hints',
+  );
   return `<details class="code-teaching-guide"><summary>Show a writing guide and starter scaffold</summary>
-    <p class="code-guide-kicker">${escapeHtml(title)}: step-by-step recipe &amp; starter scaffold</p>
+    <p class="code-guide-kicker">${escapeHtml(title)}</p>
+    ${contract}
     ${
       apis.length
         ? `<p class="code-guide-subhead"><strong>1. Key functions &amp; syntax to use:</strong></p>
@@ -246,13 +245,5 @@ export function renderExerciseCodeTeacher(solutionCode, title = 'How to write th
       .join('')}</ul>`
         : ''
     }
-    <p class="code-guide-subhead"><strong>${apis.length ? '2.' : '1.'} Step-by-step implementation plan:</strong></p>
-    <ol class="code-step-list">${steps.map((s) => `<li>${inlineMath(s)}</li>`).join('')}</ol>
-    <div class="starter-scaffold">
-      <div class="starter-scaffold-header">
-        <span>Starter code scaffold · copy into your file &amp; fill in the TODOs</span>
-      </div>
-      <pre data-language="python"><code>${CourseCode.highlight(scaffold, 'python')}</code></pre>
-    </div>
   </details>`;
 }

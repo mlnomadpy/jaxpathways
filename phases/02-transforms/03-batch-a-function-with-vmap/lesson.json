@@ -83,7 +83,27 @@
         "prompt": "Use targets \\([0, 2, 7]\\). Define a scalar squared-error function for one example. Compute all per-example parameter gradients and derive the first row independently.",
         "hint": "The per-example squared-loss gradient is \\(2(\\hat y-y)x\\): twice the residual times the input. A prediction gradient by itself is not a loss gradient.",
         "solution": "# Turn sensitivities into training gradients (Practice): The first residual is 1, so the first loss gradient is [2, 2].\ntargets = jnp.array([0., 2., 7.])\ndef single_loss(parameters, row, target):\n    return (predict(parameters, row) - target) ** 2\nindividual_grads = jax.vmap(jax.grad(single_loss), in_axes=(None, 0, 0))(weight, batch, targets)\nmanual_grads = 2. * (batch @ weight - targets)[:, None] * batch\n# Check tensor shape invariant: `individual_grads.shape == (3, 2)`\nassert individual_grads.shape == (3, 2)\nassert jnp.allclose(individual_grads, manual_grads)\nassert jnp.allclose(individual_grads[0], jnp.array([2., 2.]))",
-        "explanation": "The first residual is \\(1\\), so the first loss gradient is \\([2, 2]\\). The batch axis records three separate contributions."
+        "explanation": "The first residual is \\(1\\), so the first loss gradient is \\([2, 2]\\). The batch axis records three separate contributions.",
+        "learnerStarter": {
+          "inputs": [
+            "The lesson batch and targets `[0, 2, 7]`.",
+            "A scalar squared-error function for one example."
+          ],
+          "outputs": [
+            "One parameter gradient per example.",
+            "An independent first-row calculation."
+          ],
+          "invariants": [
+            "Each example loss is scalar.",
+            "A prediction sensitivity is not substituted for a loss gradient.",
+            "The mapped result preserves the batch axis."
+          ],
+          "hints": [
+            "Differentiate the per-example loss with respect to parameters.",
+            "Keep targets aligned with rows."
+          ],
+          "code": "import jax\nimport jax.numpy as jnp\n\ndef single_loss(parameters, row, target):\n    # TODO: define one scalar example loss\n    raise NotImplementedError\n\ndef collect_example_gradients(parameters, rows, targets):\n    # TODO: map the loss gradient across aligned examples\n    raise NotImplementedError\n"
+        }
       },
       {
         "title": "Prove the mean-gradient identity with an experiment",
@@ -91,7 +111,26 @@
         "prompt": "Define the mean loss from the mapped single loss. Compare its parameter gradient with the mean of individual_grads. Repeat after changing targets and explain why a sum changes the relationship.",
         "hint": "Differentiation is linear over these independent sums. Ensure your function actually averages over the example axis.",
         "solution": "# Prove the mean-gradient identity with an experiment (Challenge)\ndef batch_mean_loss(parameters, rows, labels):\n    return jnp.mean(jax.vmap(single_loss, in_axes=(None, 0, 0))(parameters, rows, labels))\nfor labels in (targets, targets + 0.5):\n    each = jax.vmap(jax.grad(single_loss), in_axes=(None, 0, 0))(weight, batch, labels)\n    aggregate = jax.grad(batch_mean_loss)(weight, batch, labels)\n    # Check tensor shape invariant: `aggregate.shape == weight.shape`\n    assert aggregate.shape == weight.shape\n    assert jnp.allclose(aggregate, jnp.mean(each, axis=0))",
-        "explanation": "The aggregate has parameter shape, while per-example gradients add an examples axis. This identity relies on the stated independent-example loss and mean reduction, not on every model that has a batch dimension."
+        "explanation": "The aggregate has parameter shape, while per-example gradients add an examples axis. This identity relies on the stated independent-example loss and mean reduction, not on every model that has a batch dimension.",
+        "learnerStarter": {
+          "inputs": [
+            "A mapped single-example loss and parameter tree.",
+            "Original targets and a changed target vector."
+          ],
+          "outputs": [
+            "The batch-mean gradient and average individual gradient for both target sets."
+          ],
+          "invariants": [
+            "The mean reduction uses the example axis.",
+            "Changed targets are included in the comparison.",
+            "A sum is identified as a different objective."
+          ],
+          "hints": [
+            "Define the batch objective from the mapped single loss.",
+            "Keep the parameter axis shared in `vmap`."
+          ],
+          "code": "import jax\nimport jax.numpy as jnp\n\ndef compare_batch_and_individual_gradients(single_loss, parameters, rows, targets):\n    # TODO: compare a batch-mean gradient with mapped gradients\n    raise NotImplementedError\n"
+        }
       }
     ],
     "diagnosis": "If mapped axes have inconsistent sizes, inspect every mapped input before changing the model. If dot-product shapes fail, check whether you selected a row or a column. If gradients have an unexpected examples axis, distinguish a mapped gradient from the gradient of a reduced loss. If an implementation seems faster, first establish value equivalence and use the synchronized benchmark procedure from the next lesson.",
@@ -182,6 +221,24 @@
       "The per-example Jacobian keeps the batch axis. Differentiating a scalar mean reduces that axis, leaving one value per parameter.",
       "Mapping collects one parameter gradient per example. Reducing independent losses to a mean produces one gradient matching the shared parameter shape.",
       "This reverses the two contracts. Inspect whether the differentiated function returns one scalar per example or one scalar for the batch."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "A single-example prediction function and shared weight vector.",
+        "A batch of three rows."
+      ],
+      "outputs": [
+        "One weight gradient per row and the dot-product gradient."
+      ],
+      "invariants": [
+        "Map the batch axis while sharing parameters.",
+        "Predict the output shape before execution."
+      ],
+      "hints": [
+        "Compare vectorized output with independent row calculations.",
+        "Map only the example input axis."
+      ],
+      "code": "import jax\nimport jax.numpy as jnp\n\ndef batched_prediction_grad(predict, weight, batch):\n    # TODO: map the single-example gradient across rows\n    raise NotImplementedError\n"
+    }
   }
 }

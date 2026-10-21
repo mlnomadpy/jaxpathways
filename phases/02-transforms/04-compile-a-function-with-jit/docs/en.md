@@ -185,15 +185,15 @@ visual_data = {'kind': 'bar', 'labels': ['eager', 'first compiled', 'repeat comp
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:27:06.518873+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:03:38.371314+00:00. JAX 0.9.2.
 
 ```text
 Loss: 0.46000000834465027
-First/repeat seconds: 0.027464875020086765 2.8207898139953613e-05
-eager median / min / max seconds: 3.749970346689224e-05 3.474997356534004e-05 5.954178050160408e-05
-compiled median / min / max seconds: 5.729496479034424e-06 5.33275306224823e-06 8.167233318090439e-06
+First/repeat seconds: 0.014777290634810925 2.187490463256836e-05
+eager median / min / max seconds: 2.4584122002124786e-05 2.3334287106990814e-05 4.179216921329498e-05
+compiled median / min / max seconds: 4.082918167114258e-06 3.666616976261139e-06 5.499925464391708e-06
 backend / shapes / dtype: cpu (4, 3) (3,) (4,) float32
-compiled value-and-grad median seconds: 9.666429832577705e-06
+compiled value-and-grad median seconds: 7.874798029661179e-06
 PASS: transforms-04
 
 ```
@@ -250,23 +250,32 @@ Foundation · Compile `value_and_grad(loss)`, check the loss and gradient agains
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.value_and_grad(loss_fn)(params, ...)` — Evaluates both the scalar loss and its gradient PyTree `(loss_val, grads)` in a single forward+backward pass.
-- `jax.jit(fn) / @jax.jit` — Traces `fn` for its input signatures and compiles an executable. Changed shapes, dtypes or static arguments can trigger another compilation.
+**Inputs:**
+- The lesson loss, weight, input and target arrays.
+- Eager and compiled value-and-gradient computations.
 
-**Step-by-step implementation plan:**
-1. Exercise solution
+**Outputs:**
+- Compiled and eager outputs checked against independent formulas.
+- A synchronization plan for every timed output.
+
+**Invariants to check:**
+- Validate numerical results before interpreting speed.
+- Wait for every result leaf before stopping the timer.
+- Do not infer a universal speedup.
+
+**Hints:**
+- Keep shape and dtype fixed for equivalence.
+- Synchronize the full returned tree.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-compiled_step = jax.jit(...)  # TODO: compute compiled_step
-v, g = compiled_step(...)  # TODO: compute v, g
-expected_v, expected_g = jax.value_and_grad(...)  # TODO: compute expected_v, expected_g
-assert jnp.allclose(v, expected_v)  # TODO: complete assertion check
-assert jnp.allclose(g, expected_g)  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+
+def compare_compiled_value_gradient(loss, weight, inputs, targets):
+    # TODO: compile value_and_grad and compare against independent checks
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -296,22 +305,30 @@ Compilation specializes to relevant properties, not each ordinary array element 
 
 ### How to write: Check that a new value remains runtime data — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- A compiled loss and two weights with fixed shapes and dtypes.
+- The same lesson inputs and targets.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- Two compiled outputs and independent residual-mean references.
+
+**Invariants to check:**
+- Changing numerical values alone keeps the array signature fixed.
+- Check each result independently.
+- Timing alone is not evidence of retracing.
+
+**Hints:**
+- Build the reference from residuals, not by calling the compiled function.
+- Keep shape and dtype unchanged.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Check that a new value remains runtime data (Practice): The same computation accepts different runtime values.
-for new_w in (w, w + 0.25):
-    expected = jnp.mean(...)  # TODO: compute expected
-    observed = compiled(...)  # TODO: compute observed
-    assert jnp.allclose(observed, expected, rtol=1e-5, atol=1e-6)  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def compare_runtime_weights(compiled_loss, weight_a, weight_b, inputs, targets):
+    # TODO: evaluate both weights and create independent references
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -342,27 +359,31 @@ Use `jax.tree.map` to block on every returned array, then stop the timer.
 
 ### How to write: Build a report whose timing claim can be checked — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jax.tree.map(lambda p, g: ..., params, grads)` — Applies a function leaf-by-leaf across matching PyTrees (such as updating every parameter tensor with its gradient).
-- `jax.block_until_ready(output)` — Synchronizes with the accelerator/CPU device so asynchronous dispatch finishes before wall-clock timing.
+**Inputs:**
+- A compiled value-and-gradient function and one warmup call.
+- Twenty measured calls with backend, shapes, and dtype metadata.
 
-**Step-by-step implementation plan:**
-1. Build a report whose timing claim can be checked (Challenge)
+**Outputs:**
+- A synchronized median latency and workload report.
+
+**Invariants to check:**
+- Synchronize all output leaves before stopping each timer.
+- Exclude warmup from the repeated-call distribution.
+- State what the measurement does not include.
+
+**Hints:**
+- Use tree traversal to wait for every leaf.
+- Store metadata beside the latency statistic.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Build a report whose timing claim can be checked (Challenge)
-def wait_for_outputs(outputs):
-    return ...  # TODO: return computed result
-wait_for_outputs(compiled_value_gradient(w, x, y))
-gradient_times = ...  # TODO: compute gradient_times
-for _ in range(20):
-    started = time.perf_counter(...)  # TODO: compute started
-    wait_for_outputs(compiled_value_gradient(w, x, y))
-    gradient_times.append(time.perf_counter() - started)
-print("compiled value-and-grad median seconds:", statistics.median(gradient_times))
-assert len(gradient_times)  # TODO: complete assertion check
+import time
+import jax
+
+def benchmark_compiled(compiled_step, weight, inputs, targets):
+    # TODO: warm up, synchronize every output, and retain repeated durations
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

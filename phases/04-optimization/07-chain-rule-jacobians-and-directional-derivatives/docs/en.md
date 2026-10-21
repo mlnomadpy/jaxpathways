@@ -176,7 +176,7 @@ visual_data = {'kind': 'heatmap', 'values': jax.jacfwd(f)(x).tolist(), 'rows': [
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:27:32.780282+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:04:07.186302+00:00. JAX 0.9.2.
 
 ```text
 Jv / loss gradient: [3. 1.] [46. 19.]
@@ -222,22 +222,29 @@ Replace the scalar loss by $L(x)=f_0(x)+2f_1(x)$. Predict its gradient at $(2,3)
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
+**Inputs:**
+- A vector input, a vector-valued function, and output weights.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- The gradient of the weighted scalar output.
+
+**Invariants to check:**
+- The VJP maps output sensitivities back to the input dimension.
+
+**Hints:**
+- Form the scalar objective explicitly before differentiating.
+- Use an independent matrix product to check the changed output dimension.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Replace the scalar loss by L(x)=f_0(x)+2f_1(x).
-def weighted_loss(x):
-    return ...  # TODO: return computed result
-assert jnp.allclose(jax.grad(weighted_loss)(x), jnp.array([10.0, 5.0]))  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+
+def weighted_output_gradient(point, weights):
+    """The gradient of the weighted scalar output."""
+    # TODO: Form the weighted scalar output and check its gradient/VJP against the requested input and output shapes.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -265,26 +272,28 @@ Compare the derivative of the sum of outputs with $J^\mathsf{T}(1,1)$.
 
 ### How to write: Find the broken derivative path — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
+**Inputs:**
+- A colleague wraps the first input in `jax.lax.stop_gradient`. The forward outputs are unchanged. Show why the gradient no longer matches the intended mathematical function.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- Forward-output parity and the two derivative results.
+
+**Invariants to check:**
+- Stopping a gradient does not change the forward value but changes the derivative path.
+
+**Hints:**
+- Compare the derivative of the sum of outputs with $J^\mathsf{T}(1,1)$.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Find the broken derivative path (Transfer / diagnosis)
-def detached(x):
-    a = jax.lax.stop_gradient(...)  # TODO: compute a
-    return ...  # TODO: return computed result
-assert jnp.allclose(detached(x), f(x))  # TODO: complete assertion check
-assert jnp.allclose(jax.grad(lambda z: jnp.sum(detached(z)))(x), jnp.array([0.0, 3.0]))  # TODO: complete assertion check
-assert jnp.allclose(jax.grad(lambda z: jnp.sum(f(z)))(x), jnp.array([7.0, 3.0]))  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+
+def practice_find_the_broken_derivative_path(point):
+    """Implement the find the broken derivative path check."""
+    # TODO: Differentiate the intended composition and a version with stop_gradient on the first input; compare both with an independent derivative.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -317,24 +326,28 @@ The reference is $A^\mathsf{T}c$, not $Ac$.
 
 ### How to write: Transfer to unequal dimensions — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.jvp / jax.vjp / jax.jacfwd / jax.hessian` — Computes JVPs, VJPs, Jacobians or Hessians by differentiating the implemented operations. Results still have floating-point error.
+**Inputs:**
+- For a matrix $A\in\mathbb{R}^{3\times2}$, check that the VJP of $Ax$ maps an output sensitivity of length $3$ into a vector of length $2$.
 
-**Step-by-step implementation plan:**
-1. Check tensor shape invariant: `back(c3)[0].shape == (2,)`
+**Outputs:**
+- A length-two input cotangent checked against the matrix transpose product.
+
+**Invariants to check:**
+- The cotangent shape follows the output, and the VJP result follows the input.
+
+**Hints:**
+- The reference is $A^\mathsf{T}c$, not $Ac$.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Transfer to unequal dimensions (Transfer / diagnosis)
-A = jnp.array(...)  # TODO: compute A
-c3 = jnp.array(...)  # TODO: compute c3
-_, back = jax.vjp(...)  # TODO: compute _, back
-# Check tensor shape invariant: `back(c3)[0].shape == (2,)`
-assert back(c3)[0].shape  # TODO: complete assertion check
-assert jnp.allclose(back(c3)[0], jnp.array([3.0, 0.0]))  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+
+def practice_transfer_to_unequal_dimensions(matrix, input, output_sensitivity):
+    """Implement the transfer to unequal dimensions check."""
+    # TODO: Build a 3-by-2 matrix product and apply a VJP to a length-three cotangent.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

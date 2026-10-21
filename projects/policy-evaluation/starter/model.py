@@ -1,22 +1,26 @@
-"""Implement the four cumulative stages described in ../README.md.
+"""Implement the five cumulative stages described in ../README.md.
 
 Use the course CPU environment. Do not import the instructor reference or
 hard-code its reported returns: checks use changed horizons, seeds and policies.
 """
+
 from typing import NamedTuple
 import jax
 import jax.numpy as jnp
+
 
 class State(NamedTuple):
     position: jax.Array
     elapsed: jax.Array
     done: jax.Array
 
+
 def reset(key):
     """Stage 1: uniform start at 0 or 1, zero elapsed, unfinished."""
     # Key APIs to use: `State`, `random.randint`, `jnp.int32`, `jnp.bool_`
     # Step 1: Return `State(jax.random.randint(key, (), 0, 2), jnp.int32(0), jnp.bool_(False))` to the caller.
-    raise NotImplementedError('Implement explicit reset state')
+    raise NotImplementedError("Implement explicit reset state")
+
 
 def step(state, action, horizon=8):
     """Stage 1: return (State, reward, terminated event, truncated event).
@@ -32,19 +36,23 @@ def step(state, action, horizon=8):
     # Step 4: Evaluate `elapsed` from the current inputs and state.
     # Step 5: Evaluate `terminated` from the current inputs and state.
     # Step 6: Evaluate `truncated` from the current inputs and state.
-    raise NotImplementedError('Implement and enumerate transition rules')
+    raise NotImplementedError("Implement and enumerate transition rules")
+
 
 def log_probability(theta, observations, actions):
     """Stage 2: theta contains one right-action logit for positions 0, 1, 2."""
     # Key APIs to use: `jnp.minimum`, `jnp.where`, `nn.log_sigmoid`
     # Step 1: Reduce across the target axis to summarize `logits`.
     # Step 2: Return `jnp.where(actions == 1, jax.nn.log_sigmoid(logits), jax.nn.log_sigmoid(-logits))` to the caller.
-    raise NotImplementedError('Use stable log-sigmoid probabilities')
+    raise NotImplementedError("Use stable log-sigmoid probabilities")
+
 
 def rollout(theta, key, batch_size=256, horizon=8):
     """Stage 2: final State and time-major record dictionary.
 
-    Fields: observation, action, reward, active, terminated, truncated, old_logp.
+    Fields: observation, next_observation, next_elapsed, action, reward,
+    active, terminated, truncated, old_logp. The next observation is retained
+    from the transition before any reset so later bootstrapping uses the right state.
     Use fresh keys across reset, time, and environments. Do not auto-reset.
     """
     # Key APIs to use: `key`, `random.split`, `jax.vmap`, `body`, `subkeys`
@@ -54,15 +62,17 @@ def rollout(theta, key, batch_size=256, horizon=8):
     # Step 4: Function `body(states, time_key)` implementing this stage's computation:
     # Step 5: Run a compiled sequential scan over the time/step axis (`(final, records)`).
     # Step 6: Return `(final, records)` to the caller.
-    raise NotImplementedError('Build vmap within scan')
+    raise NotImplementedError("Build vmap within scan")
+
 
 def returns_to_go(rewards):
     """Stage 2: sum future rewards along time axis, preserving both axes."""
     # Key APIs to use: `jnp.cumsum`
     # Step 1: Return `jnp.cumsum(rewards[::-1], axis=0)[::-1]` to the caller.
-    raise NotImplementedError('Implement reverse cumulative returns')
+    raise NotImplementedError("Implement reverse cumulative returns")
 
-def policy_loss(theta, records, method='ppo', clip=.2):
+
+def policy_loss(theta, records, method="ppo", clip=0.2):
     """Stage 3: negative live-action sum divided by episode count.
 
     REINFORCE uses log probability times frozen reward-to-go. PPO uses the
@@ -74,7 +84,8 @@ def policy_loss(theta, records, method='ppo', clip=.2):
     # Step 3: Run `log_probability` to compute `new_logp`.
     # Step 4: Branch on condition `method == 'reinforce'`:
     # Step 5: Return `-jnp.sum(jnp.where(records['active'], terms, 0.0)) / records['reward'].shape[1]` to the caller.
-    raise NotImplementedError('Implement both objective branches')
+    raise NotImplementedError("Implement both objective branches")
+
 
 def exact_return(theta, horizon=8):
     """Stage 3: exact finite-horizon expectation, averaged over starts 0 and 1."""
@@ -85,9 +96,18 @@ def exact_return(theta, horizon=8):
     # Step 4: Evaluate `right` from the current inputs and state.
     # Step 5: Function `backup(_, values)` implementing this stage's computation:
     # Step 6: Allocate initialized array `values` with the specified shape and dtype.
-    raise NotImplementedError('Use dynamic programming, not random samples')
+    raise NotImplementedError("Use dynamic programming, not random samples")
 
-def train(seed=0, updates=40, batch_size=256, horizon=8, method='ppo', epochs=3, learning_rate=.5):
+
+def train(
+    seed=0,
+    updates=40,
+    batch_size=256,
+    horizon=8,
+    method="ppo",
+    epochs=3,
+    learning_rate=0.5,
+):
     """Stage 4: (final theta, exact-return history including initial value).
 
     Start at zero logits. Collect fresh data for each update. Freeze each batch
@@ -98,7 +118,8 @@ def train(seed=0, updates=40, batch_size=256, horizon=8, method='ppo', epochs=3,
     # Step 2: Guard input contract (`method not in ('ppo', 'reinforce')`) and fail fast if violated.
     # Step 3: Guard input contract (`method == 'reinforce' and epochs != 1`) and fail fast if violated.
     # Step 4: Return `_train(seed, updates, batch_size, horizon, method, epochs, learning_rate)` to the caller.
-    raise NotImplementedError('Implement complete rollout and update cycle')
+    raise NotImplementedError("Implement complete rollout and update cycle")
+
 
 def evaluate(theta, seeds, batch_size=512, horizon=8):
     """Stage 4: reject malformed theta, duplicate/fewer-than-two seeds or bad sizes.
@@ -113,4 +134,46 @@ def evaluate(theta, seeds, batch_size=512, horizon=8):
     # Step 4: Guard input contract (`len(seeds) < 2 or len(set(seeds)) != len(seeds) or batch_size < 1 or (horizon < 1)`) and fail fast if violated.
     # Step 5: Convert `returns` to a host NumPy array for inspection or verification.
     # Step 6: Return `{'seeds': list(seeds), 'episode_returns': returns, 'stream_means': returns.mean(1), 'mean': float(returns.mean()), 'exact': float(exact_return(theta, horizon))}` to the caller.
-    raise NotImplementedError('Retain disaggregated held-out evaluation')
+    raise NotImplementedError("Retain disaggregated held-out evaluation")
+
+
+# Stage 5 — fit a state-value table and estimate GAE from retained transitions.
+def value_predict(value_table, observations):
+    """Look up V(s) for corridor positions 0..3."""
+    # Step 1: Clip the position index to the table's state range.
+    # Step 2: Return the selected state values.
+    raise NotImplementedError("Implement the tabular value function")
+
+
+def value_loss(value_table, records, targets):
+    """Mean squared prediction error over live transitions only."""
+    # Step 1: Predict values for the recorded observations.
+    # Step 2: Stop gradients through the sampled return targets.
+    # Step 3: Average squared error over active transitions (zero for empty masks).
+    raise NotImplementedError("Implement a masked critic objective")
+
+
+def fit_value_function(records, targets, updates=200, learning_rate=0.1):
+    """Fit V(s) to return targets and retain initial plus per-update MSE."""
+    # Step 1: Validate matching time-major shapes, positive settings, and a nonempty active mask.
+    # Step 2: Initialize four tabular values and evaluate the initial loss.
+    # Step 3: Use jax.value_and_grad with gradient descent for `updates` steps.
+    # Step 4: Return `(value_table, loss_history)` with history length `updates + 1`.
+    raise NotImplementedError("Train and retain value-function evidence")
+
+
+def generalized_advantage_estimate(
+    records, value_table, gamma=0.9, lam=0.95, bootstrap_on_truncation=False
+):
+    """Reverse-scan GAE; bootstrap from retained next_observation, then stop at resets.
+
+    True terminals always have zero bootstrap. A truncation bootstraps only when
+    `bootstrap_on_truncation` is true, which is for an external collector cutoff
+    in a continuing task. Set it false for this project's finite-horizon objective.
+    `next_observation` must be the final observation before any environment reset.
+    """
+    # Step 1: Predict current and explicit next-state values from the retained rollout.
+    # Step 2: Form TD residuals with separate terminal and truncation bootstrap masks.
+    # Step 3: Reverse-scan residuals and stop the trace at termination, truncation, or padding.
+    # Step 4: Return advantages in the original time-major order, zero on padding.
+    raise NotImplementedError("Implement reverse-scan GAE")

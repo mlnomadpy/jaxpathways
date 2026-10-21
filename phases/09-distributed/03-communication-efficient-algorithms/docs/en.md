@@ -348,17 +348,17 @@ visual_data={'panels':[{'kind':'bar','labels':['all-reduce','reduce-scatter','af
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:30:25.843906+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:06:40.269864+00:00. JAX 0.9.2.
 
 ```text
 Gradient reference: [0.0029296851716935635, 0.00219726306386292, 0.0014648411888629198, 0.0007324193138629198, -2.6193447411060333e-09, -0.000732424552552402, -0.001464846427552402, -0.002197268418967724]
 Local result shapes: replicated (8,), reduce-scatter (2,), gathered (8,)
 Idealized ring bytes per rank: 48.0 24.0
-Completed CPU median microseconds: {'all_reduce': 87.58297190070152, 'reduce_scatter': 101.74978524446487, 'all_gather_only': 69.9157826602459}
+Completed CPU median microseconds: {'all_reduce': 323.709100484848, 'reduce_scatter': 339.7497348487377, 'all_gather_only': 214.2917364835739}
 Gradient reference: [0.0029296851716935635, 0.00219726306386292, 0.0014648411888629198, 0.0007324193138629198, -2.6193447411060333e-09, -0.000732424552552402, -0.001464846427552402, -0.002197268418967724]
 Local result shapes: replicated (8,), reduce-scatter (2,), gathered (8,)
 Idealized ring bytes per rank: 48.0 24.0
-Completed CPU median microseconds: {'all_reduce': 89.70825001597404, 'reduce_scatter': 59.83375012874603, 'all_gather_only': 57.37459287047386}
+Completed CPU median microseconds: {'all_reduce': 291.166827082634, 'reduce_scatter': 570.7498639822006, 'all_gather_only': 997.5829161703587}
 Sharded momentum matches the independent elementwise update.
 Joint permutation preserves the gradient; label-only reversal does not.
 Idealized payload/storage budget, not observed network traffic: [{'ranks': 2, 'all_reduce_bytes': 1048576, 'scatter_gather_bytes': 1048576, 'shard_storage_bytes': 524288}, {'ranks': 4, 'all_reduce_bytes': 1572864, 'scatter_gather_bytes': 1572864, 'shard_storage_bytes': 262144}, {'ranks': 8, 'all_reduce_bytes': 1835008, 'scatter_gather_bytes': 1835008, 'shard_storage_bytes': 131072}]
@@ -401,35 +401,30 @@ Repeat the gradient comparison after reversing both observation rows and labels 
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `Mesh + PartitionSpec + NamedSharding` — Maps logical tensor axes onto physical device mesh axes for SPMD data, tensor, or pipeline parallelism.
+**Inputs:**
+- Reversed observation rows and labels, changed initial weights, and the distributed gradient routine from the lesson.
 
-**Step-by-step implementation plan:**
-1. Exercise solution
-2. Place `w2` explicitly onto the target JAX device.
-3. Transfer the device result to the host for an independent NumPy comparison.
-4. Transfer the device result to the host for an independent NumPy comparison.
+**Outputs:**
+- Gradients and updated parameters after the changed data ordering.
+- Reconstructed local replicas and all-reduce comparisons.
+- A comparison showing why reversing labels without the corresponding rows changes the gradient problem.
+
+**Invariants to check:**
+- Reversing both paired arrays preserves examples; reversing labels alone changes targets.
+- Each local replica matches the globally updated parameter vector.
+
+**Hints:**
+- Apply the same row permutation to features and labels.
+- Compare local contributions, reduced gradients, and replica state independently.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-x2 = jax.device_put(...)  # TODO: compute x2
-y2 = jax.device_put(...)  # TODO: compute y2
-w2h = ...  # TODO: compute w2h
-# Place `w2` explicitly onto the target JAX device.
-w2 = jax.device_put(...)  # TODO: compute w2
-r2 = ...  # TODO: compute r2
-for answer in [all_gradient(x2, y2, w2), gather(shard_gradient(x2, y2, w2))]:
-    # Transfer the device result to the host for an independent NumPy comparison.
-    np.testing.assert_allclose(np.asarray(answer), r2, atol = ...  # TODO: compute np.testing.assert_allclose(np.asarray(answer), r2, atol
-    for shard in answer.addressable_shards:
-        # Transfer the device result to the host for an independent NumPy comparison.
-        np.testing.assert_allclose(np.asarray(shard.data), r2, atol = ...  # TODO: compute np.testing.assert_allclose(np.asarray(shard.data), r2, atol
-wrong_labels = ...  # TODO: compute wrong_labels
-assert np.max(np.abs(wrong_labels-r2))  # TODO: complete assertion check
-print('Joint permutation preserves the gradient; label-only reversal does not.')
+import numpy as np
+
+def verify_changed_distributed_step(features, labels, initial_weights, update):
+    # TODO: reverse paired observations, change the initial state, and audit replicas.
+    raise NotImplementedError("Check pairing, reduction, and replica agreement")
 ```
 
 <details><summary>Reference solution</summary>
@@ -469,26 +464,28 @@ Use the same full gradient byte count for both collectives; one mebibyte is 2**2
 
 ### How to write: Account for the complete communication cycle — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Inputs:**
+- A one-mebibyte gradient payload and rank counts 2, 4, and 8.
+- A ring collective communication model.
+
+**Outputs:**
+- Per-rank storage and communicated bytes for each complete strategy.
+
+**Invariants to check:**
+- The all-reduce comparison includes both reduce-scatter and all-gather phases.
+- Per-rank storage is distinct from network bytes transferred.
+
+**Hints:**
+- For a ring, account for (P-1) chunks in each phase.
+- Keep byte units explicit and divide payload by rank count only for shard storage.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Account for the complete communication cycle (Transfer)
-budget = ...  # TODO: compute budget
-for p in [2, 4, 8]:
-    size = ...  # TODO: compute size
-    rs = ...  # TODO: compute rs
-    ar = ...  # TODO: compute ar
-    cycle = ...  # TODO: compute cycle
-    assert ar  # TODO: complete assertion check
-    assert size // p * p  # TODO: complete assertion check
-    budget.append({'ranks': p, 'all_reduce_bytes': ar,
-                   'scatter_gather_bytes': cycle, 'shard_storage_bytes': size // p})
-assert [row['all_reduce_bytes'] for row  # TODO: complete assertion check
-print('Idealized payload/storage budget, not observed network traffic:', budget)
+def compare_ring_collectives(payload_bytes, rank_counts):
+    # TODO: calculate complete all-reduce and reduce-scatter/all-gather costs.
+    # Return storage and communication in separately named fields.
+    raise NotImplementedError("Count both ring phases and per-rank storage")
 ```
 
 <details><summary>Reference solution and reasoning</summary>

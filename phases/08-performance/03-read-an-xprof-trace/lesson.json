@@ -76,7 +76,22 @@
         "prompt": "For hypothetical intervals [0,10], [2,7] and [8,12] microseconds, calculate their union duration and compare with their summed durations. Explain why this matters for nested host events.",
         "hint": "Sort endpoints and merge intervals that intersect.",
         "solution": "def union_duration(intervals):\n    total=0\n    left=right=None\n    for start,end in sorted(intervals):\n        if end<start:raise ValueError('negative interval')\n        if right is None:left,right=start,end\n        elif start<=right:right=max(right,end)\n        else:\n            total+=right-left\n            left,right=start,end\n    return total+(0 if right is None else right-left)\nassert union_duration([(0,10),(2,7),(8,12)])==12\nassert sum(b-a for a,b in [(0,10),(2,7),(8,12)])==19\nprint('Hypothetical union: 12 microseconds; summed duration: 19.')",
-        "explanation": "A union describes time covered by any interval. A sum counts overlap repeatedly. Neither alone says which device was busy; lane and dependency information still matter."
+        "explanation": "A union describes time covered by any interval. A sum counts overlap repeatedly. Neither alone says which device was busy; lane and dependency information still matter.",
+        "learnerStarter": {
+          "inputs": [
+            "For hypothetical intervals [0,10], [2,7] and [8,12] microseconds, calculate their union duration and compare with their summed durations. Explain why this matters for nested host events."
+          ],
+          "outputs": [
+            "Union duration and naive sum in microseconds."
+          ],
+          "invariants": [
+            "Overlapping time is counted once in wall-clock union duration."
+          ],
+          "hints": [
+            "Sort endpoints and merge intervals that intersect."
+          ],
+          "code": "import gzip\nimport json\nfrom pathlib import Path\n\ndef practice_compute_a_union_instead_of_summing_overlap(intervals):\n    \"\"\"Implement the compute a union instead of summing overlap check.\"\"\"\n    # TODO: Sort the three intervals, merge overlaps, and compare union duration with the sum of individual durations.\n    raise NotImplementedError\n"
+        }
       }
     ],
     "question": "A step annotation lasts longer than its model annotation. What can this alone establish?",
@@ -136,6 +151,22 @@
       "The difference can include host work, transfers, synchronization or scheduling. Inspect trace lanes before assigning all of it to idle time.",
       "A wide step region alone cannot isolate data loading. Compare input, host and device events within the same time interval.",
       "The annotation boundaries establish inclusion, not a universal attribution of the remaining time. Our injected wait is known from code; an actual workload needs trace evidence."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "Named nested trace intervals in a declared time unit."
+      ],
+      "outputs": [
+        "Per-model min/median/max and non-double-counted interval summaries."
+      ],
+      "invariants": [
+        "Nested event durations are not summed as independent wall time; small sample count is not a tail guarantee."
+      ],
+      "hints": [
+        "Convert units before summarizing.",
+        "Compute interval unions when events overlap."
+      ],
+      "code": "import gzip\nimport json\nfrom pathlib import Path\n\ndef summarize_trace_intervals(intervals):\n    \"\"\"Per-model min/median/max and non-double-counted interval summaries.\"\"\"\n    # TODO: Parse interval units, identify nesting, and summarize model timings without double-counting overlaps.\n    raise NotImplementedError\n"
+    }
   }
 }

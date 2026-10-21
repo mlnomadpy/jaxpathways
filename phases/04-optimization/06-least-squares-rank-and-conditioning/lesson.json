@@ -91,7 +91,22 @@
         "prompt": "Multiply the first feature of \\(X\\) by \\(100\\). Predict the new weights and compare predictions.",
         "hint": "The first weight must divide by \\(100\\) to represent the same model.",
         "solution": "# Change feature units (Transfer / diagnosis): Feature units affect coefficients and conditioning.\nscaled = X * jnp.array([100.0, 1.0])\nws = jnp.linalg.lstsq(scaled, y, rcond=None)[0]\nassert jnp.allclose(ws, expected / jnp.array([100.0, 1.0]), atol=3e-06)\nassert jnp.allclose(scaled @ ws, X @ w, atol=3e-06)",
-        "explanation": "Feature units affect coefficients and conditioning. They need not change the fitted prediction space."
+        "explanation": "Feature units affect coefficients and conditioning. They need not change the fitted prediction space.",
+        "learnerStarter": {
+          "inputs": [
+            "Multiply the first feature of \\(X\\) by \\(100\\). Predict the new weights and compare predictions."
+          ],
+          "outputs": [
+            "Original/scaled coefficients and prediction parity."
+          ],
+          "invariants": [
+            "The feature transform is inverted when interpreting its coefficient; predictions use matched rows."
+          ],
+          "hints": [
+            "The first weight must divide by \\(100\\) to represent the same model."
+          ],
+          "code": "import jax.numpy as jnp\n\ndef practice_change_feature_units(features, targets):\n    \"\"\"Implement the change feature units check.\"\"\"\n    # TODO: Scale only the first feature column by 100, refit, and compare predictions before comparing coefficients.\n    raise NotImplementedError\n"
+        }
       },
       {
         "title": "Explain the squared conditioning",
@@ -99,7 +114,22 @@
         "prompt": "Compare the condition numbers of the diagonal matrix with entries \\((1,0.1)\\) and its Gram matrix. Why is a solver preferable to forming the inverse?",
         "hint": "The diagonal entries are singular values here; squaring them changes the ratio from \\(10\\) to \\(100\\).",
         "solution": "# Explain the squared conditioning (Transfer / diagnosis): The normal equations can worsen numerical sensitivity.\nD = jnp.diag(jnp.array([1.0, 0.1]))\nassert jnp.allclose(jnp.linalg.cond(D), 10.0)\nassert jnp.allclose(jnp.linalg.cond(D.T @ D), 100.0, rtol=2e-06)",
-        "explanation": "The normal equations can worsen numerical sensitivity. A small residual alone is verified separately from coefficient accuracy."
+        "explanation": "The normal equations can worsen numerical sensitivity. A small residual alone is verified separately from coefficient accuracy.",
+        "learnerStarter": {
+          "inputs": [
+            "Compare the condition numbers of the diagonal matrix with entries \\((1,0.1)\\) and its Gram matrix. Why is a solver preferable to forming the inverse?"
+          ],
+          "outputs": [
+            "Both condition numbers and a solve result for a declared right-hand side."
+          ],
+          "invariants": [
+            "The Gram conditioning comparison uses the same nonzero singular directions."
+          ],
+          "hints": [
+            "The diagonal entries are singular values here; squaring them changes the ratio from \\(10\\) to \\(100\\)."
+          ],
+          "code": "import jax.numpy as jnp\n\ndef practice_explain_the_squared_conditioning(matrix):\n    \"\"\"Implement the explain the squared conditioning check.\"\"\"\n    # TODO: Compute condition numbers for the diagonal matrix and its Gram matrix, then compare solve-based and inverse-based procedures.\n    raise NotImplementedError\n"
+        }
       }
     ],
     "question": "Can zero training error prove that fitted weights are uniquely determined?",
@@ -138,6 +168,22 @@
       "Dependent columns admit a nonzero null-space direction. Move the weights in that direction and check whether predictions change.",
       "Independent feature directions determine uniqueness. Extra precision cannot create information missing from the design matrix.",
       "Higher precision can reduce roundoff but cannot make linearly dependent columns independent. Inspect rank or singular values."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "A design matrix, target vector, and an explicit constant feature for the intercept."
+      ],
+      "outputs": [
+        "Least-squares coefficients and predictions."
+      ],
+      "invariants": [
+        "The coefficient order is documented; predictions are recomputed from the design matrix."
+      ],
+      "hints": [
+        "Use a linear solve or least-squares routine, not an explicitly formed inverse.",
+        "Compare prediction parity when only feature units change."
+      ],
+      "code": "import jax.numpy as jnp\n\ndef fit_with_bias(features, targets):\n    \"\"\"Least-squares coefficients and predictions.\"\"\"\n    # TODO: Build the bias-augmented design matrix and solve the least-squares system without forming its inverse.\n    raise NotImplementedError\n"
+    }
   }
 }

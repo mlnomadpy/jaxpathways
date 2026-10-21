@@ -272,7 +272,7 @@ visual_data={'kind':'bar','labels':['valid predictions','expected rejections'],'
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:32:53.511392+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:09:33.990747+00:00. JAX 0.9.2.
 
 ```text
 Fresh-process valid requests: 2 rejected boundaries: 3
@@ -333,17 +333,27 @@ Reject an artifact whose bytes changed after its expected digest was recorded.
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Exercise solution
+**Inputs:**
+- Artifact bytes and the digest recorded before those bytes were changed.
+
+**Outputs:**
+- An integrity rejection for the artifact whose current digest differs from the recorded digest.
+
+**Invariants to check:**
+- Digest comparison uses the exact bytes that would be loaded; a mismatch prevents artifact acceptance.
+
+**Hints:**
+- Hash the bytes after mutation and compare with the stored expected digest.
+- Assert the rejection explicitly instead of treating an absent result as success.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-original = json.dumps(...)  # TODO: compute original
-mutated = json.dumps(...)  # TODO: compute mutated
-assert hashlib.sha256(original).hexdigest()  # TODO: complete assertion check
-print('Changed artifact requires a new recorded digest.')
+import hashlib
+
+def reject_changed_artifact(artifact_bytes, expected_digest, verifier):
+    # TODO: Verify the changed bytes against the prior digest and require an explicit integrity failure.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -372,23 +382,29 @@ The validation boundary should reject before producing JSON predictions.
 
 ### How to write: Reject a nonfinite request — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Reject a nonfinite request (transfer)
-2. Keep this run’s database and artifacts in a scratch directory removed on exit.
+**Inputs:**
+- Send an infinite input to the process contract and verify the rejection.
+
+**Outputs:**
+- A process-boundary rejection for infinite input.
+
+**Invariants to check:**
+- The inference call is skipped after a failed finiteness check.
+
+**Hints:**
+- The validation boundary should reject before producing JSON predictions.
+- Validate the incoming feature array before model execution.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Reject a nonfinite request (transfer)
-# Keep this run’s database and artifacts in a scratch directory removed on exit.
-with tempfile.TemporaryDirectory() as tmp:
-    p = Path(...)  # TODO: compute p
-    (p/'model').write_text(json.dumps(MODEL))
-    (p/'service.py').write_text(SERVICE)
-    env = dict(...)  # TODO: compute env
-    bad = subprocess.run(...)  # TODO: compute bad
-    assert bad.returncode  # TODO: complete assertion check
-print('Nonfinite input rejected before output.')
+import hashlib
+import numpy as np
+
+def practice_reject_a_nonfinite_request(features, validator):
+    """Complete the reject a nonfinite request check."""
+    # TODO: ('Run the process request validator on an infinite feature and reject before model evaluation.', 'A clear nonfinite-input rejection and no inference call.', 'Finiteness is checked at the service boundary.')
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -424,24 +440,29 @@ A legitimate new digest permits loading. Independent expected predictions decide
 
 ### How to write: Check changed behavior after a legitimate artifact replacement — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Keep this run’s database and artifacts in a scratch directory removed on exit.
+**Inputs:**
+- Create an artifact with weight $3$, keep bias $1$, and use its new matching digest. Check the result for input $2$, then compare with the previous model.
+
+**Outputs:**
+- Verified output from the new artifact and comparison with the old model.
+
+**Invariants to check:**
+- The new digest is recomputed from the replacement bytes.
+
+**Hints:**
+- A legitimate new digest permits loading. Independent expected predictions decide whether the changed behavior is acceptable.
+- Input and bias stay fixed while the artifact weight changes.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Check changed behavior after a legitimate artifact replacement (Transfer / diagnosis): The old model produced 5; the new one produces 7.
-# Keep this run’s database and artifacts in a scratch directory removed on exit.
-with tempfile.TemporaryDirectory() as directory:
-    model_path = Path(...)  # TODO: compute model_path
-    runner_path = Path(...)  # TODO: compute runner_path
-    model_path.write_text(json.dumps(dict(MODEL,weight = ...  # TODO: compute model_path.write_text(json.dumps(dict(MODEL,weight
-    runner_path.write_text(SERVICE)
-    digest = hashlib.sha256(...)  # TODO: compute digest
-    changed = subprocess.run(...)  # TODO: compute changed
-    values = json.loads(...)  # TODO: compute values
-    assert values  # TODO: complete assertion check
-print('New artifact loads, but the old behavioral expectation no longer passes.')
+import hashlib
+import numpy as np
+
+def practice_check_changed_behavior_after_a_legitimate_artifact_replacement(artifact_bytes, expected_digest, input_value, prior_output):
+    """Complete the check changed behavior after a legitimate artifact replacement check."""
+    # TODO: ('Load the new artifact only with its matching digest, evaluate input 2, and compare with the previous model output.', 'New verified output and prior-output comparison.', 'Artifact replacement changes identity deliberately and the new digest matches its exact bytes.')
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

@@ -1,0 +1,31 @@
+{
+  "title": "NumPyro NUTS diagnostics against the conjugate Gaussian posterior",
+  "x": [
+    "intercept",
+    "slope"
+  ],
+  "xlabel": "regression parameter",
+  "left_axis": {
+    "label": "rank-normalized split R-hat (unitless)",
+    "guide": 1.01,
+    "values": [
+      1.0002062320709229,
+      1.0002720355987549
+    ]
+  },
+  "right_axis": {
+    "label": "effective sample size (effective draws)",
+    "bulk_ess": [
+      1227.3501496030635,
+      1455.1676041467188
+    ],
+    "tail_ess": [
+      947.9638279627661,
+      1049.185962848521
+    ]
+  },
+  "chains": 4,
+  "draws_per_chain": 400,
+  "divergences": 0,
+  "scope": "Measured CPU execution of the pinned environment. ESS estimates information after autocorrelation adjustment; it is not independent stored rows. Diagnostics do not prove convergence or rule out missed modes."
+}

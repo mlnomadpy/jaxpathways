@@ -465,14 +465,14 @@ visual_data = {
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:34:57.046280+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:11:47.309797+00:00. JAX 0.9.2.
 
 ```text
 Resumed state_hash matches uninterrupted control: ecba6a13e41beb0003af0371f8422efa3b08538c4420efb07a9bc61b0a10cdc1
 Losses across 6 steps: [3.6712, 3.78913, 1.91372, 2.09553, 1.81174, 1.16636]
 Resumed state_hash matches uninterrupted control: ecba6a13e41beb0003af0371f8422efa3b08538c4420efb07a9bc61b0a10cdc1
 Losses across 6 steps: [3.6712, 3.78913, 1.91372, 2.09553, 1.81174, 1.16636]
-Warmup ms: 98.396 Median steady step ms: 0.0422
+Warmup ms: 85.62 Median steady step ms: 0.0419
 Resume rejection: checkpoint state hash mismatch
 Step 8 resumed vs control hash: eba1c0bcfb80184d9f5108c1d6539369e21f95276e5d6806234237f41eccbed9 eba1c0bcfb80184d9f5108c1d6539369e21f95276e5d6806234237f41eccbed9
 Recorded event sequence: ['started', 'warmup', 'step', 'step', 'checkpoint', 'completed', 'restored', 'warmup', 'step', 'step', 'checkpoint', 'completed']
@@ -531,22 +531,28 @@ Run `run_tpu_ready_job` for $4$ steps (`save_every=2`), resume to $8$ steps, and
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Exercise solution
-2. Keep this run’s database and artifacts in a scratch directory removed on exit.
+**Inputs:**
+- A scratch job directory, checkpoint interval, deterministic job config, and step targets four and eight.
+
+**Outputs:**
+- Resumed and uninterrupted final state hashes at step eight.
+
+**Invariants to check:**
+- The final hashes match only when resume restores the complete deterministic state and compatible configuration.
+
+**Hints:**
+- Run the first segment, resume from its checkpoint, then run an uninterrupted control.
+- Keep each run's files isolated.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-# Keep this run’s database and artifacts in a scratch directory removed on exit.
-with tempfile.TemporaryDirectory(prefix="tpu-ex-") as tmp:
-    ex_root = Path(...)  # TODO: compute ex_root
-    r1 = run_tpu_ready_job(...)  # TODO: compute r1
-    r2 = run_tpu_ready_job(...)  # TODO: compute r2
-    ctrl8 = run_tpu_ready_job(...)  # TODO: compute ctrl8
-print("Step 8 resumed vs control hash:", r2["state_hash"], ctrl8["state_hash"])
-assert r2["state_hash"]  # TODO: complete assertion check
+import jax.numpy as jnp
+import numpy as np
+
+def compare_resumed_and_uninterrupted_runs(run_tpu_ready_job, root):
+    # TODO: run the staged and control trajectories and compare final state hashes.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -579,22 +585,28 @@ Read `events.jsonl` line by line with `json.loads`.
 
 ### How to write: Inspect the JSONL event sequence from a resumed run — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Inspect the JSONL event sequence from a resumed run (Foundations)
-2. Keep this run’s database and artifacts in a scratch directory removed on exit.
+**Inputs:**
+- A temporary job directory and the public two-step/resume-to-four-step launcher.
+
+**Outputs:**
+- The ordered event names recorded in JSONL after resume.
+
+**Invariants to check:**
+- Event order comes from the durable log, not from an assumed event sequence.
+
+**Hints:**
+- Parse one JSON object per line.
+- Include both the initial and resumed launch events.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Inspect the JSONL event sequence from a resumed run (Foundations)
-# Keep this run’s database and artifacts in a scratch directory removed on exit.
-with tempfile.TemporaryDirectory(prefix="tpu-events-") as tmp:
-    ev_dir = Path(...)  # TODO: compute ev_dir
-    run_tpu_ready_job(ev_dir, steps = ...  # TODO: compute run_tpu_ready_job(ev_dir, steps
-    run_tpu_ready_job(ev_dir, steps = ...  # TODO: compute run_tpu_ready_job(ev_dir, steps
-    event_names = ...  # TODO: compute event_names
-print("Recorded event sequence:", event_names)
-assert "started"  # TODO: complete assertion check
+import jax.numpy as jnp
+import numpy as np
+
+def read_resumed_event_names(run_tpu_ready_job, root):
+    # TODO: launch both segments and return the event names in file order.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -629,24 +641,28 @@ Check `list(Path(tmp).glob('*.tmp')) == []`.
 
 ### How to write: Verify atomic checkpoint file replacement — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Keep this run’s database and artifacts in a scratch directory removed on exit.
-2. Assert invariant `loaded["step"] == 4 and leftovers == []` holds
+**Inputs:**
+- A temporary target path and two JSON payloads written through atomic_write_json.
+
+**Outputs:**
+- The final decoded second payload and a check for leftover temporary siblings.
+
+**Invariants to check:**
+- The destination contains a complete JSON object; no staging temp file remains after success.
+
+**Hints:**
+- Write twice to the same target.
+- Inspect the directory after the second replacement.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Verify atomic checkpoint file replacement (Transfer / diagnosis)
-# Keep this run’s database and artifacts in a scratch directory removed on exit.
-with tempfile.TemporaryDirectory(prefix="tpu-atomic-") as tmp:
-    target = Path(...)  # TODO: compute target
-    atomic_write_json(target, {"step": 2})
-    atomic_write_json(target, {"step": 4})
-    leftovers = list(...)  # TODO: compute leftovers
-    loaded = json.loads(...)  # TODO: compute loaded
-print("Loaded step:", loaded["step"], "Leftover tmp files:", leftovers)
-# Assert invariant `loaded["step"] == 4 and leftovers == []` holds
-assert loaded["step"]  # TODO: complete assertion check
+import jax.numpy as jnp
+import numpy as np
+
+def check_atomic_json_replacement(atomic_write_json, root):
+    # TODO: write two payloads and inspect the final file and temporary-file cleanup.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

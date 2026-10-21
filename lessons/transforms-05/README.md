@@ -165,7 +165,7 @@ visual_data = {'kind': 'bar', 'x': [0, 1], 'labels': ['sum', 'mean'], 'xlabel': 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:27:09.577956+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:03:40.549230+00:00. JAX 0.9.2.
 
 ```text
 Sum: 6.0
@@ -235,39 +235,35 @@ Foundation · Extend reduce_values with a static max mode while preserving sum a
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.jit(fn) / @jax.jit` — Traces `fn` for its input signatures and compiles an executable. Changed shapes, dtypes or static arguments can trigger another compilation.
+**Inputs:**
+- A reducer supporting sum, mean, and max.
+- Two arrays containing positive and negative values.
 
-**Step-by-step implementation plan:**
-1. Exercise solution
-2. Wrap with `jax.jit` (`choose`) so XLA traces and compiles the function.
+**Outputs:**
+- Jitted results for all supported modes and an error for an unknown mode.
+
+**Invariants to check:**
+- The mode is static configuration.
+- Unknown modes are rejected.
+- Both signs of input are checked.
+
+**Hints:**
+- Keep array values dynamic and specialize the mode.
+- Reuse the function for changed array values.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-def choose_reduction(values, mode):
-    if mode = ...  # TODO: compute if mode
-        return ...  # TODO: return computed result
-    if mode = ...  # TODO: compute if mode
-        return ...  # TODO: return computed result
-    if mode = ...  # TODO: compute if mode
-        return ...  # TODO: return computed result
-    raise ValueError("unknown mode")
-# Wrap with `jax.jit` (`choose`) so XLA traces and compiles the function.
-choose = jax.jit(...)  # TODO: compute choose
-for values in (x, jnp.array([-4., -1., -2.])):
-    for mode, reference in (("sum", jnp.sum), ("mean", jnp.mean), ("max", jnp.max)):
-        assert jnp.allclose(choose(values, mode=mode), reference(values))  # TODO: complete assertion check
-try:
-    choose(x, mode = ...  # TODO: compute choose(x, mode
-except ValueError:
-    pass
-else:
-    raise AssertionError("Unknown mode should fail")
+import jax
+import jax.numpy as jnp
+
+def reduce_values(values, mode):
+    # TODO: implement the declared reductions and reject unknown modes
+    raise NotImplementedError
+
+def verify_reductions():
+    # TODO: compile with mode static and check both input sets
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -311,24 +307,34 @@ Implement an elementwise absolute value with a numerical selection, jit it, and 
 
 ### How to write: Keep runtime values dynamic — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.jit(fn) / @jax.jit` — Traces `fn` for its input signatures and compiles an executable. Changed shapes, dtypes or static arguments can trigger another compilation.
+**Inputs:**
+- Mixed-sign numeric vectors.
+- An elementwise absolute-value function.
 
-**Step-by-step implementation plan:**
-1. Wrap with `jax.jit` (`compiled_absolute`) so XLA traces and compiles the function.
+**Outputs:**
+- Jitted results for each vector.
+
+**Invariants to check:**
+- Numerical values remain runtime data.
+- Output shape matches its input.
+
+**Hints:**
+- Use elementwise numerical selection.
+- Do not make the entire vector static.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Keep runtime values dynamic (Practice): The vector values are runtime data.
+import jax
+import jax.numpy as jnp
+
 def elementwise_absolute(values):
-    return ...  # TODO: return computed result
-# Wrap with `jax.jit` (`compiled_absolute`) so XLA traces and compiles the function.
-compiled_absolute = jax.jit(...)  # TODO: compute compiled_absolute
-for values in (jnp.array([-2., 0., 3.]), jnp.array([5., -4., -1.])):
-    assert jnp.allclose(compiled_absolute(values), jnp.abs(values))  # TODO: complete assertion check
+    # TODO: select the nonnegative magnitude elementwise
+    raise NotImplementedError
+
+def verify_absolute(compiled_absolute, vectors):
+    # TODO: test the compiled function on each mixed-sign input
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -361,29 +367,36 @@ Do not use elapsed time alone to infer whether tracing occurred. Values and shap
 
 ### How to write: Audit a shape-dependent specialization — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.arange(n, dtype=...)` — Creates a 1-D JAX array of evenly spaced values `[0, 1, ..., n-1]` on the target device.
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.jit(fn) / @jax.jit` — Traces `fn` for its input signatures and compiles an executable. Changed shapes, dtypes or static arguments can trigger another compilation.
+**Inputs:**
+- A jitted sum-of-squares function.
+- Inputs of lengths three and five with two value sets each.
 
-**Step-by-step implementation plan:**
-1. Audit a shape-dependent specialization (Challenge)
-2. Wrap with `jax.jit` (`compiled_squares`) so XLA traces and compiles the function.
+**Outputs:**
+- Compiled results and an independent Python-loop reference.
+- A note distinguishing shape from data-value changes.
+
+**Invariants to check:**
+- Each element contributes once.
+- Separate changed shape from changed values.
+- Do not use elapsed time alone to claim a trace count.
+
+**Hints:**
+- Inspect shape metadata directly.
+- Build the reference with a plain Python loop.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Audit a shape-dependent specialization (Challenge)
-def plain_sum_squares(values):
-    return ...  # TODO: return computed result
-# Wrap with `jax.jit` (`compiled_squares`) so XLA traces and compiles the function.
-compiled_squares = jax.jit(...)  # TODO: compute compiled_squares
-for length in (3, 5):
-    for shift in (0., 1.):
-        values = jnp.arange(...)  # TODO: compute values
-        expected = sum(...)  # TODO: compute expected
-        assert jnp.allclose(compiled_squares(values), expected)  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+
+def sum_squares(values):
+    # TODO: define the numerical reduction
+    raise NotImplementedError
+
+def audit_shapes(compiled, value_sets):
+    # TODO: compare compiled results with an independent loop reference
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

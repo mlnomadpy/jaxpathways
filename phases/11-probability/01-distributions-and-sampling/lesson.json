@@ -75,7 +75,23 @@
         "prompt": "Compare scales \\(1\\) and \\(2\\) at their common mean. Show why a residual-only objective incorrectly ties them.",
         "hint": "The residual is zero for both; retain \\(-\\log\\sigma\\).",
         "solution": "# Detect a missing normalization (Transfer / diagnosis): Scale changes density even with identical zero residuals.\nscores = normal_logpdf(0.,0.,jnp.array([1.,2.]))\nassert jnp.allclose(scores[0]-scores[1],jnp.log(2.))",
-        "explanation": "Scale changes density even with identical zero residuals."
+        "explanation": "Scale changes density even with identical zero residuals.",
+        "learnerStarter": {
+          "inputs": [
+            "The shared mean and two normal scales, 1 and 2."
+          ],
+          "outputs": [
+            "The two log densities at the common mean and the change in the normalized density across scales."
+          ],
+          "invariants": [
+            "The residual-only term is identical at the shared mean, while the full log densities differ because scale changes the normalizer."
+          ],
+          "hints": [
+            "Evaluate both normalized log densities at the same zero-residual point.",
+            "Compare the full expression with the residual-only term."
+          ],
+          "code": "import jax.numpy as jnp\n\ndef compare_normal_scales_at_common_mean(normal_logpdf):\n    # TODO: Evaluate scales one and two at their common mean and expose the residual-only tie.\n    raise NotImplementedError\n"
+        }
       },
       {
         "title": "Demonstrate key ownership",
@@ -83,7 +99,22 @@
         "prompt": "Produce two separately owned standard-normal draws and show replay of the first. Explain why replay alone does not test independence.",
         "hint": "Split before use; compare arrays with the same shape.",
         "solution": "# Demonstrate key ownership (Transfer / diagnosis)\n# Create or split explicit PRNG key(s) (`(left, right)`) for reproducible randomness.\nleft,right = jax.random.split(jax.random.key(17))\n# Sample deterministic random values into `first` using an explicit PRNG key.\nfirst = jax.random.normal(left,(32,))\n# Sample deterministic random values into `second` using an explicit PRNG key.\nsecond = jax.random.normal(right,(32,))\nassert jnp.array_equal(first,jax.random.normal(left,(32,)))\nassert not jnp.array_equal(first,second)",
-        "explanation": "Different split keys avoid accidental replay; one differing pair does not prove every statistical property of a generator."
+        "explanation": "Different split keys avoid accidental replay; one differing pair does not prove every statistical property of a generator.",
+        "learnerStarter": {
+          "inputs": [
+            "An explicit JAX key, two child-work labels, and a changed seed."
+          ],
+          "outputs": [
+            "Two reproducible but independent random arrays."
+          ],
+          "invariants": [
+            "Reusing a key replays its random values; splitting creates independent child streams."
+          ],
+          "hints": [
+            "Split once for each random operation. Verify replay and changed-seed behavior separately."
+          ],
+          "code": "def check_key_ownership(key, seed):\n    \"\"\"Return two draws and a replay/changed-seed comparison.\"\"\"\n    # TODO: allocate child keys and record the random-stream checks.\n    raise NotImplementedError"
+        }
       }
     ],
     "takeaways": [
@@ -135,6 +166,24 @@
       "The mean becomes more precisely estimated while individual draws remain variable. Compare the sampling distribution with the distribution of sample means.",
       "Dividing variance by sample count describes uncertainty in the mean estimator, not the variability of one future reading.",
       "For independent draws the average has variance \\(\\sigma^2/N\\); a new reading still has variance \\(\\sigma^2\\). These are different random variables."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "A seed for a fresh observation key; mean and standard deviation of the sensor."
+      ],
+      "outputs": [
+        "One reading vector, its sample variance, and the standard error of its sample mean."
+      ],
+      "invariants": [
+        "The input key is not reused for another random draw.",
+        "The reported standard error uses the number of readings, not the variance alone."
+      ],
+      "hints": [
+        "Split a key before sampling.",
+        "For independent readings, standard error scales as standard deviation divided by the square root of the sample count.",
+        "Compare empirical moments with finite-sample tolerances rather than exact equality."
+      ],
+      "code": "def compare_sample_moments(key, mean, scale, count):\n    \"\"\"Return readings, sample variance, and standard error of the mean.\"\"\"\n    # TODO: split the key, draw readings, and compute both summaries.\n    raise NotImplementedError"
+    }
   }
 }

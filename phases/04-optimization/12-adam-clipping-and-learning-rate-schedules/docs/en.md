@@ -207,7 +207,7 @@ visual_data = {'kind': 'line', 'x': list(range(51)), 'xlabel': 'completed update
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:28:11.583981+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:04:46.687346+00:00. JAX 0.9.2.
 
 ```text
 step / update: 1 [-0.09999993  0.09999993]
@@ -281,22 +281,27 @@ Compare global norm clipping with coordinate-wise clipping on $(3,4)$. Check whi
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- The gradient vector (3, 4) and the global and coordinate clipping bound used in the lesson.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- The globally clipped vector and coordinate-wise clipped vector, their coordinate ratios, and which operation preserves the original ratio.
+
+**Invariants to check:**
+- Global norm clipping scales both coordinates by one factor, while coordinate clipping can change their ratio.
+
+**Hints:**
+- Compute the vector norm before the global rescaling.
+- Apply coordinate clipping independently to each component and compare ratios.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Compare global norm clipping with coordinate-wise clipping on (3,4).
-coordinate = jnp.clip(...)  # TODO: compute coordinate
-assert jnp.allclose(coordinate, jnp.array([1.0, 1.0]))  # TODO: complete assertion check
-assert jnp.allclose(clipped[0] / clipped[1], g[0] / g[1])  # TODO: complete assertion check
-assert not jnp.allclose(coordinate[0] / coordinate[1], g[0] / g[1])  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def compare_global_and_coordinate_clipping(gradient, max_norm):
+    # TODO: Compute both clipped vectors for the supplied gradient and report their coordinate ratios.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -325,29 +330,28 @@ The retained count has reached the final rate; a reset count starts at $0$.
 
 ### How to write: Catch schedule restart — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `optax.adam(lr) / optax.apply_updates(params, updates)` — Optax gradient transformations and numerically stable loss functions over parameter PyTrees.
+**Inputs:**
+- After five scheduled SGD steps with constant gradient $1$, compare a retained optimizer state with a freshly initialized state for the next update.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- Both parameter updates and the scheduler/optimizer states.
+
+**Invariants to check:**
+- Only the optimizer-state reset differs between the two continuations.
+
+**Hints:**
+- The retained count has reached the final rate; a reset count starts at $0$.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Catch schedule restart (Transfer / diagnosis)
-tx = optax.sgd(...)  # TODO: compute tx
-p = jnp.array(...)  # TODO: compute p
-s = tx.init(...)  # TODO: compute s
-for _ in range(5):
-    delta, s = tx.update(...)  # TODO: compute delta, s
-    p = optax.apply_updates(...)  # TODO: compute p
-continued, _ = tx.update(...)  # TODO: compute continued, _
-restarted, _ = tx.update(...)  # TODO: compute restarted, _
-assert jnp.allclose(continued, -0.01, atol=1e-06)  # TODO: complete assertion check
-assert jnp.allclose(restarted, -0.1, atol=1e-06)  # TODO: complete assertion check
+import jax.numpy as jnp
+import optax
+
+def practice_catch_schedule_restart(gradient, state, next_step):
+    """Implement the catch schedule restart check."""
+    # TODO: Apply the next scheduled update with retained state and with reset state after the same first five steps.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -384,25 +388,29 @@ The un-clipped SGD update already has norm $0.5$, below the threshold $1$.
 
 ### How to write: Check transformation order — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.zeros / jnp.ones(shape, dtype=...)` — Allocates a tensor of the given `shape` initialized with constants.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `optax.adam(lr) / optax.apply_updates(params, updates)` — Optax gradient transformations and numerically stable loss functions over parameter PyTrees.
+**Inputs:**
+- For gradient $(3,4)$, compare clipping before SGD at rate $0.1$ with clipping after it. Write a decision memo explaining which quantity you intended to bound.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- Both transformed gradients and their global norms.
+
+**Invariants to check:**
+- The declared bound names whether it applies to raw gradients or scaled updates.
+
+**Hints:**
+- The un-clipped SGD update already has norm $0.5$, below the threshold $1$.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Check transformation order (Transfer / diagnosis): Transformation order changes the algorithm.
-before = optax.chain(...)  # TODO: compute before
-after = optax.chain(...)  # TODO: compute after
-u_before, _ = before.update(...)  # TODO: compute u_before, _
-u_after, _ = after.update(...)  # TODO: compute u_after, _
-assert jnp.allclose(jnp.linalg.norm(u_before), 0.1, atol=1e-06)  # TODO: complete assertion check
-assert jnp.allclose(jnp.linalg.norm(u_after), 0.5, atol=1e-06)  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+import optax
+
+def practice_check_transformation_order(gradient, learning_rate, max_norm):
+    """Implement the check transformation order check."""
+    # TODO: Apply clipping before the learning-rate transform and after it, recording both bounded quantities.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

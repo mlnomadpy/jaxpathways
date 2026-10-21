@@ -521,7 +521,7 @@ visual_data={'kind':'bar','labels':['completed','runtime rejected','timed out'],
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:33:28.528230+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:10:12.215386+00:00. JAX 0.9.2.
 
 ```text
 statuses: completed failed timed_out
@@ -569,19 +569,36 @@ Launch a changed job with $3$ updates and batch size $5$. Verify the observed pr
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Keep this run’s database and artifacts in a scratch directory removed on exit.
+**Inputs:**
+- A local child-process command, a finite timeout, and a serialized run configuration.
+
+**Outputs:**
+- Structured launch/progress/completion or failure events, exit status, and proof the child was reaped.
+
+**Invariants to check:**
+- A zero/oversized work configuration is rejected before spawning; process exit code alone does not prove completed work.
+
+**Hints:**
+- Validate configuration before creating the subprocess.
+- Keep timeout termination and child reaping in the supervisor boundary.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Launch a changed job with 3 updates and batch size 5.
-# Keep this run’s database and artifacts in a scratch directory removed on exit.
-with tempfile.TemporaryDirectory() as folder:
-    short = launch(...)  # TODO: compute short
-assert short['status']  # TODO: complete assertion check
-assert [e['step'] for e  # TODO: complete assertion check
-assert short['events'][-1]['step']  # TODO: complete assertion check
+from pathlib import Path
+import hashlib
+import json
+import math
+import os
+import subprocess
+import sys
+import tempfile
+import time
+
+def run_bounded_worker(command, timeout_seconds, config):
+    """Structured launch/progress/completion or failure events, exit status, and proof the child was reaped."""
+    # TODO: Reject invalid config before spawn; capture bounded subprocess events and reap the child after completion or timeout.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -612,21 +629,36 @@ Call default_config directly; no child should be needed.
 
 ### How to write: Reject invalid work before spawning — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Inputs:**
+- Try a zero step budget and an oversized minibatch. Require a clear configuration error for each.
+
+**Outputs:**
+- Configuration errors with a zero-spawn assertion.
+
+**Invariants to check:**
+- No child process starts for invalid step or minibatch settings.
+
+**Hints:**
+- Call default_config directly; no child should be needed.
+- Validate both bounds before process creation.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Reject invalid work before spawning (Transfer / diagnosis)
-for values in [dict(steps=0),dict(batch_size=65)]:
-    try:
-        default_config(**values)
-    except ValueError:
-        pass
-    else:
-        raise AssertionError('invalid work accepted')
+from pathlib import Path
+import hashlib
+import json
+import math
+import os
+import subprocess
+import sys
+import tempfile
+import time
+
+def practice_reject_invalid_work_before_spawning(config, spawn_worker):
+    """Complete the reject invalid work before spawning check."""
+    # TODO: ('Validate positive step budget and minibatch bounds before creating a child process.', 'Two configuration errors and proof the spawn function was not called.', 'Rejected configuration starts no worker.')
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -660,20 +692,36 @@ Read the files before leaving the temporary-directory context.
 
 ### How to write: Preserve a successful checkpoint — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Keep this run’s database and artifacts in a scratch directory removed on exit.
+**Inputs:**
+- Run $4$ updates in a temporary directory and verify that the final checkpoint and run record both refer to the completed work.
+
+**Outputs:**
+- A run record and checkpoint pointing to the same completed update.
+
+**Invariants to check:**
+- Completion status follows the final update and checkpoint write.
+
+**Hints:**
+- Read the files before leaving the temporary-directory context.
+- Check the recorded step, not only process exit status.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Preserve a successful checkpoint (Transfer / diagnosis)
-# Keep this run’s database and artifacts in a scratch directory removed on exit.
-with tempfile.TemporaryDirectory() as folder:
-    result = launch(...)  # TODO: compute result
-    saved = json.loads(...)  # TODO: compute saved
-    record = json.loads(...)  # TODO: compute record
-    assert saved['step']  # TODO: complete assertion check
-    assert record['worker_hash']  # TODO: complete assertion check
+from pathlib import Path
+import hashlib
+import json
+import math
+import os
+import subprocess
+import sys
+import tempfile
+import time
+
+def practice_preserve_a_successful_checkpoint(run_record, checkpoint, expected_updates):
+    """Complete the preserve a successful checkpoint check."""
+    # TODO: ('Run four local updates in a temporary directory and validate checkpoint step and run-record completion identity.', 'Matching completed step references in checkpoint and run record.', 'The checkpoint is accepted only after the run reports completed work.')
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

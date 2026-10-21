@@ -75,7 +75,22 @@
         "prompt": "Save a fresh snapshot, edit only the vocabulary metadata, and prove the loader rejects it. Restore the metadata and verify recovery. Then forge `step=101` while retaining the 100-step optimizer state and verify that this mismatch is also rejected.",
         "hint": "Change one vocabulary mapping rather than numeric leaves.",
         "solution": "# Reject an incompatible checkpoint (Transfer / diagnosis)\n# Keep this run’s database and artifacts in a scratch directory removed on exit.\nwith TemporaryDirectory() as directory:\n    folder = Path(directory)\n    save_snapshot(folder,params,state,100)\n    metadata_path = folder/\"manifest.json\"\n    correct = metadata_path.read_text()\n    metadata = json.loads(correct)\n    metadata[\"vocabulary\"] = {\"a\":1,\"b\":0,\"c\":2}\n    # Write the serialized artifact payload to disk.\n    metadata_path.write_text(json.dumps(metadata))\n    try:\n        load_snapshot(folder)\n    except ValueError:\n        pass\n    else:\n        raise AssertionError(\"wrong vocabulary accepted\")\n    forged_step = json.loads(correct)\n    forged_step[\"step\"] = 101\n    # Write the serialized artifact payload to disk.\n    metadata_path.write_text(json.dumps(forged_step))\n    try:\n        load_snapshot(folder)\n    except ValueError:\n        pass\n    else:\n        raise AssertionError(\"wrong step accepted\")\n    # Write the serialized artifact payload to disk.\n    metadata_path.write_text(correct)\n    recovered, _, recovered_step = load_snapshot(folder)\n    assert recovered_step == 100\n    assert jnp.allclose(logits(recovered,jnp.array([0,1,2,0])),logits(params,jnp.array([0,1,2,0])))",
-        "explanation": "The metadata is part of the model contract even when parameter array shapes still match."
+        "explanation": "The metadata is part of the model contract even when parameter array shapes still match.",
+        "learnerStarter": {
+          "inputs": [
+            "Save a fresh snapshot, edit only the vocabulary metadata, and prove the loader rejects it. Restore the metadata and verify recovery. Then forge `step=101` while retaining the 100-step optimizer state and verify that this mismatch is also rejected."
+          ],
+          "outputs": [
+            "Two compatibility rejections and a valid restore after restoring metadata."
+          ],
+          "invariants": [
+            "Vocabulary and optimizer-step metadata must agree with the checkpoint payload."
+          ],
+          "hints": [
+            "Change one vocabulary mapping rather than numeric leaves."
+          ],
+          "code": "import jax.numpy as jnp\nimport json\nfrom pathlib import Path\nfrom tempfile import TemporaryDirectory\n\ndef practice_reject_an_incompatible_checkpoint(checkpoint, vocabulary):\n    \"\"\"Implement the reject an incompatible checkpoint check.\"\"\"\n    # TODO: Edit only vocabulary metadata in a disposable checkpoint and separately forge the step; require each restore to reject.\n    raise NotImplementedError\n"
+        }
       },
       {
         "title": "Make prompt failures explicit",
@@ -83,7 +98,22 @@
         "prompt": "Verify empty prompt rejection and unknown-character rejection. Record the difference between a ValueError for missing context and a KeyError for an unknown token.",
         "hint": "The vocabulary mapping intentionally accepts only a, b and c.",
         "solution": "# Make prompt failures explicit (Transfer / diagnosis)\ntry:\n    generate(params,\"\",1)\nexcept ValueError:\n    pass\nelse:\n    raise AssertionError(\"empty prompt accepted\")\ntry:\n    generate(params,\"x\",1)\nexcept KeyError:\n    pass\nelse:\n    raise AssertionError(\"unknown token accepted\")\nassert generate(params,\"abca\",0) == \"abca\"",
-        "explanation": "A decoding interface needs a defined input contract; neither failure should be mistaken for a training problem."
+        "explanation": "A decoding interface needs a defined input contract; neither failure should be mistaken for a training problem.",
+        "learnerStarter": {
+          "inputs": [
+            "Verify empty prompt rejection and unknown-character rejection. Record the difference between a ValueError for missing context and a KeyError for an unknown token."
+          ],
+          "outputs": [
+            "A ValueError for missing context and a KeyError for an unknown token."
+          ],
+          "invariants": [
+            "Prompt validation runs before sampling and does not conflate missing and out-of-vocabulary input."
+          ],
+          "hints": [
+            "The vocabulary mapping intentionally accepts only a, b and c."
+          ],
+          "code": "import jax.numpy as jnp\n\ndef practice_make_prompt_failures_explicit(prompt, vocabulary):\n    \"\"\"Implement the make prompt failures explicit check.\"\"\"\n    # TODO: Call generation with an empty prompt and an unknown character, and assert their distinct exception types.\n    raise NotImplementedError\n"
+        }
       }
     ],
     "question": "Why is saving only parameters insufficient to replay the next Adam update?",
@@ -182,6 +212,22 @@
       "Adam’s update depends on its explicit state. Compare the actual next transition after restoring both parameter and optimizer values.",
       "Vocabulary settings belong to the model/data contract, but do not replace Adam moments and its update count.",
       "Equal current losses can hide different optimizer histories. Compare the next update with full state restored."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "The trained toy language-model parameters, prompt \"bcab\", and the periodic character vocabulary."
+      ],
+      "outputs": [
+        "The twelve generated characters, an independently derived expected cycle, and a comparison result."
+      ],
+      "invariants": [
+        "Generation follows the known periodic pattern for this fixture; this result does not establish natural-language performance."
+      ],
+      "hints": [
+        "Derive the next character from the repeating \"abc\" training pattern before invoking generation.",
+        "Keep the prompt and token count aligned with the requested continuation."
+      ],
+      "code": "import jax.numpy as jnp\n\ndef check_periodic_generation(params, prompt, count, vocabulary):\n    # TODO: Generate the requested continuation and compare it with the independently derived cycle.\n    raise NotImplementedError\n"
+    }
   }
 }

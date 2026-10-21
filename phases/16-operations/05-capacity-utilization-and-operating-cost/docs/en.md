@@ -582,16 +582,16 @@ visual_data={'panels':[{'kind':'bar','labels':[str(n) for n,_,_ in samples],'xla
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:34:09.092170+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:10:54.671540+00:00. JAX 0.9.2.
 
 ```text
-measured local job seconds: [0.6168613750487566, 0.6577395000495017, 0.6894487086683512]
-illustrative capacity plan: {'offered_worker_hours_per_hour': 0.11490811811139186, 'load_fraction': 0.05745405905569593, 'minimum_workers_with_reserve': 1, 'hourly_budget': 3.0, 'hypothetical_cost_per_job': 0.0002872702952784797, 'within_reserve': True}
+measured local job seconds: [0.6406106250360608, 0.6188522079028189, 0.648827999830246]
+illustrative capacity plan: {'offered_worker_hours_per_hour': 0.10813799997170766, 'load_fraction': 0.05406899998585383, 'minimum_workers_with_reserve': 1, 'hourly_budget': 3.0, 'hypothetical_cost_per_job': 0.00027034499992926916, 'within_reserve': True}
 assumptions: 600 arrivals/hour, 2 workers, hypothetical 1.50 per worker-hour, 25% reserve
-measured local job seconds: [0.7571705421432853, 0.6526923752389848, 0.6576270833611488]
-illustrative capacity plan: {'offered_worker_hours_per_hour': 0.1261950903572142, 'load_fraction': 0.0630975451786071, 'minimum_workers_with_reserve': 1, 'hourly_budget': 3.0, 'hypothetical_cost_per_job': 0.00031548772589303555, 'within_reserve': True}
+measured local job seconds: [0.7135265413671732, 0.715399167034775, 0.8027491671964526]
+illustrative capacity plan: {'offered_worker_hours_per_hour': 0.13379152786607543, 'load_fraction': 0.06689576393303771, 'minimum_workers_with_reserve': 1, 'hourly_budget': 3.0, 'hypothetical_cost_per_job': 0.00033447881966518857, 'within_reserve': True}
 assumptions: 600 arrivals/hour, 2 workers, hypothetical 1.50 per worker-hour, 25% reserve
-nominal load at two demand scenarios: 0.0630975451786071 0.1261950903572142
+nominal load at two demand scenarios: 0.06689576393303771 0.13379152786607543
 required workers under changed hypothetical reserve: 1
 PASS: operations-05
 
@@ -638,19 +638,29 @@ Using the measured service-time input, calculate the minimum worker count for $1
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Exercise solution
+**Inputs:**
+- Arrival demand, measured service duration, reserve fraction, and proposed worker count.
+
+**Outputs:**
+- A minimum worker estimate and an independent utilization/load-bound check.
+
+**Invariants to check:**
+- Units are consistent; full reserve, nonpositive workers, and nonfinite service measurements are rejected.
+
+**Hints:**
+- Convert hourly arrivals to per-second demand before multiplying by service time.
+- Label price and demand as assumptions unless directly measured.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-changed = capacity(...)  # TODO: compute changed
-required = ...  # TODO: compute required
-demand = ...  # TODO: compute demand
-assert demand/required  # TODO: complete assertion check
-if required>1: assert demand/(required-1) > .6
-print('required workers under changed hypothetical reserve:',required)
+import math
+import numpy as np
+
+def required_worker_count(arrivals_per_hour, service_seconds, reserve_fraction, workers):
+    """A minimum worker estimate and an independent utilization/load-bound check."""
+    # TODO: Convert demand, service time, reserve, and worker count to consistent units before checking feasibility.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -681,17 +691,28 @@ Every attempt consumes resources under this hypothetical model.
 
 ### How to write: Account for failed attempts — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Inputs:**
+- Assume $100$ completed jobs require $125$ equal-duration attempts. Compare active-time cost per attempt with active-time cost per completion.
+
+**Outputs:**
+- Cost per attempt and per successful completion.
+
+**Invariants to check:**
+- The two calculations differ only by their declared denominator.
+
+**Hints:**
+- Every attempt consumes resources under this hypothetical model.
+- Count all 125 attempts for attempt cost and 100 completions for completion cost.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Account for failed attempts (Transfer / diagnosis)
-per_attempt = ...  # TODO: compute per_attempt
-per_completion = ...  # TODO: compute per_completion
-assert abs(per_completion-1.25*per_attempt)  # TODO: complete assertion check
+import math
+
+def practice_account_for_failed_attempts(completed_jobs, total_attempts, attempt_seconds):
+    """Complete the account for failed attempts check."""
+    # TODO: ('Compute active-time cost per attempt and per completion from 125 equal-duration attempts for 100 completed jobs.', 'Both cost denominators and their distinct totals.', 'Attempt cost uses all attempts; completion cost uses only successful completions.')
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -721,20 +742,28 @@ A plan should not silently divide by zero or emit a meaningless worker count.
 
 ### How to write: Reject impossible capacity inputs — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Inputs:**
+- Try a full reserve, zero workers and a nonfinite measured duration.
+
+**Outputs:**
+- Input errors for infeasible reserve, worker count, and service duration.
+
+**Invariants to check:**
+- A capacity report requires reserve below one and finite positive work/service values.
+
+**Hints:**
+- A plan should not silently divide by zero or emit a meaningless worker count.
+- Check all three invalid cases before division.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Reject impossible capacity inputs (Transfer / diagnosis)
-for change in [dict(reserve_fraction=1.),dict(workers=0),dict(measured_job_s=float('nan'))]:
-    inputs = dict(...)  # TODO: compute inputs
-    inputs.update(change)
-    try:capacity(**inputs)
-    except ValueError:pass
-    else:raise AssertionError('invalid plan accepted')
+import math
+
+def practice_reject_impossible_capacity_inputs(arrival_rate, service_seconds, reserve, workers):
+    """Complete the reject impossible capacity inputs check."""
+    # TODO: ('Reject reserve fraction 1, worker count 0, and a nonfinite service duration before computing a plan.', 'Three explicit input rejections.', 'A finite feasible capacity estimate requires positive workers and reserve below one.')
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

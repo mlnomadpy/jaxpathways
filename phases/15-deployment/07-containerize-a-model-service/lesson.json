@@ -102,7 +102,23 @@
         "prompt": "Send an infinite input to the process contract and verify the rejection.",
         "hint": "The validation boundary should reject before producing JSON predictions.",
         "solution": "# Reject a nonfinite request (transfer)\n# Keep this run’s database and artifacts in a scratch directory removed on exit.\nwith tempfile.TemporaryDirectory() as tmp:\n    p=Path(tmp)\n    (p/'model').write_text(json.dumps(MODEL))\n    (p/'service.py').write_text(SERVICE)\n    env=dict(os.environ,MODEL_PATH=str(p/'model'),MODEL_SHA256=hashlib.sha256((p/'model').read_bytes()).hexdigest())\n    bad=subprocess.run([sys.executable,str(p/'service.py')],input=json.dumps({'inputs':[float('inf')]}),text=True,capture_output=True,env=env)\n    assert bad.returncode != 0\nprint('Nonfinite input rejected before output.')",
-        "explanation": "A request can parse as JSON in Python while still violating the numerical service contract."
+        "explanation": "A request can parse as JSON in Python while still violating the numerical service contract.",
+        "learnerStarter": {
+          "inputs": [
+            "Send an infinite input to the process contract and verify the rejection."
+          ],
+          "outputs": [
+            "A process-boundary rejection for infinite input."
+          ],
+          "invariants": [
+            "The inference call is skipped after a failed finiteness check."
+          ],
+          "hints": [
+            "The validation boundary should reject before producing JSON predictions.",
+            "Validate the incoming feature array before model execution."
+          ],
+          "code": "import hashlib\nimport numpy as np\n\ndef practice_reject_a_nonfinite_request(features, validator):\n    \"\"\"Complete the reject a nonfinite request check.\"\"\"\n    # TODO: ('Run the process request validator on an infinite feature and reject before model evaluation.', 'A clear nonfinite-input rejection and no inference call.', 'Finiteness is checked at the service boundary.')\n    raise NotImplementedError\n"
+        }
       },
       {
         "title": "Check changed behavior after a legitimate artifact replacement",
@@ -110,7 +126,23 @@
         "prompt": "Create an artifact with weight \\(3\\), keep bias \\(1\\), and use its new matching digest. Check the result for input \\(2\\), then compare with the previous model.",
         "hint": "A legitimate new digest permits loading. Independent expected predictions decide whether the changed behavior is acceptable.",
         "solution": "# Check changed behavior after a legitimate artifact replacement (Transfer / diagnosis): The old model produced 5; the new one produces 7.\n# Keep this run’s database and artifacts in a scratch directory removed on exit.\nwith tempfile.TemporaryDirectory() as directory:\n    model_path=Path(directory)/'model.json'\n    runner_path=Path(directory)/'service.py'\n    model_path.write_text(json.dumps(dict(MODEL,weight=3.)))\n    runner_path.write_text(SERVICE)\n    digest=hashlib.sha256(model_path.read_bytes()).hexdigest()\n    changed=subprocess.run([sys.executable,str(runner_path)],input=json.dumps({'inputs':[2.]}),text=True,capture_output=True,check=True,env=dict(os.environ,MODEL_PATH=str(model_path),MODEL_SHA256=digest),timeout=30)\n    values=json.loads(changed.stdout)['predictions']\n    assert values==[7.] and values!=[5.]\nprint('New artifact loads, but the old behavioral expectation no longer passes.')",
-        "explanation": "The old model produced \\(5\\); the new one produces \\(7\\). Neither a successful build nor a matching digest decides whether that change is desirable. Retain both identities and compare the release against the intended task criteria."
+        "explanation": "The old model produced \\(5\\); the new one produces \\(7\\). Neither a successful build nor a matching digest decides whether that change is desirable. Retain both identities and compare the release against the intended task criteria.",
+        "learnerStarter": {
+          "inputs": [
+            "Create an artifact with weight \\(3\\), keep bias \\(1\\), and use its new matching digest. Check the result for input \\(2\\), then compare with the previous model."
+          ],
+          "outputs": [
+            "Verified output from the new artifact and comparison with the old model."
+          ],
+          "invariants": [
+            "The new digest is recomputed from the replacement bytes."
+          ],
+          "hints": [
+            "A legitimate new digest permits loading. Independent expected predictions decide whether the changed behavior is acceptable.",
+            "Input and bias stay fixed while the artifact weight changes."
+          ],
+          "code": "import hashlib\nimport numpy as np\n\ndef practice_check_changed_behavior_after_a_legitimate_artifact_replacement(artifact_bytes, expected_digest, input_value, prior_output):\n    \"\"\"Complete the check changed behavior after a legitimate artifact replacement check.\"\"\"\n    # TODO: ('Load the new artifact only with its matching digest, evaluate input 2, and compare with the previous model output.', 'New verified output and prior-output comparison.', 'Artifact replacement changes identity deliberately and the new digest matches its exact bytes.')\n    raise NotImplementedError\n"
+        }
       }
     ],
     "question": "The image built successfully. What should happen before serving traffic?",
@@ -217,6 +249,22 @@
       "An image can build while carrying the wrong model. Verify the artifact digest and a known prediction inside the target runtime.",
       "A container image packages the service runtime and code. The model artifact, runtime configuration and release identity are separate inputs. A reproducible service verifies all of them instead of assuming that an image tag names the same bytes forever.",
       "Pinned packages do not specify preprocessing. Export and test the exact input-to-output pipeline."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "Artifact bytes and the digest recorded before those bytes were changed."
+      ],
+      "outputs": [
+        "An integrity rejection for the artifact whose current digest differs from the recorded digest."
+      ],
+      "invariants": [
+        "Digest comparison uses the exact bytes that would be loaded; a mismatch prevents artifact acceptance."
+      ],
+      "hints": [
+        "Hash the bytes after mutation and compare with the stored expected digest.",
+        "Assert the rejection explicitly instead of treating an absent result as success."
+      ],
+      "code": "import hashlib\n\ndef reject_changed_artifact(artifact_bytes, expected_digest, verifier):\n    # TODO: Verify the changed bytes against the prior digest and require an explicit integrity failure.\n    raise NotImplementedError\n"
+    }
   }
 }

@@ -151,7 +151,7 @@ visual_data = {'kind': 'line', 'x': x.tolist(), 'xlabel': 'input', 'ylabel': 'pr
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:26:49.315141+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:03:25.827380+00:00. JAX 0.9.2.
 
 ```text
 [1. 3. 5.]
@@ -205,21 +205,30 @@ Create new parameters with weight $3$ while retaining the original bias. Show th
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- A parameter mapping with weight and bias.
+- A requested new weight and the prediction inputs.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- A new parameter mapping and predictions under both versions.
+
+**Invariants to check:**
+- The original mapping remains unchanged.
+- The retained field keeps its original value.
+- Original predictions can be replayed.
+
+**Hints:**
+- Return a new mapping instead of assigning into the input.
+- Pass the changed mapping explicitly to prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Create new parameters with weight 3 while retaining the original bias.
-updated = ...  # TODO: compute updated
-assert jnp.allclose(predict(updated, x), jnp.array([1.,4.,7.]))  # TODO: complete assertion check
-assert float(params["weight"])  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def update_weight(params, new_weight):
+    # TODO: return a new mapping with only the requested field changed
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -247,23 +256,28 @@ A new dictionary is required; changing a binding in the original dictionary brea
 
 ### How to write: Update the bias without changing either parameter input — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- The original parameters, a new bias value, and the lesson prediction function.
 
-**Step-by-step implementation plan:**
-1. Update the bias without changing either parameter input (Practice)
+**Outputs:**
+- A new mapping and predictions for both parameter versions.
+
+**Invariants to check:**
+- The returned mapping is a distinct container.
+- Changing bias does not alter the original prediction.
+
+**Hints:**
+- Create a copy with one updated field.
+- Check identity and numerical replay separately.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Update the bias without changing either parameter input (Practice)
-def with_bias(parameters, new_bias):
-    return ...  # TODO: return computed result
-changed_bias = with_bias(...)  # TODO: compute changed_bias
-assert changed_bias is not params  # TODO: complete assertion check
-assert jnp.allclose(predict(changed_bias, x), jnp.array([-2., 0., 2.]))  # TODO: complete assertion check
-assert jnp.allclose(predict(params, x), jnp.array([1., 3., 5.]))  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def with_bias(params, new_bias, predict, inputs):
+    # TODO: return a new mapping and compare both prediction paths
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -296,31 +310,29 @@ Compute data inside the numerical core and report it outside. A tuple return doe
 
 ### How to write: Return predictions and metrics together — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- Two parameter configurations, inputs, and targets.
 
-**Step-by-step implementation plan:**
-1. Return predictions and metrics together (Challenge)
-2. Check tensor shape invariant: `error.shape == ()`
+**Outputs:**
+- Predictions and scalar loss for both configurations.
+
+**Invariants to check:**
+- Evaluation returns numerical data without printing.
+- The loss reduces example errors to one scalar.
+- Parameter inputs are not mutated.
+
+**Hints:**
+- Keep reporting outside the function.
+- Use the supplied prediction function.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Return predictions and metrics together (Challenge)
-def evaluate(parameters, inputs, targets):
-    predictions = predict(...)  # TODO: compute predictions
-    return ...  # TODO: return computed result
-labels = jnp.array(...)  # TODO: compute labels
-outputs, error = evaluate(...)  # TODO: compute outputs, error
-other_outputs, other_error = evaluate(...)  # TODO: compute other_outputs, other_error
-# Check tensor shape invariant: `error.shape == ()`
-assert error.shape  # TODO: complete assertion check
-assert jnp.allclose(error, 0.)  # TODO: complete assertion check
-assert jnp.allclose(other_error, 6.)  # TODO: complete assertion check
-assert jnp.allclose(outputs, first_output)  # TODO: complete assertion check
-print("evaluation losses:", float(error), float(other_error))
+import jax.numpy as jnp
+
+def evaluate(params, inputs, targets, predict):
+    # TODO: return predictions and scalar mean squared error
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

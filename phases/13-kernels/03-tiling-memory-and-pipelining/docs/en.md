@@ -314,7 +314,7 @@ visual_data={'panels':[{'kind':'bar','labels':labels,'ylabel':'program count (co
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:31:52.675450+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:08:31.866768+00:00. JAX 0.9.2.
 
 ```text
 Actual backend: cpu simulated layout: TPU v5 lite
@@ -374,24 +374,31 @@ Use a (9,129) random fixture and verify synchronous, double-input-buffered and t
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Exercise solution
-2. Transfer the device result to the host for an independent NumPy comparison.
+**Inputs:**
+- Two frozen (9,129) arrays generated from a local NumPy random generator with seed 23.
+- Float32 and bfloat16 represented-input variants, valid tile, and buffer modes (2 input slots synchronous, 2 buffered, 3 buffered).
+
+**Outputs:**
+- Outputs for all three schedules at each dtype.
+- Exact comparison with the reference computed from the represented input values.
+
+**Invariants to check:**
+- The same source values are used across schedules.
+- Every schedule uses two output slots; the synchronous case is separate from buffered execution.
+
+**Hints:**
+- Cast the reference operands to float32 for arithmetic, then cast the result to the requested output dtype.
+- Keep input and output buffer counts separate.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-rng = np.random.default_rng(...)  # TODO: compute rng
-for dtype in (jnp.float32,jnp.bfloat16):
-    a = jnp.asarray(...)  # TODO: compute a
-    b = jnp.asarray(...)  # TODO: compute b
-    expected = ...  # TODO: compute expected
-    for buffers,sync in [(2,True),(2,False),(3,False)]:
-        result = pipelined_axpy(...)  # TODO: compute result
-        # Transfer the device result to the host for an independent NumPy comparison.
-        np.testing.assert_array_equal(np.asarray(result),np.asarray(expected))
-print("Changed shape, dtype and schedules verified")
+import numpy as np
+import jax.numpy as jnp
+
+def compare_pipeline_modes(run_pipeline, seed, tile, dtypes):
+    # TODO: generate the two fixed arrays once and compare all schedule/dtype combinations.
+    raise NotImplementedError("Compare synchronous and buffered pipelines on fixed represented inputs")
 ```
 
 <details><summary>Reference solution</summary>
@@ -426,19 +433,27 @@ The pipeline lab deliberately uses a conservative TPU-compatible tile family.
 
 ### How to write: Reject an unsupported pipeline tile — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Inputs:**
+- Two shape-compatible arrays and the pipeline wrapper.
+- A supported tile for the valid control case and unsupported tile (3,5).
+
+**Outputs:**
+- A clear ValueError for unsupported geometry before arithmetic interpretation or accelerator launch.
+
+**Invariants to check:**
+- The valid control establishes that inputs are otherwise acceptable.
+- The arithmetic interpreter is never used as a hidden fallback for the rejected pipeline configuration.
+
+**Hints:**
+- Place supported-tile validation before selecting execution backend.
+- Use a test double to confirm no arithmetic path was invoked.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Reject an unsupported pipeline tile (Practice): Different wrappers may expose different supported contracts.
-rejected = ...  # TODO: compute rejected
-try:pipelined_axpy(x,y,(3,5))
-except ValueError:rejected=True
-assert rejected  # TODO: complete assertion check
-print("Unsupported pipeline tile rejected")
+def reject_unsupported_pipeline_tile(pipeline, first, second, supported_tile):
+    # TODO: confirm the supported control works, then require rejection for tile (3,5).
+    raise NotImplementedError("Reject unsupported pipeline geometry before dispatch")
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -470,18 +485,32 @@ Count two input arrays and one output array separately because their buffer coun
 
 ### How to write: Estimate the price of a third input buffer — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Estimate the price of a third input buffer (Challenge)
+**Inputs:**
+- Matrix shape (9,129), candidate tile sizes, element size, and two output buffer slots.
+
+**Outputs:**
+- Data-buffer byte counts for two and three input slots.
+- Explicit list of excluded memory costs.
+- At least two memory costs explicitly excluded from the data-buffer estimate.
+
+**Invariants to check:**
+- Output slots stay fixed at two in both estimates.
+- The third input slot adds one input-tile allocation.
+- The footprint is a declared-buffer model, not total HBM usage.
+
+**Hints:**
+- Count padded tile elements times bytes per element and slots.
+- Do not include compiler, allocator, or runtime overhead in this data-only estimate.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Estimate the price of a third input buffer (Challenge)
-for bm,bn in configurations:
-    two = ...  # TODO: compute two
-    three = ...  # TODO: compute three
-    assert three*3  # TODO: complete assertion check
-    print("Tile, two/three-input-slot modeled bytes:",(bm,bn),two,three)
+import math
+
+def estimate_pipeline_buffers(shape, tile_sizes, bytes_per_element):
+    # TODO: compute padded input tile bytes for two/three slots and fixed output slots.
+    # Return excluded costs alongside estimates.
+    raise NotImplementedError("Separate declared data buffers from total device memory")
 ```
 
 <details><summary>Reference solution and reasoning</summary>

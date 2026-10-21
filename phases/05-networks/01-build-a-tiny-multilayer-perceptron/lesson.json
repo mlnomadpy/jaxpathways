@@ -89,7 +89,22 @@
         "prompt": "Permute the hidden units and make the matching change to the output layer. Predict whether the logits change. Test the result on new coordinates, then show why permuting only one side breaks the contract.",
         "hint": "Columns of the first kernel and rows of the second kernel describe the same hidden units.",
         "solution": "# Reorder hidden units without changing predictions (Transfer): A hidden unit has no intrinsic index.\norder=jnp.array([7,0,6,1,5,2,4,3])\nprobe=jnp.array([[.2,-.9],[-.4,.6],[.8,.1]])\npermuted=dict(params,w1=params['w1'][:,order],b1=params['b1'][order],w2=params['w2'][order,:])\nnp.testing.assert_allclose(logits(permuted,probe),logits(params,probe),rtol=1e-5,atol=1e-5)\nbroken=dict(params,w1=params['w1'][:,order],b1=params['b1'][order])\nassert not np.allclose(logits(broken,probe),logits(params,probe),atol=1e-5)\nprint('Consistent hidden permutation preserves logits; one-sided permutation changes them.')",
-        "explanation": "A hidden unit has no intrinsic index. Reordering its incoming weights, bias and outgoing weights together preserves the function. This is a parameter-layout invariant, not another training run."
+        "explanation": "A hidden unit has no intrinsic index. Reordering its incoming weights, bias and outgoing weights together preserves the function. This is a parameter-layout invariant, not another training run.",
+        "learnerStarter": {
+          "inputs": [
+            "Permute the hidden units and make the matching change to the output layer. Predict whether the logits change. Test the result on new coordinates, then show why permuting only one side breaks the contract."
+          ],
+          "outputs": [
+            "Logit parity on new inputs plus a one-sided-permutation counterexample."
+          ],
+          "invariants": [
+            "Incoming and outgoing parameter axes use the same hidden-unit permutation."
+          ],
+          "hints": [
+            "Columns of the first kernel and rows of the second kernel describe the same hidden units."
+          ],
+          "code": "import jax.numpy as jnp\n\ndef practice_reorder_hidden_units_without_changing_predictions(hidden_permutation, hidden_weights, output_weights):\n    \"\"\"Implement the reorder hidden units without changing predictions check.\"\"\"\n    # TODO: Permute the hidden-unit axis and apply the matching inverse permutation to outgoing weights and biases.\n    raise NotImplementedError\n"
+        }
       },
       {
         "title": "Diagnose accidental pairwise broadcasting",
@@ -97,7 +112,22 @@
         "prompt": "Demonstrate how labels shaped \\((B, 1)\\) and scores shaped \\((B,)\\) create a \\((B, B)\\) loss. Repair the contract before averaging.",
         "hint": "Inspect the unreduced loss shape; a scalar mean can hide the error.",
         "solution": "# Diagnose accidental pairwise broadcasting (Intermediate)\nbad=optax.sigmoid_binary_cross_entropy(logits(params,x),y[:,None])\n# Check tensor shape invariant: `bad.shape==(4,4)`\nassert bad.shape==(4,4)\ngood=optax.sigmoid_binary_cross_entropy(logits(params,x),y)\n# Check tensor shape invariant: `good.shape==(4,)`\nassert good.shape==(4,)\nnp.testing.assert_allclose(jnp.mean(good),loss(params,x,y),rtol=1e-6)",
-        "explanation": "The incorrect scalar still looks plausible, but it compares each score with every label. A shape check catches the silent objective change."
+        "explanation": "The incorrect scalar still looks plausible, but it compares each score with every label. A shape check catches the silent objective change.",
+        "learnerStarter": {
+          "inputs": [
+            "Demonstrate how labels shaped \\((B, 1)\\) and scores shaped \\((B,)\\) create a \\((B, B)\\) loss. Repair the contract before averaging."
+          ],
+          "outputs": [
+            "Rejected mismatched shape and a per-example loss after alignment."
+          ],
+          "invariants": [
+            "One score is paired with one label; the reduction is over examples only."
+          ],
+          "hints": [
+            "Inspect the unreduced loss shape; a scalar mean can hide the error."
+          ],
+          "code": "import jax.numpy as jnp\n\ndef practice_diagnose_accidental_pairwise_broadcasting(scores, labels):\n    \"\"\"Implement the diagnose accidental pairwise broadcasting check.\"\"\"\n    # TODO: Assert score and label shapes match before subtraction, then show the (B,1) by (B,) broadcast shape and repair it.\n    raise NotImplementedError\n"
+        }
       }
     ],
     "exercise": "Swap class zero and one. Transform only the trained output layer to preserve the boundary and verify predictions on new coordinates.",
@@ -140,6 +170,22 @@
       "The optimizer can change coefficients but cannot enlarge the affine function class. The activation supplies nonlinear intermediate features.",
       "Two affine layers compose into another affine map. Write their combined matrix and bias to see why another layer alone is insufficient.",
       "The loss changes how parameters are fitted, not which functions the architecture can represent. Inspect the forward map for a nonlinearity."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "An MLP parameter pytree and a permutation of its output classes."
+      ],
+      "outputs": [
+        "Transformed output-layer parameters and logits on held-out coordinates."
+      ],
+      "invariants": [
+        "The transformed model preserves or intentionally permutes class scores as specified; hidden-unit changes must be paired."
+      ],
+      "hints": [
+        "Inspect which parameter axis represents classes.",
+        "Test a new coordinate batch, not only the training points."
+      ],
+      "code": "import jax.numpy as jnp\n\ndef permute_output_classes(params, class_permutation):\n    \"\"\"Transformed output-layer parameters and logits on held-out coordinates.\"\"\"\n    # TODO: Transform the output-layer class axis and verify logits on new input coordinates.\n    raise NotImplementedError\n"
+    }
   }
 }

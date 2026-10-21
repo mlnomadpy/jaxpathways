@@ -86,7 +86,23 @@
         "prompt": "Duplicate all four pairs while keeping diagonal-only positives. Calculate the change in loss and explain the false-negative effect.",
         "hint": "Each original candidate appears twice, but only one copy is labeled positive.",
         "solution": "# Duplicate a source and inspect the objective (Transfer)\nduplicated = float(\n    paired_contrastive(jnp.tile(left @ w, (2, 1)), jnp.tile(right @ w, (2, 1)))\n)\noriginal = float(paired_contrastive(left @ w, right @ w))\nnp.testing.assert_allclose(duplicated - original, np.log(2), atol=1e-5)\nprint('Duplicated diagonal-only penalty:', duplicated - original)",
-        "explanation": "The extra log(2) comes from duplicating each denominator candidate without adding the second copy to the positive set. Use source/semantic identity to define multi-positive supervision when appropriate."
+        "explanation": "The extra log(2) comes from duplicating each denominator candidate without adding the second copy to the positive set. Use source/semantic identity to define multi-positive supervision when appropriate.",
+        "learnerStarter": {
+          "inputs": [
+            "Four paired embeddings and a duplicated copy of each pair."
+          ],
+          "outputs": [
+            "Original and duplicated diagonal-positive losses and their difference."
+          ],
+          "invariants": [
+            "Duplicating candidates while retaining one diagonal positive changes the negative set."
+          ],
+          "hints": [
+            "Duplicate both sides in the same order.",
+            "Do not relabel the extra copies as positives."
+          ],
+          "code": "import jax.numpy as jnp\nimport numpy as np\n\ndef inspect_duplicate_pair_effect(left, right, projection, temperature):\n    # TODO: compare diagonal-positive losses before and after duplicating the batch.\n    raise NotImplementedError"
+        }
       },
       {
         "title": "Check the encoder gradient through normalization",
@@ -94,7 +110,23 @@
         "prompt": "Perturb one encoder weight at the initial, noncollapsed matrix and compare centered differences with autodiff. Repeat with a second finite-difference step.",
         "hint": "Use a fresh matrix; a gradient near a trained optimum may be too small to diagnose accurately.",
         "solution": "# Check the encoder gradient through normalization (Challenge): This checks the complete input-to-normalized-similarity chain.\naudit_w = jnp.array([[0.2, 0.1], [0.1, 0.1], [0.02, -0.01]])\nobjective = lambda weights: paired_contrastive(left @ weights, right @ weights, 0.2)\nauto = float(jax.grad(objective)(audit_w)[0, 0])\nfor epsilon in [1e-3, 5e-4]:\n    delta = jnp.zeros_like(audit_w).at[0, 0].set(epsilon)\n    estimate = float(\n        (objective(audit_w + delta) - objective(audit_w - delta)) / (2 * epsilon)\n    )\n    np.testing.assert_allclose(estimate, auto, rtol=3e-3, atol=1e-3)\n    print('Step / finite difference / autodiff:', epsilon, estimate, auto)",
-        "explanation": "This checks the complete input-to-normalized-similarity chain. Trying two step sizes helps distinguish truncation error from a broken derivative."
+        "explanation": "This checks the complete input-to-normalized-similarity chain. Trying two step sizes helps distinguish truncation error from a broken derivative.",
+        "learnerStarter": {
+          "inputs": [
+            "A noncollapsed encoder weight matrix, fixed paired inputs, and two finite-difference step sizes."
+          ],
+          "outputs": [
+            "Autodiff and centered-difference estimates for one encoder weight."
+          ],
+          "invariants": [
+            "The tested parameter is away from a collapsed representation and both perturbations are symmetric."
+          ],
+          "hints": [
+            "Differentiate the full normalized-pair objective.",
+            "Report errors for each step size; finite differences have truncation and roundoff error."
+          ],
+          "code": "import jax.numpy as jnp\nimport numpy as np\n\ndef check_encoder_gradient(weights, left, right, steps):\n    # TODO: compare one autodiff gradient with centered differences at each requested step.\n    raise NotImplementedError"
+        }
       }
     ],
     "question": "What does successful retrieval on the training pairs establish?",
@@ -156,6 +188,22 @@
       "Training-pair retrieval shows that this objective and implementation can fit the observed pairs. It does not establish held-out semantic retrieval, robustness, or the absence of duplicate-positive problems. Keep the evaluation candidate pool and split identities separate.",
       "Temperature rescales logits but does not change a fixed embedding’s cosine ranking. Training effects require a separate comparison.",
       "A diagonal label still penalizes duplicate positives in other columns. Use a multi-positive objective or data policy when the task requires it."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "Left and right embeddings, a trained projection, and pair IDs."
+      ],
+      "outputs": [
+        "The original and right-permuted contrastive losses with a pair-identity diagnosis."
+      ],
+      "invariants": [
+        "Only the intended paired entries are positives; a permutation changes identity without changing vector values."
+      ],
+      "hints": [
+        "Apply the same projection before comparing both arrangements.",
+        "Keep the right-side permutation explicit."
+      ],
+      "code": "import jax.numpy as jnp\nimport numpy as np\n\ndef compare_pairing_losses(left, right, projection, permutation):\n    # TODO: measure the objective before and after permuting right-side pair identity.\n    raise NotImplementedError"
+    }
   }
 }

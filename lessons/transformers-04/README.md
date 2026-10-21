@@ -483,7 +483,7 @@ visual_data = {'kind': 'heatmap', 'values': probs.tolist(), 'rows': ['position '
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:30:13.970606+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:06:20.735929+00:00. JAX 0.9.2.
 
 ```text
 Initial / held loss / held accuracy: 0.9807573556900024 0.0017881905660033226 1.0
@@ -530,15 +530,27 @@ Generate twelve new tokens from prompt bcab. Derive the expected cycle first; ve
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Inputs:**
+- The trained toy language-model parameters, prompt "bcab", and the periodic character vocabulary.
+
+**Outputs:**
+- The twelve generated characters, an independently derived expected cycle, and a comparison result.
+
+**Invariants to check:**
+- Generation follows the known periodic pattern for this fixture; this result does not establish natural-language performance.
+
+**Hints:**
+- Derive the next character from the repeating "abc" training pattern before invoking generation.
+- Keep the prompt and token count aligned with the requested continuation.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Generate twelve new tokens from prompt bcab.
-assert generate(params,"bcab",12)  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def check_periodic_generation(params, prompt, count, vocabulary):
+    # TODO: Generate the requested continuation and compare it with the independently derived cycle.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -564,51 +576,30 @@ Change one vocabulary mapping rather than numeric leaves.
 
 ### How to write: Reject an incompatible checkpoint — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- Save a fresh snapshot, edit only the vocabulary metadata, and prove the loader rejects it. Restore the metadata and verify recovery. Then forge `step=101` while retaining the 100-step optimizer state and verify that this mismatch is also rejected.
 
-**Step-by-step implementation plan:**
-1. Keep this run’s database and artifacts in a scratch directory removed on exit.
-2. Write the serialized artifact payload to disk.
-3. Write the serialized artifact payload to disk.
-4. Write the serialized artifact payload to disk.
+**Outputs:**
+- Two compatibility rejections and a valid restore after restoring metadata.
+
+**Invariants to check:**
+- Vocabulary and optimizer-step metadata must agree with the checkpoint payload.
+
+**Hints:**
+- Change one vocabulary mapping rather than numeric leaves.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Reject an incompatible checkpoint (Transfer / diagnosis)
-# Keep this run’s database and artifacts in a scratch directory removed on exit.
-with TemporaryDirectory() as directory:
-    folder = Path(...)  # TODO: compute folder
-    save_snapshot(folder,params,state,100)
-    metadata_path = ...  # TODO: compute metadata_path
-    correct = metadata_path.read_text(...)  # TODO: compute correct
-    metadata = json.loads(...)  # TODO: compute metadata
-    metadata["vocabulary"] = ...  # TODO: compute metadata["vocabulary"]
-    # Write the serialized artifact payload to disk.
-    metadata_path.write_text(json.dumps(metadata))
-    try:
-        load_snapshot(folder)
-    except ValueError:
-        pass
-    else:
-        raise AssertionError("wrong vocabulary accepted")
-    forged_step = json.loads(...)  # TODO: compute forged_step
-    forged_step["step"] = ...  # TODO: compute forged_step["step"]
-    # Write the serialized artifact payload to disk.
-    metadata_path.write_text(json.dumps(forged_step))
-    try:
-        load_snapshot(folder)
-    except ValueError:
-        pass
-    else:
-        raise AssertionError("wrong step accepted")
-    # Write the serialized artifact payload to disk.
-    metadata_path.write_text(correct)
-    recovered, _, recovered_step = load_snapshot(...)  # TODO: compute recovered, _, recovered_step
-    assert recovered_step  # TODO: complete assertion check
-    assert jnp.allclose(logits(recovered,jnp.array([0,1,2,0])),logits(params,jnp.array([0,1,2,0])))  # TODO: complete assertion check
+import jax.numpy as jnp
+import json
+from pathlib import Path
+from tempfile import TemporaryDirectory
+
+def practice_reject_an_incompatible_checkpoint(checkpoint, vocabulary):
+    """Implement the reject an incompatible checkpoint check."""
+    # TODO: Edit only vocabulary metadata in a disposable checkpoint and separately forge the step; require each restore to reject.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -666,27 +657,27 @@ The vocabulary mapping intentionally accepts only a, b and c.
 
 ### How to write: Make prompt failures explicit — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Inputs:**
+- Verify empty prompt rejection and unknown-character rejection. Record the difference between a ValueError for missing context and a KeyError for an unknown token.
+
+**Outputs:**
+- A ValueError for missing context and a KeyError for an unknown token.
+
+**Invariants to check:**
+- Prompt validation runs before sampling and does not conflate missing and out-of-vocabulary input.
+
+**Hints:**
+- The vocabulary mapping intentionally accepts only a, b and c.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Make prompt failures explicit (Transfer / diagnosis)
-try:
-    generate(params,"",1)
-except ValueError:
-    pass
-else:
-    raise AssertionError("empty prompt accepted")
-try:
-    generate(params,"x",1)
-except KeyError:
-    pass
-else:
-    raise AssertionError("unknown token accepted")
-assert generate(params,"abca",0)  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def practice_make_prompt_failures_explicit(prompt, vocabulary):
+    """Implement the make prompt failures explicit check."""
+    # TODO: Call generation with an empty prompt and an unknown character, and assert their distinct exception types.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

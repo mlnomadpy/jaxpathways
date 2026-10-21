@@ -185,7 +185,7 @@ visual_data = {'kind': 'line', 'x': list(range(len(good))), 'xlabel': 'pre-updat
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:28:46.310854+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:05:16.983668+00:00. JAX 0.9.2.
 
 ```text
 Stable final weight: 1.999999761581421 unstable pre-update [weight,loss,|gradient|]:
@@ -246,24 +246,29 @@ Use features $[1, 1, 1]$ and targets $2$. Predict the new stability ceiling. Com
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.zeros / jnp.ones(shape, dtype=...)` — Allocates a tensor of the given `shape` initialized with constants.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- A scalar linear model features, targets, initial weight, and candidate rates.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- Loss/parameter histories that distinguish stable from unstable updates.
+
+**Invariants to check:**
+- The stability limit is recomputed for the changed feature scale; reject nonfinite inputs before updating.
+
+**Hints:**
+- Differentiate the mean squared objective at the supplied data.
+- Scale the rate when scaling the objective, and check the assumption behind that relation.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Use features [1, 1, 1] and targets 2.
-ones = jnp.ones(...)  # TODO: compute ones
-exact,history = run(...)  # TODO: compute exact,history
-divergent,divergent_history = run(...)  # TODO: compute divergent,divergent_history
-np.testing.assert_allclose(exact,2.,atol = ...  # TODO: compute np.testing.assert_allclose(exact,2.,atol
-assert divergent_history[-1,1]  # TODO: complete assertion check
-np.testing.assert_allclose(divergent_history[1:,1]/divergent_history[:-1,1],1.44,rtol=1e-5)
+import jax
+import jax.numpy as jnp
+
+def compare_learning_rates(features, targets, initial_weight, rates):
+    """Loss/parameter histories that distinguish stable from unstable updates."""
+    # TODO: Compare finite loss/gradient updates across rates and feature/objective scales before accepting a step.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -294,29 +299,28 @@ Differentiate the scaled objective; plain gradient descent multiplies its gradie
 
 ### How to write: Rescale the objective and compensate the update — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
+**Inputs:**
+- Multiply the squared-loss objective by five. Compare one plain gradient-descent update at the old rate and at one fifth of that rate. Explain why this compensation does not automatically describe Adam or clipping.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- Both parameter changes and losses for the two rate/objective pairs.
+
+**Invariants to check:**
+- The compensation is evaluated for plain gradient descent at the same initial point.
+
+**Hints:**
+- Differentiate the scaled objective; plain gradient descent multiplies its gradient by the learning rate.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Rescale the objective and compensate the update (Transfer): Scaling the objective scales the gradient.
-w0 = jnp.array(...)  # TODO: compute w0
-base_gradient = jax.grad(...)  # TODO: compute base_gradient
-scaled_gradient = jax.grad(...)  # TODO: compute scaled_gradient
-np.testing.assert_allclose(scaled_gradient,5*base_gradient,rtol=1e-6)
-reference = ...  # TODO: compute reference
-compensated = ...  # TODO: compute compensated
-uncompensated = ...  # TODO: compute uncompensated
-np.testing.assert_allclose(compensated,reference,rtol = ...  # TODO: compute np.testing.assert_allclose(compensated,reference,rtol
-assert not np.isclose(uncompensated,reference)  # TODO: complete assertion check
-print('Reference / compensated / unchanged-rate updates:',reference,compensated,uncompensated)
+import jax
+import jax.numpy as jnp
+
+def practice_rescale_the_objective_and_compensate_the_update(features, targets, old_rate, scale_factor):
+    """Implement the rescale the objective and compensate the update check."""
+    # TODO: Compare one gradient update before and after multiplying the objective by five, using the original and one-fifth rates.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -353,26 +357,28 @@ Changing the learning rate cannot make a NaN observation valid.
 
 ### How to write: Diagnose a nonfinite input before an update — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jnp.isfinite(x)` — Returns a boolean mask verifying that no element is `NaN` or `Inf`.
-- `jax.value_and_grad(loss_fn)(params, ...)` — Evaluates both the scalar loss and its gradient PyTree `(loss_val, grads)` in a single forward+backward pass.
+**Inputs:**
+- Insert one NaN feature. Show that loss/gradient finite checks fail, then repair the source data and recheck the independent initial gradient.
 
-**Step-by-step implementation plan:**
-1. Diagnose a nonfinite input before an update (Intermediate): Nonfinite data is a different cause than excessive step size.
+**Outputs:**
+- A rejected nonfinite batch and a finite independent initial gradient after repair.
+
+**Invariants to check:**
+- No optimizer transition runs on a batch with nonfinite features.
+
+**Hints:**
+- Changing the learning rate cannot make a NaN observation valid.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Diagnose a nonfinite input before an update (Intermediate): Nonfinite data is a different cause than excessive step size.
-corrupted = ...  # TODO: compute corrupted
-bad_value,bad_grad = jax.value_and_grad(...)  # TODO: compute bad_value,bad_grad
-assert not np.isfinite(float(bad_value))  # TODO: complete assertion check
-repaired = jnp.array(...)  # TODO: compute repaired
-repaired_value,repaired_grad = jax.value_and_grad(...)  # TODO: compute repaired_value,repaired_grad
-np.testing.assert_allclose(repaired_grad,-56/3,rtol=1e-6)
-assert np.isfinite(float(repaired_value))  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+
+def practice_diagnose_a_nonfinite_input_before_an_update(features, targets, weight):
+    """Implement the diagnose a nonfinite input before an update check."""
+    # TODO: Insert one NaN feature, check input/loss/gradient finiteness before stepping, then repair the source row.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

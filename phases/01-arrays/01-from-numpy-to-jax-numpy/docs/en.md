@@ -155,7 +155,7 @@ visual_data = {'kind': 'line', 'x': [0, 1, 2], 'xlabel': 'observation index', 'y
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:26:45.187067+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:03:22.361171+00:00. JAX 0.9.2.
 
 ```text
 Mean: [ 3. 14.]
@@ -222,22 +222,34 @@ Foundation · Standardize the original data using its standard deviation plus ep
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- A training matrix with observations in rows and features in columns.
+- A positive epsilon for scale stability.
 
-**Step-by-step implementation plan:**
-1. Exercise solution
-2. Reduce along axis=0 to compute `standardized`.
+**Outputs:**
+- Fitted feature statistics and standardized training rows.
+
+**Invariants to check:**
+- Fit statistics feature-wise using training data only.
+- Reuse the same statistics for later rows.
+- Constant features follow the lesson’s stated scale policy.
+
+**Hints:**
+- Keep the feature axis during reductions.
+- Center before scaling.
+- Separate fitting statistics from applying them.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-# Reduce along axis=0 to compute `standardized`.
-standardized = ...  # TODO: compute standardized
-assert jnp.allclose(standardized.mean(axis=0), 0., atol=1e-6)  # TODO: complete assertion check
-assert jnp.allclose(standardized.std(axis=0), 1., atol=1e-5)  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def fit_and_standardize(training, epsilon=1e-6):
+    # TODO: compute feature statistics and standardized values
+    center = ...
+    scale = ...
+    transformed = ...
+    return transformed, center, scale
 ```
 
 <details><summary>Reference solution</summary>
@@ -266,24 +278,33 @@ Fit uses scale $1$ for a constant training feature. Applying statistics does not
 
 ### How to write: Test the constant-feature policy — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jnp.isfinite(x)` — Returns a boolean mask verifying that no element is `NaN` or `Inf`.
+**Inputs:**
+- Training data with a constant second feature.
+- A new row whose second feature differs.
+- The standardizer fit/apply functions.
 
-**Step-by-step implementation plan:**
-1. Test the constant-feature policy (Practice)
+**Outputs:**
+- Transformed training data and transformed new row.
+
+**Invariants to check:**
+- A constant training feature follows the declared unit-scale policy.
+- Applying the transform does not refit statistics.
+
+**Hints:**
+- Inspect the fitted training scale.
+- Apply the same saved statistics to the new row.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Test the constant-feature policy (Practice)
-constant_data = jnp.array(...)  # TODO: compute constant_data
-constant_statistics = fit_standardizer(...)  # TODO: compute constant_statistics
-constant_transformed = apply_standardizer(...)  # TODO: compute constant_transformed
-assert jnp.all(jnp.isfinite(constant_transformed))  # TODO: complete assertion check
-assert jnp.allclose(constant_transformed[:, 1], 0.)  # TODO: complete assertion check
-assert jnp.allclose(apply_standardizer(jnp.array([[7., 6.]]), constant_statistics)[0, 1], 1.)  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def check_constant_feature(training, new_row, fit_standardizer, apply_standardizer):
+    # TODO: fit once and transform training and new data
+    statistics = ...
+    training_result = ...
+    new_result = ...
+    return statistics, training_result, new_result
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -316,23 +337,32 @@ The application function should depend on each row and fixed statistics, not on 
 
 ### How to write: Detect accidental batch-dependent preprocessing — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- Statistics fitted on the original training matrix.
+- Two new rows transformed jointly and one at a time.
 
-**Step-by-step implementation plan:**
-1. Detect accidental batch-dependent preprocessing (Challenge)
+**Outputs:**
+- A fixed-statistics comparison and a separate refit comparison.
+
+**Invariants to check:**
+- A row’s transform is independent of its request-batch companions.
+- Refitting on new rows is a distinct operation.
+
+**Hints:**
+- Reuse identical training statistics for both application paths.
+- Keep the newly fitted result separately labeled.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Detect accidental batch-dependent preprocessing (Challenge)
-new_rows = jnp.array(...)  # TODO: compute new_rows
-together = apply_standardizer(...)  # TODO: compute together
-separately = jnp.concatenate(...)  # TODO: compute separately
-assert jnp.allclose(together, separately)  # TODO: complete assertion check
-refitted = apply_standardizer(...)  # TODO: compute refitted
-assert not jnp.allclose(together, refitted)  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def audit_batch_independence(new_rows, statistics, apply_standardizer, fit_standardizer):
+    # TODO: compare joint and separate application, then compare a refit
+    together = ...
+    separately = ...
+    refitted = ...
+    return together, separately, refitted
 ```
 
 <details><summary>Reference solution and reasoning</summary>

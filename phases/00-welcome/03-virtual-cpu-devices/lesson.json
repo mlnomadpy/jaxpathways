@@ -59,7 +59,25 @@
         "prompt": "Create twelve two-feature rows with values \\(0\\) through \\(23\\). Predict shard shape and check every slice of a squared output.",
         "hint": "Use each shard index to select the corresponding NumPy reference slice.",
         "solution": "# Move from four rows to twelve (Challenge): The twelve rows split into four groups of three.\ntwelve = np.arange(24,dtype=np.float32).reshape(12,2)\n# Place `z` explicitly onto the target JAX device.\nz = jax.device_put(twelve, rows)\n# Wrap with `jax.jit` (`z2`) so XLA traces and compiles the function.\nz2 = jax.jit(lambda a:a*a, in_shardings=rows, out_shardings=rows)(z)\n# Check tensor shape invariant: `all(s.data.shape == (3,2) for s in z2.addressable_shards)`\nassert all(s.data.shape == (3,2) for s in z2.addressable_shards)\nfor shard in z2.addressable_shards:\n    # Transfer the device result to the host for an independent NumPy comparison.\n    np.testing.assert_array_equal(np.asarray(shard.data), (twelve*twelve)[shard.index])",
-        "explanation": "The twelve rows split into four groups of three. Index-based comparisons establish that the right values occupy each piece, rather than checking only a total."
+        "explanation": "The twelve rows split into four groups of three. Index-based comparisons establish that the right values occupy each piece, rather than checking only a total.",
+        "learnerStarter": {
+          "inputs": [
+            "Four row-sharded devices and twelve two-feature rows.",
+            "The squared output for each row."
+          ],
+          "outputs": [
+            "Every output shard and its matching NumPy slice."
+          ],
+          "invariants": [
+            "Each shard index selects matching global rows.",
+            "Local shape matches an even partition."
+          ],
+          "hints": [
+            "Build the full reference before selecting slices.",
+            "Compare the complete shard payload."
+          ],
+          "code": "import jax\nimport numpy as np\n\ndef verify_twelve_rows(row_sharding):\n    # TODO: square the sharded data and compare every indexed slice\n    raise NotImplementedError\n"
+        }
       },
       {
         "title": "Repair a batch that does not divide evenly",
@@ -67,7 +85,24 @@
         "prompt": "Place a \\((5,2)\\) array with the same row sharding. Capture the failure. Repair this placement demonstration by replicating it, and explain why that does not prove the partitioned algorithm supports uneven batches.",
         "hint": "Do not drop a row to hide the error.",
         "solution": "# Repair a batch that does not divide evenly (Challenge): Five rows cannot be evenly split across the four-way data axis.\nuneven = np.arange(10,dtype=np.float32).reshape(5,2)\ntry:\n    jax.device_put(uneven, rows)\nexcept ValueError:\n    print(\"Expected indivisible row dimension\")\nelse:\n    raise AssertionError(\"Expected divisibility failure\")\n# Place `fixed` explicitly onto the target JAX device.\nfixed = jax.device_put(uneven, replicated)\n# Transfer the device result to the host for an independent NumPy comparison.\nnp.testing.assert_array_equal(np.asarray(fixed), uneven)\nassert fixed.is_fully_replicated",
-        "explanation": "Five rows cannot be evenly split across the four-way data axis. Replication preserves all observations but changes the memory/communication plan; padding requires a mask when computing means."
+        "explanation": "Five rows cannot be evenly split across the four-way data axis. Replication preserves all observations but changes the memory/communication plan; padding requires a mask when computing means.",
+        "learnerStarter": {
+          "inputs": [
+            "The same four-way row sharding and a five-by-two input."
+          ],
+          "outputs": [
+            "A captured partitioning failure and a replicated placement with all rows."
+          ],
+          "invariants": [
+            "No row is dropped to force divisibility.",
+            "Replication is not described as uneven partition support."
+          ],
+          "hints": [
+            "Capture the expected placement error.",
+            "Inspect the replicated values and state the evidence limit."
+          ],
+          "code": "import jax\nimport numpy as np\n\ndef diagnose_uneven_rows(row_sharding):\n    # TODO: capture the partition attempt, then test replicated placement\n    raise NotImplementedError\n"
+        }
       }
     ],
     "question": "What does a \\((12,2)\\) global array sharded with `P(\"data\",None)` over four devices mean?",
@@ -140,6 +175,26 @@
       "Partitioning divides the mapped dimension; it does not change the global shape or create accelerator hardware.",
       "P(data, None) partitions the first axis. Divide twelve rows among four devices and inspect addressable_shards rather than assuming replication.",
       "These are logical CPU devices. They let you test partitioning semantics, but provide no evidence about TPU chips, interconnects or throughput."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "Four virtual CPU devices and the row-sharded placement from the lesson.",
+        "Twelve rows with two features, plus a five-row placement case."
+      ],
+      "outputs": [
+        "Observed shard shapes and slices for twelve rows.",
+        "A captured uneven-placement failure and a replicated placement retaining all five rows."
+      ],
+      "invariants": [
+        "Every source row appears in the reference comparison.",
+        "Replication preserves data but does not prove uneven partition support.",
+        "Label logical CPU devices accurately."
+      ],
+      "hints": [
+        "Use shard indices to select matching reference rows.",
+        "Keep partition failure and replicated repair as separate observations."
+      ],
+      "code": "import jax\nimport numpy as np\n\ndef audit_row_placements(row_sharding, devices):\n    # TODO: place the requested arrays and inspect shard metadata\n    raise NotImplementedError\n"
+    }
   }
 }

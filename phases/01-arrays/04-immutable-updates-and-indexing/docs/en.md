@@ -149,7 +149,7 @@ visual_data = {'kind': 'heatmap', 'values': jnp.stack([x, y, z]).tolist(), 'rows
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:26:52.432761+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:03:28.331968+00:00. JAX 0.9.2.
 
 ```text
 Original: [1. 2. 3. 4.]
@@ -209,21 +209,30 @@ Replace the last two elements with zero in a new array. Keep $x$ unchanged.
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- A one-dimensional four-value array `x`.
+- A request to replace its final two positions in a new value.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- A changed array and the unchanged original input.
+
+**Invariants to check:**
+- The source array remains unchanged.
+- Output shape matches input shape.
+- Only requested positions change.
+
+**Hints:**
+- Use a functional indexed update and keep its returned array.
+- Compare the input after the update.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Replace the last two elements with zero in a new array.
-masked = ...  # TODO: compute masked
-assert jnp.allclose(masked, jnp.array([1.,2.,0.,0.]))  # TODO: complete assertion check
-assert jnp.allclose(x, jnp.array([1.,2.,3.,4.]))  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def replace_suffix(x):
+    # TODO: make the requested functional indexed update
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -251,23 +260,29 @@ The slice [:, $-1$] selects every row and the last column. A scalar replacement 
 
 ### How to write: Replace a region of a matrix — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.arange(n, dtype=...)` — Creates a 1-D JAX array of evenly spaced values `[0, 1, ..., n-1]` on the target device.
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `array.reshape(new_shape)` — Reorganizes tensor axes without changing the total element count (`array.size`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- A three-by-three matrix of consecutive values.
 
-**Step-by-step implementation plan:**
-1. Replace a region of a matrix (Practice)
+**Outputs:**
+- A new matrix with its final column replaced.
+
+**Invariants to check:**
+- Nonselected entries match the input.
+- The original matrix is unchanged.
+- The returned shape remains `(3, 3)`.
+
+**Hints:**
+- Select the last column in every row.
+- Check the entire result and original.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Replace a region of a matrix (Practice)
-matrix = jnp.arange(...)  # TODO: compute matrix
-updated_matrix = ...  # TODO: compute updated_matrix
-assert jnp.allclose(updated_matrix, jnp.array([[0., 1., -1.], [3., 4., -1.], [6., 7., -1.]]))  # TODO: complete assertion check
-assert jnp.allclose(matrix, jnp.arange(9).reshape(3, 3))  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def replace_final_column(matrix):
+    # TODO: update the selected region in a returned array
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -298,27 +313,28 @@ Use where for the fixed-shape result. Boolean indexing produces selected values,
 
 ### How to write: Keep shape while masking values — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- A one-dimensional input `x` and threshold two.
 
-**Step-by-step implementation plan:**
-1. Keep shape while masking values (Challenge)
-2. Check tensor shape invariant: `fixed_shape.shape == (4,)`
-3. Check tensor shape invariant: `selected.shape == (2,)`
+**Outputs:**
+- A fixed-shape masked value and a compact selected value.
+
+**Invariants to check:**
+- The masked result keeps input shape.
+- The compact result contains only selected entries.
+
+**Hints:**
+- Use elementwise selection for fixed shape.
+- Inspect both output shapes.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Keep shape while masking values (Challenge)
-fixed_shape = jnp.where(...)  # TODO: compute fixed_shape
-selected = ...  # TODO: compute selected
-# Check tensor shape invariant: `fixed_shape.shape == (4,)`
-assert fixed_shape.shape  # TODO: complete assertion check
-# Check tensor shape invariant: `selected.shape == (2,)`
-assert selected.shape  # TODO: complete assertion check
-assert jnp.allclose(fixed_shape, jnp.array([0., 0., 3., 4.]))  # TODO: complete assertion check
-assert jnp.allclose(selected, jnp.array([3., 4.]))  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def compare_mask_and_selection(x, threshold=2.):
+    # TODO: construct both fixed-shape mask and compact selection
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

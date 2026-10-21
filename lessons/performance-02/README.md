@@ -240,7 +240,7 @@ visual_data = {'kind': 'bar', 'labels': ['initial', 'new values', 'new gain', 'n
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:30:16.632828+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:06:24.392180+00:00. JAX 0.9.2.
 
 ```text
 {
@@ -356,8 +356,8 @@ CPU run: 2026-10-21T11:30:16.632828+00:00. JAX 0.9.2.
   ]
 }
 Static branch trace observations: [{'shape': [8], 'square': True}, {'shape': [8], 'square': False}]
-Per-step host reads seconds: 8.16253013908863e-05
-Final-only wait seconds: 2.0875129848718643e-05
+Per-step host reads seconds: 0.0001482083462178707
+Final-only wait seconds: 2.8458423912525177e-05
 Added ledger row: {'label': 'new length sixteen', 'shape': [16], 'dtype': 'float32', 'observed_trace_delta': 1, 'result': 1240.0}
 Masked versus unmasked padded objective: 55.0 58.0
 Observed runtime-Python-branch tracing failure
@@ -434,21 +434,27 @@ Add a call with sixteen float32 elements. Calculate its expected score independe
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `Mesh + PartitionSpec + NamedSharding` — Maps logical tensor axes onto physical device mesh axes for SPMD data, tensor, or pipeline parallelism.
+**Inputs:**
+- The existing specialization ledger, a 16-element float32 input, and the observed-call helper.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- An independently checked score for the 16-element call and a new ledger row with its signature and trace observation.
+
+**Invariants to check:**
+- The changed input shape adds a signature entry; a Python trace event is not labeled as proof of compilation.
+
+**Hints:**
+- Calculate the sum of squared scaled elements on the host independently.
+- Record shape, dtype, and trace delta as separate observations.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Add a call with sixteen float32 elements.
-x16 = jax.device_put(...)  # TODO: compute x16
-observed_call("new length sixteen", x16, 1.)
-assert call_rows[-1]["result"]  # TODO: complete assertion check
-print("Added ledger row:", call_rows[-1])
+import numpy as np
+
+def add_sixteen_element_call(ledger, values, gain, observed_call):
+    # TODO: Run the new 16-element signature, verify its score independently, and append its observed ledger row.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -477,33 +483,28 @@ Use a fixed-size input and mask; compute the offset transformation before maskin
 
 ### How to write: Pad a final batch while preserving the objective — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.jit(fn) / @jax.jit` — Traces `fn` for its input signatures and compiles an executable. Changed shapes, dtypes or static arguments can trigger another compilation.
-- `Mesh + PartitionSpec + NamedSharding` — Maps logical tensor axes onto physical device mesh axes for SPMD data, tensor, or pipeline parallelism.
+**Inputs:**
+- A final batch has five values while other batches have eight. Pad to eight and use an explicit validity mask in a dynamic array. Compare the masked sum of squares to an ordinary five-value calculation. Explain why padding without masking changes objectives with offsets.
 
-**Step-by-step implementation plan:**
-1. Wrap with `jax.jit` (`masked_score`) so XLA traces and compiles the function.
-2. Place `padded` explicitly onto the target JAX device.
-3. Transfer the device result to the host for an independent NumPy comparison.
+**Outputs:**
+- Equal masked/unpadded objectives plus a counterexample without masking.
+
+**Invariants to check:**
+- Padded entries contribute neither residual nor offset terms.
+
+**Hints:**
+- Use a fixed-size input and mask; compute the offset transformation before masking.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Pad a final batch while preserving the objective (Transfer): The mask removes three synthetic rows.
-# Wrap with `jax.jit` (`masked_score`) so XLA traces and compiles the function.
-masked_score = jax.jit(...)  # TODO: compute masked_score
-five = np.arange(...)  # TODO: compute five
-# Place `padded` explicitly onto the target JAX device.
-padded = jax.device_put(...)  # TODO: compute padded
-mask = jax.device_put(...)  # TODO: compute mask
-masked = masked_score(...)  # TODO: compute masked
-# Transfer the device result to the host for an independent NumPy comparison.
-np.testing.assert_allclose(np.asarray(masked), sum((i+1)**2 for i in range(5)))
-wrong = jnp.sum(...)  # TODO: compute wrong
-assert float(wrong)  # TODO: complete assertion check
-print("Masked versus unmasked padded objective:", float(masked), float(wrong))
+import jax.numpy as jnp
+import time
+
+def practice_pad_a_final_batch_while_preserving_the_objective(values, valid_mask):
+    """Implement the pad a final batch while preserving the objective check."""
+    # TODO: Pad five values to eight with a validity mask and compare masked squared-error sum with the unpadded calculation.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -542,39 +543,29 @@ A runtime scalar predicate is a tracer, so Python cannot decide its truth value 
 
 ### How to write: Reproduce and repair runtime Python branching — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.jit(fn) / @jax.jit` — Traces `fn` for its input signatures and compiles an executable. Changed shapes, dtypes or static arguments can trigger another compilation.
-- `Mesh + PartitionSpec + NamedSharding` — Maps logical tensor axes onto physical device mesh axes for SPMD data, tensor, or pipeline parallelism.
+**Inputs:**
+- Write a jitted function using if gain > $1$ on a scalar array. Capture its tracing failure and replace the branch with lax.cond. Verify both branches against independent arithmetic.
 
-**Step-by-step implementation plan:**
-1. Reproduce and repair runtime Python branching (Diagnosis)
-2. Wrap with `jax.jit` (`repaired`) so XLA traces and compiles the function.
-3. Place `result` explicitly onto the target JAX device.
-4. Transfer the device result to the host for an independent NumPy comparison.
+**Outputs:**
+- Captured tracing failure and correct outputs for both predicate outcomes.
+
+**Invariants to check:**
+- The branch predicate is a scalar JAX value and both branches return matching result types.
+
+**Hints:**
+- A runtime scalar predicate is a tracer, so Python cannot decide its truth value during tracing.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Reproduce and repair runtime Python branching (Diagnosis)
-def broken_branch(values, gain):
-    if gain > 1.:
-        return ...  # TODO: return computed result
-    return ...  # TODO: return computed result
-try:
-    jax.jit(broken_branch)(x8, jax.device_put(np.float32(2.), cpu))
-except jax.errors.TracerBoolConversionError:
-    print("Observed runtime-Python-branch tracing failure")
-else:
-    raise AssertionError("runtime branch unexpectedly accepted")
-# Wrap with `jax.jit` (`repaired`) so XLA traces and compiles the function.
-repaired = jax.jit(...)  # TODO: compute repaired
-for gain, expected in [(0.5, 28.), (2., 140.)]:
-    # Place `result` explicitly onto the target JAX device.
-    result = repaired(...)  # TODO: compute result
-    # Transfer the device result to the host for an independent NumPy comparison.
-    np.testing.assert_allclose(np.asarray(result), expected)
+import jax
+import jax.numpy as jnp
+import time
+
+def practice_reproduce_and_repair_runtime_python_branching(value, threshold):
+    """Implement the reproduce and repair runtime python branching check."""
+    # TODO: Trigger the traced scalar-array branch failure, then replace it with lax.cond and verify both branches against arithmetic.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

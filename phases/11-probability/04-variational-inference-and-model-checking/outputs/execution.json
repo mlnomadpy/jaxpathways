@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "probability-04",
-  "contentHash": "818793d65359166226c56348e9c1844a4f43f5376eae78059e2e20f8a1f99ebf",
-  "executedAt": "2026-10-21T11:31:16.033812+00:00",
+  "contentHash": "ce10cff942c731bf3b8908107c924f04f4536c97e020560657637a6004b6e105",
+  "executedAt": "2026-10-21T16:07:50.776965+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -100,7 +100,7 @@
       ]
     },
     {
-      "sourceHash": "427da52576602a1264e616d2994411e218c4a79b51604efec32546b37a2c646d",
+      "sourceHash": "22d5d8896e54aecd8b70f9aafa0c68cf3475cdb9799648df8d1bbbd8b53d1ac8",
       "outputs": []
     },
     {
@@ -108,7 +108,7 @@
       "outputs": []
     },
     {
-      "sourceHash": "69e47c71f1f31517276d524b6d95ffa2a1a20c66c336eed087c4122f6147981e",
+      "sourceHash": "22d5d8896e54aecd8b70f9aafa0c68cf3475cdb9799648df8d1bbbd8b53d1ac8",
       "outputs": []
     },
     {
@@ -116,7 +116,7 @@
       "outputs": []
     },
     {
-      "sourceHash": "24e172dbee1b77d9f092348b69cc3231c7578340feed8515351ae3519957c86f",
+      "sourceHash": "22d5d8896e54aecd8b70f9aafa0c68cf3475cdb9799648df8d1bbbd8b53d1ac8",
       "outputs": []
     },
     {

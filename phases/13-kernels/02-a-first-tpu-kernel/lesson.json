@@ -73,7 +73,24 @@
         "hint": "A column bias is a vector with exactly one entry per matrix column.",
         "solution": "# Reject hidden bias-axis broadcasting (Practice)\nfor malformed in (jnp.ones((1,129),dtype=jnp.float32),jnp.ones(9,dtype=jnp.float32)):\n    rejected=False\n    try:fused_bias_relu(x,malformed)\n    except ValueError:rejected=True\n    assert rejected\nprint(\"Malformed bias axes rejected\")",
         "explanation": "Explicit validation turns a confusing broadcast result into a local contract error.",
-        "difficulty": "Practice"
+        "difficulty": "Practice",
+        "learnerStarter": {
+          "inputs": [
+            "The lesson wrapper and bias vectors with matrix-shaped and wrong-length variants."
+          ],
+          "outputs": [
+            "Two captured validation failures before launch."
+          ],
+          "invariants": [
+            "Bias rank and length exactly match the column axis.",
+            "No implicit broadcasting is accepted by this kernel interface."
+          ],
+          "hints": [
+            "Test rank first, then the expected column length.",
+            "Assert the launch callback was not reached on invalid inputs."
+          ],
+          "code": "def reject_invalid_bias(wrapper, matrix, bias_matrix, short_bias):\n    # TODO: exercise both malformed cases and confirm validation precedes launch.\n    raise NotImplementedError(\"Check rank and length for the per-column bias\")"
+        }
       },
       {
         "title": "Check a permutation invariant",
@@ -81,7 +98,24 @@
         "hint": "Use a deterministic reversed column order; do not permute the bias independently.",
         "solution": "# Check a permutation invariant (Challenge)\norder=jnp.arange(128,-1,-1)\npermuted=fused_bias_relu(x[:,order],bias[order])\nnp.testing.assert_allclose(permuted[:,order],actual,rtol=1e-6,atol=1e-6)\nprint(\"Column/bias pairing survives a joint permutation\")",
         "explanation": "The kernel is columnwise when the corresponding bias travels with each column. This catches a wrong window map without relying only on one original fixture.",
-        "difficulty": "Challenge"
+        "difficulty": "Challenge",
+        "learnerStarter": {
+          "inputs": [
+            "A matrix, distinct per-column bias, and a nontrivial column permutation."
+          ],
+          "outputs": [
+            "Original output, inverse-permuted output, and equality check."
+          ],
+          "invariants": [
+            "Matrix columns and bias entries move together.",
+            "Undoing the permutation restores the original output."
+          ],
+          "hints": [
+            "Apply the same permutation to columns and bias.",
+            "Invert the permutation only on the output column axis."
+          ],
+          "code": "import numpy as np\n\ndef check_column_permutation(kernel, matrix, bias, permutation):\n    # TODO: compare the original output with the restored permuted output.\n    raise NotImplementedError(\"Test equivariance under joint column and bias permutation\")"
+        }
       }
     ],
     "diagnosis": "If every row has a repeated bias pattern, inspect the bias BlockSpec and its column coordinate. If CPU interpretation passes but TPU lowering fails, preserve the target error and inspect layout/dtype restrictions. If a target command succeeds on a CPU-only environment, its fallback guard is broken and the receipt must not be called TPU validation.",
@@ -153,6 +187,23 @@
       "Interpret mode executes a semantic reference and cannot establish TPU throughput. Time a supported compiled kernel on the target.",
       "Interpretation is useful correctness evidence. It does not execute the target compiler or hardware, so those claims require a separate guarded target run.",
       "The tested grid and shapes do not cover every generation or block choice. Extend cases and qualify each claimed target explicitly."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "A frozen-seed random matrix shaped (17,257), distinct per-column bias values, and two target-compatible tile choices."
+      ],
+      "outputs": [
+        "Interpreted outputs, exact shapes, and NumPy agreement for each tile."
+      ],
+      "invariants": [
+        "Both candidates consume identical inputs and bias values.",
+        "The final partial tiles do not change output shape or values."
+      ],
+      "hints": [
+        "Generate the fixture once from a local seeded generator.",
+        "Compare block choices with the same reference and tolerance."
+      ],
+      "code": "import numpy as np\n\ndef compare_activation_tiles(interpreter, seed, block_choices):\n    # TODO: build one seeded (17,257) fixture with distinct column biases.\n    raise NotImplementedError(\"Compare target-compatible tiles on fixed inputs\")"
+    }
   }
 }

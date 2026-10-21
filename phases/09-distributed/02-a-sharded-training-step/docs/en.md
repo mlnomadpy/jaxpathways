@@ -244,7 +244,7 @@ visual_data = {'kind': 'bar', 'labels': ['weight 0', 'weight 1'], 'ylabel': 'gra
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:30:24.461646+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:06:36.236647+00:00. JAX 0.9.2.
 
 ```text
 Initial loss: 4.875
@@ -310,49 +310,35 @@ Run a changed target/initial-state update, then diagnose the factor-of-four loca
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
-- `jax.jit(fn) / @jax.jit` — Traces `fn` for its input signatures and compiles an executable. Changed shapes, dtypes or static arguments can trigger another compilation.
+**Inputs:**
+- Feature matrix and labels for a linear model; changed true weights [-1, 3], initial weights [0.2, -0.1], and learning rate 0.05.
+- Four equal-size host shards and one uneven-size partition of the same examples.
 
-**Step-by-step implementation plan:**
-1. Exercise solution
-2. Wrap with `jax.jit` (`changed_step`) so XLA traces and compiles the function.
-3. Place `result` explicitly onto the target JAX device.
-4. Transfer the device result to the host for an independent NumPy comparison.
-5. Reduce along axis=0 to compute `wrong`.
+**Outputs:**
+- One changed-target parameter update and an independent gradient check.
+- Four local mean gradients, their naive sum, the correctly averaged global gradient, and an example-count-weighted uneven-shard result.
+
+**Invariants to check:**
+- Summing four local means scales the result by four; averaging equal-size local means recovers the global mean.
+- Unequal local batches must be weighted by example count.
+- The update uses the changed target and starts from the supplied initial weights.
+
+**Hints:**
+- Derive labels from the changed true weights, then differentiate the mean loss.
+- Compare local-mean aggregation separately from the changed one-step update.
+- For unequal shards, weight each local mean by its local count.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-changed_y = ...  # TODO: compute changed_y
-start = np.array(...)  # TODO: compute start
-def changed_update(weights,features,labels):
-    return ...  # TODO: return computed result
-# Wrap with `jax.jit` (`changed_step`) so XLA traces and compiles the function.
-changed_step = jax.jit(...)  # TODO: compute changed_step
-# Place `result` explicitly onto the target JAX device.
-result = changed_step(...)  # TODO: compute result
-reference_gradient = ...  # TODO: compute reference_gradient
-# Transfer the device result to the host for an independent NumPy comparison.
-np.testing.assert_allclose(np.asarray(result),start-0.05*reference_gradient,rtol=1e-6,atol=1e-6)
+import numpy as np
+import jax
+import jax.numpy as jnp
 
-local_gradients = ...  # TODO: compute local_gradients
-for features,labels in zip(np.split(host_x,4),np.split(host_y,4)):
-    local_gradients.append(2*features.T @ (-labels)/len(labels))
-# Reduce along axis=0 to compute `wrong`.
-wrong = np.sum(...)  # TODO: compute wrong
-# Reduce along axis=0 to compute `right`.
-right = np.mean(...)  # TODO: compute right
-np.testing.assert_allclose(wrong,4*expected_gradient,rtol=1e-6)
-np.testing.assert_allclose(right,expected_gradient,rtol = ...  # TODO: compute np.testing.assert_allclose(right,expected_gradient,rtol
-# Unequal partitions: weight local mean gradients by their observation counts.
-parts = ...  # TODO: compute parts
-weighted = sum(...)  # TODO: compute weighted
-np.testing.assert_allclose(weighted,expected_gradient,rtol = ...  # TODO: compute np.testing.assert_allclose(weighted,expected_gradient,rtol
-print("Summed local means are four times too large; weighted aggregation repaired")
+def diagnose_sharded_update(features, labels, true_weights, initial_weights, learning_rate, equal_shards, uneven_shards):
+    # TODO: derive the changed target update and compare local/global gradients.
+    # Report both the naive local-mean sum and count-weighted uneven aggregation.
+    raise NotImplementedError("Separate the changed training step from local-mean aggregation")
 ```
 
 <details><summary>Reference solution</summary>
@@ -403,33 +389,31 @@ The original train_step hardcodes $0.1$; define a new step with the changed rate
 
 ### How to write: Transfer to a different target model — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
-- `jax.jit(fn) / @jax.jit` — Traces `fn` for its input signatures and compiles an executable. Changed shapes, dtypes or static arguments can trigger another compilation.
-- `Mesh + PartitionSpec + NamedSharding` — Maps logical tensor axes onto physical device mesh axes for SPMD data, tensor, or pipeline parallelism.
+**Inputs:**
+- Features and labels for a linear model, changed true weights [-1,3], starting weights [0.2,-0.1], and step size 0.05.
 
-**Step-by-step implementation plan:**
-1. Transfer to a different target model (Challenge)
-2. Wrap with `jax.jit` (`changed_step`) so XLA traces and compiles the function.
-3. Place `result` explicitly onto the target JAX device.
-4. Transfer the device result to the host for an independent NumPy comparison.
+**Outputs:**
+- Changed one-step parameter vector.
+- Independent objective and gradient comparison.
+
+**Invariants to check:**
+- The check derives labels from the changed true weights.
+- The update starts from the supplied initial weights.
+
+**Hints:**
+- Use a mean over examples in the loss.
+- Keep truth weights separate from the fitted parameter vector.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Transfer to a different target model (Challenge)
-changed_y = ...  # TODO: compute changed_y
-start = np.array(...)  # TODO: compute start
-def changed_update(weights,features,labels):
-    return ...  # TODO: return computed result
-# Wrap with `jax.jit` (`changed_step`) so XLA traces and compiles the function.
-changed_step = jax.jit(...)  # TODO: compute changed_step
-# Place `result` explicitly onto the target JAX device.
-result = changed_step(...)  # TODO: compute result
-reference_gradient = ...  # TODO: compute reference_gradient
-# Transfer the device result to the host for an independent NumPy comparison.
-np.testing.assert_allclose(np.asarray(result),start-0.05*reference_gradient,rtol=1e-6,atol=1e-6)
+import numpy as np
+import jax
+import jax.numpy as jnp
+
+def transfer_update(features, initial_weights, true_weights, learning_rate):
+    # TODO: build labels, differentiate the mean loss, and check the update independently.
+    raise NotImplementedError("Implement the changed target and initial state")
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -467,33 +451,30 @@ A mean of equal-size local means works; unequal sizes require weighting by local
 
 ### How to write: Diagnose summed local means — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- Four equal-sized feature/label shards and a parameter vector.
+- An additional unequal-sized partitioning for the generalization check.
 
-**Step-by-step implementation plan:**
-1. Reduce along axis=0 to compute `wrong`.
-2. Reduce along axis=0 to compute `right`.
-3. Unequal partitions: weight local mean gradients by their observation counts.
+**Outputs:**
+- Local mean gradients, their sum, and the correctly aggregated global gradient.
+
+**Invariants to check:**
+- Summing four local means is scaled by the number of shards.
+- Unequal shard sizes require weighting by example count.
+
+**Hints:**
+- Compare sums of losses with sums of gradients before averaging.
+- Weight each local mean by its local count for unequal partitions.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Diagnose summed local means (Challenge): Each local gradient already divides by its local count.
-local_gradients = ...  # TODO: compute local_gradients
-for features,labels in zip(np.split(host_x,4),np.split(host_y,4)):
-    local_gradients.append(2*features.T @ (-labels)/len(labels))
-# Reduce along axis=0 to compute `wrong`.
-wrong = np.sum(...)  # TODO: compute wrong
-# Reduce along axis=0 to compute `right`.
-right = np.mean(...)  # TODO: compute right
-np.testing.assert_allclose(wrong,4*expected_gradient,rtol=1e-6)
-np.testing.assert_allclose(right,expected_gradient,rtol = ...  # TODO: compute np.testing.assert_allclose(right,expected_gradient,rtol
-# Unequal partitions: weight local mean gradients by their observation counts.
-parts = ...  # TODO: compute parts
-weighted = sum(...)  # TODO: compute weighted
-np.testing.assert_allclose(weighted,expected_gradient,rtol = ...  # TODO: compute np.testing.assert_allclose(weighted,expected_gradient,rtol
-print("Summed local means are four times too large; weighted aggregation repaired")
+import numpy as np
+
+def compare_local_mean_gradients(feature_shards, label_shards, weights):
+    # TODO: calculate each local mean gradient and both aggregations.
+    # Also return an example-count-weighted aggregation.
+    raise NotImplementedError("Diagnose local-mean scaling and size-weight the shards")
 ```
 
 <details><summary>Reference solution and reasoning</summary>

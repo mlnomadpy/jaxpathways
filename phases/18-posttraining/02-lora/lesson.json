@@ -86,7 +86,23 @@
         "prompt": "Draw a new input batch and compare the merged layer with the adapter path.",
         "hint": "The equivalence is algebraic, so a new input should still agree.",
         "solution": "# Check the merge on new inputs (Transfer)\nnew_x = jnp.asarray(np.random.default_rng(91).normal(size=(7, 6)), jnp.float32)\nnp.testing.assert_allclose(\n    lora_forward(new_x, base, a, b), new_x @ merged, atol=1e-6, rtol=1e-5\n)\nassert np.linalg.norm(np.asarray(new_x @ (base + 2 * a @ b) - new_x @ merged)) > 1e-3\nprint('New-input merge passes; accidental double merge changes outputs.')",
-        "explanation": "The second check detects an operational merge error that training loss alone would not reveal."
+        "explanation": "The second check detects an operational merge error that training loss alone would not reveal.",
+        "learnerStarter": {
+          "inputs": [
+            "Frozen base matrix, trained adapter factors, rank and alpha metadata, and a newly drawn input batch."
+          ],
+          "outputs": [
+            "Merged-layer and adapter-path predictions for the new batch, plus their maximum difference."
+          ],
+          "invariants": [
+            "The same alpha-over-rank scale is used in both paths; the frozen base is unchanged."
+          ],
+          "hints": [
+            "Draw a fresh input batch rather than reusing training examples.",
+            "Compare predictions after applying the adapter and after merging its update into the base."
+          ],
+          "code": "import jax.numpy as jnp\nimport numpy as np\n\ndef compare_lora_merge_on_new_inputs(base, a, b, alpha, new_x):\n    # TODO: compare the adapter path with the merged matrix on this held-out batch.\n    raise NotImplementedError"
+        }
       },
       {
         "title": "Test nonunit scaling and an impossible rank-one target",
@@ -94,7 +110,23 @@
         "prompt": "Check merge equivalence at rank two with alpha three. Then use identity inputs and a diagonal target with singular values three and one to calculate the best rank-one residual.",
         "hint": "Use an independent singular-value decomposition for the rank bound, and divide alpha by rank in both serving paths.",
         "solution": "# Test nonunit scaling and an impossible rank-one target (Challenge)\nrng = np.random.default_rng(8)\na2 = jnp.asarray(rng.normal(size=(6, 2)), jnp.float32)\nb2 = jnp.asarray(rng.normal(size=(2, 4)), jnp.float32)\nnp.testing.assert_allclose(\n    lora_forward(x, base, a2, b2, alpha=3.0),\n    x @ (base + 1.5 * a2 @ b2),\n    rtol=1e-5,\n    atol=2e-6,\n)\ntarget_update = np.diag([3.0, 1.0])\nu_s, s_s, v_s = np.linalg.svd(target_update)\nrank_one = (u_s[:, :1] * s_s[:1]) @ v_s[:1]\nnp.testing.assert_allclose(np.sum((target_update - rank_one) ** 2), 1.0)\nnp.testing.assert_allclose(\n    np.mean((np.eye(2) @ target_update - np.eye(2) @ rank_one) ** 2), 0.25\n)\nprint('Nonunit scaling passes; best rank-one identity-input MSE is 0.25.')",
-        "explanation": "The residual predicts a capacity limit independently of an optimizer. The nonunit-alpha case catches a scaling bug that the main rank-one demonstration would miss."
+        "explanation": "The residual predicts a capacity limit independently of an optimizer. The nonunit-alpha case catches a scaling bug that the main rank-one demonstration would miss.",
+        "learnerStarter": {
+          "inputs": [
+            "A frozen base matrix, rank-two adapter factors, alpha equal to three, identity input rows, and a diagonal target with singular values three and one."
+          ],
+          "outputs": [
+            "The adapter-versus-merged predictions on identity inputs and the best rank-one residual norm for the diagonal target."
+          ],
+          "invariants": [
+            "The adapter contribution is scaled by alpha divided by rank; the rank-one residual is determined by the smaller nonzero singular value."
+          ],
+          "hints": [
+            "Compare adapter and merged predictions using the identity input rows.",
+            "Then compute the best rank-one approximation residual for the specified diagonal target."
+          ],
+          "code": "import jax.numpy as jnp\nimport numpy as np\n\ndef audit_lora_scaling_and_rank_limit(base, a, b, identity_inputs, target):\n    # TODO: check alpha=3 rank-two merging and determine the best rank-one residual.\n    raise NotImplementedError"
+        }
       }
     ],
     "question": "Does LoRA require updating the base weights during adapter training?",
@@ -250,6 +282,22 @@
       "LoRA freezes the base parameters while optimizing the named adapter parameters. Verify parameter ownership and actual before/after deltas. Frozen base storage does not imply unchanged behavior or retained capability.",
       "With zero B and nonzero A, the B gradient can be nonzero while A initially receives zero gradient. Inspect both adapter gradients.",
       "Adapters can alter behavior even when the base weights are frozen. Test retention and task quality rather than inferring them from frozen storage."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "Frozen base matrix, trained low-rank factors, rank, scaling metadata, and a held-out input batch."
+      ],
+      "outputs": [
+        "Reloaded factors and predictions from merged and adapter forms."
+      ],
+      "invariants": [
+        "The base weights stay frozen; metadata reproduces the same scale after save and reload."
+      ],
+      "hints": [
+        "Store rank and alpha with factor arrays.",
+        "Evaluate both forms on new inputs after loading."
+      ],
+      "code": "import jax.numpy as jnp\nimport numpy as np\n\ndef roundtrip_lora_adapter(base, a, b, alpha, heldout_x, path):\n    # TODO: save adapter metadata, reload it, and compare merged with unmerged predictions.\n    raise NotImplementedError"
+    }
   }
 }

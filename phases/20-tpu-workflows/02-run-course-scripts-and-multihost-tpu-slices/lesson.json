@@ -106,7 +106,23 @@
         "prompt": "List the slice names in `SLICE_CATALOG` that require `--worker=all` (`multi_host == True`).",
         "hint": "Filter by `s['multi_host']`.",
         "solution": "# Filter multi-host slices from the catalog (Foundations)\npod_slices = [s[\"slice\"] for s in SLICE_CATALOG if s[\"multi_host\"]]\nprint(\"Multi-host Pod slices:\", pod_slices)\n# Assert invariant `pod_slices == [\"v5litepod-16\"` holds\nassert pod_slices == [\"v5litepod-16\", \"v6e-16\"]",
-        "explanation": "Both 16-chip slices span 4 hosts (`4` chips per host) and therefore require multi-host coordination."
+        "explanation": "Both 16-chip slices span 4 hosts (`4` chips per host) and therefore require multi-host coordination.",
+        "learnerStarter": {
+          "inputs": [
+            "A slice catalog whose entries include the multi_host flag."
+          ],
+          "outputs": [
+            "Names of slices that require launching every worker."
+          ],
+          "invariants": [
+            "Only entries explicitly marked multi_host are included."
+          ],
+          "hints": [
+            "Filter by the boolean flag rather than slice-name patterns.",
+            "A catalog result does not demonstrate that a multi-host job ran."
+          ],
+          "code": "import jax.numpy as jnp\nimport numpy as np\n\ndef list_multihost_slices(slice_catalog):\n    # TODO: return slice names with the explicit multi_host flag set.\n    raise NotImplementedError"
+        }
       },
       {
         "title": "Compute per-host vs global batch size on a 4-host Pod slice",
@@ -114,7 +130,23 @@
         "prompt": "If each TPU chip processes a microbatch of \\(8\\) sequences on `v5litepod-16` (`4` hosts, `4` chips/host), compute the per-host batch size and the global batch size per step.",
         "hint": "Multiply `8 * chips_per_host` and `8 * global_chips`.",
         "solution": "microbatch_per_chip = 8\nper_host_batch = microbatch_per_chip * 4\nglobal_batch = microbatch_per_chip * 16\nprint(\"Per-host batch:\", per_host_batch, \"Global batch:\", global_batch)\n# Assert invariant `per_host_batch == 32 and global_batch == 128` holds\nassert per_host_batch == 32 and global_batch == 128",
-        "explanation": "Each host feeds its 4 local chips (`32` sequences per host), yielding a synchronized global batch of `128` sequences across the 16-chip mesh."
+        "explanation": "Each host feeds its 4 local chips (`32` sequences per host), yielding a synchronized global batch of `128` sequences across the 16-chip mesh.",
+        "learnerStarter": {
+          "inputs": [
+            "Four hosts, four chips per host, and a microbatch of eight sequences per chip."
+          ],
+          "outputs": [
+            "Per-host and global sequences processed per step."
+          ],
+          "invariants": [
+            "Global batch equals per-host batch times host count; each chip contributes one microbatch."
+          ],
+          "hints": [
+            "Multiply by chips per host before multiplying by hosts.",
+            "State that these are arithmetic counts, not measured throughput."
+          ],
+          "code": "import jax.numpy as jnp\nimport numpy as np\n\ndef batch_sizes_per_step(hosts, chips_per_host, microbatch_per_chip):\n    # TODO: return per-host and global sequence counts for one step.\n    raise NotImplementedError"
+        }
       }
     ],
     "question": "You launch an ordinary TPU-VM SSH command on worker zero of a multi-host slice, without another launcher. What can happen?",
@@ -156,7 +188,23 @@
       "An SSH command does not automatically launch Python on every worker. Use an explicit per-host launcher with matching configuration.",
       "An explicit launcher must start every participating process with compatible configuration. --worker=all is one Cloud TPU API method; other orchestrators can do the same job. Initialization, data ownership and collected worker receipts still require separate checks.",
       "Omitting participating workers cannot accelerate a collective that requires them. It can leave distributed initialization or communication waiting."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "The reviewed script identifier distributed-02, default classification, and a four-host CPU-only request."
+      ],
+      "outputs": [
+        "Commands for the reviewed CPU route and ValueError checks for unsafe TPU routes."
+      ],
+      "invariants": [
+        "A CPU-only script is routed to CPU; unreviewed or incompatible multi-host requests fail closed."
+      ],
+      "hints": [
+        "Use the public command builder for every case.",
+        "Do not infer distributed qualification from a host-count field."
+      ],
+      "code": "import jax.numpy as jnp\nimport numpy as np\n\ndef audit_script_routes(build_tpu_experiment_commands):\n    # TODO: build the reviewed CPU route and capture both expected route rejections.\n    raise NotImplementedError"
+    }
   },
   "title": "Review scripts before TPU staging",
   "objective": "Classify the exact program before staging: keep `distributed-02` on CPU and generate a TPU launch only for a reviewed target whose backend, pinned dependencies, topology, and data ownership are explicit. Distinguish multi-host discovery from a qualified distributed update."

@@ -79,7 +79,26 @@
         "prompt": "Fit a standardizer to \\([[1, 5]\\), \\([3, 5]\\), \\([5, 5]]\\). Check the second training column and transform the new row \\([7, 6]\\). Explain why its second output is \\(1\\) rather than zero.",
         "hint": "Fit uses scale \\(1\\) for a constant training feature. Applying statistics does not re-fit them.",
         "solution": "# Test the constant-feature policy (Practice)\nconstant_data = jnp.array([[1., 5.], [3., 5.], [5., 5.]])\nconstant_statistics = fit_standardizer(constant_data)\nconstant_transformed = apply_standardizer(constant_data, constant_statistics)\nassert jnp.all(jnp.isfinite(constant_transformed))\nassert jnp.allclose(constant_transformed[:, 1], 0.)\nassert jnp.allclose(apply_standardizer(jnp.array([[7., 6.]]), constant_statistics)[0, 1], 1.)",
-        "explanation": "The training feature is constant but the new value differs from its fitted mean. The transformation retains that difference under the documented policy."
+        "explanation": "The training feature is constant but the new value differs from its fitted mean. The transformation retains that difference under the documented policy.",
+        "learnerStarter": {
+          "inputs": [
+            "Training data with a constant second feature.",
+            "A new row whose second feature differs.",
+            "The standardizer fit/apply functions."
+          ],
+          "outputs": [
+            "Transformed training data and transformed new row."
+          ],
+          "invariants": [
+            "A constant training feature follows the declared unit-scale policy.",
+            "Applying the transform does not refit statistics."
+          ],
+          "hints": [
+            "Inspect the fitted training scale.",
+            "Apply the same saved statistics to the new row."
+          ],
+          "code": "import jax.numpy as jnp\n\ndef check_constant_feature(training, new_row, fit_standardizer, apply_standardizer):\n    # TODO: fit once and transform training and new data\n    statistics = ...\n    training_result = ...\n    new_result = ...\n    return statistics, training_result, new_result\n"
+        }
       },
       {
         "title": "Detect accidental batch-dependent preprocessing",
@@ -87,7 +106,25 @@
         "prompt": "Transform two new rows together and separately using training statistics. The outputs should agree. Then show that re-fitting on the new batch changes the outputs.",
         "hint": "The application function should depend on each row and fixed statistics, not on which other rows share the request.",
         "solution": "# Detect accidental batch-dependent preprocessing (Challenge)\nnew_rows = jnp.array([[7., 22.], [9., 26.]])\ntogether = apply_standardizer(new_rows, statistics)\nseparately = jnp.concatenate([apply_standardizer(new_rows[i:i+1], statistics) for i in range(2)])\nassert jnp.allclose(together, separately)\nrefitted = apply_standardizer(new_rows, fit_standardizer(new_rows))\nassert not jnp.allclose(together, refitted)",
-        "explanation": "This consistency test expresses an inference boundary: a fixed preprocessing transform should not change a row because a different neighbor was batched with it."
+        "explanation": "This consistency test expresses an inference boundary: a fixed preprocessing transform should not change a row because a different neighbor was batched with it.",
+        "learnerStarter": {
+          "inputs": [
+            "Statistics fitted on the original training matrix.",
+            "Two new rows transformed jointly and one at a time."
+          ],
+          "outputs": [
+            "A fixed-statistics comparison and a separate refit comparison."
+          ],
+          "invariants": [
+            "A row’s transform is independent of its request-batch companions.",
+            "Refitting on new rows is a distinct operation."
+          ],
+          "hints": [
+            "Reuse identical training statistics for both application paths.",
+            "Keep the newly fitted result separately labeled."
+          ],
+          "code": "import jax.numpy as jnp\n\ndef audit_batch_independence(new_rows, statistics, apply_standardizer, fit_standardizer):\n    # TODO: compare joint and separate application, then compare a refit\n    together = ...\n    separately = ...\n    refitted = ...\n    return together, separately, refitted\n"
+        }
       }
     ],
     "diagnosis": "If a statistic has the wrong length, inspect the reduced axis. If normalized values become NaN, check zero scales and finite inputs before increasing epsilon. If a model behaves differently across inference batch sizes, inspect whether preprocessing re-fits statistics on each batch. If JAX and NumPy differ, align dtype, axis, and degrees-of-freedom choices before treating the difference as a library bug.",
@@ -140,6 +177,26 @@
       "A row average reduces axis one. Here axis zero combines observations at the same feature position. Trace the column sums by hand.",
       "Axis \\(0\\) is the observation axis. Reducing it leaves one statistic for each feature column.",
       "The number two comes from this input having two feature columns. Add a third column and the same reduction returns three means."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "A training matrix with observations in rows and features in columns.",
+        "A positive epsilon for scale stability."
+      ],
+      "outputs": [
+        "Fitted feature statistics and standardized training rows."
+      ],
+      "invariants": [
+        "Fit statistics feature-wise using training data only.",
+        "Reuse the same statistics for later rows.",
+        "Constant features follow the lesson’s stated scale policy."
+      ],
+      "hints": [
+        "Keep the feature axis during reductions.",
+        "Center before scaling.",
+        "Separate fitting statistics from applying them."
+      ],
+      "code": "import jax.numpy as jnp\n\ndef fit_and_standardize(training, epsilon=1e-6):\n    # TODO: compute feature statistics and standardized values\n    center = ...\n    scale = ...\n    transformed = ...\n    return transformed, center, scale\n"
+    }
   }
 }

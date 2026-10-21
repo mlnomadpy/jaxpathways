@@ -1,6 +1,6 @@
 import {loadLessonEvidence,restoreNotebookOutputs} from './figure-artifacts.mjs';
 import {portablePath} from './portable-path.mjs';
-import {lessonMarkdown,lessonScript,lessonCells} from './lesson-artifacts.mjs';
+import {lessonMarkdown,lessonScript,lessonCells,learnerNotebookCells,learnerScript,learnerStarterCoverage,learnerStarterInventory,readyLearnerArtifactPaths} from './lesson-artifacts.mjs';
 import {createHash} from 'node:crypto';
 import {readFileSync,writeFileSync,mkdirSync,readdirSync} from 'node:fs';
 const root=new URL('../',import.meta.url);
@@ -18,6 +18,9 @@ for(const phase of course.phases)for(const lesson of phase.lessons)if(lesson.sta
   lesson.minutes=authored.minutes;lesson.content=authored.content;
   lesson.contentHash=createHash('sha256').update(JSON.stringify(authored.content)).digest('hex');
   loadLessonEvidence(lesson);
+  // Derive learner-only companion paths during rendering so canonical course
+  // registry entries do not need a second, hand-maintained artifact inventory.
+  Object.assign(lesson.artifacts,readyLearnerArtifactPaths(lesson));
 }
 writeFileSync(new URL('public/curriculum.json',root),JSON.stringify(course,null,2)+'\n');
 const navigationCourse = {
@@ -83,12 +86,30 @@ for(const phase of course.phases)for(const lesson of phase.lessons){
   const generatedCells=restoreNotebookOutputs(lesson,cells.map(([t,s],i)=>cell(t,s,i)));
   const executed=generatedCells.filter(c=>c.cell_type==='code').every(c=>c.execution_count!==null);
   writeFileSync(new URL('public/'+lesson.artifacts.notebook,root),JSON.stringify({nbformat:4,nbformat_minor:5,metadata:{kernelspec:{display_name:'Python 3',language:'python',name:'python3'},...(executed?{course_execution:{contentHash:lesson.contentHash,executedAt:lesson.execution.executedAt,environment:lesson.execution.environment,scope:'Recorded instructor reference run; rerun all cells to recompute.'}}:{})},cells:generatedCells},null,2)+'\n');
+  if(lesson.artifacts.learnerNotebook&&lesson.artifacts.learnerScript){
+    const learnerCoverage=learnerStarterCoverage(lesson);
+    const learnerCells=learnerNotebookCells(lesson).map(([type,source],i)=>({
+      cell_type:type,id:`learner-cell-${i}`,metadata:{},source:source.split(/(?<=\n)/),
+      ...(type==='code'?{execution_count:null,outputs:[]}:{}),
+    }));
+    writeFileSync(new URL('public/'+lesson.artifacts.learnerNotebook,root),JSON.stringify({
+      nbformat:4,nbformat_minor:5,
+      metadata:{kernelspec:{display_name:'Python 3',language:'python',name:'python3'},
+        course_learner_starter:{coverage:learnerCoverage,scope:'Authored learner-only contracts and TODO scaffolds; no worked reference execution.'}},
+      cells:learnerCells,
+    },null,2)+'\n');
+    writeFileSync(new URL('public/'+lesson.artifacts.learnerScript,root),learnerScript(lesson));
+  }
 }
 
   // Companion source files and tool-readable resources share the same generated content.
 for(const phase of course.phases)for(const lesson of phase.lessons){
   if(lesson.status!=='authored')continue;
   for(const [local,source] of [['script','scriptSource'],['notebook','notebookSource']])writeFileSync(new URL(lesson.artifacts[source],root),readFileSync(new URL('public/'+lesson.artifacts[local],root)));
+  if(lesson.artifacts.learnerScript&&lesson.artifacts.learnerNotebook){
+    writeFileSync(new URL(lesson.artifacts.learnerScriptSource,root),readFileSync(new URL('public/'+lesson.artifacts.learnerScript,root)));
+    writeFileSync(new URL(lesson.artifacts.learnerNotebookSource,root),readFileSync(new URL('public/'+lesson.artifacts.learnerNotebook,root)));
+  }
   const c=lesson.content;
   writeFileSync(new URL(lesson.artifacts.quizSource,root),JSON.stringify({schemaVersion:1,lessonId:lesson.id,questions:[{stage:'post',question:c.question,options:c.options,correct:c.answer,explanation:c.explanation,optionFeedback:c.optionFeedback}]},null,2)+'\n');
   const beginnerWorkspace = lesson.content?.setupBundle;
@@ -101,15 +122,16 @@ for(const phase of course.phases)for(const lesson of phase.lessons){
   const evidence=`# Evidence: ${lesson.title}\n\nCopy this template into your own portfolio and fill it after running your modified exercise.\n\n## Evidence required\n\n${lesson.evidence}\n\n- Command: ${evidenceCommand}\n- Working directory: ${evidenceFolder}\n- Python / JAX / NumPy versions: \n- Hardware and device: \n- My prediction before running: \n- My change to the exercise: \n- Exit code and meaningful output: \n- Why the result supports or contradicts my prediction: \n- Checkpoint result: \n- Artifact link or saved filename: \n- Portfolio status: saved in local workspace\n`;
   writeFileSync(new URL(lesson.artifacts.evidenceSource,root),evidence);
   writeFileSync(new URL('public/'+lesson.artifacts.evidence,root),evidence);
-  writeFileSync(new URL(lesson.path+'/README.md',root),`# ${lesson.title}\n\n[Read](docs/en.md) · [Code](code/main.py) · [Notebook](notebooks/exercise.ipynb) · [Quiz](quiz.json) · [Evidence template](outputs/evidence.md)\n\nRun from the repository root: \`python3 ${lesson.artifacts.scriptSource}\`\n\nEdit lesson.json to update this lesson, then run \`npm run build\`. Other files in this bundle are generated.\n`);
+  writeFileSync(new URL(lesson.path+'/README.md',root),`# ${lesson.title}\n\n[Read](docs/en.md)${lesson.artifacts.learnerNotebook ? ' · [Practice notebook](notebooks/learner.ipynb) · [Practice script](code/learner.py)' : ''} · [Worked examples](code/main.py) · [Worked reference notebook](notebooks/exercise.ipynb) · [Quiz](quiz.json) · [Evidence template](outputs/evidence.md)\n\nRun the worked reference from the repository root: \`python3 ${lesson.artifacts.scriptSource}\`\n\nEdit lesson.json to update this lesson, then run \`npm run build\`. Other files in this bundle are generated.\n`);
 }
 const json=(path,value)=>{mkdirSync(new URL(path.substring(0,path.lastIndexOf('/')+1),root),{recursive:true});writeFileSync(new URL(path,root),JSON.stringify(value,null,2)+'\n');};
+json('public/api/v1/learner-starters.json',{schemaVersion:1,...learnerStarterInventory(course.phases.flatMap(phase=>phase.lessons))});
 const catalog={schemaVersion:1,title:course.title,phases:course.phases.map(({lessons,...phase})=>({...phase,lessons:lessons.map(({content:_content,...lesson})=>({...lesson,url:`lesson.html?lesson=${lesson.id}`}))}))};
 json('public/api/v1/catalog.json',catalog);
 json('public/api/v1/pathways.json',{schemaVersion:1,pathways:course.pathways});
 json('public/api/v1/roles.json',{schemaVersion:1,roles:course.roles,domains:course.domains});
 for(const phase of course.phases)for(const lesson of phase.lessons)json(`public/api/v1/lessons/${lesson.id}.json`,{schemaVersion:1,phaseId:phase.id,...lesson});
-const llms=`# JAX Pathways\n\nHands-on JAX, Flax NNX, Optax, and Cloud TPU engineering course.\n\n- [Catalog](api/v1/catalog.json)\n- [Pathways](api/v1/pathways.json)\n- [Roles](api/v1/roles.json)\n- [Material maturity and contributions](api/v1/content-status.json)\n- [API contract](openapi.json)\n\n## Available lessons\n\n${course.phases.flatMap(p=>p.lessons).filter(l=>l.status==='authored').map(l=>`- [${l.title}](lesson.html?lesson=${l.id}) · [Source](api/v1/lessons/${l.id}.json) · ${l.path}`).join('\n')}\n\n## Open Engineering TODOs\n\n- Add runnable starter/solution harnesses for the 10 planned large-model and retrieval capstones in projects/.\n- Retain scoped physical target evidence separately from CPU reference checks; add fresh-process and worker-loss multi-host recovery qualification.\n`;
+const llms=`# JAX Pathways\n\nHands-on JAX, Flax NNX, Optax, and Cloud TPU engineering course.\n\n- [Catalog](api/v1/catalog.json)\n- [Pathways](api/v1/pathways.json)\n- [Roles](api/v1/roles.json)\n- [Learner starter coverage](api/v1/learner-starters.json)\n- [Material maturity and contributions](api/v1/content-status.json)\n- [API contract](openapi.json)\n\n## Available lessons\n\n${course.phases.flatMap(p=>p.lessons).filter(l=>l.status==='authored').map(l=>`- [${l.title}](lesson.html?lesson=${l.id}) · [Source](api/v1/lessons/${l.id}.json) · ${l.path}`).join('\n')}\n\n## Open Engineering TODOs\n\n- Add runnable starter/solution harnesses for the 10 planned large-model and retrieval capstones in projects/.\n- Retain scoped physical target evidence separately from CPU reference checks; add fresh-process and worker-loss multi-host recovery qualification.\n`;
 writeFileSync(new URL('public/llms.txt',root),llms);
 
 const projects=JSON.parse(readFileSync(new URL('curriculum/projects.json',root)));

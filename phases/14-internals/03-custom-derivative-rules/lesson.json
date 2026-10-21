@@ -74,7 +74,24 @@
         "prompt": "Add a common constant of \\(1000\\) to every logit. Verify the value shift, unchanged gradient, and Hessian row sums.",
         "hint": "Use stable references and avoid direct exponentiation of the shifted logits.",
         "solution": "# Check common-shift invariance of curvature (Practice): The common shift leaves probabilities unchanged.\nshift=1000.0\nnp.testing.assert_allclose(stable_logsumexp(x+shift)-stable_logsumexp(x),shift,rtol=1e-12)\nnp.testing.assert_allclose(jax.grad(stable_logsumexp)(x+shift),jax.grad(stable_logsumexp)(x),rtol=1e-12)\nhess=jax.jacrev(jax.grad(stable_logsumexp))(x+shift)\nnp.testing.assert_allclose(jnp.sum(hess,axis=1),0.,atol=1e-12)\nprint(\"Stable shift invariance and zero common-direction curvature verified\")",
-        "explanation": "The common shift leaves probabilities unchanged. Zero curvature in that direction is a structural identity, not a numerical accident."
+        "explanation": "The common shift leaves probabilities unchanged. Zero curvature in that direction is a structural identity, not a numerical accident.",
+        "learnerStarter": {
+          "inputs": [
+            "A stable log-sum-exp custom derivative, a logit vector, and a common shift of 1000."
+          ],
+          "outputs": [
+            "Value shift, gradient comparison, and Hessian row sums before/after shift."
+          ],
+          "invariants": [
+            "The value increases by the common shift.",
+            "Gradient stays invariant and Hessian has near-zero row sums."
+          ],
+          "hints": [
+            "Use centered logits for numerical stability.",
+            "Compute Hessian row sums from derivatives, not from a stored expected answer."
+          ],
+          "code": "import jax\nimport jax.numpy as jnp\n\ndef check_shift_curvature(logsumexp, logits, shift):\n    # TODO: compare values, gradients, and Hessian row sums under a common shift.\n    raise NotImplementedError(\"Check shift invariance of first and second derivatives\")"
+        }
       },
       {
         "title": "Audit a nonlinear seed rule before registering it",
@@ -82,7 +99,24 @@
         "prompt": "A proposed JVP returns \\(\\sigma(x)\\dot{x}^2\\). Show explicitly why it cannot be the derivative map, then repair it and test a mixed linear combination.",
         "hint": "At fixed x, compare the response to twice a tangent with twice the response.",
         "solution": "# Audit a nonlinear seed rule before registering it (Challenge)\ncoefficient=float(jax.nn.sigmoid(0.4))\nbad=lambda tangent:coefficient*tangent*tangent\nassert not np.isclose(bad(2.0),2*bad(1.0))\ngood=lambda tangent:jax.jvp(stable_softplus,(jnp.array(0.4),),(jnp.array(tangent),))[1]\nnp.testing.assert_allclose(good(2*.7-.3),2*good(.7)-good(.3),rtol=1e-12)\nprint(\"Nonlinear seed rule rejected by its contract; repaired JVP is linear\")",
-        "explanation": "Linearity follows from the definition of a derivative at a fixed primal point. API acceptance is not a substitute for this mathematical check."
+        "explanation": "Linearity follows from the definition of a derivative at a fixed primal point. API acceptance is not a substitute for this mathematical check.",
+        "learnerStarter": {
+          "inputs": [
+            "A proposed JVP rule returning sigmoid(x)*dx**2 and a repaired tangent-linear rule."
+          ],
+          "outputs": [
+            "A mixed-seed counterexample to additivity and a repaired-rule check."
+          ],
+          "invariants": [
+            "A derivative is linear in the tangent at fixed primal input.",
+            "The repaired rule passes mixed linear-combination checks."
+          ],
+          "hints": [
+            "Compare the rule at dx1, dx2, and dx1+dx2.",
+            "Keep the primal input fixed in each additivity test."
+          ],
+          "code": "import jax.numpy as jnp\n\ndef audit_jvp_rule(primal, dx1, dx2):\n    # TODO: expose nonlinearity in the proposed seed rule, then repair it.\n    raise NotImplementedError(\"Require additivity and homogeneity in every tangent seed\")"
+        }
       }
     ],
     "diagnosis": "If first derivatives pass but second derivatives fail, inspect whether residuals or derivative coefficients have been detached. If extreme values are nonfinite, inspect both primal and derivative expressions. If a custom VJP direct JVP fails, treat that as an interface boundary. If a plausible custom gradient differs from finite differences, do not relabel it exact without a valid derivation.",
@@ -154,6 +188,23 @@
       "Linearity is necessary, but a wrong constant multiple of the true derivative is also linear and finite. Independent comparisons establish the missing mathematical agreement.",
       "A bigger batch does not supply an independent derivative reference. Compare the custom rule against the intended primal function.",
       "Many wrong derivative rules are linear and finite. Test against an analytic derivative or a carefully chosen finite difference."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "Logits (-3, 0.2, 2, 5), explicit scalar output cotangent, and two directions."
+      ],
+      "outputs": [
+        "Custom-gradient result, stable softmax reference, and centered directional differences."
+      ],
+      "invariants": [
+        "The custom gradient scales by the explicit cotangent.",
+        "Softmax reference is stable under large logits."
+      ],
+      "hints": [
+        "Subtract the maximum before exponentiating.",
+        "Use the same cotangent for autodiff and independent directional checks."
+      ],
+      "code": "import numpy as np\nimport jax\nimport jax.numpy as jnp\n\ndef check_custom_logsumexp(logits, cotangent, directions, epsilon):\n    # TODO: compare custom VJP with stable softmax and directional differences.\n    raise NotImplementedError(\"Audit the explicit cotangent and two independent directions\")"
+    }
   }
 }

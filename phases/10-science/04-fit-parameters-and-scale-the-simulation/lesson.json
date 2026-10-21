@@ -77,7 +77,24 @@
         "hint": "At fixed rate, predictions are amplitude multiplied by a known decay vector.",
         "solution": "# Infer a different physical quantity (Practice): The inverse problem becomes linear when rate is fixed.\nbasis=np.exp(-0.7*np.asarray(times))\nunknown_initial=2.8\nmeasured=unknown_initial*basis\nestimate=float(np.dot(basis,measured)/np.dot(basis,basis))\nassert abs(estimate-unknown_initial)<1e-12\ndef amplitude_loss(amplitude):\n    return jnp.mean((amplitude*jnp.asarray(basis)-jnp.asarray(measured))**2)\nassert abs(float(jax.grad(amplitude_loss)(estimate)))<1e-12\nprint(\"Recovered initial amplitude:\",estimate)",
         "explanation": "The inverse problem becomes linear when rate is fixed. Jointly unknown amplitude and rate require enough distinct observation times to distinguish their effects.",
-        "title": "Infer a different physical quantity"
+        "title": "Infer a different physical quantity",
+        "learnerStarter": {
+          "inputs": [
+            "A fixed rate, observation times, and a trajectory with unknown initial amplitude."
+          ],
+          "outputs": [
+            "Least-squares amplitude estimate and NumPy closed-form estimate."
+          ],
+          "invariants": [
+            "The fitted amplitude uses training observations only.",
+            "The closed form matches a one-parameter linear least-squares solution."
+          ],
+          "hints": [
+            "Factor the unit-amplitude trajectory from the unknown scalar.",
+            "Use dot(b,y)/dot(b,b) for the independent closed form."
+          ],
+          "code": "import numpy as np\n\ndef estimate_initial_amplitude(rate, times, observations):\n    # TODO: solve the scalar least-squares problem and verify its closed form.\n    raise NotImplementedError(\"Estimate amplitude as a linear parameter\")"
+        }
       },
       {
         "difficulty": "Challenge",
@@ -85,7 +102,25 @@
         "hint": "Search a dense one-dimensional grid using the analytic forward model and report the minimizing rate and residual scale.",
         "solution": "# Compare noisy inference with an independent search (Challenge): A noisy optimum need not equal the generating parameter exactly.\nnoisy=np.asarray(observations)+0.005*np.random.default_rng(19).normal(size=observations.shape)\ncandidates=np.linspace(0.65,0.75,1001)\n# Transfer the device result to the host for an independent NumPy comparison.\nreference_predictions=np.asarray(train_initials)[None,:,None]*np.exp(-candidates[:,None,None]*np.asarray(times)[None,None,:])\n# Reduce along axis=(1 to compute `reference_losses`.\nreference_losses=np.mean((reference_predictions-noisy[None,:,:])**2,axis=(1,2))\nbest=float(candidates[np.argmin(reference_losses)])\nassert abs(best-0.7)<0.01\nassert float(np.min(reference_losses))>0\nprint(\"Noisy grid-search estimate:\",best,\"residual MSE:\",float(np.min(reference_losses)))",
         "explanation": "A noisy optimum need not equal the generating parameter exactly. One fixed-seed recovery check is not a calibrated uncertainty interval; repeated datasets or a justified statistical model are needed.",
-        "title": "Compare noisy inference with an independent search"
+        "title": "Compare noisy inference with an independent search",
+        "learnerStarter": {
+          "inputs": [
+            "A deterministic noisy trajectory generated with seed 19, training times, and a candidate rate grid."
+          ],
+          "outputs": [
+            "Training residual per candidate and selected rate.",
+            "Held-out prediction error reported after selection."
+          ],
+          "invariants": [
+            "Selection uses training labels only.",
+            "The search is independent of the JAX autodiff fit."
+          ],
+          "hints": [
+            "Generate noise from a local seeded generator.",
+            "Keep held-out values out of the candidate scoring loop."
+          ],
+          "code": "import numpy as np\n\ndef grid_search_noisy_rate(train_times, train_values, candidates, initial, held_out_times, held_out_values):\n    # TODO: score candidates on training data, select, then report held-out error.\n    raise NotImplementedError(\"Keep candidate selection independent of held-out labels\")"
+        }
       }
     ],
     "diagnosis": "If the training loss is tiny but the parameter changes with step size, suspect solver bias. If every candidate has zero derivative, inspect observation times and parameter dependence before adjusting the optimizer. If timing results are implausibly tiny, confirm synchronization and warmup. If test performance drove your learning-rate choice, the test set is no longer untouched.",
@@ -159,6 +194,26 @@
       "A larger accelerator batch repeats the same uninformative time-zero observations. Add measurements that depend on the unknown rate.",
       "A smaller integration step cannot make a time-zero observation informative about dynamics. Inspect parameter sensitivity of the data.",
       "The initial state is independent of rate. No optimizer can recover a rate from data whose predictions do not depend on it."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "Training initial conditions and times with analytically generated observations at true rate 0.4.",
+        "A rate-optimization start of 0.9 and held-out times/initial conditions."
+      ],
+      "outputs": [
+        "Recovered rate from training observations.",
+        "Predictions at held-out times and initial conditions using the fitted rate."
+      ],
+      "invariants": [
+        "The rate parameter starts at 0.9 and converges toward the generating rate 0.4.",
+        "Held-out labels are not used to choose the fitted parameter.",
+        "Predictions use the new fitted rate and corresponding initial conditions."
+      ],
+      "hints": [
+        "Generate training observations from each initial condition and the shared decay rate.",
+        "Optimize the rate using training observations only; evaluate held-out conditions afterward."
+      ],
+      "code": "import jax\nimport jax.numpy as jnp\n\ndef fit_changed_rate(train_times, train_initials, train_values, held_out_times, held_out_initials, initial_rate=0.9):\n    # TODO: fit the shared rate from training trajectories and predict held-out ones.\n    raise NotImplementedError(\"Fit from training trajectories and preserve held-out separation\")"
+    }
   }
 }

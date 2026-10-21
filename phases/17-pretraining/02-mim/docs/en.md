@@ -315,7 +315,7 @@ visual_data={"panels":[*visual_data.get("panels",[visual_data]),extra_panel]}
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:34:27.710977+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:11:16.467187+00:00. JAX 0.9.2.
 
 ```text
 Masked pixel MSE initial/final/held amplitudes: 0.5538085699081421 0.0016928859986364841 0.0011766081443056464
@@ -379,20 +379,28 @@ Verify the bottom-right patch against a direct slice and explain why a whole-arr
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `array.reshape(new_shape)` — Reorganizes tensor axes without changing the total element count (`array.size`).
+**Inputs:**
+- A rectangular image batch, patch size, and a selected bottom-right patch index.
 
-**Step-by-step implementation plan:**
-1. Exercise solution
+**Outputs:**
+- Patch tokens and the original-space bottom-right patch verified by direct slicing.
+
+**Invariants to check:**
+- Patch ordering preserves row/column identity; reconstruction never receives hidden target pixels as encoder inputs.
+
+**Hints:**
+- Track the reshape and transpose axes before flattening.
+- Use direct slicing as an independent oracle.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-np.testing.assert_array_equal(
-    patches[2, 3], np.asarray(images[2, 2:, 2:, :]).reshape(-1)
-)
-print('Bottom-right patch order verified.')
+import jax.numpy as jnp
+import numpy as np
+
+def check_bottom_right_patch(images, patch_size):
+    # TODO: patchify the image and compare the final patch with a direct spatial slice.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -421,18 +429,27 @@ Measure the shortcut, then inspect which function inputs contain hidden pixels.
 
 ### How to write: Expose the leakage shortcut — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Check tensor shape invariant: `features.shape[1] == 9`
+**Inputs:**
+- A visible-only prediction function and parameters, clean patch targets, hidden-patch mask, and patch mask token.
+
+**Outputs:**
+- Hidden-region reconstruction errors for the target-copy shortcut and visible-only model, plus a leakage diagnosis.
+
+**Invariants to check:**
+- The shortcut has zero error because it receives clean targets; model evidence must come from predictions computed only from visible inputs.
+
+**Hints:**
+- Call the visible-only model using corrupted inputs and its parameters.
+- Measure both predictions on the same hidden patches.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Expose the leakage shortcut (Transfer)
-shortcut = ...  # TODO: compute shortcut
-assert float(masked_mse(shortcut, patches, hidden))  # TODO: complete assertion check
-# Check tensor shape invariant: `features.shape[1] == 9`
-assert features.shape[1]  # TODO: complete assertion check
-print('The zero-loss shortcut receives hidden pixels; the real features contain only eight visible pixels and a bias.')
+import jax.numpy as jnp
+
+def audit_target_leakage(predict_visible, params, clean_patches, hidden, mask_token):
+    # TODO: compare the target-copy shortcut with predictions from the visible-only path.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -464,37 +481,28 @@ Use explicit image slices inside the oracle; do not copy the reshape/transpose i
 
 ### How to write: Audit every patch of a rectangular color image — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `array.reshape(new_shape)` — Reorganizes tensor axes without changing the total element count (`array.size`).
+**Inputs:**
+- A patchify function, visible encoder and parameters, two numbered images of shape 4 by 6 by 3, patch size, and hidden-patch indices.
 
-**Step-by-step implementation plan:**
-1. Audit every patch of a rectangular color image (Challenge)
+**Outputs:**
+- Every patch checked against nested slicing and visible features shown unchanged after hidden pixels are altered.
+
+**Invariants to check:**
+- Patch order matches image coordinates; the encoder receives only visible patches, so changing hidden pixels cannot alter its features.
+
+**Hints:**
+- Build the patch oracle with explicit row and column loops.
+- Apply the same hidden mask and encoder to both images, changing hidden pixels only.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Audit every patch of a rectangular color image (Challenge)
-numbered = np.arange(...)  # TODO: compute numbered
-oracle = np.stack(...)  # TODO: compute oracle
-    [
-        np.stack(
-            [
-                image[row : row + 2, col : col + 2, :].reshape(-1)
-                for row in range(0, 4, 2)
-                for col in range(0, 6, 2)
-            ]
-        )
-        for image in numbered
-    ]
-)
-np.testing.assert_array_equal(patchify(jnp.asarray(numbered)), oracle)
-changed_images = ...  # TODO: compute changed_images
-changed_patches = patchify(...)  # TODO: compute changed_patches
-np.testing.assert_array_equal(changed_patches[:, [0, 3], :], visible)
-assert not np.array_equal(  # TODO: complete assertion check
-    np.asarray(changed_patches[:, [1, 2], :]), np.asarray(patches[:, [1, 2], :])
-)
-print('All rectangular RGB patches agree; hidden-pixel intervention preserves visible features.')
+import jax.numpy as jnp
+import numpy as np
+
+def audit_rectangular_patch_layout(patchify, encode_visible, params, images, patch_size, hidden):
+    # TODO: compare all patches with a slicing oracle and test hidden-pixel isolation through the encoder.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

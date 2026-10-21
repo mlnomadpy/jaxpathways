@@ -280,7 +280,7 @@ visual_data={"panels":[*visual_data.get("panels",[visual_data]),extra_panel]}
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:34:33.194040+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:11:23.263569+00:00. JAX 0.9.2.
 
 ```text
 Paired contrastive initial/final: 0.564157247543335 0.013556718826293945 ; all four nearest pairs correct
@@ -340,16 +340,28 @@ Permute only the right-hand embeddings after training and demonstrate the effect
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Exercise solution
+**Inputs:**
+- Left and right embeddings, a trained projection, and pair IDs.
+
+**Outputs:**
+- The original and right-permuted contrastive losses with a pair-identity diagnosis.
+
+**Invariants to check:**
+- Only the intended paired entries are positives; a permutation changes identity without changing vector values.
+
+**Hints:**
+- Apply the same projection before comparing both arrangements.
+- Keep the right-side permutation explicit.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-wrong_pair_loss = float(...)  # TODO: compute wrong_pair_loss
-assert wrong_pair_loss  # TODO: complete assertion check
-print('Incorrect pair mapping loss:', wrong_pair_loss)
+import jax.numpy as jnp
+import numpy as np
+
+def compare_pairing_losses(left, right, projection, permutation):
+    # TODO: measure the objective before and after permuting right-side pair identity.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -377,23 +389,28 @@ Each original candidate appears twice, but only one copy is labeled positive.
 
 ### How to write: Duplicate a source and inspect the objective — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- Four paired embeddings and a duplicated copy of each pair.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- Original and duplicated diagonal-positive losses and their difference.
+
+**Invariants to check:**
+- Duplicating candidates while retaining one diagonal positive changes the negative set.
+
+**Hints:**
+- Duplicate both sides in the same order.
+- Do not relabel the extra copies as positives.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Duplicate a source and inspect the objective (Transfer)
-duplicated = float(...)  # TODO: compute duplicated
-    paired_contrastive(jnp.tile(left @ w, (2, 1)), jnp.tile(right @ w, (2, 1)))
-)
-original = float(...)  # TODO: compute original
-np.testing.assert_allclose(duplicated - original, np.log(2), atol=1e-5)
-print('Duplicated diagonal-only penalty:', duplicated - original)
+import jax.numpy as jnp
+import numpy as np
+
+def inspect_duplicate_pair_effect(left, right, projection, temperature):
+    # TODO: compare diagonal-positive losses before and after duplicating the batch.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -426,29 +443,28 @@ Use a fresh matrix; a gradient near a trained optimum may be too small to diagno
 
 ### How to write: Check the encoder gradient through normalization — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
+**Inputs:**
+- A noncollapsed encoder weight matrix, fixed paired inputs, and two finite-difference step sizes.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- Autodiff and centered-difference estimates for one encoder weight.
+
+**Invariants to check:**
+- The tested parameter is away from a collapsed representation and both perturbations are symmetric.
+
+**Hints:**
+- Differentiate the full normalized-pair objective.
+- Report errors for each step size; finite differences have truncation and roundoff error.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Check the encoder gradient through normalization (Challenge): This checks the complete input-to-normalized-similarity chain.
-audit_w = jnp.array(...)  # TODO: compute audit_w
-objective = ...  # TODO: compute objective
-auto = float(...)  # TODO: compute auto
-for epsilon in [1e-3, 5e-4]:
-    delta = jnp.zeros_like(...)  # TODO: compute delta
-    estimate = float(...)  # TODO: compute estimate
-        (objective(audit_w + delta) - objective(audit_w - delta)) / (2 * epsilon)
-    )
-    np.testing.assert_allclose(estimate, auto, rtol = ...  # TODO: compute np.testing.assert_allclose(estimate, auto, rtol
-    print('Step / finite difference / autodiff:', epsilon, estimate, auto)
+import jax.numpy as jnp
+import numpy as np
+
+def check_encoder_gradient(weights, left, right, steps):
+    # TODO: compare one autodiff gradient with centered differences at each requested step.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

@@ -98,7 +98,23 @@
         "prompt": "Compare five requests spaced three milliseconds apart with five simultaneous requests. Use two-millisecond service and compare maximum response latency.",
         "hint": "The worker is idle between spaced requests but never idle during the burst.",
         "solution": "# Expose burst sensitivity (Transfer / diagnosis)\n_,_,smooth=simulate_queue(np.arange(5)*3.,2.)\n_,_,burst=simulate_queue(np.zeros(5),2.)\nassert smooth.max()==2. and burst.max()==10.",
-        "explanation": "An average arrival rate alone does not describe a burst or tail latency."
+        "explanation": "An average arrival rate alone does not describe a burst or tail latency.",
+        "learnerStarter": {
+          "inputs": [
+            "Compare five requests spaced three milliseconds apart with five simultaneous requests. Use two-millisecond service and compare maximum response latency."
+          ],
+          "outputs": [
+            "Two simulated response-time vectors and their maxima."
+          ],
+          "invariants": [
+            "Both cases use five arrivals and the same 2 ms service assumption."
+          ],
+          "hints": [
+            "The worker is idle between spaced requests but never idle during the burst.",
+            "Keep spaced and simultaneous arrival vectors separate."
+          ],
+          "code": "import math\n\ndef practice_expose_burst_sensitivity(spaced_arrivals_ms, simultaneous_arrivals_ms, service_ms):\n    \"\"\"Complete the expose burst sensitivity check.\"\"\"\n    # TODO: ('Simulate five requests spaced 3 ms apart and five simultaneous requests with 2 ms service.', 'Two response-time vectors and their maximum latencies.', 'Service duration is fixed at 2 ms and the two scenarios differ only in arrivals.')\n    raise NotImplementedError\n"
+        }
       },
       {
         "title": "Reject a broken timeline",
@@ -106,7 +122,23 @@
         "prompt": "Pass an out-of-order arrival vector and a zero service duration. Confirm both are rejected instead of returning a plausible chart.",
         "hint": "Public simulation inputs need finite, ordered values and positive service time.",
         "solution": "# Reject a broken timeline (Transfer / diagnosis)\nfor arrivals,duration in [([2.,1.],2.),([0.,1.],0.)]:\n    try:\n        simulate_queue(arrivals,duration)\n    except ValueError:\n        pass\n    else:\n        raise AssertionError(\"invalid timeline was accepted\")",
-        "explanation": "Validating assumptions prevents a simulation from silently supporting a false capacity story."
+        "explanation": "Validating assumptions prevents a simulation from silently supporting a false capacity story.",
+        "learnerStarter": {
+          "inputs": [
+            "Pass an out-of-order arrival vector and a zero service duration. Confirm both are rejected instead of returning a plausible chart."
+          ],
+          "outputs": [
+            "Explicit input errors for unsorted arrivals and nonpositive service."
+          ],
+          "invariants": [
+            "Queue calculation runs only for ordered arrivals and positive service duration."
+          ],
+          "hints": [
+            "Public simulation inputs need finite, ordered values and positive service time.",
+            "Validate the timeline before deriving finish times."
+          ],
+          "code": "import math\n\ndef practice_reject_a_broken_timeline(arrival_ms, service_ms):\n    \"\"\"Complete the reject a broken timeline check.\"\"\"\n    # TODO: ('Validate monotone arrival times and strictly positive service duration before queue simulation.', 'Clear errors for out-of-order arrivals and zero service time.', 'Invalid timing inputs are rejected instead of yielding a chart or capacity estimate.')\n    raise NotImplementedError\n"
+        }
       },
       {
         "title": "Measure the margin below a response deadline",
@@ -114,7 +146,23 @@
         "prompt": "For five simultaneous requests and a \\(2\\)-millisecond serial service, count responses that exceed a \\(6\\)-millisecond deadline. Explain why adding a faster model alone is not the only intervention.",
         "hint": "Compute finish minus arrival for each request. Here a response exactly at the deadline is accepted; declare that convention.",
         "solution": "# Measure the margin below a response deadline (Transfer / diagnosis): Two responses miss the deadline in this serial simulation.\n_,_,deadline_latencies=simulate_queue(np.zeros(5),2.)\nnp.testing.assert_array_equal(deadline_latencies,[2.,4.,6.,8.,10.])\nmissed_deadlines=int(np.count_nonzero(deadline_latencies>6.))\nassert missed_deadlines==2\nprint('Requests beyond the declared deadline:',missed_deadlines)",
-        "explanation": "Two responses miss the deadline in this serial simulation. Admission control, batching policy or additional workers could change the queue, but each requires a new model or measurement. The example does not execute a real autoscaler."
+        "explanation": "Two responses miss the deadline in this serial simulation. Admission control, batching policy or additional workers could change the queue, but each requires a new model or measurement. The example does not execute a real autoscaler.",
+        "learnerStarter": {
+          "inputs": [
+            "For five simultaneous requests and a \\(2\\)-millisecond serial service, count responses that exceed a \\(6\\)-millisecond deadline. Explain why adding a faster model alone is not the only intervention."
+          ],
+          "outputs": [
+            "A simulated count of requests past the deadline."
+          ],
+          "invariants": [
+            "Deadline violations use completion-minus-arrival response time."
+          ],
+          "hints": [
+            "Compute finish minus arrival for each request. Here a response exactly at the deadline is accepted; declare that convention.",
+            "Label the result as serial queue simulation, not a measured service SLO."
+          ],
+          "code": "import math\n\ndef practice_measure_the_margin_below_a_response_deadline(arrival_ms, service_ms, deadline_ms):\n    \"\"\"Complete the measure the margin below a response deadline check.\"\"\"\n    # TODO: ('Count serial burst responses exceeding the declared 6 ms deadline and compare with an alternative queue intervention.', 'Deadline violation count and an explicitly labeled simulated response-time result.', 'The deadline and service-time assumptions remain fixed across the comparison.')\n    raise NotImplementedError\n"
+        }
       }
     ],
     "takeaways": [
@@ -166,6 +214,22 @@
       "Dividing batch time by eight gives an amortized throughput cost, not each request’s elapsed latency. Requests still wait for batch execution.",
       "Eight examples per four milliseconds gives two thousand per second when batches remain full. A request still waits for collection and the full execution, plus any other boundary costs.",
       "Arrival rate and batching wait change latency. Measure the chosen traffic pattern instead of inferring a universal service guarantee."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "Four arrival times all equal to zero and a two-millisecond serial service time."
+      ],
+      "outputs": [
+        "The four finish times and four response times in arrival order."
+      ],
+      "invariants": [
+        "Each request starts when the prior serial request finishes; response time is finish time minus arrival time."
+      ],
+      "hints": [
+        "Derive each finish as the previous finish plus service time.",
+        "Keep queue arithmetic separate from model execution timing."
+      ],
+      "code": "import numpy as np\n\ndef simulate_four_request_burst(service_ms):\n    # TODO: Calculate serial finish and response times for four arrivals at time zero.\n    raise NotImplementedError\n"
+    }
   }
 }

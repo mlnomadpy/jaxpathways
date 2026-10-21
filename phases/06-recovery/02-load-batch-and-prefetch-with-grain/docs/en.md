@@ -214,7 +214,7 @@ visual_data = {'kind': 'bar', 'labels': ['slot 0', 'slot 1', 'slot 2', 'slot 3']
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:29:02.250064+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:05:27.226925+00:00. JAX 0.9.2.
 
 ```text
 First IDs: [8, 6, 7, 9]
@@ -273,21 +273,29 @@ Consume two batches, snapshot, and replay the third batch with a new compatible 
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Exercise solution
+**Inputs:**
+- A dataset, saved iterator snapshot, and matching loader configuration.
+
+**Outputs:**
+- A restored iterator whose next batches match uninterrupted iteration.
+
+**Invariants to check:**
+- Restore validates the sampler contract before yielding; compare IDs and values across epoch boundaries.
+
+**Hints:**
+- Save iterator state after a known batch, then restore into a fresh compatible iterator.
+- Change one compatibility field to confirm early rejection.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-later = iter(...)  # TODO: compute later
-next(later)
-next(later)
-later_state = later.get_state(...)  # TODO: compute later_state
-expected_third = next(...)  # TODO: compute expected_third
-new_iterator = iter(...)  # TODO: compute new_iterator
-new_iterator.set_state(later_state)
-np.testing.assert_array_equal(next(new_iterator)["id"],expected_third["id"])
+import numpy as np
+import grain.python as grain
+
+def restore_loader(dataset, snapshot, expected_seed):
+    """A restored iterator whose next batches match uninterrupted iteration."""
+    # TODO: Restore a compatible Grain iterator snapshot and compare its next batches with uninterrupted iteration.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -320,24 +328,28 @@ The loader has two epochs; the fourth and fifth batches belong to the next epoch
 
 ### How to write: Replay through an epoch boundary — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Inputs:**
+- Save the iterator after the third batch and compare the next two batches with a fresh restored iterator. Check IDs and values. Explain why reproducing only the last batch of one epoch is not sufficient.
+
+**Outputs:**
+- Two matching subsequent batches across the epoch boundary.
+
+**Invariants to check:**
+- The snapshot includes epoch/order position, not merely the last batch contents.
+
+**Hints:**
+- The loader has two epochs; the fourth and fifth batches belong to the next epoch.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Replay through an epoch boundary (Transfer): An epoch boundary changes the sampling context.
-boundary = iter(...)  # TODO: compute boundary
-for _ in range(3):next(boundary)
-boundary_state = boundary.get_state(...)  # TODO: compute boundary_state
-expected = ...  # TODO: compute expected
-replay = iter(...)  # TODO: compute replay
-replay.set_state(boundary_state)
-for reference in expected:
-    actual = next(...)  # TODO: compute actual
-    for name in ('id','x','y'):np.testing.assert_array_equal(actual[name],reference[name])
-print('Next-epoch IDs replayed:',[b['id'].tolist() for b in expected])
+import numpy as np
+import grain.python as grain
+
+def practice_replay_through_an_epoch_boundary(loader, snapshot):
+    """Implement the replay through an epoch boundary check."""
+    # TODO: Restore the saved iterator at the boundary and compare the next two batch IDs and values with uninterrupted iteration.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -374,23 +386,28 @@ Read the restore diagnostic; changing the seed changes sampler identity.
 
 ### How to write: Reject a changed sampler — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Reject a changed sampler (Challenge)
+**Inputs:**
+- Try restoring the original snapshot into a loader with a different seed. Capture the compatibility error, then rebuild the matching loader.
+
+**Outputs:**
+- Early rejection for the incompatible seed and successful replay with matching configuration.
+
+**Invariants to check:**
+- Compatibility is checked before any batch is consumed.
+
+**Hints:**
+- Read the restore diagnostic; changing the seed changes sampler identity.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Reject a changed sampler (Challenge)
-incompatible = iter(...)  # TODO: compute incompatible
-try:
-    incompatible.set_state(snapshot)
-except ValueError:
-    print("Expected sampler compatibility rejection")
-else:
-    raise AssertionError("Expected changed sampler rejection")
-compatible = iter(...)  # TODO: compute compatible
-compatible.set_state(snapshot)
-np.testing.assert_array_equal(next(compatible)["id"],second_batch["id"])
+import numpy as np
+import grain.python as grain
+
+def practice_reject_a_changed_sampler(loader, snapshot, changed_seed):
+    """Implement the reject a changed sampler check."""
+    # TODO: Restore the original snapshot with a changed seed, capture the contract error, and retry with the matching seed.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

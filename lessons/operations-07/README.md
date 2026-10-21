@@ -242,7 +242,7 @@ visual_data={'kind':'bar','labels':['overall (10)','answerable (9)','unsupported
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:34:17.984127+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:11:03.128520+00:00. JAX 0.9.2.
 
 ```text
 Observed replay scores: [{'overall': 0.9, 'answerable': 1.0, 'unanswerable': 0.0}, {'overall': 1.0, 'answerable': 1.0, 'unanswerable': 1.0}]
@@ -314,16 +314,25 @@ Add a response with an invented citation and require the evaluator to fail it.
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Exercise solution
+**Inputs:**
+- The lesson’s answerable case, its allowed citations, and a response containing an invented citation.
+
+**Outputs:**
+- The evaluator result showing that the unsupported citation fails the case.
+
+**Invariants to check:**
+- A citation absent from the case’s allowed evidence cannot pass the citation check.
+
+**Hints:**
+- Check citation support against the case evidence, not whether the citation string is well formed.
+- Keep the test response otherwise valid so the invented citation is the failure cause.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-for citation in ['invented','old-index-v0']:
-    assert not llm_case(cases[0],dict(answer='CPU',citations=[citation],abstain=False),['course-v1'])  # TODO: complete assertion check
-print('Unrecognized citations rejected.')
+def reject_invented_citation(case, response, allowed_citations):
+    # TODO: Evaluate the response and confirm its unsupported citation causes a failure.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -351,16 +360,32 @@ The fixture contract requires both empty answer text and no citations.
 
 ### How to write: Check abstention structure — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Check abstention structure (transfer)
+**Inputs:**
+- Try a response that claims to abstain but still returns an unsupported answer.
+
+**Outputs:**
+- A failed evaluator result for abstention containing an unsupported answer.
+
+**Invariants to check:**
+- The case remains in results with a structured failure reason.
+
+**Hints:**
+- The fixture contract requires both empty answer text and no citations.
+- Validate response form and evidence support independently.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Check abstention structure (transfer)
-bad = dict(...)  # TODO: compute bad
-assert not llm_case(cases[-1],bad,['course-v1'])  # TODO: complete assertion check
-print('An abstention flag alone does not satisfy the output contract.')
+import os
+import tempfile
+from pathlib import Path
+import mlflow
+from mlflow import MlflowClient
+
+def practice_check_abstention_structure(response, allowed_evidence):
+    """Complete the check abstention structure check."""
+    # TODO: ('Parse an abstaining response that still contains an unsupported claim and fail the structured response check.', 'A rejected malformed abstention with its case ID retained.', 'An abstention response contains no answer claim unsupported by the evidence.')
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -390,19 +415,32 @@ Use the contract-aware replies as the starting point. An empty abstention is cor
 
 ### How to write: Keep failed work in the evaluation inventory — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Inputs:**
+- Replace the answer for the first answerable case with an empty abstention. Keep the case ID and show how the complete-suite score changes.
+
+**Outputs:**
+- Per-case result inventory and complete-suite score.
+
+**Invariants to check:**
+- The failed case ID remains in the denominator after its answer is replaced.
+
+**Hints:**
+- Use the contract-aware replies as the starting point. An empty abstention is correct for the unsupported case but wrong for the selected answerable case.
+- Do not drop failed or abstained responses.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Keep failed work in the evaluation inventory (Transfer)
-timeout_replies = ...  # TODO: compute timeout_replies
-timeout_replies[0]['response'] = dict(...)  # TODO: compute timeout_replies[0]['response']
-timeout_summary = score_replay(...)  # TODO: compute timeout_summary
-assert timeout_summary  # TODO: complete assertion check
-print('Failed answerable work remains in denominator:', timeout_summary)
+import os
+import tempfile
+from pathlib import Path
+import mlflow
+from mlflow import MlflowClient
+
+def practice_keep_failed_work_in_the_evaluation_inventory(cases, responses):
+    """Complete the keep failed work in the evaluation inventory check."""
+    # TODO: ('Replace the first answerable case output with an empty abstention while retaining its ID, then recompute full-suite score.', 'Complete case inventory and changed full-suite score.', 'Failed and abstained cases remain in the denominator and cannot be dropped.')
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

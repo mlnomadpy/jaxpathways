@@ -957,14 +957,12 @@
   color: var(--ink);
 }
 
-.code-api-list,
-.code-step-list {
+.code-api-list {
   margin: 6px 0 12px;
   padding-left: 20px;
 }
 
-.code-api-list li,
-.code-step-list li {
+.code-api-list li {
   margin: 5px 0;
 }
 

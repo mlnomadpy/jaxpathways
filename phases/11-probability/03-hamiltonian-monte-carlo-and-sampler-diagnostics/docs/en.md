@@ -61,6 +61,10 @@ We start four chains from dispersed points and discard the first $400$ transitio
 
 Here the exact mean, variance and covariance are known. Check all of them: getting both marginal means right can still hide missing correlation. Acceptance alone is insufficient; a tiny step can accept almost everything while exploring slowly. Effective sample size concerns the information in correlated draws, not the number of rows stored. Before using a library such as NumPyro on an unknown posterior, repeat an exact-model validation and inspect its documented diagnostics. This CPU fixture establishes neither multimodal exploration nor accelerator performance.
 
+## Optional NumPyro check against a conjugate posterior
+
+The project extension at `projects/bayesian-regression/` adds a real NumPyro NUTS run in its own pinned optional CPU environment. It runs four chains, compares sampled means and covariance to a separate host NumPy precision solve using estimated Monte Carlo standard errors, and repeats after changing the random seed, number of observations and parameter dimension. Its diagnostics use rank-normalized split R-hat, bulk ESS, tail ESS and the sampler divergence count. These answer different questions: R-hat compares chains, ESS estimates information after serial correlation, and divergences flag problematic Hamiltonian transitions. None establishes that every mode was explored. The saved diagnostic plot and the exact values used to draw it are under `projects/bayesian-regression/reference/numpyro/`. The optional workflow does not replace the transparent sampler built in this lesson or validate TPU performance.
+
 ## 1. Write a known target and its gradient
 
 Create a fresh main.py. This correlated Gaussian is an exact test target for an inference algorithm, not a new unknown statistical model.
@@ -239,7 +243,7 @@ visual_data={"kind":"line","x":indices.tolist(),"xlabel":"retained transition (a
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:31:12.248686+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:07:46.758595+00:00. JAX 0.9.2.
 
 ```text
 mean: [ 0.98358583 -1.0185838 ] covariance: [[0.98042357 0.7727629 ]
@@ -297,22 +301,29 @@ Increase the step size to 1.2 with the same leapfrog count. Record acceptance an
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jax.random.PRNGKey(seed) & jax.random.split(key)` — Uses explicit PRNG keys. Split a key when you need independent random draws; reusing a key repeats its random stream.
+**Inputs:**
+- A target mean and covariance, chain starts, and a deliberately large leapfrog step size.
 
-**Step-by-step implementation plan:**
-1. Create or split explicit PRNG key(s) (`bad`) for reproducible randomness.
+**Outputs:**
+- Per-chain acceptance summaries, signed energy errors, and a saved position trace.
+
+**Invariants to check:**
+- A rejected transition retains the previous state.
+- A large positive energy error lowers acceptance probability.
+- The diagnostic report names its R-hat variant and does not infer convergence from acceptance alone.
+
+**Hints:**
+- Keep momentum and acceptance random keys independent.
+- Inspect energy error and trace movement together.
+- Compare with the exact Gaussian target before interpreting a sampler statistic.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Increase the step size to 1.2 with the same leapfrog count.
-# Create or split explicit PRNG key(s) (`bad`) for reproducible randomness.
-bad = chain(...)  # TODO: compute bad
-assert bad[1].mean()  # TODO: complete assertion check
-assert jnp.max(bad[2])  # TODO: complete assertion check
-print("bad acceptance:",float(bad[1].mean()),"maximum energy error:",float(jnp.max(bad[2])))
+def summarize_unstable_trajectory(key, mean, covariance, starts, step_size):
+    """Return transition summaries and the chain states for inspection."""
+    # TODO: run the changed-step experiment and preserve per-chain evidence.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -342,20 +353,27 @@ Use independent small noise around four different constants.
 
 ### How to write: Catch chains trapped at different levels — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.arange(n, dtype=...)` — Creates a 1-D JAX array of evenly spaced values `[0, 1, ..., n-1]` on the target device.
-- `jax.random.PRNGKey(seed) & jax.random.split(key)` — Uses explicit PRNG keys. Split a key when you need independent random draws; reusing a key repeats its random stream.
+**Inputs:**
+- Four chains with similar within-chain variation and means separated by four units.
 
-**Step-by-step implementation plan:**
-1. Create or split explicit PRNG key(s) (`fake`) for reproducible randomness.
+**Outputs:**
+- The classical split R-hat and a check that it flags the separated chain means.
+
+**Invariants to check:**
+- Chain identity is retained through splitting; a classical split diagnostic is reported, not a rank-normalized modern diagnostic.
+
+**Hints:**
+- Split each chain into two halves before computing within- and between-chain variation.
+- Keep the chain offsets and within-chain noise on separate axes.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Catch chains trapped at different levels (Transfer / diagnosis)
-# Create or split explicit PRNG key(s) (`fake`) for reproducible randomness.
-fake = jax.random.normal(...)  # TODO: compute fake
-assert split_rhat(fake)  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def check_classical_split_rhat(chains, split_rhat):
+    # TODO: Construct the specified separated chains and evaluate the classical split diagnostic.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -385,26 +403,28 @@ Use the same direction and a moderate float32 finite-difference step.
 
 ### How to write: Verify a directional derivative — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- The target mean and precision matrix, the log-density gradient, a nonzero position, a direction, and a finite-difference step.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- The analytic precision-matrix directional derivative, autodiff directional derivative, and central-difference estimate.
+
+**Invariants to check:**
+- All three derivatives use the same nonzero position and direction; the central difference perturbs only along that direction.
+
+**Hints:**
+- Form the analytic gradient action from the precision matrix and centered position.
+- Compare a symmetric log-density difference with the autodiff directional derivative.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Verify a directional derivative (Transfer / diagnosis)
-q = jnp.array(...)  # TODO: compute q
-v = jnp.array(...)  # TODO: compute v
-eps = ...  # TODO: compute eps
-analytic = ...  # TODO: compute analytic
-auto = force(...)  # TODO: compute auto
-finite = ...  # TODO: compute finite
-np.testing.assert_allclose(auto,analytic,rtol = ...  # TODO: compute np.testing.assert_allclose(auto,analytic,rtol
-np.testing.assert_allclose(finite,analytic,rtol = ...  # TODO: compute np.testing.assert_allclose(finite,analytic,rtol
+import jax
+import jax.numpy as jnp
+
+def compare_gaussian_directional_derivatives(log_density, mean, precision, point, direction, epsilon):
+    # TODO: Compare the analytic precision action, autodiff derivative, and central difference.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

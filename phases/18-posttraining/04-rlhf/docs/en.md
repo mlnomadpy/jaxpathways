@@ -328,7 +328,7 @@ visual_data={"panels":[*visual_data.get("panels",[visual_data]),extra_panel]}
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:34:48.473293+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:11:38.424626+00:00. JAX 0.9.2.
 
 ```text
 Reward initial/final and final KL: 0.28191882371902466 1.9185447692871094 0.7824773192405701
@@ -395,19 +395,27 @@ Check the KL at the fixed reference and compare it with the final policy’s exa
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
+**Inputs:**
+- Reference-policy log probabilities and final-policy log probabilities for the same categorical action set.
 
-**Step-by-step implementation plan:**
-1. Exercise solution
+**Outputs:**
+- The self-KL and $D_{\mathrm{KL}}(\pi_{\mathrm{final}}\parallel\pi_{\mathrm{ref}})$ for the exact categorical distributions.
+
+**Invariants to check:**
+- The self-KL is zero up to floating-point tolerance; compute $D_{\mathrm{KL}}(\pi_{\mathrm{final}}\parallel\pi_{\mathrm{ref}})=\sum_a \pi_{\mathrm{final}}(a)\log(\pi_{\mathrm{final}}(a)/\pi_{\mathrm{ref}}(a))$, never the reverse direction.
+
+**Hints:**
+- Normalize both log-probability vectors.
+- Weight each log ratio by the corresponding final-policy probability.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-zero_kl = float(...)  # TODO: compute zero_kl
-assert zero_kl  # TODO: complete assertion check
-print('Reference/final KL:', zero_kl, kl_history[-1])
+import jax.numpy as jnp
+
+def compare_reference_and_policy_kl(reference_logps, final_policy_logps):
+    # TODO: compute self-KL and D_KL(final policy || frozen reference).
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -435,23 +443,28 @@ Use argnums to inspect only those two inputs.
 
 ### How to write: Verify detached behavior information — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
+**Inputs:**
+- A callable PPO objective, policy logits, supplied old action log probabilities, sampled actions, advantages, reference log probabilities, and PPO coefficients.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- Gradients of the objective with respect to old log probabilities and advantages.
+
+**Invariants to check:**
+- Both rollout-time inputs are stop-gradient constants in this update, while policy logits remain differentiable.
+
+**Hints:**
+- Differentiate the supplied objective with respect to the two rollout arrays only.
+- Check zero arrays with their original shapes.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Verify detached behavior information (Transfer)
-old_grad, adv_grad = jax.grad(...)  # TODO: compute old_grad, adv_grad
-    theta, old_selected, actions, advantage, reference, 0.2, 0.2
-)
-np.testing.assert_array_equal(old_grad, np.zeros(old_grad.shape))
-np.testing.assert_array_equal(adv_grad, np.zeros(adv_grad.shape))
-print('Behavior log probabilities and advantages are detached.')
+import jax
+import jax.numpy as jnp
+
+def check_rollout_inputs_are_detached(ppo_objective, logits, old_logps, actions, advantages, reference_logps, clip, beta):
+    # TODO: differentiate the objective with respect to old_logps and advantages.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -484,34 +497,28 @@ Evaluate expected reward minus beta times KL for all three policies, and compute
 
 ### How to write: Compare with the finite-action regularized optimum — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
+**Inputs:**
+- A finite action set, frozen reference distribution, reward vector, beta equal to 0.2, and trained policy.
 
-**Step-by-step implementation plan:**
-1. Compare with the finite-action regularized optimum (Challenge)
+**Outputs:**
+- The analytic regularized optimum and matching regularized objective values for the reference and trained policy.
+
+**Invariants to check:**
+- Every objective uses D_KL(policy || reference) with the same reward, frozen reference, and beta.
+
+**Hints:**
+- Normalize reward-adjusted reference log probabilities with log-sum-exp.
+- Compare objective values, including the policy-to-reference KL, rather than only the highest-probability action.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Compare with the finite-action regularized optimum (Challenge)
-beta = ...  # TODO: compute beta
-optimal_logp = jax.nn.log_softmax(...)  # TODO: compute optimal_logp
+import jax.numpy as jnp
+import numpy as np
 
-def regularized(logp):
-    return ...  # TODO: return computed result
-        jnp.exp(logp) * (logp - reference)
-    )
-
-optimum = float(...)  # TODO: compute optimum
-trained = float(...)  # TODO: compute trained
-baseline = float(...)  # TODO: compute baseline
-assert optimum  # TODO: complete assertion check
-print(
-    'Regularized objective reference/trained/optimum:',
-    baseline,
-    trained,
-    optimum,
-)
+def compare_policy_with_regularized_optimum(reward, reference_probs, policy_probs, beta):
+    # TODO: construct the finite-action optimum and evaluate all policies with D_KL(policy || reference).
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

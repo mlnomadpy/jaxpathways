@@ -211,7 +211,7 @@ visual_data = {
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:35:35.439963+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:11:49.428825+00:00. JAX 0.9.2.
 
 ```text
 TPU ridge points (FLOP/byte): {'v5e': 240.5, 'v5p': 166.0, 'v6e': 560.4}
@@ -268,22 +268,28 @@ Compute estimate_memory_gib for a 1.5B parameter model with 4096 KV tokens. Chec
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Inputs:**
+- The public memory estimator, a 1.5-billion parameter training case, 4096 KV tokens, and an inference cache scenario.
+
+**Outputs:**
+- Training state estimate, slice-budget comparisons, and a separate BF16 KV-cache estimate.
+
+**Invariants to check:**
+- Training state and inference KV cache are distinct ledgers; aggregate slice HBM does not ensure each sharded device fits.
+
+**Hints:**
+- Read and preserve the estimator's dtype and exclusion assumptions.
+- Report cache memory separately from training-state memory.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-budget_check = estimate_memory_gib(...)  # TODO: compute budget_check
-usable_hbm_gib = ...  # TODO: compute usable_hbm_gib
-training_state_gib = ...  # TODO: compute training_state_gib
-inference_kv_gib = ...  # TODO: compute inference_kv_gib
-print("Assumed training state (GiB):", training_state_gib)
-print("Separate inference BF16 KV cache (GiB):", inference_kv_gib)
-assert training_state_gib  # TODO: complete assertion check
-assert training_state_gib  # TODO: complete assertion check
-assert np.isclose(inference_kv_gib, 0.5)  # TODO: complete assertion check
+import jax.numpy as jnp
+import numpy as np
+
+def audit_training_and_inference_memory(estimate_memory_gib):
+    # TODO: evaluate the training case and compute a separately labeled inference-cache estimate.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -316,18 +322,28 @@ For two `N x N` BF16 inputs and one BF16 output, arithmetic intensity simplifies
 
 ### How to write: Compare arithmetic intensity against the TPU v5e and v6e ridge points — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Inputs:**
+- Square BF16 matrix dimension 1024 and the documented v5e and v6e ridge points.
+
+**Outputs:**
+- Arithmetic intensity in FLOPs per byte and a comparison with each ridge point.
+
+**Invariants to check:**
+- FLOPs and bytes use the same operation count as the lesson; intensity is not device memory capacity.
+
+**Hints:**
+- Simplify the given expression before evaluating it.
+- Compare with ridge points in matching FLOPs-per-byte units.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-n = ...  # TODO: compute n
-intensity = ...  # TODO: compute intensity
-print("Arithmetic intensity:", intensity, "FLOPs/byte")
-assert intensity  # TODO: complete assertion check
-assert intensity  # TODO: complete assertion check
+import jax.numpy as jnp
+import numpy as np
+
+def compare_matmul_intensity(size, ridge_points):
+    # TODO: compute the stated BF16 intensity and report which ridge points it exceeds.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -358,17 +374,28 @@ Compare `budget_7b['mixed_bf16_train_state_gib']` with `4 * 32.0 * 0.8`.
 
 ### How to write: Size a Trillium v6e-4 slice for a 7B training state — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Inputs:**
+- Four v6e chips at 32 GiB each and the 7B mixed-BF16 training estimate.
+
+**Outputs:**
+- Aggregate HBM and a check against 80 percent of the slice capacity.
+
+**Invariants to check:**
+- The calculation is a catalog budget screen and does not guarantee per-device placement or runtime success.
+
+**Hints:**
+- Multiply chips by HBM per chip.
+- Compare the estimate with the reserved-capacity threshold.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-v6e4_usable_gib = ...  # TODO: compute v6e4_usable_gib
-fits_v6e4 = ...  # TODO: compute fits_v6e4
-print("v6e-4 80% usable GiB:", v6e4_usable_gib, "Fits 7B state estimate:", fits_v6e4)
-assert fits_v6e4 is False  # TODO: complete assertion check
+import jax.numpy as jnp
+import numpy as np
+
+def check_v6e4_budget(training_state_gib, chips, hbm_per_chip_gib):
+    # TODO: compare the training estimate with the specified fraction of aggregate HBM.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

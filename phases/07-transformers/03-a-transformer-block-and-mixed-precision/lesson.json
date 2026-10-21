@@ -70,7 +70,22 @@
         "prompt": "Compute the first normalized row using NumPy and compare. Also check a constant row.",
         "hint": "Use population variance over features and epsilon \\(10^{-5}\\).",
         "solution": "# Check normalization without autodiff (Transfer / diagnosis)\nrow = np.asarray(x[0])\nreference = (row-row.mean())/np.sqrt(np.mean((row-row.mean())**2)+1e-5)\nnp.testing.assert_allclose(layer_norm(x)[0],reference,atol=1e-6)\nassert jnp.allclose(layer_norm(jnp.ones((2,8))),0.)",
-        "explanation": "The independent reduction and constant-row case check the normalization mechanism."
+        "explanation": "The independent reduction and constant-row case check the normalization mechanism.",
+        "learnerStarter": {
+          "inputs": [
+            "Compute the first normalized row using NumPy and compare. Also check a constant row."
+          ],
+          "outputs": [
+            "JAX/NumPy parity and finite output for a constant row."
+          ],
+          "invariants": [
+            "Normalization uses the same epsilon and feature axis in both implementations."
+          ],
+          "hints": [
+            "Use population variance over features and epsilon \\(10^{-5}\\)."
+          ],
+          "code": "import jax\nimport jax.numpy as jnp\nimport numpy as np\n\ndef practice_check_normalization_without_autodiff(inputs):\n    \"\"\"Implement the check normalization without autodiff check.\"\"\"\n    # TODO: Normalize the first row using a separate NumPy mean/variance calculation and check the constant-row case.\n    raise NotImplementedError\n"
+        }
       },
       {
         "title": "Repair a residual width mismatch",
@@ -78,7 +93,22 @@
         "prompt": "Remove the contraction from the MLP and reproduce the residual addition failure. Restore the contraction and verify shape.",
         "hint": "The expanded tensor has twice the model width.",
         "solution": "# Repair a residual width mismatch (Transfer / diagnosis)\nexpanded = jax.nn.gelu(layer_norm(x)@p[\"up\"])\n# Check tensor shape invariant: `expanded.shape == (4,16)`\nassert expanded.shape == (4,16)\ntry:\n    _ = x + expanded\nexcept TypeError:\n    pass\nelse:\n    raise AssertionError(\"expected width mismatch\")\n# Check tensor shape invariant: `(x + expanded@p[\"down\"]).shape == x.shape`\nassert (x + expanded@p[\"down\"]).shape == x.shape",
-        "explanation": "Residual paths require matching widths; the down projection restores the model-width contract."
+        "explanation": "Residual paths require matching widths; the down projection restores the model-width contract.",
+        "learnerStarter": {
+          "inputs": [
+            "Remove the contraction from the MLP and reproduce the residual addition failure. Restore the contraction and verify shape."
+          ],
+          "outputs": [
+            "The incompatible-shape failure and repaired output shape."
+          ],
+          "invariants": [
+            "Both residual operands share the same final feature dimension."
+          ],
+          "hints": [
+            "The expanded tensor has twice the model width."
+          ],
+          "code": "import numpy as np\n\ndef practice_repair_a_residual_width_mismatch(params, inputs):\n    \"\"\"Implement the repair a residual width mismatch check.\"\"\"\n    # TODO: Remove the MLP contraction to reproduce the residual-add shape error, restore it, and assert both branches match residual width.\n    raise NotImplementedError\n"
+        }
       }
     ],
     "question": "If all projection matrices are zero in this block, what should the output be?",
@@ -271,6 +301,22 @@
       "The attention branch vanishes but the skip connection remains. Substitute a zero branch into input plus branch.",
       "Zero scores create uniform attention, but zero projections make sublayer contributions zero; both residual paths preserve \\(x\\).",
       "Zero scores produce a defined softmax over valid keys. The zero value/output projections remove the branch contribution, leaving the residual."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "The transformer block parameters, one sequence input, and a selected parameter coordinate with a finite-difference step."
+      ],
+      "outputs": [
+        "Mean-squared output loss, gradient leaves with their shapes and finite checks, and the selected autodiff/central-difference comparison."
+      ],
+      "invariants": [
+        "Every projection gradient matches its parameter shape and is finite; the central difference checks the selected loss derivative."
+      ],
+      "hints": [
+        "Differentiate the scalar mean-squared block output with respect to the full parameter pytree.",
+        "Perturb one scalar parameter coordinate in both directions and compare the resulting loss difference."
+      ],
+      "code": "import jax\nimport jax.numpy as jnp\n\ndef check_block_parameter_gradients(params, inputs, parameter_path, coordinate, epsilon):\n    # TODO: Check every gradient leaf and compare one selected derivative with central differences.\n    raise NotImplementedError\n"
+    }
   }
 }

@@ -272,6 +272,26 @@
       "A screenshot records the result, but leaves the inputs and computation hidden. Give another learner the script and environment record so they can try to reproduce it.",
       "The script records what ran; versions and device information record where it ran. CPU success is separate from TPU compatibility.",
       "The editor does not determine the numerical backend or package APIs. Record Python, package versions, devices and the runnable script."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "The saved experiment currently uses a JAX array and prints its total.",
+        "The changed input contains six values.",
+        "Save the observed result and explain why it changed."
+      ],
+      "outputs": [
+        "A modified runnable function and a first-run evidence note."
+      ],
+      "invariants": [
+        "The saved script is the source that was executed.",
+        "The note reports an observed result.",
+        "The command can be rerun from the experiment folder."
+      ],
+      "hints": [
+        "Make the requested edit in the starter file.",
+        "Save terminal output before writing the explanation."
+      ],
+      "code": "import jax.numpy as jnp\n\ndef changed_experiment():\n    # TODO: create the changed input and report its total\n    result = ...\n    return result\n"
+    }
   }
 }

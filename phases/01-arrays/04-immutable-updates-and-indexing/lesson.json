@@ -78,7 +78,25 @@
         "prompt": "Create a \\((3, 3)\\) matrix containing \\(0\\) through \\(8\\). Set its final column to \\(-1\\) in a returned value. Verify the whole result and original matrix.",
         "hint": "The slice [:, \\(-1\\)] selects every row and the last column. A scalar replacement broadcasts across that slice.",
         "solution": "# Replace a region of a matrix (Practice)\nmatrix = jnp.arange(9, dtype=jnp.float32).reshape(3, 3)\nupdated_matrix = matrix.at[:, -1].set(-1.)\nassert jnp.allclose(updated_matrix, jnp.array([[0., 1., -1.], [3., 4., -1.], [6., 7., -1.]]))\nassert jnp.allclose(matrix, jnp.arange(9).reshape(3, 3))",
-        "explanation": "Checking the entire matrix verifies both changed and unchanged positions; preserving the original checks the update contract."
+        "explanation": "Checking the entire matrix verifies both changed and unchanged positions; preserving the original checks the update contract.",
+        "learnerStarter": {
+          "inputs": [
+            "A three-by-three matrix of consecutive values."
+          ],
+          "outputs": [
+            "A new matrix with its final column replaced."
+          ],
+          "invariants": [
+            "Nonselected entries match the input.",
+            "The original matrix is unchanged.",
+            "The returned shape remains `(3, 3)`."
+          ],
+          "hints": [
+            "Select the last column in every row.",
+            "Check the entire result and original."
+          ],
+          "code": "import jax.numpy as jnp\n\ndef replace_final_column(matrix):\n    # TODO: update the selected region in a returned array\n    raise NotImplementedError\n"
+        }
       },
       {
         "title": "Keep shape while masking values",
@@ -86,7 +104,24 @@
         "prompt": "Keep only values greater than \\(2\\) from \\(x\\), replacing other positions with zero. Compare with compact selection and explain the shape difference.",
         "hint": "Use where for the fixed-shape result. Boolean indexing produces selected values, not a shape-preserving mask.",
         "solution": "# Keep shape while masking values (Challenge)\nfixed_shape = jnp.where(x > 2., x, 0.)\nselected = x[x > 2.]\n# Check tensor shape invariant: `fixed_shape.shape == (4,)`\nassert fixed_shape.shape == (4,)\n# Check tensor shape invariant: `selected.shape == (2,)`\nassert selected.shape == (2,)\nassert jnp.allclose(fixed_shape, jnp.array([0., 0., 3., 4.]))\nassert jnp.allclose(selected, jnp.array([3., 4.]))",
-        "explanation": "Both are useful representations, but they are not interchangeable. The expected downstream shape determines which is appropriate."
+        "explanation": "Both are useful representations, but they are not interchangeable. The expected downstream shape determines which is appropriate.",
+        "learnerStarter": {
+          "inputs": [
+            "A one-dimensional input `x` and threshold two."
+          ],
+          "outputs": [
+            "A fixed-shape masked value and a compact selected value."
+          ],
+          "invariants": [
+            "The masked result keeps input shape.",
+            "The compact result contains only selected entries."
+          ],
+          "hints": [
+            "Use elementwise selection for fixed shape.",
+            "Inspect both output shapes."
+          ],
+          "code": "import jax.numpy as jnp\n\ndef compare_mask_and_selection(x, threshold=2.):\n    # TODO: construct both fixed-shape mask and compact selection\n    raise NotImplementedError\n"
+        }
       }
     ],
     "diagnosis": "If nothing changes, check whether the returned update was discarded. If old values seem changed, distinguish name rebinding from mutation and inspect mutable containers around the array. If duplicate replacements are surprising, do not assume last-write-wins order; use an explicit unique-index policy. If a mask later fails under jit, inspect whether its output length depends on runtime values.",
@@ -139,6 +174,25 @@
       "The update expression creates a new array value. Compare x with the returned value; assignment to a new name does not mutate x.",
       "The expression returns the updated value. Assign it to a name to keep it; \\(x\\) retains its original value.",
       "The .at update preserves array semantics. Inspect the returned shape and dtype rather than expecting a Python list."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "A one-dimensional four-value array `x`.",
+        "A request to replace its final two positions in a new value."
+      ],
+      "outputs": [
+        "A changed array and the unchanged original input."
+      ],
+      "invariants": [
+        "The source array remains unchanged.",
+        "Output shape matches input shape.",
+        "Only requested positions change."
+      ],
+      "hints": [
+        "Use a functional indexed update and keep its returned array.",
+        "Compare the input after the update."
+      ],
+      "code": "import jax.numpy as jnp\n\ndef replace_suffix(x):\n    # TODO: make the requested functional indexed update\n    raise NotImplementedError\n"
+    }
   }
 }

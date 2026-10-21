@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { Window } from 'happy-dom';
+import katex from 'katex';
 import { inlineMath, mathProse, renderMath } from '../src/lib/math.js';
 import { deepConcepts, codePanel } from '../src/lib/lesson-content.js';
 
@@ -21,6 +22,70 @@ test('math prose escapes raw HTML, rejects malformed TeX and does not trust URL 
   assert.throws(() => renderMath(String.raw`\frac{1}{`));
   assert(!/<a(?:\s|>)/.test(renderMath(String.raw`\href{javascript:alert(1)}{x}`)));
   assert(!inlineMath(String.raw`\(\text{<script>}\)`).includes('<script>'));
+});
+
+test('renderMath normalizes MathML script arity and operator tokens without changing visible HTML', async () => {
+  const tex = String.raw`\sigma_{\max} + a \bmod b`;
+  const htmlOnly = renderMath(tex, false, 'html');
+  const expectedHtmlOnly = katex.renderToString(tex, {
+    displayMode: false,
+    output: 'html',
+    throwOnError: true,
+    strict: 'error',
+    trust: false,
+    maxExpand: 1000,
+    maxSize: 20,
+    macros: {},
+  });
+  assert.equal(htmlOnly, expectedHtmlOnly, 'HTML-only output must remain byte-for-byte KaTeX output');
+
+  const combined = renderMath(tex);
+  const htmlWindow = new Window();
+  try {
+    htmlWindow.document.body.innerHTML = combined;
+    const renderedHtml = htmlWindow.document.querySelector('.katex-html')?.outerHTML;
+    const expectedWindow = new Window();
+    try {
+      expectedWindow.document.body.innerHTML = katex.renderToString(tex, {
+        displayMode: false,
+        output: 'htmlAndMathml',
+        throwOnError: true,
+        strict: 'error',
+        trust: false,
+        maxExpand: 1000,
+        maxSize: 20,
+        macros: {},
+      });
+      assert.equal(renderedHtml, expectedWindow.document.querySelector('.katex-html')?.outerHTML);
+    } finally {
+      await expectedWindow.happyDOM.abort();
+    }
+
+    const math = htmlWindow.document.querySelector('math');
+    const subscript = math?.querySelector('msub');
+    assert.equal(subscript?.children.length, 2, 'msub has exactly base and subscript children');
+    assert.equal(subscript?.children[1].textContent, 'max');
+    assert.equal(math?.querySelector('mo mrow'), null, 'operator tokens must not contain nested rows');
+    assert.equal(math?.querySelector('annotation[encoding="application/x-tex"]')?.textContent, tex);
+  } finally {
+    await htmlWindow.happyDOM.abort();
+  }
+
+  const mathmlOnly = renderMath(tex, false, 'mathml');
+  assert.match(mathmlOnly, /<math\b/);
+  assert.doesNotMatch(mathmlOnly, /class="katex-html"/);
+  const mathmlWindow = new Window();
+  try {
+    mathmlWindow.document.body.innerHTML = mathmlOnly;
+    assert.equal(mathmlWindow.document.querySelectorAll('msub')[0]?.children.length, 2);
+    assert.equal(mathmlWindow.document.querySelector('mo mrow'), null);
+    assert.equal(
+      mathmlWindow.document.querySelector('annotation[encoding="application/x-tex"]')?.textContent,
+      tex,
+    );
+  } finally {
+    await mathmlWindow.happyDOM.abort();
+  }
 });
 
 test('equations and shape sketches stay distinct, and code panels never typeset source', () => {

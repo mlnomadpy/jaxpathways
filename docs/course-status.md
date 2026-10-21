@@ -1,8 +1,8 @@
 # Current course status
 
-Generated from canonical registries for version 0.10.0 (2026-10-21). Historical audits describe their own inspected revisions.
+Generated from canonical registries for version 0.11.0 (2026-10-21). Historical audits describe their own inspected revisions.
 
-- 22 phases and 103 authored lessons.
+- 22 phases and 104 authored lessons.
 - 10 pathways and 7 career routes.
 - 31 registered practice projects.
 - 10 separately labeled planned model-lifecycle capstones.

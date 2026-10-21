@@ -86,7 +86,23 @@
         "prompt": "Pass an empty selection mask through the public corruption boundary and require a clear failure.",
         "hint": "Validate outside the transformed objective before dividing by a count.",
         "solution": "# Reject a missing learning signal (Transfer): A skipped batch requires an explicit training policy.\ntry:\n    corrupt_tokens(tokens, jnp.zeros_like(tokens, dtype=bool), 3)\nexcept ValueError:\n    print('Empty mask rejected')\nelse:\n    raise AssertionError('empty mask accepted')",
-        "explanation": "A skipped batch requires an explicit training policy. It must not silently become a zero loss or a NaN update."
+        "explanation": "A skipped batch requires an explicit training policy. It must not silently become a zero loss or a NaN update.",
+        "learnerStarter": {
+          "inputs": [
+            "A token batch and an all-false Boolean selection mask."
+          ],
+          "outputs": [
+            "A clear ValueError before any zero-count loss reduction."
+          ],
+          "invariants": [
+            "A batch with no selected targets cannot silently produce NaN or a zero training signal."
+          ],
+          "hints": [
+            "Validate the mask at the public corruption boundary.",
+            "Check shape and selected count before entering a transformed loss."
+          ],
+          "code": "import jax.numpy as jnp\nimport numpy as np\n\ndef require_selected_positions(tokens, selected, mask_id):\n    # TODO: validate the mask and return a corrupted token batch.\n    raise NotImplementedError"
+        }
       },
       {
         "title": "Derive the output gradient without autodiff",
@@ -94,7 +110,23 @@
         "prompt": "Implement the probability-minus-one-hot formula for the unequal-mask fixture and compare every element with autodiff. Explain where visible context can still receive gradient.",
         "hint": "Broadcast the mask over vocabulary and divide by the selected count, not the batch size.",
         "solution": "# Derive the output gradient without autodiff (Challenge)\n# Reduce along axis=-1 to compute `analytic`.\nanalytic = (\n    (jax.nn.softmax(audit_logits, axis=-1) - jax.nn.one_hot(audit_targets, 3))\n    * audit_mask[..., None]\n    / audit_mask.sum()\n)\nnp.testing.assert_allclose(\n    jax.grad(masked_ce)(audit_logits, audit_targets, audit_mask),\n    analytic,\n    atol=1e-6,\n)\nprint('Independent masked softmax gradient agrees.')",
-        "explanation": "This verifies the entire derivative tensor, including zeros at unsupervised outputs. It says nothing by itself about intermediate embedding gradients."
+        "explanation": "This verifies the entire derivative tensor, including zeros at unsupervised outputs. It says nothing by itself about intermediate embedding gradients.",
+        "learnerStarter": {
+          "inputs": [
+            "One logits tensor, integer target IDs, and a nonuniform selected mask."
+          ],
+          "outputs": [
+            "The analytical softmax-cross-entropy gradient and an autodiff comparison."
+          ],
+          "invariants": [
+            "Unselected token gradients are zero; selected token gradients sum to zero across vocabulary."
+          ],
+          "hints": [
+            "For each selected row, start from probability minus one-hot target.",
+            "Include the selected-count normalization and compare with autodiff."
+          ],
+          "code": "import jax.numpy as jnp\nimport numpy as np\n\ndef compare_masked_logit_gradients(logits, targets, selected):\n    # TODO: derive the masked gradient and compare it elementwise with autodiff.\n    raise NotImplementedError"
+        }
       }
     ],
     "question": "Why are visible input tokens useful even when their output positions are excluded from the loss?",
@@ -234,6 +266,22 @@
       "The mask controls the supervised outputs, while attention controls how input context influences them.",
       "Only selected targets contribute direct loss, but other input tokens still provide context through attention. Distinguish input masking from loss masking.",
       "A loss mask selects scored positions; it does not remove keys or values from attention. Test those masks independently."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "A trained model apply function and parameters, token IDs, original target IDs, mask token ID, and a selection mask with the first position selected."
+      ],
+      "outputs": [
+        "Predictions and selected-token loss at the first position, evaluated without changing parameters."
+      ],
+      "invariants": [
+        "Only selected positions contribute to loss; clean target IDs are labels, not model inputs. Gradient from the selected loss may flow through shared attention into visible context representations."
+      ],
+      "hints": [
+        "Corrupt the selected input position while keeping its clean target separate.",
+        "Run the trained parameters in evaluation mode and do not apply an optimizer update."
+      ],
+      "code": "import jax.numpy as jnp\n\ndef evaluate_alternate_mask(apply_model, params, tokens, targets, mask_id, selected):\n    # TODO: corrupt the selected input, run the trained model, and score the selected clean target.\n    raise NotImplementedError"
+    }
   }
 }

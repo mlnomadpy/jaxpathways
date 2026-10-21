@@ -243,7 +243,7 @@ visual_data={'kind':'heatmap','values':owner.tolist(),'unit':'program ID (catego
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:35:32.777095+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:08:17.625498+00:00. JAX 0.9.2.
 
 ```text
 Shape and boundary: (5, 11) -3.75 7.050000190734863
@@ -302,28 +302,31 @@ Test a singleton row and a changed nondivisible matrix with negative values. Ver
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- Two same-shaped float32 matrices for each fixture: singleton-row shape (1,7) and changed tail shape (7,9).
+- Two block choices, (2,4) and (3,5), with the lesson kernel wrapper.
 
-**Step-by-step implementation plan:**
-1. Exercise solution
-2. Check tensor shape invariant: `result.shape==shape`
-3. Transfer the device result to the host for an independent NumPy comparison.
+**Outputs:**
+- Exact logical output shape for each fixture/block pair.
+- Full elementwise agreement with the independent NumPy expression.
+
+**Invariants to check:**
+- Each input pair has identical shape and the result preserves that shape.
+- Masked partial blocks cover every logical element, including negative values.
+
+**Hints:**
+- Test the one-row case separately from a partial final tile.
+- Compare every output element with the NumPy expression.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-for shape in [(1,7),(7,9)]:
-    a = jnp.asarray(...)  # TODO: compute a
-    b = jnp.asarray(...)  # TODO: compute b
-    for block in [(2,4),(3,5)]:
-        result = blocked_axpy(...)  # TODO: compute result
-        # Check tensor shape invariant: `result.shape==shape`
-        assert result.shape  # TODO: complete assertion check
-        # Transfer the device result to the host for an independent NumPy comparison.
-        np.testing.assert_allclose(result,2*np.asarray(a)+np.asarray(b),rtol=1e-6,atol=1e-6)
-print("Singleton and changed tails verified")
+import numpy as np
+import jax.numpy as jnp
+
+def verify_changed_kernel(wrapper, singleton_pair, changed_pair, block_choices):
+    # TODO: run both same-shaped input pairs under each block and check NumPy values.
+    raise NotImplementedError("Exercise singleton rows and nondivisible negative-valued tails")
 ```
 
 <details><summary>Reference solution</summary>
@@ -358,22 +361,26 @@ Require identical matrix shapes, not merely broadcast-compatible shapes.
 
 ### How to write: Reject a broadcast that changes the contract — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.zeros / jnp.ones(shape, dtype=...)` — Allocates a tensor of the given `shape` initialized with constants.
+**Inputs:**
+- A kernel wrapper and a (n,1) second input where the contract requires matching vector shape.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- A pre-launch validation error and its message.
+
+**Invariants to check:**
+- Shape validation happens before kernel execution.
+- Broadcast compatibility does not imply the documented input contract.
+
+**Hints:**
+- Check exact ranks and dimensions before creating a launch grid.
+- Make the failure distinguishable from arithmetic errors.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Reject a broadcast that changes the contract (Practice): The operation promises paired matrices.
-rejected = ...  # TODO: compute rejected
-try:blocked_axpy(x,jnp.ones((5,1),dtype=jnp.float32))
-except ValueError:rejected=True
-assert rejected  # TODO: complete assertion check
-print("Mismatched global shape rejected")
+def reject_broadcast_input(kernel_wrapper, values, column_values):
+    # TODO: call the wrapper and require its documented shape error.
+    raise NotImplementedError("Verify invalid broadcast shapes are rejected before launch")
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -405,22 +412,28 @@ Use integer ceiling division; do not time interpretation as accelerator performa
 
 ### How to write: Measure padding overhead without claiming runtime — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Inputs:**
+- Logical shapes (5,11) and (33,129), plus three valid block shapes.
+
+**Outputs:**
+- Program count and padded elements for each shape/block choice.
+
+**Invariants to check:**
+- Logical element count is invariant across tile choices.
+- Padded element count can rise even when program count falls.
+
+**Hints:**
+- Compute ceil-divided grid dimensions.
+- Report logical work and padded launch work as separate columns.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Measure padding overhead without claiming runtime (Challenge): Program count and padded work expose different costs.
-for shape in [(5,11),(33,129)]:
-    counts = ...  # TODO: compute counts
-    for bm,bn in [(2,4),(8,128),(16,256)]:
-        gm = ...  # TODO: compute gm
-        gn = ...  # TODO: compute gn
-        counts.append((bm,bn,gm*gn,gm*gn*bm*bn))
-    assert all(padded  # TODO: complete assertion check
-    print("Shape, block/program/padded counts:",shape,counts)
+import math
+
+def padding_report(shapes, blocks):
+    # TODO: calculate grids, program counts, and padded elements.
+    raise NotImplementedError("Quantify launch padding without making a timing claim")
 ```
 
 <details><summary>Reference solution and reasoning</summary>

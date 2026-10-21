@@ -15,7 +15,41 @@ import {
   workedExperiments,
   furtherPractice,
 } from './lesson-content.js';
-import { renderBuildStepCodeBreakdown, renderExerciseCodeTeacher } from './code-teaching.js';
+import {
+  isLearnerStarterContract,
+  renderBuildStepCodeBreakdown,
+  renderExerciseCodeTeacher,
+} from './code-teaching.js';
+
+/** Counts authored learner contracts across the exercise and all practice tasks. */
+/** @param {import('../types/course').LessonContent | undefined} content */
+export function learnerStarterCoverage(content) {
+  const contracts = [
+    content?.learnerStarter,
+    ...(content?.practice || []).map(
+      (/** @type {{ learnerStarter?: import('../types/course').LearnerStarterContract }} */ task) =>
+        task.learnerStarter,
+    ),
+  ];
+  return { ready: contracts.filter(isLearnerStarterContract).length, total: contracts.length };
+}
+
+/** Offer downloads only when every task has an authored learner contract. */
+/** @param {import('../types/course').Lesson['artifacts'] | undefined} artifacts @param {import('../types/course').LessonContent | undefined} content @param {'notebook' | 'script'} kind */
+export function learnerDownloadLink(artifacts, content, kind) {
+  const coverage = learnerStarterCoverage(content);
+  const notebook = kind === 'notebook';
+  const label = notebook ? 'notebook' : 'Python script';
+  const href = notebook ? artifacts?.learnerNotebook : artifacts?.learnerScript;
+  if (!coverage.total || coverage.ready !== coverage.total || !href) {
+    return `<p class="learner-starter-pending"><strong>Learner-only ${label} pending.</strong> ${coverage.ready} of ${coverage.total} task starters are authored; download appears when every task has its own contract.</p>`;
+  }
+  const coverageLabel =
+    coverage.ready === coverage.total
+      ? `${coverage.ready} task starter${coverage.ready === 1 ? '' : 's'}`
+      : `${coverage.ready} of ${coverage.total} task starters; ${coverage.total - coverage.ready} pending`;
+  return `<a class="button${notebook ? '' : ' learner-script-download'}" href="${escapeHtml(href)}" download>Download learner-only ${label} · ${coverageLabel}</a>`;
+}
 /**
  * Pure lesson view: escaped canonical content, with browser behavior bound separately.
  * @param {{
@@ -52,7 +86,7 @@ export function renderLesson({ phase, lesson, prerequisiteLinks, allLessons, ind
     `<p class="edition">Phase ${phase.number} / ${escapeHtml(phase.title)}</p><h1 id="lesson-title" tabindex="-1">${escapeHtml(lesson.title)}</h1>${revisionMarkup('lessons', lesson.id)}<p class="lesson-status">${authored ? `Lesson · about ${lesson.minutes} minutes · ${runtimeLabel(lesson)}` : 'TODO · lesson in progress'}</p>${authored ? materialNotice('lessons', lesson.id) : ''}<p>${inlineMath(lesson.objective)}</p><p><a href="phase-guides/${encodeURIComponent(phase.id)}.html">Phase study guide: preparation, milestones and project evidence</a></p><details class="before-start"><summary>Before you start</summary><p class="soft"><strong>Before this:</strong> ${prerequisiteLinks}<br><strong>Hardware:</strong> ${inlineMath(lesson.hardware || phase.hardware)}</p>${authored ? `<aside class="runtime-note"><strong>${runtimeLabel(lesson)}</strong><p>${escapeHtml(scope.description)}</p><p>${escapeHtml(scope.target)} <a href="lesson-tpu-05.html">Read the execution matrix</a>.</p></aside>` : ''}</details>` +
     (authored && c && artifacts
       ? `
-    <div class="lesson-artifacts">${c.setupBundle ? `<a class="button primary" href="${escapeHtml(c.setupBundle.url)}" download>${escapeHtml(c.setupBundle.title)}</a>` : ''}${!c.setupBundle ? `<a class="button" href="${escapeHtml(artifacts.notebook)}" download>Download notebook</a>` : ''}<details class="lesson-resources"><summary>Other downloads</summary>${c.setupBundle ? `<a href="${escapeHtml(artifacts.notebook)}" download>Lesson notebook</a>` : ''}<a href="${escapeHtml(artifacts.script)}" download>Python worked examples</a><a href="${escapeHtml(artifacts.markdown)}" download>Lesson text</a></details></div>
+    <div class="lesson-artifacts">${c.setupBundle ? `<a class="button primary" href="${escapeHtml(c.setupBundle.url)}" download>${escapeHtml(c.setupBundle.title)}</a>` : learnerDownloadLink(artifacts, c, 'notebook')}<details class="lesson-resources"><summary>Other downloads</summary><a href="${escapeHtml(artifacts.notebook)}" download>Worked reference notebook</a>${c.setupBundle ? learnerDownloadLink(artifacts, c, 'notebook') : ''} ${learnerDownloadLink(artifacts, c, 'script')}<a href="${escapeHtml(artifacts.script)}" download>Python worked examples</a><a href="${escapeHtml(artifacts.markdown)}" download>Lesson text</a></details></div>
     ${practiceDrawer(lesson)}
     <div id="lesson-stage-bar" class="lesson-stage-bar" data-active-stage="Understand" aria-label="Lesson stage progress">
       <div class="stage-bar-context">
@@ -95,7 +129,7 @@ export function renderLesson({ phase, lesson, prerequisiteLinks, allLessons, ind
         </div>
         <h2>Make it yours</h2>
         ${c.setupBundle ? '<p class="stage-code-guide"><strong>Where to make the change:</strong> Edit the existing <code>first_experiment.py</code> inside <code>jax-start-here</code>, then run it again using your OS-specific setup command. Save your prediction and output before opening the reference solution.</p>' : '<p class="stage-code-guide"><strong>Where to put your code:</strong> Modify your own <code>main.py</code>, or use the <em>Make it yours</em> cell in your downloaded notebook. Run your attempt in the declared environment and verify your prediction before opening the reference solution.</p>'}
-        ${prose(c.exercise)}${renderExerciseCodeTeacher(c.solution, 'How to write this exercise code')}<details><summary>Reveal the reference solution</summary>${codePanel(c.solution, 'Reference solution')}</details>
+        ${prose(c.exercise)}${renderExerciseCodeTeacher(c.solution, 'How to write this exercise code', c.learnerStarter)}<details><summary>Reveal the reference solution</summary>${codePanel(c.solution, 'Reference solution')}</details>
       </div>
       ${furtherPractice(c)}<form id="lesson-checkpoint" class="lesson-checkpoint"><h2>Check your understanding</h2>${prose(c.question)}${renderRadioGroup({ name: 'answer', legend: 'Choose one answer', required: true, options: c.options.map((label, i) => ({ value: String(i), label })) }, inlineMath)}<button class="primary" type="submit">Check my answer</button><p id="checkpoint-result" role="status"></p></form>
       ${c.diagnosis ? `<h2>Diagnose the result</h2>${prose(c.diagnosis)}` : ''}

@@ -261,56 +261,56 @@ visual_data={'kind':'line','x':[0,1,2,3],'xlabel':'captured step','ylabel':'host
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:30:17.832572+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:06:26.096930+00:00. JAX 0.9.2.
 
 ```text
-Trace directory: /private/var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-course-trace-w7v_e05c
+Trace directory: /private/var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-course-trace-3amanmzr
 {
   "input_wait_us": [
-    1412,
-    1157,
-    1506,
-    1507
+    1262,
+    1287,
+    1258,
+    1270
+  ],
+  "model_and_wait_us": [
+    81,
+    104,
+    66,
+    75
+  ],
+  "step_us": [
+    1352,
+    1405,
+    1329,
+    1353
+  ]
+}
+Four named steps verified; host annotations are not isolated device kernels.
+Trace directory: /private/var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-course-trace-em9_0u6i
+{
+  "input_wait_us": [
+    1272,
+    1261,
+    1248,
+    1261
   ],
   "model_and_wait_us": [
     77,
-    45,
-    37,
-    45
-  ],
-  "step_us": [
-    1498,
-    1209,
-    1547,
-    1554
-  ]
-}
-Four named steps verified; host annotations are not isolated device kernels.
-Trace directory: /private/var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-course-trace-x3ur39xu
-{
-  "input_wait_us": [
-    1255,
-    1509,
-    1317,
-    1509
-  ],
-  "model_and_wait_us": [
-    69,
-    97,
     47,
-    41
+    51,
+    113
   ],
   "step_us": [
-    1331,
-    1614,
-    1369,
-    1552
+    1358,
+    1313,
+    1306,
+    1379
   ]
 }
 Four named steps verified; host annotations are not isolated device kernels.
-Unattributed outer time, microseconds: [7, 8, 5, 2]
-Wrong double-counted totals: [2655, 3220, 2733, 3102]
-{'minimum_ms': 0.041, 'median_ms': 0.058, 'maximum_ms': 0.097}
+Unattributed outer time, microseconds: [9, 5, 7, 5]
+Wrong double-counted totals: [2707, 2621, 2605, 2753]
+{'minimum_ms': 0.047, 'median_ms': 0.064, 'maximum_ms': 0.113}
 Hypothetical union: 12 microseconds; summed duration: 19.
 PASS: performance-03
 
@@ -341,21 +341,30 @@ Convert every model interval to milliseconds and summarize its minimum, median a
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- Named nested trace intervals in a declared time unit.
 
-**Step-by-step implementation plan:**
-1. Exercise solution
+**Outputs:**
+- Per-model min/median/max and non-double-counted interval summaries.
+
+**Invariants to check:**
+- Nested event durations are not summed as independent wall time; small sample count is not a tail guarantee.
+
+**Hints:**
+- Convert units before summarizing.
+- Compute interval unions when events overlap.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-model_ms = np.asarray(...)  # TODO: compute model_ms
-summary = ...  # TODO: compute summary
-assert summary['minimum_ms']  # TODO: complete assertion check
-np.testing.assert_allclose(model_ms*1000,model_us)
-print(summary)
+import gzip
+import json
+from pathlib import Path
+
+def summarize_trace_intervals(intervals):
+    """Per-model min/median/max and non-double-counted interval summaries."""
+    # TODO: Parse interval units, identify nesting, and summarize model timings without double-counting overlaps.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -385,27 +394,29 @@ Sort endpoints and merge intervals that intersect.
 
 ### How to write: Compute a union instead of summing overlap — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Inputs:**
+- For hypothetical intervals [0,10], [2,7] and [8,12] microseconds, calculate their union duration and compare with their summed durations. Explain why this matters for nested host events.
+
+**Outputs:**
+- Union duration and naive sum in microseconds.
+
+**Invariants to check:**
+- Overlapping time is counted once in wall-clock union duration.
+
+**Hints:**
+- Sort endpoints and merge intervals that intersect.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-def union_duration(intervals):
-    total = ...  # TODO: compute total
-    left = ...  # TODO: compute left
-    for start,end in sorted(intervals):
-        if end<start:raise ValueError('negative interval')
-        if right is None:left,right=start,end
-        elif start<=right:right=max(right,end)
-        else:
-            total+=right-left
-            left,right = ...  # TODO: compute left,right
-    return ...  # TODO: return computed result
-assert union_duration([(0,10),(2,7),(8,12)])  # TODO: complete assertion check
-assert sum(b-a for a,b  # TODO: complete assertion check
-print('Hypothetical union: 12 microseconds; summed duration: 19.')
+import gzip
+import json
+from pathlib import Path
+
+def practice_compute_a_union_instead_of_summing_overlap(intervals):
+    """Implement the compute a union instead of summing overlap check."""
+    # TODO: Sort the three intervals, merge overlaps, and compare union duration with the sum of individual durations.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

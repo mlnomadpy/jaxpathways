@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "auditedAt": "2026-10-21",
-  "baseCommit": "972cbb07870ab60758bc9ce38540855c2275463e",
+  "baseCommit": "7554817ed19a26dabfb1e183220cf84308382906",
   "method": "Complete source/companion/receipt inventory and per-item scope review; exercises and transfer prompts inspected across all phases. Mathematical/code close review and visual inspection are selective, not a proof of every sentence or a novice/expert acceptance.",
   "levels": {
     "available-draft": "Material is available for its stated practice scope. Teaching review and learner validation are still pending.",
@@ -57,13 +57,15 @@
     {
       "id": "starter-contract",
       "priority": "P2",
-      "title": "Reference notebooks and generated scaffolds are practice aids, not independent assessment",
+      "title": "Learner-only contracts are authored; independent assessment calibration remains open",
       "evidence": [
         "src/lib/code-teaching.js",
-        "scripts/lesson-artifacts.mjs"
+        "scripts/lesson-artifacts.mjs",
+        "tests/learner-starters.test.mjs",
+        "docs/review-guide-0.11.md"
       ],
-      "action": "Author learner-only starter contracts and changed unseen fixtures where appropriate; keep solutions behind an explicit reveal and retain review rubrics.",
-      "status": "open"
+      "action": "Review all 303 authored task contracts and pilot unseen transfer cases. Learner-only downloads omit reference solutions and checkpoint answers; this author revision does not establish independent learner success or calibrated grading.",
+      "status": "partly-addressed"
     },
     {
       "id": "figure-review",
@@ -105,7 +107,7 @@
   ],
   "summary": {
     "byKind": {
-      "lessons": 103,
+      "lessons": 104,
       "phases": 22,
       "projects": 31,
       "plans": 10,
@@ -121,18 +123,18 @@
       "in-development": 13
     },
     "itemLevels": {
-      "available-draft": 164,
+      "available-draft": 165,
       "in-development": 28,
       "planned": 10
     },
-    "tasks": 529,
-    "lessonTasks": 403,
-    "projectStages": 126,
-    "currentCpuLessons": 103,
+    "tasks": 534,
+    "lessonTasks": 407,
+    "projectStages": 127,
+    "currentCpuLessons": 104,
     "currentProjectReferences": 31,
     "expertReviewedLessons": 0,
     "novicePilotedLessons": 0,
-    "choiceSpecificFeedbackLessons": 103,
+    "choiceSpecificFeedbackLessons": 104,
     "boundedHardwareQualifications": 4
   },
   "hardware": [
@@ -184,7 +186,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "welcome",
-      "sourceHash": "7349146bfb89a0191691280a1607bdda4fb252148e3435593c479b79d3458e03",
+      "sourceHash": "be81fcbaff1abe7a163395de0c2751a53830943f287f179c43b286822938f229",
       "metrics": {
         "sections": 9,
         "experiments": 0,
@@ -209,7 +211,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "welcome",
-      "sourceHash": "5a6f10547a54450186f2f2d4f8f2cfbd9a68e7fc505e96b95c2233cea0737a56",
+      "sourceHash": "453197dfdde304329632ce9bee8977fe753229c974c1324aa123655e6d4aae79",
       "metrics": {
         "sections": 5,
         "experiments": 2,
@@ -234,7 +236,7 @@
       "validation": "Logical CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "welcome",
-      "sourceHash": "8e93fd9b2925e0275bf23ae9483c8fc381cd5f6a8a94b36d37a2b2a5e46d457d",
+      "sourceHash": "b641c0dec203c4fd63473c3aa5372639c9bb1bd0c385e33c30127991782c3e06",
       "metrics": {
         "sections": 5,
         "experiments": 2,
@@ -259,7 +261,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "welcome",
-      "sourceHash": "f5b891b4fe92a08bc949d2b94d82b84f827da76d767939edcb81645a9858ccb1",
+      "sourceHash": "0cffd6b03cfec61fec5722e22ad761521fc24a5d658f10d9bc42d1ec6ff3f77d",
       "metrics": {
         "sections": 7,
         "experiments": 1,
@@ -300,7 +302,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "arrays",
-      "sourceHash": "65ce2586590122f3ab68587bbb8c9a192fda36a1284cfcb5a85e2783a879e160",
+      "sourceHash": "9c5682baecb4c71d6b8ba59142c631d83f74574267e31ce3983f3477e3999bb6",
       "metrics": {
         "sections": 6,
         "experiments": 2,
@@ -325,7 +327,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "arrays",
-      "sourceHash": "625c2c258a89ecc949121f5676211ecab26958b685176cbd34a66e63ff23ac25",
+      "sourceHash": "e5e35f817715f6e74313ec3337d20b85c23cfd62a84064fde4306547b45ba970",
       "metrics": {
         "sections": 6,
         "experiments": 2,
@@ -350,7 +352,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "arrays",
-      "sourceHash": "4ee1c73d46ac07af0c4bbc69566ecefb1da48af3318bc5639d9722114cfa4235",
+      "sourceHash": "731b1f9ccdc0ace8e172dee67d20b9a4389a3ceec4976b39927273c23c5285c5",
       "metrics": {
         "sections": 6,
         "experiments": 2,
@@ -375,7 +377,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "arrays",
-      "sourceHash": "b49c73f8d3bc4a8532ff2d5aa22c505c6d65a5a9680f78635aecccf5082e2ab4",
+      "sourceHash": "abc8895132dec29e2fc17eb59ae76b28e4e51e5ca8fc27c442e7b1346beecea9",
       "metrics": {
         "sections": 6,
         "experiments": 2,
@@ -416,7 +418,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "transforms",
-      "sourceHash": "b5fce64c4d1a88dd634b22ba67ca5894e4810cfdc4f03fd31eab49ff36663ee1",
+      "sourceHash": "7a9dcfa2c2cbddc1e328e928375e74688ee74b505bdab45a62bddfe72a5bf5b3",
       "metrics": {
         "sections": 6,
         "experiments": 2,
@@ -441,7 +443,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "transforms",
-      "sourceHash": "82e7295997b99fcbb246678a6e4cb0fb4ec16c44669d7fe7fcf2261d16d8fc37",
+      "sourceHash": "039bc996e592df8fe92c2533d46524e96599357c58fb952fa5ab501955582be0",
       "metrics": {
         "sections": 6,
         "experiments": 2,
@@ -466,7 +468,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "transforms",
-      "sourceHash": "2d5c3a3a9938d2e21496cad666c19c6c2cbc82908e8a788ea2d70b259dc1537c",
+      "sourceHash": "550145f1b48061ac3b039d0a1b65be6e46876140cf16bfbdc25e055b6721c493",
       "metrics": {
         "sections": 7,
         "experiments": 2,
@@ -491,7 +493,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "transforms",
-      "sourceHash": "3cc83bffe28e858f9a8bf014ae3435e94d05e4664fb0f86f210852a81fb67a69",
+      "sourceHash": "d721e8983fc6c60c71b1fe05d7843828601e69b0f9b46869323099ec9c7ba31d",
       "metrics": {
         "sections": 7,
         "experiments": 2,
@@ -516,7 +518,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "transforms",
-      "sourceHash": "e0452a2d8f19031329399acc1531b4ca6a8ed3ec1ad7d49464969e9b24a44690",
+      "sourceHash": "be317959804798f14933f1a2517d77e635fbe27b402c49b0d9d0a38a1f611b41",
       "metrics": {
         "sections": 7,
         "experiments": 2,
@@ -557,7 +559,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "state",
-      "sourceHash": "d145f9fd3dc8dc79909a81f3906b2a7e15646c94cb3e0565852730fed01af84b",
+      "sourceHash": "1111d087a1fa7e18b86e6899e083ee70019bfcfcb7e45fc1ac41984149c452b5",
       "metrics": {
         "sections": 5,
         "experiments": 2,
@@ -582,7 +584,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "state",
-      "sourceHash": "0cc8e47415c7a39f4cb5fe41b2fafa25b5c71498b455598e9e27350d3a72479a",
+      "sourceHash": "7d5dabe92b4a5e262abfa6dda173700bf377c9d18275cbb17ce1e2d719426e8e",
       "metrics": {
         "sections": 5,
         "experiments": 2,
@@ -607,7 +609,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "state",
-      "sourceHash": "56a80cdf04d5cf81832a1abf842180ad212d94ef6d80a920e614770c41898f88",
+      "sourceHash": "127cebda841a48bf585e1af938faeeb9ccdf4047a0daf5f2220ee6c293b1a021",
       "metrics": {
         "sections": 5,
         "experiments": 2,
@@ -632,7 +634,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "state",
-      "sourceHash": "83046dd71a9ef2806c7fb9dc7ab612b435b13117bd850f9aaa97e0c950a4f521",
+      "sourceHash": "ead3cd7cc404640bee789fb39c268c9b5ff1b64ec3368ce7a4d0001926ff1510",
       "metrics": {
         "sections": 5,
         "experiments": 2,
@@ -673,7 +675,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "optimization",
-      "sourceHash": "cf99d0952b2b8630e1595c8c5e8b39afa5f3802b574f27db93a5b0a8080e8d25",
+      "sourceHash": "cd065a1bd4c0dd31c617b0732f940423e3daa26d996a164d35d0deae030d644f",
       "metrics": {
         "sections": 5,
         "experiments": 2,
@@ -698,7 +700,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "optimization",
-      "sourceHash": "c845c3ebe930bbf332f5ee32a6491584fb74f02ec7d671a1e95a38f250bf29a9",
+      "sourceHash": "73a87819d5650bfb9786f0e0c77cd64f624248608f32957c08d9056e5922a8eb",
       "metrics": {
         "sections": 6,
         "experiments": 3,
@@ -723,7 +725,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "optimization",
-      "sourceHash": "cdbcc081ffa4b0ab2a81660b3939770e7bc2601c0fb1a412af12d6001ed3eb15",
+      "sourceHash": "bacfcbc2fec02bdcb99e9b76e0a362d69fc729d88318c604b73833ab4540eb2d",
       "metrics": {
         "sections": 5,
         "experiments": 2,
@@ -748,7 +750,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "optimization",
-      "sourceHash": "74e739c4de0ac4bd2fcc9aeabe2f8a1417d3a067b3152515bd2f28b8b68e696c",
+      "sourceHash": "4788f614bf811fa94db374bddada156bab25b53606ccda9ecbf66fe54c2435d3",
       "metrics": {
         "sections": 5,
         "experiments": 2,
@@ -773,7 +775,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "optimization",
-      "sourceHash": "5c7d07cbba6eb3a32aa65018695f01a0422e35388dfb2d9e1ee70eeeef04a781",
+      "sourceHash": "05c07c6f3f39d7ebef54b7aee3d5eec8bb7c1b772e3474c50261b32f43625f80",
       "metrics": {
         "sections": 6,
         "experiments": 3,
@@ -798,7 +800,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "optimization",
-      "sourceHash": "05585ca4208bf46fc7ceac6e73782a564842ebad96cb9dc89617fadb33e026bc",
+      "sourceHash": "ebbd2eb3a96d86c5eef13bfddbb89479f43237ffee18b47b86d99728d4dc9cf7",
       "metrics": {
         "sections": 5,
         "experiments": 2,
@@ -823,7 +825,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "optimization",
-      "sourceHash": "69a3a02265a3e7123fbe514c5fbb6e51bcf84b00fc80a451345580467d0ebc35",
+      "sourceHash": "4fdd783e8ebe388d16924c84275ff3a2f8e07c4180573acd838c7859b3ef4155",
       "metrics": {
         "sections": 6,
         "experiments": 3,
@@ -848,7 +850,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "optimization",
-      "sourceHash": "ad68a6860def86dc2b87094ae03c1b2af07885418dcbc11c0c9b11d09a65ace6",
+      "sourceHash": "0e116115c141e85173400fd745a6517fd3cf457265ce1fc8f0d9e5920228d5ac",
       "metrics": {
         "sections": 5,
         "experiments": 2,
@@ -873,7 +875,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "optimization",
-      "sourceHash": "24c713f1d5ff85899ae5b7674557cc9676fe1de3f71611c98003abefc103b0d1",
+      "sourceHash": "ea7fc538f9c4ddfd4ad55f0ad4a8d558d12f35c2c619538bdb0e7c4185c25498",
       "metrics": {
         "sections": 5,
         "experiments": 2,
@@ -898,7 +900,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "optimization",
-      "sourceHash": "98ccbf12e54ff605417dbe687dd67011ab9402ddc6c8c46da98445ebf99c2dc6",
+      "sourceHash": "e3bb3a10a83f49cb645530c15ecc87ecced517e1c32e440493e7455b200c6a42",
       "metrics": {
         "sections": 5,
         "experiments": 2,
@@ -923,7 +925,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "optimization",
-      "sourceHash": "7b6843f14c0e2fdb30f860a4f4ef8d6853c9ee4ae98cb19f6a89f48b7713b8ee",
+      "sourceHash": "644c72048c5f9d010a1f7f32e5314393e85be0a08a8b5509ca9e255446e89b3a",
       "metrics": {
         "sections": 6,
         "experiments": 3,
@@ -948,7 +950,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "optimization",
-      "sourceHash": "fca61277542fdd0c0b7060cf4400124fa3e940c89c2a24dd8ffd6915f58d71b4",
+      "sourceHash": "7e31a860ba95bc3a5de478bfff7f11c2a14af09f057a40bd77282cbb058b3602",
       "metrics": {
         "sections": 6,
         "experiments": 2,
@@ -989,7 +991,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "networks",
-      "sourceHash": "0759eb113d93778f6f7d8da368bc7cec31cf56f5d521ff88f62e6357bd2c3da6",
+      "sourceHash": "fbf7b99a3dd4c3534bf2625027ca97cf49f446810f60665a1c89bc9cd63e7fc4",
       "metrics": {
         "sections": 6,
         "experiments": 2,
@@ -1014,7 +1016,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "networks",
-      "sourceHash": "ffee3c31b4e89ea66bc2e5aae4af441f878bbd547b645fbbc661987cbf07754e",
+      "sourceHash": "80aa62bb3122f62e9eb19efa07cd2b01d37eb8e4103fde5e1ce1196db551dacd",
       "metrics": {
         "sections": 5,
         "experiments": 2,
@@ -1039,7 +1041,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "networks",
-      "sourceHash": "e7b694e9cf0a1dbf8c8a33a9ae101eb24ac90248f5f8eef6a69e7b3dc216b899",
+      "sourceHash": "9481319f90191f78b23a8aa2ccfefd13602af083049d52e74b044882e219031d",
       "metrics": {
         "sections": 5,
         "experiments": 2,
@@ -1064,7 +1066,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "networks",
-      "sourceHash": "9ff5f136e309966b568999ef98e6949ad4313e97ebc61d7534f12c95cc4a5af5",
+      "sourceHash": "155a7aea7a1911e1f05afabe59c6069018cacaeb748ab92b8d4744dc4fb70bbd",
       "metrics": {
         "sections": 5,
         "experiments": 2,
@@ -1089,7 +1091,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "networks",
-      "sourceHash": "2dd6cb55e5049921d8d4365c3da08a483b3d25c30c4faf2b110aba62d2a88391",
+      "sourceHash": "ab5ea6cd4307680501d01319c555aa25a71aafb80ea99fe2ea883cd94bf19ae3",
       "metrics": {
         "sections": 5,
         "experiments": 2,
@@ -1130,7 +1132,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "recovery",
-      "sourceHash": "1dc6ee64127bb87a41ed513d7f6b6ed898b983af084d35d5c0c9c8ff3ab94c38",
+      "sourceHash": "cdada437698d308adfc0758e6da03c67313b30cd8263862352e4aef2145696bf",
       "metrics": {
         "sections": 5,
         "experiments": 2,
@@ -1155,7 +1157,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "recovery",
-      "sourceHash": "a4ccf941274c36161bdd4c09a03743789804e768e4b638a7b949a6f0dfe10723",
+      "sourceHash": "57f6194cfee77d071086254bca5501b6fb213646dd9d2dd0e93835e71530b5ea",
       "metrics": {
         "sections": 5,
         "experiments": 2,
@@ -1180,7 +1182,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "recovery",
-      "sourceHash": "a1a37fdad5ac92073bfb48bb1881c3dc8488e26ab64e148d1cd7a0604c202091",
+      "sourceHash": "0365474559a216bf166c4825fc8b6d325c045bc812c597bd997926f78a168467",
       "metrics": {
         "sections": 5,
         "experiments": 2,
@@ -1205,7 +1207,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "recovery",
-      "sourceHash": "14cd0bfcb0332a73bd93b7f332ca93864cc3badab044fec55cabbcb3c7c3e903",
+      "sourceHash": "f0bd20bc4fec090f4aa3d4688aaf91b39ff2a078b37a490c2224417d0421c926",
       "metrics": {
         "sections": 5,
         "experiments": 2,
@@ -1230,7 +1232,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "recovery",
-      "sourceHash": "fdff635cbc86f6c6257305cc64d2107b6b2d88ac855ff0bfa33f6ef0a5e6f73e",
+      "sourceHash": "aae7622d4463a28b13c2ddc5123290f82643ef5d69473e19b31657068df3c483",
       "metrics": {
         "sections": 6,
         "experiments": 1,
@@ -1255,7 +1257,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "recovery",
-      "sourceHash": "80dad7b807fa74e5e245270fd469bcb1949f7bae9a5af2f621f924fdcd7e67fc",
+      "sourceHash": "86f40f9b698e86b5ea30e3e8b39c44f195e2b0138964740321f00fef87b87d31",
       "metrics": {
         "sections": 7,
         "experiments": 1,
@@ -1296,7 +1298,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "transformers",
-      "sourceHash": "97642e0575047f8da8364fba7d6de1f2daa70dc33275815ba6c29fd318e5d7d1",
+      "sourceHash": "39fcd1ca11222d1e67abd45bc92d39188253debb016f39efee8e3e1f9bd06c46",
       "metrics": {
         "sections": 6,
         "experiments": 2,
@@ -1321,7 +1323,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "transformers",
-      "sourceHash": "a73d71f63211a82d51e6737e04a1b65c67fe58cb6fd82ccfad24b2f541513cec",
+      "sourceHash": "4df868dfd6e73e87c43642aef43578f4bf6ca1693f8d032f379b47f4a0b688e0",
       "metrics": {
         "sections": 6,
         "experiments": 2,
@@ -1346,7 +1348,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "transformers",
-      "sourceHash": "7ab9edfe4c1373ef5eb9b8480849eae7d468d05563af2ecf5a2dfeac5527ed9f",
+      "sourceHash": "a704dc96cd5390e9fdbc72908206fb47cfa3ff8c5e63e637dcdd0c9ff92a734f",
       "metrics": {
         "sections": 5,
         "experiments": 2,
@@ -1371,7 +1373,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "transformers",
-      "sourceHash": "777a2289b422eddcdcea91ed06ad4dc45c530f8940dab2c9d4c1423b03528b81",
+      "sourceHash": "8d8b1cca9cbbfc463f1b3fe3e44100534ab07a47d1011428dea28a4e00c8efd9",
       "metrics": {
         "sections": 6,
         "experiments": 2,
@@ -1412,7 +1414,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "performance",
-      "sourceHash": "5a7271813ed4860ccfc8ed2f6ddee3fdb0d3e378458e797dc3fad4d7da6ca612",
+      "sourceHash": "85a440072dadd40218f394fe012b6ca5a88bd0e1e9f8c125c05910dcc0773d08",
       "metrics": {
         "sections": 5,
         "experiments": 2,
@@ -1437,7 +1439,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "performance",
-      "sourceHash": "71822916ff71e853098e215e838dcf94470302c838b025ccb7635abd7f08ae1c",
+      "sourceHash": "3ac3cce45d0eb06e94e73e67f15ecddd463be68124ad48825f95d22ed87e9705",
       "metrics": {
         "sections": 5,
         "experiments": 2,
@@ -1462,7 +1464,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "performance",
-      "sourceHash": "09d75f28837b99abedd74e2db5168a03887700493e4e25df680cf6fb00ac1d37",
+      "sourceHash": "0e5df397dcf57d17f4a9edf39d20645213d63d0acb28261810126d34f74f2bf8",
       "metrics": {
         "sections": 6,
         "experiments": 1,
@@ -1487,7 +1489,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "performance",
-      "sourceHash": "5c797410f553331c5da7e62152796a5d03dc861026f060811e9ba10feb87e28e",
+      "sourceHash": "bf053e5000a75083976a7c9a6b77e9deb02201f7d3d3608a828741f4e86f2894",
       "metrics": {
         "sections": 6,
         "experiments": 1,
@@ -1512,7 +1514,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "performance",
-      "sourceHash": "014003db450f4d8bb72506a3aba9d44c228fc8a0d7e2d31bcec36078e146309d",
+      "sourceHash": "9dc879729b95e651e20ab7a7bd77774c02f52554414a1b6915d52ecbfdff7b79",
       "metrics": {
         "sections": 6,
         "experiments": 1,
@@ -1553,7 +1555,7 @@
       "validation": "Logical CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "distributed",
-      "sourceHash": "a111cdedbe40d49514ac3a1c177897af0ac7394a329c5773661655fbc1611707",
+      "sourceHash": "09f62871ba36e8da00f15878458eee53ba0424ad57aa82a4065bf9db9f724f3d",
       "metrics": {
         "sections": 5,
         "experiments": 2,
@@ -1578,7 +1580,7 @@
       "validation": "Logical CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "distributed",
-      "sourceHash": "0aa86f2211ab702f117926df44260c8652dcb8b32cfe8893404e769d4ebed427",
+      "sourceHash": "cd2940677cdca6fbea267433557efa441abe42fa14a60de9716d6c6cc3641336",
       "metrics": {
         "sections": 5,
         "experiments": 2,
@@ -1603,7 +1605,7 @@
       "validation": "Logical CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "distributed",
-      "sourceHash": "0f3e6c962164b55fa0cf96198f4f94fdb096638c6531d10b0301da9deec14e43",
+      "sourceHash": "7e8030ff1df539475ca7b07f15be850009cce6d9ffadb66a38dddb66de2cf46e",
       "metrics": {
         "sections": 6,
         "experiments": 1,
@@ -1628,7 +1630,7 @@
       "validation": "Logical CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "distributed",
-      "sourceHash": "9a117b14c895206d816bb5f176fa252869da17fa204d2ddad1261d7940cc4203",
+      "sourceHash": "a07b5c3037b8b35a11e45e2f62ac33eedc89bf9f1870c68640a83767e9f6f079",
       "metrics": {
         "sections": 6,
         "experiments": 1,
@@ -1669,7 +1671,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "science",
-      "sourceHash": "3dc4e29821a88b9d5c4adce22dd7d5bd04a4879bd193cbc3d97184f614653e6e",
+      "sourceHash": "57652b72fddba823d7f54206af80bca313c1771b8ae8bb574c14c425d55bb2de",
       "metrics": {
         "sections": 6,
         "experiments": 2,
@@ -1694,7 +1696,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "science",
-      "sourceHash": "5f9c787a19f6cb2dd56429b6e58203d20e0739261dbb537bd5db7f1687f80d7c",
+      "sourceHash": "df1990f04e64d18a8b09b9ab313123c2dd67bf06ed82b7fe207394913f3ed406",
       "metrics": {
         "sections": 6,
         "experiments": 2,
@@ -1719,7 +1721,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "science",
-      "sourceHash": "8df9893ce7f4116615917f1b944521fd3383a67e23062b32ece54b55c5991b4a",
+      "sourceHash": "4d5f48d73db38bce05cca4b573a4b540c5a31339593ea8b6024266504cc1e92b",
       "metrics": {
         "sections": 6,
         "experiments": 2,
@@ -1744,7 +1746,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "science",
-      "sourceHash": "7705d973dc3a041f6629e016654e8b54c4ed179632824578b7b509194b84e7f1",
+      "sourceHash": "31ffc184f76f483a8b607f5bf7118deb5921d625cf5a6699d1040488d7d81180",
       "metrics": {
         "sections": 8,
         "experiments": 2,
@@ -1781,11 +1783,11 @@
       "source": "phases/11-probability/01-distributions-and-sampling/lesson.json",
       "level": "available-draft",
       "summary": "Distinguish samples, density, variance and standard error Check normal moments against independent analytic expectations",
-      "contribution": "Add a real NumPyro or equivalent library workflow, modern chain diagnostics and a deliberately failing posterior predictive check.",
+      "contribution": "Review the probabilistic assumptions with a specialist and extend the synthetic model checks to a licensed real-data case with calibrated predictive evaluation.",
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "probability",
-      "sourceHash": "8854eb201368b5c836837245756e7103edffbf5011b90228d5cbcde871a48317",
+      "sourceHash": "1732880ec4fd32849c0d51d1315ecb94bfe73cf9cac225a151d0b3533baaa256",
       "metrics": {
         "sections": 5,
         "experiments": 2,
@@ -1806,11 +1808,11 @@
       "source": "phases/11-probability/02-build-a-bayesian-regression/lesson.json",
       "level": "available-draft",
       "summary": "State the prior, likelihood and observation-noise assumptions Derive posterior precision and check a closed-form special case",
-      "contribution": "Add a real NumPyro or equivalent library workflow, modern chain diagnostics and a deliberately failing posterior predictive check.",
+      "contribution": "Review the probabilistic assumptions with a specialist and extend the synthetic model checks to a licensed real-data case with calibrated predictive evaluation.",
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "probability",
-      "sourceHash": "18d790b07297cef7b877d6d7773131e27a57a6ec7978bc2c10227e52f575de9e",
+      "sourceHash": "3404f7174e13cb909f0b3248272e7b7a89f756b6b9932a17845f5700ad02eeeb",
       "metrics": {
         "sections": 6,
         "experiments": 2,
@@ -1831,13 +1833,13 @@
       "source": "phases/11-probability/03-hamiltonian-monte-carlo-and-sampler-diagnostics/lesson.json",
       "level": "available-draft",
       "summary": "Implement leapfrog with the correct half-step boundaries Check reversibility and an independent analytic gradient",
-      "contribution": "Add a real NumPyro or equivalent library workflow, modern chain diagnostics and a deliberately failing posterior predictive check.",
+      "contribution": "Review the probabilistic assumptions with a specialist and extend the synthetic model checks to a licensed real-data case with calibrated predictive evaluation.",
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "probability",
-      "sourceHash": "32329b0c924674d91f4395d34e57b98114ee93e202244f3f36295dfeb15f1c37",
+      "sourceHash": "4281e8b1c0c7a9e27242557230d9769b6c05315f43c024743289f026bf8437b6",
       "metrics": {
-        "sections": 6,
+        "sections": 7,
         "experiments": 2,
         "practice": 2,
         "references": 3,
@@ -1856,11 +1858,11 @@
       "source": "phases/11-probability/04-variational-inference-and-model-checking/lesson.json",
       "level": "available-draft",
       "summary": "Derive the diagonal Gaussian variational optimum for a correlated target Separate optimization error from variational-family error",
-      "contribution": "Add a real NumPyro or equivalent library workflow, modern chain diagnostics and a deliberately failing posterior predictive check.",
+      "contribution": "Review the probabilistic assumptions with a specialist and extend the synthetic model checks to a licensed real-data case with calibrated predictive evaluation.",
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "probability",
-      "sourceHash": "818793d65359166226c56348e9c1844a4f43f5376eae78059e2e20f8a1f99ebf",
+      "sourceHash": "ce10cff942c731bf3b8908107c924f04f4536c97e020560657637a6004b6e105",
       "metrics": {
         "sections": 6,
         "experiments": 2,
@@ -1880,8 +1882,8 @@
       "url": "phase-guides/probability.html",
       "source": "curriculum/course.json",
       "level": "in-development",
-      "summary": "Exact Bayesian regression, instructional HMC and VI provide independent oracles.",
-      "contribution": "Add a real NumPyro or equivalent library workflow, modern chain diagnostics and a deliberately failing posterior predictive check.",
+      "summary": "Exact Bayesian regression, instructional HMC/VI and an optional real NumPyro workflow with raw chains, modern diagnostics and paired model-mismatch checks.",
+      "contribution": "Review the probabilistic assumptions with a specialist and extend the synthetic model checks to a licensed real-data case with calibrated predictive evaluation.",
       "validation": "4/4 current CPU references",
       "review": "Teaching review pending",
       "metrics": {
@@ -1897,11 +1899,11 @@
       "source": "phases/12-rl/01-write-a-functional-environment/lesson.json",
       "level": "available-draft",
       "summary": "Implement reset and step as pure functions with explicit state. Distinguish termination, time-limit truncation and an absorbing finished state.",
-      "contribution": "Implement a learned value function, GAE and timeout bootstrapping before extending to continuous actions or larger benchmark environments.",
+      "contribution": "Connect the learned critic and GAE to actor updates, then evaluate larger tasks or continuous actions with independent learner and expert review.",
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "rl",
-      "sourceHash": "1ce5762143ea14a68861f19d470a1d4e072cd0732a88491a73756cba415b807a",
+      "sourceHash": "4b18d87b426ade6c3fd228d95e86fde8a786fa52ef95ad5c880f2612d25c3fd1",
       "metrics": {
         "sections": 6,
         "experiments": 2,
@@ -1922,11 +1924,11 @@
       "source": "phases/12-rl/02-batch-environments-and-scan-rollouts/lesson.json",
       "level": "available-draft",
       "summary": "Build a scan over vmapped transitions with explicit key ownership. Reconstruct episode returns and reward-to-go from padded trajectories.",
-      "contribution": "Implement a learned value function, GAE and timeout bootstrapping before extending to continuous actions or larger benchmark environments.",
+      "contribution": "Connect the learned critic and GAE to actor updates, then evaluate larger tasks or continuous actions with independent learner and expert review.",
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "rl",
-      "sourceHash": "479ca9e67698abee0b60c33233e28919579c973b257a4a1f6ef8b41159f89a13",
+      "sourceHash": "74a5427a6815a7293a5a09e82e674666590034f4d6a092e27b73cd04eb01e73f",
       "metrics": {
         "sections": 6,
         "experiments": 2,
@@ -1947,11 +1949,11 @@
       "source": "phases/12-rl/03-policy-gradients-and-ppo/lesson.json",
       "level": "available-draft",
       "summary": "Derive and implement the score-function policy gradient for complete episodes. Train with fresh stochastic rollouts and a fixed behavior policy per PPO batch.",
-      "contribution": "Implement a learned value function, GAE and timeout bootstrapping before extending to continuous actions or larger benchmark environments.",
+      "contribution": "Connect the learned critic and GAE to actor updates, then evaluate larger tasks or continuous actions with independent learner and expert review.",
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "rl",
-      "sourceHash": "9339626f997ba770399f90993de93af13798f499a6e33e2c05e39f9666d28f2f",
+      "sourceHash": "ca30eab5328b13074f97a434318edbf29023940e246726bc44b50c4c96813bf4",
       "metrics": {
         "sections": 7,
         "experiments": 2,
@@ -1972,13 +1974,38 @@
       "source": "phases/12-rl/04-evaluate-agents-across-seeds/lesson.json",
       "level": "available-draft",
       "summary": "Separate training seeds, evaluation streams and individual episodes. Report per-agent means and variability with an explicit aggregation unit.",
-      "contribution": "Implement a learned value function, GAE and timeout bootstrapping before extending to continuous actions or larger benchmark environments.",
+      "contribution": "Connect the learned critic and GAE to actor updates, then evaluate larger tasks or continuous actions with independent learner and expert review.",
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "rl",
-      "sourceHash": "b4e812af9e8244b04cdc5ef583af3dfd8f6fcfbc961afa73bc14be74bd1088a1",
+      "sourceHash": "31a258a2e7cea8ad94c188650370997f46e7373f3df6f39c317ab7583972557c",
       "metrics": {
         "sections": 7,
+        "experiments": 2,
+        "practice": 2,
+        "references": 4,
+        "expertReviewed": false,
+        "novicePiloted": false,
+        "missing": [],
+        "missingFiles": [],
+        "choiceSpecificFeedback": true
+      }
+    },
+    {
+      "kind": "lessons",
+      "id": "rl-05",
+      "title": "Learn value functions and generalized advantage estimation",
+      "url": "lesson-rl-05.html",
+      "source": "phases/12-rl/05-learn-values-and-gae/lesson.json",
+      "level": "available-draft",
+      "summary": "Fit a tabular value function from retained trajectories and estimate GAE with terminal and collector-cutoff semantics explicit.",
+      "contribution": "Connect the learned critic and GAE to actor updates, then evaluate larger tasks or continuous actions with independent learner and expert review.",
+      "validation": "CPU reference checked",
+      "review": "Expert review pending; learner pilot pending",
+      "phaseId": "rl",
+      "sourceHash": "91cd0755e49ed028441b8c19c43b4b7b7f0dd1af4e912c49b23e6ff4709cd535",
+      "metrics": {
+        "sections": 4,
         "experiments": 2,
         "practice": 2,
         "references": 4,
@@ -1996,13 +2023,13 @@
       "url": "phase-guides/rl.html",
       "source": "curriculum/course.json",
       "level": "in-development",
-      "summary": "A tabular environment, policy updates and paired-seed evaluation have exact finite-task checks.",
-      "contribution": "Implement a learned value function, GAE and timeout bootstrapping before extending to continuous actions or larger benchmark environments.",
-      "validation": "4/4 current CPU references",
+      "summary": "Tabular policy objectives, paired-seed evaluation, a separately learned value table and explicit GAE terminal/cutoff/reset checks have bounded CPU references.",
+      "contribution": "Connect the learned critic and GAE to actor updates, then evaluate larger tasks or continuous actions with independent learner and expert review.",
+      "validation": "5/5 current CPU references",
       "review": "Teaching review pending",
       "metrics": {
-        "lessons": 4,
-        "estimatedMinutes": 360
+        "lessons": 5,
+        "estimatedMinutes": 405
       }
     },
     {
@@ -2017,7 +2044,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "kernels",
-      "sourceHash": "b82305aa59f8f4070ca8a6c5d791048e2438f7ae06cfed1f5c8344896fc0d5ef",
+      "sourceHash": "5c2bf71a7aad7ee0646907ed755c064137f9d20f71ce5548a5b1e5b45fe61c80",
       "metrics": {
         "sections": 6,
         "experiments": 2,
@@ -2042,7 +2069,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "kernels",
-      "sourceHash": "94f6f3352f12b4ec2061861952d1f928425679e5a33e334bd98bba4273ff8fd7",
+      "sourceHash": "96259401a10fe98cb952e3a73d9f90688495a34642ff9d4b9134d49cbb39a459",
       "metrics": {
         "sections": 7,
         "experiments": 2,
@@ -2067,7 +2094,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "kernels",
-      "sourceHash": "2281232a637a34a2a776ef6295de7a4a38f0f0f8581d75f1e1b4816295548c90",
+      "sourceHash": "d055015bab85ae0aa31a5c589baff7dac35e7ad8214350b02b445eee543083c1",
       "metrics": {
         "sections": 7,
         "experiments": 2,
@@ -2092,7 +2119,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "kernels",
-      "sourceHash": "388c0e179e386b16d7eacfed27351fede7e483e7f1405b7edb6fa033ed83f99c",
+      "sourceHash": "539994a05e58aadcdc6277f1e7a736bfd73e4d4857be2bcec7b54cdd38e4b4e0",
       "metrics": {
         "sections": 7,
         "experiments": 2,
@@ -2133,7 +2160,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "internals",
-      "sourceHash": "d142a0104f97cee0cda4ee449596bcdc9c7b00a4f1298ebe9410a56d401427de",
+      "sourceHash": "2e9e50f31b24be6130d2c69b87c2a788bfe503494e8d655849b5831faaab95cb",
       "metrics": {
         "sections": 7,
         "experiments": 2,
@@ -2158,7 +2185,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "internals",
-      "sourceHash": "2947ac9cf1adda4b1a171abcd11a2cd406196d2bede49df0128b90993ab0de4e",
+      "sourceHash": "5c808b39d0d3f3a8b5eb39795e8447cd0949c800570328cffe8c2a7f9f6c2e38",
       "metrics": {
         "sections": 7,
         "experiments": 2,
@@ -2183,7 +2210,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "internals",
-      "sourceHash": "ef1fb634522d4661d539137333269b84d4c7800a8cf444a9af67e3ec789ab418",
+      "sourceHash": "e3df22609e6a6a7c24b527fd38a21e9fe129076db0cd92118487f4ed2a291b83",
       "metrics": {
         "sections": 7,
         "experiments": 2,
@@ -2208,7 +2235,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "internals",
-      "sourceHash": "8d5a500a6b4db94f27f2ba57879f7f7073f58adc6f3046ae47788de3edbe80bf",
+      "sourceHash": "ac99e692d472d6b8f022a56f82053f0ce991b3a1e094b23e4504a237227f41b5",
       "metrics": {
         "sections": 7,
         "experiments": 2,
@@ -2249,7 +2276,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "deployment",
-      "sourceHash": "4f15985ed321ae3e475fc34da2427047a9d4023aedc132e7b9b190c27c6c0268",
+      "sourceHash": "d4ac83c7e753056dbeb701781439cf6d67da1ed7deba7b9aa9a273ee9895b0ab",
       "metrics": {
         "sections": 8,
         "experiments": 2,
@@ -2274,7 +2301,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "deployment",
-      "sourceHash": "ed11aebbd5248a8da1ea8b386c78c1252f2ba32b40e02d80b58c3df80190540b",
+      "sourceHash": "e9b63b274915419309fe9bcb9fa44f1f82297a2228ab3f0240b816d0ec8bace9",
       "metrics": {
         "sections": 9,
         "experiments": 2,
@@ -2299,7 +2326,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "deployment",
-      "sourceHash": "246a351c5c547d7d2a807a1caceab64efff16cb1ab0ade0f0208b1f7db023324",
+      "sourceHash": "f86cfd251fd5b8c12d8e4ceb587a7eac1adf2a6617ca86fc910168cee0294c6d",
       "metrics": {
         "sections": 9,
         "experiments": 2,
@@ -2324,7 +2351,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "deployment",
-      "sourceHash": "18fb85b08abccd7332bf8f72e23ecd5b8c7e7ab20352b4ba868722dc373898b9",
+      "sourceHash": "63457d83e24b92d1ee48a4dcbb0ed2e9c2456632af61906ee7639dcd1ba785dc",
       "metrics": {
         "sections": 7,
         "experiments": 2,
@@ -2349,7 +2376,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "deployment",
-      "sourceHash": "5fc2e493549ccd8c62afb5e6620b24bd9d02c6813d7e1567a01194bd1cdb6c18",
+      "sourceHash": "6f336ea1641e8b186cb5a3354b1978ba272f475c7c4fd350dc3a4875779f37f5",
       "metrics": {
         "sections": 11,
         "experiments": 3,
@@ -2374,7 +2401,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "deployment",
-      "sourceHash": "5bbd4ce5df2d6ede76c7163d31387941bfe57f1d619b61e8514f39503d68e9ce",
+      "sourceHash": "d3d72bdb6fa9a91d3d574cd5a006e4cdc9ac20ce5d67eb5336b9a0ccea1a59bc",
       "metrics": {
         "sections": 8,
         "experiments": 2,
@@ -2399,7 +2426,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "deployment",
-      "sourceHash": "084e4ec61590bfe5c9251652498c91b65283569553745cae9dc21a63c29c8ca1",
+      "sourceHash": "14c19f720d2031d56104d43e661ed6257da92d39cd6a52b8372c1399636c6608",
       "metrics": {
         "sections": 8,
         "experiments": 3,
@@ -2424,7 +2451,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "deployment",
-      "sourceHash": "0483e7a91d3f9716b29709c58673e84c629b776087e23dac9f5d8a2cc150b5ac",
+      "sourceHash": "5080a2e53739d571d4f64bbf4ab139ab0eb6e0ebcd838345371d526046063a5b",
       "metrics": {
         "sections": 9,
         "experiments": 2,
@@ -2465,7 +2492,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "operations",
-      "sourceHash": "dfa9058c0b28ebf6b42ec0ee5eeb7dadeaa38472575c45a4a565c5483960e852",
+      "sourceHash": "4b14ce303c7f7fb80ccee0f1de2e032091f78b701fae25fcdfb4ce49c932288f",
       "metrics": {
         "sections": 7,
         "experiments": 2,
@@ -2490,7 +2517,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "operations",
-      "sourceHash": "d4c2fbbde32e792212ef57b123cae78be657e147878cef80cdab9555148ee0b3",
+      "sourceHash": "c01b5b5f9367b19dd7ea77cff0ef8c450d4c2e351e62271ec1c03b990f769065",
       "metrics": {
         "sections": 7,
         "experiments": 2,
@@ -2515,7 +2542,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "operations",
-      "sourceHash": "cc8d03827bfdd80efabf9b3bdd47874144e7f17f0f8fdf768684abbdf11ad0da",
+      "sourceHash": "fb60f41174e6e4507cd11562f09d552f7ee15aba83c819a72430c223df6d0342",
       "metrics": {
         "sections": 7,
         "experiments": 2,
@@ -2540,7 +2567,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "operations",
-      "sourceHash": "541db5429c74bb0669058ec8635335642b5218bb27bbd449d935f5594b7740dc",
+      "sourceHash": "8d498acaccf90d5000e04487b465b2b05a56c740d5049bcd618eafb1d83ff71e",
       "metrics": {
         "sections": 7,
         "experiments": 3,
@@ -2565,7 +2592,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "operations",
-      "sourceHash": "daa386f25cf33ecf1e3d48d480d34dcfcfd2d89d6a2232b7c4569f4d518a55ae",
+      "sourceHash": "01ac7b214cb17c92d1863550bbc3cce55c3e96907b8e06e412edbccaf85dee52",
       "metrics": {
         "sections": 7,
         "experiments": 2,
@@ -2590,7 +2617,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "operations",
-      "sourceHash": "2440cebff5265d9d36ebf54c2f7ceada3ad8ce35e2601d6a80fac0e7f6e6949f",
+      "sourceHash": "6b56c095bdcc755e9a52e9cd26d56c897cb1f6f0f33e69271f7b8ef1778931c0",
       "metrics": {
         "sections": 7,
         "experiments": 1,
@@ -2615,7 +2642,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "operations",
-      "sourceHash": "11589eccd099c89fd7ae5ea2606706e56c2464d4b412d816292fe4d0e884de54",
+      "sourceHash": "33d4f922404b7601fbbbd1b158a216eebbd7df6f8fcf86b1421c654e203c6695",
       "metrics": {
         "sections": 8,
         "experiments": 2,
@@ -2640,7 +2667,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "operations",
-      "sourceHash": "8df04386622ebbca1915109d34ba8854b96654de59788395c9056e7be6110bb8",
+      "sourceHash": "eb0aa87d8a8593142c19fcf378004b40301f04a302adcc6087ff19b414dd520e",
       "metrics": {
         "sections": 7,
         "experiments": 1,
@@ -2681,7 +2708,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "pretraining",
-      "sourceHash": "3a486023f0615555f7e445404abe7e612b25a679701a1b6aa51da55f47fe8808",
+      "sourceHash": "ce46af0324f49989b47bfc09fe3fa408cf6836928ee11edd164c1a2132c5b399",
       "metrics": {
         "sections": 10,
         "experiments": 2,
@@ -2706,7 +2733,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "pretraining",
-      "sourceHash": "e558dcd4fce66b1364dd764711d69848440fab0a2dfe77de6584cc7cbb2de2ad",
+      "sourceHash": "8e65358ea9ca267d917afa6b658a55bcbd94bd7bd6ba025993ed3aca34a3f432",
       "metrics": {
         "sections": 10,
         "experiments": 2,
@@ -2731,7 +2758,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "pretraining",
-      "sourceHash": "2b6a0559107ea84110e6d17ba85dae3edb7ec769c3420a8b18419b4c6f33d430",
+      "sourceHash": "1a0a0fc26efe32514b7b26ea94f6db8e566845e304f16846cdd30c240563be9f",
       "metrics": {
         "sections": 10,
         "experiments": 2,
@@ -2772,7 +2799,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "posttraining",
-      "sourceHash": "4ccc2716bb7d88f74b7accc66cb6d2ee2afbbdc55227abdc58e5ca6174814785",
+      "sourceHash": "4750bef6c7401821da4531d3b6a0ae1a9e19fa93f0df81bbffe010a90de9e0ae",
       "metrics": {
         "sections": 10,
         "experiments": 2,
@@ -2797,7 +2824,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "posttraining",
-      "sourceHash": "b99b48b5f05482f1b5d8de4909d2306ec932c2ca333d89d7eac082dd945b7422",
+      "sourceHash": "038a491d4ef6f114f92937b8eaff4ac8d655ae21382f8778ee8ca07288149c05",
       "metrics": {
         "sections": 10,
         "experiments": 2,
@@ -2822,7 +2849,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "posttraining",
-      "sourceHash": "094f8f56ac0094608344f1075ffd2d5eba4b46576cb03a46f056822861aec2cc",
+      "sourceHash": "d5f5dc9dfec4aad915d078b8356e7ba90c521088696ddefc5cf8380ffc08111d",
       "metrics": {
         "sections": 10,
         "experiments": 2,
@@ -2847,7 +2874,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "posttraining",
-      "sourceHash": "4cdaf8768cce32b9358401e9dfa1ebe5adcdf8d82c467a708ec05664a1afcfe5",
+      "sourceHash": "1fd1780c91e620ac9e7e24091093856818b7e919bec8fc83dd8608c89bf36aa3",
       "metrics": {
         "sections": 10,
         "experiments": 2,
@@ -2872,7 +2899,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "posttraining",
-      "sourceHash": "111c8176de0c2949ba399876e9c82a91383330a5db6a266a622fbc3f50dc68b7",
+      "sourceHash": "e362398242942406096d8edb4ac468bf8efa634dcdb6b479e486495f0ba2a2ae",
       "metrics": {
         "sections": 10,
         "experiments": 2,
@@ -2913,7 +2940,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "tpu",
-      "sourceHash": "714bef1c08460542cbbdff8826f00e6f5b99f2be3b47fa239f00472b871b22ac",
+      "sourceHash": "93529620832b4f8b3a7018ad6eeba09a73b6020cec23efb04f725fee73bd304e",
       "metrics": {
         "sections": 6,
         "experiments": 2,
@@ -2938,7 +2965,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "tpu",
-      "sourceHash": "e2c2796b7d974f4413dedb97b20f825efba12296e2ede87d86bda79437a390a0",
+      "sourceHash": "4dca7c86ff29ae6765918316b0c56afeb88a5e77227a28de0daadbddf2b20bf2",
       "metrics": {
         "sections": 3,
         "experiments": 2,
@@ -2979,7 +3006,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "tpu-workflows",
-      "sourceHash": "3a0f6e18878466bce15bea3f66ddf5078e2b8195868d57c830c3e2d3a6b51760",
+      "sourceHash": "72b8c3ca95546ff35900ba3f4bbee1d2fdb54391dfcf95f749c4df531435fc39",
       "metrics": {
         "sections": 2,
         "experiments": 2,
@@ -3004,7 +3031,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "tpu-workflows",
-      "sourceHash": "dbdc92591a85fd06382520ad3fa9db4a7298bcdf2a02d3b662a1663aff1d871d",
+      "sourceHash": "41970c23328f45832f31d6283685e8346a6a2c75e663b55fcbca0eaf9da4e212",
       "metrics": {
         "sections": 3,
         "experiments": 2,
@@ -3045,7 +3072,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "tpu-systems",
-      "sourceHash": "8d86097eb24c2b0430ba3dab9b0f25a70c85b75ee7b1aac89b3784cb9a5961f8",
+      "sourceHash": "54dda500f31d51e93d5ffe56ac080976ac0353378d8b1453b25c3b35f0073deb",
       "metrics": {
         "sections": 3,
         "experiments": 2,
@@ -3070,7 +3097,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "tpu-systems",
-      "sourceHash": "578a53769a2177f02cca8eb1ef243a4981f9e0eab21b3f689a46ecd87374dd8f",
+      "sourceHash": "694ea9a2b1e1b702348cf837eab4f61c58c02361417965a65c1f19be6a2aebe2",
       "metrics": {
         "sections": 2,
         "experiments": 2,
@@ -3160,13 +3187,13 @@
       "url": "project-guides/policy-evaluation.html",
       "source": "projects/policy-evaluation/README.md",
       "level": "available-draft",
-      "summary": "Tabular environment, policy objectives and held-out evaluation.",
-      "contribution": "Add learned value estimates and a larger task after validating timeout semantics.",
+      "summary": "Tabular environment, policy objectives, held-out evaluation and a separately checked learned value table with GAE.",
+      "contribution": "Integrate the critic/GAE with actor updates and evaluate a larger task with a fixed held-out protocol and learner review.",
       "validation": "CPU reference checker passed for current sources",
       "review": "Teaching review pending",
-      "sourceHash": "c5345d61078f4dbdd2ef24a5256e2103492b4ae35c9452e4504af029422b0fff",
+      "sourceHash": "e6c11f32784dac1b27ed1750d391883b1cf1414d34f413f7c4ccdf2d3361b6a3",
       "metrics": {
-        "stages": 4,
+        "stages": 5,
         "currentReference": true,
         "missingFiles": []
       }
@@ -3178,11 +3205,11 @@
       "url": "project-guides/bayesian-regression.html",
       "source": "projects/bayesian-regression/README.md",
       "level": "available-draft",
-      "summary": "Exact regression oracle and instructional sampler/predictive checks.",
-      "contribution": "Add library inference, modern diagnostics and reviewer-checked model mismatch cases.",
+      "summary": "Exact regression oracle and an optional, separately pinned NumPyro NUTS workflow with raw-chain diagnostics and paired predictive checks.",
+      "contribution": "Validate assumptions, diagnostics and model mismatch interpretation with specialist and learner review, then extend to a real-data example.",
       "validation": "CPU reference checker passed for current sources",
       "review": "Teaching review pending",
-      "sourceHash": "0b1179836a6a85014effdc549448f439309d9c8ff9ee2d7fab311527f0a27e5d",
+      "sourceHash": "60e58fbcf208acdbd9fb0fff4f213a43080a9ca5a6f1363caa2571127dc910f2",
       "metrics": {
         "stages": 3,
         "currentReference": true,
@@ -6722,6 +6749,46 @@
       "validation": "CPU reference checked; reference solution, not learner grading"
     },
     {
+      "id": "rl-05:exercise",
+      "lessonId": "rl-05",
+      "phaseId": "rl",
+      "title": "Main exercise",
+      "prompt": "Change the collection key from 313 to 314. Before running, predict which of the fitted values and final MSE should remain identical. Then retain both error histories and explain why changed trajectories should change the fitted table.",
+      "level": "available-draft",
+      "source": "phases/12-rl/05-learn-values-and-gae/lesson.json",
+      "validation": "CPU reference checked; reference solution, not learner grading"
+    },
+    {
+      "id": "rl-05:checkpoint",
+      "lessonId": "rl-05",
+      "phaseId": "rl",
+      "title": "Understanding checkpoint",
+      "prompt": "At a continuing-task time-limit cutoff, what should happen to the value bootstrap and the reverse GAE trace?",
+      "level": "available-draft",
+      "source": "phases/12-rl/05-learn-values-and-gae/lesson.json",
+      "validation": "Authored answer and rationale; uncalibrated checkpoint"
+    },
+    {
+      "id": "rl-05:practice-1",
+      "lessonId": "rl-05",
+      "phaseId": "rl",
+      "title": "Find a reset leak",
+      "prompt": "A collector resets immediately after a time limit. The previous transition stores the reset observation as `next_observation`; its value is large. What failed, and what should the record preserve?",
+      "level": "available-draft",
+      "source": "phases/12-rl/05-learn-values-and-gae/lesson.json",
+      "validation": "CPU reference checked; reference solution, not learner grading"
+    },
+    {
+      "id": "rl-05:practice-2",
+      "lessonId": "rl-05",
+      "phaseId": "rl",
+      "title": "Choose the finite-horizon contract",
+      "prompt": "The corridor objective ends after exactly eight actions, even if the agent has not reached the goal. Should its horizon row bootstrap from a hypothetical next value? Explain which GAE argument to set.",
+      "level": "available-draft",
+      "source": "phases/12-rl/05-learn-values-and-gae/lesson.json",
+      "validation": "CPU reference checked; reference solution, not learner grading"
+    },
+    {
       "id": "kernels-01:exercise",
       "lessonId": "kernels-01",
       "phaseId": "kernels",
@@ -8086,7 +8153,7 @@
       "lessonId": "tpu-04",
       "phaseId": "tpu",
       "title": "Estimate hourly billing savings from immediate teardown",
-      "prompt": "If a 4-chip TPU slice costs \\(4.80\\) USD/hour and your verification + experiment takes \\(0.5\\) hours, compute how many USD you save by deleting the VM immediately instead of leaving it idle overnight for \\(16\\) hours.",
+      "prompt": "If a 4-chip TPU slice costs \\(4.80\\) USD/hour and verification plus experiment takes \\(0.5\\) hours, compute how much you save by deleting the VM immediately instead of keeping it running for \\(16\\) total hours, including the active time.",
       "level": "available-draft",
       "source": "phases/19-tpu/02-bootstrap-venv-and-verify-tpu-runtime-receipt/lesson.json",
       "validation": "CPU reference checked; reference solution, not learner grading"
@@ -8387,6 +8454,16 @@
       "phaseId": "",
       "title": "Training and held-out evaluation",
       "prompt": "Multi-seed learning histories, baselines and per-agent held-out report",
+      "source": "projects/policy-evaluation/README.md",
+      "level": "available-draft",
+      "validation": "Public reference stage checked; no independent learner assessment"
+    },
+    {
+      "id": "policy-evaluation:stage-5",
+      "projectId": "policy-evaluation",
+      "phaseId": "",
+      "title": "Value learning and generalized advantage estimation",
+      "prompt": "Fitted value table and loss history; hand-computed terminal and time-limit GAE traces",
       "source": "projects/policy-evaluation/README.md",
       "level": "available-draft",
       "validation": "Public reference stage checked; no independent learner assessment"

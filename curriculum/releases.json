@@ -1,5 +1,19 @@
 [
   {
+    "version": "0.11.0",
+    "date": "2026-10-21",
+    "title": "Practice independently and inspect the evidence",
+    "summary": "Prepare a deeper review edition with authored learner workspaces, a learned-value RL lesson, real NumPyro inference and standards-valid book math.",
+    "changes": [
+      "Added explicit learner-only input/output contracts, invariants, hints and TODO scaffolds throughout the lesson exercises and practice tasks. Separate learner notebook and Python downloads omit reference solutions and checkpoint answers; worked references remain clearly labeled. The book includes the same contracts before its separate solutions appendix.",
+      "Added a self-contained value-function and GAE lesson with retained final observations, terminal versus continuing-cutoff masks, reset boundaries and padding gradients. The cumulative RL project checks the returned value table against independent NumPy calculations; its actor still uses reward-to-go.",
+      "Added a separately pinned optional NumPyro NUTS workflow. Its checker owns the data and recomputes posterior moments, batch-means uncertainty, rank/folded R-hat, bulk/tail ESS, divergence counts and paired posterior predictive checks from raw chains. Retained arrays, plots, source hashes and deliberately corrupted controls support review; optional study helpers are labeled separately from the graded sampler API.",
+      "Repaired 14 EPUB MathML conformance errors and applied the same normalization to accessible website/standalone-reader math while preserving visible KaTeX HTML and original TeX annotations. Added regression fixtures and a pinned official EPUBCheck gate alongside a separate NumPyro CPU CI job. Native reader and screen-reader acceptance remain separate qualifications.",
+      "Removed duplicated lesson bodies from the raw curriculum manifest. Canonical lesson JSON now supplies the generated website, tutor API and exports; consistency guards reject missing, duplicated or drifting content.",
+      "Prepared an author review guide and blank review record. Thirteen developing phases, ten planned large-model lifecycles, physical target work and independent human review retain their open status; this edition does not claim all gaps are closed."
+    ]
+  },
+  {
     "version": "0.10.0",
     "date": "2026-10-21",
     "title": "Explain the result and defend the evidence",

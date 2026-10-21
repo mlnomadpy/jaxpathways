@@ -183,7 +183,7 @@ visual_data = {"kind":"line","x":sizes.tolist(),"xlabel":"independent observatio
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:31:03.330004+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:07:36.328938+00:00. JAX 0.9.2.
 
 ```text
 sample mean, variance: 2.0067408084869385 9.035282135009766
@@ -235,22 +235,28 @@ Change the sensor to mean $-1$, standard deviation $0.5$, and draw $30000$ readi
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jax.random.PRNGKey(seed) & jax.random.split(key)` — Uses explicit PRNG keys. Split a key when you need independent random draws; reusing a key repeats its random stream.
+**Inputs:**
+- A seed for a fresh observation key; mean and standard deviation of the sensor.
 
-**Step-by-step implementation plan:**
-1. Exercise solution
-2. Create or split explicit PRNG key(s) (`changed`) for reproducible randomness.
+**Outputs:**
+- One reading vector, its sample variance, and the standard error of its sample mean.
+
+**Invariants to check:**
+- The input key is not reused for another random draw.
+- The reported standard error uses the number of readings, not the variance alone.
+
+**Hints:**
+- Split a key before sampling.
+- For independent readings, standard error scales as standard deviation divided by the square root of the sample count.
+- Compare empirical moments with finite-sample tolerances rather than exact equality.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-# Create or split explicit PRNG key(s) (`changed`) for reproducible randomness.
-changed = ...  # TODO: compute changed
-assert abs(float(changed.mean())+1.)  # TODO: complete assertion check
-assert abs(float(changed.var())-.25)  # TODO: complete assertion check
+def compare_sample_moments(key, mean, scale, count):
+    """Return readings, sample variance, and standard error of the mean."""
+    # TODO: split the key, draw readings, and compute both summaries.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -279,20 +285,27 @@ The residual is zero for both; retain $-\log\sigma$.
 
 ### How to write: Detect a missing normalization — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- The shared mean and two normal scales, 1 and 2.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- The two log densities at the common mean and the change in the normalized density across scales.
+
+**Invariants to check:**
+- The residual-only term is identical at the shared mean, while the full log densities differ because scale changes the normalizer.
+
+**Hints:**
+- Evaluate both normalized log densities at the same zero-residual point.
+- Compare the full expression with the residual-only term.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Detect a missing normalization (Transfer / diagnosis): Scale changes density even with identical zero residuals.
-scores = normal_logpdf(...)  # TODO: compute scores
-assert jnp.allclose(scores[0]-scores[1],jnp.log(2.))  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def compare_normal_scales_at_common_mean(normal_logpdf):
+    # TODO: Evaluate scales one and two at their common mean and expose the residual-only tie.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -321,26 +334,25 @@ Split before use; compare arrays with the same shape.
 
 ### How to write: Demonstrate key ownership — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jax.random.PRNGKey(seed) & jax.random.split(key)` — Uses explicit PRNG keys. Split a key when you need independent random draws; reusing a key repeats its random stream.
+**Inputs:**
+- An explicit JAX key, two child-work labels, and a changed seed.
 
-**Step-by-step implementation plan:**
-1. Create or split explicit PRNG key(s) (`(left, right)`) for reproducible randomness.
-2. Sample deterministic random values into `first` using an explicit PRNG key.
-3. Sample deterministic random values into `second` using an explicit PRNG key.
+**Outputs:**
+- Two reproducible but independent random arrays.
+
+**Invariants to check:**
+- Reusing a key replays its random values; splitting creates independent child streams.
+
+**Hints:**
+- Split once for each random operation. Verify replay and changed-seed behavior separately.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Demonstrate key ownership (Transfer / diagnosis)
-# Create or split explicit PRNG key(s) (`(left, right)`) for reproducible randomness.
-left,right = jax.random.split(...)  # TODO: compute left,right
-# Sample deterministic random values into `first` using an explicit PRNG key.
-first = jax.random.normal(...)  # TODO: compute first
-# Sample deterministic random values into `second` using an explicit PRNG key.
-second = jax.random.normal(...)  # TODO: compute second
-assert jnp.array_equal(first,jax.random.normal(left,(32,)))  # TODO: complete assertion check
-assert not jnp.array_equal(first,second)  # TODO: complete assertion check
+def check_key_ownership(key, seed):
+    """Return two draws and a replay/changed-seed comparison."""
+    # TODO: allocate child keys and record the random-stream checks.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

@@ -88,7 +88,23 @@
         "prompt": "Quantize `w` with a single global scalar `scale_global = jnp.max(jnp.abs(w)) / 127.0` and compare its max error against per-channel quantization when one column of `w` is scaled by `10.0`.",
         "hint": "Multiply `w[:, :1]` by `10.0` and compare per-column `axis=0` scale vs global scalar scale.",
         "solution": "# Compare per-channel vs per-tensor INT8 quantization error (Foundations)\n# Create or split explicit PRNG key(s) (`w_skew`) for reproducible randomness.\nw_skew = jax.random.normal(jax.random.PRNGKey(9), (128, 32), dtype=jnp.float32) * 0.2\nw_skew = w_skew.at[:, 0].multiply(10.0)\n# Create or split explicit PRNG key(s) (`x_in`) for reproducible randomness.\nx_in = jax.random.normal(jax.random.PRNGKey(10), (32, 128), dtype=jnp.float32)\n# Cast or evaluate `ref` in explicit floating-point precision.\nref = jnp.dot(x_in, w_skew, preferred_element_type=jnp.float32)\n# Reduce along axis=0 to compute `s_col`.\ns_col = jnp.max(jnp.abs(w_skew), axis=0, keepdims=True) / 127.0\ns_glb = jnp.max(jnp.abs(w_skew)) / 127.0\nq_col = jnp.clip(jnp.round(w_skew / s_col), -127, 127).astype(jnp.int8)\nq_glb = jnp.clip(jnp.round(w_skew / s_glb), -127, 127).astype(jnp.int8)\nerr_col = float(jnp.mean(jnp.abs(jnp.dot(x_in, q_col.astype(jnp.float32) * s_col) - ref)))\nerr_glb = float(jnp.mean(jnp.abs(jnp.dot(x_in, q_glb.astype(jnp.float32) * s_glb) - ref)))\nprint(\"Mean error (per-channel vs per-tensor):\", round(err_col, 5), round(err_glb, 5))\n# Assert invariant `err_col < err_glb` holds\nassert err_col < err_glb",
-        "explanation": "One outlier channel stretches a per-tensor scale factor and crushes small channels into a few integer buckets; per-channel scaling isolates each column."
+        "explanation": "One outlier channel stretches a per-tensor scale factor and crushes small channels into a few integer buckets; per-channel scaling isolates each column.",
+        "learnerStarter": {
+          "inputs": [
+            "A weight matrix with one column scaled by ten and per-channel and global INT8 quantizers."
+          ],
+          "outputs": [
+            "Maximum reconstruction errors for both quantization scales."
+          ],
+          "invariants": [
+            "The global scale covers the largest magnitude; per-channel scales are computed per output column (axis 0 for this weight layout)."
+          ],
+          "hints": [
+            "Construct the skewed matrix deterministically by multiplying one column by ten.",
+            "Compare dequantized weights with the same original matrix using global and per-column scales."
+          ],
+          "code": "import jax.numpy as jnp\nimport numpy as np\n\ndef compare_int8_scale_granularity(weights):\n    # TODO: skew one column and compare max error from global and per-channel scales.\n    raise NotImplementedError"
+        }
       },
       {
         "title": "Verify non-empty XProf *.xplane.pb byte size",
@@ -96,7 +112,23 @@
         "prompt": "Capture a trace in a temporary directory and verify that the generated `*.xplane.pb` file has `stat().st_size > 0`.",
         "hint": "Check `xplane_files[0].stat().st_size > 0`.",
         "solution": "# Verify non-empty XProf *.xplane.pb byte size (Transfer / diagnosis)\n# Keep this run’s database and artifacts in a scratch directory removed on exit.\nwith tempfile.TemporaryDirectory(prefix=\"tpu-xplane-size-\") as d:\n    a = jnp.ones((128, 128), dtype=jnp.bfloat16)\n    # Wrap with `jax.jit` (`fn`) so XLA traces and compiles the function.\n    fn = jax.jit(lambda z: z @ z)\n    # Wait for device work to finish before timing it or comparing its result on the host.\n    jax.block_until_ready(fn(a))\n    # Enter managed runtime/context scope for this block:\n    with jax.profiler.trace(d):\n        # Wait for device work to finish before timing it or comparing its result on the host.\n        jax.block_until_ready(fn(a))\n    pb = list(Path(d).rglob(\"*.xplane.pb\"))[0]\n    size_bytes = pb.stat().st_size\nprint(\"xplane.pb bytes:\", size_bytes)\n# Assert invariant `size_bytes > 0` holds\nassert size_bytes > 0",
-        "explanation": "Verifying a non-empty `*.xplane.pb` file confirms the profiler flushed device and host events before closing."
+        "explanation": "Verifying a non-empty `*.xplane.pb` file confirms the profiler flushed device and host events before closing.",
+        "learnerStarter": {
+          "inputs": [
+            "A temporary trace directory and the public capture_warmed_trace function."
+          ],
+          "outputs": [
+            "The captured XPlane file path and its byte size."
+          ],
+          "invariants": [
+            "The reported trace must be an actual file with positive size; a directory count alone is insufficient."
+          ],
+          "hints": [
+            "Capture a short warmed run.",
+            "Inspect each generated xplane.pb file with stat."
+          ],
+          "code": "import jax.numpy as jnp\nimport numpy as np\n\ndef inspect_xplane_file(capture_warmed_trace, root):\n    # TODO: capture a trace and return the nonempty XPlane file evidence.\n    raise NotImplementedError"
+        }
       }
     ],
     "question": "Why should you run and synchronize at least one warmup step before entering `with jax.profiler.trace(trace_dir):` on a TPU VM?",
@@ -138,6 +170,22 @@
       "Tracing should observe execution, not delete model state. Warmup prepares the tested executable before the recorded window.",
       "Warming and synchronizing the same signature reduces initial compilation in the recorded window. Inspect the trace to confirm: new shapes or static arguments can still compile, and cache state can still affect timing. Record target latency outside profiler overhead too.",
       "Profiling is not restricted to BF16. Record the precision used and the actual operations in the captured target workload."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "The seeded precision-policy evaluator and warmed trace capture helper."
+      ],
+      "outputs": [
+        "Seed-42 policy error measurements, trace receipt, and the observed backend."
+      ],
+      "invariants": [
+        "The stated BF16 error ordering holds for this run, and the trace receipt records at least one XPlane file; report the backend that actually ran."
+      ],
+      "hints": [
+        "Compare rows by policy name rather than relying on incidental table formatting.",
+        "A CPU trace is a valid local exercise result; reserve TPU-performance claims for a TPU receipt."
+      ],
+      "code": "import jax\n\ndef compare_precision_run(evaluate_precision_policies, capture_warmed_trace):\n    # TODO: Run the seeded comparison and trace, then validate the requested results and backend.\n    raise NotImplementedError\n"
+    }
   }
 }

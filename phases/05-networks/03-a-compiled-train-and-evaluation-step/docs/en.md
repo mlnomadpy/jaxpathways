@@ -239,7 +239,7 @@ visual_data = {'kind': 'field', 'values': prob.tolist(), 'extent': [-3.0, 3.0, -
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:28:31.748997+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:05:06.820818+00:00. JAX 0.9.2.
 
 ```text
 Updates: 80 held-out loss: 0.018426384776830673 accuracy: 1.0
@@ -285,26 +285,28 @@ Compute held-out metrics in three equal chunks and reconstruct the overall means
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- A model and held-out arrays split into chunks with a final partial batch.
 
-**Step-by-step implementation plan:**
-1. Exercise solution
-2. Reduce along axis=0 to compute `aggregate`.
-3. Transfer the device result to the host for an independent NumPy comparison.
+**Outputs:**
+- Count-weighted aggregate loss/accuracy and an unchanged model snapshot.
+
+**Invariants to check:**
+- Metrics are weighted by example counts; evaluation does not update model or optimizer state.
+
+**Hints:**
+- Accumulate metric sums and counts, then divide once.
+- Use a separate clone when deliberately testing a training call on held-out data.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-old = snapshot(...)  # TODO: compute old
-pieces = ...  # TODO: compute pieces
-# Reduce along axis=0 to compute `aggregate`.
-aggregate = np.mean(...)  # TODO: compute aggregate
-# Transfer the device result to the host for an independent NumPy comparison.
-np.testing.assert_allclose(aggregate,np.asarray(evaluate(model,test_x,test_y)),rtol = ...  # TODO: compute np.testing.assert_allclose(aggregate,np.asarray(evaluate(model,test_x,test_y)),rtol
-for a,b in zip(old,snapshot(model)):np.testing.assert_array_equal(a,b)
+import jax.numpy as jnp
+
+def evaluate_in_chunks(model, features, labels, chunk_size):
+    """Count-weighted aggregate loss/accuracy and an unchanged model snapshot."""
+    # TODO: Aggregate held-out metric sums by example count and assert evaluation leaves model state unchanged.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -336,31 +338,27 @@ Weight each batch mean by its number of observations.
 
 ### How to write: Aggregate unequal batches — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- Evaluate the held-out set in batches of seven and forty-one observations. Reconstruct both metrics from sums and counts. Use a separate constructed count example to demonstrate why averaging batch accuracies can be wrong.
 
-**Step-by-step implementation plan:**
-1. Transfer the device result to the host for an independent NumPy comparison.
-2. Reduce along axis=0 to compute `weighted`.
-3. Transfer the device result to the host for an independent NumPy comparison.
+**Outputs:**
+- Count-weighted aggregate metrics and a constructed unequal-count accuracy example.
+
+**Invariants to check:**
+- Batch metrics are weighted by the number of examples, not averaged equally.
+
+**Hints:**
+- Weight each batch mean by its number of observations.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-sizes = np.array(...)  # TODO: compute sizes
-# Transfer the device result to the host for an independent NumPy comparison.
-metrics = np.asarray(...)  # TODO: compute metrics
-# Reduce along axis=0 to compute `weighted`.
-weighted = ...  # TODO: compute weighted
-# Transfer the device result to the host for an independent NumPy comparison.
-np.testing.assert_allclose(weighted,np.asarray(evaluate(model,test_x,test_y)),rtol = ...  # TODO: compute np.testing.assert_allclose(weighted,np.asarray(evaluate(model,test_x,test_y)),rtol
-correct = np.array(...)  # TODO: compute correct
-counts = np.array(...)  # TODO: compute counts
-expected = ...  # TODO: compute expected
-np.testing.assert_allclose(correct.sum()/counts.sum(),expected)
-assert not np.isclose(np.mean(correct/counts),expected)  # TODO: complete assertion check
-print('Count-weighted held-out metrics:',weighted,'constructed accuracy:',expected)
+import jax.numpy as jnp
+
+def practice_aggregate_unequal_batches(model, features, labels, batch_sizes):
+    """Implement the aggregate unequal batches check."""
+    # TODO: Accumulate metric sums and example counts for batch sizes seven and forty-one, then compare with concatenated evaluation.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -399,27 +397,28 @@ Compare both optimizer.step and model parameters around the bad call.
 
 ### How to write: Catch an evaluation function that trains — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jax.tree.map(lambda p, g: ..., params, grads)` — Applies a function leaf-by-leaf across matching PyTrees (such as updating every parameter tensor with its gradient).
-- `nnx.Module / nnx.Linear / nnx.Optimizer` — Flax NNX stateful module and optimizer containers with explicit RNG streams (`nnx.Rngs`) and traced graph updates.
-- `optax.adam(lr) / optax.apply_updates(params, updates)` — Optax gradient transformations and numerically stable loss functions over parameter PyTrees.
+**Inputs:**
+- On an independent clone, deliberately call train_step with held-out data and show the isolation checks fail. Keep the real model untouched.
 
-**Step-by-step implementation plan:**
-1. Catch an evaluation function that trains (Intermediate): A plausible returned loss is separate from evaluation.
+**Outputs:**
+- A detected clone mutation and an unchanged real model snapshot.
+
+**Invariants to check:**
+- The model used for held-out evaluation and the model used for the deliberate failure are distinct.
+
+**Hints:**
+- Compare both optimizer.step and model parameters around the bad call.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Catch an evaluation function that trains (Intermediate): A plausible returned loss is separate from evaluation.
-graph,state = nnx.split(...)  # TODO: compute graph,state
-bad_model = nnx.merge(...)  # TODO: compute bad_model
-bad_optimizer = nnx.Optimizer(...)  # TODO: compute bad_optimizer
-prior = snapshot(...)  # TODO: compute prior
-train_step(bad_model,bad_optimizer,test_x,test_y)
-assert int(bad_optimizer.step[...])  # TODO: complete assertion check
-assert any(not np.array_equal(a,b) for a,b  # TODO: complete assertion check
-assert int(optimizer.step[...])  # TODO: complete assertion check
+from flax import nnx
+import jax.numpy as jnp
+
+def practice_catch_an_evaluation_function_that_trains(model, optimizer, heldout_features, heldout_labels):
+    """Implement the catch an evaluation function that trains check."""
+    # TODO: Run the mutating train_step only on a disposable clone and compare its state snapshot before and after evaluation.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

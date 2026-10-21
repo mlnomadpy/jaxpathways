@@ -86,7 +86,23 @@
         "prompt": "Compute the arithmetic intensity (FLOPs/byte) of a `bfloat16` square matrix multiply of size \\(N = 1024\\) (`2 * N^3` FLOPs divided by `3 * 2 * N^2` bytes) and check whether it exceeds the `v5e` ridge point.",
         "hint": "For two `N x N` BF16 inputs and one BF16 output, arithmetic intensity simplifies to `N / 3.0` FLOPs/byte.",
         "solution": "n = 1024\nintensity = (2 * n**3) / (3 * 2 * n**2)\nprint(\"Arithmetic intensity:\", intensity, \"FLOPs/byte\")\nassert intensity == n / 3.0\nassert intensity > TPU_SPECS[0][\"ridge_flops_per_byte\"]",
-        "explanation": "The idealized operation has about 341.3 FLOP/byte. It is above v5e’s 240.5 ridge and below v6e’s 560.4 ridge, assuming exactly the stated two BF16 input reads and one BF16 output write. That assigns different ideal ceilings; padding, actual output dtype, cache reuse and measured traffic can change the comparison."
+        "explanation": "The idealized operation has about 341.3 FLOP/byte. It is above v5e’s 240.5 ridge and below v6e’s 560.4 ridge, assuming exactly the stated two BF16 input reads and one BF16 output write. That assigns different ideal ceilings; padding, actual output dtype, cache reuse and measured traffic can change the comparison.",
+        "learnerStarter": {
+          "inputs": [
+            "Square BF16 matrix dimension 1024 and the documented v5e and v6e ridge points."
+          ],
+          "outputs": [
+            "Arithmetic intensity in FLOPs per byte and a comparison with each ridge point."
+          ],
+          "invariants": [
+            "FLOPs and bytes use the same operation count as the lesson; intensity is not device memory capacity."
+          ],
+          "hints": [
+            "Simplify the given expression before evaluating it.",
+            "Compare with ridge points in matching FLOPs-per-byte units."
+          ],
+          "code": "import jax.numpy as jnp\nimport numpy as np\n\ndef compare_matmul_intensity(size, ridge_points):\n    # TODO: compute the stated BF16 intensity and report which ridge points it exceeds.\n    raise NotImplementedError"
+        }
       },
       {
         "title": "Size a Trillium v6e-4 slice for a 7B training state",
@@ -94,7 +110,23 @@
         "prompt": "Compute the total HBM (in GiB) of a 4-chip `v6e-4` slice (`32` GiB/chip) and check whether `budget_7b['mixed_bf16_train_state_gib']` fits inside `80%` of that slice's HBM.",
         "hint": "Compare `budget_7b['mixed_bf16_train_state_gib']` with `4 * 32.0 * 0.8`.",
         "solution": "v6e4_usable_gib = 4 * 32.0 * 0.8\nfits_v6e4 = budget_7b[\"mixed_bf16_train_state_gib\"] <= v6e4_usable_gib\nprint(\"v6e-4 80% usable GiB:\", v6e4_usable_gib, \"Fits 7B state estimate:\", fits_v6e4)\nassert fits_v6e4 is False",
-        "explanation": "A 4-chip v6e slice has 128 GiB total HBM and 102.4 GiB at an 80% budget. The 117.347 GiB named-tensor estimate exceeds that budget, before activations and other excluded allocations."
+        "explanation": "A 4-chip v6e slice has 128 GiB total HBM and 102.4 GiB at an 80% budget. The 117.347 GiB named-tensor estimate exceeds that budget, before activations and other excluded allocations.",
+        "learnerStarter": {
+          "inputs": [
+            "Four v6e chips at 32 GiB each and the 7B mixed-BF16 training estimate."
+          ],
+          "outputs": [
+            "Aggregate HBM and a check against 80 percent of the slice capacity."
+          ],
+          "invariants": [
+            "The calculation is a catalog budget screen and does not guarantee per-device placement or runtime success."
+          ],
+          "hints": [
+            "Multiply chips by HBM per chip.",
+            "Compare the estimate with the reserved-capacity threshold."
+          ],
+          "code": "import jax.numpy as jnp\nimport numpy as np\n\ndef check_v6e4_budget(training_state_gib, chips, hbm_per_chip_gib):\n    # TODO: compare the training estimate with the specified fraction of aggregate HBM.\n    raise NotImplementedError"
+        }
       }
     ],
     "question": "What does the theoretical BF16 Roofline ridge point, \\(1000 \\times \\text{TFLOP/s} / \\text{GB/s}\\) in FLOP/byte, describe?",
@@ -205,6 +237,22 @@
       "A roofline ratio describes compute and memory rates. Authentication and SSH limits belong to a different control-plane contract.",
       "Convert both rates to FLOP/s and byte/s first. The ratio locates the intersection of two ideal ceilings. Below it the bandwidth ceiling is lower; above it the compute ceiling is lower. Actual performance can fall below either ceiling because of tiling, communication, vector work or launch overhead.",
       "Provisioning wait depends on capacity and scheduling, not this compute-to-bandwidth ratio. Keep capacity planning separate from kernel analysis."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "The public memory estimator, a 1.5-billion parameter training case, 4096 KV tokens, and an inference cache scenario."
+      ],
+      "outputs": [
+        "Training state estimate, slice-budget comparisons, and a separate BF16 KV-cache estimate."
+      ],
+      "invariants": [
+        "Training state and inference KV cache are distinct ledgers; aggregate slice HBM does not ensure each sharded device fits."
+      ],
+      "hints": [
+        "Read and preserve the estimator's dtype and exclusion assumptions.",
+        "Report cache memory separately from training-state memory."
+      ],
+      "code": "import jax.numpy as jnp\nimport numpy as np\n\ndef audit_training_and_inference_memory(estimate_memory_gib):\n    # TODO: evaluate the training case and compute a separately labeled inference-cache estimate.\n    raise NotImplementedError"
+    }
   }
 }

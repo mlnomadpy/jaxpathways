@@ -173,7 +173,7 @@ visual_data['yscale'] = 'log'
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:27:37.276758+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:04:13.623123+00:00. JAX 0.9.2.
 
 ```text
 Finite difference: [-2.9999971  2.4999976]
@@ -249,23 +249,29 @@ Check the gradient again at $w=[2., -1.]$. Explain why this checks a minimum but
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.zeros / jnp.ones(shape, dtype=...)` — Allocates a tensor of the given `shape` initialized with constants.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
+**Inputs:**
+- A differentiable scalar objective and a vector of evaluation points.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- A report comparing autodiff with central finite differences at multiple step sizes.
+
+**Invariants to check:**
+- Compare the same scalar objective and coordinate at every step size; finite differences are estimates, not a proof for all inputs.
+
+**Hints:**
+- Check a smooth point, and compare several perturbation scales.
+- Keep the analytic derivative independent from the finite-difference implementation.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Check the gradient again at w=[2., -1.].
-minimum = jnp.array(...)  # TODO: compute minimum
-assert jnp.allclose(jax.grad(objective)(minimum), jnp.zeros(2))  # TODO: complete assertion check
-assert jnp.allclose(objective(minimum), 0.)  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+
+def gradient_check_report(point, epsilons):
+    """A report comparing autodiff with central finite differences at multiple step sizes."""
+    # TODO: Evaluate autodiff and central-difference gradients at the supplied point across the requested perturbations.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -293,26 +299,28 @@ Use cosine as the analytic reference; here truncation error also matters.
 
 ### How to write: Move to a different smooth objective — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.zeros / jnp.ones(shape, dtype=...)` — Allocates a tensor of the given `shape` initialized with constants.
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- Check the derivative of `sum(sin(z))` at $[0.2, -0.7]$ using cosine and central differences.
 
-**Step-by-step implementation plan:**
-1. Vectorize across the batch dimension with `jax.vmap` (`fd`).
+**Outputs:**
+- Autodiff, analytic derivative, and finite-difference values for both coordinates.
+
+**Invariants to check:**
+- All methods evaluate the same scalar objective at the requested point.
+
+**Hints:**
+- Use cosine as the analytic reference; here truncation error also matters.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Move to a different smooth objective (Transfer / diagnosis)
-z = jnp.array(...)  # TODO: compute z
-def trig_loss(z):
-    return ...  # TODO: return computed result
-# Vectorize across the batch dimension with `jax.vmap` (`fd`).
-fd = jax.vmap(...)  # TODO: compute fd
-assert jnp.allclose(jax.grad(trig_loss)(z), jnp.cos(z))  # TODO: complete assertion check
-assert jnp.allclose(fd, jnp.cos(z), atol=5e-5, rtol=5e-5)  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+
+def practice_move_to_a_different_smooth_objective(point):
+    """Implement the move to a different smooth objective check."""
+    # TODO: Differentiate the sine-sum objective at both supplied coordinates and compare each result with cosine and central differences.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -346,25 +354,28 @@ Differentiate $(z_0-2)^2$ and compare both coordinates.
 
 ### How to write: Catch the wrong objective despite correct gradients — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
+**Inputs:**
+- A model is meant to use both coordinates. Show that an objective omitting the second coordinate has a correct derivative for itself but fails the intended analytic reference. Repair it.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- A counterexample for the incomplete objective and a passing repaired comparison.
+
+**Invariants to check:**
+- The derivative is checked against the intended function, not only the function that produced it.
+
+**Hints:**
+- Differentiate $(z_0-2)^2$ and compare both coordinates.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Catch the wrong objective despite correct gradients (Transfer / diagnosis)
-def incomplete(z):
-    return ...  # TODO: return computed result
-bad = jax.grad(...)  # TODO: compute bad
-assert jnp.allclose(bad, jnp.array([-3., 0.]))  # TODO: complete assertion check
-assert not jnp.allclose(bad, analytic)  # TODO: complete assertion check
-assert jnp.allclose(jax.grad(objective)(w), analytic)  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+
+def practice_catch_the_wrong_objective_despite_correct_gradients(point):
+    """Implement the catch the wrong objective despite correct gradients check."""
+    # TODO: Construct the objective that drops the second coordinate, compare its gradient to the intended two-coordinate reference, then restore the missing dependence.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

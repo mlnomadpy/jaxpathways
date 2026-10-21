@@ -82,7 +82,23 @@
         "prompt": "Run a \\(2\\)-step job followed by a `--resume` to step \\(4\\) and list the ordered `event` names recorded in `events.jsonl`.",
         "hint": "Read `events.jsonl` line by line with `json.loads`.",
         "solution": "# Inspect the JSONL event sequence from a resumed run (Foundations)\n# Keep this run’s database and artifacts in a scratch directory removed on exit.\nwith tempfile.TemporaryDirectory(prefix=\"tpu-events-\") as tmp:\n    ev_dir = Path(tmp) / \"job\"\n    run_tpu_ready_job(ev_dir, steps=2, save_every=2, resume=False)\n    run_tpu_ready_job(ev_dir, steps=4, save_every=2, resume=True)\n    event_names = [json.loads(line)[\"event\"] for line in (ev_dir / \"events.jsonl\").read_text().splitlines()]\nprint(\"Recorded event sequence:\", event_names)\nassert \"started\" in event_names and \"restored\" in event_names and event_names[-1] == \"completed\"",
-        "explanation": "The single append-only events.jsonl log captures both the initial run (`started` -> `warmup` -> `step` -> `checkpoint` -> `completed`) and the resumed run (`restored` -> `warmup` -> `step` -> `checkpoint` -> `completed`)."
+        "explanation": "The single append-only events.jsonl log captures both the initial run (`started` -> `warmup` -> `step` -> `checkpoint` -> `completed`) and the resumed run (`restored` -> `warmup` -> `step` -> `checkpoint` -> `completed`).",
+        "learnerStarter": {
+          "inputs": [
+            "A temporary job directory and the public two-step/resume-to-four-step launcher."
+          ],
+          "outputs": [
+            "The ordered event names recorded in JSONL after resume."
+          ],
+          "invariants": [
+            "Event order comes from the durable log, not from an assumed event sequence."
+          ],
+          "hints": [
+            "Parse one JSON object per line.",
+            "Include both the initial and resumed launch events."
+          ],
+          "code": "import jax.numpy as jnp\nimport numpy as np\n\ndef read_resumed_event_names(run_tpu_ready_job, root):\n    # TODO: launch both segments and return the event names in file order.\n    raise NotImplementedError"
+        }
       },
       {
         "title": "Verify atomic checkpoint file replacement",
@@ -90,7 +106,23 @@
         "prompt": "Write a small test that calls `atomic_write_json` twice on the same path and confirms that no `.tmp` file remains alongside the final JSON file.",
         "hint": "Check `list(Path(tmp).glob('*.tmp')) == []`.",
         "solution": "# Verify atomic checkpoint file replacement (Transfer / diagnosis)\n# Keep this run’s database and artifacts in a scratch directory removed on exit.\nwith tempfile.TemporaryDirectory(prefix=\"tpu-atomic-\") as tmp:\n    target = Path(tmp) / \"checkpoint-latest.json\"\n    atomic_write_json(target, {\"step\": 2})\n    atomic_write_json(target, {\"step\": 4})\n    leftovers = list(Path(tmp).glob(\"*.tmp\"))\n    loaded = json.loads(target.read_text(encoding=\"utf-8\"))\nprint(\"Loaded step:\", loaded[\"step\"], \"Leftover tmp files:\", leftovers)\n# Assert invariant `loaded[\"step\"] == 4 and leftovers == []` holds\nassert loaded[\"step\"] == 4 and leftovers == []",
-        "explanation": "`os.replace` atomically swaps the flushed `.tmp` file into `checkpoint-latest.json`, leaving zero partial files behind."
+        "explanation": "`os.replace` atomically swaps the flushed `.tmp` file into `checkpoint-latest.json`, leaving zero partial files behind.",
+        "learnerStarter": {
+          "inputs": [
+            "A temporary target path and two JSON payloads written through atomic_write_json."
+          ],
+          "outputs": [
+            "The final decoded second payload and a check for leftover temporary siblings."
+          ],
+          "invariants": [
+            "The destination contains a complete JSON object; no staging temp file remains after success."
+          ],
+          "hints": [
+            "Write twice to the same target.",
+            "Inspect the directory after the second replacement."
+          ],
+          "code": "import jax.numpy as jnp\nimport numpy as np\n\ndef check_atomic_json_replacement(atomic_write_json, root):\n    # TODO: write two payloads and inspect the final file and temporary-file cleanup.\n    raise NotImplementedError"
+        }
       }
     ],
     "question": "Why does `run_tpu_ready_job` execute `train_step` once and discard its outputs before starting the timed `while step < steps` loop?",
@@ -197,6 +229,22 @@
       "Retaining warmup output would advance this example’s state. Discard its returned state and begin the measured trajectory from the intended checkpoint.",
       "This fixed-signature example warms and synchronizes the compiled step, then discards its returned state so the measured trajectory starts at the intended state. A later shape, dtype or static-argument change can still recompile. Warmup is not a general steady-state guarantee.",
       "Checkpoint compatibility is not created by warmup. Warmup separates initial compilation from timing for the tested signature."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "A scratch job directory, checkpoint interval, deterministic job config, and step targets four and eight."
+      ],
+      "outputs": [
+        "Resumed and uninterrupted final state hashes at step eight."
+      ],
+      "invariants": [
+        "The final hashes match only when resume restores the complete deterministic state and compatible configuration."
+      ],
+      "hints": [
+        "Run the first segment, resume from its checkpoint, then run an uninterrupted control.",
+        "Keep each run's files isolated."
+      ],
+      "code": "import jax.numpy as jnp\nimport numpy as np\n\ndef compare_resumed_and_uninterrupted_runs(run_tpu_ready_job, root):\n    # TODO: run the staged and control trajectories and compare final state hashes.\n    raise NotImplementedError"
+    }
   }
 }

@@ -354,7 +354,7 @@ visual_data = {
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:35:34.263030+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:11:42.353442+00:00. JAX 0.9.2.
 
 ```text
 Verified runtime receipt: {"contract_ok": true, "device_count": 1, "device_kinds": ["cpu"], "expected_backend": "cpu", "expected_sum_of_squares": 140.0, "jax": "0.9.2", "local_device_count": 1, "observed_backend": "cpu", "pmap_sum_of_squares": 140.0, "python": "3.14.3", "receipt_sha256": "4ddc0cbb323fe3bd"}
@@ -407,17 +407,27 @@ Call `verify_runtime_contract` for the active backend with `min_devices=1`, then
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Exercise solution
+**Inputs:**
+- The verify_runtime_contract callable, active backend expectation, minimum local device count, and named TPU slice catalog.
+
+**Outputs:**
+- A runtime receipt plus chip and aggregate HBM counts for v5litepod-4.
+
+**Invariants to check:**
+- Runtime acceptance describes devices actually discovered by JAX; a CPU backend must not be reported as TPU qualification.
+
+**Hints:**
+- Call the verifier for the active backend with a minimum of one local device.
+- Treat catalog capacity as descriptive and runtime discovery as observed evidence.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-checked = verify_runtime_contract(...)  # TODO: compute checked
-v5e4 = next(...)  # TODO: compute v5e4
-print("Checked receipt sha256:", checked["receipt_sha256"], "v5litepod-4 chips:", v5e4["total_chips"], "HBM GiB:", v5e4["total_hbm_gib"])
-assert checked["contract_ok"] is True  # TODO: complete assertion check
+import jax
+
+def inspect_runtime_and_slice(verify_runtime_contract, expected_backend, min_devices, topologies):
+    # TODO: verify the active runtime and look up v5litepod-4 chip and HBM metadata.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -446,18 +456,28 @@ Filter `topologies` by `t['total_hbm_gib'] >= 48`.
 
 ### How to write: Check whether a model state fits on a single-host TPU slice — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Check whether a model state fits on a single-host TPU slice (Foundations)
-2. Assert invariant `fitting_slices == ["v5litepod-4"` holds
+**Inputs:**
+- A slice catalog with total HBM values and a required state size of 48 GiB.
+
+**Outputs:**
+- The names of slices with enough catalogued aggregate HBM.
+
+**Invariants to check:**
+- Capacity filtering uses the provided requirement and catalog units consistently; it does not prove per-device fit.
+
+**Hints:**
+- Filter the catalog by total_hbm_gib.
+- Keep memory capacity claims separate from runtime verification.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Check whether a model state fits on a single-host TPU slice (Foundations)
-fitting_slices = ...  # TODO: compute fitting_slices
-print("Slices fitting 48 GiB:", fitting_slices)
-# Assert invariant `fitting_slices == ["v5litepod-4"` holds
-assert fitting_slices  # TODO: complete assertion check
+import jax.numpy as jnp
+import numpy as np
+
+def slices_meeting_hbm_requirement(topologies, required_gib):
+    # TODO: return the catalog slices whose aggregate HBM meets the requirement.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -488,21 +508,31 @@ Sum `np.arange(32, dtype=np.float64) ** 2`.
 
 ### How to write: Verify the pmap sum-of-squares formula for 4 TPU devices — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `Mesh + PartitionSpec + NamedSharding` — Maps logical tensor axes onto physical device mesh axes for SPMD data, tensor, or pipeline parallelism.
+**Inputs:**
+- Four local TPU devices and the mapped range of 32 integers from zero through 31.
 
-**Step-by-step implementation plan:**
-1. Assert invariant `four_device_expected == 10416.0` holds
+**Outputs:**
+- Expected exact sum of squares for the four-device pmap fixture.
+
+**Invariants to check:**
+- The expected value sums each integer exactly once; it is an oracle for the four-device test only.
+
+**Hints:**
+- Use the closed-form sum-of-squares identity or an integer reference sum.
+- Run the pmap assertion on a real four-chip TPU to qualify runtime behavior.
+
+**Key functions & syntax to use:**
+- `Mesh + PartitionSpec + NamedSharding` — Maps logical tensor axes onto physical device mesh axes for SPMD data, tensor, or pipeline parallelism.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Verify the pmap sum-of-squares formula for 4 TPU devices (Transfer / diagnosis)
-four_device_expected = float(...)  # TODO: compute four_device_expected
-print("Expected 4-device pmap sum of squares:", four_device_expected)
-# Assert invariant `four_device_expected == 10416.0` holds
-assert four_device_expected  # TODO: complete assertion check
+import jax.numpy as jnp
+import numpy as np
+
+def expected_four_chip_sum():
+    # TODO: compute the integer oracle for the range consumed by the four-device pmap.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

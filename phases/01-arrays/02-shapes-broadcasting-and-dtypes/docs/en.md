@@ -168,7 +168,7 @@ visual_data = {'kind': 'heatmap', 'values': (y - batch).tolist(), 'rows': ['obse
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:35:27.356105+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:03:24.201996+00:00. JAX 0.9.2.
 
 ```text
 [[11. 22. 33.]
@@ -230,22 +230,31 @@ Add a different scalar offset to each row using offsets $[100., 200.]$. Make its
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- A `(2, 3)` batch and one scalar row offset per observation.
 
-**Step-by-step implementation plan:**
-1. Check tensor shape invariant: `offsets.shape == (2, 1)`
+**Outputs:**
+- An explicit offset shape and the row-offset result.
+
+**Invariants to check:**
+- The feature axis remains length three.
+- Each row receives its own scalar offset.
+- The batch shape is unchanged.
+
+**Hints:**
+- Make the singleton feature dimension explicit.
+- Keep row offsets distinct from feature biases.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Add a different scalar offset to each row using offsets [100., 200.].
-offsets = jnp.array(...)  # TODO: compute offsets
-z = ...  # TODO: compute z
-# Check tensor shape invariant: `offsets.shape == (2, 1)`
-assert offsets.shape  # TODO: complete assertion check
-assert jnp.allclose(z, jnp.array([[101.,102.,103.],[204.,205.,206.]]))  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def add_row_offsets(batch, row_offsets):
+    # TODO: arrange offsets to broadcast over features
+    offsets_by_row = ...
+    result = ...
+    return result, offsets_by_row
 ```
 
 <details><summary>Reference solution</summary>
@@ -275,22 +284,28 @@ Use bias shape $(3,)$ and offsets shape $(2, 1)$. Do not swap their semantic rol
 
 ### How to write: Use both kinds of offsets together — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- The lesson batch, feature bias, and two row offsets.
 
-**Step-by-step implementation plan:**
-1. Use both kinds of offsets together (Practice)
-2. Check tensor shape invariant: `combined.shape == (2, 3)`
+**Outputs:**
+- The combined table with both offsets applied.
+
+**Invariants to check:**
+- Feature bias and row offsets have different axes.
+- The output retains the original batch shape.
+
+**Hints:**
+- Give each offset an explicit shape before adding.
+- Verify every row and feature.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Use both kinds of offsets together (Practice)
-combined = ...  # TODO: compute combined
-# Check tensor shape invariant: `combined.shape == (2, 3)`
-assert combined.shape  # TODO: complete assertion check
-assert jnp.allclose(combined, jnp.array([[111., 122., 133.], [214., 225., 236.]]))  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def combine_offsets(batch, feature_bias, row_offsets):
+    # TODO: apply feature and observation offsets with distinct shapes
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -321,28 +336,28 @@ Raise a descriptive ValueError before subtracting. The check is based on shape m
 
 ### How to write: Reject an aligned-loss contract violation — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- Prediction and target arrays with matching vector shapes, then a column-shaped target.
 
-**Step-by-step implementation plan:**
-1. Reject an aligned-loss contract violation (Challenge)
+**Outputs:**
+- A scalar MSE for aligned vectors and a descriptive mismatch error.
+
+**Invariants to check:**
+- Shape metadata is checked before subtraction.
+- Do not silently reshape or broadcast mismatched data.
+
+**Hints:**
+- Compare shape tuples before arithmetic.
+- Use a clear exception for invalid alignment.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Reject an aligned-loss contract violation (Challenge)
+import jax.numpy as jnp
+
 def aligned_mse(prediction, target):
-    if prediction.shape != target.shape:
-        raise ValueError("aligned prediction and target shapes must match")
-    return ...  # TODO: return computed result
-assert jnp.allclose(aligned_mse(predictions, targets), 0.)  # TODO: complete assertion check
-try:
-    aligned_mse(predictions, targets[:, None])
-except ValueError:
-    pass
-else:
-    raise AssertionError("Column targets must be rejected")
+    # TODO: reject shape mismatch before computing scalar mean squared error
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

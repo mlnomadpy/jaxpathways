@@ -189,10 +189,11 @@ Specializations. Start after: 05: Neural network training.
 - Batch environments and scan rollouts (lesson and exercise available)
 - Policy gradients and PPO (lesson and exercise available)
 - Evaluate agents across seeds (lesson and exercise available)
+- Learn value functions and generalized advantage estimation (lesson and exercise available)
 
 **Build:** An evaluated policy in a functional environment.
 
-**Checkpoint:** Compare a trained policy to a baseline across several seeds and report variability.
+**Checkpoint:** Compare a trained policy to baselines across independent seeds, then defend a learned value estimate and a hand-computed GAE trace at terminal and collector-cutoff boundaries.
 
 ### [13: Pallas kernels](phases/13-kernels/README.md)
 
@@ -597,7 +598,7 @@ Train a policy from actual environment interaction, verify its objective against
 
 **First artifact:** A tested environment transition table and reproducible batched trajectories.
 
-**Study advice:** Test one environment transition before batching it. Reconstruct a trajectory by hand, then compare the policy gradient with the small-state enumeration reference. Train multiple agents with different seeds and freeze the evaluation policy and random streams. Use the policy project to separate an implementation bug, Monte Carlo variation and an algorithm that learns poorly. For review, draw one terminal and one cutoff transition, showing the bootstrap observation. Then present per-agent held-out returns across independently trained seeds; episode count alone does not quantify training robustness.
+**Study advice:** Test one environment transition before batching it. Reconstruct a trajectory by hand, then compare the policy gradient with the small-state enumeration reference. Train multiple agents with different seeds and freeze the evaluation policy and random streams. Use the policy project to separate an implementation bug, Monte Carlo variation and an algorithm that learns poorly. For review, draw one terminal and one cutoff transition, showing the bootstrap observation. Then present per-agent held-out returns across independently trained seeds; episode count alone does not quantify training robustness. Finish rl-05 by checking the value fit and deriving the GAE recursion by hand. The value/advantage exercise is separate from the actor training loop; do not describe it as a complete actor-critic benchmark.
 
 **Engineering extensions (follow each lesson prerequisite):** recovery-06, operations-06. See [the engineering release project](projects/engineering-release/README.md).
 
@@ -611,6 +612,7 @@ Train a policy from actual environment interaction, verify its objective against
 - Verified transitions, terminal masks and reconstructed return targets
 - A policy-gradient comparison against independent state enumeration
 - Learning curves and fixed held-out evaluation for several trained seeds, with failed trajectories explained
+- A fitted tabular value table with independently checked masked error, and hand-calculated GAE across true terminal, collector-cutoff and reset boundaries
 
 ### Make it fast. Make it scale.
 

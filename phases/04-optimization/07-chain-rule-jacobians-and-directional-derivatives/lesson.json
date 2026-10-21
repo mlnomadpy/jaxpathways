@@ -92,7 +92,22 @@
         "prompt": "A colleague wraps the first input in `jax.lax.stop_gradient`. The forward outputs are unchanged. Show why the gradient no longer matches the intended mathematical function.",
         "hint": "Compare the derivative of the sum of outputs with \\(J^\\mathsf{T}(1,1)\\).",
         "solution": "# Find the broken derivative path (Transfer / diagnosis)\ndef detached(x):\n    a = jax.lax.stop_gradient(x[0])\n    return jnp.array([a * a + x[1], a * x[1]])\nassert jnp.allclose(detached(x), f(x))\nassert jnp.allclose(jax.grad(lambda z: jnp.sum(detached(z)))(x), jnp.array([0.0, 3.0]))\nassert jnp.allclose(jax.grad(lambda z: jnp.sum(f(z)))(x), jnp.array([7.0, 3.0]))",
-        "explanation": "Equal forward values do not imply equal differentiation behavior when derivative rules are deliberately changed."
+        "explanation": "Equal forward values do not imply equal differentiation behavior when derivative rules are deliberately changed.",
+        "learnerStarter": {
+          "inputs": [
+            "A colleague wraps the first input in `jax.lax.stop_gradient`. The forward outputs are unchanged. Show why the gradient no longer matches the intended mathematical function."
+          ],
+          "outputs": [
+            "Forward-output parity and the two derivative results."
+          ],
+          "invariants": [
+            "Stopping a gradient does not change the forward value but changes the derivative path."
+          ],
+          "hints": [
+            "Compare the derivative of the sum of outputs with \\(J^\\mathsf{T}(1,1)\\)."
+          ],
+          "code": "import jax\nimport jax.numpy as jnp\n\ndef practice_find_the_broken_derivative_path(point):\n    \"\"\"Implement the find the broken derivative path check.\"\"\"\n    # TODO: Differentiate the intended composition and a version with stop_gradient on the first input; compare both with an independent derivative.\n    raise NotImplementedError\n"
+        }
       },
       {
         "title": "Transfer to unequal dimensions",
@@ -100,7 +115,22 @@
         "prompt": "For a matrix \\(A\\in\\mathbb{R}^{3\\times2}\\), check that the VJP of \\(Ax\\) maps an output sensitivity of length \\(3\\) into a vector of length \\(2\\).",
         "hint": "The reference is \\(A^\\mathsf{T}c\\), not \\(Ac\\).",
         "solution": "# Transfer to unequal dimensions (Transfer / diagnosis)\nA = jnp.array([[1.0, 0.0], [0.0, 2.0], [1.0, 1.0]])\nc3 = jnp.array([1.0, -1.0, 2.0])\n_, back = jax.vjp(lambda z: A @ z, x)\n# Check tensor shape invariant: `back(c3)[0].shape == (2,)`\nassert back(c3)[0].shape == (2,)\nassert jnp.allclose(back(c3)[0], jnp.array([3.0, 0.0]))",
-        "explanation": "Unequal input and output dimensions make a mistaken transpose visible."
+        "explanation": "Unequal input and output dimensions make a mistaken transpose visible.",
+        "learnerStarter": {
+          "inputs": [
+            "For a matrix \\(A\\in\\mathbb{R}^{3\\times2}\\), check that the VJP of \\(Ax\\) maps an output sensitivity of length \\(3\\) into a vector of length \\(2\\)."
+          ],
+          "outputs": [
+            "A length-two input cotangent checked against the matrix transpose product."
+          ],
+          "invariants": [
+            "The cotangent shape follows the output, and the VJP result follows the input."
+          ],
+          "hints": [
+            "The reference is \\(A^\\mathsf{T}c\\), not \\(Ac\\)."
+          ],
+          "code": "import jax\nimport jax.numpy as jnp\n\ndef practice_transfer_to_unequal_dimensions(matrix, input, output_sensitivity):\n    \"\"\"Implement the transfer to unequal dimensions check.\"\"\"\n    # TODO: Build a 3-by-2 matrix product and apply a VJP to a length-three cotangent.\n    raise NotImplementedError\n"
+        }
       }
     ],
     "question": "Which object does a reverse-mode pullback map to input sensitivity?",
@@ -135,6 +165,22 @@
       "A VJP multiplies an output sensitivity by the transposed Jacobian. A JVP instead propagates an input direction forward.",
       "An input direction belongs to a JVP. A VJP takes an output cotangent and maps it back into the input space.",
       "A learning rate belongs to the optimizer. The VJP is a derivative operation and exists before any update rule is chosen."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "A vector input, a vector-valued function, and output weights."
+      ],
+      "outputs": [
+        "The gradient of the weighted scalar output."
+      ],
+      "invariants": [
+        "The VJP maps output sensitivities back to the input dimension."
+      ],
+      "hints": [
+        "Form the scalar objective explicitly before differentiating.",
+        "Use an independent matrix product to check the changed output dimension."
+      ],
+      "code": "import jax\nimport jax.numpy as jnp\n\ndef weighted_output_gradient(point, weights):\n    \"\"\"The gradient of the weighted scalar output.\"\"\"\n    # TODO: Form the weighted scalar output and check its gradient/VJP against the requested input and output shapes.\n    raise NotImplementedError\n"
+    }
   }
 }

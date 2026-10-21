@@ -301,7 +301,7 @@ visual_data = {
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:34:58.009898+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:11:48.366949+00:00. JAX 0.9.2.
 
 ```text
 CPU route: python public/exercises/distributed-02.py
@@ -358,23 +358,28 @@ Use `build_tpu_experiment_commands` for the reviewed CPU-only `distributed-02` r
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Inputs:**
+- The reviewed script identifier distributed-02, default classification, and a four-host CPU-only request.
+
+**Outputs:**
+- Commands for the reviewed CPU route and ValueError checks for unsafe TPU routes.
+
+**Invariants to check:**
+- A CPU-only script is routed to CPU; unreviewed or incompatible multi-host requests fail closed.
+
+**Hints:**
+- Use the public command builder for every case.
+- Do not infer distributed qualification from a host-count field.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-cpu_cmds = build_tpu_experiment_commands(...)  # TODO: compute cpu_cmds
-print("CPU route:", cpu_cmds["run"])
-assert cpu_cmds["run"]  # TODO: complete assertion check
-for kwargs in ({}, {"hosts": 4, "execution_class": "cpu-only"}):
-    try:
-        build_tpu_experiment_commands("jax-tpu-pod", "us-west1-c", "distributed-02", **kwargs)
-    except ValueError:
-        print("Rejected unsafe route:", kwargs)
-    else:
-        raise AssertionError("unreviewed or CPU-only work must not be routed to a TPU Pod")
+import jax.numpy as jnp
+import numpy as np
+
+def audit_script_routes(build_tpu_experiment_commands):
+    # TODO: build the reviewed CPU route and capture both expected route rejections.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -408,18 +413,28 @@ Filter by `s['multi_host']`.
 
 ### How to write: Filter multi-host slices from the catalog — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Filter multi-host slices from the catalog (Foundations)
-2. Assert invariant `pod_slices == ["v5litepod-16"` holds
+**Inputs:**
+- A slice catalog whose entries include the multi_host flag.
+
+**Outputs:**
+- Names of slices that require launching every worker.
+
+**Invariants to check:**
+- Only entries explicitly marked multi_host are included.
+
+**Hints:**
+- Filter by the boolean flag rather than slice-name patterns.
+- A catalog result does not demonstrate that a multi-host job ran.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Filter multi-host slices from the catalog (Foundations)
-pod_slices = ...  # TODO: compute pod_slices
-print("Multi-host Pod slices:", pod_slices)
-# Assert invariant `pod_slices == ["v5litepod-16"` holds
-assert pod_slices  # TODO: complete assertion check
+import jax.numpy as jnp
+import numpy as np
+
+def list_multihost_slices(slice_catalog):
+    # TODO: return slice names with the explicit multi_host flag set.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -450,18 +465,28 @@ Multiply `8 * chips_per_host` and `8 * global_chips`.
 
 ### How to write: Compute per-host vs global batch size on a 4-host Pod slice — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Assert invariant `per_host_batch == 32 and global_batch == 128` holds
+**Inputs:**
+- Four hosts, four chips per host, and a microbatch of eight sequences per chip.
+
+**Outputs:**
+- Per-host and global sequences processed per step.
+
+**Invariants to check:**
+- Global batch equals per-host batch times host count; each chip contributes one microbatch.
+
+**Hints:**
+- Multiply by chips per host before multiplying by hosts.
+- State that these are arithmetic counts, not measured throughput.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-microbatch_per_chip = ...  # TODO: compute microbatch_per_chip
-per_host_batch = ...  # TODO: compute per_host_batch
-global_batch = ...  # TODO: compute global_batch
-print("Per-host batch:", per_host_batch, "Global batch:", global_batch)
-# Assert invariant `per_host_batch == 32 and global_batch == 128` holds
-assert per_host_batch  # TODO: complete assertion check
+import jax.numpy as jnp
+import numpy as np
+
+def batch_sizes_per_step(hosts, chips_per_host, microbatch_per_chip):
+    # TODO: return per-host and global sequence counts for one step.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

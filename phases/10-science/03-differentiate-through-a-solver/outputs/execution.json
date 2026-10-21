@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "science-03",
-  "contentHash": "8df9893ce7f4116615917f1b944521fd3383a67e23062b32ece54b55c5991b4a",
-  "executedAt": "2026-10-21T11:30:38.414360+00:00",
+  "contentHash": "4d5f48d73db38bce05cca4b573a4b540c5a31339593ea8b6024266504cc1e92b",
+  "executedAt": "2026-10-21T16:07:06.549883+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -98,7 +98,7 @@
       ]
     },
     {
-      "sourceHash": "dc2dcebc679bf29a27be04c98d7cda41438f2dd5f126d5b10a065eab0829ed42",
+      "sourceHash": "22d5d8896e54aecd8b70f9aafa0c68cf3475cdb9799648df8d1bbbd8b53d1ac8",
       "outputs": []
     },
     {
@@ -114,7 +114,7 @@
       ]
     },
     {
-      "sourceHash": "7073ee8cfd44e3f408e334ad29c6c00c34fc35124d8a1c5cc50c5c704f70f6cd",
+      "sourceHash": "22d5d8896e54aecd8b70f9aafa0c68cf3475cdb9799648df8d1bbbd8b53d1ac8",
       "outputs": []
     },
     {
@@ -130,7 +130,7 @@
       ]
     },
     {
-      "sourceHash": "f397bb9956ecc84ce143d7ceb1da594fbd44d6c87a36fe9ee0b7542cbc65d1a8",
+      "sourceHash": "22d5d8896e54aecd8b70f9aafa0c68cf3475cdb9799648df8d1bbbd8b53d1ac8",
       "outputs": []
     },
     {

@@ -321,7 +321,7 @@ visual_data = {'kind': 'bar', 'x': list(range(len(saved_norms))), 'labels': [f'l
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:29:11.083378+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:05:33.314450+00:00. JAX 0.9.2.
 
 ```text
 Restored step: 3
@@ -381,25 +381,34 @@ Advance to step five, save to a new directory, restore and verify step six again
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Exercise solution
+**Inputs:**
+- A full training snapshot and a template state containing model, optimizer, step, and RNG state.
+
+**Outputs:**
+- A restored state that produces the same next update as uninterrupted training.
+
+**Invariants to check:**
+- Parameters, optimizer moments, step, and random key are restored together; contract mismatches are rejected.
+
+**Hints:**
+- Compare the next transition, not only restored parameter equality.
+- Change only optimizer state in a controlled comparison.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-later = ...  # TODO: compute later
-for _ in range(2):later,_=step(later,x,y)
-with ocp.StandardCheckpointer() as cp:
-    later_path = Path(...)  # TODO: compute later_path
-    cp.save(later_path,{"training":later,"contract":encode_contract(contract)})
-    cp.wait_until_finished()
-    recovered = cp.restore(...)  # TODO: compute recovered
-validate_contract(recovered["contract"],contract)
-left,_ = step(...)  # TODO: compute left,_
-right,_ = step(...)  # TODO: compute right,_
-same_tree(left,right)
-assert int(right["step"])  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+import numpy as np
+import optax
+import orbax.checkpoint as ocp
+import json
+import hashlib
+
+def restore_training_state(checkpoint_path, template, contract):
+    """A restored state that produces the same next update as uninterrupted training."""
+    # TODO: Serialize full parameters, optimizer state, step, RNG key, and configuration; compare the next resumed update.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -436,25 +445,33 @@ Create a new mapping and replace only its optimizer entry.
 
 ### How to write: Show what weights-only recovery loses — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- Keep the restored parameters but reset Adam’s memory. Compare the next update with the full-state restore. Keep data and random state identical so the optimizer memory is the only changed factor.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- The two next parameter updates and their optimizer state difference.
+
+**Invariants to check:**
+- Data, random key, parameters, and learning rate stay identical across the comparison.
+
+**Hints:**
+- Create a new mapping and replace only its optimizer entry.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Show what weights-only recovery loses (Transfer)
-full = ...  # TODO: compute full
-weights_only = dict(...)  # TODO: compute weights_only
-full_next,_ = step(...)  # TODO: compute full_next,_
-reset_next,_ = step(...)  # TODO: compute reset_next,_
-assert int(full_next['optimizer'][0].count)  # TODO: complete assertion check
-assert int(reset_next['optimizer'][0].count)  # TODO: complete assertion check
-assert any(not np.allclose(a,b,rtol=1e-6,atol=1e-7) for a,b  # TODO: complete assertion check
-print('Full restore Adam count: 4; reset memory count: 1; next parameters differ.')
+import jax
+import jax.numpy as jnp
+import numpy as np
+import optax
+import orbax.checkpoint as ocp
+import json
+import hashlib
+
+def practice_show_what_weights_only_recovery_loses(state, inputs, targets):
+    """Implement the show what weights-only recovery loses check."""
+    # TODO: Restore the same parameters with full Adam state and with fresh moments; compare their next updates on the identical batch.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -489,35 +506,33 @@ A compatible pytree can still represent the wrong update rule.
 
 ### How to write: Reject an incompatible update configuration — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Reject an incompatible update configuration (Challenge)
-2. Check tensor shape invariant: `a.shape==b.shape and a.dtype==b.dtype`
-3. Integer PRNG words must be checked exactly, not with relative float tolerance.
+**Inputs:**
+- Attempt to restore the contract under learning rate $0.1$. Show the rejection, then validate the original configuration. Also inspect shape and dtype equality of restored parameter leaves.
+
+**Outputs:**
+- Rejected changed configuration and validated original checkpoint state.
+
+**Invariants to check:**
+- Configuration validation happens before applying the resumed update.
+
+**Hints:**
+- A compatible pytree can still represent the wrong update rule.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Reject an incompatible update configuration (Challenge)
-changed_contract = dict(...)  # TODO: compute changed_contract
-try:
-    validate_contract(restored["contract"],changed_contract)
-except ValueError:
-    print("Expected changed configuration rejection")
-else:
-    raise AssertionError("Expected contract mismatch")
-validate_contract(restored["contract"],contract)
-for a,b in zip(jax.tree.leaves(state["params"]),jax.tree.leaves(restored["training"]["params"])):
-    # Check tensor shape invariant: `a.shape==b.shape and a.dtype==b.dtype`
-    assert a.shape  # TODO: complete assertion check
-# Integer PRNG words must be checked exactly, not with relative float tolerance.
-changed_key = dict(...)  # TODO: compute changed_key
-changed_key["key_data"] = ...  # TODO: compute changed_key["key_data"]
-try:
-    same_tree(state,changed_key)
-except AssertionError:
-    print("Expected exact key-data mismatch")
-else:
-    raise AssertionError("Expected changed PRNG word rejection")
+import jax
+import jax.numpy as jnp
+import numpy as np
+import optax
+import orbax.checkpoint as ocp
+import json
+import hashlib
+
+def practice_reject_an_incompatible_update_configuration(checkpoint, contract):
+    """Implement the reject an incompatible update configuration check."""
+    # TODO: Attempt restore with the changed learning rate, then verify the original config and compare every restored leaf shape/dtype.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

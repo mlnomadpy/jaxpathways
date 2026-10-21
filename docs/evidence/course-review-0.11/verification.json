@@ -1,0 +1,135 @@
+{
+  "schemaVersion": 1,
+  "candidateVersion": "0.11.0",
+  "verifiedAt": "2026-10-21T16:43:13.928702+00:00",
+  "baseCommit": "7554817ed19a26dabfb1e183220cf84308382906",
+  "sourceSnapshotHash": "22b42bf35415155411a70a07336c87625d04e2560bdfe25a38a0b20d6aff2c85",
+  "branch": "codex/all-gaps-repairs",
+  "scope": "Local author and internal agent verification for review; no independent human acceptance, additional target hardware qualification, hosted CI acceptance or production publication.",
+  "summary": {
+    "byKind": {
+      "lessons": 104,
+      "phases": 22,
+      "projects": 31,
+      "plans": 10,
+      "assessments": 11,
+      "pathways": 10,
+      "careers": 7,
+      "tracks": 4,
+      "guides": 3,
+      "book": 1
+    },
+    "phaseLevels": {
+      "available-draft": 9,
+      "in-development": 13
+    },
+    "itemLevels": {
+      "available-draft": 165,
+      "in-development": 28,
+      "planned": 10
+    },
+    "tasks": 534,
+    "lessonTasks": 407,
+    "projectStages": 127,
+    "currentCpuLessons": 104,
+    "currentProjectReferences": 31,
+    "expertReviewedLessons": 0,
+    "novicePilotedLessons": 0,
+    "choiceSpecificFeedbackLessons": 104,
+    "boundedHardwareQualifications": 4
+  },
+  "learnerContracts": {
+    "lessons": 104,
+    "mainAndPracticeContracts": 303,
+    "readyLessons": 104,
+    "scope": "Authored task contracts and learner-only export fidelity; not automatically graded independent learner success."
+  },
+  "checks": [
+    {
+      "command": "npm run check",
+      "status": "passed",
+      "tests": 148,
+      "log": "check.log"
+    },
+    {
+      "command": "npm run check:deployment",
+      "status": "passed",
+      "scope": "Root and /jaxpathways/ static routing, metadata/schema, maturity labels and book distribution",
+      "log": "deployment.log"
+    },
+    {
+      "command": "python3 scripts/smoke-lessons.py",
+      "status": "passed",
+      "lessons": 104,
+      "executions": 208,
+      "logs": [
+        "lesson-executions.log",
+        "rl-final-execution.log"
+      ],
+      "note": "RL-05 was rerun after its final feedback/source correction; all current lesson hashes match."
+    },
+    {
+      "command": "python3 scripts/check-projects.py",
+      "status": "passed",
+      "projects": 31,
+      "logs": [
+        "project-executions.log",
+        "bayesian-final-execution.log"
+      ],
+      "note": "Bayesian reference rerun after final optional helper repair; all 31 registry source hashes independently rechecked."
+    },
+    {
+      "command": "python3 assessments/check_assessments.py",
+      "status": "passed",
+      "assessments": 11,
+      "log": "assessment-executions.log"
+    },
+    {
+      "command": "python projects/bayesian-regression/tests/check_numpyro.py --implementation projects/bayesian-regression/solution/numpyro_workflow.py --evidence-dir <temporary-directory>",
+      "status": "passed",
+      "scope": "Separate pinned optional environment, actual CPU NUTS chains and independently reconstructed statistics; no real-data or accelerator claim.",
+      "log": "numpyro.log",
+      "retainedEvidence": "../../../projects/bayesian-regression/reference/numpyro/numpyro-check-evidence.json"
+    },
+    {
+      "command": "PLAYWRIGHT_BROWSERS_PATH=<isolated-install> PLAYWRIGHT_PORT=4188 CI=1 npm run test:browser -- --workers=2",
+      "status": "passed",
+      "tests": 26,
+      "scope": "Headless desktop/mobile Chromium regression tests; not native book reading acceptance.",
+      "log": "browser.log"
+    },
+    {
+      "command": "java -jar epubcheck-5.4.0/epubcheck.jar public/downloads/jax-foundations.epub --json <report>",
+      "status": "passed",
+      "checkerVersion": "5.4.0",
+      "fatal": 0,
+      "errors": 0,
+      "warnings": 0,
+      "report": "epubcheck-report.json"
+    }
+  ],
+  "bookArtifacts": {
+    "jax-foundations.epub": "d6f62d8ee73eee06b4d52c352c954808664d068e10f3e982004367080e6963f5",
+    "jax-foundations.html": "8d5f7b882d1153478a0ad53de07dc273620a6235edb810a7e4d3116d8d32ff0c"
+  },
+  "pending": [
+    "Independent specialist teaching reviews and novice learner pilots",
+    "Native Apple Books and second EPUB reader, actual screen-reader speech and inspected A4/Letter pagination; desktop locked during native attempt",
+    "Thirteen developing phases and ten planned larger capstone lifecycles retain their stated gaps",
+    "Broader real-data, native low-bit, edge and target-hardware evidence",
+    "Hosted CI on the candidate commit and any subsequently authorized production publication"
+  ],
+  "logSha256": {
+    "check.log": "8f14d7e2827c7a8a9f8db08d329d1421025303a606deb43dd27e5c7d1831e392",
+    "deployment.log": "e36636de51038a5009c5489679603a50cc22e55b9efa67dcce3a646025601f06",
+    "browser.log": "8fa58d705375bbe0c9aafcad01fdd4e81d98ec0f74b541248dfb045747eb0532",
+    "lesson-executions.log": "eb31296c6b1f11b511ce7e0dd10f1d62c62a3e944f59767f557f66d41553bc5f",
+    "rl-final-execution.log": "d53888167ed5663442a9c62dd52f912b01f937eeaba207ee1cac33daea13e1b0",
+    "project-executions.log": "a742f58162ffe9e16cd485e45e806cef46b40584279d662fc7e2ed0dea6fb5f7",
+    "bayesian-final-execution.log": "1c0391356ef34d64140787d9f077863bd60ee7c9c06e20cfbb0921ca5ee97c48",
+    "assessment-executions.log": "8d199ccd92d8737b56f66ef11e235d55e9d33a65f32107de404d21475fdcab50",
+    "numpyro.log": "3f8439fec9b1452f6741d4b88f7a139c92bef2b3451f9d5e1fe5e0443bad37b9",
+    "epubcheck.log": "7762882cc0e77ad791a4d3cbda6ae124ed8682e19906d72b6983987e55585d12",
+    "epubcheck-report.json": "ffedbbac3afe27c1d6951c41ea507b723e13b7c2a652a3254dc6c0bc2be04bd0"
+  }
+}

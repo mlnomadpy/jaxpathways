@@ -327,7 +327,7 @@ visual_data = {'kind': 'bar', 'x': list(range(len(x))), 'labels': [f'x[{i}]' for
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:26:35.183891+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:03:14.966566+00:00. JAX 0.9.2.
 
 ```text
 Python: 3.14.3
@@ -353,19 +353,32 @@ Edit the starter as shown in Step 6: change the array length from $4$ to $6$ and
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
+**Inputs:**
+- The saved experiment currently uses a JAX array and prints its total.
+- The changed input contains six values.
+- Save the observed result and explain why it changed.
 
-**Step-by-step implementation plan:**
-1. Exercise solution
+**Outputs:**
+- A modified runnable function and a first-run evidence note.
+
+**Invariants to check:**
+- The saved script is the source that was executed.
+- The note reports an observed result.
+- The command can be rerun from the experiment folder.
+
+**Hints:**
+- Make the requested edit in the starter file.
+- Save terminal output before writing the explanation.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-x = jax.numpy.arange(...)  # TODO: compute x
-print("Changed experiment sum:", float(x.sum()))
-assert float(x.sum())  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def changed_experiment():
+    # TODO: create the changed input and report its total
+    result = ...
+    return result
 ```
 
 <details><summary>Reference solution</summary>

@@ -255,7 +255,7 @@ visual_data={"panels":[*visual_data.get("panels",[visual_data]),extra_panel]}
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:34:51.098699+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:11:40.972155+00:00. JAX 0.9.2.
 
 ```text
 DPO initial/final: 0.6931471824645996 0.27227783203125 ; reference-corrected margins: [3.0890286  6.17805719 3.08902884]
@@ -317,16 +317,28 @@ Swap chosen and rejected IDs after training and verify that the loss rises.
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Exercise solution
+**Inputs:**
+- Policy and reference log probabilities plus chosen and rejected comparison IDs.
+
+**Outputs:**
+- Pairwise loss before and after swapping the chosen/rejected identities.
+
+**Invariants to check:**
+- The reference correction uses the same frozen reference for both response IDs.
+
+**Hints:**
+- Swap IDs without changing either probability table.
+- Evaluate the loss at the trained policy.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-reverse = float(...)  # TODO: compute reverse
-assert reverse  # TODO: complete assertion check
-print('Reversed-label loss:', reverse)
+import jax.numpy as jnp
+import numpy as np
+
+def compare_swapped_preference_loss(policy_logps, reference_logps, chosen, rejected):
+    # TODO: evaluate the corrected objective under original and swapped pair identities.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -354,24 +366,28 @@ The reference is an input to the objective but not an optimization variable.
 
 ### How to write: Freeze the reference numerically and in autodiff — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
+**Inputs:**
+- Policy logits, reference log probabilities, chosen/rejected IDs, and beta.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- The reference-input gradient of the DPO objective.
+
+**Invariants to check:**
+- Reference values affect the numeric margin but are stopped from receiving optimization gradients.
+
+**Hints:**
+- Differentiate with respect to the reference argument only.
+- Check the gradient shape and that every entry is zero.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Freeze the reference numerically and in autodiff (Transfer)
-reference_grad = jax.grad(...)  # TODO: compute reference_grad
-    policy, reference, chosen, rejected, 0.3
-)
-np.testing.assert_array_equal(
-    reference_grad, np.zeros(reference_grad.shape)
-)
-print('Reference gradient is zero.')
+import jax.numpy as jnp
+import numpy as np
+
+def check_reference_gradient(policy_logits, reference_logps, chosen, rejected, beta):
+    # TODO: differentiate the pair objective with respect to the reference values.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -405,31 +421,28 @@ The log-softmax normalizer cancels in a log-probability difference. Shared model
 
 ### How to write: Derive a one-pair categorical gradient — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
+**Inputs:**
+- Three-action policy logits, fixed reference log probabilities, one chosen ID, one rejected ID, and beta.
 
-**Step-by-step implementation plan:**
-1. Derive a one-pair categorical gradient (Challenge)
+**Outputs:**
+- Corrected margin and analytic logit-gradient vector checked against autodiff.
+
+**Invariants to check:**
+- Only chosen and rejected action logits have direct gradient; the third action cancels in the pairwise log-probability difference.
+
+**Hints:**
+- Write the log-softmax derivative for each selected action.
+- Check all three entries against autodiff.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Derive a one-pair categorical gradient (Challenge)
-probe = jnp.array(...)  # TODO: compute probe
-choice = jnp.array(...)  # TODO: compute choice
-reject = jnp.array(...)  # TODO: compute reject
-beta = ...  # TODO: compute beta
-one_pair = ...  # TODO: compute one_pair
-    jax.nn.log_softmax(logits), reference, choice, reject, beta
-)
-margin_value = float(...)  # TODO: compute margin_value
-factor = ...  # TODO: compute factor
-np.testing.assert_allclose(
-    jax.grad(one_pair)(probe), [factor, -factor, 0.0], atol=1e-6
-)
-print('One-pair logit gradient agrees with independent margin derivative.')
+import jax.numpy as jnp
+import numpy as np
+
+def derive_one_pair_logit_gradient(logits, reference_logps, chosen, rejected, beta):
+    # TODO: derive the corrected pair margin and compare the three logit derivatives.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

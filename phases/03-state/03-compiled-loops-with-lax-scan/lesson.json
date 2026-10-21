@@ -69,7 +69,24 @@
         "hint": "The second returned value is only the recorded output.",
         "solution": "# Record a different output (Practice): Carry and history need not have the same interpretation.\nlast,energy=jax.lax.scan(lambda c,u:(0.5*c+u,(0.5*c+u)**2),jnp.array(0.),increments)\nassert jnp.allclose(last,1.875)\nassert jnp.allclose(energy,jnp.array([1.,2.25,3.0625,3.515625]))",
         "explanation": "Carry and history need not have the same interpretation. The state remains unsquared for the next transition.",
-        "difficulty": "Practice"
+        "difficulty": "Practice",
+        "learnerStarter": {
+          "inputs": [
+            "An initial scalar carry and a sequence of increments."
+          ],
+          "outputs": [
+            "The final state and the squared state recorded at every step."
+          ],
+          "invariants": [
+            "The carry remains unsquared between transitions.",
+            "Recorded output has the same leading length as increments."
+          ],
+          "hints": [
+            "Compute the next state once in the transition.",
+            "Return that state as carry and its square as the scan output."
+          ],
+          "code": "import jax\nimport jax.numpy as jnp\n\ndef state_and_energy(initial: jax.Array, increments: jax.Array, decay: float = 0.5) -> tuple[jax.Array, jax.Array]:\n    \"\"\"Scan a scalar state while recording its squared energy.\"\"\"\n    # TODO: define the transition and return lax.scan outputs.\n    raise NotImplementedError\n"
+        }
       },
       {
         "title": "Diagnose a growing carry",
@@ -77,7 +94,24 @@
         "hint": "The carry shape is part of the loop type.",
         "solution": "# Diagnose a growing carry (Challenge): The error identifies incompatible carry input/output types.\ndef growing(c,u):\n    return jnp.concatenate([c,u[None]]),u\ntry:\n    jax.lax.scan(growing,jnp.zeros((0,)),increments)\nexcept TypeError:\n    print(\"Expected carry-shape mismatch\")\nelse:\n    raise AssertionError(\"Expected scan type failure\")\n_,saved=jax.lax.scan(lambda c,u:(c,u),jnp.array(0.),increments)\nassert jnp.array_equal(saved,increments)",
         "explanation": "The error identifies incompatible carry input/output types. Store per-step values in scan outputs instead of growing the carry.",
-        "difficulty": "Challenge"
+        "difficulty": "Challenge",
+        "learnerStarter": {
+          "inputs": [
+            "A fixed-shape scan carry and a sequence whose values are to be recorded."
+          ],
+          "outputs": [
+            "A scan result whose carry shape stays fixed while all per-step values are stacked in output."
+          ],
+          "invariants": [
+            "Carry shape and dtype agree on every iteration.",
+            "History length equals the sequence length, including empty sequences."
+          ],
+          "hints": [
+            "A growing array belongs in the scan output, not in carry.",
+            "Keep the carry fixed and return each new value as the output."
+          ],
+          "code": "import jax\nimport jax.numpy as jnp\n\ndef collect_scan(initial: jax.Array, values: jax.Array) -> tuple[jax.Array, jax.Array]:\n    \"\"\"Keep a fixed carry and collect each input in the scan history.\"\"\"\n    # TODO: implement a fixed-type carry transition with per-step output.\n    raise NotImplementedError\n"
+        }
       }
     ],
     "objectives": [
@@ -270,6 +304,22 @@
       "The carry values are meant to change. It is their structure, shapes and dtypes that must stay compatible across iterations.",
       "The carry value changes through time, but its structural and array type properties must remain consistent.",
       "Outputs can contain arbitrary computed values with a consistent per-step structure. They do not need to be zero."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "The initial scalar state, increments, and explicit decay scalar from the exercise."
+      ],
+      "outputs": [
+        "The final scan value, per-step history, autodiff derivative with respect to decay, and comparison with the analytic value at 0.5."
+      ],
+      "invariants": [
+        "The final value is differentiated through the scan; the derivative check uses decay 0.5 and the stated analytic reference."
+      ],
+      "hints": [
+        "Pass decay as an explicit scan-transition input.",
+        "Differentiate the function returning only the final carry, then compare at the requested decay."
+      ],
+      "code": "import jax\nimport jax.numpy as jnp\n\ndef check_scan_decay_derivative(initial, increments, decay):\n    # TODO: Return the scan history and final carry, then differentiate the final carry with respect to decay.\n    raise NotImplementedError\n"
+    }
   }
 }

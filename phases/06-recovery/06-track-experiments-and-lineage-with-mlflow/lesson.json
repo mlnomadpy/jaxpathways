@@ -83,7 +83,22 @@
         "prompt": "Change one training target and compute the data fingerprint again without overwriting the original record.",
         "hint": "Hash the same input bytes plus changed target bytes.",
         "solution": "# Change a data value (transfer): Identical filenames or shapes do not imply identical data.\nchanged_y=np.asarray(y).copy()\nchanged_y[0]+=.1\n# Transfer the device result to the host for an independent NumPy comparison.\nchanged_hash=hashlib.sha256(np.asarray(x).tobytes()+changed_y.tobytes()).hexdigest()\nassert changed_hash != data_hash\nprint('Changed target changes dataset identity.')",
-        "explanation": "Identical filenames or shapes do not imply identical data. A changed target creates a different experiment contract."
+        "explanation": "Identical filenames or shapes do not imply identical data. A changed target creates a different experiment contract.",
+        "learnerStarter": {
+          "inputs": [
+            "Change one training target and compute the data fingerprint again without overwriting the original record."
+          ],
+          "outputs": [
+            "Original and changed fingerprints with the source record preserved."
+          ],
+          "invariants": [
+            "The only dataset change is one target value, and its fingerprint is distinct."
+          ],
+          "hints": [
+            "Hash the same input bytes plus changed target bytes."
+          ],
+          "code": "import hashlib\nimport json\nfrom pathlib import Path\nimport numpy as np\nimport mlflow\nfrom mlflow import MlflowClient\n\ndef practice_change_a_data_value(features, labels):\n    \"\"\"Implement the change a data value check.\"\"\"\n    # TODO: Copy the training targets, change one value, and recompute the content fingerprint without overwriting the original.\n    raise NotImplementedError\n"
+        }
       }
     ],
     "question": "A run is tagged champion. What does that establish?",
@@ -143,6 +158,22 @@
       "An alias is a registry pointer. Deployment still needs an explicit artifact selection, loading and target prediction check.",
       "An alias points to a registered model version. It does not deploy that version or approve its quality. Resolve the alias to a version and artifact identity, then verify the actual runtime loads and evaluates that artifact.",
       "Renaming a registered model does not change the role of the evaluation data. Preserve the original split and selection protocol."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "The fitted candidate parameters, held-out inputs and labels, and the current release candidate selected from the two trained runs."
+      ],
+      "outputs": [
+        "The deliberately wrong third candidate’s held-out loss and a decision that rejects it despite its low training loss."
+      ],
+      "invariants": [
+        "Release selection uses held-out evidence; a low training loss alone cannot override the candidate’s worse validation result."
+      ],
+      "hints": [
+        "Evaluate the zero-weight, zero-bias candidate on the existing held-out set.",
+        "Compare its validation error with the selected candidate and record why it is not released."
+      ],
+      "code": "import jax.numpy as jnp\n\ndef evaluate_third_release_candidate(candidate_params, heldout_inputs, heldout_targets, selected_validation_loss):\n    # TODO: Measure the deliberately wrong candidate on held-out rows and decide whether it passes release selection.\n    raise NotImplementedError\n"
+    }
   }
 }

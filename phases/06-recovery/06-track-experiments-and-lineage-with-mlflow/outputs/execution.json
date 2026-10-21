@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "recovery-06",
-  "contentHash": "80dad7b807fa74e5e245270fd469bcb1949f7bae9a5af2f621f924fdcd7e67fc",
-  "executedAt": "2026-10-21T11:29:43.036990+00:00",
+  "contentHash": "86f40f9b698e86b5ea30e3e8b39c44f195e2b0138964740321f00fef87b87d31",
+  "executedAt": "2026-10-21T16:05:53.428377+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -28,12 +28,12 @@
           "output_type": "stream",
           "name": "stderr",
           "text": [
-            "2026/10/21 04:29:38 INFO mlflow.store.db.utils: Creating initial MLflow database tables...\n",
-            "2026/10/21 04:29:38 INFO mlflow.store.db.utils: Updating database tables\n",
+            "2026/10/21 09:05:51 INFO mlflow.store.db.utils: Creating initial MLflow database tables...\n",
+            "2026/10/21 09:05:51 INFO mlflow.store.db.utils: Updating database tables\n",
             "\r",
             "Downloading artifacts:   0%|          | 0/1 [00:00<?, ?it/s]\r",
-            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 5849.80it/s]\r",
-            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 1083.24it/s]\n"
+            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 5322.72it/s]\r",
+            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 2054.02it/s]\n"
           ]
         }
       ]
@@ -53,12 +53,12 @@
           "output_type": "stream",
           "name": "stderr",
           "text": [
-            "2026/10/21 04:29:40 INFO mlflow.store.db.utils: Creating initial MLflow database tables...\n",
-            "2026/10/21 04:29:40 INFO mlflow.store.db.utils: Updating database tables\n",
+            "2026/10/21 09:05:52 INFO mlflow.store.db.utils: Creating initial MLflow database tables...\n",
+            "2026/10/21 09:05:52 INFO mlflow.store.db.utils: Updating database tables\n",
             "\r",
             "Downloading artifacts:   0%|          | 0/1 [00:00<?, ?it/s]\r",
-            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 1253.15it/s]\r",
-            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 807.84it/s] \n"
+            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 2531.26it/s]\r",
+            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 1697.41it/s]\n"
           ]
         }
       ]
@@ -95,7 +95,7 @@
       ]
     },
     {
-      "sourceHash": "bb6a83e2b2b73484df0a02092064f868feeb728784b5fad62ae7f75c1e176853",
+      "sourceHash": "22d5d8896e54aecd8b70f9aafa0c68cf3475cdb9799648df8d1bbbd8b53d1ac8",
       "outputs": []
     },
     {
@@ -111,7 +111,7 @@
       ]
     },
     {
-      "sourceHash": "42eb736c6dd3f6a20e41cc0d47b902156798af1f509452a2882941120bbe7f15",
+      "sourceHash": "22d5d8896e54aecd8b70f9aafa0c68cf3475cdb9799648df8d1bbbd8b53d1ac8",
       "outputs": []
     },
     {

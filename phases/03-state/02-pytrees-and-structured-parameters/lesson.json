@@ -69,7 +69,24 @@
         "hint": "At the starting point prediction is \\(1\\) and residual is \\(-2\\), so the scale derivative is \\(-4\\).",
         "solution": "# Extend to a nested model (Practice): Nested parameter identity survives differentiation.\nnested={\"layer\":params,\"scale\":jnp.array(1.)}\ndef nested_loss(p):\n    pred=p[\"scale\"]*(jnp.dot(p[\"layer\"][\"weight\"],x)+p[\"layer\"][\"bias\"])\n    return (pred-3.)**2\ng=jax.grad(nested_loss)(nested)\nassert jax.tree.structure(g)==jax.tree.structure(nested)\nassert jnp.allclose(g[\"scale\"],-4.)",
         "explanation": "Nested parameter identity survives differentiation. The independent scale calculation checks the new path.",
-        "difficulty": "Practice"
+        "difficulty": "Practice",
+        "learnerStarter": {
+          "inputs": [
+            "A weight vector, scalar bias, scalar scale, and input vector."
+          ],
+          "outputs": [
+            "The gradient pytree for the squared prediction loss of scale*(weight dot x + bias)."
+          ],
+          "invariants": [
+            "Gradient leaves follow the same nested structure as the parameters.",
+            "The scale derivative is computed by autodiff for the supplied values."
+          ],
+          "hints": [
+            "Put weight and bias below a layer key, with scale as a separate leaf.",
+            "Differentiate a scalar loss with jax.grad."
+          ],
+          "code": "import jax\nimport jax.numpy as jnp\n\ndef nested_gradients(weight: jax.Array, bias: jax.Array, scale: jax.Array, x: jax.Array, target: jax.Array) -> dict:\n    \"\"\"Return gradients for a nested scaled linear model.\"\"\"\n    # TODO: construct the parameter pytree and differentiate its scalar loss.\n    raise NotImplementedError\n"
+        }
       },
       {
         "title": "Repair a mismatched update tree",
@@ -77,7 +94,24 @@
         "hint": "Matching leaf counts is not enough; key paths matter.",
         "solution": "# Repair a mismatched update tree (Challenge): A missing bias gradient is a tree mismatch.\ntry:\n    jax.tree.map(lambda p,g:p-0.05*g,params,{\"weight\":grads[\"weight\"]})\nexcept ValueError:\n    print(\"Expected tree mismatch\")\nelse:\n    raise AssertionError(\"Expected a missing-key failure\")\nfixed=jax.tree.map(lambda p,g:p-0.05*g,params,grads)\nassert jnp.allclose(loss(fixed),0.64,atol=1e-6)",
         "explanation": "A missing bias gradient is a tree mismatch. Broadcasting weights or changing a learning rate cannot supply the missing parameter identity.",
-        "difficulty": "Challenge"
+        "difficulty": "Challenge",
+        "learnerStarter": {
+          "inputs": [
+            "A parameter pytree and a matching gradient pytree."
+          ],
+          "outputs": [
+            "A gradient tree validated against the parameter structure and a matching updated parameter pytree."
+          ],
+          "invariants": [
+            "Every parameter path has exactly one gradient leaf.",
+            "A missing bias gradient is rejected instead of broadcast or silently omitted."
+          ],
+          "hints": [
+            "Use tree structure comparison or a tree map to validate alignment.",
+            "Apply the hand update only after the structures match."
+          ],
+          "code": "import jax\nimport jax.numpy as jnp\n\ndef checked_tree_update(params: dict, grads: dict, learning_rate: float = 0.05) -> dict:\n    \"\"\"Reject a mismatched pytree and otherwise perform one aligned update.\"\"\"\n    # TODO: check structure compatibility, then update corresponding leaves.\n    raise NotImplementedError\n"
+        }
       }
     ],
     "objectives": [
@@ -130,6 +164,23 @@
       "The loss is scalar, but there is one gradient leaf for each differentiable parameter leaf. Compare tree structures and leaf shapes.",
       "The differentiated input determines the gradient structure. Each floating-point parameter leaf gets a corresponding gradient leaf.",
       "Automatic differentiation follows array operations, not source line numbers. Inspect the gradient pytree alongside the parameter pytree."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "A nested parameter pytree with weight and bias leaves and a matching gradient pytree."
+      ],
+      "outputs": [
+        "The squared Euclidean norm of all gradient leaves."
+      ],
+      "invariants": [
+        "Every gradient leaf contributes exactly once.",
+        "The pytree structure is preserved while reducing the scalar contributions."
+      ],
+      "hints": [
+        "Map a square operation over gradient leaves, then reduce the resulting leaves.",
+        "Compare your result to direct weight and bias contributions."
+      ],
+      "code": "import jax\nimport jax.numpy as jnp\n\ndef squared_gradient_norm(grads: dict) -> jax.Array:\n    \"\"\"Return the sum of squared values across all gradient leaves.\"\"\"\n    # TODO: traverse the pytree leaves and reduce their squared entries.\n    raise NotImplementedError\n"
+    }
   }
 }

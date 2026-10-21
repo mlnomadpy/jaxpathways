@@ -231,7 +231,7 @@ visual_data={'panels':[{'kind':'bar','labels':['output 0','output 1'],'ylabel':'
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:32:14.094675+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:08:53.670272+00:00. JAX 0.9.2.
 
 ```text
 Jacobian: [[-0.7         0.4       ]
@@ -295,31 +295,30 @@ Repeat the Jacobian, JVP, VJP and adjoint checks at $x=(-0.2,0.8)$ with $v=(-0.5
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.jvp / jax.vjp / jax.jacfwd / jax.hessian` — Computes JVPs, VJPs, Jacobians or Hessians by differentiating the implemented operations. Results still have floating-point error.
+**Inputs:**
+- Vector function mapping R² to R².
+- Changed base point x=(-0.2, 0.8), tangent v=(-0.5, 1.3), and output cotangent u=(1.1, -0.4).
 
-**Step-by-step implementation plan:**
-1. Exercise solution
-2. Transfer the device result to the host for an independent NumPy comparison.
+**Outputs:**
+- Jacobian, JVP, VJP, and adjoint inner products at the changed point.
+
+**Invariants to check:**
+- JVP belongs to output space and VJP belongs to input space.
+- The two adjoint inner products agree within numerical tolerance.
+
+**Hints:**
+- Use the changed primal and seeds for every transform.
+- Check each result shape before comparing scalar inner products.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-changed_x = jnp.array(...)  # TODO: compute changed_x
-changed_v = jnp.array(...)  # TODO: compute changed_v
-changed_u = jnp.array(...)  # TODO: compute changed_u
-# Transfer the device result to the host for an independent NumPy comparison.
-a2,b2 = np.asarray(...)  # TODO: compute a2,b2
-j2 = np.array(...)  # TODO: compute j2
-fj = jax.jvp(...)  # TODO: compute fj
-rj = jax.vjp(...)  # TODO: compute rj
-np.testing.assert_allclose(fj,j2@changed_v,rtol=1e-12)
-np.testing.assert_allclose(rj,j2.T@changed_u,rtol=1e-12)
-np.testing.assert_allclose(jnp.vdot(changed_u,fj),jnp.vdot(rj,changed_v),rtol = ...  # TODO: compute np.testing.assert_allclose(jnp.vdot(changed_u,fj),jnp.vdot(rj,changed_v),rtol
-print("Changed-point adjoint verified")
+import jax
+import jax.numpy as jnp
+
+def inspect_changed_linearization(function, x, v, u):
+    # TODO: compute Jacobian, JVP, VJP, and both adjoint inner products.
+    raise NotImplementedError("Check primal, tangent, and cotangent spaces separately")
 ```
 
 <details><summary>Reference solution</summary>
@@ -356,25 +355,29 @@ A derivative is linear in its direction at a fixed base point.
 
 ### How to write: Test linearity at a fixed point — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.jvp / jax.vjp / jax.jacfwd / jax.hessian` — Computes JVPs, VJPs, Jacobians or Hessians by differentiating the implemented operations. Results still have floating-point error.
+**Inputs:**
+- A fixed base point, tangent directions v and w, and f(v,w)=2v-w.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- JVP for a combined direction and sum of separate JVPs.
+
+**Invariants to check:**
+- The base point remains fixed for the linearity comparison.
+- Changing the base point is not tangent linearity.
+
+**Hints:**
+- Use jax.jvp at one shared primal input.
+- Compare one combined seed with the linear combination of separate seeds.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Test linearity at a fixed point (Practice): Linearity in the tangent is a local property.
-w = jnp.array(...)  # TODO: compute w
-product = ...  # TODO: compute product
-np.testing.assert_allclose(product(2*v-w),2*product(v)-product(w),rtol=1e-12)
-shifted = jax.jvp(...)  # TODO: compute shifted
-assert np.linalg.norm(np.asarray(shifted-product(v)))  # TODO: complete assertion check
-print("Direction linearity holds; the Jacobian changes with the base point")
+import jax
+import jax.numpy as jnp
+
+def check_jvp_linearity(function, base, v, w):
+    # TODO: compare combined and separate JVPs at the same base.
+    raise NotImplementedError("Test tangent linearity without changing the primal point")
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -407,27 +410,29 @@ Compose jvp with grad and compare scalar products.
 
 ### How to write: Check curvature symmetry without a full Hessian — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
-- `jax.jvp / jax.vjp / jax.jacfwd / jax.hessian` — Computes JVPs, VJPs, Jacobians or Hessians by differentiating the implemented operations. Results still have floating-point error.
+**Inputs:**
+- A scalar-valued twice-differentiable function, base point, and directions v,w.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- Both mixed Hessian directional products and a finite-difference check.
+
+**Invariants to check:**
+- Mixed products agree within a stated tolerance.
+- Finite differences independently check one Hessian-vector product.
+
+**Hints:**
+- Compute Hessian-vector products with forward-over-reverse or jvp(grad).
+- Perturb the gradient along one direction for the finite-difference comparison.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Check curvature symmetry without a full Hessian (Challenge): For this smooth scalar objective, mixed partials agree.
-w = jnp.array(...)  # TODO: compute w
-hw = jax.jvp(...)  # TODO: compute hw
-np.testing.assert_allclose(jnp.vdot(w,hvp),jnp.vdot(v,hw),rtol = ...  # TODO: compute np.testing.assert_allclose(jnp.vdot(w,hvp),jnp.vdot(v,hw),rtol
-eps = ...  # TODO: compute eps
-fdw = ...  # TODO: compute fdw
-np.testing.assert_allclose(hw,fdw,rtol = ...  # TODO: compute np.testing.assert_allclose(hw,fdw,rtol
-print("Bilinear Hessian symmetry and finite-difference product verified")
+import jax
+import jax.numpy as jnp
+
+def check_hessian_symmetry(function, point, v, w, epsilon):
+    # TODO: compare the two mixed products and finite-difference one product.
+    raise NotImplementedError("Verify curvature symmetry without materializing the Hessian")
 ```
 
 <details><summary>Reference solution and reasoning</summary>

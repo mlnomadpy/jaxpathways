@@ -669,7 +669,7 @@ visual_data={'kind':'bar','labels':['activate A','publish B','activate B','rejec
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:33:58.695195+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:10:44.631215+00:00. JAX 0.9.2.
 
 ```text
 first / second content IDs: 810b956e3376228ff3c1f03f469feb3ab26653b488ba51271e82277672590b80 aed1378a7842598237e59c5d189b13d486068b6284d9c1ca3d4e865866ba6990
@@ -748,22 +748,31 @@ Publish two compatible validated artifacts that differ in an explicit release no
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Exercise solution
-2. Keep this run’s database and artifacts in a scratch directory removed on exit.
+**Inputs:**
+- A candidate artifact, immutable payload/evidence hashes, validation record, and current release selection.
+
+**Outputs:**
+- An activation decision or rejection, followed by a rollback that selects the exact prior ID.
+
+**Invariants to check:**
+- Failed validation leaves the active pointer unchanged; approval binds to content and evidence identity.
+
+**Hints:**
+- Validate all required evidence before mutating the active selection.
+- Compare IDs and payload hashes after rollback, not only a display label.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-# Keep this run’s database and artifacts in a scratch directory removed on exit.
-with tempfile.TemporaryDirectory() as folder:
-    one = publish(...)  # TODO: compute one
-    two = publish(...)  # TODO: compute two
-    activate(folder,one)
-    activate(folder,two)
-    assert rollback(folder)  # TODO: complete assertion check
-    assert read_artifact(folder,one)['release_note']  # TODO: complete assertion check
+from pathlib import Path
+import hashlib
+import json
+import tempfile
+
+def promote_validated_artifact(store, artifact_id, payload, evidence, release_note):
+    """An activation decision or rejection, followed by a rollback that selects the exact prior ID."""
+    # TODO: Verify content and evidence identity before switching the active ID; preserve that ID whenever validation fails.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -796,24 +805,31 @@ A boolean flag does not replace required source/config/data evidence.
 
 ### How to write: Reject an incomplete provenance record — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Keep this run’s database and artifacts in a scratch directory removed on exit.
+**Inputs:**
+- Construct a payload claiming passing validation but lacking the worker-source hash. Verify that it cannot become active.
+
+**Outputs:**
+- A rejected candidate and the unchanged active artifact ID.
+
+**Invariants to check:**
+- Required source identity is present before activation.
+
+**Hints:**
+- A boolean flag does not replace required source/config/data evidence.
+- Treat a claimed validation pass and artifact provenance as separate fields.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Reject an incomplete provenance record (Transfer / diagnosis)
-# Keep this run’s database and artifacts in a scratch directory removed on exit.
-with tempfile.TemporaryDirectory() as folder:
-    incomplete = dict(...)  # TODO: compute incomplete
-    del incomplete['worker_hash']
-    identifier = publish(...)  # TODO: compute identifier
-    try:
-        activate(folder,identifier)
-    except ValueError:
-        pass
-    else:
-        raise AssertionError('missing provenance accepted')
+from pathlib import Path
+import hashlib
+import json
+import tempfile
+
+def practice_reject_an_incomplete_provenance_record(candidate, required_hashes, active_id):
+    """Complete the reject an incomplete provenance record check."""
+    # TODO: ('Require a worker-source hash before activating a payload even if its validation status says passed.', 'A provenance rejection and unchanged active artifact ID.', 'Passing metrics do not substitute for missing source identity.')
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -851,25 +867,31 @@ A failed rollback must not clear the current selection.
 
 ### How to write: Check rollback without history — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Keep this run’s database and artifacts in a scratch directory removed on exit.
+**Inputs:**
+- Attempt rollback before any previous artifact exists, then verify the first activation remains selected.
+
+**Outputs:**
+- A rollback rejection while preserving first activation.
+
+**Invariants to check:**
+- No nonexistent previous version is selected.
+
+**Hints:**
+- A failed rollback must not clear the current selection.
+- Require a recorded rollback target.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Check rollback without history (Transfer / diagnosis)
-# Keep this run’s database and artifacts in a scratch directory removed on exit.
-with tempfile.TemporaryDirectory() as folder:
-    identifier = publish(...)  # TODO: compute identifier
-    activate(folder,identifier)
-    before = ...  # TODO: compute before
-    try:
-        rollback(folder)
-    except ValueError:
-        pass
-    else:
-        raise AssertionError('invented rollback history')
-    assert before  # TODO: complete assertion check
+from pathlib import Path
+import hashlib
+import json
+import tempfile
+
+def practice_check_rollback_without_history(store, active_id):
+    """Complete the check rollback without history check."""
+    # TODO: ('Attempt rollback before any prior artifact is recorded and verify the first active ID remains selected.', 'A rollback rejection and unchanged first activation.', 'No previous artifact means no rollback target exists.')
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

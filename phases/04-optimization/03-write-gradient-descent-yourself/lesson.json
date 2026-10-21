@@ -80,7 +80,22 @@
         "prompt": "For \\(4(w-3)^2\\), derive a stable rate and verify convergence from zero.",
         "hint": "The error multiplier is \\(1-8\\eta\\); use \\(\\eta=0.1\\).",
         "solution": "# Transfer the stability analysis (Transfer / diagnosis)\ndef scaled_loss(w):\n    return 4*(w-3.)**2\ndef scaled_step(w, _):\n    new = w-0.1*jax.grad(scaled_loss)(w)\n    return new, scaled_loss(new)\nscaled_w, scaled_history = jax.lax.scan(scaled_step, jnp.array(0.), None, length=20)\nassert jnp.allclose(scaled_w, 3., atol=1e-5)\nassert jnp.all(jnp.diff(scaled_history) <= 1e-6)",
-        "explanation": "Changing curvature changes the stability interval to \\(0<\\eta<0.25\\)."
+        "explanation": "Changing curvature changes the stability interval to \\(0<\\eta<0.25\\).",
+        "learnerStarter": {
+          "inputs": [
+            "For \\(4(w-3)^2\\), derive a stable rate and verify convergence from zero."
+          ],
+          "outputs": [
+            "A finite loss history that contracts under the derived rate."
+          ],
+          "invariants": [
+            "The rate is checked against the new curvature rather than copied from the earlier example."
+          ],
+          "hints": [
+            "The error multiplier is \\(1-8\\eta\\); use \\(\\eta=0.1\\)."
+          ],
+          "code": "import jax.numpy as jnp\n\ndef practice_transfer_the_stability_analysis(rate):\n    \"\"\"Implement the transfer the stability analysis check.\"\"\"\n    # TODO: Derive the update multiplier for the changed quadratic, select a stable rate, and retain loss history from zero.\n    raise NotImplementedError\n"
+        }
       },
       {
         "title": "Reproduce an uphill update and repair it",
@@ -88,7 +103,22 @@
         "prompt": "Show how adding the gradient increases loss, then verify subtraction at the same starting point.",
         "hint": "The derivative at zero is \\(-4\\).",
         "solution": "# Reproduce an uphill update and repair it (Transfer / diagnosis)\nuphill = 0. + 0.1*jax.grad(loss)(0.)\ndownhill = 0. - 0.1*jax.grad(loss)(0.)\nassert loss(uphill) > loss(0.)\nassert loss(downhill) < loss(0.)\nassert jnp.allclose(downhill, 0.4)",
-        "explanation": "The sign error is isolated using the same input and rate; the repaired first step matches the analytic result."
+        "explanation": "The sign error is isolated using the same input and rate; the repaired first step matches the analytic result.",
+        "learnerStarter": {
+          "inputs": [
+            "Show how adding the gradient increases loss, then verify subtraction at the same starting point."
+          ],
+          "outputs": [
+            "Both candidate losses and an explicit direction check."
+          ],
+          "invariants": [
+            "The candidates share the same starting point and learning rate."
+          ],
+          "hints": [
+            "The derivative at zero is \\(-4\\)."
+          ],
+          "code": "import jax\nimport jax.numpy as jnp\n\ndef practice_reproduce_an_uphill_update_and_repair_it(initial, rate):\n    \"\"\"Implement the reproduce an uphill update and repair it check.\"\"\"\n    # TODO: Apply a plus-gradient step and a minus-gradient step from the same initial value, then compare their losses.\n    raise NotImplementedError\n"
+        }
       }
     ],
     "references": [
@@ -145,6 +175,22 @@
       "The recurrence multiplies the error by \\(-1.2\\), so its magnitude grows while its sign alternates.",
       "scan repeats the update you give it. Derive the one-step error factor; the instability is already present in that recurrence.",
       "A safe learning rate depends on curvature. For this quadratic, use the magnitude of the error multiplier rather than a universal threshold."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "An initial scalar parameter, step size, and fixed number of updates."
+      ],
+      "outputs": [
+        "The parameter/loss history for the requested update schedule."
+      ],
+      "invariants": [
+        "Each update uses the gradient evaluated at the current parameter; report divergence rather than clipping it away."
+      ],
+      "hints": [
+        "Use value_and_grad to measure the loss and gradient at one point.",
+        "Check whether the update changes the loss in the direction predicted by curvature."
+      ],
+      "code": "import jax\nimport jax.numpy as jnp\nimport optax\n\ndef gradient_descent(initial, rate, steps):\n    \"\"\"The parameter/loss history for the requested update schedule.\"\"\"\n    # TODO: Record parameter and loss after each explicit gradient-descent transition, including the high-rate case.\n    raise NotImplementedError\n"
+    }
   }
 }

@@ -224,7 +224,7 @@ visual_data = {'kind': 'field', 'values': prob.tolist(), 'extent': [-1.6, 1.6, -
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:28:18.403080+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:04:55.576473+00:00. JAX 0.9.2.
 
 ```text
 Training loss: 0.7047799825668335 -> 0.0015878621488809586 held-out accuracy: 1.0
@@ -275,23 +275,28 @@ Swap class zero and one. Transform only the trained output layer to preserve the
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- An MLP parameter pytree and a permutation of its output classes.
 
-**Step-by-step implementation plan:**
-1. Transfer the device result to the host for an independent NumPy comparison.
+**Outputs:**
+- Transformed output-layer parameters and logits on held-out coordinates.
+
+**Invariants to check:**
+- The transformed model preserves or intentionally permutes class scores as specified; hidden-unit changes must be paired.
+
+**Hints:**
+- Inspect which parameter axis represents classes.
+- Test a new coordinate batch, not only the training points.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Swap class zero and one.
-complemented = dict(...)  # TODO: compute complemented
-changed_x = jnp.array(...)  # TODO: compute changed_x
-np.testing.assert_allclose(logits(complemented,changed_x),-logits(params,changed_x),atol=1e-6)
-# Transfer the device result to the host for an independent NumPy comparison.
-expected_labels = ...  # TODO: compute expected_labels
-assert np.array_equal(np.asarray(logits(complemented,changed_x)  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def permute_output_classes(params, class_permutation):
+    """Transformed output-layer parameters and logits on held-out coordinates."""
+    # TODO: Transform the output-layer class axis and verify logits on new input coordinates.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -322,25 +327,27 @@ Columns of the first kernel and rows of the second kernel describe the same hidd
 
 ### How to write: Reorder hidden units without changing predictions — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- Permute the hidden units and make the matching change to the output layer. Predict whether the logits change. Test the result on new coordinates, then show why permuting only one side breaks the contract.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- Logit parity on new inputs plus a one-sided-permutation counterexample.
+
+**Invariants to check:**
+- Incoming and outgoing parameter axes use the same hidden-unit permutation.
+
+**Hints:**
+- Columns of the first kernel and rows of the second kernel describe the same hidden units.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Reorder hidden units without changing predictions (Transfer): A hidden unit has no intrinsic index.
-order = jnp.array(...)  # TODO: compute order
-probe = jnp.array(...)  # TODO: compute probe
-permuted = dict(...)  # TODO: compute permuted
-np.testing.assert_allclose(logits(permuted,probe),logits(params,probe),rtol = ...  # TODO: compute np.testing.assert_allclose(logits(permuted,probe),logits(params,probe),rtol
-broken = dict(...)  # TODO: compute broken
-assert not np.allclose(logits(broken,probe),logits(params,probe),atol=1e-5)  # TODO: complete assertion check
-print('Consistent hidden permutation preserves logits; one-sided permutation changes them.')
+import jax.numpy as jnp
+
+def practice_reorder_hidden_units_without_changing_predictions(hidden_permutation, hidden_weights, output_weights):
+    """Implement the reorder hidden units without changing predictions check."""
+    # TODO: Permute the hidden-unit axis and apply the matching inverse permutation to outgoing weights and biases.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -374,27 +381,27 @@ Inspect the unreduced loss shape; a scalar mean can hide the error.
 
 ### How to write: Diagnose accidental pairwise broadcasting — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `optax.adam(lr) / optax.apply_updates(params, updates)` — Optax gradient transformations and numerically stable loss functions over parameter PyTrees.
+**Inputs:**
+- Demonstrate how labels shaped $(B, 1)$ and scores shaped $(B,)$ create a $(B, B)$ loss. Repair the contract before averaging.
 
-**Step-by-step implementation plan:**
-1. Diagnose accidental pairwise broadcasting (Intermediate)
-2. Check tensor shape invariant: `bad.shape==(4,4)`
-3. Check tensor shape invariant: `good.shape==(4,)`
+**Outputs:**
+- Rejected mismatched shape and a per-example loss after alignment.
+
+**Invariants to check:**
+- One score is paired with one label; the reduction is over examples only.
+
+**Hints:**
+- Inspect the unreduced loss shape; a scalar mean can hide the error.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Diagnose accidental pairwise broadcasting (Intermediate)
-bad = optax.sigmoid_binary_cross_entropy(...)  # TODO: compute bad
-# Check tensor shape invariant: `bad.shape==(4,4)`
-assert bad.shape  # TODO: complete assertion check
-good = optax.sigmoid_binary_cross_entropy(...)  # TODO: compute good
-# Check tensor shape invariant: `good.shape==(4,)`
-assert good.shape  # TODO: complete assertion check
-np.testing.assert_allclose(jnp.mean(good),loss(params,x,y),rtol = ...  # TODO: compute np.testing.assert_allclose(jnp.mean(good),loss(params,x,y),rtol
+import jax.numpy as jnp
+
+def practice_diagnose_accidental_pairwise_broadcasting(scores, labels):
+    """Implement the diagnose accidental pairwise broadcasting check."""
+    # TODO: Assert score and label shapes match before subtraction, then show the (B,1) by (B,) broadcast shape and repair it.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

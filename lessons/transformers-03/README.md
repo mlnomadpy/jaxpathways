@@ -227,7 +227,7 @@ visual_data = {'kind': 'heatmap', 'values': (output - x).tolist(), 'rows': ['tok
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:30:03.244690+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:06:09.539736+00:00. JAX 0.9.2.
 
 ```text
 Block shape: (4, 8)
@@ -297,30 +297,28 @@ Differentiate the mean squared block output with respect to every projection. Ch
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jnp.isfinite(x)` — Returns a boolean mask verifying that no element is `NaN` or `Inf`.
-- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
+**Inputs:**
+- The transformer block parameters, one sequence input, and a selected parameter coordinate with a finite-difference step.
 
-**Step-by-step implementation plan:**
-1. Exercise solution
-2. Check tensor shape invariant: `all(a.shape==b.shape and jnp.all(jnp.isfinite(b)) for a,b in zip(...`
+**Outputs:**
+- Mean-squared output loss, gradient leaves with their shapes and finite checks, and the selected autodiff/central-difference comparison.
+
+**Invariants to check:**
+- Every projection gradient matches its parameter shape and is finite; the central difference checks the selected loss derivative.
+
+**Hints:**
+- Differentiate the scalar mean-squared block output with respect to the full parameter pytree.
+- Perturb one scalar parameter coordinate in both directions and compare the resulting loss difference.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-def objective(params):
-    return ...  # TODO: return computed result
-g = jax.grad(...)  # TODO: compute g
-# Check tensor shape invariant: `all(a.shape==b.shape and jnp.all(jnp.isfinite(b)) for a,b in zip(...`
-assert all(a.shape  # TODO: complete assertion check
-def shifted_objective(delta):
-    altered = ...  # TODO: compute altered
-    return ...  # TODO: return computed result
-fd = ...  # TODO: compute fd
-assert jnp.allclose(fd,g["down"][0,0],atol=1e-4,rtol=2e-2)  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+
+def check_block_parameter_gradients(params, inputs, parameter_path, coordinate, epsilon):
+    # TODO: Check every gradient leaf and compare one selected derivative with central differences.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -355,23 +353,29 @@ Use population variance over features and epsilon $10^{-5}$.
 
 ### How to write: Check normalization without autodiff — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.zeros / jnp.ones(shape, dtype=...)` — Allocates a tensor of the given `shape` initialized with constants.
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- Compute the first normalized row using NumPy and compare. Also check a constant row.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- JAX/NumPy parity and finite output for a constant row.
+
+**Invariants to check:**
+- Normalization uses the same epsilon and feature axis in both implementations.
+
+**Hints:**
+- Use population variance over features and epsilon $10^{-5}$.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Check normalization without autodiff (Transfer / diagnosis)
-row = np.asarray(...)  # TODO: compute row
-reference = ...  # TODO: compute reference
-np.testing.assert_allclose(layer_norm(x)[0],reference,atol = ...  # TODO: compute np.testing.assert_allclose(layer_norm(x)[0],reference,atol
-assert jnp.allclose(layer_norm(jnp.ones((2,8))),0.)  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+import numpy as np
+
+def practice_check_normalization_without_autodiff(inputs):
+    """Implement the check normalization without autodiff check."""
+    # TODO: Normalize the first row using a separate NumPy mean/variance calculation and check the constant-row case.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -402,25 +406,27 @@ The expanded tensor has twice the model width.
 
 ### How to write: Repair a residual width mismatch — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Check tensor shape invariant: `expanded.shape == (4,16)`
-2. Check tensor shape invariant: `(x + expanded@p["down"]).shape == x.shape`
+**Inputs:**
+- Remove the contraction from the MLP and reproduce the residual addition failure. Restore the contraction and verify shape.
+
+**Outputs:**
+- The incompatible-shape failure and repaired output shape.
+
+**Invariants to check:**
+- Both residual operands share the same final feature dimension.
+
+**Hints:**
+- The expanded tensor has twice the model width.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Repair a residual width mismatch (Transfer / diagnosis)
-expanded = jax.nn.gelu(...)  # TODO: compute expanded
-# Check tensor shape invariant: `expanded.shape == (4,16)`
-assert expanded.shape  # TODO: complete assertion check
-try:
-    _ = ...  # TODO: compute _
-except TypeError:
-    pass
-else:
-    raise AssertionError("expected width mismatch")
-# Check tensor shape invariant: `(x + expanded@p["down"]).shape == x.shape`
-assert (x + expanded@p["down"]).shape  # TODO: complete assertion check
+import numpy as np
+
+def practice_repair_a_residual_width_mismatch(params, inputs):
+    """Implement the repair a residual width mismatch check."""
+    # TODO: Remove the MLP contraction to reproduce the residual-add shape error, restore it, and assert both branches match residual width.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

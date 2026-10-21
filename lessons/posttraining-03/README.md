@@ -248,7 +248,7 @@ visual_data={"panels":[*visual_data.get("panels",[visual_data]),extra_panel]}
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:34:44.375795+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:11:34.318913+00:00. JAX 0.9.2.
 
 ```text
 Synthetic preference NLL initial/final: 0.6931471824645996 0.08669456839561462 ; rewards: [ 1.9811294  0.327278  -2.3084073]
@@ -304,22 +304,29 @@ Calculate the initial loss for tied reward scores independently and verify the t
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.zeros / jnp.ones(shape, dtype=...)` — Allocates a tensor of the given `shape` initialized with constants.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- Chosen and rejected feature pairs plus a zero-initialized reward vector.
+- A trained reward vector for the same comparisons.
 
-**Step-by-step implementation plan:**
-1. Exercise solution
+**Outputs:**
+- Initial tied-score preference loss and a check of the trained chosen-over-rejected ordering.
+
+**Invariants to check:**
+- At equal scores, each binary preference contributes the same finite loss.
+- The ordering check compares chosen and rejected scores for each labeled pair.
+
+**Hints:**
+- Compute the score difference for each pair before applying the softplus loss.
+- Keep the initial calculation independent from the trained ordering check.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-np.testing.assert_allclose(
-    preference_loss(jnp.zeros(2), chosen, rejected), -np.log(0.5), atol=1e-6
-)
-assert np.all(np.asarray((chosen - rejected) @ w)  # TODO: complete assertion check
-print('Tied baseline and preference directions verified.')
+import jax.numpy as jnp
+
+def audit_initial_and_trained_preferences(chosen, rejected, trained_weights):
+    # TODO: calculate the tied-score loss and audit the trained pair ordering.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -349,20 +356,26 @@ Positive scaling preserves ordering but sharpens probabilities.
 
 ### How to write: Show that feature scale can change scores without changing ranking — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Inputs:**
+- Feature pairs, the trained reward weights, and the same weights multiplied by two.
+
+**Outputs:**
+- Score-order comparisons and preference probabilities before and after scaling.
+
+**Invariants to check:**
+- Positive scaling preserves ordering while it changes probability sharpness.
+
+**Hints:**
+- Compare score order and sigmoid probability as separate quantities.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Show that feature scale can change scores without changing ranking (Transfer): A policy’s reward-versus-KL tradeoff depends on reward scale.
-scaled_rewards = ...  # TODO: compute scaled_rewards
-np.testing.assert_array_equal(np.argsort(rewards), np.argsort(scaled_rewards))
-assert float(preference_loss(2 * w, chosen, rejected))  # TODO: complete assertion check
-    preference_loss(w, chosen, rejected)
-)
-print('Ranking unchanged; confidence and downstream reward scale change.')
+import jax.numpy as jnp
+
+def compare_reward_scale(features, chosen, rejected, weights):
+    # TODO: compare pair ordering and probabilities at both scales.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -395,36 +408,28 @@ Use NumPy sigmoid values for the independent calculation; reversing both feature
 
 ### How to write: Derive the linear reward gradient — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
+**Inputs:**
+- Chosen and rejected feature matrices plus a fresh reward weight vector.
 
-**Step-by-step implementation plan:**
-1. Derive the linear reward gradient (Challenge)
-2. Transfer the device result to the host for an independent NumPy comparison.
-3. Reduce along axis=0 to compute `analytic`.
+**Outputs:**
+- Mean feature-difference gradient from the likelihood formula and autodiff, repeated with reversed labels.
+
+**Invariants to check:**
+- The gradient is averaged across comparisons and flips consistently when every label is reversed.
+
+**Hints:**
+- Differentiate the scalar loss with respect to the weight vector.
+- Use the same parameter values for both labelings.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Derive the linear reward gradient (Challenge)
-probe_w = jnp.array(...)  # TODO: compute probe_w
-for positive, negative in [(chosen, rejected), (rejected, chosen)]:
-    # Transfer the device result to the host for an independent NumPy comparison.
-    difference = np.asarray(...)  # TODO: compute difference
-    margin_host = ...  # TODO: compute margin_host
-    # Reduce along axis=0 to compute `analytic`.
-    analytic = np.mean(...)  # TODO: compute analytic
-        (1 / (1 + np.exp(-margin_host)) - 1)[:, None] * difference, axis=0
-    )
-    np.testing.assert_allclose(
-        jax.grad(preference_loss)(probe_w, positive, negative),
-        analytic,
-        atol = ...  # TODO: compute atol
-    )
-print('Independent reward gradients agree in both label directions.')
+import jax
+import jax.numpy as jnp
+
+def compare_linear_reward_gradient(weights, chosen, rejected):
+    # TODO: derive and check the preference-loss gradient before and after label reversal.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

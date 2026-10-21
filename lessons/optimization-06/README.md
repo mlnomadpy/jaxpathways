@@ -160,7 +160,7 @@ visual_data = {'kind': 'bar', 'labels': ['row 0', 'row 1', 'row 2'], 'ylabel': '
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:27:28.943919+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:04:03.664134+00:00. JAX 0.9.2.
 
 ```text
 weights / rank / MSE: [0.6666669 1.6666665] 2 0.11111113
@@ -213,22 +213,28 @@ Add a constant bias column to inputs $(-1,0,1)$ and fit targets $(-1,1,3)$. Reco
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- A design matrix, target vector, and an explicit constant feature for the intercept.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- Least-squares coefficients and predictions.
+
+**Invariants to check:**
+- The coefficient order is documented; predictions are recomputed from the design matrix.
+
+**Hints:**
+- Use a linear solve or least-squares routine, not an explicitly formed inverse.
+- Compare prediction parity when only feature units change.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Add a constant bias column to inputs (-1,0,1) and fit targets (-1,1,3).
-x = jnp.array(...)  # TODO: compute x
-design = jnp.stack(...)  # TODO: compute design
-fit = jnp.linalg.lstsq(...)  # TODO: compute fit
-assert jnp.allclose(fit, jnp.array([2.0, 1.0]), atol=2e-06)  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def fit_with_bias(features, targets):
+    """Least-squares coefficients and predictions."""
+    # TODO: Build the bias-augmented design matrix and solve the least-squares system without forming its inverse.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -257,22 +263,27 @@ The first weight must divide by $100$ to represent the same model.
 
 ### How to write: Change feature units — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- Multiply the first feature of $X$ by $100$. Predict the new weights and compare predictions.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- Original/scaled coefficients and prediction parity.
+
+**Invariants to check:**
+- The feature transform is inverted when interpreting its coefficient; predictions use matched rows.
+
+**Hints:**
+- The first weight must divide by $100$ to represent the same model.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Change feature units (Transfer / diagnosis): Feature units affect coefficients and conditioning.
-scaled = ...  # TODO: compute scaled
-ws = jnp.linalg.lstsq(...)  # TODO: compute ws
-assert jnp.allclose(ws, expected / jnp.array([100.0, 1.0]), atol=3e-06)  # TODO: complete assertion check
-assert jnp.allclose(scaled @ ws, X @ w, atol=3e-06)  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def practice_change_feature_units(features, targets):
+    """Implement the change feature units check."""
+    # TODO: Scale only the first feature column by 100, refit, and compare predictions before comparing coefficients.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -303,21 +314,27 @@ The diagonal entries are singular values here; squaring them changes the ratio f
 
 ### How to write: Explain the squared conditioning — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- Compare the condition numbers of the diagonal matrix with entries $(1,0.1)$ and its Gram matrix. Why is a solver preferable to forming the inverse?
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- Both condition numbers and a solve result for a declared right-hand side.
+
+**Invariants to check:**
+- The Gram conditioning comparison uses the same nonzero singular directions.
+
+**Hints:**
+- The diagonal entries are singular values here; squaring them changes the ratio from $10$ to $100$.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Explain the squared conditioning (Transfer / diagnosis): The normal equations can worsen numerical sensitivity.
-D = jnp.diag(...)  # TODO: compute D
-assert jnp.allclose(jnp.linalg.cond(D), 10.0)  # TODO: complete assertion check
-assert jnp.allclose(jnp.linalg.cond(D.T @ D), 100.0, rtol=2e-06)  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def practice_explain_the_squared_conditioning(matrix):
+    """Implement the explain the squared conditioning check."""
+    # TODO: Compute condition numbers for the diagonal matrix and its Gram matrix, then compare solve-based and inverse-based procedures.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

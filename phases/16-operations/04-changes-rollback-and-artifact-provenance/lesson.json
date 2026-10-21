@@ -79,7 +79,23 @@
         "prompt": "Construct a payload claiming passing validation but lacking the worker-source hash. Verify that it cannot become active.",
         "hint": "A boolean flag does not replace required source/config/data evidence.",
         "solution": "# Reject an incomplete provenance record (Transfer / diagnosis)\n# Keep this run’s database and artifacts in a scratch directory removed on exit.\nwith tempfile.TemporaryDirectory() as folder:\n    incomplete=dict(artifact)\n    del incomplete['worker_hash']\n    identifier=publish(folder,incomplete)\n    try:\n        activate(folder,identifier)\n    except ValueError:\n        pass\n    else:\n        raise AssertionError('missing provenance accepted')",
-        "explanation": "The gate establishes only the declared local contract; it still does not authenticate who supplied those claims."
+        "explanation": "The gate establishes only the declared local contract; it still does not authenticate who supplied those claims.",
+        "learnerStarter": {
+          "inputs": [
+            "Construct a payload claiming passing validation but lacking the worker-source hash. Verify that it cannot become active."
+          ],
+          "outputs": [
+            "A rejected candidate and the unchanged active artifact ID."
+          ],
+          "invariants": [
+            "Required source identity is present before activation."
+          ],
+          "hints": [
+            "A boolean flag does not replace required source/config/data evidence.",
+            "Treat a claimed validation pass and artifact provenance as separate fields."
+          ],
+          "code": "from pathlib import Path\nimport hashlib\nimport json\nimport tempfile\n\ndef practice_reject_an_incomplete_provenance_record(candidate, required_hashes, active_id):\n    \"\"\"Complete the reject an incomplete provenance record check.\"\"\"\n    # TODO: ('Require a worker-source hash before activating a payload even if its validation status says passed.', 'A provenance rejection and unchanged active artifact ID.', 'Passing metrics do not substitute for missing source identity.')\n    raise NotImplementedError\n"
+        }
       },
       {
         "title": "Check rollback without history",
@@ -87,7 +103,23 @@
         "prompt": "Attempt rollback before any previous artifact exists, then verify the first activation remains selected.",
         "hint": "A failed rollback must not clear the current selection.",
         "solution": "# Check rollback without history (Transfer / diagnosis)\n# Keep this run’s database and artifacts in a scratch directory removed on exit.\nwith tempfile.TemporaryDirectory() as folder:\n    identifier=publish(folder,artifact)\n    activate(folder,identifier)\n    before=(Path(folder)/'active.json').read_bytes()\n    try:\n        rollback(folder)\n    except ValueError:\n        pass\n    else:\n        raise AssertionError('invented rollback history')\n    assert before==(Path(folder)/'active.json').read_bytes()",
-        "explanation": "A runbook needs a defined failure path when no compatible previous version is available."
+        "explanation": "A runbook needs a defined failure path when no compatible previous version is available.",
+        "learnerStarter": {
+          "inputs": [
+            "Attempt rollback before any previous artifact exists, then verify the first activation remains selected."
+          ],
+          "outputs": [
+            "A rollback rejection while preserving first activation."
+          ],
+          "invariants": [
+            "No nonexistent previous version is selected."
+          ],
+          "hints": [
+            "A failed rollback must not clear the current selection.",
+            "Require a recorded rollback target."
+          ],
+          "code": "from pathlib import Path\nimport hashlib\nimport json\nimport tempfile\n\ndef practice_check_rollback_without_history(store, active_id):\n    \"\"\"Complete the check rollback without history check.\"\"\"\n    # TODO: ('Attempt rollback before any prior artifact is recorded and verify the first active ID remains selected.', 'A rollback rejection and unchanged first activation.', 'No previous artifact means no rollback target exists.')\n    raise NotImplementedError\n"
+        }
       }
     ],
     "question": "What does a matching artifact digest establish?",
@@ -261,6 +293,22 @@
       "A digest is an integrity/identity mechanism. Quality evaluation and authenticated authority require separate evidence and controls.",
       "A digest binds bytes, not future behavior. Evaluate quality under a defined data and runtime contract.",
       "Anyone can hash an artifact. Publisher authentication requires a separate trusted identity or signing mechanism."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "A candidate artifact, immutable payload/evidence hashes, validation record, and current release selection."
+      ],
+      "outputs": [
+        "An activation decision or rejection, followed by a rollback that selects the exact prior ID."
+      ],
+      "invariants": [
+        "Failed validation leaves the active pointer unchanged; approval binds to content and evidence identity."
+      ],
+      "hints": [
+        "Validate all required evidence before mutating the active selection.",
+        "Compare IDs and payload hashes after rollback, not only a display label."
+      ],
+      "code": "from pathlib import Path\nimport hashlib\nimport json\nimport tempfile\n\ndef promote_validated_artifact(store, artifact_id, payload, evidence, release_note):\n    \"\"\"An activation decision or rejection, followed by a rollback that selects the exact prior ID.\"\"\"\n    # TODO: Verify content and evidence identity before switching the active ID; preserve that ID whenever validation fails.\n    raise NotImplementedError\n"
+    }
   }
 }

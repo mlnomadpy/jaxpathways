@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "science-04",
-  "contentHash": "7705d973dc3a041f6629e016654e8b54c4ed179632824578b7b509194b84e7f1",
-  "executedAt": "2026-10-21T11:30:59.965943+00:00",
+  "contentHash": "31ffc184f76f483a8b607f5bf7118deb5921d625cf5a6699d1040488d7d81180",
+  "executedAt": "2026-10-21T16:07:33.149207+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -11,7 +11,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Initial/fitted rate: 1.4 0.7000000090128304\nInitial/final loss: 0.11676630453561089 1.9484774169068916e-32\nHeld-out RMSE: 4.572895313141112e-16 finer-grid RMSE: 7.282689372293896e-09\nInitial-time-only gradient: 0.0\nInitial/fitted rate: 1.4 0.7000000090128304\nInitial/final loss: 0.11676630453561089 1.9484774169068916e-32\nHeld-out RMSE: 4.572895313141112e-16 finer-grid RMSE: 7.282689372293896e-09\nInitial-time-only gradient: 0.0\nTrue rate: 0.7 perfect coarse Euler rate: 0.5906238205625731\nbatch, median milliseconds, milliseconds per trajectory: [(1, 0.004500150680541992, 0.004500150680541992), (16, 0.005416106432676315, 0.0003385066520422697), (256, 0.03458419814705849, 0.00013509452401194721)]\nChanged true/recovered rate: 0.4 0.40000000054230433\nRecovered initial amplitude: 2.8000000000000003\nNoisy grid-search estimate: 0.7 residual MSE: 2.6000611439697964e-05\nPASS: science-04\n",
+  "stdout": "Initial/fitted rate: 1.4 0.7000000090128304\nInitial/final loss: 0.11676630453561089 1.9484774169068916e-32\nHeld-out RMSE: 4.572895313141112e-16 finer-grid RMSE: 7.282689372293896e-09\nInitial-time-only gradient: 0.0\nInitial/fitted rate: 1.4 0.7000000090128304\nInitial/final loss: 0.11676630453561089 1.9484774169068916e-32\nHeld-out RMSE: 4.572895313141112e-16 finer-grid RMSE: 7.282689372293896e-09\nInitial-time-only gradient: 0.0\nTrue rate: 0.7 perfect coarse Euler rate: 0.5906238205625731\nbatch, median milliseconds, milliseconds per trajectory: [(1, 0.006667338311672211, 0.006667338311672211), (16, 0.0063749030232429504, 0.0003984314389526844), (256, 0.06220769137144089, 0.00024299879441969097)]\nChanged true/recovered rate: 0.4 0.40000000054230433\nRecovered initial amplitude: 2.8000000000000003\nNoisy grid-search estimate: 0.7 residual MSE: 2.6000611439697964e-05\nPASS: science-04\n",
   "notebookCells": [
     {
       "sourceHash": "65a9a7447a53a5c3447eff97406302b1e83271af7b4870fa9f68be1f60df59e7",
@@ -96,13 +96,13 @@
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "batch, median milliseconds, milliseconds per trajectory: [(1, 0.005499925464391708, 0.005499925464391708), (16, 0.005749985575675964, 0.00035937409847974777), (256, 0.039833132177591324, 0.0001555981725687161)]\n"
+            "batch, median milliseconds, milliseconds per trajectory: [(1, 0.004999805241823196, 0.004999805241823196), (16, 0.005499925464391708, 0.0003437453415244818), (256, 0.03416696563363075, 0.00013346470950637013)]\n"
           ]
         }
       ]
     },
     {
-      "sourceHash": "2054be4494fe04da072da2a7936733797bb3eb830ba557ae5239b9b78447fb16",
+      "sourceHash": "22d5d8896e54aecd8b70f9aafa0c68cf3475cdb9799648df8d1bbbd8b53d1ac8",
       "outputs": []
     },
     {
@@ -118,7 +118,7 @@
       ]
     },
     {
-      "sourceHash": "559f87fd69f753611df7b991fbef2ba08263b2bd180407d4913ada8cc1b4a614",
+      "sourceHash": "22d5d8896e54aecd8b70f9aafa0c68cf3475cdb9799648df8d1bbbd8b53d1ac8",
       "outputs": []
     },
     {
@@ -134,7 +134,7 @@
       ]
     },
     {
-      "sourceHash": "5c67a4c7f4fe8556841902e9e5bcd293d2604ef83b63e4cb4325270d571a9bb8",
+      "sourceHash": "22d5d8896e54aecd8b70f9aafa0c68cf3475cdb9799648df8d1bbbd8b53d1ac8",
       "outputs": []
     },
     {

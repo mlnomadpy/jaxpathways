@@ -80,7 +80,25 @@
         "prompt": "Restore the saved order and cursor but replace the saved key with a different key. Compare the first resumed batch and the following epoch’s first batch. Predict where replay will first fail.",
         "hint": "The saved order supplies the remaining current-epoch batch. The key is consumed when the next permutation is generated.",
         "solution": "# Find a delayed random-state failure (Transfer)\n# Create or split explicit PRNG key(s) (`wrong_key_state`) for reproducible randomness.\nwrong_key_state = {**restored, 'key': placed(np.asarray(jax.random.PRNGKey(999)))}\ncorrect_a, ids_a, _ = transition(restored)\nwrong_a, ids_b, _ = transition(wrong_key_state)\nnp.testing.assert_array_equal(ids_a, ids_b)\n# Transfer the device result to the host for an independent NumPy comparison.\nnp.testing.assert_allclose(np.asarray(correct_a['weights']), np.asarray(wrong_a['weights']), rtol=2e-5, atol=2e-6)\ncorrect_b, ids_c, _ = transition(correct_a)\nwrong_b, ids_d, _ = transition(wrong_a)\nassert not np.array_equal(ids_c, ids_d)\nprint('Current-epoch batch matches; next-epoch batch exposes the wrong key.')",
-        "explanation": "A successful first resumed update is separate from future replay when later branches consume state that was not yet used. Crossing the epoch boundary reveals the changed key."
+        "explanation": "A successful first resumed update is separate from future replay when later branches consume state that was not yet used. Crossing the epoch boundary reveals the changed key.",
+        "learnerStarter": {
+          "inputs": [
+            "A checkpoint with saved sample order, cursor, key, parameters, optimizer state, and step.",
+            "A deliberately replaced random key."
+          ],
+          "outputs": [
+            "First resumed batch and following epoch first batch for both key choices."
+          ],
+          "invariants": [
+            "Restored sample order/cursor initially agree even if later randomness diverges.",
+            "Compare all replay state, not only model parameters."
+          ],
+          "hints": [
+            "Hold checkpoint fields fixed one at a time.",
+            "Inspect the next epoch boundary where the key affects a fresh permutation."
+          ],
+          "code": "import numpy as np\n\ndef compare_replay_keys(checkpoint, alternate_key):\n    # TODO: restore twice, changing only the random key.\n    raise NotImplementedError(\"Locate the first replay divergence caused by the changed key\")"
+        }
       }
     ],
     "question": "The first resumed batch and update match, but sample IDs differ at the next epoch. Which saved value should you inspect first?",
@@ -168,6 +186,24 @@
       "A learning rate changes updates, not the next permutation. Compare the saved random key and loader cursor first.",
       "The current order can reproduce the rest of one epoch while an incorrect saved key changes the next shuffle. Check complete random state at the accepted boundary.",
       "Print formatting cannot change IDs. Inspect the actual next-epoch order and the key used to generate it."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "An uninterrupted training run and a checkpoint taken before the final two updates."
+      ],
+      "outputs": [
+        "Sample IDs and full training state after two extra steps on both paths.",
+        "Per-replica parameter comparisons."
+      ],
+      "invariants": [
+        "Restored and uninterrupted paths consume the same subsequent IDs.",
+        "Parameters, optimizer, key, cursor, and step agree after each update."
+      ],
+      "hints": [
+        "Advance both paths by exactly two updates.",
+        "Compare tree leaves and each local replica, not only the primary state."
+      ],
+      "code": "import numpy as np\n\ndef compare_two_step_resume(uninterrupted, checkpoint, train_step):\n    # TODO: extend the uninterrupted and restored paths by two updates.\n    raise NotImplementedError(\"Verify complete-state replay across two additional steps\")"
+    }
   }
 }

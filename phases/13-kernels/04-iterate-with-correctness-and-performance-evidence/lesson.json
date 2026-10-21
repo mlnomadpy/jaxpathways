@@ -73,7 +73,25 @@
         "hint": "The wrapper promises matching float32 or bfloat16 inputs.",
         "solution": "# Reject unsupported dtype mixing (Practice): Supported dtype boundaries are a correctness decision.\nfor first,second in [(jnp.ones((8,128),jnp.float32),jnp.ones((8,128),jnp.bfloat16)),(jnp.ones((8,128),jnp.int32),jnp.ones((8,128),jnp.int32))]:\n    rejected=False\n    try:pipelined_axpy(first,second)\n    except ValueError:rejected=True\n    assert rejected\nprint(\"Mixed and integer dtypes rejected\")",
         "explanation": "Supported dtype boundaries are a correctness decision. Adding a new dtype requires a reference, target support and justified tolerances.",
-        "difficulty": "Practice"
+        "difficulty": "Practice",
+        "learnerStarter": {
+          "inputs": [
+            "Float32 and bfloat16 matrices plus integer matrix inputs.",
+            "A wrapper with an observable launch callback."
+          ],
+          "outputs": [
+            "Rejection for mixed floating dtypes and integer inputs before launch."
+          ],
+          "invariants": [
+            "The wrapper does not silently cast unsupported inputs.",
+            "No launch occurs on either invalid case."
+          ],
+          "hints": [
+            "Compare declared dtype contracts before conversion or dispatch.",
+            "Test each invalid pair independently."
+          ],
+          "code": "def reject_unsupported_dtypes(wrapper, float_matrix, bf16_matrix, integer_matrix):\n    # TODO: assert mixed and integer inputs fail before launch.\n    raise NotImplementedError(\"Enforce the documented same-floating-dtype contract\")"
+        }
       },
       {
         "title": "Bound the end-to-end opportunity",
@@ -81,7 +99,24 @@
         "hint": "Keep the remaining workload time unchanged in the calculation.",
         "solution": "# Bound the end-to-end opportunity (Challenge): These are conditional analytic estimates, not measured speedups.\nfraction=.3\nlocal_speedup=2.0\nend_to_end=1/((1-fraction)+fraction/local_speedup)\nlimit=1/(1-fraction)\nnp.testing.assert_allclose(end_to_end,1.1764705882352942)\nnp.testing.assert_allclose(limit,1.4285714285714286)\nprint(\"Modeled twofold-local speedup and zero-cost limit:\",end_to_end,limit)",
         "explanation": "These are conditional analytic estimates, not measured speedups. Communication or scheduling changes can alter the fraction, so reprofile the complete workload.",
-        "difficulty": "Challenge"
+        "difficulty": "Challenge",
+        "learnerStarter": {
+          "inputs": [
+            "Amdahl fraction 0.30 and local speedup 2.0."
+          ],
+          "outputs": [
+            "End-to-end speedup for the stated improvement and the zero-cost limit."
+          ],
+          "invariants": [
+            "Unaccelerated fraction remains unchanged.",
+            "The limiting result is finite and bounded by the accelerated fraction."
+          ],
+          "hints": [
+            "Apply S=1/((1-p)+p/s).",
+            "Set s to infinity for the zero-cost limit."
+          ],
+          "code": "def amdahl_bounds(fraction, local_speedup):\n    # TODO: return achieved and asymptotic end-to-end speedup.\n    raise NotImplementedError(\"Bound system-level gains from a local optimization\")"
+        }
       }
     ],
     "diagnosis": "If bfloat16 disagrees only with the original float32 data, check whether the represented-input oracle still passes before calling it a kernel bug. If timings are implausibly tiny, inspect synchronization and device placement. If a local speedup fails to improve the training step, reprofile communication and other unchanged work. Never replace missing target evidence with simulated-device labels.",
@@ -153,6 +188,25 @@
       "First compare against an oracle using the same represented operands. Error from casting the original FP32 inputs is a separate numerical budget.",
       "Numerical agreement says nothing about TPU throughput. Native lowering and target timing need separate evidence.",
       "The references answer different questions. Correct execution of a low-precision contract does not imply identical values to a higher-precision dataset."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "Two frozen float32 inputs shaped (15,255), generated once for all candidates.",
+        "Two tile choices, (8,128) and (16,256), and two/three input-buffer counts."
+      ],
+      "outputs": [
+        "Numerical error against the independent NumPy expression for each candidate.",
+        "Padded work calculated from tile geometry and reported separately from numerical error."
+      ],
+      "invariants": [
+        "All candidates receive the same input arrays.",
+        "Logical output shape remains (15,255); error and padded work are distinct measurements."
+      ],
+      "hints": [
+        "Generate the matrix once, outside the candidate loop.",
+        "Compute padded work from launch geometry rather than wall-clock time."
+      ],
+      "code": "import numpy as np\n\ndef compare_kernel_candidates(run_candidate, first, second, tiles, input_buffer_counts):\n    # TODO: keep the fixture fixed while comparing each tile/buffer combination.\n    raise NotImplementedError(\"Compare numerical error and padded work on identical inputs\")"
+    }
   }
 }

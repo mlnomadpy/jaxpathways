@@ -69,7 +69,25 @@
         "prompt": "Compute the continuing-task bootstrap target for a timeout and a true terminal transition when \\(r=-0.01\\), \\(\\gamma=0.9\\) and \\(V=2\\). Compare with our finite-horizon objective.",
         "hint": "Use the termination flag for the continuing task. The finite-horizon task assigns zero value after its own deadline.",
         "solution": "# Separate the two target meanings (Transfer / diagnosis): The arithmetic exposes a modeling choice.\nr, gamma, value = -.01, .9, 2.\ncontinuing_timeout = r + gamma * value\nterminal = r\nfinite_horizon_timeout = r\nassert abs(continuing_timeout - 1.79) < 1e-7\nassert terminal == finite_horizon_timeout == -.01",
-        "explanation": "The arithmetic exposes a modeling choice. Copying a done mask from a different task can silently change the objective."
+        "explanation": "The arithmetic exposes a modeling choice. Copying a done mask from a different task can silently change the objective.",
+        "learnerStarter": {
+          "inputs": [
+            "A transition reward of -0.01, discount 0.9, and next-state value 2.",
+            "Two meanings for the ending event: a continuing-task timeout and a true terminal."
+          ],
+          "outputs": [
+            "Both candidate targets and a comparison with the finite-horizon contract."
+          ],
+          "invariants": [
+            "A true terminal has no future value.",
+            "The finite-horizon deadline and a continuing-task collection cutoff express different objectives."
+          ],
+          "hints": [
+            "Write the one-step target before substituting the timeout or terminal mask.",
+            "Keep the reward term in both cases."
+          ],
+          "code": "import jax.numpy as jnp\n\ndef compare_ending_targets(reward, discount, next_value):\n    # TODO: compute the continuing-cutoff and terminal targets\n    timeout_target = ...\n    terminal_target = ...\n    raise NotImplementedError\n"
+        }
       },
       {
         "title": "Enumerate all one-step moves",
@@ -77,7 +95,25 @@
         "prompt": "Check both actions at every unfinished position with a Python reference, then compare the jitted function.",
         "hint": "Use ordinary min and max for the independent reference.",
         "solution": "# Enumerate all one-step moves (Transfer / diagnosis)\n# Wrap with `jax.jit` (`compiled`) so XLA traces and compiles the function.\ncompiled = jax.jit(step)\nfor position in range(3):\n    for action in [0, 1]:\n        s = State(jnp.int32(position), jnp.int32(0), jnp.bool_(False))\n        nxt, reward, term, trunc = compiled(s, jnp.int32(action))\n        expected = min(3, max(0, position + (1 if action else -1)))\n        assert int(nxt.position) == expected\n        assert bool(term) == (expected == 3)\n        assert abs(float(reward) - (1. if expected == 3 else -.01)) < 1e-6",
-        "explanation": "Enumeration checks boundary behavior separately from the vectorized implementation."
+        "explanation": "Enumeration checks boundary behavior separately from the vectorized implementation.",
+        "learnerStarter": {
+          "inputs": [
+            "Every unfinished corridor position and both binary actions.",
+            "The lesson’s transition function."
+          ],
+          "outputs": [
+            "A Python reference result and the compiled transition result for each case."
+          ],
+          "invariants": [
+            "Both action choices are checked at both boundaries.",
+            "The reference check does not call the JAX transition to compute its expected result."
+          ],
+          "hints": [
+            "Represent the independent reference using ordinary Python integers.",
+            "Compare next state, reward, and both ending flags."
+          ],
+          "code": "import jax\n\ndef compare_all_moves(step, State):\n    compiled_step = jax.jit(step)\n    # TODO: enumerate positions/actions and compare with an independent rule\n    raise NotImplementedError\n"
+        }
       }
     ],
     "question": "What should step emit when called on a finished state?",
@@ -148,6 +184,27 @@
       "Repeated terminal rewards would change the return. Step the absorbing state again and check for zero additional reward.",
       "An implicit reset would mix episodes and change the next observation contract. Reset explicitly after the terminal transition.",
       "Absorbing padding preserves one episode. Reset is a separate explicit operation, and ending flags mark events rather than every later padded row."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "Initial state is position 0, elapsed count 0, and not done.",
+        "The attempted action is left (0), and the horizon is 3.",
+        "Use the lesson’s `State` and `step` definitions."
+      ],
+      "outputs": [
+        "A trace with one next state, reward, termination flag, and truncation flag per transition.",
+        "A check for a repeated call after the state has finished."
+      ],
+      "invariants": [
+        "The step at the deadline remains part of the return.",
+        "A call after finishing emits no new reward or ending event.",
+        "Position and elapsed count follow the declared environment contract."
+      ],
+      "hints": [
+        "Keep event flags separate from the persistent `done` state.",
+        "Record the reward from each transition before checking the next state."
+      ],
+      "code": "from typing import NamedTuple\nimport jax.numpy as jnp\n\nclass State(NamedTuple):\n    position: jnp.ndarray\n    elapsed: jnp.ndarray\n    done: jnp.ndarray\n\ndef step(state, action, horizon=3):\n    # TODO: implement the transition contract from the lesson\n    raise NotImplementedError\n\ndef inspect_deadline():\n    state = State(jnp.int32(0), jnp.int32(0), jnp.bool_(False))\n    rewards = []\n    events = []\n    # TODO: record the three requested transitions and one call after done\n    raise NotImplementedError\n"
+    }
   }
 }

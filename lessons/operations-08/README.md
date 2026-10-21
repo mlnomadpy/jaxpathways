@@ -259,7 +259,7 @@ visual_data={'kind':'bar','labels':['reviewed','changed model','expired','wrong 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:34:18.986696+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:11:04.357947+00:00. JAX 0.9.2.
 
 ```text
 Accepted original / changed artifact / expired approval / wrong target: [True, False, False, False]
@@ -299,20 +299,25 @@ Change the evaluation hash while keeping the model unchanged, and prove the old 
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Exercise solution
+**Inputs:**
+- The unchanged model bundle with a changed evaluation hash and the approval bound to the prior hash.
+
+**Outputs:**
+- A rejection showing the old approval no longer applies, with the active selection unchanged.
+
+**Invariants to check:**
+- Approval is bound to the evaluation hash as well as the model; changing that hash invalidates reuse.
+
+**Hints:**
+- Compare the approval’s evaluation hash with the current bundle hash.
+- Verify that rejection leaves the selected artifact ID untouched.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-rechecked = dict(...)  # TODO: compute rechecked
-try:
-    verify_release(rechecked,approval,150,'cpu-demo')
-except ValueError:
-    print('Changed evaluation invalidates the old approval.')
-else:
-    raise AssertionError('stale approval accepted')
+def check_changed_evaluation_hash(bundle, prior_approval, active_selection):
+    # TODO: Reject reuse of approval after the evaluation hash changes and preserve the current selection.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -344,21 +349,32 @@ The owner is part of the reviewed release identity.
 
 ### How to write: Review a changed owner — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Review a changed owner (transfer)
+**Inputs:**
+- Change the responsible owner and check whether the old bundle approval can be reused.
+
+**Outputs:**
+- An approval rejection for the owner mismatch and unchanged selection.
+
+**Invariants to check:**
+- The old approval does not bind to the newly named owner.
+
+**Hints:**
+- The owner is part of the reviewed release identity.
+- Check owner identity in addition to bundle digest and expiry.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Review a changed owner (transfer)
-changed_owner = dict(...)  # TODO: compute changed_owner
-assert digest(changed_owner)  # TODO: complete assertion check
-try:
-    verify_release(changed_owner,approval,150,'cpu-demo')
-except ValueError:
-    print('Ownership change requires renewed review.')
-else:
-    raise AssertionError('changed owner accepted')
+import hashlib
+import json
+import math
+import tempfile
+from pathlib import Path
+
+def practice_review_a_changed_owner(bundle, approval, new_owner, now):
+    """Complete the review a changed owner check."""
+    # TODO: ('Change the responsible owner and check the old approval bundle against the new owner metadata.', 'Old approval rejection and an unchanged active selection.', 'Approval identity includes the owner as well as the artifact content hash.')
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

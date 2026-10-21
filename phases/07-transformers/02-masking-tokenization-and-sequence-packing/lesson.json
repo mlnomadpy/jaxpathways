@@ -74,7 +74,22 @@
         "prompt": "Use `valid=[True,True,False,False]`. Reproduce the undefined all-masked rows, then give padded queries a fallback and zero their outputs.",
         "hint": "Insert a diagonal fallback only for invalid queries.",
         "solution": "# Repair padding-query NaNs (Transfer / diagnosis)\npad_valid = jnp.array([True,True,False,False])\npad_mask = make_mask(jnp.zeros(4, dtype=int), pad_valid)\nbad_pad, _ = masked_mean(values, pad_mask)\nassert not jnp.all(jnp.isfinite(bad_pad))\nfallback = (~pad_valid[:, None]) & jnp.eye(4, dtype=bool)\npad_out, _ = masked_mean(values, pad_mask | fallback)\npad_out = jnp.where(pad_valid[:, None], pad_out, 0.)\nassert jnp.all(jnp.isfinite(pad_out))\nassert jnp.allclose(pad_out[:,0], jnp.array([2.,3.,0.,0.]))",
-        "explanation": "A fallback makes normalization defined; zeroing and loss masking retain the semantic padding contract."
+        "explanation": "A fallback makes normalization defined; zeroing and loss masking retain the semantic padding contract.",
+        "learnerStarter": {
+          "inputs": [
+            "Use `valid=[True,True,False,False]`. Reproduce the undefined all-masked rows, then give padded queries a fallback and zero their outputs."
+          ],
+          "outputs": [
+            "Finite attention outputs with padded query rows exactly zero."
+          ],
+          "invariants": [
+            "Valid queries preserve their allowed keys; only invalid padded-query rows use the fallback."
+          ],
+          "hints": [
+            "Insert a diagonal fallback only for invalid queries."
+          ],
+          "code": "import jax.numpy as jnp\n\ndef practice_repair_padding_query_nans(valid, logits):\n    \"\"\"Implement the repair padding-query nans check.\"\"\"\n    # TODO: Create an all-masked padded query, add a numerically safe fallback for that row, and zero its output afterward.\n    raise NotImplementedError\n"
+        }
       },
       {
         "title": "Detect packed-example leakage",
@@ -82,7 +97,22 @@
         "prompt": "Compare causal-only and segment-aware outputs at query \\(2\\). Explain which prior values caused the difference.",
         "hint": "Query \\(2\\) should see only value \\(8\\) from its own segment.",
         "solution": "# Detect packed-example leakage (Transfer / diagnosis)\nassert jnp.allclose(out[2,0], 14/3)\nassert jnp.allclose(packed_out[2,0], 8.)\nassert not jnp.allclose(out[2,0], packed_out[2,0])",
-        "explanation": "The earlier values \\(2\\) and \\(4\\) belong to another example; they must be excluded despite being past positions."
+        "explanation": "The earlier values \\(2\\) and \\(4\\) belong to another example; they must be excluded despite being past positions.",
+        "learnerStarter": {
+          "inputs": [
+            "Compare causal-only and segment-aware outputs at query \\(2\\). Explain which prior values caused the difference."
+          ],
+          "outputs": [
+            "Two outputs and a boundary-leakage difference check."
+          ],
+          "invariants": [
+            "A packed query attends only to causal keys from its own segment."
+          ],
+          "hints": [
+            "Query \\(2\\) should see only value \\(8\\) from its own segment."
+          ],
+          "code": "import jax.numpy as jnp\n\ndef practice_detect_packed_example_leakage(segment_ids, values):\n    \"\"\"Implement the detect packed-example leakage check.\"\"\"\n    # TODO: Compare outputs at query two with causal-only and segment-aware masks, then identify the prior-segment values that change the result.\n    raise NotImplementedError\n"
+        }
       }
     ],
     "question": "What must a packed causal mask enforce?",
@@ -146,6 +176,22 @@
       "A causal mask still allows earlier tokens from another packed example. Require the same segment as well as a valid causal position.",
       "Packing combines positions in storage, not their semantic context. Segment and validity constraints retain example boundaries.",
       "Equal token IDs do not imply the same example or a valid attention edge. Use segment IDs, positions and padding validity."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "Token IDs, shifted targets, segment IDs, and a validity mask."
+      ],
+      "outputs": [
+        "A causal attention mask and loss-eligibility mask that respect segment boundaries."
+      ],
+      "invariants": [
+        "No future token or cross-segment token is visible; padded queries have finite zero outputs."
+      ],
+      "hints": [
+        "Separate attention permission from target-loss eligibility.",
+        "Give all-masked padded queries an explicit fallback before applying the output mask."
+      ],
+      "code": "import jax.numpy as jnp\n\ndef packed_causal_mask(segment_ids, valid):\n    \"\"\"A causal attention mask and loss-eligibility mask that respect segment boundaries.\"\"\"\n    # TODO: Build causal and segment-aware permission masks, then define which shifted targets enter loss.\n    raise NotImplementedError\n"
+    }
   }
 }

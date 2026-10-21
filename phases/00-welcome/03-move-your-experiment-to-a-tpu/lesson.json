@@ -113,7 +113,26 @@
         "prompt": "Reverse the observation rows and predict the result order before execution. Verify the first and last values, the complete vector and device placement. Explain why this is a stronger check than only comparing the vector sum.",
         "hint": "A row-wise affine prediction commutes with row permutation. A sum would conceal an ordering bug.",
         "solution": "# Test row order without changing the model (Transfer)\nreversed_x = jax.device_put(x_host[::-1].copy(), devices[0])\nreversed_y = predict(reversed_x, w)\n# Wait for device work to finish before timing it or comparing its result on the host.\nreversed_y.block_until_ready()\n# Transfer the device result to the host for an independent NumPy comparison.\nnp.testing.assert_allclose(np.asarray(reversed_y), reference[::-1], atol=1e-5, rtol=1e-5)\nassert {d.platform for d in reversed_y.devices()} == {expected}\nassert np.isclose(float(reversed_y[0]), 3.625)\nassert np.isclose(float(reversed_y[-1]), 0.34375)\nprint('Row reversal preserved values and requested placement.')",
-        "explanation": "Reversing rows should reverse predictions because each observation is evaluated independently. Matching a sum would not reveal a misplaced or reordered prediction."
+        "explanation": "Reversing rows should reverse predictions because each observation is evaluated independently. Matching a sum would not reveal a misplaced or reordered prediction.",
+        "learnerStarter": {
+          "inputs": [
+            "Observation rows, model weights, and the selected device.",
+            "A reversed copy of the input rows."
+          ],
+          "outputs": [
+            "The reversed prediction vector and a NumPy reference."
+          ],
+          "invariants": [
+            "Output row order follows input row order.",
+            "Compare the full vector, not only its sum.",
+            "The result is placed on the selected device."
+          ],
+          "hints": [
+            "Reverse a host copy so the original stays unchanged.",
+            "Check endpoints and every value after execution completes."
+          ],
+          "code": "import jax\nimport numpy as np\n\ndef check_reversed_rows(x_host, weights, device, predict):\n    # TODO: place reversed rows, predict, and compare the full result\n    raise NotImplementedError\n"
+        }
       }
     ],
     "question": "The values match NumPy, but the output array is on CPU when the requested platform was TPU. What has been demonstrated?",
@@ -185,6 +204,25 @@
       "Backend qualification is a separate claim. A matching CPU result checks those numerical cases; it cannot show that a TPU executed the program.",
       "A correct value can be produced on the wrong device. Require both reference agreement and the output placement before recording a successful target run.",
       "Different hardware is not itself a mathematical failure. Compare the requested and observed backend before diagnosing the model."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "The original inputs, weights, prediction function, and selected device.",
+        "A compiled prediction path and changed bias."
+      ],
+      "outputs": [
+        "The changed device result, an independent NumPy comparison, and device metadata."
+      ],
+      "invariants": [
+        "The observed result comes from the selected device.",
+        "Check against both a shift-based prediction and an independent calculation.",
+        "Unavailable requested hardware cannot silently pass as CPU evidence."
+      ],
+      "hints": [
+        "Keep the original model inputs fixed.",
+        "Wait for device work before transferring a result for comparison."
+      ],
+      "code": "import jax\nimport jax.numpy as jnp\nimport numpy as np\n\ndef check_changed_bias(x, weight, predict, device):\n    # TODO: run the changed compiled prediction on the selected device\n    changed = ...\n    # TODO: compare with an independent host calculation\n    raise NotImplementedError\n"
+    }
   }
 }

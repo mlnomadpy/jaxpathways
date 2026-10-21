@@ -62,7 +62,22 @@
         "prompt": "Compare Hessian-vector products of the ordinary and rematerialized objectives along a nonuniform direction. Explain why equal first derivatives alone would be a weaker test.",
         "hint": "Apply jvp to each gradient function with the same primal point and tangent.",
         "solution": "# Check higher-order differentiation (Transfer)\ndirection=jnp.linspace(-1.,1.,len(x))\n_,hvp_plain=jax.jvp(jax.grad(plain),(x,),(direction,))\n_,hvp_remat=jax.jvp(jax.grad(remat),(x,),(direction,))\nnp.testing.assert_allclose(hvp_plain,hvp_remat,rtol=3e-5,atol=1e-7)\nassert np.isfinite(np.asarray(hvp_plain)).all()\nprint('Higher-order directional derivatives agree.')",
-        "explanation": "Recomputation should preserve the differentiable function in this pure example, including its higher-order directional behavior. This still is separate from a device-memory improvement."
+        "explanation": "Recomputation should preserve the differentiable function in this pure example, including its higher-order directional behavior. This still is separate from a device-memory improvement.",
+        "learnerStarter": {
+          "inputs": [
+            "Compare Hessian-vector products of the ordinary and rematerialized objectives along a nonuniform direction. Explain why equal first derivatives alone would be a weaker test."
+          ],
+          "outputs": [
+            "Both HVP vectors and an independent parity check."
+          ],
+          "invariants": [
+            "The comparison uses the same point, direction, and objective for both differentiation paths."
+          ],
+          "hints": [
+            "Apply jvp to each gradient function with the same primal point and tangent."
+          ],
+          "code": "import jax\nimport jax.numpy as jnp\nimport numpy as np\nfrom jax.ad_checkpoint import print_saved_residuals\n\ndef practice_check_higher_order_differentiation(objective, point, direction):\n    \"\"\"Implement the check higher-order differentiation check.\"\"\"\n    # TODO: Compare ordinary and rematerialized Hessian-vector products along the nonuniform direction.\n    raise NotImplementedError\n"
+        }
       }
     ],
     "question": "Rematerialization reduces the number of saved residual descriptions but the compiled temporary-byte estimates are equal. What is the supported conclusion?",
@@ -126,6 +141,22 @@
       "AD residuals and compiler temporary-buffer estimates describe different stages. Fewer saved intermediates need not lower the reported buffer peak.",
       "Residual lists and compiler buffer estimates describe different levels. Report the observed equality and investigate the real target workload before claiming a memory or speed benefit.",
       "Rematerialization trades storage for recomputation. Measure latency and peak memory separately before claiming an improvement."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "The original objective, its existing evaluation point, an all-ones direction, and the finite-difference perturbation."
+      ],
+      "outputs": [
+        "The central-difference directional derivative, gradient dot direction, and their discrepancy at the stated perturbation."
+      ],
+      "invariants": [
+        "The derivative uses the original objective and existing input; the finite-difference direction is the requested all-ones vector."
+      ],
+      "hints": [
+        "Evaluate the scalar objective at the point plus and minus epsilon times the direction.",
+        "Compute the autodiff gradient once and take its dot product with the same direction."
+      ],
+      "code": "import jax\nimport jax.numpy as jnp\n\ndef check_directional_derivative(objective, point, direction, epsilon):\n    # TODO: Compare the directional central difference with the gradient dot direction.\n    raise NotImplementedError\n"
+    }
   }
 }

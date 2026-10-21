@@ -83,7 +83,26 @@
         "prompt": "Keep shapes and dtypes fixed, change \\(w\\), and compare the compiled loss against an independently computed residual mean. Explain why a different numerical answer does not itself imply a new compilation.",
         "hint": "Compilation specializes to relevant properties, not each ordinary array element value.",
         "solution": "# Check that a new value remains runtime data (Practice): The same computation accepts different runtime values.\nfor new_w in (w, w + 0.25):\n    expected = jnp.mean((x @ new_w - y) ** 2)\n    observed = compiled(new_w, x, y)\n    assert jnp.allclose(observed, expected, rtol=1e-5, atol=1e-6)",
-        "explanation": "The same computation accepts different runtime values. The next lesson inspects tracing explicitly rather than inferring it from timing noise."
+        "explanation": "The same computation accepts different runtime values. The next lesson inspects tracing explicitly rather than inferring it from timing noise.",
+        "learnerStarter": {
+          "inputs": [
+            "A compiled loss and two weights with fixed shapes and dtypes.",
+            "The same lesson inputs and targets."
+          ],
+          "outputs": [
+            "Two compiled outputs and independent residual-mean references."
+          ],
+          "invariants": [
+            "Changing numerical values alone keeps the array signature fixed.",
+            "Check each result independently.",
+            "Timing alone is not evidence of retracing."
+          ],
+          "hints": [
+            "Build the reference from residuals, not by calling the compiled function.",
+            "Keep shape and dtype unchanged."
+          ],
+          "code": "import jax.numpy as jnp\n\ndef compare_runtime_weights(compiled_loss, weight_a, weight_b, inputs, targets):\n    # TODO: evaluate both weights and create independent references\n    raise NotImplementedError\n"
+        }
       },
       {
         "title": "Build a report whose timing claim can be checked",
@@ -91,7 +110,26 @@
         "prompt": "Benchmark the compiled value-and-gradient function for \\(20\\) calls after warmup, waiting on every output leaf. Include backend, input shapes, dtype, and median. State what your measurement excludes.",
         "hint": "Use `jax.tree.map` to block on every returned array, then stop the timer.",
         "solution": "# Build a report whose timing claim can be checked (Challenge)\ndef wait_for_outputs(outputs):\n    return jax.tree.map(lambda array: array.block_until_ready(), outputs)\nwait_for_outputs(compiled_value_gradient(w, x, y))\ngradient_times = []\nfor _ in range(20):\n    started = time.perf_counter()\n    wait_for_outputs(compiled_value_gradient(w, x, y))\n    gradient_times.append(time.perf_counter() - started)\nprint(\"compiled value-and-grad median seconds:\", statistics.median(gradient_times))\nassert len(gradient_times) == 20",
-        "explanation": "The measurement excludes input construction and first compilation, and includes repeated invocation and completion. It cannot be compared with another report without matching those boundaries."
+        "explanation": "The measurement excludes input construction and first compilation, and includes repeated invocation and completion. It cannot be compared with another report without matching those boundaries.",
+        "learnerStarter": {
+          "inputs": [
+            "A compiled value-and-gradient function and one warmup call.",
+            "Twenty measured calls with backend, shapes, and dtype metadata."
+          ],
+          "outputs": [
+            "A synchronized median latency and workload report."
+          ],
+          "invariants": [
+            "Synchronize all output leaves before stopping each timer.",
+            "Exclude warmup from the repeated-call distribution.",
+            "State what the measurement does not include."
+          ],
+          "hints": [
+            "Use tree traversal to wait for every leaf.",
+            "Store metadata beside the latency statistic."
+          ],
+          "code": "import time\nimport jax\n\ndef benchmark_compiled(compiled_step, weight, inputs, targets):\n    # TODO: warm up, synchronize every output, and retain repeated durations\n    raise NotImplementedError\n"
+        }
       }
     ],
     "diagnosis": "A suspiciously tiny time may measure dispatch only; inspect synchronization. A slow first call followed by faster calls may reflect setup, but timing alone does not identify which setup stage. Inconsistent eager/compiled results call for shape, dtype, and tolerance checks before performance tuning. Repeatedly slow setup can come from recreating transformed functions or changing specialization inputs; the next lesson tests those hypotheses directly.",
@@ -144,6 +182,26 @@
       "Waiting changes when the host proceeds, not the derivative. Compare the numerical results before and after synchronization.",
       "Without waiting, elapsed time can primarily measure dispatch rather than the completion of the numerical work.",
       "Synchronization waits for completion; it does not choose or constrain the answer. Without it, a timer can mostly measure dispatch."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "The lesson loss, weight, input and target arrays.",
+        "Eager and compiled value-and-gradient computations."
+      ],
+      "outputs": [
+        "Compiled and eager outputs checked against independent formulas.",
+        "A synchronization plan for every timed output."
+      ],
+      "invariants": [
+        "Validate numerical results before interpreting speed.",
+        "Wait for every result leaf before stopping the timer.",
+        "Do not infer a universal speedup."
+      ],
+      "hints": [
+        "Keep shape and dtype fixed for equivalence.",
+        "Synchronize the full returned tree."
+      ],
+      "code": "import jax\nimport jax.numpy as jnp\n\ndef compare_compiled_value_gradient(loss, weight, inputs, targets):\n    # TODO: compile value_and_grad and compare against independent checks\n    raise NotImplementedError\n"
+    }
   }
 }

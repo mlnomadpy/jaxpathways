@@ -73,7 +73,24 @@
         "prompt": "Check the JVP of \\(2v-w\\) against the same combination of separate JVPs. Then show why changing the base point is a different operation.",
         "hint": "A derivative is linear in its direction at a fixed base point.",
         "solution": "# Test linearity at a fixed point (Practice): Linearity in the tangent is a local property.\nw=jnp.array([-0.6,0.9])\nproduct=lambda direction:jax.jvp(mapping,(x,),(direction,))[1]\nnp.testing.assert_allclose(product(2*v-w),2*product(v)-product(w),rtol=1e-12)\nshifted=jax.jvp(mapping,(x+w,),(v,))[1]\nassert np.linalg.norm(np.asarray(shifted-product(v)))>0.1\nprint(\"Direction linearity holds; the Jacobian changes with the base point\")",
-        "explanation": "Linearity in the tangent is a local property. A nonlinear function need not use the same linear map at different points."
+        "explanation": "Linearity in the tangent is a local property. A nonlinear function need not use the same linear map at different points.",
+        "learnerStarter": {
+          "inputs": [
+            "A fixed base point, tangent directions v and w, and f(v,w)=2v-w."
+          ],
+          "outputs": [
+            "JVP for a combined direction and sum of separate JVPs."
+          ],
+          "invariants": [
+            "The base point remains fixed for the linearity comparison.",
+            "Changing the base point is not tangent linearity."
+          ],
+          "hints": [
+            "Use jax.jvp at one shared primal input.",
+            "Compare one combined seed with the linear combination of separate seeds."
+          ],
+          "code": "import jax\nimport jax.numpy as jnp\n\ndef check_jvp_linearity(function, base, v, w):\n    # TODO: compare combined and separate JVPs at the same base.\n    raise NotImplementedError(\"Test tangent linearity without changing the primal point\")"
+        }
       },
       {
         "title": "Check curvature symmetry without a full Hessian",
@@ -81,7 +98,24 @@
         "prompt": "For two directions \\(v,w\\), verify \\(w^\\mathsf{T}Hv=v^\\mathsf{T}Hw\\), then verify one product with finite differences.",
         "hint": "Compose jvp with grad and compare scalar products.",
         "solution": "# Check curvature symmetry without a full Hessian (Challenge): For this smooth scalar objective, mixed partials agree.\nw=jnp.array([0.2,0.9])\nhw=jax.jvp(jax.grad(objective),(x,),(w,))[1]\nnp.testing.assert_allclose(jnp.vdot(w,hvp),jnp.vdot(v,hw),rtol=1e-12)\neps=1e-4\nfdw=(jax.grad(objective)(x+eps*w)-jax.grad(objective)(x-eps*w))/(2*eps)\nnp.testing.assert_allclose(hw,fdw,rtol=1e-7,atol=1e-8)\nprint(\"Bilinear Hessian symmetry and finite-difference product verified\")",
-        "explanation": "For this smooth scalar objective, mixed partials agree. Symmetry is a useful invariant, but an independent derivative check is still necessary."
+        "explanation": "For this smooth scalar objective, mixed partials agree. Symmetry is a useful invariant, but an independent derivative check is still necessary.",
+        "learnerStarter": {
+          "inputs": [
+            "A scalar-valued twice-differentiable function, base point, and directions v,w."
+          ],
+          "outputs": [
+            "Both mixed Hessian directional products and a finite-difference check."
+          ],
+          "invariants": [
+            "Mixed products agree within a stated tolerance.",
+            "Finite differences independently check one Hessian-vector product."
+          ],
+          "hints": [
+            "Compute Hessian-vector products with forward-over-reverse or jvp(grad).",
+            "Perturb the gradient along one direction for the finite-difference comparison."
+          ],
+          "code": "import jax\nimport jax.numpy as jnp\n\ndef check_hessian_symmetry(function, point, v, w, epsilon):\n    # TODO: compare the two mixed products and finite-difference one product.\n    raise NotImplementedError(\"Verify curvature symmetry without materializing the Hessian\")"
+        }
       }
     ],
     "diagnosis": "If a product has the wrong shape, identify whether its seed lives in input or output space. If basis reconstruction is transposed, inspect which index vmap stacks first. If an HVP differs from J-transpose-J times the direction, calculate the residual-weighted second-derivative term before blaming autodiff.",
@@ -184,6 +218,24 @@
       "A VJP is a linear map on output sensitivity at a fixed input, not a finite perturbation of the forward function.",
       "The pullback applies the transpose Jacobian to the output weighting. It maps an output cotangent into the input space at the stored base point.",
       "A VJP uses first derivatives. A Hessian requires differentiating a gradient or composing appropriate derivative operations."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "Vector function mapping R² to R².",
+        "Changed base point x=(-0.2, 0.8), tangent v=(-0.5, 1.3), and output cotangent u=(1.1, -0.4)."
+      ],
+      "outputs": [
+        "Jacobian, JVP, VJP, and adjoint inner products at the changed point."
+      ],
+      "invariants": [
+        "JVP belongs to output space and VJP belongs to input space.",
+        "The two adjoint inner products agree within numerical tolerance."
+      ],
+      "hints": [
+        "Use the changed primal and seeds for every transform.",
+        "Check each result shape before comparing scalar inner products."
+      ],
+      "code": "import jax\nimport jax.numpy as jnp\n\ndef inspect_changed_linearization(function, x, v, u):\n    # TODO: compute Jacobian, JVP, VJP, and both adjoint inner products.\n    raise NotImplementedError(\"Check primal, tangent, and cotangent spaces separately\")"
+    }
   }
 }

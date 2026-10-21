@@ -221,7 +221,7 @@ visual_data={'kind':'line','x':counts,'xlabel':'RK4 steps over two seconds','yla
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:30:38.414360+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:07:06.549883+00:00. JAX 0.9.2.
 
 ```text
 Autodiff: -0.9863878096749447 discrete oracle: -0.9863878096749429 continuous oracle: -0.9863878557664257
@@ -282,25 +282,33 @@ Change the initial value to $3$ and the rate to $0.4$. Verify the endpoint gradi
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
+**Inputs:**
+- RK4 endpoint solver, initial value 3.0, rate 0.4, and the lesson final time.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- Endpoint derivatives with respect to rate and initial value.
+- An analytic continuous-time comparison for both sensitivities.
+
+**Invariants to check:**
+- The rate derivative matches -t*u0*exp(-rate*t) within numerical tolerance.
+- The initial-value derivative matches exp(-rate*t).
+- Derivatives are taken through the discrete solver before comparison with the continuous reference.
+
+**Hints:**
+- Differentiate the actual discrete endpoint with respect to each input separately.
+- Use the same final time in the two analytic sensitivity formulas.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Change the initial value to 3 and the rate to 0.4.
-changed_rate, changed_initial = ...  # TODO: compute changed_rate, changed_initial
-g_rate = jax.grad(...)  # TODO: compute g_rate
-g_initial = jax.grad(...)  # TODO: compute g_initial
-np.testing.assert_allclose(g_rate,-2*changed_initial*np.exp(-0.8),rtol=1e-7)
-np.testing.assert_allclose(g_initial,np.exp(-0.8),rtol=1e-8)
-print("Rate and initial-state sensitivities:",float(g_rate),float(g_initial))
+import numpy as np
+import jax
+import jax.numpy as jnp
+
+def endpoint_sensitivities(solve_endpoint, final_time, initial=3.0, rate=0.4):
+    # TODO: differentiate the discrete endpoint with respect to both inputs.
+    # Compare each result with its continuous-time sensitivity.
+    raise NotImplementedError("Check rate and initial-state endpoint sensitivities")
 ```
 
 <details><summary>Reference solution</summary>
@@ -331,34 +339,30 @@ Weights change the observation importance and must be normalized explicitly.
 
 ### How to write: Weight observations without losing normalization — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
+**Inputs:**
+- Observation times, weights emphasizing later observations, initial value, and a rate parameter.
 
-**Step-by-step implementation plan:**
-1. Weight observations without losing normalization (Practice)
+**Outputs:**
+- Weighted observation-loss gradient and an independent NumPy chain-rule value.
+
+**Invariants to check:**
+- Normalization uses the sum of observation weights.
+- The independent path differentiates the RK4 polynomial rather than calling JAX autodiff.
+
+**Hints:**
+- Write the weighted residual loss explicitly.
+- Propagate a scalar derivative through each RK4 stage in the reference calculation.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Weight observations without losing normalization (Practice)
-weights = np.linspace(...)  # TODO: compute weights
-def weighted_objective(k):
-    residual = solve(...)  # TODO: compute residual
-    return ...  # TODO: return computed result
-k = ...  # TODO: compute k
-h = ...  # TODO: compute h
-n = np.arange(...)  # TODO: compute n
-z = ...  # TODO: compute z
-r = ...  # TODO: compute r
-dr = ...  # TODO: compute dr
-u = ...  # TODO: compute u
-sensitivity = ...  # TODO: compute sensitivity
-reference = np.sum(...)  # TODO: compute reference
-np.testing.assert_allclose(jax.grad(weighted_objective)(k),reference,rtol = ...  # TODO: compute np.testing.assert_allclose(jax.grad(weighted_objective)(k),reference,rtol
-print("Weighted derivative reference:",reference)
+import numpy as np
+import jax
+import jax.numpy as jnp
+
+def weighted_loss_gradient(times, observations, weights, initial, rate):
+    # TODO: define the weighted loss and build an independent RK4 derivative check.
+    raise NotImplementedError("Preserve weighted-loss normalization and independent derivative check")
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -400,26 +404,32 @@ stop_gradient preserves values but removes their derivative.
 
 ### How to write: Diagnose a detached backward path — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
+**Inputs:**
+- The decay solver, observations generated for initial value 2.0, and scalar rate parameter.
+- A differentiable objective and the same objective with its simulated prediction detached.
+- Parameter point 1.0 and centered finite-difference step 1e-4.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- Autodiff gradients for attached and detached objectives.
+- Centered finite-difference estimate exposing the detached-path error.
+
+**Invariants to check:**
+- The detached autodiff path can be zero while the objective value still changes with the parameter.
+- Centered finite differences use the same held observations and initial state.
+
+**Hints:**
+- Keep the forward objective identical and detach only its simulated prediction in the intentionally broken variant.
+- Compare autodiff with a centered difference around the stated parameter.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Diagnose a detached backward path (Challenge): A plausible forward curve does not validate backward behavior.
-def detached_objective(k):
-    prediction = jax.lax.stop_gradient(...)  # TODO: compute prediction
-    return ...  # TODO: return computed result
-assert float(jax.grad(detached_objective)(1.0))  # TODO: complete assertion check
-fd = ...  # TODO: compute fd
-assert abs(fd)  # TODO: complete assertion check
-print("Detached autodiff is zero; actual value sensitivity:",fd)
+import jax
+import jax.numpy as jnp
+
+def diagnose_detached_path(solve, observations, parameter=1.0, initial=2.0, epsilon=1e-4):
+    # TODO: compare attached and detached autodiff with a centered difference.
+    raise NotImplementedError("Find the gradient path severed by stop_gradient")
 ```
 
 <details><summary>Reference solution and reasoning</summary>

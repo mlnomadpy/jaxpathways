@@ -75,7 +75,25 @@
         "prompt": "Compare a complete ring all-reduce with reduce-scatter followed by all-gather for a gradient of one mebibyte at two, four and eight ranks. Also compute per-rank gradient storage. Explain why lower storage does not guarantee fewer communicated bytes.",
         "hint": "Use the same full gradient byte count for both collectives; one mebibyte is 2**20 bytes. Divide storage by ranks only for the sharded state.",
         "solution": "# Account for the complete communication cycle (Transfer)\nbudget = []\nfor p in [2, 4, 8]:\n    size = 2**20\n    rs = size * (p - 1) // p\n    ar = 2 * rs\n    cycle = rs + rs\n    assert ar == cycle\n    assert size // p * p == size\n    budget.append({'ranks': p, 'all_reduce_bytes': ar,\n                   'scatter_gather_bytes': cycle, 'shard_storage_bytes': size // p})\nassert [row['all_reduce_bytes'] for row in budget] == [1048576, 1572864, 1835008]\nprint('Idealized payload/storage budget, not observed network traffic:', budget)",
-        "explanation": "The two-phase payload equals the all-reduce payload under this model, even though the persistent sharded state is smaller. Timing and algorithm selection still need measurements on the complete target workload."
+        "explanation": "The two-phase payload equals the all-reduce payload under this model, even though the persistent sharded state is smaller. Timing and algorithm selection still need measurements on the complete target workload.",
+        "learnerStarter": {
+          "inputs": [
+            "A one-mebibyte gradient payload and rank counts 2, 4, and 8.",
+            "A ring collective communication model."
+          ],
+          "outputs": [
+            "Per-rank storage and communicated bytes for each complete strategy."
+          ],
+          "invariants": [
+            "The all-reduce comparison includes both reduce-scatter and all-gather phases.",
+            "Per-rank storage is distinct from network bytes transferred."
+          ],
+          "hints": [
+            "For a ring, account for (P-1) chunks in each phase.",
+            "Keep byte units explicit and divide payload by rank count only for shard storage."
+          ],
+          "code": "def compare_ring_collectives(payload_bytes, rank_counts):\n    # TODO: calculate complete all-reduce and reduce-scatter/all-gather costs.\n    # Return storage and communication in separately named fields.\n    raise NotImplementedError(\"Count both ring phases and per-rank storage\")"
+        }
       }
     ],
     "question": "A program replaces all-reduce with reduce-scatter and immediately gathers the full vector again. What does the idealized ring model predict?",
@@ -192,6 +210,25 @@
       "Count bytes in both collective phases. Replacing an all-reduce with reduce-scatter plus all-gather need not reduce the ideal ring payload.",
       "The scatter and gather each contribute one phase. The advantage depends on what consumes the partitioned value and when reconstruction is required.",
       "A global shape describes array semantics, not how replicas or shards become consistent. Communication still has to move the contributions."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "Reversed observation rows and labels, changed initial weights, and the distributed gradient routine from the lesson."
+      ],
+      "outputs": [
+        "Gradients and updated parameters after the changed data ordering.",
+        "Reconstructed local replicas and all-reduce comparisons.",
+        "A comparison showing why reversing labels without the corresponding rows changes the gradient problem."
+      ],
+      "invariants": [
+        "Reversing both paired arrays preserves examples; reversing labels alone changes targets.",
+        "Each local replica matches the globally updated parameter vector."
+      ],
+      "hints": [
+        "Apply the same row permutation to features and labels.",
+        "Compare local contributions, reduced gradients, and replica state independently."
+      ],
+      "code": "import numpy as np\n\ndef verify_changed_distributed_step(features, labels, initial_weights, update):\n    # TODO: reverse paired observations, change the initial state, and audit replicas.\n    raise NotImplementedError(\"Check pairing, reduction, and replica agreement\")"
+    }
   }
 }

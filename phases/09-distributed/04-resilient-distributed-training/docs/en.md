@@ -427,7 +427,7 @@ visual_data={'kind':'line','x':[1,2,3],'xlabel':'update after checkpoint','ylabe
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:30:28.854658+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:06:46.320262+00:00. JAX 0.9.2.
 
 ```text
 Recorded backend/processes/devices: cpu 1 4
@@ -435,13 +435,13 @@ Restored step/cursor: 1 8
 Next sample IDs across epoch boundary: [[12, 5, 4, 1, 8, 13, 2, 11], [9, 0, 7, 15, 11, 13, 8, 14], [1, 6, 5, 4, 3, 12, 2, 10]]
 Uninterrupted losses: [0.5069587826728821, 0.19637340307235718, 0.1798383891582489]
 Restored losses: [0.5069587826728821, 0.19637340307235718, 0.1798383891582489]
-Checkpoint: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-distributed-recovery-sjtnbuyi/step-one
+Checkpoint: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-distributed-recovery-z_x8a3i8/step-one
 Recorded backend/processes/devices: cpu 1 4
 Restored step/cursor: 1 8
 Next sample IDs across epoch boundary: [[12, 5, 4, 1, 8, 13, 2, 11], [9, 0, 7, 15, 11, 13, 8, 14], [1, 6, 5, 4, 3, 12, 2, 10]]
 Uninterrupted losses: [0.5069587826728821, 0.19637340307235718, 0.1798383891582489]
 Restored losses: [0.5069587826728821, 0.19637340307235718, 0.1798383891582489]
-Checkpoint: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-distributed-recovery-4rdbza1i/step-one
+Checkpoint: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-distributed-recovery-6pawiuyy/step-one
 Same next sample IDs, different weights after missing momentum: 0.0195157527923584
 Five resumed transitions and all addressable parameter replicas agree.
 Current-epoch batch matches; next-epoch batch exposes the wrong key.
@@ -474,29 +474,29 @@ Extend uninterrupted and restored execution by two additional steps. Verify samp
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- An uninterrupted training run and a checkpoint taken before the final two updates.
 
-**Step-by-step implementation plan:**
-1. Transfer the device result to the host for an independent NumPy comparison.
-2. Transfer the device result to the host for an independent NumPy comparison.
+**Outputs:**
+- Sample IDs and full training state after two extra steps on both paths.
+- Per-replica parameter comparisons.
+
+**Invariants to check:**
+- Restored and uninterrupted paths consume the same subsequent IDs.
+- Parameters, optimizer, key, cursor, and step agree after each update.
+
+**Hints:**
+- Advance both paths by exactly two updates.
+- Compare tree leaves and each local replica, not only the primary state.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Extend uninterrupted and restored execution by two additional steps.
-for _ in range(2):
-    baseline, ids_a, _ = transition(...)  # TODO: compute baseline, ids_a, _
-    resumed, ids_b, _ = transition(...)  # TODO: compute resumed, ids_b, _
-    np.testing.assert_array_equal(ids_a, ids_b)
-    for name in baseline:
-        # Transfer the device result to the host for an independent NumPy comparison.
-        np.testing.assert_allclose(np.asarray(baseline[name]), np.asarray(resumed[name]), rtol = ...  # TODO: compute np.testing.assert_allclose(np.asarray(baseline[name]), np.asarray(resumed[name]), rtol
-    for shard in resumed['weights'].addressable_shards:
-        # Transfer the device result to the host for an independent NumPy comparison.
-        np.testing.assert_allclose(np.asarray(shard.data), np.asarray(baseline['weights']), rtol = ...  # TODO: compute np.testing.assert_allclose(np.asarray(shard.data), np.asarray(baseline['weights']), rtol
-assert int(resumed['step'])  # TODO: complete assertion check
-print('Five resumed transitions and all addressable parameter replicas agree.')
+import numpy as np
+
+def compare_two_step_resume(uninterrupted, checkpoint, train_step):
+    # TODO: extend the uninterrupted and restored paths by two updates.
+    raise NotImplementedError("Verify complete-state replay across two additional steps")
 ```
 
 <details><summary>Reference solution</summary>
@@ -533,29 +533,29 @@ The saved order supplies the remaining current-epoch batch. The key is consumed 
 
 ### How to write: Find a delayed random-state failure — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.random.PRNGKey(seed) & jax.random.split(key)` — Uses explicit PRNG keys. Split a key when you need independent random draws; reusing a key repeats its random stream.
+**Inputs:**
+- A checkpoint with saved sample order, cursor, key, parameters, optimizer state, and step.
+- A deliberately replaced random key.
 
-**Step-by-step implementation plan:**
-1. Create or split explicit PRNG key(s) (`wrong_key_state`) for reproducible randomness.
-2. Transfer the device result to the host for an independent NumPy comparison.
+**Outputs:**
+- First resumed batch and following epoch first batch for both key choices.
+
+**Invariants to check:**
+- Restored sample order/cursor initially agree even if later randomness diverges.
+- Compare all replay state, not only model parameters.
+
+**Hints:**
+- Hold checkpoint fields fixed one at a time.
+- Inspect the next epoch boundary where the key affects a fresh permutation.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Find a delayed random-state failure (Transfer)
-# Create or split explicit PRNG key(s) (`wrong_key_state`) for reproducible randomness.
-wrong_key_state = ...  # TODO: compute wrong_key_state
-correct_a, ids_a, _ = transition(...)  # TODO: compute correct_a, ids_a, _
-wrong_a, ids_b, _ = transition(...)  # TODO: compute wrong_a, ids_b, _
-np.testing.assert_array_equal(ids_a, ids_b)
-# Transfer the device result to the host for an independent NumPy comparison.
-np.testing.assert_allclose(np.asarray(correct_a['weights']), np.asarray(wrong_a['weights']), rtol = ...  # TODO: compute np.testing.assert_allclose(np.asarray(correct_a['weights']), np.asarray(wrong_a['weights']), rtol
-correct_b, ids_c, _ = transition(...)  # TODO: compute correct_b, ids_c, _
-wrong_b, ids_d, _ = transition(...)  # TODO: compute wrong_b, ids_d, _
-assert not np.array_equal(ids_c, ids_d)  # TODO: complete assertion check
-print('Current-epoch batch matches; next-epoch batch exposes the wrong key.')
+import numpy as np
+
+def compare_replay_keys(checkpoint, alternate_key):
+    # TODO: restore twice, changing only the random key.
+    raise NotImplementedError("Locate the first replay divergence caused by the changed key")
 ```
 
 <details><summary>Reference solution and reasoning</summary>

@@ -158,7 +158,7 @@ visual_data = {'kind': 'line', 'x': grid.tolist(), 'xlabel': 'input', 'ylabel': 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:27:20.467904+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:03:54.491914+00:00. JAX 0.9.2.
 
 ```text
 3.0
@@ -215,25 +215,34 @@ Write a compiled function that applies $2x$ when $x$ is positive and $x-2$ other
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.jit(fn) / @jax.jit` — Traces `fn` for its input signatures and compiles an executable. Changed shapes, dtypes or static arguments can trigger another compilation.
+**Inputs:**
+- A scalar or array of values evaluated as scalar calls.
 
-**Step-by-step implementation plan:**
-1. Exercise solution
-2. Define and JIT-compile `choose_update(x)` so XLA traces and fuses the operations:
+**Outputs:**
+- A JIT-compatible piecewise function: twice x when positive, otherwise x minus two.
+
+**Invariants to check:**
+- Both lax.cond branches return identical shape and dtype.
+- The zero boundary follows the non-positive branch.
+
+**Hints:**
+- Use x > 0 as the predicate.
+- Pass x as the operand and use one scalar result from each branch.
+
+**Key functions & syntax to use:**
+- `jax.jit(fn) / @jax.jit` — Traces `fn` for its input signatures and compiles an executable. Changed shapes, dtypes or static arguments can trigger another compilation.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-# Define and JIT-compile `choose_update(x)` so XLA traces and fuses the operations:
+import jax
+import jax.numpy as jnp
+
 @jax.jit
-def choose_update(x):
-    return ...  # TODO: return computed result
-assert jnp.allclose(choose_update(3.), 6.)  # TODO: complete assertion check
-assert jnp.allclose(choose_update(-3.), -5.)  # TODO: complete assertion check
-assert jnp.allclose(choose_update(0.), -2.)  # TODO: complete assertion check
+def piecewise_rule(x: jax.Array) -> jax.Array:
+    """Return 2*x for positive x and x-2 otherwise."""
+    # TODO: express the runtime branch with jax.lax.cond.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -265,24 +274,30 @@ At $x=1$ the false branch is selected.
 
 ### How to write: Match a changed piecewise rule — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
-- `jax.vmap(fn, in_axes=..., out_axes=...)` — Vectorizes a single-example function across a batch axis without writing a Python loop.
+**Inputs:**
+- A scalar input v.
 
-**Step-by-step implementation plan:**
-1. Match a changed piecewise rule (Practice)
+**Outputs:**
+- The value of v squared for v>1, and 2v otherwise.
+
+**Invariants to check:**
+- At v=1 the false branch is chosen.
+- Both branches return a scalar of compatible dtype.
+
+**Hints:**
+- Set the predicate to v > 1.
+- Check derivatives only away from the branch boundary.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Match a changed piecewise rule (Practice)
-def piecewise(v):
-    return ...  # TODO: return computed result
-assert jnp.allclose(jax.vmap(piecewise)(jnp.array([-1.,1.,2.])),jnp.array([-2.,2.,4.]))  # TODO: complete assertion check
-assert jnp.allclose(jax.grad(piecewise)(-1.),2.)  # TODO: complete assertion check
-assert jnp.allclose(jax.grad(piecewise)(2.),4.)  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+
+def changed_rule(v: jax.Array) -> jax.Array:
+    """Implement the two-branch scalar rule."""
+    # TODO: use lax.cond with the exact boundary specified in the task.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -314,26 +329,30 @@ Decide what each output component means before padding.
 
 ### How to write: Repair incompatible branch shapes — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- A scalar input v used by two branch functions.
 
-**Step-by-step implementation plan:**
-1. Repair incompatible branch shapes (Challenge)
+**Outputs:**
+- A pair of scalar values with the same shape and dtype regardless of the predicate.
+
+**Invariants to check:**
+- lax.cond requires compatible results from both branches.
+- The pair gives the same semantic meaning on both paths.
+
+**Hints:**
+- Choose what the two returned components represent first.
+- Construct a length-two array in each branch.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Repair incompatible branch shapes (Challenge)
-try:
-    jax.lax.cond(True,lambda x:x,lambda x:jnp.stack([x,x]),jnp.array(2.))
-except TypeError:
-    print("Expected branch shape mismatch")
-else:
-    raise AssertionError("Expected result type error")
-def pair(v):
-    return ...  # TODO: return computed result
-assert jnp.allclose(pair(jnp.array(-2.)),jnp.array([2.,4.]))  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+
+def consistent_pair(v: jax.Array) -> jax.Array:
+    """Return a consistent length-two result from both runtime branches."""
+    # TODO: make both cond branches return matching shape and dtype.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

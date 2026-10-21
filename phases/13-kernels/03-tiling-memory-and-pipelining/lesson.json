@@ -73,7 +73,25 @@
         "hint": "The pipeline lab deliberately uses a conservative TPU-compatible tile family.",
         "solution": "# Reject an unsupported pipeline tile (Practice): Different wrappers may expose different supported contracts.\nrejected=False\ntry:pipelined_axpy(x,y,(3,5))\nexcept ValueError:rejected=True\nassert rejected\nprint(\"Unsupported pipeline tile rejected\")",
         "explanation": "Different wrappers may expose different supported contracts. A narrower explicit contract is safer than implying the generic interpreter established target compatibility.",
-        "difficulty": "Practice"
+        "difficulty": "Practice",
+        "learnerStarter": {
+          "inputs": [
+            "Two shape-compatible arrays and the pipeline wrapper.",
+            "A supported tile for the valid control case and unsupported tile (3,5)."
+          ],
+          "outputs": [
+            "A clear ValueError for unsupported geometry before arithmetic interpretation or accelerator launch."
+          ],
+          "invariants": [
+            "The valid control establishes that inputs are otherwise acceptable.",
+            "The arithmetic interpreter is never used as a hidden fallback for the rejected pipeline configuration."
+          ],
+          "hints": [
+            "Place supported-tile validation before selecting execution backend.",
+            "Use a test double to confirm no arithmetic path was invoked."
+          ],
+          "code": "def reject_unsupported_pipeline_tile(pipeline, first, second, supported_tile):\n    # TODO: confirm the supported control works, then require rejection for tile (3,5).\n    raise NotImplementedError(\"Reject unsupported pipeline geometry before dispatch\")"
+        }
       },
       {
         "title": "Estimate the price of a third input buffer",
@@ -81,7 +99,27 @@
         "hint": "Count two input arrays and one output array separately because their buffer counts differ.",
         "solution": "# Estimate the price of a third input buffer (Challenge)\nfor bm,bn in configurations:\n    two=(2*2+2)*bm*bn*4\n    three=(2*3+2)*bm*bn*4\n    assert three*3==two*4\n    print(\"Tile, two/three-input-slot modeled bytes:\",(bm,bn),two,three)",
         "explanation": "A third slot for each input increases this limited data-buffer model by one third. Output buffering stays at two slots. The estimate excludes registers, semaphores, compiler scratch and layout effects.",
-        "difficulty": "Challenge"
+        "difficulty": "Challenge",
+        "learnerStarter": {
+          "inputs": [
+            "Matrix shape (9,129), candidate tile sizes, element size, and two output buffer slots."
+          ],
+          "outputs": [
+            "Data-buffer byte counts for two and three input slots.",
+            "Explicit list of excluded memory costs.",
+            "At least two memory costs explicitly excluded from the data-buffer estimate."
+          ],
+          "invariants": [
+            "Output slots stay fixed at two in both estimates.",
+            "The third input slot adds one input-tile allocation.",
+            "The footprint is a declared-buffer model, not total HBM usage."
+          ],
+          "hints": [
+            "Count padded tile elements times bytes per element and slots.",
+            "Do not include compiler, allocator, or runtime overhead in this data-only estimate."
+          ],
+          "code": "import math\n\ndef estimate_pipeline_buffers(shape, tile_sizes, bytes_per_element):\n    # TODO: compute padded input tile bytes for two/three slots and fixed output slots.\n    # Return excluded costs alongside estimates.\n    raise NotImplementedError(\"Separate declared data buffers from total device memory\")"
+        }
       }
     ],
     "diagnosis": "If the buffered result differs from synchronous execution, keep arithmetic and tile geometry fixed while inspecting copies, ownership and synchronization. If the interpreter cannot infer TPU layout on CPU, choose the documented TPU simulation API and label the metadata as simulated. If a larger tile uses fewer programs but more padded work, neither count alone ranks its performance.",
@@ -153,6 +191,25 @@
       "Fewer programs can still mean more padding, pressure or stalls. Compare target measurements for identical useful work.",
       "A simulator’s schedule is not device latency. Record actual target timing and inspect memory/overlap behavior.",
       "Simulation establishes tested semantics. Buffering and tile changes affect several costs, and only actual target measurements can rank performance."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "Two frozen (9,129) arrays generated from a local NumPy random generator with seed 23.",
+        "Float32 and bfloat16 represented-input variants, valid tile, and buffer modes (2 input slots synchronous, 2 buffered, 3 buffered)."
+      ],
+      "outputs": [
+        "Outputs for all three schedules at each dtype.",
+        "Exact comparison with the reference computed from the represented input values."
+      ],
+      "invariants": [
+        "The same source values are used across schedules.",
+        "Every schedule uses two output slots; the synchronous case is separate from buffered execution."
+      ],
+      "hints": [
+        "Cast the reference operands to float32 for arithmetic, then cast the result to the requested output dtype.",
+        "Keep input and output buffer counts separate."
+      ],
+      "code": "import numpy as np\nimport jax.numpy as jnp\n\ndef compare_pipeline_modes(run_pipeline, seed, tile, dtypes):\n    # TODO: generate the two fixed arrays once and compare all schedule/dtype combinations.\n    raise NotImplementedError(\"Compare synchronous and buffered pipelines on fixed represented inputs\")"
+    }
   }
 }

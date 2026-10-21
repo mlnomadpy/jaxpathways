@@ -249,7 +249,7 @@ visual_data = {'kind': 'panels', 'panels': [{'kind': 'bar', 'title': 'First call
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:30:15.224809+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:06:22.289646+00:00. JAX 0.9.2.
 
 ```text
 {
@@ -267,17 +267,17 @@ CPU run: 2026-10-21T11:30:15.224809+00:00. JAX 0.9.2.
   ],
   "dtype": "float32",
   "boundary": "input already placed; call plus output synchronization",
-  "first_call_seconds": 0.028692624997347593,
+  "first_call_seconds": 0.029734750278294086,
   "warm_samples_seconds": [
-    4.0084123611450195e-05,
-    1.3208016753196716e-05,
-    1.7875339835882187e-05,
-    8.457805961370468e-06,
-    8.00006091594696e-06,
-    7.334165275096893e-06,
-    8.542090654373169e-06
+    4.00422140955925e-05,
+    1.6042031347751617e-05,
+    8.332543075084686e-06,
+    9.458046406507492e-06,
+    7.291790097951889e-06,
+    7.958151400089264e-06,
+    7.1660615503787994e-06
   ],
-  "warm_median_seconds": 8.542090654373169e-06,
+  "warm_median_seconds": 8.332543075084686e-06,
   "max_abs_error": 2.384185791015625e-07
 }
 {
@@ -295,25 +295,25 @@ CPU run: 2026-10-21T11:30:15.224809+00:00. JAX 0.9.2.
   ],
   "dtype": "float32",
   "boundary": "input already placed; call plus output synchronization",
-  "first_call_seconds": 0.017361541744321585,
+  "first_call_seconds": 0.01793929236009717,
   "warm_samples_seconds": [
-    2.820882946252823e-05,
-    1.5084166079759598e-05,
-    8.79121944308281e-06,
-    9.833835065364838e-06,
-    7.207971066236496e-06,
-    7.417052984237671e-06,
-    6.833113729953766e-06
+    2.9665883630514145e-05,
+    1.1583790183067322e-05,
+    7.4999406933784485e-06,
+    7.666181772947311e-06,
+    7.041264325380325e-06,
+    7.790978997945786e-06,
+    6.95791095495224e-06
   ],
-  "warm_median_seconds": 8.79121944308281e-06,
+  "warm_median_seconds": 7.666181772947311e-06,
   "max_abs_error": 2.384185791015625e-07
 }
 Handle-only seconds: 7.750000804662704e-06
-Complete-call samples: [1.4499761164188385e-05, 8.457805961370468e-06, 7.832888513803482e-06]
-Structured samples: [4.2084138840436935e-05, 2.5250017642974854e-05, 1.7167069017887115e-05]
-Changed workload: (96, 32) [2.950010821223259e-05, 1.4374963939189911e-05, 8.292030543088913e-06, 8.499715477228165e-06, 9.750016033649445e-06]
-Energy shape and samples: (64,) [2.691708505153656e-05, 1.4374963939189911e-05, 8.916947990655899e-06, 1.1249911040067673e-05, 9.708106517791748e-06]
-{'boundary': 'placed inputs; warm call plus output wait', 'samples': [1.2666918337345123e-05, 9.25036147236824e-06, 6.583984941244125e-06, 9.167008101940155e-06, 7.041729986667633e-06]}
+Complete-call samples: [1.2207776308059692e-05, 7.417052984237671e-06, 7.375143468379974e-06]
+Structured samples: [4.1624996811151505e-05, 1.9082799553871155e-05, 1.5334226191043854e-05]
+Changed workload: (96, 32) [3.183400258421898e-05, 1.1416152119636536e-05, 1.0250136256217957e-05, 9.125098586082458e-06, 6.624963134527206e-06]
+Energy shape and samples: (64,) [3.5624951124191284e-05, 2.529192715883255e-05, 2.516619861125946e-05, 1.39591284096241e-05, 8.875038474798203e-06]
+{'boundary': 'placed inputs; warm call plus output wait', 'samples': [1.3208016753196716e-05, 8.375383913516998e-06, 7.4589625000953674e-06, 1.0333023965358734e-05, 6.125308573246002e-06]}
 PASS: performance-01
 
 ```
@@ -365,33 +365,30 @@ Repeat the benchmark with $96$ rows while preserving the feature and output dime
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `Mesh + PartitionSpec + NamedSharding` — Maps logical tensor axes onto physical device mesh axes for SPMD data, tensor, or pipeline parallelism.
-- `jax.block_until_ready(output)` — Synchronizes with the accelerator/CPU device so asynchronous dispatch finishes before wall-clock timing.
+**Inputs:**
+- A JAX function, fixed workload, warmup count, and repeat count.
 
-**Step-by-step implementation plan:**
-1. Exercise solution
-2. Place `larger` explicitly onto the target JAX device.
-3. Wait for device work to finish before timing it or comparing its result on the host.
-4. Wait for device work to finish before timing it or comparing its result on the host.
-5. Transfer the device result to the host for an independent NumPy comparison.
+**Outputs:**
+- Raw synchronized timings with compilation separated from warmed execution.
+
+**Invariants to check:**
+- Every sample waits for completed output; workload shape/dtype and timing boundary are recorded.
+
+**Hints:**
+- Call block_until_ready inside each measured interval.
+- Use an independent NumPy result for the changed equivalent workload.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-larger_host = rng.normal(...)  # TODO: compute larger_host
-# Place `larger` explicitly onto the target JAX device.
-larger = jax.device_put(...)  # TODO: compute larger
-# Wait for device work to finish before timing it or comparing its result on the host.
-larger.block_until_ready()
-# Wait for device work to finish before timing it or comparing its result on the host.
-compiled_predict(larger, w).block_until_ready()
-larger_result, larger_times = synchronized_samples(...)  # TODO: compute larger_result, larger_times
-# Transfer the device result to the host for an independent NumPy comparison.
-np.testing.assert_allclose(np.asarray(larger_result), np.tanh(larger_host @ w_host), atol=2e-5, rtol=2e-5)
-print("Changed workload:", larger.shape, larger_times)
+import jax.numpy as jnp
+import time
+import statistics
+
+def synchronized_benchmark(function, arguments, warmup, repeats):
+    """Raw synchronized timings with compilation separated from warmed execution."""
+    # TODO: Warm the selected JAX function and synchronize every timed result while retaining raw samples.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -427,35 +424,30 @@ Square before reducing the output-feature axis; the result has shape $(64,)$.
 
 ### How to write: Benchmark a different equivalent workload — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.jit(fn) / @jax.jit` — Traces `fn` for its input signatures and compiles an executable. Changed shapes, dtypes or static arguments can trigger another compilation.
-- `jax.block_until_ready(output)` — Synchronizes with the accelerator/CPU device so asynchronous dispatch finishes before wall-clock timing.
+**Inputs:**
+- Replace tanh with a row-wise sum of squared predictions, returning one scalar per row. Derive the NumPy reference, warm this new function, collect five synchronized samples and record the changed output shape.
 
-**Step-by-step implementation plan:**
-1. Wrap with `jax.jit` (`energy`) so XLA traces and compiles the function.
-2. Wait for device work to finish before timing it or comparing its result on the host.
-3. Reduce along axis=1 to compute `energy_reference`.
-4. Check tensor shape invariant: `energy_result.shape == (64,)`
-5. Transfer the device result to the host for an independent NumPy comparison.
+**Outputs:**
+- Per-row scalar outputs, NumPy parity, and five completed timing samples.
+
+**Invariants to check:**
+- The benchmark synchronizes each output and records the changed output shape.
+
+**Hints:**
+- Square before reducing the output-feature axis; the result has shape $(64,)$.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Benchmark a different equivalent workload (Transfer): Changing the computation changes the performance question.
-# Wrap with `jax.jit` (`energy`) so XLA traces and compiles the function.
-energy = jax.jit(...)  # TODO: compute energy
-# Wait for device work to finish before timing it or comparing its result on the host.
-energy(x, w).block_until_ready()
-energy_result, energy_times = synchronized_samples(...)  # TODO: compute energy_result, energy_times
-# Reduce along axis=1 to compute `energy_reference`.
-energy_reference = np.sum(...)  # TODO: compute energy_reference
-# Check tensor shape invariant: `energy_result.shape == (64,)`
-assert energy_result.shape  # TODO: complete assertion check
-# Transfer the device result to the host for an independent NumPy comparison.
-np.testing.assert_allclose(np.asarray(energy_result), energy_reference, atol = ...  # TODO: compute np.testing.assert_allclose(np.asarray(energy_result), energy_reference, atol
-print("Energy shape and samples:", energy_result.shape, energy_times)
+import jax.numpy as jnp
+import numpy as np
+import time
+import statistics
+
+def practice_benchmark_a_different_equivalent_workload(features, weights):
+    """Implement the benchmark a different equivalent workload check."""
+    # TODO: Implement row-wise squared-sum predictions, derive a NumPy reference, warm the changed function, and collect five synchronized samples.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -494,32 +486,28 @@ Prepare and wait for inputs, reuse one compiled callable, warm it, then synchron
 
 ### How to write: Repair a timer that includes setup but omits completion — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.block_until_ready(output)` — Synchronizes with the accelerator/CPU device so asynchronous dispatch finishes before wall-clock timing.
+**Inputs:**
+- Inspect the broken timer below conceptually: start; create inputs; call `jit(predict)(inputs)`; stop. Write a repaired runner and show its explicit boundary. Explain which stages the broken interval mixes and misses.
 
-**Step-by-step implementation plan:**
-1. Repair a timer that includes setup but omits completion (Diagnosis)
-2. Wait for device work to finish before timing it or comparing its result on the host.
-3. Wait for device work to finish before timing it or comparing its result on the host.
-4. Transfer the device result to the host for an independent NumPy comparison.
+**Outputs:**
+- A runner with separately stated setup and completed-work timing boundaries.
+
+**Invariants to check:**
+- The measured interval contains the declared workload and waits for its result.
+
+**Hints:**
+- Prepare and wait for inputs, reuse one compiled callable, warm it, then synchronize the returned output inside every measured interval.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Repair a timer that includes setup but omits completion (Diagnosis)
-def repaired_benchmark(fn, args):
-    # Wait for device work to finish before timing it or comparing its result on the host.
-    jax.block_until_ready(args)
-    # Wait for device work to finish before timing it or comparing its result on the host.
-    jax.block_until_ready(fn(*args))
-    result, measured = synchronized_samples(...)  # TODO: compute result, measured
-    return ...  # TODO: return computed result
-fixed_report, fixed_result = repaired_benchmark(...)  # TODO: compute fixed_report, fixed_result
-# Transfer the device result to the host for an independent NumPy comparison.
-np.testing.assert_allclose(np.asarray(fixed_result), reference, atol = ...  # TODO: compute np.testing.assert_allclose(np.asarray(fixed_result), reference, atol
-assert len(fixed_report["samples"])  # TODO: complete assertion check
-print(fixed_report)
+import jax.numpy as jnp
+import time
+
+def practice_repair_a_timer_that_includes_setup_but_omits_completion(function, arguments):
+    """Implement the repair a timer that includes setup but omits completion check."""
+    # TODO: Move input creation outside the timed region and block on the output before stopping the clock.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

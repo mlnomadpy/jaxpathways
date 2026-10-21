@@ -175,7 +175,7 @@ visual_data = {'kind': 'panels', 'panels': [{'kind': 'heatmap', 'title': 'Zero q
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:29:47.030518+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:05:56.248528+00:00. JAX 0.9.2.
 
 ```text
 Weights / output: [[0.33333334 0.33333334 0.33333334]
@@ -232,23 +232,28 @@ Permute the three key/value pairs together, then permute only values. Verify inv
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- Q/K/V arrays with explicit batch, query, key, and feature axes.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- Attention outputs with one result per query and value feature.
+
+**Invariants to check:**
+- Softmax normalizes over keys; paired key/value permutations preserve the function.
+
+**Hints:**
+- Compute score scaling from the key feature width.
+- Check zero queries against the mean of the values.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Permute the three key/value pairs together, then permute only values.
-order = jnp.array(...)  # TODO: compute order
-paired, _ = attend(...)  # TODO: compute paired, _
-mismatched, _ = attend(...)  # TODO: compute mismatched, _
-assert jnp.allclose(paired, actual)  # TODO: complete assertion check
-assert not jnp.allclose(mismatched, actual)  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def scaled_dot_product_attention(queries, keys, values):
+    """Attention outputs with one result per query and value feature."""
+    # TODO: Compute scaled query-key scores, normalize along keys, and combine the paired value vectors.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -278,22 +283,27 @@ The score matrix does not depend on Dv.
 
 ### How to write: Use a different value dimension — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- Make each value a single scalar $[3, 6, 9]$. Check the output shape and zero-query mean.
 
-**Step-by-step implementation plan:**
-1. Check tensor shape invariant: `scalar_out.shape == (2, 1)`
+**Outputs:**
+- One scalar attention output per query and a zero-query mean check.
+
+**Invariants to check:**
+- The key/value row pairing remains aligned and the query axis is preserved.
+
+**Hints:**
+- The score matrix does not depend on Dv.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Use a different value dimension (Transfer / diagnosis)
-scalar_v = jnp.array(...)  # TODO: compute scalar_v
-scalar_out, _ = attend(...)  # TODO: compute scalar_out, _
-# Check tensor shape invariant: `scalar_out.shape == (2, 1)`
-assert scalar_out.shape  # TODO: complete assertion check
-assert jnp.allclose(scalar_out, 6.)  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def practice_use_a_different_value_dimension(values):
+    """Implement the use a different value dimension check."""
+    # TODO: Construct scalar values with shape (3,1), attend with a zero query, and assert the output shape and arithmetic mean.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -325,23 +335,27 @@ Two queries and three keys make the incorrect result visible.
 
 ### How to write: Expose a wrong softmax axis — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.zeros / jnp.ones(shape, dtype=...)` — Allocates a tensor of the given `shape` initialized with constants.
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- Normalize zero scores along axis $0$ and compare row sums with the intended contract. Repair the axis.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- Both row-sum diagnostics and a corrected attention-weight matrix.
+
+**Invariants to check:**
+- For each query, probabilities sum across key positions.
+
+**Hints:**
+- Two queries and three keys make the incorrect result visible.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Expose a wrong softmax axis (Transfer / diagnosis): A legal operation can normalize the wrong axis.
-wrong_w = jax.nn.softmax(...)  # TODO: compute wrong_w
-assert jnp.allclose(wrong_w.sum(axis=-1), 1.5)  # TODO: complete assertion check
-right_w = jax.nn.softmax(...)  # TODO: compute right_w
-assert jnp.allclose(right_w.sum(axis=-1), 1.)  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def practice_expose_a_wrong_softmax_axis(scores):
+    """Implement the expose a wrong softmax axis check."""
+    # TODO: Normalize a zero score matrix across axis zero, inspect column sums, and implement the key-axis normalization.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

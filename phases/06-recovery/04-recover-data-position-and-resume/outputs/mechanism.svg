@@ -21,20 +21,20 @@
  </defs>
  <g id="figure_1">
   <g id="patch_1">
-   <path d="M 0 360 
-L 576 360 
-L 576 0 
-L 0 0 
+   <path d="M 0 360
+L 576 360
+L 576 0
+L 0 0
 z
 " style="fill: #ffffff"/>
   </g>
   <g id="axes_1">
    <g id="table_1">
     <g id="patch_2">
-     <path d="M 3.00024 97.246865 
-L 193.00008 97.246865 
-L 193.00008 55.870298 
-L 3.00024 55.870298 
+     <path d="M 3.00024 97.246865
+L 193.00008 97.246865
+L 193.00008 55.870298
+L 3.00024 55.870298
 z
 " style="fill: #e9e4f5; stroke: #ccd3df; stroke-linejoin: miter"/>
     </g>
@@ -42,10 +42,10 @@ z
      <text style="font-weight: 700; font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="98.00016" y="79.869832" transform="rotate(-0 98.00016 79.869832)">State</text>
     </g>
     <g id="patch_3">
-     <path d="M 193.00008 97.246865 
-L 382.99992 97.246865 
-L 382.99992 55.870298 
-L 193.00008 55.870298 
+     <path d="M 193.00008 97.246865
+L 382.99992 97.246865
+L 382.99992 55.870298
+L 193.00008 55.870298
 z
 " style="fill: #e9e4f5; stroke: #ccd3df; stroke-linejoin: miter"/>
     </g>
@@ -53,10 +53,10 @@ z
      <text style="font-weight: 700; font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="288" y="79.822957" transform="rotate(-0 288 79.822957)">Accepted boundary</text>
     </g>
     <g id="patch_4">
-     <path d="M 382.99992 97.246865 
-L 572.99976 97.246865 
-L 572.99976 55.870298 
-L 382.99992 55.870298 
+     <path d="M 382.99992 97.246865
+L 572.99976 97.246865
+L 572.99976 55.870298
+L 382.99992 55.870298
 z
 " style="fill: #e9e4f5; stroke: #ccd3df; stroke-linejoin: miter"/>
     </g>
@@ -64,10 +64,10 @@ z
      <text style="font-weight: 700; font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="477.99984" y="79.869832" transform="rotate(-0 477.99984 79.869832)">Next use</text>
     </g>
     <g id="patch_5">
-     <path d="M 3.00024 138.623433 
-L 193.00008 138.623433 
-L 193.00008 97.246865 
-L 3.00024 97.246865 
+     <path d="M 3.00024 138.623433
+L 193.00008 138.623433
+L 193.00008 97.246865
+L 3.00024 97.246865
 z
 " style="fill: #f4f7fb; stroke: #ccd3df; stroke-linejoin: miter"/>
     </g>
@@ -75,10 +75,10 @@ z
      <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="98.00016" y="121.246399" transform="rotate(-0 98.00016 121.246399)">Parameters</text>
     </g>
     <g id="patch_6">
-     <path d="M 193.00008 138.623433 
-L 382.99992 138.623433 
-L 382.99992 97.246865 
-L 193.00008 97.246865 
+     <path d="M 193.00008 138.623433
+L 382.99992 138.623433
+L 382.99992 97.246865
+L 193.00008 97.246865
 z
 " style="fill: #f4f7fb; stroke: #ccd3df; stroke-linejoin: miter"/>
     </g>
@@ -86,10 +86,10 @@ z
      <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="288" y="121.246399" transform="rotate(-0 288 121.246399)">after update t</text>
     </g>
     <g id="patch_7">
-     <path d="M 382.99992 138.623433 
-L 572.99976 138.623433 
-L 572.99976 97.246865 
-L 382.99992 97.246865 
+     <path d="M 382.99992 138.623433
+L 572.99976 138.623433
+L 572.99976 97.246865
+L 382.99992 97.246865
 z
 " style="fill: #f4f7fb; stroke: #ccd3df; stroke-linejoin: miter"/>
     </g>
@@ -97,10 +97,10 @@ z
      <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="477.99984" y="121.246399" transform="rotate(-0 477.99984 121.246399)">forward at t + 1</text>
     </g>
     <g id="patch_8">
-     <path d="M 3.00024 180 
-L 193.00008 180 
-L 193.00008 138.623433 
-L 3.00024 138.623433 
+     <path d="M 3.00024 180
+L 193.00008 180
+L 193.00008 138.623433
+L 3.00024 138.623433
 z
 " style="fill: #ffffff; stroke: #ccd3df; stroke-linejoin: miter"/>
     </g>
@@ -108,10 +108,10 @@ z
      <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="98.00016" y="162.622966" transform="rotate(-0 98.00016 162.622966)">Optimizer</text>
     </g>
     <g id="patch_9">
-     <path d="M 193.00008 180 
-L 382.99992 180 
-L 382.99992 138.623433 
-L 193.00008 138.623433 
+     <path d="M 193.00008 180
+L 382.99992 180
+L 382.99992 138.623433
+L 193.00008 138.623433
 z
 " style="fill: #ffffff; stroke: #ccd3df; stroke-linejoin: miter"/>
     </g>
@@ -119,10 +119,10 @@ z
      <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="288" y="162.622966" transform="rotate(-0 288 162.622966)">after update t</text>
     </g>
     <g id="patch_10">
-     <path d="M 382.99992 180 
-L 572.99976 180 
-L 572.99976 138.623433 
-L 382.99992 138.623433 
+     <path d="M 382.99992 180
+L 572.99976 180
+L 572.99976 138.623433
+L 382.99992 138.623433
 z
 " style="fill: #ffffff; stroke: #ccd3df; stroke-linejoin: miter"/>
     </g>
@@ -130,10 +130,10 @@ z
      <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="477.99984" y="162.622966" transform="rotate(-0 477.99984 162.622966)">next update</text>
     </g>
     <g id="patch_11">
-     <path d="M 3.00024 221.376567 
-L 193.00008 221.376567 
-L 193.00008 180 
-L 3.00024 180 
+     <path d="M 3.00024 221.376567
+L 193.00008 221.376567
+L 193.00008 180
+L 3.00024 180
 z
 " style="fill: #f4f7fb; stroke: #ccd3df; stroke-linejoin: miter"/>
     </g>
@@ -141,10 +141,10 @@ z
      <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="98.00016" y="203.999534" transform="rotate(-0 98.00016 203.999534)">Random key</text>
     </g>
     <g id="patch_12">
-     <path d="M 193.00008 221.376567 
-L 382.99992 221.376567 
-L 382.99992 180 
-L 193.00008 180 
+     <path d="M 193.00008 221.376567
+L 382.99992 221.376567
+L 382.99992 180
+L 193.00008 180
 z
 " style="fill: #f4f7fb; stroke: #ccd3df; stroke-linejoin: miter"/>
     </g>
@@ -152,10 +152,10 @@ z
      <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="288" y="203.999534" transform="rotate(-0 288 203.999534)">next unused key</text>
     </g>
     <g id="patch_13">
-     <path d="M 382.99992 221.376567 
-L 572.99976 221.376567 
-L 572.99976 180 
-L 382.99992 180 
+     <path d="M 382.99992 221.376567
+L 572.99976 221.376567
+L 572.99976 180
+L 382.99992 180
 z
 " style="fill: #f4f7fb; stroke: #ccd3df; stroke-linejoin: miter"/>
     </g>
@@ -163,10 +163,10 @@ z
      <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="477.99984" y="203.999534" transform="rotate(-0 477.99984 203.999534)">next stochastic input</text>
     </g>
     <g id="patch_14">
-     <path d="M 3.00024 262.753135 
-L 193.00008 262.753135 
-L 193.00008 221.376567 
-L 3.00024 221.376567 
+     <path d="M 3.00024 262.753135
+L 193.00008 262.753135
+L 193.00008 221.376567
+L 3.00024 221.376567
 z
 " style="fill: #ffffff; stroke: #ccd3df; stroke-linejoin: miter"/>
     </g>
@@ -174,10 +174,10 @@ z
      <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="98.00016" y="245.376101" transform="rotate(-0 98.00016 245.376101)">Iterator</text>
     </g>
     <g id="patch_15">
-     <path d="M 193.00008 262.753135 
-L 382.99992 262.753135 
-L 382.99992 221.376567 
-L 193.00008 221.376567 
+     <path d="M 193.00008 262.753135
+L 382.99992 262.753135
+L 382.99992 221.376567
+L 193.00008 221.376567
 z
 " style="fill: #ffffff; stroke: #ccd3df; stroke-linejoin: miter"/>
     </g>
@@ -185,10 +185,10 @@ z
      <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="288" y="245.376101" transform="rotate(-0 288 245.376101)">next unconsumed batch</text>
     </g>
     <g id="patch_16">
-     <path d="M 382.99992 262.753135 
-L 572.99976 262.753135 
-L 572.99976 221.376567 
-L 382.99992 221.376567 
+     <path d="M 382.99992 262.753135
+L 572.99976 262.753135
+L 572.99976 221.376567
+L 382.99992 221.376567
 z
 " style="fill: #ffffff; stroke: #ccd3df; stroke-linejoin: miter"/>
     </g>
@@ -196,10 +196,10 @@ z
      <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="477.99984" y="245.376101" transform="rotate(-0 477.99984 245.376101)">batch for t + 1</text>
     </g>
     <g id="patch_17">
-     <path d="M 3.00024 304.129702 
-L 193.00008 304.129702 
-L 193.00008 262.753135 
-L 3.00024 262.753135 
+     <path d="M 3.00024 304.129702
+L 193.00008 304.129702
+L 193.00008 262.753135
+L 3.00024 262.753135
 z
 " style="fill: #f4f7fb; stroke: #ccd3df; stroke-linejoin: miter"/>
     </g>
@@ -207,10 +207,10 @@ z
      <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="98.00016" y="286.752668" transform="rotate(-0 98.00016 286.752668)">Step counter</text>
     </g>
     <g id="patch_18">
-     <path d="M 193.00008 304.129702 
-L 382.99992 304.129702 
-L 382.99992 262.753135 
-L 193.00008 262.753135 
+     <path d="M 193.00008 304.129702
+L 382.99992 304.129702
+L 382.99992 262.753135
+L 193.00008 262.753135
 z
 " style="fill: #f4f7fb; stroke: #ccd3df; stroke-linejoin: miter"/>
     </g>
@@ -218,10 +218,10 @@ z
      <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="288" y="286.752668" transform="rotate(-0 288 286.752668)">t completed</text>
     </g>
     <g id="patch_19">
-     <path d="M 382.99992 304.129702 
-L 572.99976 304.129702 
-L 572.99976 262.753135 
-L 382.99992 262.753135 
+     <path d="M 382.99992 304.129702
+L 572.99976 304.129702
+L 572.99976 262.753135
+L 382.99992 262.753135
 z
 " style="fill: #f4f7fb; stroke: #ccd3df; stroke-linejoin: miter"/>
     </g>

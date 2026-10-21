@@ -178,7 +178,7 @@ visual_data = {'kind': 'line', 'x': list(range(21)), 'xlabel': 'completed update
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:27:43.117717+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:04:20.854556+00:00. JAX 0.9.2.
 
 ```text
 final weights / loss: [ 0.12157664 -0.        ] 0.0073904395
@@ -227,21 +227,28 @@ For curvatures $(2,8)$, derive the stable interval and check one step at rate $0
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- A point, positive quadratic curvatures, and a proposed gradient-descent rate.
 
-**Step-by-step implementation plan:**
-1. Exercise solution
+**Outputs:**
+- One updated point and an independently evaluated loss change.
+
+**Invariants to check:**
+- Stability is determined by the largest curvature; check the actual update at the supplied rate.
+
+**Hints:**
+- For a quadratic, inspect each coordinate multiplier after one step.
+- Use a nonzero direction when checking the Hessian-vector product.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-H2 = jnp.diag(...)  # TODO: compute H2
-w_next = ...  # TODO: compute w_next
-assert jnp.allclose(w_next, jnp.array([0.8, 0.2]), atol=1e-06)  # TODO: complete assertion check
-assert jnp.allclose(2 / jnp.max(jnp.linalg.eigvalsh(H2)), 0.25)  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def quadratic_step(point, curvatures, rate):
+    """One updated point and an independently evaluated loss change."""
+    # TODO: Use each curvature to check the proposed update multiplier and evaluate one changed-rate step.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -270,26 +277,28 @@ Move by $0.1$ along each axis separately.
 
 ### How to write: Reject the zero-gradient shortcut — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.zeros / jnp.ones(shape, dtype=...)` — Allocates a tensor of the given `shape` initialized with constants.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
+**Inputs:**
+- At the origin of $S(w)=w_0^2-w_1^2$, show zero gradient and both a lower and higher nearby value.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- One stationary point with a lower and a higher nearby objective value.
+
+**Invariants to check:**
+- A zero gradient is not accepted as evidence of a local minimum.
+
+**Hints:**
+- Move by $0.1$ along each axis separately.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Reject the zero-gradient shortcut (Transfer / diagnosis)
-saddle = ...  # TODO: compute saddle
-zero = jnp.zeros(...)  # TODO: compute zero
-assert jnp.allclose(jax.grad(saddle)(zero), zero)  # TODO: complete assertion check
-assert saddle(jnp.array([0.0, 0.1]))  # TODO: complete assertion check
-assert saddle(jnp.array([0.1, 0.0]))  # TODO: complete assertion check
-assert jnp.allclose(jnp.linalg.eigvalsh(jax.hessian(saddle)(zero)), jnp.array([-2.0, 2.0]))  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+
+def practice_reject_the_zero_gradient_shortcut(point, curvatures):
+    """Implement the reject the zero-gradient shortcut check."""
+    # TODO: Evaluate the saddle objective at the origin and on both coordinate-axis perturbations.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -322,24 +331,28 @@ The analytic Hessian is diagonal with entries $e^{w_i}$.
 
 ### How to write: Transfer to a nonquadratic function — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
+**Inputs:**
+- For $F(w)=\sum_i e^{w_i}$, verify a Hessian-vector product at $(0,\log 2)$ along $(1,3)$.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- A finite HVP matching the elementwise analytic curvature action.
+
+**Invariants to check:**
+- The product uses the full nonuniform direction and the specified point.
+
+**Hints:**
+- The analytic Hessian is diagonal with entries $e^{w_i}$.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Transfer to a nonquadratic function (Transfer / diagnosis)
-point = jnp.array(...)  # TODO: compute point
-direction = jnp.array(...)  # TODO: compute direction
-product = jax.jvp(...)  # TODO: compute product
-assert jnp.allclose(product, jnp.array([1.0, 6.0]), atol=1e-06)  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+
+def practice_transfer_to_a_nonquadratic_function(point, direction):
+    """Implement the transfer to a nonquadratic function check."""
+    # TODO: Compute a Hessian-vector product for the exponential sum at the requested point and direction.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

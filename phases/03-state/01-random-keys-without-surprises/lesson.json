@@ -69,7 +69,24 @@
         "hint": "Reuse the random construction for a controlled comparison, not accidentally across independent training steps.",
         "solution": "# Replay a noisy prediction (Practice): Holding noise fixed isolates the changed numerical input.\ndef noisy_prediction(seed,x):\n    # Create or split explicit PRNG key(s) (`eps`) for reproducible randomness.\n    eps=jax.random.normal(jax.random.key(seed),x.shape)\n    return 2*x+1+eps\ninputs=jnp.array([0.,1.,2.])\nassert jnp.array_equal(noisy_prediction(4,inputs),noisy_prediction(4,inputs))\nassert jnp.allclose(noisy_prediction(4,inputs+1)-noisy_prediction(4,inputs),2.,atol=1e-6)",
         "explanation": "Holding noise fixed isolates the changed numerical input. That is a deliberately coupled experiment.",
-        "difficulty": "Practice"
+        "difficulty": "Practice",
+        "learnerStarter": {
+          "inputs": [
+            "A seed and a one-dimensional input array x."
+          ],
+          "outputs": [
+            "A reproducible batch of noisy predictions."
+          ],
+          "invariants": [
+            "The same seed and x produce identical results.",
+            "Holding the seed fixed while shifting every x by one shifts each prediction by two."
+          ],
+          "hints": [
+            "Use one normal draw per input element.",
+            "Reconstruct the key from the seed on every call to make replay explicit."
+          ],
+          "code": "import jax\nimport jax.numpy as jnp\n\ndef noisy_prediction(seed: int, x: jax.Array) -> jax.Array:\n    \"\"\"Add replayable, elementwise noise to the prediction 2*x+1.\"\"\"\n    # TODO: sample noise from a key made from seed and preserve x.shape.\n    raise NotImplementedError\n"
+        }
       },
       {
         "title": "Diagnose key reuse in a loop",
@@ -77,7 +94,24 @@
         "hint": "The draw function does not mutate the key.",
         "solution": "# Diagnose key reuse in a loop (Challenge): The repeated-row symptom comes from key allocation.\n# Create or split explicit PRNG key(s) (`root`) for reproducible randomness.\nroot=jax.random.key(5)\n# Sample deterministic random values into `broken` using an explicit PRNG key.\nbroken=jnp.stack([jax.random.normal(root,(2,)) for _ in range(3)])\nassert jnp.array_equal(broken[0],broken[1])\ncurrent=root\nrows=[]\nfor _ in range(3):\n    current,noise=noise_step(current)\n    rows.append(noise)\nfixed=jnp.stack(rows)\n# Check tensor shape invariant: `fixed.shape==(3,2)`\nassert fixed.shape==(3,2)\nassert not jnp.array_equal(fixed[0],fixed[1])",
         "explanation": "The repeated-row symptom comes from key allocation. The last inequality checks this fixed demonstration, not every possible random stream.",
-        "difficulty": "Challenge"
+        "difficulty": "Challenge",
+        "learnerStarter": {
+          "inputs": [
+            "A root PRNG key and a requested number of two-value draws."
+          ],
+          "outputs": [
+            "A broken batch showing repeated draws and a repaired batch of independent subkey draws."
+          ],
+          "invariants": [
+            "Reusing a key reproduces the same row.",
+            "Each repaired draw consumes a new key and has shape (2,)."
+          ],
+          "hints": [
+            "Keep the broken case as a diagnostic demonstration.",
+            "Thread the continuation key through the loop; collect only the sample subkeys."
+          ],
+          "code": "import jax\nimport jax.numpy as jnp\n\ndef compare_key_use(root: jax.Array, count: int = 3) -> tuple[jax.Array, jax.Array]:\n    \"\"\"Return repeated-key draws and draws made from distinct subkeys.\"\"\"\n    # TODO: build both batches and return arrays with shape (count, 2).\n    raise NotImplementedError\n"
+        }
       }
     ],
     "objectives": [
@@ -130,6 +164,23 @@
       "A JAX key is an explicit value, not an advancing generator. Split it and pass a distinct key for each intended random draw.",
       "Keys are explicit immutable inputs. Identical inputs reproduce the draw; split keys to describe independent randomness.",
       "Key reuse need not raise an exception. Compare the actual samples; reproducibility requires managing keys even when execution succeeds."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "An integer seed and a batch-shaped input array x."
+      ],
+      "outputs": [
+        "A noisy prediction batch that can be replayed exactly from the same seed."
+      ],
+      "invariants": [
+        "Randomness is derived from an explicit JAX PRNG key.",
+        "Changing x while holding the seed fixed changes the deterministic prediction by the corresponding 2x+1 input difference."
+      ],
+      "hints": [
+        "Create a root key from the seed and draw one noise value for every element of x.",
+        "Do not reuse a consumed subkey for another independent draw."
+      ],
+      "code": "import jax\nimport jax.numpy as jnp\n\ndef noisy_prediction(seed: int, x: jax.Array) -> jax.Array:\n    \"\"\"Return 2*x+1 plus reproducible elementwise Gaussian noise.\"\"\"\n    # TODO: derive a key from seed, sample noise with x.shape, and form the prediction.\n    raise NotImplementedError\n"
+    }
   }
 }

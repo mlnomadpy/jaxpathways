@@ -232,7 +232,7 @@ visual_data={'kind':'line','x':times.tolist(),'xlabel':'time (seconds)','ylabel'
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:30:33.218510+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:06:56.419136+00:00. JAX 0.9.2.
 
 ```text
 Shape: (3, 41) endpoints: [0.12329848 0.24659697 0.49319394]
@@ -290,34 +290,33 @@ Add a fourth initial condition, verify the changed output shape and exponential 
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.vmap(fn, in_axes=..., out_axes=...)` — Vectorizes a single-example function across a batch axis without writing a Python loop.
+**Inputs:**
+- Rate 0.7, a four-element initial-condition vector, and the lesson time grid with 41 points.
+- A permutation of the four initial conditions.
 
-**Step-by-step implementation plan:**
-1. Exercise solution
-2. Vectorize across the batch dimension with `jax.vmap` (`changed`).
-3. Check tensor shape invariant: `changed.shape == (4,41)`
-4. Transfer the device result to the host for an independent NumPy comparison.
-5. Vectorize across the batch dimension with `jax.vmap` (`reordered`).
+**Outputs:**
+- Batched trajectory with shape (4, 41), checked against initial * exp(-rate*time).
+- Reordered trajectories whose rows follow the changed initial-condition order.
+
+**Invariants to check:**
+- Each initial condition scales the same scalar decay trajectory.
+- Reordering inputs changes rows only; time columns remain unchanged.
+- The batch/time axes have shape (4, 41).
+
+**Hints:**
+- Vectorize over initial values while preserving the time axis.
+- Compare all values with the analytic exponential and apply the same row permutation.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-changed_initials = jnp.array(...)  # TODO: compute changed_initials
-# Vectorize across the batch dimension with `jax.vmap` (`changed`).
-changed = jax.vmap(...)  # TODO: compute changed
-# Check tensor shape invariant: `changed.shape == (4,41)`
-assert changed.shape  # TODO: complete assertion check
-# Transfer the device result to the host for an independent NumPy comparison.
-np.testing.assert_allclose(changed,np.asarray(changed_initials)[:,None]*np.exp(-0.7*times),rtol=3e-8)
-order = jnp.array(...)  # TODO: compute order
-# Vectorize across the batch dimension with `jax.vmap` (`reordered`).
-reordered = jax.vmap(...)  # TODO: compute reordered
-np.testing.assert_allclose(reordered,changed[order],rtol = ...  # TODO: compute np.testing.assert_allclose(reordered,changed[order],rtol
-print("Permutation preserves trajectory identity")
+import numpy as np
+import jax
+import jax.numpy as jnp
+
+def verify_batched_trajectories(solve, initial_values, rate, times, permutation):
+    # TODO: evaluate four starts, check shape and exponential values, then row reordering.
+    raise NotImplementedError("Check analytic trajectories and preserve batch/time axes")
 ```
 
 <details><summary>Reference solution</summary>
@@ -354,28 +353,32 @@ scan may emit None while its carry still advances.
 
 ### How to write: Save only what the objective needs — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.vmap(fn, in_axes=..., out_axes=...)` — Vectorizes a single-example function across a batch axis without writing a Python loop.
-- `jax.lax.scan(step_fn, init_carry, xs, length=...)` — Compiles a sequential loop where `step_fn(carry, x)` returns `(next_carry, y)`, returning `(final_carry, stacked_ys)`.
+**Inputs:**
+- A vector of four initial conditions, fixed scalar rate, and saved time grid.
 
-**Step-by-step implementation plan:**
-1. Define `final_only(rate, initial, steps, dt)` to carry state across steps with `jax.lax.scan`:
-2. Vectorize across the batch dimension with `jax.vmap` (`finals`).
+**Outputs:**
+- Final-state-only values and the final column from the trajectory solve.
+- A short explanation naming the intermediate-trajectory allocation no longer retained.
+
+**Invariants to check:**
+- Both methods agree at the final time.
+- The final-only solve avoids retaining intermediate states.
+- Final-only evaluation carries the state without storing every time point.
+
+**Hints:**
+- Use the same integrator, step count, and initial values in both paths.
+- Compare arrays by shape and values, not a single selected element.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Save only what the objective needs (Practice): The explicit trajectory output is removed.
-# Define `final_only(rate, initial, steps, dt)` to carry state across steps with `jax.lax.scan`:
-def final_only(rate, initial, steps=40, dt=0.05):
-    def advance(value, unused):
-        return ...  # TODO: return computed result
-    return jax.lax.scan(advance,initial,None,length = ...  # TODO: compute return jax.lax.scan(advance,initial,None,length
-# Vectorize across the batch dimension with `jax.vmap` (`finals`).
-finals = jax.vmap(...)  # TODO: compute finals
-np.testing.assert_allclose(finals,trajectories[:,-1],rtol=1e-12)
-print("Only final states returned:", np.asarray(finals))
+import numpy as np
+import jax
+import jax.numpy as jnp
+
+def compare_final_only(initial_values, rate, dt, steps):
+    # TODO: implement a scan that returns only its carry, then compare with saved states.
+    raise NotImplementedError("Compare final-only integration with the saved trajectory")
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -411,25 +414,31 @@ Use nested vmap; identify the rate, initial-condition and time axes explicitly.
 
 ### How to write: Pairing versus Cartesian products — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.arange(n, dtype=...)` — Creates a 1-D JAX array of evenly spaced values `[0, 1, ..., n-1]` on the target device.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.vmap(fn, in_axes=..., out_axes=...)` — Vectorizes a single-example function across a batch axis without writing a Python loop.
+**Inputs:**
+- Three rates and three initial values for the scalar decay model.
 
-**Step-by-step implementation plan:**
-1. Vectorize across the batch dimension with `jax.vmap` (`grid`).
-2. Check tensor shape invariant: `grid.shape == (3,3,41)`
+**Outputs:**
+- Paired outputs and a full rate-by-initial-value grid.
+
+**Invariants to check:**
+- Paired evaluation returns one output per matching input pair.
+- Cartesian evaluation returns a (3, 3) grid; its diagonal matches paired results.
+
+**Hints:**
+- Use vmap over both arguments for pairing.
+- Nest vectorization over rates and initial values for the Cartesian grid.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Pairing versus Cartesian products (Challenge): Paired batches and Cartesian products are different experiments.
-# Vectorize across the batch dimension with `jax.vmap` (`grid`).
-grid = jax.vmap(...)  # TODO: compute grid
-# Check tensor shape invariant: `grid.shape == (3,3,41)`
-assert grid.shape  # TODO: complete assertion check
-np.testing.assert_allclose(grid[jnp.arange(3),jnp.arange(3)],paired,rtol = ...  # TODO: compute np.testing.assert_allclose(grid[jnp.arange(3),jnp.arange(3)],paired,rtol
-print("Grid axes: rate, initial condition, time", grid.shape)
+import numpy as np
+import jax
+import jax.numpy as jnp
+
+def compare_pairing_and_grid(solve, rates, initials):
+    # TODO: construct paired and Cartesian evaluations.
+    # Return both arrays and an explicit diagonal consistency check.
+    raise NotImplementedError("Distinguish paired mapping from a Cartesian product")
 ```
 
 <details><summary>Reference solution and reasoning</summary>

@@ -392,7 +392,7 @@ visual_data={'kind':'bar','labels':labels,'ylabel':'max gap versus original floa
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:32:06.617866+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:08:47.069465+00:00. JAX 0.9.2.
 
 ```text
 Kernel errors versus represented-input oracle: [[0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0]]
@@ -460,28 +460,30 @@ Add a (15,255) fixture, compare two tile choices and two buffer counts, and reta
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- Two frozen float32 inputs shaped (15,255), generated once for all candidates.
+- Two tile choices, (8,128) and (16,256), and two/three input-buffer counts.
 
-**Step-by-step implementation plan:**
-1. Exercise solution
-2. Transfer the device result to the host for an independent NumPy comparison.
+**Outputs:**
+- Numerical error against the independent NumPy expression for each candidate.
+- Padded work calculated from tile geometry and reported separately from numerical error.
+
+**Invariants to check:**
+- All candidates receive the same input arrays.
+- Logical output shape remains (15,255); error and padded work are distinct measurements.
+
+**Hints:**
+- Generate the matrix once, outside the candidate loop.
+- Compute padded work from launch geometry rather than wall-clock time.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-a = jnp.asarray(...)  # TODO: compute a
-b = jnp.asarray(...)  # TODO: compute b
-# Transfer the device result to the host for an independent NumPy comparison.
-expected = ...  # TODO: compute expected
-for block in [(8,128),(16,256)]:
-    for buffers in (2,3):
-        result = pipelined_axpy(...)  # TODO: compute result
-        np.testing.assert_allclose(result,expected,rtol = ...  # TODO: compute np.testing.assert_allclose(result,expected,rtol
-        gm = ...  # TODO: compute gm
-        gn = ...  # TODO: compute gn
-        print("Configuration, padded elements:",block,buffers,gm*gn*block[0]*block[1])
+import numpy as np
+
+def compare_kernel_candidates(run_candidate, first, second, tiles, input_buffer_counts):
+    # TODO: keep the fixture fixed while comparing each tile/buffer combination.
+    raise NotImplementedError("Compare numerical error and padded work on identical inputs")
 ```
 
 <details><summary>Reference solution</summary>
@@ -517,23 +519,27 @@ The wrapper promises matching float32 or bfloat16 inputs.
 
 ### How to write: Reject unsupported dtype mixing — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.zeros / jnp.ones(shape, dtype=...)` — Allocates a tensor of the given `shape` initialized with constants.
+**Inputs:**
+- Float32 and bfloat16 matrices plus integer matrix inputs.
+- A wrapper with an observable launch callback.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- Rejection for mixed floating dtypes and integer inputs before launch.
+
+**Invariants to check:**
+- The wrapper does not silently cast unsupported inputs.
+- No launch occurs on either invalid case.
+
+**Hints:**
+- Compare declared dtype contracts before conversion or dispatch.
+- Test each invalid pair independently.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Reject unsupported dtype mixing (Practice): Supported dtype boundaries are a correctness decision.
-for first,second in [(jnp.ones((8,128),jnp.float32),jnp.ones((8,128),jnp.bfloat16)),(jnp.ones((8,128),jnp.int32),jnp.ones((8,128),jnp.int32))]:
-    rejected = ...  # TODO: compute rejected
-    try:pipelined_axpy(first,second)
-    except ValueError:rejected=True
-    assert rejected  # TODO: complete assertion check
-print("Mixed and integer dtypes rejected")
+def reject_unsupported_dtypes(wrapper, float_matrix, bf16_matrix, integer_matrix):
+    # TODO: assert mixed and integer inputs fail before launch.
+    raise NotImplementedError("Enforce the documented same-floating-dtype contract")
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -566,24 +572,26 @@ Keep the remaining workload time unchanged in the calculation.
 
 ### How to write: Bound the end-to-end opportunity — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- Amdahl fraction 0.30 and local speedup 2.0.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- End-to-end speedup for the stated improvement and the zero-cost limit.
+
+**Invariants to check:**
+- Unaccelerated fraction remains unchanged.
+- The limiting result is finite and bounded by the accelerated fraction.
+
+**Hints:**
+- Apply S=1/((1-p)+p/s).
+- Set s to infinity for the zero-cost limit.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Bound the end-to-end opportunity (Challenge): These are conditional analytic estimates, not measured speedups.
-fraction = ...  # TODO: compute fraction
-local_speedup = ...  # TODO: compute local_speedup
-end_to_end = ...  # TODO: compute end_to_end
-limit = ...  # TODO: compute limit
-np.testing.assert_allclose(end_to_end,1.1764705882352942)
-np.testing.assert_allclose(limit,1.4285714285714286)
-print("Modeled twofold-local speedup and zero-cost limit:",end_to_end,limit)
+def amdahl_bounds(fraction, local_speedup):
+    # TODO: return achieved and asymptotic end-to-end speedup.
+    raise NotImplementedError("Bound system-level gains from a local optimization")
 ```
 
 <details><summary>Reference solution and reasoning</summary>

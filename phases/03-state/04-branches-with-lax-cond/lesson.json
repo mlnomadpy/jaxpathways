@@ -69,7 +69,24 @@
         "hint": "At \\(x=1\\) the false branch is selected.",
         "solution": "# Match a changed piecewise rule (Practice)\ndef piecewise(v):\n    return jax.lax.cond(v>1.,lambda z:z*z,lambda z:2*z,v)\nassert jnp.allclose(jax.vmap(piecewise)(jnp.array([-1.,1.,2.])),jnp.array([-2.,2.,4.]))\nassert jnp.allclose(jax.grad(piecewise)(-1.),2.)\nassert jnp.allclose(jax.grad(piecewise)(2.),4.)",
         "explanation": "The values check the exact boundary and both formulas; the derivatives are checked only at smooth points.",
-        "difficulty": "Practice"
+        "difficulty": "Practice",
+        "learnerStarter": {
+          "inputs": [
+            "A scalar input v."
+          ],
+          "outputs": [
+            "The value of v squared for v>1, and 2v otherwise."
+          ],
+          "invariants": [
+            "At v=1 the false branch is chosen.",
+            "Both branches return a scalar of compatible dtype."
+          ],
+          "hints": [
+            "Set the predicate to v > 1.",
+            "Check derivatives only away from the branch boundary."
+          ],
+          "code": "import jax\nimport jax.numpy as jnp\n\ndef changed_rule(v: jax.Array) -> jax.Array:\n    \"\"\"Implement the two-branch scalar rule.\"\"\"\n    # TODO: use lax.cond with the exact boundary specified in the task.\n    raise NotImplementedError\n"
+        }
       },
       {
         "title": "Repair incompatible branch shapes",
@@ -77,7 +94,24 @@
         "hint": "Decide what each output component means before padding.",
         "solution": "# Repair incompatible branch shapes (Challenge)\ntry:\n    jax.lax.cond(True,lambda x:x,lambda x:jnp.stack([x,x]),jnp.array(2.))\nexcept TypeError:\n    print(\"Expected branch shape mismatch\")\nelse:\n    raise AssertionError(\"Expected result type error\")\ndef pair(v):\n    return jax.lax.cond(v>=0.,lambda x:jnp.stack([x,x*x]),lambda x:jnp.stack([-x,x*x]),v)\nassert jnp.allclose(pair(jnp.array(-2.)),jnp.array([2.,4.]))",
         "explanation": "A branch mismatch is a result-contract error even when the current predicate is known. Here the repaired output explicitly means [magnitude,square].",
-        "difficulty": "Challenge"
+        "difficulty": "Challenge",
+        "learnerStarter": {
+          "inputs": [
+            "A scalar input v used by two branch functions."
+          ],
+          "outputs": [
+            "A pair of scalar values with the same shape and dtype regardless of the predicate."
+          ],
+          "invariants": [
+            "lax.cond requires compatible results from both branches.",
+            "The pair gives the same semantic meaning on both paths."
+          ],
+          "hints": [
+            "Choose what the two returned components represent first.",
+            "Construct a length-two array in each branch."
+          ],
+          "code": "import jax\nimport jax.numpy as jnp\n\ndef consistent_pair(v: jax.Array) -> jax.Array:\n    \"\"\"Return a consistent length-two result from both runtime branches.\"\"\"\n    # TODO: make both cond branches return matching shape and dtype.\n    raise NotImplementedError\n"
+        }
       }
     ],
     "objectives": [
@@ -134,6 +168,23 @@
       "Both branches are traced into one conditional contract. A scalar and a length-three vector cannot be alternative results of that contract.",
       "Compiled control flow requires compatible output structures and array types across branches.",
       "The sign selects the runtime branch but does not remove the need to trace and type-check the other branch."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "A scalar or array of values evaluated as scalar calls."
+      ],
+      "outputs": [
+        "A JIT-compatible piecewise function: twice x when positive, otherwise x minus two."
+      ],
+      "invariants": [
+        "Both lax.cond branches return identical shape and dtype.",
+        "The zero boundary follows the non-positive branch."
+      ],
+      "hints": [
+        "Use x > 0 as the predicate.",
+        "Pass x as the operand and use one scalar result from each branch."
+      ],
+      "code": "import jax\nimport jax.numpy as jnp\n\n@jax.jit\ndef piecewise_rule(x: jax.Array) -> jax.Array:\n    \"\"\"Return 2*x for positive x and x-2 otherwise.\"\"\"\n    # TODO: express the runtime branch with jax.lax.cond.\n    raise NotImplementedError\n"
+    }
   }
 }
