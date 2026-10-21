@@ -46,13 +46,13 @@
     {
       "id": "checkpoint-feedback",
       "priority": "P2",
-      "title": "Every lesson checkpoint uses one explanation for all answer choices",
+      "title": "Choice-specific checkpoint reasoning is implemented; learner validation remains open",
       "evidence": [
         "src/scripts/reader.js",
         "phases"
       ],
-      "action": "Author misconception-specific feedback and pilot changed-condition tasks. Option shuffling alone does not repair an assessment.",
-      "status": "open"
+      "action": "Review the three rationales in every lesson and pilot changed-condition tasks. Author revision is not independent teaching acceptance.",
+      "status": "partly-addressed"
     },
     {
       "id": "starter-contract",
@@ -132,7 +132,7 @@
     "currentProjectReferences": 31,
     "expertReviewedLessons": 0,
     "novicePilotedLessons": 0,
-    "choiceSpecificFeedbackLessons": 0,
+    "choiceSpecificFeedbackLessons": 103,
     "boundedHardwareQualifications": 4
   },
   "hardware": [
@@ -184,7 +184,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "welcome",
-      "sourceHash": "8423cf3f67ce80aa4fe5d0aa00e997dd853a800ade0fb0e2930ae8fc5ec4e6b8",
+      "sourceHash": "7349146bfb89a0191691280a1607bdda4fb252148e3435593c479b79d3458e03",
       "metrics": {
         "sections": 9,
         "experiments": 0,
@@ -194,7 +194,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -209,7 +209,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "welcome",
-      "sourceHash": "645b39e06125ed2d102dda5a865d3c5c4fb947f5c9961aa3232c63dfe5e63049",
+      "sourceHash": "5a6f10547a54450186f2f2d4f8f2cfbd9a68e7fc505e96b95c2233cea0737a56",
       "metrics": {
         "sections": 5,
         "experiments": 2,
@@ -219,7 +219,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -234,7 +234,7 @@
       "validation": "Logical CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "welcome",
-      "sourceHash": "f6434b70381cb0056a66889045e888e6173f172e8136ffb6cd4603c49a045d1e",
+      "sourceHash": "8e93fd9b2925e0275bf23ae9483c8fc381cd5f6a8a94b36d37a2b2a5e46d457d",
       "metrics": {
         "sections": 5,
         "experiments": 2,
@@ -244,7 +244,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -259,7 +259,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "welcome",
-      "sourceHash": "577ebf51bb2c464cf12996eccc1a348642d9d51e234e36fd19077f6816e96156",
+      "sourceHash": "f5b891b4fe92a08bc949d2b94d82b84f827da76d767939edcb81645a9858ccb1",
       "metrics": {
         "sections": 7,
         "experiments": 1,
@@ -269,7 +269,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -300,7 +300,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "arrays",
-      "sourceHash": "a3bb6118788fca989b23314c257ba7a58ea6e6365f04da86cf19474861399639",
+      "sourceHash": "65ce2586590122f3ab68587bbb8c9a192fda36a1284cfcb5a85e2783a879e160",
       "metrics": {
         "sections": 6,
         "experiments": 2,
@@ -310,7 +310,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -325,7 +325,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "arrays",
-      "sourceHash": "4db67ef8528da11f293f10068e20aa3f31097a1a7ee28ff433031266ce7cd9cc",
+      "sourceHash": "625c2c258a89ecc949121f5676211ecab26958b685176cbd34a66e63ff23ac25",
       "metrics": {
         "sections": 6,
         "experiments": 2,
@@ -335,7 +335,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -350,7 +350,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "arrays",
-      "sourceHash": "0c37665d7ff65d2b80d713c9bb6931eb486e6b63714901fc8a5dc5d371a2f160",
+      "sourceHash": "4ee1c73d46ac07af0c4bbc69566ecefb1da48af3318bc5639d9722114cfa4235",
       "metrics": {
         "sections": 6,
         "experiments": 2,
@@ -360,7 +360,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -375,7 +375,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "arrays",
-      "sourceHash": "f926c94282e2049fb3c98f9c213a060fdde30c494ef85e39a04afef91a93e3a6",
+      "sourceHash": "b49c73f8d3bc4a8532ff2d5aa22c505c6d65a5a9680f78635aecccf5082e2ab4",
       "metrics": {
         "sections": 6,
         "experiments": 2,
@@ -385,7 +385,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -416,7 +416,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "transforms",
-      "sourceHash": "846162ca6d1918a1053cdbc1ab09938332c4f980834eb3a4a12ee1a2b48acf20",
+      "sourceHash": "b5fce64c4d1a88dd634b22ba67ca5894e4810cfdc4f03fd31eab49ff36663ee1",
       "metrics": {
         "sections": 6,
         "experiments": 2,
@@ -426,7 +426,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -441,7 +441,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "transforms",
-      "sourceHash": "143de0d851854ca00ca5052c9c0a62a8f0ce17e5c250fdac43f2bba606db8a60",
+      "sourceHash": "82e7295997b99fcbb246678a6e4cb0fb4ec16c44669d7fe7fcf2261d16d8fc37",
       "metrics": {
         "sections": 6,
         "experiments": 2,
@@ -451,7 +451,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -466,7 +466,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "transforms",
-      "sourceHash": "b41089a0dfc0582d12bf0894697a5b83ae2c2d2b9b4c0b270958d8747ba156c7",
+      "sourceHash": "2d5c3a3a9938d2e21496cad666c19c6c2cbc82908e8a788ea2d70b259dc1537c",
       "metrics": {
         "sections": 7,
         "experiments": 2,
@@ -476,7 +476,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -491,7 +491,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "transforms",
-      "sourceHash": "58ee043b76ff4e66f63967bcfaa06ab999c063aeebaa607c7404bae97675f56a",
+      "sourceHash": "3cc83bffe28e858f9a8bf014ae3435e94d05e4664fb0f86f210852a81fb67a69",
       "metrics": {
         "sections": 7,
         "experiments": 2,
@@ -501,7 +501,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -516,7 +516,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "transforms",
-      "sourceHash": "1bbb1235f3cca8eef9edc5edc8462af2711249f9c972bbe3b998fc74d1cc955a",
+      "sourceHash": "e0452a2d8f19031329399acc1531b4ca6a8ed3ec1ad7d49464969e9b24a44690",
       "metrics": {
         "sections": 7,
         "experiments": 2,
@@ -526,7 +526,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -557,7 +557,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "state",
-      "sourceHash": "ca960fd49ea304644dca116b6766f2b912c211379d29bb8fbfad8217b649e0d5",
+      "sourceHash": "d145f9fd3dc8dc79909a81f3906b2a7e15646c94cb3e0565852730fed01af84b",
       "metrics": {
         "sections": 5,
         "experiments": 2,
@@ -567,7 +567,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -582,7 +582,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "state",
-      "sourceHash": "46b5b8ae79f0c374540ba5570f5d8c557f0866c861054f40f86f18db03d0ec7f",
+      "sourceHash": "0cc8e47415c7a39f4cb5fe41b2fafa25b5c71498b455598e9e27350d3a72479a",
       "metrics": {
         "sections": 5,
         "experiments": 2,
@@ -592,7 +592,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -607,7 +607,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "state",
-      "sourceHash": "a3709c9b6d461910423f241af33ac7adb769d17175f694fe8bd6f7183779e874",
+      "sourceHash": "56a80cdf04d5cf81832a1abf842180ad212d94ef6d80a920e614770c41898f88",
       "metrics": {
         "sections": 5,
         "experiments": 2,
@@ -617,7 +617,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -632,7 +632,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "state",
-      "sourceHash": "e35a96c1e52da3e7fd60e1d1bf01a74877e2c064cdad3cc91d2b60a9db0f334d",
+      "sourceHash": "83046dd71a9ef2806c7fb9dc7ab612b435b13117bd850f9aaa97e0c950a4f521",
       "metrics": {
         "sections": 5,
         "experiments": 2,
@@ -642,7 +642,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -673,7 +673,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "optimization",
-      "sourceHash": "65be516b8a3c2c8a1958b1aa10213bde825088708d2662889d5e7b8ab3455b15",
+      "sourceHash": "cf99d0952b2b8630e1595c8c5e8b39afa5f3802b574f27db93a5b0a8080e8d25",
       "metrics": {
         "sections": 5,
         "experiments": 2,
@@ -683,7 +683,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -698,7 +698,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "optimization",
-      "sourceHash": "6e7589e3cd1096e39f0509479345a55ae53c18a6d07ed7e03eaf347982fdfed8",
+      "sourceHash": "c845c3ebe930bbf332f5ee32a6491584fb74f02ec7d671a1e95a38f250bf29a9",
       "metrics": {
         "sections": 6,
         "experiments": 3,
@@ -708,7 +708,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -723,7 +723,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "optimization",
-      "sourceHash": "1ab5193d56d304a3a09ce402b1a141ca054467ab772d29398885f984a79a5ca2",
+      "sourceHash": "cdbcc081ffa4b0ab2a81660b3939770e7bc2601c0fb1a412af12d6001ed3eb15",
       "metrics": {
         "sections": 5,
         "experiments": 2,
@@ -733,7 +733,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -748,7 +748,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "optimization",
-      "sourceHash": "4c5f18de4705110739f4068a78104ffbb081ed4bd2e53ff83d77c3856624e77a",
+      "sourceHash": "74e739c4de0ac4bd2fcc9aeabe2f8a1417d3a067b3152515bd2f28b8b68e696c",
       "metrics": {
         "sections": 5,
         "experiments": 2,
@@ -758,7 +758,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -773,7 +773,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "optimization",
-      "sourceHash": "0be50ef55518c74254d0b16db4924f42ba82af2aa1bcb1adf3c450df5c76809a",
+      "sourceHash": "5c7d07cbba6eb3a32aa65018695f01a0422e35388dfb2d9e1ee70eeeef04a781",
       "metrics": {
         "sections": 6,
         "experiments": 3,
@@ -783,7 +783,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -798,7 +798,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "optimization",
-      "sourceHash": "6ffb85b56b1e4c756a62df10d91c688b9d0721bf35eecfede11a909d9218103e",
+      "sourceHash": "05585ca4208bf46fc7ceac6e73782a564842ebad96cb9dc89617fadb33e026bc",
       "metrics": {
         "sections": 5,
         "experiments": 2,
@@ -808,7 +808,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -823,7 +823,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "optimization",
-      "sourceHash": "83bb5257df37e0b1b7e2727a2234ae001d4ebe881f1bb5e5c719b722b7ff9785",
+      "sourceHash": "69a3a02265a3e7123fbe514c5fbb6e51bcf84b00fc80a451345580467d0ebc35",
       "metrics": {
         "sections": 6,
         "experiments": 3,
@@ -833,7 +833,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -848,7 +848,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "optimization",
-      "sourceHash": "a203728004291f3e860d5966eab454e7012aa35c1ae016f0235c0ac57d110811",
+      "sourceHash": "ad68a6860def86dc2b87094ae03c1b2af07885418dcbc11c0c9b11d09a65ace6",
       "metrics": {
         "sections": 5,
         "experiments": 2,
@@ -858,7 +858,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -873,7 +873,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "optimization",
-      "sourceHash": "7410ad75349d61b3523658c69edf3998c9e0273d5b04a0ddc9667c2a1c4e5285",
+      "sourceHash": "24c713f1d5ff85899ae5b7674557cc9676fe1de3f71611c98003abefc103b0d1",
       "metrics": {
         "sections": 5,
         "experiments": 2,
@@ -883,7 +883,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -898,7 +898,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "optimization",
-      "sourceHash": "84be8a214c63edecdbc9afbfd8281cb6fec4143d439e7500a8d08ca515a43839",
+      "sourceHash": "98ccbf12e54ff605417dbe687dd67011ab9402ddc6c8c46da98445ebf99c2dc6",
       "metrics": {
         "sections": 5,
         "experiments": 2,
@@ -908,7 +908,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -923,7 +923,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "optimization",
-      "sourceHash": "ba1612841a736c056fd2201b031447ad0a8a075c716d1aa307b29de08fca88f6",
+      "sourceHash": "7b6843f14c0e2fdb30f860a4f4ef8d6853c9ee4ae98cb19f6a89f48b7713b8ee",
       "metrics": {
         "sections": 6,
         "experiments": 3,
@@ -933,7 +933,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -948,7 +948,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "optimization",
-      "sourceHash": "0714aab5d60a8298cca7c2886d4b499ed5791da7b0dd1ac9e222e08bddacda9e",
+      "sourceHash": "fca61277542fdd0c0b7060cf4400124fa3e940c89c2a24dd8ffd6915f58d71b4",
       "metrics": {
         "sections": 6,
         "experiments": 2,
@@ -958,7 +958,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -989,7 +989,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "networks",
-      "sourceHash": "87e05dc6b3d2ef6fd2ceb92e8824af860e7eb7fb5df12b2805df97372a34aa33",
+      "sourceHash": "0759eb113d93778f6f7d8da368bc7cec31cf56f5d521ff88f62e6357bd2c3da6",
       "metrics": {
         "sections": 6,
         "experiments": 2,
@@ -999,7 +999,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -1014,7 +1014,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "networks",
-      "sourceHash": "6ecf2783994f28c8d17cadb1b89a46655ac68ed0eacbd192c52a4044595865c5",
+      "sourceHash": "ffee3c31b4e89ea66bc2e5aae4af441f878bbd547b645fbbc661987cbf07754e",
       "metrics": {
         "sections": 5,
         "experiments": 2,
@@ -1024,7 +1024,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -1039,7 +1039,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "networks",
-      "sourceHash": "32046e1c3e946be3fb4ba7fdb17c90931db649229fe9d5959527fda4599c7a83",
+      "sourceHash": "e7b694e9cf0a1dbf8c8a33a9ae101eb24ac90248f5f8eef6a69e7b3dc216b899",
       "metrics": {
         "sections": 5,
         "experiments": 2,
@@ -1049,7 +1049,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -1064,7 +1064,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "networks",
-      "sourceHash": "b267c0271f38adcaeb8bbe9329197ac21343eafd798f7a706a6ae36a617c9c35",
+      "sourceHash": "9ff5f136e309966b568999ef98e6949ad4313e97ebc61d7534f12c95cc4a5af5",
       "metrics": {
         "sections": 5,
         "experiments": 2,
@@ -1074,7 +1074,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -1089,7 +1089,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "networks",
-      "sourceHash": "1de64108356ac6b55add5e6e18d0a2b48a58dcc018d52bc34aaaa4074385a51b",
+      "sourceHash": "2dd6cb55e5049921d8d4365c3da08a483b3d25c30c4faf2b110aba62d2a88391",
       "metrics": {
         "sections": 5,
         "experiments": 2,
@@ -1099,7 +1099,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -1130,7 +1130,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "recovery",
-      "sourceHash": "d29d2a038f4c10ad4dd40f280b7b8a5acd01d4e62a11367981b6e93bd6c94b88",
+      "sourceHash": "1dc6ee64127bb87a41ed513d7f6b6ed898b983af084d35d5c0c9c8ff3ab94c38",
       "metrics": {
         "sections": 5,
         "experiments": 2,
@@ -1140,7 +1140,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -1155,7 +1155,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "recovery",
-      "sourceHash": "f495da2358b705188085d6dc80fab3aead6198e506e3f5f8bcc63b6a981f0565",
+      "sourceHash": "a4ccf941274c36161bdd4c09a03743789804e768e4b638a7b949a6f0dfe10723",
       "metrics": {
         "sections": 5,
         "experiments": 2,
@@ -1165,7 +1165,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -1180,7 +1180,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "recovery",
-      "sourceHash": "533dd935b0e441a387312fd3ad92ecb77b962d20f41bdb9ae096d24155a7eea0",
+      "sourceHash": "a1a37fdad5ac92073bfb48bb1881c3dc8488e26ab64e148d1cd7a0604c202091",
       "metrics": {
         "sections": 5,
         "experiments": 2,
@@ -1190,7 +1190,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -1205,7 +1205,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "recovery",
-      "sourceHash": "97091b4cef07bc6260d6466aee6a9bbdde8500dd2b3c80408a708277c44c0627",
+      "sourceHash": "14cd0bfcb0332a73bd93b7f332ca93864cc3badab044fec55cabbcb3c7c3e903",
       "metrics": {
         "sections": 5,
         "experiments": 2,
@@ -1215,7 +1215,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -1230,7 +1230,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "recovery",
-      "sourceHash": "b520f1026bd4e8947b7cc60c0f5fca2907d0af68a258de8b94fe555f5f2f683b",
+      "sourceHash": "fdff635cbc86f6c6257305cc64d2107b6b2d88ac855ff0bfa33f6ef0a5e6f73e",
       "metrics": {
         "sections": 6,
         "experiments": 1,
@@ -1240,7 +1240,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -1255,7 +1255,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "recovery",
-      "sourceHash": "a0d2a3e74259b13847efbb720f08c1b5fa140fd35862091e83a7bee56418dad6",
+      "sourceHash": "80dad7b807fa74e5e245270fd469bcb1949f7bae9a5af2f621f924fdcd7e67fc",
       "metrics": {
         "sections": 7,
         "experiments": 1,
@@ -1265,7 +1265,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -1296,7 +1296,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "transformers",
-      "sourceHash": "0d6ee1eba32e1d42f9e4bf7cb87335c94e635a7197fa467fa7f2851d756e54cd",
+      "sourceHash": "97642e0575047f8da8364fba7d6de1f2daa70dc33275815ba6c29fd318e5d7d1",
       "metrics": {
         "sections": 6,
         "experiments": 2,
@@ -1306,7 +1306,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -1321,7 +1321,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "transformers",
-      "sourceHash": "b20b283b95e95f623cc8bef6ec24a863937a8592490164aff60a6664cac82cd0",
+      "sourceHash": "a73d71f63211a82d51e6737e04a1b65c67fe58cb6fd82ccfad24b2f541513cec",
       "metrics": {
         "sections": 6,
         "experiments": 2,
@@ -1331,7 +1331,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -1346,7 +1346,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "transformers",
-      "sourceHash": "6ad119670f2e09a617446318e6b6244ebbcc3cc84f4c4bf00b4ef473c6515ea5",
+      "sourceHash": "7ab9edfe4c1373ef5eb9b8480849eae7d468d05563af2ecf5a2dfeac5527ed9f",
       "metrics": {
         "sections": 5,
         "experiments": 2,
@@ -1356,7 +1356,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -1371,7 +1371,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "transformers",
-      "sourceHash": "2e669c95373bbd00fa51e4dab3753713e7b9e736fda13e2cd00134e928e07c79",
+      "sourceHash": "777a2289b422eddcdcea91ed06ad4dc45c530f8940dab2c9d4c1423b03528b81",
       "metrics": {
         "sections": 6,
         "experiments": 2,
@@ -1381,7 +1381,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -1412,7 +1412,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "performance",
-      "sourceHash": "b403b34976d1136fc1c14907cfdce91b95be88456f8d284da9584bd21c1cd6b2",
+      "sourceHash": "5a7271813ed4860ccfc8ed2f6ddee3fdb0d3e378458e797dc3fad4d7da6ca612",
       "metrics": {
         "sections": 5,
         "experiments": 2,
@@ -1422,7 +1422,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -1437,7 +1437,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "performance",
-      "sourceHash": "4787ebcdd9f2b2fb00b6758298ee1a2801419181be935d945550bd44be9b8edb",
+      "sourceHash": "71822916ff71e853098e215e838dcf94470302c838b025ccb7635abd7f08ae1c",
       "metrics": {
         "sections": 5,
         "experiments": 2,
@@ -1447,7 +1447,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -1462,7 +1462,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "performance",
-      "sourceHash": "3a5510e5b64dd7c57c0423c597e4e89439c4ab88b2efd1061943d75630f39256",
+      "sourceHash": "09d75f28837b99abedd74e2db5168a03887700493e4e25df680cf6fb00ac1d37",
       "metrics": {
         "sections": 6,
         "experiments": 1,
@@ -1472,7 +1472,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -1487,7 +1487,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "performance",
-      "sourceHash": "1e2968a6e5af5f26ce597b6dfa3725bb00cf27abc99bd801d24ddb2a0e354749",
+      "sourceHash": "5c797410f553331c5da7e62152796a5d03dc861026f060811e9ba10feb87e28e",
       "metrics": {
         "sections": 6,
         "experiments": 1,
@@ -1497,7 +1497,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -1512,7 +1512,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "performance",
-      "sourceHash": "953d2c8f82fb8e3666fe64c389103aaf9cbc0fa319805797bd0fd47319a649a6",
+      "sourceHash": "014003db450f4d8bb72506a3aba9d44c228fc8a0d7e2d31bcec36078e146309d",
       "metrics": {
         "sections": 6,
         "experiments": 1,
@@ -1522,7 +1522,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -1553,7 +1553,7 @@
       "validation": "Logical CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "distributed",
-      "sourceHash": "aa5db6bd0941d58cf7ec19201fc49c53dbc6c01d87a84048ee91bfb64f55d9b5",
+      "sourceHash": "a111cdedbe40d49514ac3a1c177897af0ac7394a329c5773661655fbc1611707",
       "metrics": {
         "sections": 5,
         "experiments": 2,
@@ -1563,7 +1563,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -1578,7 +1578,7 @@
       "validation": "Logical CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "distributed",
-      "sourceHash": "a2329b55b454ea74f41e5958428f664d866e8720b7073cc88a5ab5c48ce35c6e",
+      "sourceHash": "0aa86f2211ab702f117926df44260c8652dcb8b32cfe8893404e769d4ebed427",
       "metrics": {
         "sections": 5,
         "experiments": 2,
@@ -1588,7 +1588,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -1603,7 +1603,7 @@
       "validation": "Logical CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "distributed",
-      "sourceHash": "9de1f0e556f53526c37eedb72c46675ce93f7ecfe13d16860511aefe9ea7adea",
+      "sourceHash": "0f3e6c962164b55fa0cf96198f4f94fdb096638c6531d10b0301da9deec14e43",
       "metrics": {
         "sections": 6,
         "experiments": 1,
@@ -1613,7 +1613,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -1628,7 +1628,7 @@
       "validation": "Logical CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "distributed",
-      "sourceHash": "9cdd69b8d811c0bce40bd267e048c18cd93ad1b6242a0a9625314df9e38586ae",
+      "sourceHash": "9a117b14c895206d816bb5f176fa252869da17fa204d2ddad1261d7940cc4203",
       "metrics": {
         "sections": 6,
         "experiments": 1,
@@ -1638,7 +1638,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -1669,7 +1669,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "science",
-      "sourceHash": "a2fbff5804670b8b4ea3d809da398281608025c9908abdd2e5995fdf33a1b0b3",
+      "sourceHash": "3dc4e29821a88b9d5c4adce22dd7d5bd04a4879bd193cbc3d97184f614653e6e",
       "metrics": {
         "sections": 6,
         "experiments": 2,
@@ -1679,7 +1679,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -1694,7 +1694,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "science",
-      "sourceHash": "e209d0ae039048221b5ec3b673287b7790b27f5e333ca009869013923d129862",
+      "sourceHash": "5f9c787a19f6cb2dd56429b6e58203d20e0739261dbb537bd5db7f1687f80d7c",
       "metrics": {
         "sections": 6,
         "experiments": 2,
@@ -1704,7 +1704,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -1719,7 +1719,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "science",
-      "sourceHash": "69114cee2db562fd6b40ed3833d5280a898411201a8931c3fc1c498a06026500",
+      "sourceHash": "8df9893ce7f4116615917f1b944521fd3383a67e23062b32ece54b55c5991b4a",
       "metrics": {
         "sections": 6,
         "experiments": 2,
@@ -1729,7 +1729,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -1744,7 +1744,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "science",
-      "sourceHash": "5fa01774c3b43a21ed659b87d192b100883f4db5bf0fe76ef41669fa452dd669",
+      "sourceHash": "7705d973dc3a041f6629e016654e8b54c4ed179632824578b7b509194b84e7f1",
       "metrics": {
         "sections": 8,
         "experiments": 2,
@@ -1754,7 +1754,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -1785,7 +1785,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "probability",
-      "sourceHash": "e18a8c5d734c0f12f518c640bd1705566bc3cfcd4d59ed068557e5068a46af5f",
+      "sourceHash": "8854eb201368b5c836837245756e7103edffbf5011b90228d5cbcde871a48317",
       "metrics": {
         "sections": 5,
         "experiments": 2,
@@ -1795,7 +1795,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -1810,7 +1810,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "probability",
-      "sourceHash": "90894d79dfc9454a4cb25814a50853b0bbb5adf0ebaf076f136e9420da1b8cdb",
+      "sourceHash": "18d790b07297cef7b877d6d7773131e27a57a6ec7978bc2c10227e52f575de9e",
       "metrics": {
         "sections": 6,
         "experiments": 2,
@@ -1820,7 +1820,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -1835,7 +1835,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "probability",
-      "sourceHash": "d8afedbd44bbe1fc7b099312f8c2a9cde06f5040e96b03ae888d19bb399ce441",
+      "sourceHash": "32329b0c924674d91f4395d34e57b98114ee93e202244f3f36295dfeb15f1c37",
       "metrics": {
         "sections": 6,
         "experiments": 2,
@@ -1845,7 +1845,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -1860,7 +1860,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "probability",
-      "sourceHash": "2877a0330b6d0582e438f3d7a1cf91c6b350f48e3f14d9bf632459a2da134110",
+      "sourceHash": "818793d65359166226c56348e9c1844a4f43f5376eae78059e2e20f8a1f99ebf",
       "metrics": {
         "sections": 6,
         "experiments": 2,
@@ -1870,7 +1870,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -1901,7 +1901,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "rl",
-      "sourceHash": "8924c6656c49fe651b5e36b73cfe42986c4cadbc2500d00484f43c58c418fd99",
+      "sourceHash": "1ce5762143ea14a68861f19d470a1d4e072cd0732a88491a73756cba415b807a",
       "metrics": {
         "sections": 6,
         "experiments": 2,
@@ -1911,7 +1911,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -1926,7 +1926,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "rl",
-      "sourceHash": "eed062567019977867672fc990722e1e7684c5333282bd5509dad37ca67d46c8",
+      "sourceHash": "479ca9e67698abee0b60c33233e28919579c973b257a4a1f6ef8b41159f89a13",
       "metrics": {
         "sections": 6,
         "experiments": 2,
@@ -1936,7 +1936,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -1951,7 +1951,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "rl",
-      "sourceHash": "00d7e49541952bdfc1073f1e9c0a4b6023af5e7a5f53938b82f6a2fac7481c6a",
+      "sourceHash": "9339626f997ba770399f90993de93af13798f499a6e33e2c05e39f9666d28f2f",
       "metrics": {
         "sections": 7,
         "experiments": 2,
@@ -1961,7 +1961,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -1976,7 +1976,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "rl",
-      "sourceHash": "e6b486138cc23381c7e8a53bd424ffef1b59c470175144856a2cb61f2714dd60",
+      "sourceHash": "b4e812af9e8244b04cdc5ef583af3dfd8f6fcfbc961afa73bc14be74bd1088a1",
       "metrics": {
         "sections": 7,
         "experiments": 2,
@@ -1986,7 +1986,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -2017,7 +2017,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "kernels",
-      "sourceHash": "387bd503296b3fa5c6a18372f86ecb56ef0cff1c608aa3c402396a0905270cd0",
+      "sourceHash": "b82305aa59f8f4070ca8a6c5d791048e2438f7ae06cfed1f5c8344896fc0d5ef",
       "metrics": {
         "sections": 6,
         "experiments": 2,
@@ -2027,7 +2027,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -2042,7 +2042,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "kernels",
-      "sourceHash": "6011a5ed8dc740f1a87425e03152abccd30c7172e975641d04b774939f1a883c",
+      "sourceHash": "94f6f3352f12b4ec2061861952d1f928425679e5a33e334bd98bba4273ff8fd7",
       "metrics": {
         "sections": 7,
         "experiments": 2,
@@ -2052,7 +2052,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -2067,7 +2067,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "kernels",
-      "sourceHash": "e742271fd81f2c5ea07ee8c6682b601e0d52d97e71b8580ea6cf1d589a7e4034",
+      "sourceHash": "2281232a637a34a2a776ef6295de7a4a38f0f0f8581d75f1e1b4816295548c90",
       "metrics": {
         "sections": 7,
         "experiments": 2,
@@ -2077,7 +2077,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -2092,7 +2092,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "kernels",
-      "sourceHash": "f47f1d3e6629f5974b36e14f957442c2c4e638d57105dd5f9484c260ebad714d",
+      "sourceHash": "388c0e179e386b16d7eacfed27351fede7e483e7f1405b7edb6fa033ed83f99c",
       "metrics": {
         "sections": 7,
         "experiments": 2,
@@ -2102,7 +2102,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -2133,7 +2133,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "internals",
-      "sourceHash": "ce8a624369c7ccb4cdb8304a3cfbfe5e2211911d89b1c3c158d17544df664ed1",
+      "sourceHash": "d142a0104f97cee0cda4ee449596bcdc9c7b00a4f1298ebe9410a56d401427de",
       "metrics": {
         "sections": 7,
         "experiments": 2,
@@ -2143,7 +2143,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -2158,7 +2158,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "internals",
-      "sourceHash": "f4f338a6363e91aead0de90f4a94c243ed6575e7bbca0a1d42397536147f4a61",
+      "sourceHash": "2947ac9cf1adda4b1a171abcd11a2cd406196d2bede49df0128b90993ab0de4e",
       "metrics": {
         "sections": 7,
         "experiments": 2,
@@ -2168,7 +2168,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -2183,7 +2183,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "internals",
-      "sourceHash": "b75464a32ef934330816d6aec69f0b6f5f61c43d4747a8f621261bf30239869f",
+      "sourceHash": "ef1fb634522d4661d539137333269b84d4c7800a8cf444a9af67e3ec789ab418",
       "metrics": {
         "sections": 7,
         "experiments": 2,
@@ -2193,7 +2193,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -2208,7 +2208,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "internals",
-      "sourceHash": "7a551835941ba5bdaff7034102498c68f55d54a0bff9ffa087a2ff5a69420140",
+      "sourceHash": "8d5a500a6b4db94f27f2ba57879f7f7073f58adc6f3046ae47788de3edbe80bf",
       "metrics": {
         "sections": 7,
         "experiments": 2,
@@ -2218,7 +2218,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -2249,7 +2249,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "deployment",
-      "sourceHash": "d65b9c15f4b29ea62526c4dab4812889d9f31301bd806c0c1cacd4dd7bb25d93",
+      "sourceHash": "4f15985ed321ae3e475fc34da2427047a9d4023aedc132e7b9b190c27c6c0268",
       "metrics": {
         "sections": 8,
         "experiments": 2,
@@ -2259,7 +2259,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -2274,7 +2274,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "deployment",
-      "sourceHash": "c65b35b64a1ca62d830bfe5cbc013e7c0bde6763a7f1d8f3822d6715cb2bf39b",
+      "sourceHash": "ed11aebbd5248a8da1ea8b386c78c1252f2ba32b40e02d80b58c3df80190540b",
       "metrics": {
         "sections": 9,
         "experiments": 2,
@@ -2284,7 +2284,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -2299,7 +2299,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "deployment",
-      "sourceHash": "c8842cfffbc52bcb1ea707c05c7dca451db1638894c908df81c0356e8a6b6153",
+      "sourceHash": "246a351c5c547d7d2a807a1caceab64efff16cb1ab0ade0f0208b1f7db023324",
       "metrics": {
         "sections": 9,
         "experiments": 2,
@@ -2309,7 +2309,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -2324,7 +2324,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "deployment",
-      "sourceHash": "e80088adb3ad789a58d8eacd0ba291d56c5125f262831c9b806b27d93edd19b4",
+      "sourceHash": "18fb85b08abccd7332bf8f72e23ecd5b8c7e7ab20352b4ba868722dc373898b9",
       "metrics": {
         "sections": 7,
         "experiments": 2,
@@ -2334,7 +2334,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -2349,7 +2349,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "deployment",
-      "sourceHash": "0577618741532bdb6eeb6c2761385723059d56ddbece0be84f02d50eec2721de",
+      "sourceHash": "5fc2e493549ccd8c62afb5e6620b24bd9d02c6813d7e1567a01194bd1cdb6c18",
       "metrics": {
         "sections": 11,
         "experiments": 3,
@@ -2359,7 +2359,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -2374,7 +2374,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "deployment",
-      "sourceHash": "091a84105423934a262810668e533ec296cfced9f4f3f1632011574c820aab84",
+      "sourceHash": "5bbd4ce5df2d6ede76c7163d31387941bfe57f1d619b61e8514f39503d68e9ce",
       "metrics": {
         "sections": 8,
         "experiments": 2,
@@ -2384,7 +2384,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -2399,7 +2399,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "deployment",
-      "sourceHash": "3b122fa9b09545b8f09f1c5bb5ff9c2dfe950341ad1502cb25bbf3aa4ed9798a",
+      "sourceHash": "084e4ec61590bfe5c9251652498c91b65283569553745cae9dc21a63c29c8ca1",
       "metrics": {
         "sections": 8,
         "experiments": 3,
@@ -2409,7 +2409,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -2424,7 +2424,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "deployment",
-      "sourceHash": "67fb17127bdde697de7953664e438bbdc13daa37f34e6331c6ec5301fc8c71b7",
+      "sourceHash": "0483e7a91d3f9716b29709c58673e84c629b776087e23dac9f5d8a2cc150b5ac",
       "metrics": {
         "sections": 9,
         "experiments": 2,
@@ -2434,7 +2434,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -2465,7 +2465,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "operations",
-      "sourceHash": "42d17c0c320ed689e1b48f6fb1959f2191c0e75142741ef551c15b1874cc5b36",
+      "sourceHash": "dfa9058c0b28ebf6b42ec0ee5eeb7dadeaa38472575c45a4a565c5483960e852",
       "metrics": {
         "sections": 7,
         "experiments": 2,
@@ -2475,7 +2475,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -2490,7 +2490,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "operations",
-      "sourceHash": "4c6320d6cd7bb54793cebefc0369fbcc9d3b2223020fdbb5e1b8f7f1d93fa760",
+      "sourceHash": "d4c2fbbde32e792212ef57b123cae78be657e147878cef80cdab9555148ee0b3",
       "metrics": {
         "sections": 7,
         "experiments": 2,
@@ -2500,7 +2500,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -2515,7 +2515,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "operations",
-      "sourceHash": "24035d2dc3523f8f8236c80c7da144cbf9763694a1da5a5c0181d5758209e058",
+      "sourceHash": "cc8d03827bfdd80efabf9b3bdd47874144e7f17f0f8fdf768684abbdf11ad0da",
       "metrics": {
         "sections": 7,
         "experiments": 2,
@@ -2525,7 +2525,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -2540,7 +2540,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "operations",
-      "sourceHash": "fdfadbb1a3e40ca5fef95c02b2f369ec1a35a94868135fd4c44a92f0c576f90f",
+      "sourceHash": "541db5429c74bb0669058ec8635335642b5218bb27bbd449d935f5594b7740dc",
       "metrics": {
         "sections": 7,
         "experiments": 3,
@@ -2550,7 +2550,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -2565,7 +2565,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "operations",
-      "sourceHash": "b0557ff9b7365db24e95b83c012db26360219ce4bd2a154eb3472873123316da",
+      "sourceHash": "daa386f25cf33ecf1e3d48d480d34dcfcfd2d89d6a2232b7c4569f4d518a55ae",
       "metrics": {
         "sections": 7,
         "experiments": 2,
@@ -2575,7 +2575,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -2590,7 +2590,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "operations",
-      "sourceHash": "0121871c1f1374ac99950577151e0383ae776e976d3b81b5b7b8a42730b0ce0c",
+      "sourceHash": "2440cebff5265d9d36ebf54c2f7ceada3ad8ce35e2601d6a80fac0e7f6e6949f",
       "metrics": {
         "sections": 7,
         "experiments": 1,
@@ -2600,7 +2600,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -2615,7 +2615,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "operations",
-      "sourceHash": "d07428d34939c68d2b07403a09e85dea8be1fca3dc8a05f3b582ffb4f9408d61",
+      "sourceHash": "11589eccd099c89fd7ae5ea2606706e56c2464d4b412d816292fe4d0e884de54",
       "metrics": {
         "sections": 8,
         "experiments": 2,
@@ -2625,7 +2625,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -2640,7 +2640,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "operations",
-      "sourceHash": "34161a6bfcb2037ba0bb9fd0b0b80bbc1876ff2ae0849ebb2b651bf7c43f56b9",
+      "sourceHash": "8df04386622ebbca1915109d34ba8854b96654de59788395c9056e7be6110bb8",
       "metrics": {
         "sections": 7,
         "experiments": 1,
@@ -2650,7 +2650,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -2681,7 +2681,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "pretraining",
-      "sourceHash": "237417e175319caeaf6f3750c4e6c1ae0a9fc8f1ec11e3c4f10262e522470152",
+      "sourceHash": "3a486023f0615555f7e445404abe7e612b25a679701a1b6aa51da55f47fe8808",
       "metrics": {
         "sections": 10,
         "experiments": 2,
@@ -2691,7 +2691,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -2706,7 +2706,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "pretraining",
-      "sourceHash": "fbdcf0dec49edee880ebd7e4e743c2c4de16e6fbf31d3b3963a50066b7a492a9",
+      "sourceHash": "e558dcd4fce66b1364dd764711d69848440fab0a2dfe77de6584cc7cbb2de2ad",
       "metrics": {
         "sections": 10,
         "experiments": 2,
@@ -2716,7 +2716,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -2731,7 +2731,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "pretraining",
-      "sourceHash": "89a798a25c2ff1ea24131280c7f2d7d37a29c9b5d6dc7e4d1e7c0fa0daeb9692",
+      "sourceHash": "2b6a0559107ea84110e6d17ba85dae3edb7ec769c3420a8b18419b4c6f33d430",
       "metrics": {
         "sections": 10,
         "experiments": 2,
@@ -2741,7 +2741,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -2772,7 +2772,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "posttraining",
-      "sourceHash": "e143b22bbf5d9afe5c2d54bf7d89303256e27976ff9cc9d473d73ce42aada7f5",
+      "sourceHash": "4ccc2716bb7d88f74b7accc66cb6d2ee2afbbdc55227abdc58e5ca6174814785",
       "metrics": {
         "sections": 10,
         "experiments": 2,
@@ -2782,7 +2782,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -2797,7 +2797,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "posttraining",
-      "sourceHash": "e7d104e494933051fe13e64e431849f5aa135b6df904d42819f8b3461e62154a",
+      "sourceHash": "b99b48b5f05482f1b5d8de4909d2306ec932c2ca333d89d7eac082dd945b7422",
       "metrics": {
         "sections": 10,
         "experiments": 2,
@@ -2807,7 +2807,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -2822,7 +2822,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "posttraining",
-      "sourceHash": "faccee3034727db2448c2c101d73060330d5917072654cfa10738ec9e51853e7",
+      "sourceHash": "094f8f56ac0094608344f1075ffd2d5eba4b46576cb03a46f056822861aec2cc",
       "metrics": {
         "sections": 10,
         "experiments": 2,
@@ -2832,7 +2832,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -2847,7 +2847,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "posttraining",
-      "sourceHash": "1c1c62e2cdd853abee839b8d2960f001b72fe8fa5e0808e3ca94f3ce30a89412",
+      "sourceHash": "4cdaf8768cce32b9358401e9dfa1ebe5adcdf8d82c467a708ec05664a1afcfe5",
       "metrics": {
         "sections": 10,
         "experiments": 2,
@@ -2857,7 +2857,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -2872,7 +2872,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "posttraining",
-      "sourceHash": "9fad79b21a975beb939193f8c46fd858e858b640b4e9305c9e7832b1bd335299",
+      "sourceHash": "111c8176de0c2949ba399876e9c82a91383330a5db6a266a622fbc3f50dc68b7",
       "metrics": {
         "sections": 10,
         "experiments": 2,
@@ -2882,7 +2882,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -2913,17 +2913,17 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "tpu",
-      "sourceHash": "640f815fbd2a3f03b222521ea6936c5c227ab0abf32ea46eb54c70a96e0cb5d9",
+      "sourceHash": "714bef1c08460542cbbdff8826f00e6f5b99f2be3b47fa239f00472b871b22ac",
       "metrics": {
         "sections": 6,
         "experiments": 2,
         "practice": 2,
-        "references": 3,
+        "references": 6,
         "expertReviewed": false,
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -2938,7 +2938,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "tpu",
-      "sourceHash": "bea6fb9f5f8fad4951d860c7459a0ef56ac245d3dee084a497ce816cacd5cfce",
+      "sourceHash": "e2c2796b7d974f4413dedb97b20f825efba12296e2ede87d86bda79437a390a0",
       "metrics": {
         "sections": 3,
         "experiments": 2,
@@ -2948,7 +2948,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -2979,7 +2979,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "tpu-workflows",
-      "sourceHash": "faba90e250eac21e49d496fa2c46348cb1b4270e3d576469881b319d0b0220d0",
+      "sourceHash": "3a0f6e18878466bce15bea3f66ddf5078e2b8195868d57c830c3e2d3a6b51760",
       "metrics": {
         "sections": 2,
         "experiments": 2,
@@ -2989,7 +2989,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -3004,7 +3004,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "tpu-workflows",
-      "sourceHash": "03288bfb6ed07aa3a7f57499217b4e6dfd416cce7f49e6f2d8ec93ada44841ed",
+      "sourceHash": "dbdc92591a85fd06382520ad3fa9db4a7298bcdf2a02d3b662a1663aff1d871d",
       "metrics": {
         "sections": 3,
         "experiments": 2,
@@ -3014,7 +3014,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -3045,17 +3045,17 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "tpu-systems",
-      "sourceHash": "6763c08dcdc8e6b651783ca30eead97071b314f8bb3d601035e6848ea6a41469",
+      "sourceHash": "8d86097eb24c2b0430ba3dab9b0f25a70c85b75ee7b1aac89b3784cb9a5961f8",
       "metrics": {
-        "sections": 2,
+        "sections": 3,
         "experiments": 2,
         "practice": 2,
-        "references": 2,
+        "references": 3,
         "expertReviewed": false,
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -3070,7 +3070,7 @@
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "tpu-systems",
-      "sourceHash": "67fcbb2bd892d8f2e02910579e21ce7a9e19114342fb16de421941095cd668d6",
+      "sourceHash": "578a53769a2177f02cca8eb1ef243a4981f9e0eab21b3f689a46ecd87374dd8f",
       "metrics": {
         "sections": 2,
         "experiments": 2,
@@ -3080,7 +3080,7 @@
         "novicePiloted": false,
         "missing": [],
         "missingFiles": [],
-        "choiceSpecificFeedback": false
+        "choiceSpecificFeedback": true
       }
     },
     {
@@ -3110,7 +3110,7 @@
       "contribution": "Pilot the rubric with unseen data and retain a reviewer-scored evidence package.",
       "validation": "CPU reference checker passed for current sources",
       "review": "Teaching review pending",
-      "sourceHash": "1e8e074a40cf6170baf0fa49781e07324cb007eb56597075c3ca9d52c918eb1f",
+      "sourceHash": "67ebf0536292f58590c19ab93e7270e2a974fa322e40da8003243b5f1318d407",
       "metrics": {
         "stages": 4,
         "currentReference": true,
@@ -3128,7 +3128,7 @@
       "contribution": "Bridge to a licensed real dataset with frozen splits, error analysis and reviewer feedback.",
       "validation": "CPU reference checker passed for current sources",
       "review": "Teaching review pending",
-      "sourceHash": "249ca77e8c7661a5e978056e53e4f37e0d2614eedf3569cf5566c87c4dd86037",
+      "sourceHash": "303ac5d3761b675a60f73506c6d59129117c60286c59cc3b755c8795adde42e0",
       "metrics": {
         "stages": 3,
         "currentReference": true,
@@ -3146,7 +3146,7 @@
       "contribution": "Add noisy observations, identifiability stress tests and domain-expert interpretation.",
       "validation": "CPU reference checker passed for current sources",
       "review": "Teaching review pending",
-      "sourceHash": "dccd07e452eb85693b2da3769d816fd9f564af32b19df04625e409874f8a493a",
+      "sourceHash": "40ac9614ea0f6af95aa4fce82ec0d4d5fa47e6e2b4923bc6d1eb3e53c629ee15",
       "metrics": {
         "stages": 3,
         "currentReference": true,
@@ -3164,7 +3164,7 @@
       "contribution": "Add learned value estimates and a larger task after validating timeout semantics.",
       "validation": "CPU reference checker passed for current sources",
       "review": "Teaching review pending",
-      "sourceHash": "34afc7604758c2b10e4af358762d46430edd32dcf00a557774ed5df8575e4387",
+      "sourceHash": "c5345d61078f4dbdd2ef24a5256e2103492b4ae35c9452e4504af029422b0fff",
       "metrics": {
         "stages": 4,
         "currentReference": true,
@@ -3182,7 +3182,7 @@
       "contribution": "Add library inference, modern diagnostics and reviewer-checked model mismatch cases.",
       "validation": "CPU reference checker passed for current sources",
       "review": "Teaching review pending",
-      "sourceHash": "04c8420deab0453efc9c5fbb08f46861df581c62b00c69d190ed222cae91464c",
+      "sourceHash": "0b1179836a6a85014effdc549448f439309d9c8ff9ee2d7fab311527f0a27e5d",
       "metrics": {
         "stages": 3,
         "currentReference": true,
@@ -3200,7 +3200,7 @@
       "contribution": "Review higher-order composition and unsupported-primitive failure cases.",
       "validation": "CPU reference checker passed for current sources",
       "review": "Teaching review pending",
-      "sourceHash": "062252964622c20cc727205cd75aea4a9445f8b948f59868c237c0c62c178e10",
+      "sourceHash": "8bc10f6fbf3f3971e0b41b984c3dd97b96499f7a1580c48ca2df32b5b3795a14",
       "metrics": {
         "stages": 3,
         "currentReference": true,
@@ -3218,7 +3218,7 @@
       "contribution": "Attach a real container run, load test and target runtime report.",
       "validation": "CPU reference checker passed for current sources",
       "review": "Teaching review pending",
-      "sourceHash": "414afbbfcee9a5b49be347e5a62b2137edf1ce99a5f1af8512ae8b7970591a24",
+      "sourceHash": "7bdff2e9c0502300d953a3c433796743ced8a63994050f475882c3177b9eb682",
       "metrics": {
         "stages": 3,
         "currentReference": true,
@@ -3236,7 +3236,7 @@
       "contribution": "Extend from local drills to authenticated, concurrent cloud release and SLO failure cases.",
       "validation": "CPU reference checker passed for current sources",
       "review": "Teaching review pending",
-      "sourceHash": "6db3f098509d3348d76cfe213b329d5f6d0fde50db35f086bcd5607020a1a372",
+      "sourceHash": "79212e746bfd7f45e46d6aab0a1237c37e7b0a245f0c83bed976b03d187daae9",
       "metrics": {
         "stages": 5,
         "currentReference": true,
@@ -3254,7 +3254,7 @@
       "contribution": "Add licensed recordings, speaker/source-held-out splits and task-appropriate baselines; this is not an ASR model.",
       "validation": "CPU reference checker passed for current sources",
       "review": "Teaching review pending",
-      "sourceHash": "0b4e3e26743a3b8c5c4b4142df76ac8915a9a958768bcb598890f95529a01dc5",
+      "sourceHash": "0222a6be6a8d9f3eaddfac56ea6135f8226336ca699e9c0722cdc8dee83f5677",
       "metrics": {
         "stages": 4,
         "currentReference": true,
@@ -3272,7 +3272,7 @@
       "contribution": "Add natural paired data, duplicate-positive handling and held-out multimodal retrieval.",
       "validation": "CPU reference checker passed for current sources",
       "review": "Teaching review pending",
-      "sourceHash": "99553c26ab6873ef66f66e06cc41e913de2069f387d7a5bf0c39adaec7c271ac",
+      "sourceHash": "f05421f09a0d853236fad35af47e2fcd8201b5f36fcd184c7340dbc010a3fcd6",
       "metrics": {
         "stages": 5,
         "currentReference": true,
@@ -3290,7 +3290,7 @@
       "contribution": "Reproduce the bounded target on new shapes and interpret the trace before claiming a useful speedup.",
       "validation": "CPU reference checker passed for current sources",
       "review": "Teaching review pending",
-      "sourceHash": "dc5eb349f78a77526d94516c6656a02c4b887b2c75618146b8b4a589f1765fa4",
+      "sourceHash": "d1d50f30e769b6392260c181a808e1c88f928d64c00d5e6b87bdb77636306c87",
       "metrics": {
         "stages": 3,
         "currentReference": true,
@@ -3308,7 +3308,7 @@
       "contribution": "Add real photos, source-group leakage checks and an observed edge/runtime report.",
       "validation": "CPU reference checker passed for current sources",
       "review": "Teaching review pending",
-      "sourceHash": "85850c07f2b7bc015b7ba9a21708d4dc89b662a0652d44c0b3b84f0de090ba4a",
+      "sourceHash": "298ad53e1d020d8773bd6c7f5aaf95a6770b173ed4b65994eb50b80bfb245ab3",
       "metrics": {
         "stages": 8,
         "currentReference": true,
@@ -3326,7 +3326,7 @@
       "contribution": "Test the end-to-end beginner handoff without revealing reference answers.",
       "validation": "CPU reference checker passed for current sources",
       "review": "Teaching review pending",
-      "sourceHash": "8a49166a6e21e3597b42fcc0bce71679ae78c13d1b152d29e53bb8ec203c67df",
+      "sourceHash": "36f77ca739a1231722bd386e539b1cc01cf7175a1c2ef21bdb249080fce10595",
       "metrics": {
         "stages": 4,
         "currentReference": true,
@@ -3344,7 +3344,7 @@
       "contribution": "Qualify fresh-process multi-host data and recovery behavior on an explicitly named target.",
       "validation": "CPU reference checker passed for current sources",
       "review": "Teaching review pending",
-      "sourceHash": "73c3d2e369e473e5cd7253eabd923754ff19cd08af65a43228d6be212420e5d9",
+      "sourceHash": "5aa14b841e2f59083a303665cb970ad4ba71fc0cadbe57aada4b975d70a73a3f",
       "metrics": {
         "stages": 4,
         "currentReference": true,
@@ -3362,7 +3362,7 @@
       "contribution": "Add tokenizer/corpus studies and nonperiodic held-out generation before any language-quality claim.",
       "validation": "CPU reference checker passed for current sources",
       "review": "Teaching review pending",
-      "sourceHash": "9119e372230b32de075084aa01ff41d816a0e19c5fbd5270d400b2d56cd0de44",
+      "sourceHash": "5b6575f8de3239e2cbf7e4f91cf5cc56baa8593222fa30eb259e9ea3bbaea061",
       "metrics": {
         "stages": 4,
         "currentReference": true,
@@ -3380,7 +3380,7 @@
       "contribution": "Pilot the synthesis with learner implementations and review failure explanations.",
       "validation": "CPU reference checker passed for current sources",
       "review": "Teaching review pending",
-      "sourceHash": "b3f7ed298376a3ee46b5956392bdaf8b98a74de7fd80f6ee4ba314bdeb89931c",
+      "sourceHash": "045686f1e94f8dcac5abd95dd4942ac64afdca5cb788ba3cbc7d16dab592a487",
       "metrics": {
         "stages": 5,
         "currentReference": true,
@@ -3398,7 +3398,7 @@
       "contribution": "Evaluate a real application with versioned prompts/retrieval, adversarial cases and human review.",
       "validation": "CPU reference checker passed for current sources",
       "review": "Teaching review pending",
-      "sourceHash": "93b28dc584d72a768dc2e1cf5cbf77a00aefb58691c181a82cfbd0cb89a51ed9",
+      "sourceHash": "15f4e5b4948a36099cc6eb0990e3109bc9f07817f7b8cd30dc5d478d12d32514",
       "metrics": {
         "stages": 4,
         "currentReference": true,
@@ -3416,7 +3416,7 @@
       "contribution": "Connect each objective to real saved architectures and phase-to-phase checkpoint lineage.",
       "validation": "CPU reference checker passed for current sources",
       "review": "Teaching review pending",
-      "sourceHash": "07e83908590182605e0a1704a423ec42ac952ce3b9bd4698c9a8587618d0fbac",
+      "sourceHash": "a0d9bd440ce3e9a04f15c5fd21a8ab3a3631f0e3dad428ad228b2191c242815e",
       "metrics": {
         "stages": 8,
         "currentReference": true,
@@ -3434,7 +3434,7 @@
       "contribution": "Convert a complete saved attention architecture, including normalization, masks and input gradients.",
       "validation": "CPU reference checker passed for current sources",
       "review": "Teaching review pending",
-      "sourceHash": "25c8e0d292cb358c9e54ea8d78f185c33fc55793e80c2c14cce489c0e486bac4",
+      "sourceHash": "787e04cd3cce8b493b4325ddb771fc2c3e02fb5b0cc30e98f121303d8de961f5",
       "metrics": {
         "stages": 3,
         "currentReference": true,
@@ -3452,7 +3452,7 @@
       "contribution": "Run an unaided novice walkthrough and review the retained environment record.",
       "validation": "CPU reference checker passed for current sources",
       "review": "Teaching review pending",
-      "sourceHash": "f1719458c042597128fb6d9d3ba138a166666907df8f0b930dc78ca09a56e79a",
+      "sourceHash": "2bf857aac242ad8b2be35b4e9ab4ca34203532bdffa6190d5ba26fe3a7e12276",
       "metrics": {
         "stages": 4,
         "currentReference": true,
@@ -3470,7 +3470,7 @@
       "contribution": "Add ragged/masked data and assess the learner explanation of each axis.",
       "validation": "CPU reference checker passed for current sources",
       "review": "Teaching review pending",
-      "sourceHash": "ac0b5eefcfe4260edf9d367e88e94da67de07ad0928aa121d57974eafb11ca37",
+      "sourceHash": "9e064a314b57c4d12626d8beeea3fbb293506375a3d8b75b305159211ec708be",
       "metrics": {
         "stages": 4,
         "currentReference": true,
@@ -3488,7 +3488,7 @@
       "contribution": "Add composed transformations with a deliberately incorrect derivative boundary.",
       "validation": "CPU reference checker passed for current sources",
       "review": "Teaching review pending",
-      "sourceHash": "f42d73f0099d6581538a9c5a98120ccab5549a2d9c1d779b8c2527c69dc21b9c",
+      "sourceHash": "95fc87e6fe3a4ee77e3a5e29974fa63fa30e1a5857cdc4127a87250d8d1d45b4",
       "metrics": {
         "stages": 4,
         "currentReference": true,
@@ -3506,7 +3506,7 @@
       "contribution": "Inject incomplete writes, stale manifests and incompatible input state in separate processes.",
       "validation": "CPU reference checker passed for current sources",
       "review": "Teaching review pending",
-      "sourceHash": "03512171c3c519e51ccbd780031a1afb74affffb8c8c572c733c081cfbb7245b",
+      "sourceHash": "92920bb6d62896ea563e2f2280be5f52bd39b18c14ccede1f073874c68494b8e",
       "metrics": {
         "stages": 4,
         "currentReference": true,
@@ -3524,7 +3524,7 @@
       "contribution": "Add a target-backed workload and a reviewed trace, not a generic timing improvement claim.",
       "validation": "CPU reference checker passed for current sources",
       "review": "Teaching review pending",
-      "sourceHash": "9a937df4d949e57dd749face3c65dbceb09451be1c54b3e34f0c4910d67f4b10",
+      "sourceHash": "e4fe6edd93097e71684fc6caff2fb12c086dfc4b9ecd835b649135149b31f723",
       "metrics": {
         "stages": 4,
         "currentReference": true,
@@ -3542,7 +3542,7 @@
       "contribution": "Transfer the contracts to a saved Transformer and document retained behavior.",
       "validation": "CPU reference checker passed for current sources",
       "review": "Teaching review pending",
-      "sourceHash": "a44f36d89a89c44d9afbbe035458c0e59207e6bee5659f524c262f35fabfde8b",
+      "sourceHash": "d364b0a354c4c55b43269d6880b283b0e6013e2f340021f495da9685657d7d00",
       "metrics": {
         "stages": 4,
         "currentReference": true,
@@ -3560,7 +3560,7 @@
       "contribution": "Observe a learner-owned TPU receipt on a declared topology and keep the exact numerical reference.",
       "validation": "CPU reference checker passed for current sources",
       "review": "Teaching review pending",
-      "sourceHash": "2b4e3813d4ffb0f256be1e11a2f8a842ea671cbdfce170c5e6e327e73a3a8332",
+      "sourceHash": "07226c0df80812e9df0771ca3382367f149649ecb7718ab34c80ca1f75f16ae5",
       "metrics": {
         "stages": 4,
         "currentReference": true,
@@ -3578,7 +3578,7 @@
       "contribution": "Add a fresh-process multi-host restart and failure-injection qualification.",
       "validation": "CPU reference checker passed for current sources",
       "review": "Teaching review pending",
-      "sourceHash": "84605d9ca4058fa6b0761088fb3398a511a34cdbe1d99a9197ce01184d8f11be",
+      "sourceHash": "e5bcb33fd91a4cd8d833dfba140e74849f90c74294d51ba6913a65a808a42f48",
       "metrics": {
         "stages": 4,
         "currentReference": true,
@@ -3596,7 +3596,7 @@
       "contribution": "Attach actual native low-bit execution and an interpreted target trace.",
       "validation": "CPU reference checker passed for current sources",
       "review": "Teaching review pending",
-      "sourceHash": "881e9cf576452b9056b65d19e1feabd66966f07f665f5ee3d8ff71b66991505c",
+      "sourceHash": "55cc4318879d2b4330623d508439d29cd97189a76efe739f9f0c75d7f99dca55",
       "metrics": {
         "stages": 4,
         "currentReference": true,
@@ -3614,7 +3614,7 @@
       "contribution": "Pilot learner-owned hypotheses, failed/retried runs and the optional logger adapters.",
       "validation": "CPU reference checker passed for current sources",
       "review": "Teaching review pending",
-      "sourceHash": "6985cc1b6c612b2d30166d53a147e96f3c753b77d87341ae90a2a033b91164e9",
+      "sourceHash": "f66aab251ca438c2c85a99299d0fac342a4a25a3bd6f62a9a3f5a1837560f802",
       "metrics": {
         "stages": 4,
         "currentReference": true,
@@ -3632,7 +3632,7 @@
       "contribution": "Improve the frozen data/evaluation recipe against BM25 before scaling or claiming a useful released embedding model.",
       "validation": "CPU reference checker passed for current sources",
       "review": "Teaching review pending",
-      "sourceHash": "0beda9485192a2fc51b2e7850f11023d637127bf1e64cc2072eec70f9f5efa6a",
+      "sourceHash": "be551a4364494bc9a8bb4c15870750d470592d2142ca31f3b16a0a25688d9404",
       "metrics": {
         "stages": 4,
         "currentReference": true,
@@ -3650,7 +3650,7 @@
       "contribution": "Improve baseline-relative held-out quality and tokenizer/data decisions before scaling or publishing a production model.",
       "validation": "CPU reference checker passed for current sources",
       "review": "Teaching review pending",
-      "sourceHash": "43e73c7af772424fc1bb6002d92d1e9ef11a91645dfe9ab05aa29ec6d02e214a",
+      "sourceHash": "7ecd7447e3fcd7dc4d365df31b986f8fbc99626c8dafab6c4d9fa6f66526e24a",
       "metrics": {
         "stages": 2,
         "currentReference": true,
@@ -3668,7 +3668,7 @@
       "contribution": "Implement the scoped data recipe, architecture, training stages, independent evaluation and exported reload before attempting the target scale.",
       "validation": "Specification only; no runnable capstone",
       "review": "Implementation and review pending",
-      "sourceHash": "ab327c38f88309c510e2eefd043d4f53e7bf6e013e06cdd7815393dd90ef70f9"
+      "sourceHash": "d256672949af0f818902e496974a603127513c5b20d8e213873c1e5a6c360da8"
     },
     {
       "kind": "plans",
@@ -3681,7 +3681,7 @@
       "contribution": "Implement the scoped data recipe, architecture, training stages, independent evaluation and exported reload before attempting the target scale.",
       "validation": "Specification only; no runnable capstone",
       "review": "Implementation and review pending",
-      "sourceHash": "a1c15c349c427014bb21fe07b4b99b98e2a8cee5ceb9afe513b59208496c0537"
+      "sourceHash": "2ce920eb708f719c7f31194dbb1e6358e687275b947546704e20821e6fb7eb20"
     },
     {
       "kind": "plans",
@@ -3694,7 +3694,7 @@
       "contribution": "Implement the scoped data recipe, architecture, training stages, independent evaluation and exported reload before attempting the target scale.",
       "validation": "Specification only; no runnable capstone",
       "review": "Implementation and review pending",
-      "sourceHash": "1e7ef3c6a6276b430ce3a9a695dc650e2fb92e775675c39cb731ff344b913617"
+      "sourceHash": "7b58e96af4921a38712bd696c26edb119c0f1fd26e9363af20e37d8cc2b1a930"
     },
     {
       "kind": "plans",
@@ -3707,7 +3707,7 @@
       "contribution": "Implement the scoped data recipe, architecture, training stages, independent evaluation and exported reload before attempting the target scale.",
       "validation": "Specification only; no runnable capstone",
       "review": "Implementation and review pending",
-      "sourceHash": "f7675f348bd7fd33031ed48716663f77e13f8d4f20b78d42065795db8cebb195"
+      "sourceHash": "31f86898dbb009c31afd69a2ad65465bda0abc6ad93fad49083f121941993bad"
     },
     {
       "kind": "plans",
@@ -3720,7 +3720,7 @@
       "contribution": "Implement the scoped data recipe, architecture, training stages, independent evaluation and exported reload before attempting the target scale.",
       "validation": "Specification only; no runnable capstone",
       "review": "Implementation and review pending",
-      "sourceHash": "4429020ba550dbd4891b68d9a68276ddc4f79dd20c6680a5a9936ab58b62f8a8"
+      "sourceHash": "ba916f7be2fd4508f957cd9f9b5de77148f78ec76f54e7a85d8360827f3972c6"
     },
     {
       "kind": "plans",
@@ -3733,7 +3733,7 @@
       "contribution": "Implement the scoped data recipe, architecture, training stages, independent evaluation and exported reload before attempting the target scale.",
       "validation": "Specification only; no runnable capstone",
       "review": "Implementation and review pending",
-      "sourceHash": "24c78b42bc259092c18e428093dbc247eebc58dad535a25f709a4c568f6b8838"
+      "sourceHash": "e1a70ddb5f99fbd30a0061c88654f7662f1175d1028802471ae2ca96b518e41f"
     },
     {
       "kind": "plans",
@@ -3746,7 +3746,7 @@
       "contribution": "Implement the scoped data recipe, architecture, training stages, independent evaluation and exported reload before attempting the target scale.",
       "validation": "Specification only; no runnable capstone",
       "review": "Implementation and review pending",
-      "sourceHash": "56f1f94a5a3bf25b9e8192c0a4113d152e7887bf4c9bf84ecc3c3d374a2f6b7c"
+      "sourceHash": "448e44a4b0aeb687ca52940527b2e32ee1a2b8336ed4878737be0d2e58a5e1e7"
     },
     {
       "kind": "plans",
@@ -3759,7 +3759,7 @@
       "contribution": "Implement the scoped data recipe, architecture, training stages, independent evaluation and exported reload before attempting the target scale.",
       "validation": "Specification only; no runnable capstone",
       "review": "Implementation and review pending",
-      "sourceHash": "f27adc180179a6616c877fbf7cf73290fbb62c12a9a729d6ac4a5cb74c6a97ed"
+      "sourceHash": "49d359d27d449e0c7014e8208cdb84cc23f88d1481c916066630fdea6647d3b9"
     },
     {
       "kind": "plans",
@@ -3772,7 +3772,7 @@
       "contribution": "Implement the scoped data recipe, architecture, training stages, independent evaluation and exported reload before attempting the target scale.",
       "validation": "Specification only; no runnable capstone",
       "review": "Implementation and review pending",
-      "sourceHash": "b6f6563f453d9d36add4cbd4a2ab3ea050b3ff8e9c40183cae2ac8b31137477f"
+      "sourceHash": "79fcb6984eef61117daeb8c3413c9199669046a554bba2e984ea4f0f5d816b2e"
     },
     {
       "kind": "plans",
@@ -3785,7 +3785,7 @@
       "contribution": "Implement the scoped data recipe, architecture, training stages, independent evaluation and exported reload before attempting the target scale.",
       "validation": "Specification only; no runnable capstone",
       "review": "Implementation and review pending",
-      "sourceHash": "9691b7d601fb3be18dcbf5f5068cd8062cf323473148a685273650fe34413087"
+      "sourceHash": "c9024eed4ea6de85c664635222e21aebe547f628eab3e35d8feb158a9c87e9af"
     },
     {
       "kind": "assessments",
@@ -8026,7 +8026,7 @@
       "lessonId": "tpu-01",
       "phaseId": "tpu",
       "title": "Understanding checkpoint",
-      "prompt": "Which command sequence proves that your Cloud TPU VM is both usable by JAX and no longer billing when you finish?",
+      "prompt": "Which workflow records a small synchronized TPU computation and checks that the lab’s cloud resources were removed?",
       "level": "available-draft",
       "source": "phases/19-tpu/01-get-a-tpu-running-and-verify-the-runtime/lesson.json",
       "validation": "Authored answer and rationale; uncalibrated checkpoint"
@@ -8146,7 +8146,7 @@
       "lessonId": "tpu-05",
       "phaseId": "tpu-workflows",
       "title": "Understanding checkpoint",
-      "prompt": "What happens if you launch a distributed JAX script on a 4-host `v5litepod-16` slice without `--worker=all`?",
+      "prompt": "You launch an ordinary TPU-VM SSH command on worker zero of a multi-host slice, without another launcher. What can happen?",
       "level": "available-draft",
       "source": "phases/20-tpu-workflows/02-run-course-scripts-and-multihost-tpu-slices/lesson.json",
       "validation": "Authored answer and rationale; uncalibrated checkpoint"
@@ -8176,7 +8176,7 @@
       "lessonId": "tpu-03",
       "phaseId": "tpu-systems",
       "title": "Main exercise",
-      "prompt": "Compute `estimate_memory_gib` for a `1.5`B parameter model with `4096` KV tokens and verify that its mixed-precision training-state estimate is below `30` GiB and that state plus BF16 KV cache is below `80%` of a single-host `v5litepod-4` (`64` GiB total HBM).",
+      "prompt": "Compute estimate_memory_gib for a 1.5B parameter model with 4096 KV tokens. Check that the assumed mixed-precision training state is below 30 GiB and below 80% of a four-chip v5e slice. Separately report the BF16 KV-cache estimate for an inference scenario. Do not assume training normally retains an inference KV cache, or that aggregate HBM guarantees per-device fit.",
       "level": "available-draft",
       "source": "phases/21-tpu-systems/01-tpu-generations-and-hbm-memory-budgeting/lesson.json",
       "validation": "CPU reference checked; reference solution, not learner grading"
@@ -8186,7 +8186,7 @@
       "lessonId": "tpu-03",
       "phaseId": "tpu-systems",
       "title": "Understanding checkpoint",
-      "prompt": "What does a TPU generation's Roofline ridge point (`bf16_tflops / bw_gbs` in FLOPs/byte) tell you about a kernel?",
+      "prompt": "What does the theoretical BF16 Roofline ridge point, \\(1000 \\times \\text{TFLOP/s} / \\text{GB/s}\\) in FLOP/byte, describe?",
       "level": "available-draft",
       "source": "phases/21-tpu-systems/01-tpu-generations-and-hbm-memory-budgeting/lesson.json",
       "validation": "Authored answer and rationale; uncalibrated checkpoint"

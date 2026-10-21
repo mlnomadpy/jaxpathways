@@ -229,6 +229,11 @@
         "height": 8,
         "width": 10
       }
-    }
+    },
+    "optionFeedback": [
+      "The mask controls the supervised outputs, while attention controls how input context influences them.",
+      "Only selected targets contribute direct loss, but other input tokens still provide context through attention. Distinguish input masking from loss masking.",
+      "A loss mask selects scored positions; it does not remove keys or values from attention. Test those masks independently."
+    ]
   }
 }

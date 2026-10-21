@@ -23,3 +23,11 @@ Per-observation gradients at zero are `[-2,0]`, `[-4,-4]`, `[-4,-8]`; their mean
 The norm is five; norm-clipped gradient is `[0.6,0.8]`. The first moments are `[0.06,0.08]` and `[0.00036,0.00064]`. Bias corrections recover the clipped gradient and its elementwise square. The first update is approximately `[-0.1,-0.1]`, with a small epsilon effect. Its norm is about `0.1414`, whereas the plain gradient-descent update after clipping has norm `0.1`.
 
 Check the second update using the retained first moments and count. A correct first update is not enough to validate the state transition. Optax comparison must use the same chain order and epsilon placement. A schedule scales the update at its stated count; it does not reset the moments.
+
+## Discussion-case review notes
+
+Two coefficient vectors differ substantially but make almost identical predictions on a collinear design.
+
+Inspect singular values and prediction differences before scoring parameter error as model failure. Require an explanation of nonidentifiability or ill-conditioning and a held-out comparison under the stated distribution. Do not award a uniqueness claim from low training loss.
+
+Record the learner’s original explanation, the requested evidence and the revised claim. This discussion is qualitative review; it adds no automatic score and is not an independent teaching-review receipt.

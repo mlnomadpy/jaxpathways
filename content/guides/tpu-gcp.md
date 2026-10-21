@@ -299,3 +299,11 @@ If seeking support through TPU Builders or another programme, ask the programme 
 - Who monitors usage, who performs cleanup, and when the experiment ends.
 
 Confirm approved amount, expiry, project and eligible services before relying on credits. Small tests can use less compute than model training, but estimate them from a pilot. A future 300M-parameter reference-model project needs its own data recipe, evaluation plan and compute estimate; this eight-update exercise is verified separately from that budget.
+
+## Review the provisioning API and cleanup boundary
+
+The cloud command surface is changing. This course's v5e qualification uses the Cloud TPU queued-resource API. Google now recommends Compute Engine or GKE for newer TPU features. The [Compute Engine TPU Flex-start guide](https://docs.cloud.google.com/tpu/docs/create-flex-start-compute) documents TPU machine types and MIG restrictions, including no GPU-style resize requests. The [Cloud TPU API Flex-start guide](https://docs.cloud.google.com/tpu/docs/request-using-flex-start) documents the queued-resource path. Select one API's complete lifecycle; do not combine its create flags with another API's status or deletion commands. Guidance checked on 2026-10-21 is still subject to provider changes.
+
+For review, show the request ID, allocated VM ID, project, zone, machine/accelerator type, runtime, queue expiry and maximum run duration. Distinguish WAITING from ACTIVE/READY. Retrieve the run dossier before teardown and verify the named VM and its owning request are absent afterward. Do not delete unrelated resources just to obtain an empty list.
+
+The [pricing page](https://cloud.google.com/tpu/pricing) describes TPU compute charges in the READY state. A Python exit is not resource deletion, and a cleanup receipt is not a final bill. Check retained storage, other services and billing separately. Builder-program participation or access to a queue does not by itself establish free credits or a spending cap.

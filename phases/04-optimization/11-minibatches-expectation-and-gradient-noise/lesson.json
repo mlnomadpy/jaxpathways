@@ -133,6 +133,11 @@
       "connection": "Each batch averages independent, uniformly sampled per-example gradients with replacement. Under those assumptions, the variance of the average is the single-example variance divided by batch size. Its expected gradient remains \\(-2.5\\) for all three sizes; the estimate becomes less variable without changing its mean.\n\nThe bar heights are squared gradient units, not loss or gradient magnitude. A shorter bar does not mean a smaller learning rate or a faster overall training run. Sampling without replacement, correlated examples, and changing parameters require a different variance analysis.",
       "alt": "Averaging independent gradients reduces variance. The horizontal categories are batch sizes \\(1\\), \\(2\\), and \\(3\\). The vertical axis is the variance of the estimated gradient at one fixed weight. The bar heights are \\(1.25\\), \\(0.625\\), and approximately \\(0.417\\), respectively. Doubling the batch size from \\(1\\) to \\(2\\) halves the variance. Tripling it divides the variance by \\(3\\). These are exact enumerations of the possible sampled batches in this small example, rather than noisy estimates from a handful of trials.",
       "code": "triples = (per[:, None, None] + per[None, :, None] + per[None, None, :]) / 3\nvisual_data = {'kind': 'bar', 'labels': ['batch 1', 'batch 2', 'batch 3'], 'ylabel': 'gradient variance', 'series': [{'label': 'exact enumeration', 'y': [float(jnp.var(per)), float(jnp.var(pairs)), float(jnp.var(triples))]}]}"
-    }
+    },
+    "optionFeedback": [
+      "A small batch and a large batch should not receive equal weight. Compare batches of sizes one and three with different means.",
+      "The dataset mean weights examples equally. Unequal batches need count weighting.",
+      "The aggregation identity does not depend on Adam. Weight each batch mean by its observation count and divide by the total count."
+    ]
   }
 }

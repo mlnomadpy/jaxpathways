@@ -314,7 +314,7 @@ visual_data={'panels':[{'kind':'bar','labels':labels,'ylabel':'program count (co
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:23:48.503058+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:31:52.675450+00:00. JAX 0.9.2.
 
 ```text
 Actual backend: cpu simulated layout: TPU v5 lite
@@ -509,7 +509,15 @@ The three-buffer simulation is correct and has fewer grid programs after a tile 
 
 <details><summary>Answer and explanation</summary>
 
-No; padding, local memory and actual target overlap must be measured with synchronized target execution.
+**1. Yes; program count determines runtime.**
+
+Fewer programs can still mean more padding, pressure or stalls. Compare target measurements for identical useful work.
+
+**2. Yes; simulation latency is the TPU latency.**
+
+A simulator’s schedule is not device latency. Record actual target timing and inspect memory/overlap behavior.
+
+**3. No; padding, local memory and actual target overlap must be measured with synchronized target execution. (correct)**
 
 Simulation establishes tested semantics. Buffering and tile changes affect several costs, and only actual target measurements can rank performance.
 

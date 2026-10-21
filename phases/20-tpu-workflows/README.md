@@ -38,11 +38,11 @@ Review: [Stage and launch checkpointed TPU jobs](01-stage-and-launch-checkpointe
 
 ### Try a changed condition
 
-You move a script from a single-host v5litepod-4 VM to a 4-host v5litepod-16 Pod slice, and it hangs at startup. What is the first thing to check?
+A four-process job saves global step 20 but only three workers report it. Can it become the accepted recovery checkpoint?
 
 <details><summary>Compare an approach</summary>
 
-For topology discovery, launch all hosts with `--worker=all` and initialize JAX before querying devices. This proves process/device discovery only. A training claim also needs explicit per-process inputs, a checked global update, synchronized outputs, and all worker receipts.
+A step label does not establish a globally committed snapshot. Require all participating workers, a completed compatible checkpoint and the declared restore protocol. Keep the previous accepted checkpoint on failure. The existing multi-host receipt tests a bounded same-process restore; fresh-process worker-loss recovery remains a separate qualification.
 
 </details>
 

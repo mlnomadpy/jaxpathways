@@ -231,7 +231,7 @@ visual_data={'panels':[{'kind':'bar','labels':['output 0','output 1'],'ylabel':'
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:24:09.478062+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:32:14.094675+00:00. JAX 0.9.2.
 
 ```text
 Jacobian: [[-0.7         0.4       ]
@@ -457,9 +457,17 @@ A VJP is seeded with an output weighting u. What does the returned input cotange
 
 <details><summary>Answer and explanation</summary>
 
-The gradient of the scalar weighted output u-transpose f(x), with u fixed.
+**1. The output at a displaced input x+u.**
+
+A VJP is a linear map on output sensitivity at a fixed input, not a finite perturbation of the forward function.
+
+**2. The gradient of the scalar weighted output u-transpose f(x), with u fixed. (correct)**
 
 The pullback applies the transpose Jacobian to the output weighting. It maps an output cotangent into the input space at the stored base point.
+
+**3. A complete Hessian for every possible loss.**
+
+A VJP uses first derivatives. A Hessian requires differentiating a gradient or composing appropriate derivative operations.
 
 </details>
 

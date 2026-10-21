@@ -11,7 +11,12 @@
         "Only on TPU"
       ],
       "correct": 1,
-      "explanation": "Independent gradient calculations help expose errors, but finite test cases do not prove all behavior."
+      "explanation": "Independent gradient calculations help expose errors, but finite test cases do not prove all behavior.",
+      "optionFeedback": [
+        "An independent derivative or finite difference helps test AD. Reusing AD as its own expected answer cannot detect a shared objective error.",
+        "Independent gradient calculations help expose errors, but finite test cases do not prove all behavior.",
+        "Gradient checks are useful on CPU too. Their limits concern tested inputs, tolerances and objective correctness, not a requirement for TPUs."
+      ]
     }
   ]
 }

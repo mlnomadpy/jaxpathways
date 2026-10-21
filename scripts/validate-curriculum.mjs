@@ -62,6 +62,10 @@ for(const lesson of authored){
   validateMath(c);
   assert.ok(c&&c.idea&&c.code&&c.output&&c.exercise&&c.solution&&c.explanation);
   assert.ok(Number.isInteger(c.answer)&&c.answer>=0&&c.answer<c.options.length);
+  assert.equal(c.optionFeedback?.length,c.options.length,`${lesson.id}: feedback must follow the displayed options`);
+  assert.ok(c.optionFeedback.every(item=>typeof item==='string'&&item.trim().length>0),`${lesson.id}: empty answer feedback`);
+  assert.equal(new Set(c.optionFeedback).size,c.options.length,`${lesson.id}: each choice needs its own reasoning`);
+  assert.equal(c.optionFeedback[c.answer],c.explanation,`${lesson.id}: correct-answer reasoning disagrees`);
   assert.ok(lesson.minutes>0);
   for(const [kind,path] of Object.entries(lesson.artifacts)){assert.ok(!path.includes('..'));const base=(kind==='source'||kind.endsWith('Source'))?'../':'../public/';readFileSync(new URL(base+path,import.meta.url));}
   const notebook=JSON.parse(readFileSync(new URL('../public/'+lesson.artifacts.notebook,import.meta.url)));

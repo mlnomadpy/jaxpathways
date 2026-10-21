@@ -298,7 +298,7 @@ visual_data = {'kind':'line','x':list(range(1,9)),'xlabel':'transition index','y
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:23:22.540523+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:31:22.256006+00:00. JAX 0.9.2.
 
 ```text
 return mean: 0.5848437547683716
@@ -503,9 +503,17 @@ Which axis should be summed to obtain one return per environment from a time-maj
 
 <details><summary>Answer and explanation</summary>
 
-The time axis
+**1. The time axis (correct)**
 
 Summing over time leaves one scalar for each episode. Averaging these episode returns gives the finite-episode performance objective.
+
+**2. The environment axis**
+
+Summing over environments merges different episodes. Keep one return per environment by reducing the time axis.
+
+**3. Both axes before averaging by live transitions**
+
+Reducing both axes gives one aggregate instead of per-environment returns. Inspect the intended output shape before computing a summary.
 
 </details>
 

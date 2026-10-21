@@ -98,3 +98,11 @@ To inspect the provided implementation after your attempt:
 # Run run command in terminal using the course Python environment
 python3 projects/weight-conversion/tests/check.py --implementation solution --stage all
 ```
+
+## Review handoff: explain a changed condition
+
+Introduce a LayerNorm epsilon or variance-convention mismatch while leaving tensor shapes valid. Which intermediate should be compared first?
+
+**Keep for review:** Identical input and loaded weights, ordered intermediate errors and an independent check of the first divergent normalization. Do not resolve a structural mismatch by loosening every tolerance.
+
+Write your prediction before opening the reference implementation. Distinguish what the existing checker verifies from your proposed extension; record any extension command, actual output and limitation separately. A reviewer should be able to locate the first failed contract from your saved evidence.

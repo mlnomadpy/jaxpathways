@@ -132,6 +132,11 @@
       "connection": "The fitted weight is \\(w=3/(1+\\lambda)\\). The training targets favor slope \\(3\\), while the validation targets in this constructed example favor slope \\(2\\). Moderate shrinkage moves the model toward the validation relationship; too much shrinkage moves it past that relationship and toward underfitting.\n\nSelect the penalty using the validation minimum, not the intersection of the curves or the smallest training error. Here that choice is \\(0.5\\). A zero validation error is a property of this tiny synthetic example, not a promise that regularization removes all error on real data.",
       "alt": "Training error and validation error select different penalties. The horizontal axis varies the ridge penalty \\(\\lambda\\). For each penalty, the model is fitted again. The vertical axis shows mean squared prediction error on training and validation data; it does not include the penalty term. At \\(\\lambda=0\\), training error is zero and validation error is \\(4\\). At \\(\\lambda=0.5\\), training error rises to \\(1\\), but validation error falls to zero. Increasing the penalty to \\(2\\) makes both errors \\(4\\). The validation curve therefore has a minimum between the extremes.",
       "code": "grid = jnp.linspace(0.0, 2.0, 41)\nvisual_data = {'kind': 'line', 'x': grid.tolist(), 'xlabel': 'ridge penalty', 'ylabel': 'mean squared prediction error', 'series': [{'label': 'training', 'y': [float(mse(ridge(X, y, float(a)), X, y)) for a in grid]}, {'label': 'validation', 'y': [float(mse(ridge(X, y, float(a)), Xv, yv)) for a in grid]}]}"
-    }
+    },
+    "optionFeedback": [
+      "Penalized training losses mix prediction error with a penalty and are not directly comparable evidence of held-out prediction quality.",
+      "Validation compares predictive performance of candidates fitted on training data. A separate final test set is for reporting after selection.",
+      "Repeatedly choosing settings on the test set makes it part of model selection. Use validation data, then evaluate the frozen choice on test data."
+    ]
   }
 }

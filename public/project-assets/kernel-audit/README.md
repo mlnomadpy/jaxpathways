@@ -80,3 +80,11 @@ python3 projects/kernel-audit/tests/check.py --implementation solution --stage a
 ```
 
 Public CPU stage passes are bounded correctness evidence. They are not TPU validation, a performance win, independent expert approval or a credential. Continue to the [scale synthesis assessment](../../assessments/scale.md), which requires profiling and partitioning reasoning in addition to a local kernel.
+
+## Review handoff: explain a changed condition
+
+Choose a shape that leaves an incomplete final tile. Predict invalid lanes and compare the represented-input oracle before measuring a supported target kernel.
+
+**Keep for review:** The boundary-case array, valid-lane reasoning, absolute/relative errors and a separately scoped target timing record. CPU interpretation and original-FP32 representation error answer different questions.
+
+Write your prediction before opening the reference implementation. Distinguish what the existing checker verifies from your proposed extension; record any extension command, actual output and limitation separately. A reviewer should be able to locate the first failed contract from your saved evidence.

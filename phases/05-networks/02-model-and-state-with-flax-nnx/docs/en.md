@@ -202,7 +202,7 @@ visual_data = {'kind': 'bar', 'x': list(range(len(leaves_vis))), 'labels': [f'le
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:21:06.702568+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:28:23.332910+00:00. JAX 0.9.2.
 
 ```text
 Trainable scalars: 13; other state: 1; clone counters: 1 2
@@ -404,9 +404,17 @@ What does excluding the counter from `nnx.Param` guarantee?
 
 <details><summary>Answer and explanation</summary>
 
-It is excluded from parameter gradients, but may still change in a forward pass
+**1. It is excluded from parameter gradients, but may still change in a forward pass (correct)**
 
 Trainability and mutability are different properties. Filtering controls differentiation; the forward function still controls state updates.
+
+**2. It can never change**
+
+Excluding a value from nnx.Param does not freeze it. State such as a counter can still change in the forward computation.
+
+**3. It is automatically saved to disk**
+
+State classification does not persist anything to disk. Saving and restoring requires an explicit checkpoint contract.
 
 </details>
 

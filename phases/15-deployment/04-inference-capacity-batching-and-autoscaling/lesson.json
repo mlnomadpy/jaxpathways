@@ -161,6 +161,11 @@
         "code": "# Step 3 — 3. Model a queue with an independent hand-check\ndef simulate_queue(arrival_ms,service_ms):\n    # Transfer the device result to the host for an independent NumPy comparison.\n    arrivals=np.asarray(arrival_ms,dtype=float)\n    if arrivals.ndim!=1 or np.any(~np.isfinite(arrivals)) or np.any(np.diff(arrivals)<0):\n        raise ValueError('arrivals must be a finite ordered vector')\n    if not np.isfinite(service_ms) or service_ms<=0:\n        raise ValueError('service duration must be positive milliseconds')\n    ready=0.\n    starts=[]\n    finishes=[]\n    for arrival in arrivals:\n        start=max(float(arrival),ready)\n        ready=start+service_ms\n        starts.append(start)\n        finishes.append(ready)\n    return np.array(starts),np.array(finishes),np.array(finishes)-arrivals\nhand_start,hand_finish,hand_latency=simulate_queue([0.,1.,4.],2.)\nnp.testing.assert_allclose(hand_start,[0.,2.,4.])\nnp.testing.assert_allclose(hand_finish,[2.,4.,6.])\nnp.testing.assert_allclose(hand_latency,[2.,3.,2.])\nrequest_index=np.arange(60)\nstable_arrivals=request_index*1.5*service_ms\noverloaded_arrivals=request_index*.6*service_ms\n_,_,stable_latency=simulate_queue(stable_arrivals,service_ms)\n_,_,overloaded_latency=simulate_queue(overloaded_arrivals,service_ms)\nassert np.allclose(stable_latency,service_ms)\nassert np.isclose(overloaded_latency[-1],24.6*service_ms)\nprint('measured batch-one service proxy (ms):',service_ms)\nprint('simulated last stable/overloaded response (ms):',stable_latency[-1],overloaded_latency[-1])",
         "explanation": "This simulator assumes one serial worker and a constant service duration derived from the measured median. It is not a load test, an HTTP server or an autoscaler."
       }
+    ],
+    "optionFeedback": [
+      "Dividing batch time by eight gives an amortized throughput cost, not each request’s elapsed latency. Requests still wait for batch execution.",
+      "Eight examples per four milliseconds gives two thousand per second when batches remain full. A request still waits for collection and the full execution, plus any other boundary costs.",
+      "Arrival rate and batching wait change latency. Measure the chosen traffic pattern instead of inferring a universal service guarantee."
     ]
   }
 }

@@ -251,6 +251,11 @@
         "code": "# Step 4 — Check reconstructed outputs against a bound: Every error must fit its stated bound.\nfor bits in (8, 4):\n    q, scale = quantize_weights(w, bits)\n    reconstructed = q.astype(np.float32) * scale\n    assert np.all(np.abs(reconstructed-w) <= scale / 2 + 1e-6)\n    # Independent error bound: |x deltaW| <= |x| |deltaW|.\n    error = np.abs(x @ reconstructed-reference)\n    bound = np.abs(x) @ np.broadcast_to(scale / 2, w.shape)\n    assert np.all(error <= bound + 1e-6)\n    print(\"W%dA32 simulated output error\" % bits, float(error.max()))",
         "explanation": "Every error must fit its stated bound. Move on to activation clipping and the affine integer experiment before calling the policy W8A8."
       }
+    ],
+    "optionFeedback": [
+      "Bit width alone is incomplete. Arithmetic, scale metadata, calibration and runtime support determine both behavior and practical benefit.",
+      "A filename or container format does not define tensor scales, calibration or accumulation. Write the numerical contract explicitly.",
+      "Smaller storage does not guarantee faster execution. Check native operator support, data movement and measured target latency."
     ]
   }
 }

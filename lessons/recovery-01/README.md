@@ -224,16 +224,16 @@ visual_data = {'kind': 'line', 'x': list(range(len(seen))), 'xlabel': 'position 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:21:23.552163+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:28:48.561775+00:00. JAX 0.9.2.
 
 ```text
 Batch sizes: [4, 4, 3]
 Example order: [9, 10, 4, 1, 0, 7, 6, 8, 2, 5, 3]
-Preparation seconds (local observation only): 0.01006391691043973
+Preparation seconds (local observation only): 0.014189708977937698
 Dataset SHA256: 1a81451a8fb32a1bf0ad6307ea19198153ab1603b37174c76c4d498e343e6892
 Batch sizes: [4, 4, 3]
 Example order: [9, 10, 4, 1, 0, 7, 6, 8, 2, 5, 3]
-Preparation seconds (local observation only): 1.837499439716339e-05
+Preparation seconds (local observation only): 2.9291026294231415e-05
 Dataset SHA256: 1a81451a8fb32a1bf0ad6307ea19198153ab1603b37174c76c4d498e343e6892
 Epoch one order: [4, 0, 5, 10, 6, 2, 1, 9, 7, 3, 8]
 Omitted IDs: [2, 3, 5]
@@ -431,9 +431,17 @@ What information is missing from a model-only checkpoint for mid-epoch recovery?
 
 <details><summary>Answer and explanation</summary>
 
-The order/cursor and dataset/configuration identity.
+**1. The order/cursor and dataset/configuration identity. (correct)**
 
 Model state cannot reconstruct which records should be read next.
+
+**2. The number of input columns is always enough.**
+
+Column definitions do not identify the next examples, shuffle state or configuration. Compare the exact next batch IDs after restore.
+
+**3. Nothing: parameters reveal consumed example IDs.**
+
+Parameters summarize updates and cannot reconstruct the input cursor. Save the loader state and data identity explicitly.
 
 </details>
 

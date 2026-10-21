@@ -54,3 +54,11 @@ python3 projects/scientific-inverse/tests/check.py --implementation solution --s
 ```
 
 Public reference checks establish behavior on bounded CPU fixtures. They do not establish independent scientific review, a certified competency, or accelerator performance. Continue with the [science synthesis assessment](../../assessments/science.md) for a changed problem and reviewer rubric.
+
+## Review handoff: explain a changed condition
+
+Repeat parameter fitting on two finer time grids at the same observation times. Could a different fitted parameter be compensating for discretization error?
+
+**Keep for review:** A table of step size, forward error, inferred parameter and sensitivity error against an independent reference. Separate solver convergence from identifiability and observation noise.
+
+Write your prediction before opening the reference implementation. Distinguish what the existing checker verifies from your proposed extension; record any extension command, actual output and limitation separately. A reviewer should be able to locate the first failed contract from your saved evidence.

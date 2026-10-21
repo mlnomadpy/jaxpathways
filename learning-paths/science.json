@@ -41,7 +41,7 @@
     "science"
   ],
   "modalityTrackIds": [],
-  "studyAdvice": "Work from the cooling model through batched trajectories, sensitivities and parameter fitting. At each step compare against the analytic solution before changing the physical rate or time grid. Use the deeper linear algebra and curvature lessons when parameters are hard to identify. Finish the inverse-problem project, then attempt the two-compartment assessment with its independent conservation check.",
+  "studyAdvice": "Work from the cooling model through batched trajectories, sensitivities and parameter fitting. At each step compare against the analytic solution before changing the physical rate or time grid. Use the deeper linear algebra and curvature lessons when parameters are hard to identify. Finish the inverse-problem project, then attempt the two-compartment assessment with its independent conservation check. For review, place solver-grid refinement beside parameter recovery. Explain which derivative belongs to the discretized program and which reference describes the continuous system.",
   "engineeringLessonIds": [
     "recovery-06"
   ]

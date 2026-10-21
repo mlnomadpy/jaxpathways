@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import assert from 'node:assert/strict';
 import { Window } from 'happy-dom';
+import { inlineMath } from '../src/lib/math.js';
 
 const base = (process.env.BASE_PATH || '/').replace(/\/$/, '') + '/';
 const origin = 'https://example.org';
@@ -79,7 +80,11 @@ for(const phase of course.phases){
  assert(doc.querySelector('h1').textContent.includes(g.question),phase.id+': missing guide heading');
  for(const id of ['readiness','milestones','transfer','completion'])assert(doc.getElementById(id),phase.id+': missing guide section');
  for(const lesson of phase.lessons)assert([...doc.querySelectorAll('a')].some(a=>a.getAttribute('href')===base+'lesson-'+lesson.id+'.html'),phase.id+': permanent lesson link omitted from guide');
- for(const value of [g.completion,g.furtherWork,g.transfer.approach])assert(doc.body.textContent.includes(value)||doc.body.innerHTML.includes(value.replace(/`([^`]+)`/g,'<code>$1</code>')),phase.id+': missing phase evidence or limits');
+ for(const value of [g.completion,g.furtherWork,g.transfer.approach]){
+  const expected=doc.createElement('div');expected.innerHTML=inlineMath(value);
+  assert(doc.body.textContent.includes(expected.textContent),phase.id+': missing phase evidence or limits');
+  for(const equation of expected.querySelectorAll('annotation[encoding="application/x-tex"]'))assert([...doc.querySelectorAll('annotation[encoding="application/x-tex"]')].some(node=>node.textContent===equation.textContent),phase.id+': phase reasoning lost its typeset math');
+ }
  assert.equal(doc.querySelectorAll('input,select,textarea').length,0,phase.id+': study guide should not require form entry');
  await releaseDocuments();
 }

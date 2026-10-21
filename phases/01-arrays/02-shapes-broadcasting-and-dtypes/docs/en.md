@@ -168,7 +168,7 @@ visual_data = {'kind': 'heatmap', 'values': (y - batch).tolist(), 'rows': ['obse
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:19:59.580056+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:35:27.356105+00:00. JAX 0.9.2.
 
 ```text
 [[11. 22. 33.]
@@ -376,9 +376,17 @@ Which offset shape adds one scalar to each row of a $(2, 3)$ batch?
 
 <details><summary>Answer and explanation</summary>
 
-$(2, 1)$
+**1. $(2,)$**
+
+Broadcasting aligns trailing dimensions, so a length-two vector cannot match the trailing length-three axis. Add a singleton feature axis.
+
+**2. $(2, 1)$ (correct)**
 
 $(2, 1)$ broadcasts across the three columns. Shape $(2,)$ conflicts with the trailing dimension $3$.
+
+**3. $(3, 2)$**
+
+This has the axes reversed. Write one offset per row and repeat it across the three columns using shape $(2,1)$.
 
 </details>
 

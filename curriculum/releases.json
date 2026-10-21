@@ -1,5 +1,19 @@
 [
   {
+    "version": "0.10.0",
+    "date": "2026-10-21",
+    "title": "Explain the result and defend the evidence",
+    "summary": "Add answer-specific teaching feedback, concrete transfer reasoning and review tasks throughout the course and book.",
+    "changes": [
+      "Authored distinct reasoning for all three choices in all 103 lesson checkpoints; preserved it in the interactive reader, Markdown, quiz JSON, notebooks and book solutions. Empty or invalid answers cannot record a pass, and later retries preserve an earlier pass.",
+      "Replaced the 22 phase transfer prompts with concrete cases and worked reasoning, including unequal batches, checkpoint counterexamples, solver error, uncertainty, RL cutoffs, precision and TPU evidence.",
+      "Added specific review handoffs to all 31 runnable project manuals and discussion cases with separate reviewer notes to all eleven synthesis assessments. These proposed extensions are distinguished from existing checker coverage.",
+      "Improved review guidance across ten pathways, seven career scenarios, four modality figure guides and three practical guides; added distinct recipe decisions and rejection evidence to all ten planned capstone briefs.",
+      "Corrected v5e Flex-start provisioning and cleanup, roofline units, v6e bandwidth, TPU7x device-versus-chip scope and overbroad warmup/runtime claims using current official documentation. No new physical TPU qualification or target-scale model training is claimed.",
+      "Prepared an author review guide and blank review record. Independent teaching review and novice validation remain pending; material maturity labels retain their evidence limits. Extended release source tracking to assessment content and planned-capstone briefs so later teaching edits cannot bypass version checks."
+    ]
+  },
+  {
     "version": "0.9.0",
     "date": "2026-10-21",
     "title": "Honest material status and focused contributions",

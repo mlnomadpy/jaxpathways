@@ -11,7 +11,12 @@
         "It becomes a Python list"
       ],
       "correct": 1,
-      "explanation": "The expression returns the updated value. Assign it to a name to keep it; \\(x\\) retains its original value."
+      "explanation": "The expression returns the updated value. Assign it to a name to keep it; \\(x\\) retains its original value.",
+      "optionFeedback": [
+        "The update expression creates a new array value. Compare x with the returned value; assignment to a new name does not mutate x.",
+        "The expression returns the updated value. Assign it to a name to keep it; \\(x\\) retains its original value.",
+        "The .at update preserves array semantics. Inspect the returned shape and dtype rather than expecting a Python list."
+      ]
     }
   ]
 }

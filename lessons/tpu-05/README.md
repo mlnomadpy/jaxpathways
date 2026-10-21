@@ -301,7 +301,7 @@ visual_data = {
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T00:02:36.742376+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:34:58.009898+00:00. JAX 0.9.2.
 
 ```text
 CPU route: python public/exercises/distributed-02.py
@@ -481,17 +481,25 @@ Each host feeds its 4 local chips (`32` sequences per host), yielding a synchron
 
 ## Check your understanding
 
-What happens if you launch a distributed JAX script on a 4-host `v5litepod-16` slice without `--worker=all`?
+You launch an ordinary TPU-VM SSH command on worker zero of a multi-host slice, without another launcher. What can happen?
 
 1. Google Cloud automatically merges the 4 Linux hosts into 1 host
-2. Only worker 0 starts Python, so `jax.distributed.initialize()` hangs waiting for the other 3 hosts (or 12 of the 16 TPU chips sit idle)
+2. Only that worker starts the command; distributed initialization or collectives can wait for the missing participants
 3. The script runs four times faster
 
 <details><summary>Answer and explanation</summary>
 
-Only worker 0 starts Python, so `jax.distributed.initialize()` hangs waiting for the other 3 hosts (or 12 of the 16 TPU chips sit idle)
+**1. Google Cloud automatically merges the 4 Linux hosts into 1 host**
 
-Each TPU VM worker has its own OS and Python process. Every worker must participate in the distributed program. gcloud --worker=all can launch them together; concurrent explicit worker commands or another supported job manager can do the same. Launching only one worker does not complete a global collective.
+An SSH command does not automatically launch Python on every worker. Use an explicit per-host launcher with matching configuration.
+
+**2. Only that worker starts the command; distributed initialization or collectives can wait for the missing participants (correct)**
+
+An explicit launcher must start every participating process with compatible configuration. --worker=all is one Cloud TPU API method; other orchestrators can do the same job. Initialization, data ownership and collected worker receipts still require separate checks.
+
+**3. The script runs four times faster**
+
+Omitting participating workers cannot accelerate a collective that requires them. It can leave distributed initialization or communication waiting.
 
 </details>
 

@@ -135,6 +135,11 @@
       "connection": "The global shape is \\((4,2)\\), so splitting its first axis across four devices gives each device a local piece with shape \\((1,2)\\). This is the spatial meaning of the row partition in the code. The numbers in the figure are ownership labels, not the original array’s contents.\n\nYou can check the interpretation by locating row \\(2\\), feature \\(1\\): its owner is device \\(2\\). These logical devices share the host CPU. The figure establishes where values are placed, not a measured speedup or the behavior of four physical accelerators.",
       "alt": "Four logical devices own four different rows. Each cell represents a position in the global array, and its number identifies the logical CPU device that owns that position. The colors are categories: device \\(3\\) is not “more powerful” than device \\(0\\). Both cells in row \\(0\\) belong to device \\(0\\); both cells in row \\(1\\) belong to device \\(1\\), and the same pattern continues through row \\(3\\). Horizontal bands show that this layout partitions rows while keeping each row’s features together.",
       "code": "owners = np.empty(host.shape, dtype=int)\nfor s in x.addressable_shards:\n    owners[s.index] = s.device.id\nvisual_data = {'kind': 'heatmap', 'values': owners.tolist(), 'unit': 'logical CPU device ID', 'rows': ['row ' + str(i) for i in range(4)], 'columns': ['feature 0', 'feature 1']}"
-    }
+    },
+    "optionFeedback": [
+      "Partitioning divides the mapped dimension; it does not change the global shape or create accelerator hardware.",
+      "P(data, None) partitions the first axis. Divide twelve rows among four devices and inspect addressable_shards rather than assuming replication.",
+      "These are logical CPU devices. They let you test partitioning semantics, but provide no evidence about TPU chips, interconnects or throughput."
+    ]
   }
 }

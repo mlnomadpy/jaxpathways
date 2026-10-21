@@ -141,6 +141,11 @@
         "code": "x = jnp.array([1., 2., 3.])\nassert jnp.allclose(compiled(x, mode=\"sum\"), 6.)\nassert jnp.allclose(compiled(x, mode=\"mean\"), 2.)",
         "explanation": "The outputs 6 and 2 distinguish the two reduction rules while using the same data array."
       }
+    ],
+    "optionFeedback": [
+      "Making a value static specializes on it and can trigger a new compilation when it changes. Use runtime control flow when the predicate is data.",
+      "A runtime decision belongs in the staged computation. Static configuration is useful for a small program choice, but making changing data static can create unnecessary specializations.",
+      "Returning zero hides the original contract failure and changes the function. Express both branches with compatible JAX values instead."
     ]
   }
 }

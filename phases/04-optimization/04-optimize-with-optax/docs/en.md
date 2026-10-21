@@ -182,7 +182,7 @@ visual_data = {'kind': 'line', 'x': x.tolist(), 'xlabel': 'input', 'ylabel': 'pr
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:20:49.580340+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:28:06.898731+00:00. JAX 0.9.2.
 
 ```text
 Parameters: {'bias': Array(1., dtype=float32), 'weight': Array(1.9999996, dtype=float32)}
@@ -393,9 +393,17 @@ What should a training step retain besides updated parameters for a stateful opt
 
 <details><summary>Answer and explanation</summary>
 
-The new optimizer state returned by update
+**1. Only the final loss**
+
+The scalar loss does not contain the optimizer moments or update count. Keep the returned optimizer state with the parameters.
+
+**2. The new optimizer state returned by update (correct)**
 
 State carries momentum or adaptive statistics between steps. Reinitializing it discards that history.
+
+**3. A freshly initialized state every time**
+
+Reinitialization discards history and changes later updates. Compare two steps with retained state against two first-step updates.
 
 </details>
 

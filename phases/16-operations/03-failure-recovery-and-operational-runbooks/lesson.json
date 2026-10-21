@@ -152,6 +152,11 @@
         "code": "# Step 4 — Rehearse a failure and verify every resumed update\n# Keep this run’s database and artifacts in a scratch directory removed on exit.\nwith tempfile.TemporaryDirectory(prefix='ops-recovery-') as folder:\n    base=Path(folder)\n    uninterrupted=launch(base/'full')\n    failed=launch(base/'resume',dict(fail_after=3))\n    committed=json.loads((base/'resume'/'checkpoint.json').read_text())\n    assert committed['step']==2\n    resumed=launch(base/'resume',dict(resume=True))\n    final_full=json.loads((base/'full'/'checkpoint.json').read_text())\n    final_resumed=json.loads((base/'resume'/'checkpoint.json').read_text())\nassert failed['status']=='failed' and resumed['status']=='completed'\nassert final_full==final_resumed\nfull_events={e['step']:e for e in uninterrupted['events'] if e['event']=='progress'}\nresume_events=[e for e in resumed['events'] if e['event']=='progress']\nassert [e['step'] for e in resume_events]==[3,4,5,6,7,8]\nassert all(e['state_hash']==full_events[e['step']]['state_hash'] for e in resume_events)\nprint('restored step:',committed['step'],'replayed updates:',[e['step'] for e in resume_events])\nprint('all next-update state hashes match:',final_full==final_resumed)",
         "explanation": "All files stay inside one temporary drill directory; the two runs have independent output paths."
       }
+    ],
+    "optionFeedback": [
+      "Starting a process does not show correct continuation. Compare the next batches, state and losses with an uninterrupted baseline.",
+      "Recovery preserves a continuation, so the first resumed update and subsequent state are the relevant evidence. Startup and a finite scalar loss are much weaker.",
+      "A finite loss can belong to a different trajectory. Test state equality and several subsequent updates at the same boundary."
     ]
   }
 }

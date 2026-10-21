@@ -242,7 +242,7 @@ visual_data={'kind':'bar','labels':['overall (10)','answerable (9)','unsupported
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:26:31.002086+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:34:17.984127+00:00. JAX 0.9.2.
 
 ```text
 Observed replay scores: [{'overall': 0.9, 'answerable': 1.0, 'unanswerable': 0.0}, {'overall': 1.0, 'answerable': 1.0, 'unanswerable': 1.0}]
@@ -430,9 +430,17 @@ The controlled replay suite passes every case. What is established?
 
 <details><summary>Answer and explanation</summary>
 
-The evaluator accepts these fixtures; live model and held-out application evaluation remain separate.
+**1. The live LLM is safe and accurate for arbitrary requests.**
 
-LLMOps versions the whole application: model and tokenizer, prompt, retrieval corpus and index, tools, decoding configuration, evaluators and runtime. A model weight version alone cannot reproduce a retrieval-augmented or tool-using answer.
+Fixtures cover their specified cases, not every live prompt or attack. Preserve scope and add held-out adversarial cases.
+
+**2. The evaluator accepts these fixtures; live model and held-out application evaluation remain separate. (correct)**
+
+A passing fixture suite establishes that the evaluator accepts those declared cases. It does not establish live application safety, general quality or coverage of unseen prompts. Version the model, prompt, retrieval inputs, tools and evaluator, and keep independent held-out cases.
+
+**3. Prompt versions no longer need recording.**
+
+Evaluator success does not remove the need to version prompts, data and models. Record those inputs to make the result reproducible.
 
 </details>
 

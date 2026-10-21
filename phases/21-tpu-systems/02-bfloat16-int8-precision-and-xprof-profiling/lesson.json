@@ -106,7 +106,7 @@
       "Because `bfloat16` only works inside a profiler context"
     ],
     "answer": 1,
-    "explanation": "Separating warmup from the traced steps ensures the XProf timeline reflects actual steady-state device execution, host input dispatch, and ICI collectives.",
+    "explanation": "Warming and synchronizing the same signature reduces initial compilation in the recorded window. Inspect the trace to confirm: new shapes or static arguments can still compile, and cache state can still affect timing. Record target latency outside profiler overhead too.",
     "diagnosis": "If XProf shows large gaps between device steps on your TPU VM, check for un-jitted Python work, host-side NumPy conversions, or synchronous `print(array)` calls inside the training step.",
     "takeaways": [
       "Use `bfloat16` matmul operands with `preferred_element_type=jnp.float32` accumulation, and use per-channel scales when quantizing weights to `int8`.",
@@ -133,6 +133,11 @@
     },
     "runtime": {
       "kind": "cpu"
-    }
+    },
+    "optionFeedback": [
+      "Tracing should observe execution, not delete model state. Warmup prepares the tested executable before the recorded window.",
+      "Warming and synchronizing the same signature reduces initial compilation in the recorded window. Inspect the trace to confirm: new shapes or static arguments can still compile, and cache state can still affect timing. Record target latency outside profiler overhead too.",
+      "Profiling is not restricted to BF16. Record the precision used and the actual operations in the captured target workload."
+    ]
   }
 }

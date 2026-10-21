@@ -181,6 +181,11 @@
         "code": "# Step 3 — Write bytes, reload and compare: The output agrees with hand arithmetic.\n# Keep this run’s database and artifacts in a scratch directory removed on exit.\nwith tempfile.TemporaryDirectory() as folder:\n    path = Path(folder) / \"dense.jaxexport\"\n    path.write_bytes(artifact.serialize())\n    restored = export.deserialize(path.read_bytes())\n    # Transfer the device result to the host for an independent NumPy comparison.\n    sample = np.array([[1., 2., -1.]], np.float32)\n    # Transfer the device result to the host for an independent NumPy comparison.\n    actual = np.asarray(restored.call(sample))\n    np.testing.assert_allclose(actual, [[3.1, -.45]], atol=1e-6)\n    print(\"Verified serialized bytes:\", path.stat().st_size)",
         "explanation": "The output agrees with hand arithmetic. File size is recorded rather than hard-coded because the representation can change with the JAX version. Next, run the fresh-interpreter experiment."
       }
+    ],
+    "optionFeedback": [
+      "A successful round trip verifies the tested artifact and local runtime. Other consumers, device kernels and request systems require separate checks.",
+      "Other targets may lack operators or lower them differently. Preserve the tested CPU scope until the actual target runner is exercised.",
+      "An exported function is an artifact, not a running service. Loading, request validation and serving behavior need their own tests."
     ]
   }
 }

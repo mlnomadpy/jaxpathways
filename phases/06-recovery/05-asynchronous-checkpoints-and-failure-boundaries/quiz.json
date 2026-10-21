@@ -11,7 +11,12 @@
         "Retain the previous accepted checkpoint and investigate the failed attempt."
       ],
       "correct": 2,
-      "explanation": "A directory is not the application’s acceptance signal. Completion, restoration checks and publication must succeed before replacing the previous recovery point."
+      "explanation": "A directory is not the application’s acceptance signal. Completion, restoration checks and publication must succeed before replacing the previous recovery point.",
+      "optionFeedback": [
+        "Directory creation can precede a failed asynchronous write. A candidate becomes accepted only after completion and validation.",
+        "Deleting the last accepted checkpoint removes the recovery path. Retain it until a new candidate has completed and passed validation.",
+        "A directory is not the application’s acceptance signal. Completion, restoration checks and publication must succeed before replacing the previous recovery point."
+      ]
     }
   ]
 }

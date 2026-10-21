@@ -11,7 +11,12 @@
         "Only if we use float64"
       ],
       "correct": 1,
-      "explanation": "Independent feature directions determine uniqueness. Extra precision cannot create information missing from the design matrix."
+      "explanation": "Independent feature directions determine uniqueness. Extra precision cannot create information missing from the design matrix.",
+      "optionFeedback": [
+        "Dependent columns admit a nonzero null-space direction. Move the weights in that direction and check whether predictions change.",
+        "Independent feature directions determine uniqueness. Extra precision cannot create information missing from the design matrix.",
+        "Higher precision can reduce roundoff but cannot make linearly dependent columns independent. Inspect rank or singular values."
+      ]
     }
   ]
 }

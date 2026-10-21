@@ -25,7 +25,7 @@ When you create a Cloud TPU VM, Google Cloud allocates a Linux host machine dire
 
 Because your commands run on the TPU VM's Linux host, standard Linux environment rules still apply: you create a Python virtual environment (`.venv`), install `jax[tpu]` from the libtpu wheel index, and run Python scripts there. When Python imports `jax`, `libtpu` initializes the attached TPU chips and `jax.default_backend()` reports `'tpu'`.
 
-Every Cloud TPU VM bills while it exists (`READY` or `STOPPED`), even if no Python process is running. Therefore, a complete TPU workflow always pairs creation (`tpu-vm create`) and verification with artifact retrieval (`tpu-vm scp`) and verified deletion (`tpu-vm delete` followed by `tpu-vm list`).
+A completed Python process does not release a READY TPU. The pricing page describes TPU charges in the READY state; storage and other resources can have separate charges. Do not assume that every stopped VM or unallocated queued request incurs TPU compute charges. This lab ends by retrieving evidence, deleting its allocated VM and owning queued request, and checking the named resources are absent. A control-plane absence check is cleanup evidence, not a final billing statement.
 
 $$
 N_{\text{chips}} = \text{device\_count}(\texttt{'tpu'}), \qquad \text{HBM}_{\text{total}} = N_{\text{chips}} \times \text{HBM}_{\text{chip}}
@@ -53,22 +53,22 @@ Why does creating a Cloud TPU VM and seeing `STATUS: READY` in `gcloud` not prov
 
 ## 1. Choose how to get a TPU: Colab/Kaggle vs Google Cloud TPU VM
 
-You can complete every TPU verification in this course using either a hosted notebook TPU or a Google Cloud TPU VM:
+Choose the runtime that matches the task. A hosted notebook can support a small single-process backend check if TPU access is available. It does not provide every topology, shell permission or multi-host workflow in this course. Availability and quotas depend on the provider.
 
-- **Route 1 — Hosted Notebook TPU (Google Colab or Kaggle)**: Fastest zero-CLI start. In Google Colab, open **Runtime → Change runtime type → Hardware accelerator → TPU** (such as TPU v5e-1 or TPU v2-8). Skip `gcloud` provisioning and run the Python runtime-receipt verifier directly inside a notebook cell.
-- **Route 2A — Direct Cloud TPU VM (`gcloud compute tpus tpu-vm create`)**: Best when you want direct SSH and `scp` access to a single-host `v5litepod-4` (`4` chips) or `v6e-4` (`4` chips) VM in your own GCP project.
-- **Route 2B — Flex-start Queued Provisioning (`gcloud beta compute instance-groups managed create`)**: Recommended when on-demand TPU capacity in a zone is busy or you want a bounded `--max-run-duration` that automatically terminates the instance when the lease expires.
+For the v5e lab below, use the Cloud TPU API: direct TPU VM creation or a bounded Flex-start queued resource. Keep creation, status, SSH and deletion commands within that API. Google now recommends Compute Engine or GKE for newer features. Its Compute Engine TPU Flex-start workflow uses supported TPU machine types and MIGs, but does not support GPU-style resize requests. Do not mix that workflow with this v5e queued-resource example. See both linked API guides before adapting the lab.
 
 ## 2. Authenticate `gcloud`, enable the TPU API, and check quota
 
 On your local workstation (or inside Google Cloud Shell), set your project ID, zone, and TPU name, enable `tpu.googleapis.com`, and inspect the available accelerator types in your chosen zone before requesting hardware. Using a single-host slice such as `v5litepod-4` (`4` chips on `1` host) avoids multi-host coordination while still letting you run real `jax.pmap` and mesh sharding across $4$ TPU devices.
+
+The example zone is a starting choice for v5e Flex-start, not a capacity promise. Check supported zones, quota and current pricing before creating a request. Set both a queue expiry and a run duration; a budget alert is not a spending cap.
 
 **Configure project, zone, and enable the Cloud TPU API**
 
 ```bash
 # Configure project, zone, and enable the Cloud TPU API
 export PROJECT_ID="your-gcp-project-id"
-export ZONE="us-west1-c"
+export ZONE="us-west4-a"
 export TPU_NAME="jax-tpu-course"
 export ACCELERATOR_TYPE="v5litepod-4"
 export RUNTIME_VERSION="v2-alpha-tpuv5-lite"
@@ -79,11 +79,11 @@ gcloud services enable tpu.googleapis.com
 gcloud compute tpus accelerator-types list --zone="$ZONE"
 ```
 
-**Expected:** Lists the TPU accelerator types supported in $ZONE, including v5litepod-1, v5litepod-4, and v5litepod-8.
+**Expected:** Lists the accelerator types supported in the selected zone. Confirm the requested type is listed; quota and free capacity are separate checks.
 
-## 3. Create the Cloud TPU VM (Direct or Flex-start) and verify READY state
+## 3. Select one Cloud TPU API provisioning route
 
-Run either the direct `tpu-vm create` command (add `--spot` if you are using Spot quota) or the Flex-start template + managed instance group commands below. Wait until `describe` reports `state: READY`.
+Choose one route, not both. A direct VM must reach READY. A Flex-start request must reach ACTIVE and its named VM must become READY before SSH. A queued request is not proof that capacity has been allocated. Inspect FAILED or expired requests and delete them instead of leaving a future allocation behind.
 
 **Route 2A: Create a single-host Cloud TPU v5e-4 VM directly**
 
@@ -101,25 +101,24 @@ gcloud compute tpus tpu-vm describe "$TPU_NAME" \
 
 **Expected:** Outputs READY, v5litepod-4, and the internal IP address of the newly provisioned TPU VM.
 
-**Route 2B: Alternative Flex-start queued provisioning with automatic 4-hour termination**
+**Route 2B: Bounded Cloud TPU API Flex-start request for v5e**
 
 ```bash
-# Route 2B: Alternative Flex-start queued provisioning with automatic 4-hour termination
-gcloud beta compute instance-templates create tpu-course-flex-tmpl \
-  --machine-type=ct5lp-hightpu-4t \
-  --provisioning-model=FLEX_START \
-  --max-run-duration=4h \
-  --instance-termination-action=DELETE \
-  --reservation-affinity=none
+export QUEUED_RESOURCE_ID="${TPU_NAME}-request"
+gcloud alpha compute tpus queued-resources create "$QUEUED_RESOURCE_ID" \
+  --project="$PROJECT_ID" --zone="$ZONE" --node-id="$TPU_NAME" \
+  --accelerator-type="$ACCELERATOR_TYPE" --runtime-version="$RUNTIME_VERSION" \
+  --provisioning-model=flex-start --max-run-duration=1h \
+  --valid-until-duration=30m
 
-gcloud beta compute instance-groups managed create tpu-course-mig \
-  --zone="$ZONE" --template=tpu-course-flex-tmpl --size=0
-
-gcloud beta compute instance-groups managed resize-requests create tpu-course-mig \
-  --zone="$ZONE" --resize-request=req-tpu-1 --resize-by=1
+gcloud alpha compute tpus queued-resources describe "$QUEUED_RESOURCE_ID" \
+  --project="$PROJECT_ID" --zone="$ZONE" --format='value(state.state)'
+# Continue only after ACTIVE, then check the named VM is READY.
+gcloud compute tpus tpu-vm describe "$TPU_NAME" \
+  --project="$PROJECT_ID" --zone="$ZONE" --format='value(state)'
 ```
 
-**Expected:** Creates a Flex-start request for a 4-chip TPU v5e instance that automatically deletes after 4 hours.
+**Expected:** The queue can wait or fail. Proceed only after ACTIVE and READY; the requested run duration starts after allocation. No capacity or cost-free execution is promised.
 
 ## 4. SSH into the TPU VM, create `.venv`, and install `jax[tpu]`
 
@@ -150,12 +149,20 @@ Before claiming a TPU runtime is ready—or before starting a long run—execute
 **Copy back any receipts and delete the Cloud TPU VM to stop billing**
 
 ```bash
-# Copy back any receipts and delete the Cloud TPU VM to stop billing
-gcloud compute tpus tpu-vm delete "$TPU_NAME" --zone="$ZONE" --quiet
-gcloud compute tpus tpu-vm list --zone="$ZONE"
+# First copy the receipt/checkpoints you intend to keep from the VM.
+# Flex-start route: delete the owning request and its allocated VM.
+if [ -n "${QUEUED_RESOURCE_ID:-}" ]; then
+  gcloud alpha compute tpus queued-resources delete "$QUEUED_RESOURCE_ID" \
+    --project="$PROJECT_ID" --zone="$ZONE" --force --quiet
+else
+  gcloud compute tpus tpu-vm delete "$TPU_NAME" \
+    --project="$PROJECT_ID" --zone="$ZONE" --quiet
+fi
+gcloud compute tpus tpu-vm list --project="$PROJECT_ID" --zone="$ZONE"
+gcloud alpha compute tpus queued-resources list --project="$PROJECT_ID" --zone="$ZONE"
 ```
 
-**Expected:** Deletes the TPU VM and confirms Listed 0 items so no idle TPU resource remains.
+**Expected:** The named VM and, if used, its queued request are absent. Other resources may remain; inspect their ownership rather than deleting unrelated work. Check storage retention and billing separately.
 
 ## Write the runtime contract and synchronized pmap verifier
 
@@ -347,7 +354,7 @@ visual_data = {
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:27:06.078773+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:35:34.263030+00:00. JAX 0.9.2.
 
 ```text
 Verified runtime receipt: {"contract_ok": true, "device_count": 1, "device_kinds": ["cpu"], "expected_backend": "cpu", "expected_sum_of_squares": 140.0, "jax": "0.9.2", "local_device_count": 1, "observed_backend": "cpu", "pmap_sum_of_squares": 140.0, "python": "3.14.3", "receipt_sha256": "4ddc0cbb323fe3bd"}
@@ -514,17 +521,25 @@ On a 4-chip TPU VM (`v5litepod-4` or `v6e-4`), `x` has shape `(4, 8)` and the sy
 
 ## Check your understanding
 
-Which command sequence proves that your Cloud TPU VM is both usable by JAX and no longer billing when you finish?
+Which workflow records a small synchronized TPU computation and checks that the lab’s cloud resources were removed?
 
 1. Running `gcloud compute tpus tpu-vm create` and closing your laptop lid when done
-2. Running a Python check on the TPU VM that verifies `jax.default_backend() == 'tpu'` and a synchronized computation, copying receipts back, running `gcloud compute tpus tpu-vm delete`, and confirming `list` is empty
+2. Assert the remote TPU backend, run and synchronize the verifier, retrieve evidence, delete the VM and any owning request, then check their absence
 3. Checking `pip list` on your local laptop
 
 <details><summary>Answer and explanation</summary>
 
-Running a Python check on the TPU VM that verifies `jax.default_backend() == 'tpu'` and a synchronized computation, copying receipts back, running `gcloud compute tpus tpu-vm delete`, and confirming `list` is empty
+**1. Running `gcloud compute tpus tpu-vm create` and closing your laptop lid when done**
 
-Only an in-process JAX check on the TPU VM confirms TPU device discovery and execution, and only `tpu-vm delete` verified by `tpu-vm list` stops Cloud TPU VM billing.
+Closing a laptop does not stop a remote job or release capacity. Retrieve the receipt, then inspect both the VM and any owning request.
+
+**2. Assert the remote TPU backend, run and synchronize the verifier, retrieve evidence, delete the VM and any owning request, then check their absence (correct)**
+
+The computation receipt identifies a bounded tested runtime. The separate cleanup checks cover the named VM and request. Neither a small arithmetic pass nor an empty resource listing proves all workload behavior or a final bill.
+
+**3. Checking `pip list` on your local laptop**
+
+Local packages describe the workstation, not the remote backend. Execute and synchronize the verifier on the TPU host.
 
 </details>
 
@@ -549,4 +564,7 @@ Save your predictions, modified code, terminal outputs, and reasoning in your en
 - [Google Cloud TPU VM user guide and architecture](https://cloud.google.com/tpu/docs/system-architecture-tpu-vm)
 - [Manage TPU VMs with gcloud](https://cloud.google.com/tpu/docs/managing-tpus-tpu-vm)
 - [JAX installation for Cloud TPU](https://docs.jax.dev/en/latest/installation.html)
+- [Cloud TPU API Flex-start requests (checked 2026-10-21)](https://docs.cloud.google.com/tpu/docs/request-using-flex-start)
+- [Compute Engine TPU Flex-start and MIG limitations](https://docs.cloud.google.com/tpu/docs/create-flex-start-compute)
+- [Cloud TPU pricing and READY-state charges](https://cloud.google.com/tpu/pricing)
 

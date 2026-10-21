@@ -11,7 +11,12 @@
         "A scale-invariant objective whose positive rescaling leaves downstream KL regularization unchanged."
       ],
       "correct": 0,
-      "explanation": "A shared additive offset cancels from every pairwise probability."
+      "explanation": "A shared additive offset cancels from every pairwise probability.",
+      "optionFeedback": [
+        "A shared additive offset cancels from every pairwise probability.",
+        "Pairwise losses are unchanged by a shared score offset for each compared pair. They do not identify an absolute utility zero.",
+        "Changing reward scale changes its balance with the KL penalty. Compare the terms in the actual policy objective."
+      ]
     }
   ]
 }

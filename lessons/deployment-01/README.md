@@ -209,7 +209,7 @@ visual_data = {'kind': 'panels', 'panels': [{'kind': 'heatmap', 'title': 'Input 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:24:23.045594+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:32:32.841870+00:00. JAX 0.9.2.
 
 ```text
 Matched dense outputs: [[ 3.1  -0.45]
@@ -417,9 +417,17 @@ The Dense predictions match after transposing weights. What has been established
 
 <details><summary>Answer and explanation</summary>
 
-The tested inference mapping matches for these inputs.
+**1. The tested inference mapping matches for these inputs. (correct)**
 
 The comparison establishes bounded numerical equivalence. Training state, other operators, shapes and target runtime support each need their own evidence.
+
+**2. Optimizer and random state are now equivalent.**
+
+Inference-weight parity does not map optimizer history or random state. Training continuation requires a larger conversion contract.
+
+**3. Any runtime can execute the model.**
+
+A tested Dense mapping cannot establish compatibility with every runtime, operator or architecture. Expand cases before expanding the claim.
 
 </details>
 

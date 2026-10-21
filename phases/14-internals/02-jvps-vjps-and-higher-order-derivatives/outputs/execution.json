@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "internals-02",
-  "contentHash": "f4f338a6363e91aead0de90f4a94c243ed6575e7bbca0a1d42397536147f4a61",
-  "executedAt": "2026-10-20T22:24:09.478062+00:00",
+  "contentHash": "2947ac9cf1adda4b1a171abcd11a2cd406196d2bede49df0128b90993ab0de4e",
+  "executedAt": "2026-10-21T11:32:14.094675+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,

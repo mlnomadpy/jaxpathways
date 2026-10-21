@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "recovery-01",
-  "contentHash": "d29d2a038f4c10ad4dd40f280b7b8a5acd01d4e62a11367981b6e93bd6c94b88",
-  "executedAt": "2026-10-20T22:21:23.552163+00:00",
+  "contentHash": "1dc6ee64127bb87a41ed513d7f6b6ed898b983af084d35d5c0c9c8ff3ab94c38",
+  "executedAt": "2026-10-21T11:28:48.561775+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -11,7 +11,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Batch sizes: [4, 4, 3]\nExample order: [9, 10, 4, 1, 0, 7, 6, 8, 2, 5, 3]\nPreparation seconds (local observation only): 0.01006391691043973\nDataset SHA256: 1a81451a8fb32a1bf0ad6307ea19198153ab1603b37174c76c4d498e343e6892\nBatch sizes: [4, 4, 3]\nExample order: [9, 10, 4, 1, 0, 7, 6, 8, 2, 5, 3]\nPreparation seconds (local observation only): 1.837499439716339e-05\nDataset SHA256: 1a81451a8fb32a1bf0ad6307ea19198153ab1603b37174c76c4d498e343e6892\nEpoch one order: [4, 0, 5, 10, 6, 2, 1, 9, 7, 3, 8]\nOmitted IDs: [2, 3, 5]\nCopy preserves fingerprint; reordered source and edited labels invalidate it.\nPASS: recovery-01\n",
+  "stdout": "Batch sizes: [4, 4, 3]\nExample order: [9, 10, 4, 1, 0, 7, 6, 8, 2, 5, 3]\nPreparation seconds (local observation only): 0.014189708977937698\nDataset SHA256: 1a81451a8fb32a1bf0ad6307ea19198153ab1603b37174c76c4d498e343e6892\nBatch sizes: [4, 4, 3]\nExample order: [9, 10, 4, 1, 0, 7, 6, 8, 2, 5, 3]\nPreparation seconds (local observation only): 2.9291026294231415e-05\nDataset SHA256: 1a81451a8fb32a1bf0ad6307ea19198153ab1603b37174c76c4d498e343e6892\nEpoch one order: [4, 0, 5, 10, 6, 2, 1, 9, 7, 3, 8]\nOmitted IDs: [2, 3, 5]\nCopy preserves fingerprint; reordered source and edited labels invalidate it.\nPASS: recovery-01\n",
   "notebookCells": [
     {
       "sourceHash": "e78ec54a582ee347617fb616386906ebc6dced452326308a2ddb63ff2dba9d7c",
@@ -30,7 +30,7 @@
           "text": [
             "Batch sizes: [4, 4, 3]\n",
             "Example order: [9, 10, 4, 1, 0, 7, 6, 8, 2, 5, 3]\n",
-            "Preparation seconds (local observation only): 0.009791667107492685\n",
+            "Preparation seconds (local observation only): 0.0174729167483747\n",
             "Dataset SHA256: 1a81451a8fb32a1bf0ad6307ea19198153ab1603b37174c76c4d498e343e6892\n"
           ]
         }
@@ -45,7 +45,7 @@
           "text": [
             "Batch sizes: [4, 4, 3]\n",
             "Example order: [9, 10, 4, 1, 0, 7, 6, 8, 2, 5, 3]\n",
-            "Preparation seconds (local observation only): 2.2124964743852615e-05\n",
+            "Preparation seconds (local observation only): 5.808332934975624e-05\n",
             "Dataset SHA256: 1a81451a8fb32a1bf0ad6307ea19198153ab1603b37174c76c4d498e343e6892\n"
           ]
         }

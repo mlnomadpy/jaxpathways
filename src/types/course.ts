@@ -68,6 +68,7 @@ export interface LessonContent {
   options: string[];
   answer: number;
   explanation: string;
+  optionFeedback: string[];
   diagnosis?: string;
   takeaways?: string[];
   references?: { title: string; url: string }[];

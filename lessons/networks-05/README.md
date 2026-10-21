@@ -185,7 +185,7 @@ visual_data = {'kind': 'line', 'x': list(range(len(good))), 'xlabel': 'pre-updat
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:21:22.606387+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:28:46.310854+00:00. JAX 0.9.2.
 
 ```text
 Stable final weight: 1.999999761581421 unstable pre-update [weight,loss,|gradient|]:
@@ -402,9 +402,17 @@ Why does scaling both $x$ and $y$ by ten require a different stable step-size ra
 
 <details><summary>Answer and explanation</summary>
 
-The squared-loss curvature grows by $100$
+**1. The squared-loss curvature grows by $100$ (correct)**
 
 Both the residual scale and its weight derivative scale by ten, so the gradient and curvature scale by $100$. This is specific to the squared objective and paired scaling.
+
+**2. Autodiff stops working on scaled inputs**
+
+Scaling inputs changes gradient curvature even when AD remains correct. Derive the squared input factor in the Hessian.
+
+**3. The number of observations changes**
+
+Multiplying values does not add observations. Compare the data shape with the scale of the quadratic loss.
 
 </details>
 

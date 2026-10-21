@@ -134,6 +134,11 @@
         "code": "assert jnp.allclose(x, jnp.array([1.,2.,3.,4.]))\nassert jnp.allclose(y, jnp.array([1.,20.,3.,4.]))\nassert jnp.allclose(z, jnp.array([6.,2.,8.,4.]))",
         "explanation": "Checking x itself makes the immutability behavior observable; the other checks verify the selected indices and values."
       }
+    ],
+    "optionFeedback": [
+      "The update expression creates a new array value. Compare x with the returned value; assignment to a new name does not mutate x.",
+      "The expression returns the updated value. Assign it to a name to keep it; \\(x\\) retains its original value.",
+      "The .at update preserves array semantics. Inspect the returned shape and dtype rather than expecting a Python list."
     ]
   }
 }

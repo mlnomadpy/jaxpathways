@@ -11,7 +11,12 @@
         "The standard error of the average decreases, while the distribution of an individual reading stays the same"
       ],
       "correct": 2,
-      "explanation": "For independent draws the average has variance \\(\\sigma^2/N\\); a new reading still has variance \\(\\sigma^2\\). These are different random variables."
+      "explanation": "For independent draws the average has variance \\(\\sigma^2/N\\); a new reading still has variance \\(\\sigma^2\\). These are different random variables.",
+      "optionFeedback": [
+        "The mean becomes more precisely estimated while individual draws remain variable. Compare the sampling distribution with the distribution of sample means.",
+        "Dividing variance by sample count describes uncertainty in the mean estimator, not the variability of one future reading.",
+        "For independent draws the average has variance \\(\\sigma^2/N\\); a new reading still has variance \\(\\sigma^2\\). These are different random variables."
+      ]
     }
   ]
 }

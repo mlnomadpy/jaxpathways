@@ -327,7 +327,7 @@ visual_data = {'kind': 'bar', 'x': list(range(len(x))), 'labels': [f'x[{i}]' for
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:19:52.582445+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:26:35.183891+00:00. JAX 0.9.2.
 
 ```text
 Python: 3.14.3
@@ -389,9 +389,17 @@ Which evidence lets another learner reproduce your environment?
 
 <details><summary>Answer and explanation</summary>
 
-Python/package versions, device information, and the script
+**1. A screenshot of the final number only**
+
+A screenshot records the result, but leaves the inputs and computation hidden. Give another learner the script and environment record so they can try to reproduce it.
+
+**2. Python/package versions, device information, and the script (correct)**
 
 The script records what ran; versions and device information record where it ran. CPU success is separate from TPU compatibility.
+
+**3. The name of your editor**
+
+The editor does not determine the numerical backend or package APIs. Record Python, package versions, devices and the runnable script.
 
 </details>
 

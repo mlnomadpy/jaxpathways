@@ -11,7 +11,12 @@
         "To force a different result"
       ],
       "correct": 1,
-      "explanation": "Without waiting, elapsed time can primarily measure dispatch rather than the completion of the numerical work."
+      "explanation": "Without waiting, elapsed time can primarily measure dispatch rather than the completion of the numerical work.",
+      "optionFeedback": [
+        "Waiting changes when the host proceeds, not the derivative. Compare the numerical results before and after synchronization.",
+        "Without waiting, elapsed time can primarily measure dispatch rather than the completion of the numerical work.",
+        "Synchronization waits for completion; it does not choose or constrain the answer. Without it, a timer can mostly measure dispatch."
+      ]
     }
   ]
 }

@@ -82,3 +82,11 @@ python3 projects/mlp-classifier/tests/check.py --stage 3 --implementation projec
 ```
 
 A CPU receipt establishes execution in one environment. It is verified separately from TPU behavior, generalization outside these perturbed corners, secure deployment, or independently reviewed competency.
+
+## Review handoff: explain a changed condition
+
+Replace the evaluation distribution with a declared class imbalance while keeping the trained model fixed. Which baseline and per-class errors change the interpretation of accuracy?
+
+**Keep for review:** Class counts, a constant-predictor baseline, a confusion matrix with row/column meanings and examples from a failing class. Do not retune on the final evaluation labels.
+
+Write your prediction before opening the reference implementation. Distinguish what the existing checker verifies from your proposed extension; record any extension command, actual output and limitation separately. A reviewer should be able to locate the first failed contract from your saved evidence.

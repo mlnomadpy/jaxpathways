@@ -11,7 +11,12 @@
         "JAX always returns two values"
       ],
       "correct": 1,
-      "explanation": "Axis \\(0\\) is the observation axis. Reducing it leaves one statistic for each feature column."
+      "explanation": "Axis \\(0\\) is the observation axis. Reducing it leaves one statistic for each feature column.",
+      "optionFeedback": [
+        "A row average reduces axis one. Here axis zero combines observations at the same feature position. Trace the column sums by hand.",
+        "Axis \\(0\\) is the observation axis. Reducing it leaves one statistic for each feature column.",
+        "The number two comes from this input having two feature columns. Add a third column and the same reduction returns three means."
+      ]
     }
   ]
 }

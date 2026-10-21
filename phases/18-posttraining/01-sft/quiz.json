@@ -11,7 +11,12 @@
         "No, but the logit produced at the final prompt position must be excluded because its input role is prompt."
       ],
       "correct": 0,
-      "explanation": "Attention visibility and supervised output positions are separate contracts."
+      "explanation": "Attention visibility and supervised output positions are separate contracts.",
+      "optionFeedback": [
+        "Attention visibility and supervised output positions are separate contracts.",
+        "A response-only loss keeps prompt tokens as conditioning inputs. Attention visibility and target eligibility are separate contracts.",
+        "Eligibility belongs to the shifted target token, not simply the role of the input position. Inspect the last prompt position’s next-token target."
+      ]
     }
   ]
 }

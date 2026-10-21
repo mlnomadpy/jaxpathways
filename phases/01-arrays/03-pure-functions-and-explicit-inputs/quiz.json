@@ -11,7 +11,12 @@
         "Printing inside every numerical operation"
       ],
       "correct": 1,
-      "explanation": "Explicit inputs expose the computation and let you compare calls with controlled parameter values."
+      "explanation": "Explicit inputs expose the computation and let you compare calls with controlled parameter values.",
+      "optionFeedback": [
+        "A mutable global makes the result depend on hidden state and can be captured during tracing. Pass the current parameters explicitly.",
+        "Explicit inputs expose the computation and let you compare calls with controlled parameter values.",
+        "Printing exposes a trace or value but does not make the function pure. Check whether the return depends only on explicit inputs."
+      ]
     }
   ]
 }

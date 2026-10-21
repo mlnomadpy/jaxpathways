@@ -171,7 +171,7 @@ visual_data = {'kind': 'line', 'x': grid.tolist(), 'xlabel': 'ridge penalty', 'y
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:20:43.467134+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:27:57.830607+00:00. JAX 0.9.2.
 
 ```text
 train / validation / objective: 1.0 0.0 3.0
@@ -371,9 +371,17 @@ Which loss should select the penalty in this exercise?
 
 <details><summary>Answer and explanation</summary>
 
-Unpenalized validation prediction loss
+**1. The penalized training objective alone**
+
+Penalized training losses mix prediction error with a penalty and are not directly comparable evidence of held-out prediction quality.
+
+**2. Unpenalized validation prediction loss (correct)**
 
 Validation compares predictive performance of candidates fitted on training data. A separate final test set is for reporting after selection.
+
+**3. A repeatedly inspected final test loss**
+
+Repeatedly choosing settings on the test set makes it part of model selection. Use validation data, then evaluate the frozen choice on test data.
 
 </details>
 

@@ -243,21 +243,21 @@ visual_data={'kind':'bar','labels':['saved snapshot','live state','accepted chec
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:21:42.787594+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:29:28.862525+00:00. JAX 0.9.2.
 
 ```text
-Checkpoint workspace: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-async-lesson-20iu6hgs
+Checkpoint workspace: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-async-lesson-wd23ag1m
 {
-  "save_call_seconds": 0.003268791828304529,
-  "remaining_work_and_wait_seconds": 0.016436292324215174,
+  "save_call_seconds": 0.004686499945819378,
+  "remaining_work_and_wait_seconds": 0.029625291004776955,
   "accepted_step": 1,
   "live_step": 2
 }
 Unpublished step 2 exists; application recovery still selects verified step 1.
-Checkpoint workspace: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-async-lesson-e4ianqej
+Checkpoint workspace: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-async-lesson-3nu25rwx
 {
-  "save_call_seconds": 0.0017639580182731152,
-  "remaining_work_and_wait_seconds": 0.009139417205005884,
+  "save_call_seconds": 0.003711916971951723,
+  "remaining_work_and_wait_seconds": 0.01665245834738016,
   "accepted_step": 1,
   "live_step": 2
 }
@@ -403,7 +403,15 @@ A new checkpoint directory exists but the completion wait raises an exception. W
 
 <details><summary>Answer and explanation</summary>
 
-Retain the previous accepted checkpoint and investigate the failed attempt.
+**1. Accept the newest directory immediately.**
+
+Directory creation can precede a failed asynchronous write. A candidate becomes accepted only after completion and validation.
+
+**2. Delete the previous checkpoint because save returned.**
+
+Deleting the last accepted checkpoint removes the recovery path. Retain it until a new candidate has completed and passed validation.
+
+**3. Retain the previous accepted checkpoint and investigate the failed attempt. (correct)**
 
 A directory is not the application’s acceptance signal. Completion, restoration checks and publication must succeed before replacing the previous recovery point.
 

@@ -145,6 +145,11 @@
       "connection": "The final reduction adds the bottom row to obtain \\(4+9+16=29\\). That scalar is not another row in the heatmap because it no longer has three separate coordinates. This change of shape connects the elementwise operations to the reduction in the jaxpr.\n\nA jaxpr describes operations and abstract values. The figure supplies concrete intermediate values for this one input, making that program easier to trace by hand. Changing the input changes these numbers without necessarily changing the jaxpr’s structure.",
       "alt": "Follow values through the jaxpr operations. Columns track the three array coordinates, while rows track stages of a computation. The first row is input \\((1,2,3)\\). Adding \\(1\\) produces \\((2,3,4)\\), and multiplying those values by themselves produces \\((4,9,16)\\). Follow one column downward: the final coordinate changes from \\(3\\) to \\(4\\) to \\(16\\). Its darker bottom cell reflects a larger intermediate value, not a more expensive operation or longer runtime.",
       "code": "visual_data = {'kind': 'heatmap', 'values': jnp.stack([x, x + 1, (x + 1) ** 2]).tolist(), 'rows': ['input', 'add 1', 'multiply by self'], 'columns': ['coordinate 0', 'coordinate 1', 'coordinate 2'], 'unit': 'intermediate value'}"
-    }
+    },
+    "optionFeedback": [
+      "Equation counts omit fusion, scheduling and memory effects. Measure the workload before ranking runtime cost.",
+      "A jaxpr describes traced primitives. Compiler transformations and hardware execution determine kernel boundaries and timing.",
+      "One jaxpr equation need not become one hardware kernel. Inspect lowered/compiler artifacts and device traces."
+    ]
   }
 }

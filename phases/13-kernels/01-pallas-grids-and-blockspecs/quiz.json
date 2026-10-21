@@ -11,7 +11,12 @@
         "A block whose origin must be multiplied by block sizes again inside the index map."
       ],
       "correct": 0,
-      "explanation": "BlockSpec coordinates select blocks. Pallas scales them by the block dimensions; an extra multiplication in the map would skip windows."
+      "explanation": "BlockSpec coordinates select blocks. Pallas scales them by the block dimensions; an extra multiplication in the map would skip windows.",
+      "optionFeedback": [
+        "BlockSpec coordinates select blocks. Pallas scales them by the block dimensions; an extra multiplication in the map would skip windows.",
+        "The index map returns block coordinates; BlockSpec scales them by block dimensions. Distinguish a program index from an element origin.",
+        "Applying the scale twice skips blocks. Write the element interval for program \\((1,1)\\) before implementing the map."
+      ]
     }
   ]
 }

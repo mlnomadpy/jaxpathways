@@ -86,3 +86,9 @@ Inspect both the original and transformed lowered programs. Describe an observed
 - **Accept explanation:** Figures and compiler observations are tied to actual saved results with bounded claims. **Revise:** generic captions or IR counts replace interpretation and runtime evidence.
 
 Submit code, report, numerical records and generated figure data. Public references are available; independent reasoning and inspectable changed-condition evidence remain necessary.
+
+## Reviewer discussion: distinguish evidence from a plausible claim
+
+A custom derivative passes tangent one at base point zero and fails a directional finite difference elsewhere.
+
+Before opening the reviewer notes, name the first unsupported claim and the smallest additional artifact that would resolve it. Keep correct partial reasoning even when the overall submission needs repair.

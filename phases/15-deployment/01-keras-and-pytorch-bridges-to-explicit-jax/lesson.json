@@ -164,6 +164,11 @@
         "code": "# Step 3 — Verify values before extending the architecture\n# Wrap with `jax.jit` (`actual`) so XLA traces and compiles the function.\nactual = np.asarray(jax.jit(predict)(params, jnp.asarray(x)))\n# A hand-computed first row detects a shared layout mistake.\nnp.testing.assert_allclose(actual[0], [3.1, -.45], atol=1e-6)\nnp.testing.assert_allclose(actual, x @ keras_kernel + bias, atol=1e-6)\nprint(\"Matched dense outputs:\", actual)",
         "explanation": "The first assertion checks hand arithmetic; the second compares the entire batch with the source-layout calculation. Continue with the feature-order and second-layer experiments below."
       }
+    ],
+    "optionFeedback": [
+      "The comparison establishes bounded numerical equivalence. Training state, other operators, shapes and target runtime support each need their own evidence.",
+      "Inference-weight parity does not map optimizer history or random state. Training continuation requires a larger conversion contract.",
+      "A tested Dense mapping cannot establish compatibility with every runtime, operator or architecture. Expand cases before expanding the claim."
     ]
   }
 }

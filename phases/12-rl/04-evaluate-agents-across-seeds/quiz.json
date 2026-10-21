@@ -11,7 +11,12 @@
         "Variation in returns between the sampled episodes"
       ],
       "correct": 1,
-      "explanation": "More evaluation episodes estimate one policy more precisely. To study training variability, repeat training with different seeds and preserve those runs as separate units."
+      "explanation": "More evaluation episodes estimate one policy more precisely. To study training variability, repeat training with different seeds and preserve those runs as separate units.",
+      "optionFeedback": [
+        "Repeated episodes can estimate the return of this fitted policy. They do not measure variation across independently trained policies.",
+        "More evaluation episodes estimate one policy more precisely. To study training variability, repeat training with different seeds and preserve those runs as separate units.",
+        "Episode variation is exactly what those repeated evaluations observe. Add separate training seeds to measure training variability."
+      ]
     }
   ]
 }

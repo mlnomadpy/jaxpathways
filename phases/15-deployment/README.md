@@ -42,11 +42,11 @@ Review: [Move models between JAX, Keras, TensorFlow and PyTorch](01-keras-and-py
 
 ### Try a changed condition
 
-An INT8 model matches typical inputs but fails after a sensor’s range changes. How do you locate the regression?
+Frozen calibration maps [-1, 1] to signed integers. New inputs include 3. Explain why a small weight-file size says little about prediction quality or speed.
 
 <details><summary>Compare an approach</summary>
 
-Verify raw preprocessing first; count values outside the frozen calibration range, inspect clipped channels and compare float-converted versus quantized outputs. Do not recalibrate on final test labels. Re-evaluate a revised policy on a separate held-out set.
+The out-of-range activation must follow the declared clipping or fallback policy. Track saturation by channel and compare the same preprocessed input with the float reference. Storage savings do not show native integer execution. Measure actual runtime placement and latency after numerical and quality gates pass.
 
 </details>
 

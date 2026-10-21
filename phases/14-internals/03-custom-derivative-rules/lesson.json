@@ -149,6 +149,11 @@
       "Higher-order behavior is part of the promise",
       "Custom reverse mode has a transformation boundary",
       "An intentionally different gradient needs a different claim"
+    ],
+    "optionFeedback": [
+      "Linearity is necessary, but a wrong constant multiple of the true derivative is also linear and finite. Independent comparisons establish the missing mathematical agreement.",
+      "A bigger batch does not supply an independent derivative reference. Compare the custom rule against the intended primal function.",
+      "Many wrong derivative rules are linear and finite. Test against an analytic derivative or a carefully chosen finite difference."
     ]
   }
 }

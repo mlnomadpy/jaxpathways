@@ -11,7 +11,12 @@
         "The same worker count meets any bursty arrival pattern"
       ],
       "correct": 0,
-      "explanation": "The timing boundary is an application measurement. Hardware occupancy and queue latency require additional evidence from the actual target workload."
+      "explanation": "The timing boundary is an application measurement. Hardware occupancy and queue latency require additional evidence from the actual target workload.",
+      "optionFeedback": [
+        "The timing boundary is an application measurement. Hardware occupancy and queue latency require additional evidence from the actual target workload.",
+        "Device occupancy needs device-level evidence. This timer measures how the local worker divides its wall time.",
+        "A synchronized loop excludes queueing and burst arrivals. Use a load test for service-level latency claims."
+      ]
     }
   ]
 }

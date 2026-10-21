@@ -130,3 +130,11 @@ For GPU, TPU or edge deployment, start from the framework and conversion path th
 Keep the pair manifest, independent objective/gradient checks, full fresh-process recovery comparison, both retrieval directions, the shifted failure, calibration hashes, exported parity, raw request samples and failed-release/rollback result.
 
 For an independent review, change the noise seed and geometric shift, compare a fixed-pixel encoder with a translation-aware alternative, and decide which precision policy to deploy under a declared quality budget. Derive the multi-positive loss for one four-pair example by hand. Explain why a failed shift test changes your conclusion even if both the clean metric and public stage checks pass.
+
+## Review handoff: explain a changed condition
+
+Duplicate one semantic pair without changing its meaning. Write which entries of the positive matrix should be true before choosing a diagonal softmax or multi-positive objective.
+
+**Keep for review:** Pair IDs, group-safe splits, both retrieval directions and a loss/gradient check for the chosen positive policy. Do not count repeated views as independent retrieval successes.
+
+Write your prediction before opening the reference implementation. Distinguish what the existing checker verifies from your proposed extension; record any extension command, actual output and limitation separately. A reviewer should be able to locate the first failed contract from your saved evidence.

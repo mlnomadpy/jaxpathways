@@ -160,7 +160,7 @@ visual_data = {'kind': 'bar', 'labels': ['row 0', 'row 1', 'row 2'], 'ylabel': '
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:20:24.836317+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:27:28.943919+00:00. JAX 0.9.2.
 
 ```text
 weights / rank / MSE: [0.6666669 1.6666665] 2 0.11111113
@@ -343,9 +343,17 @@ Can zero training error prove that fitted weights are uniquely determined?
 
 <details><summary>Answer and explanation</summary>
 
-No; dependent columns can produce many equally good weights
+**1. Yes, zero error is a unique solution**
+
+Dependent columns admit a nonzero null-space direction. Move the weights in that direction and check whether predictions change.
+
+**2. No; dependent columns can produce many equally good weights (correct)**
 
 Independent feature directions determine uniqueness. Extra precision cannot create information missing from the design matrix.
+
+**3. Only if we use float64**
+
+Higher precision can reduce roundoff but cannot make linearly dependent columns independent. Inspect rank or singular values.
 
 </details>
 

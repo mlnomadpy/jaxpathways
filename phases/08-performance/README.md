@@ -42,11 +42,11 @@ Review: [Benchmark asynchronous work correctly](01-benchmark-asynchronous-work-c
 
 ### Try a changed condition
 
-A kernel becomes twice as fast but the full step barely changes. What does the result suggest?
+A step takes 100 ms, of which one kernel takes 10 ms. That kernel becomes twice as fast while everything else stays fixed. Predict the new step time.
 
 <details><summary>Compare an approach</summary>
 
-First measure the kernel’s original share of the step. Even eliminating a small component has limited total benefit. Also inspect copies, synchronization and changed compilation; a local kernel timer cannot explain the complete pipeline alone.
+The estimate is \(90+5=95\) ms, a speedup of about 1.053. A 2x kernel improvement is compatible with a small end-to-end gain. If the observed time differs, inspect the timing boundary, changed transfers, compilation and overlap rather than forcing the trace to fit the estimate.
 
 </details>
 

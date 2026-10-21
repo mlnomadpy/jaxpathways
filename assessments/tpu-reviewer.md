@@ -33,3 +33,11 @@ Profiler annotations delimit declared operations. Their duration may include Pyt
 Physical TPU claims need actual TPU device and execution records. Multi-controller claims additionally require all-process participation, global data/count semantics, intended sharding and a committed restart demonstration. The course's logical CPU device exercise and the text harness's single-CPU trace remain useful references but are not replacements for that evidence.
 
 When the target was unavailable, accept the CPU work on its own merits and retain target qualification as not demonstrated. Do not widen tolerances or relabel the platform merely to make the report appear complete.
+
+## Discussion-case review notes
+
+A CPU run is correct and a cloud receipt enumerates TPU devices, but the submitted throughput timer ends before synchronization.
+
+Credit CPU numerical evidence and device discovery within their scope. Withhold the target-throughput claim until the actual target computation completes inside the declared measurement boundary. Require resource/request cleanup evidence separately.
+
+Record the learner’s original explanation, the requested evidence and the revised claim. This discussion is qualitative review; it adds no automatic score and is not an independent teaching-review receipt.

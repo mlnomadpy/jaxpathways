@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "tpu-06",
-  "contentHash": "67fcbb2bd892d8f2e02910579e21ce7a9e19114342fb16de421941095cd668d6",
-  "executedAt": "2026-10-20T22:27:19.988713+00:00",
+  "contentHash": "578a53769a2177f02cca8eb1ef243a4981f9e0eab21b3f689a46ecd87374dd8f",
+  "executedAt": "2026-10-21T11:35:02.849718+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -11,7 +11,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Precision comparison: [{'policy': 'bf16 (fp32 accum)', 'max_abs_err': 0.03718, 'mean_abs_err': 0.00756, 'weight_bytes': 16384, 'scale_bytes': 256}, {'policy': 'bf16 (bf16 accum)', 'max_abs_err': 0.05545, 'mean_abs_err': 0.00912, 'weight_bytes': 16384, 'scale_bytes': 256}, {'policy': 'int8 per-col (fp32 accum)', 'max_abs_err': 0.12516, 'mean_abs_err': 0.02322, 'weight_bytes': 16384, 'scale_bytes': 256}]\nCaptured *.xplane.pb trace count: 12 steady_ms: 0.214\nPrecision comparison: [{'policy': 'bf16 (fp32 accum)', 'max_abs_err': 0.03718, 'mean_abs_err': 0.00756, 'weight_bytes': 16384, 'scale_bytes': 256}, {'policy': 'bf16 (bf16 accum)', 'max_abs_err': 0.05545, 'mean_abs_err': 0.00912, 'weight_bytes': 16384, 'scale_bytes': 256}, {'policy': 'int8 per-col (fp32 accum)', 'max_abs_err': 0.12516, 'mean_abs_err': 0.02322, 'weight_bytes': 16384, 'scale_bytes': 256}]\nRetained trace directory: /Users/tahabsn/Documents/ChatGPT/jaxpathways/tpu-xprof-trace\nCaptured *.xplane.pb trace count: 12 steady_ms: 0.1226\nBF16-accum / FP32-accum max error ratio: 1.49\nWarmup ms: 32.025 Traced steady step ms: 0.1226\nSeed 42 mean errors: {'bf16 (fp32 accum)': 0.0075, 'bf16 (bf16 accum)': 0.00902, 'int8 per-col (fp32 accum)': 0.02182} xplane files: 12\nMean error (per-channel vs per-tensor): 0.01389 0.0979\nxplane.pb bytes: 259914\nPASS: tpu-06\n",
+  "stdout": "Precision comparison: [{'policy': 'bf16 (fp32 accum)', 'max_abs_err': 0.03718, 'mean_abs_err': 0.00756, 'weight_bytes': 16384, 'scale_bytes': 256}, {'policy': 'bf16 (bf16 accum)', 'max_abs_err': 0.05545, 'mean_abs_err': 0.00912, 'weight_bytes': 16384, 'scale_bytes': 256}, {'policy': 'int8 per-col (fp32 accum)', 'max_abs_err': 0.12516, 'mean_abs_err': 0.02322, 'weight_bytes': 16384, 'scale_bytes': 256}]\nCaptured *.xplane.pb trace count: 16 steady_ms: 0.0803\nPrecision comparison: [{'policy': 'bf16 (fp32 accum)', 'max_abs_err': 0.03718, 'mean_abs_err': 0.00756, 'weight_bytes': 16384, 'scale_bytes': 256}, {'policy': 'bf16 (bf16 accum)', 'max_abs_err': 0.05545, 'mean_abs_err': 0.00912, 'weight_bytes': 16384, 'scale_bytes': 256}, {'policy': 'int8 per-col (fp32 accum)', 'max_abs_err': 0.12516, 'mean_abs_err': 0.02322, 'weight_bytes': 16384, 'scale_bytes': 256}]\nRetained trace directory: /Users/tahabsn/Documents/ChatGPT/jaxpathways/tpu-xprof-trace\nCaptured *.xplane.pb trace count: 16 steady_ms: 0.0847\nBF16-accum / FP32-accum max error ratio: 1.49\nWarmup ms: 17.771 Traced steady step ms: 0.0847\nSeed 42 mean errors: {'bf16 (fp32 accum)': 0.0075, 'bf16 (bf16 accum)': 0.00902, 'int8 per-col (fp32 accum)': 0.02182} xplane files: 16\nMean error (per-channel vs per-tensor): 0.01389 0.0979\nxplane.pb bytes: 259901\nPASS: tpu-06\n",
   "notebookCells": [
     {
       "sourceHash": "8ebd3fe5ac74b9dee7d1ea2ec8535c2988c35c6b687050ea163892b7b3049dfd",
@@ -25,7 +25,7 @@
           "name": "stdout",
           "text": [
             "Precision comparison: [{'policy': 'bf16 (fp32 accum)', 'max_abs_err': 0.03718, 'mean_abs_err': 0.00756, 'weight_bytes': 16384, 'scale_bytes': 256}, {'policy': 'bf16 (bf16 accum)', 'max_abs_err': 0.05545, 'mean_abs_err': 0.00912, 'weight_bytes': 16384, 'scale_bytes': 256}, {'policy': 'int8 per-col (fp32 accum)', 'max_abs_err': 0.12516, 'mean_abs_err': 0.02322, 'weight_bytes': 16384, 'scale_bytes': 256}]\n",
-            "Captured *.xplane.pb trace count: 13 steady_ms: 0.1161\n"
+            "Captured *.xplane.pb trace count: 17 steady_ms: 0.0944\n"
           ]
         }
       ]
@@ -43,7 +43,7 @@
           "text": [
             "Precision comparison: [{'policy': 'bf16 (fp32 accum)', 'max_abs_err': 0.03718, 'mean_abs_err': 0.00756, 'weight_bytes': 16384, 'scale_bytes': 256}, {'policy': 'bf16 (bf16 accum)', 'max_abs_err': 0.05545, 'mean_abs_err': 0.00912, 'weight_bytes': 16384, 'scale_bytes': 256}, {'policy': 'int8 per-col (fp32 accum)', 'max_abs_err': 0.12516, 'mean_abs_err': 0.02322, 'weight_bytes': 16384, 'scale_bytes': 256}]\n",
             "Retained trace directory: /Users/tahabsn/Documents/ChatGPT/jaxpathways/tpu-xprof-trace\n",
-            "Captured *.xplane.pb trace count: 13 steady_ms: 0.1057\n"
+            "Captured *.xplane.pb trace count: 17 steady_ms: 0.0747\n"
           ]
         }
       ]
@@ -86,7 +86,7 @@
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "Warmup ms: 22.185 Traced steady step ms: 0.1057\n"
+            "Warmup ms: 19.658 Traced steady step ms: 0.0747\n"
           ]
         }
       ]
@@ -102,7 +102,7 @@
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "Seed 42 mean errors: {'bf16 (fp32 accum)': 0.0075, 'bf16 (bf16 accum)': 0.00902, 'int8 per-col (fp32 accum)': 0.02182} xplane files: 13\n"
+            "Seed 42 mean errors: {'bf16 (fp32 accum)': 0.0075, 'bf16 (bf16 accum)': 0.00902, 'int8 per-col (fp32 accum)': 0.02182} xplane files: 17\n"
           ]
         }
       ]
@@ -134,7 +134,7 @@
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "xplane.pb bytes: 275259\n"
+            "xplane.pb bytes: 275236\n"
           ]
         }
       ]

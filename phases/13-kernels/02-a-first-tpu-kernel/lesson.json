@@ -148,6 +148,11 @@
       "Make the execution mode inspectable",
       "Run the real target path as a separate lab",
       "Compare with a strong baseline before optimizing"
+    ],
+    "optionFeedback": [
+      "Interpret mode executes a semantic reference and cannot establish TPU throughput. Time a supported compiled kernel on the target.",
+      "Interpretation is useful correctness evidence. It does not execute the target compiler or hardware, so those claims require a separate guarded target run.",
+      "The tested grid and shapes do not cover every generation or block choice. Extend cases and qualify each claimed target explicitly."
     ]
   }
 }

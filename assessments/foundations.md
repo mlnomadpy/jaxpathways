@@ -119,3 +119,9 @@ Keep learner-written work distinct from public-check output and reference soluti
 Review tasks individually as **accept**, **revise**, or **not demonstrated** and explain the reason. An overall local assessment is accepted only when every task and its evidence are accepted. A reviewer may ask the learner to explain one changed condition live. Public checks alone do not decide this assessment, and acceptance does not issue a certificate.
 
 Reviewer numerical references are separate. After your attempt, [download the reviewer notes](foundations-reviewer.md). These notes are public, not a secret examination key; reading them is separate from demonstrating the tasks.
+
+## Reviewer discussion: distinguish evidence from a plausible claim
+
+A submission returns residuals of shape (3, 3), reports a small mean and has a matching AD gradient.
+
+Before opening the reviewer notes, name the first unsupported claim and the smallest additional artifact that would resolve it. Keep correct partial reasoning even when the overall submission needs repair.

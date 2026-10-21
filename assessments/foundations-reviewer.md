@@ -11,3 +11,11 @@ For Task 3, mean(x)=0 and the bias target is 1. With `e_t=b_t-1`, `e_(t+1)=(1-2*
 Task 4 produces a `(3,3)` matrix: its rows index targets and its columns index predictions. An explicit `targets[:,0]` conversion is reasonable only when the caller has validated the intended single target column. `squeeze()` without an axis can destroy a singleton batch dimension.
 
 Do not require exact finite-difference errors or timings across machines. Verify explanations against the actual dtype/values. If copied numeric answers appear without code or reasoning, request a new three-point fixture rather than awarding acceptance.
+
+## Discussion-case review notes
+
+A submission returns residuals of shape (3, 3), reports a small mean and has a matching AD gradient.
+
+Ask for the intended residual shape and a three-observation hand calculation. The submission has differentiated its broadcasted objective correctly but has not implemented the intended objective. Credit derivative reasoning separately from model-contract correctness.
+
+Record the learner’s original explanation, the requested evidence and the revised claim. This discussion is qualitative review; it adds no automatic score and is not an independent teaching-review receipt.

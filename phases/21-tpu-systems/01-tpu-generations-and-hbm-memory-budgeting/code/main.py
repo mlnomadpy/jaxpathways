@@ -9,7 +9,7 @@ import numpy as np
 TPU_SPECS = [
     {"gen": "v5e", "hbm_gib": 16.0, "bw_gbs": 819.0, "bf16_tflops": 197.0},
     {"gen": "v5p", "hbm_gib": 95.0, "bw_gbs": 2765.0, "bf16_tflops": 459.0},
-    {"gen": "v6e", "hbm_gib": 32.0, "bw_gbs": 1600.0, "bf16_tflops": 918.0},
+    {"gen": "v6e", "hbm_gib": 32.0, "bw_gbs": 1638.0, "bf16_tflops": 918.0},
 ]
 for s in TPU_SPECS:
     s["ridge_flops_per_byte"] = round((s["bf16_tflops"] * 1e12) / (s["bw_gbs"] * 1e9), 1)
@@ -51,7 +51,7 @@ import numpy as np
 TPU_SPECS = [
     {"gen": "v5e", "hbm_gib": 16.0, "bw_gbs": 819.0, "bf16_tflops": 197.0},
     {"gen": "v5p", "hbm_gib": 95.0, "bw_gbs": 2765.0, "bf16_tflops": 459.0},
-    {"gen": "v6e", "hbm_gib": 32.0, "bw_gbs": 1600.0, "bf16_tflops": 918.0},
+    {"gen": "v6e", "hbm_gib": 32.0, "bw_gbs": 1638.0, "bf16_tflops": 918.0},
 ]
 for s in TPU_SPECS:
     s["ridge_flops_per_byte"] = round((s["bf16_tflops"] * 1e12) / (s["bw_gbs"] * 1e9), 1)
@@ -109,10 +109,13 @@ assert min_v5e_chips > 8 and min_v5e_chips <= 16
 # Reference solution. Try the exercise before reading this.
 budget_check = estimate_memory_gib(params_billions=1.5, kv_tokens=4096)
 usable_hbm_gib = 4 * 16.0 * 0.8
-state_and_kv_gib = budget_check["mixed_bf16_train_state_gib"] + budget_check["kv_bf16_gib"]
-print("1.5B state plus BF16 KV cache (GiB):", state_and_kv_gib)
-assert budget_check["mixed_bf16_train_state_gib"] < 30.0
-assert state_and_kv_gib < usable_hbm_gib
+training_state_gib = budget_check["mixed_bf16_train_state_gib"]
+inference_kv_gib = budget_check["kv_bf16_gib"]
+print("Assumed training state (GiB):", training_state_gib)
+print("Separate inference BF16 KV cache (GiB):", inference_kv_gib)
+assert training_state_gib < 30.0
+assert training_state_gib < usable_hbm_gib
+assert np.isclose(inference_kv_gib, 0.5)
 
 # Reference practice: Compare arithmetic intensity against the TPU v5e and v6e ridge points
 n = 1024

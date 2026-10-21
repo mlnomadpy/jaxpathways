@@ -83,3 +83,9 @@ After your attempt, read [reviewer notes](ship-reviewer.md).
 After `deployment-07`, use the [engineering release project](../project.html?id=engineering-release) to move an actually tracked model into the supplied container boundary. Record the resolved base image, resulting image identity, artifact checksum and preprocessing/signature. Verify singleton and changed-batch predictions against the source model, readiness after loading, non-root execution and a rejected wrong digest. Retain the real Docker output separately from local Python-process checks.
 
 Describe a CI sequence that builds once, evaluates the same immutable artifact and promotes that identity. Distinguish a registry alias change from a rollout. State the missing concurrency, authentication, overload and accelerator/edge checks before describing the fixture as a production service.
+
+## Reviewer discussion: distinguish evidence from a plausible claim
+
+The quantized artifact is smaller and matches one example, but some operators fall back to CPU and rare-slice quality drops.
+
+Before opening the reviewer notes, name the first unsupported claim and the smallest additional artifact that would resolve it. Keep correct partial reasoning even when the overall submission needs repair.

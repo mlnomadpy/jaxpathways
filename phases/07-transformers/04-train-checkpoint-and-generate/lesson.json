@@ -177,6 +177,11 @@
       "connection": "Greedy decoding takes the largest-probability token from the relevant row. The final context position therefore chooses c as the next token. The earlier rows show predictions for earlier prefixes; they are not four independently generated continuations from the final position.\n\nThese probabilities describe the trained model’s output on this tiny task. High probability and success on a repeating pattern are separate from general language ability or calibrated confidence. Check the row labels and the context before interpreting a bright cell as a correct prediction.",
       "alt": "Inspect next-token probabilities before greedy decoding. Each row is a position in the held-out context, and columns are the possible next tokens: a, b, and c. The cells contain next-token probabilities, with darker purple indicating larger probability. Each row sums to approximately \\(1\\); displayed numbers are rounded. Read the darkest column in each row: c, a, b, then c. Their probabilities are all above \\(0.99\\) in this run, while the other entries are close to zero. For the context b, c, a, b, these choices continue the learned repeating sequence.",
       "code": "probs = jax.nn.softmax(held_logits[0], axis=-1)\nvisual_data = {'kind': 'heatmap', 'values': probs.tolist(), 'rows': ['position ' + str(i) for i in range(CONTEXT)], 'columns': list(VOCAB.keys()), 'unit': 'next-token probability'}"
-    }
+    },
+    "optionFeedback": [
+      "Adam’s update depends on its explicit state. Compare the actual next transition after restoring both parameter and optimizer values.",
+      "Vocabulary settings belong to the model/data contract, but do not replace Adam moments and its update count.",
+      "Equal current losses can hide different optimizer histories. Compare the next update with full state restored."
+    ]
   }
 }

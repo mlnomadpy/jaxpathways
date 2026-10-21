@@ -315,7 +315,7 @@ visual_data={"panels":[*visual_data.get("panels",[visual_data]),extra_panel]}
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:26:44.902630+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:34:27.710977+00:00. JAX 0.9.2.
 
 ```text
 Masked pixel MSE initial/final/held amplitudes: 0.5538085699081421 0.0016928859986364841 0.0011766081443056464
@@ -538,9 +538,17 @@ Why must the encoder input be inspected separately from reconstruction loss?
 
 <details><summary>Answer and explanation</summary>
 
-A leaked target can produce a perfect loss without learning to infer missing content.
+**1. A leaked target can produce a perfect loss without learning to infer missing content. (correct)**
 
 Correct reduction does not prevent input leakage. Audit the visible-only boundary and validate patch order.
+
+**2. Averaging squared error over only hidden patches automatically prevents hidden pixels from entering the encoder.**
+
+A hidden-target loss mask does not prevent leakage if the target remains visible in the encoder input. Check both masks.
+
+**3. Flattening an image without transposing grid and patch axes changes the shape of the patch tensor.**
+
+A patch permutation can preserve shape while corrupting spatial correspondence. Check content/order against a known image, not shape alone.
 
 </details>
 

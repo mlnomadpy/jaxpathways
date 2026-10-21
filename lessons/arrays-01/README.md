@@ -155,7 +155,7 @@ visual_data = {'kind': 'line', 'x': [0, 1, 2], 'xlabel': 'observation index', 'y
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:19:58.088865+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:26:45.187067+00:00. JAX 0.9.2.
 
 ```text
 Mean: [ 3. 14.]
@@ -361,9 +361,17 @@ Why does `x.mean(axis=0)` return two values?
 
 <details><summary>Answer and explanation</summary>
 
-It preserves the two feature columns while reducing observations
+**1. It averages each row**
+
+A row average reduces axis one. Here axis zero combines observations at the same feature position. Trace the column sums by hand.
+
+**2. It preserves the two feature columns while reducing observations (correct)**
 
 Axis $0$ is the observation axis. Reducing it leaves one statistic for each feature column.
+
+**3. JAX always returns two values**
+
+The number two comes from this input having two feature columns. Add a third column and the same reduction returns three means.
 
 </details>
 

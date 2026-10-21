@@ -56,3 +56,11 @@ python3 projects/derivative-audit/tests/check.py --implementation solution --sta
 ```
 
 The reference implements a narrow flat real-valued subset. It does not support control-flow subprograms, custom derivative primitives, integer tangents, arbitrary pytrees, complex conventions, effects or general compiler optimization. New support requires explicit semantics and independent checks.
+
+## Review handoff: explain a changed condition
+
+Propose a custom tangent rule that accidentally squares the incoming direction. Find a nonzero base point and two directions that expose the bug.
+
+**Keep for review:** A linearity counterexample and an independent primal derivative check. Passing only direction one or base point zero is insufficient.
+
+Write your prediction before opening the reference implementation. Distinguish what the existing checker verifies from your proposed extension; record any extension command, actual output and limitation separately. A reviewer should be able to locate the first failed contract from your saved evidence.

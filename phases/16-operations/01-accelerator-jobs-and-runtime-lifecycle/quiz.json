@@ -11,7 +11,12 @@
         "Delete the last log line"
       ],
       "correct": 1,
-      "explanation": "The supervisor must resolve the actual process lifetime. A status label does not stop computation or release process resources."
+      "explanation": "The supervisor must resolve the actual process lifetime. A status label does not stop computation or release process resources.",
+      "optionFeedback": [
+        "A timed-out parent can leave the child consuming resources. Terminate the process group, escalate if needed and reap its exit.",
+        "The supervisor must resolve the actual process lifetime. A status label does not stop computation or release process resources.",
+        "Editing a log does not stop a process. Check process termination and the resulting exit status."
+      ]
     }
   ]
 }

@@ -173,7 +173,7 @@ visual_data = {'kind': 'line', 'x': [0, 1, 2], 'xlabel': 'sample coordinate', 'y
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:20:14.269894+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:27:13.092659+00:00. JAX 0.9.2.
 
 ```text
 Replay equal: True
@@ -399,9 +399,17 @@ What happens if the same key is used twice for the same random operation?
 
 <details><summary>Answer and explanation</summary>
 
-The same sample is reproduced
+**1. The generator automatically advances**
+
+A JAX key is an explicit value, not an advancing generator. Split it and pass a distinct key for each intended random draw.
+
+**2. The same sample is reproduced (correct)**
 
 Keys are explicit immutable inputs. Identical inputs reproduce the draw; split keys to describe independent randomness.
+
+**3. JAX guarantees an exception**
+
+Key reuse need not raise an exception. Compare the actual samples; reproducibility requires managing keys even when execution succeeds.
 
 </details>
 

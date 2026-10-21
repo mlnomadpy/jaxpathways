@@ -257,7 +257,7 @@ visual_data={'kind':'line','x':list(range(1,31)),'xlabel':'completed update','yl
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:21:49.231439+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:29:43.036990+00:00. JAX 0.9.2.
 
 ```text
 Validation MSE by learning rate: {0.02: 0.11994461715221405, 0.15: 5.049471951679152e-10}
@@ -368,9 +368,17 @@ A run is tagged champion. What does that establish?
 
 <details><summary>Answer and explanation</summary>
 
-A registry alias points to that version; deployment and acceptance need their own evidence.
+**1. It is automatically deployed and monitored.**
 
-An experiment groups comparable runs. A run stores one configuration, a history of metrics and artifacts. Lineage is the connection between those results and the exact code, data and environment that produced them. Tracking records an experiment; it does not recover the optimizer state or prove that a model deserves deployment.
+An alias is a registry pointer. Deployment still needs an explicit artifact selection, loading and target prediction check.
+
+**2. A registry alias points to that version; deployment and acceptance need their own evidence. (correct)**
+
+An alias points to a registered model version. It does not deploy that version or approve its quality. Resolve the alias to a version and artifact identity, then verify the actual runtime loads and evaluates that artifact.
+
+**3. Its validation set is now an untouched test set.**
+
+Renaming a registered model does not change the role of the evaluation data. Preserve the original split and selection protocol.
 
 </details>
 

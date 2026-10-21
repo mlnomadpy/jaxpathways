@@ -11,7 +11,12 @@
         "Choose the device with the lowest local loss."
       ],
       "correct": 1,
-      "explanation": "A global mean gives each observation equal weight. With equal local counts, averaging local means preserves that weighting."
+      "explanation": "A global mean gives each observation equal weight. With equal local counts, averaging local means preserves that weighting.",
+      "optionFeedback": [
+        "Summing local means multiplies the gradient for equal shard sizes. Compare the result with a single-device global mean.",
+        "A global mean gives each observation equal weight. With equal local counts, averaging local means preserves that weighting.",
+        "Choosing one device discards the other data. Aggregate all example contributions with the correct observation denominator."
+      ]
     }
   ]
 }

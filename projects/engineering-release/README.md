@@ -118,3 +118,11 @@ For image work, preserve decoder and preprocessing contracts. For audio, include
 Retain your implementation, commands and actual outputs; a failed case and its diagnosis; MLflow run/model/prompt identifiers; model/image/evaluation identities; the container report when executed; and a written release or rejection decision. Explain what the figures and checks establish, and which production qualifications remain unperformed. Public reference checks and reviewer approval are distinct.
 
 References: [MLflow tracking](https://mlflow.org/docs/latest/ml/tracking/quickstart/), [model registry](https://mlflow.org/docs/latest/ml/model-registry/workflow/), [prompt registry](https://mlflow.org/docs/latest/genai/prompt-registry/index.html), [tracing](https://mlflow.org/docs/latest/genai/tracing/quickstart/), [Docker build practices](https://docs.docker.com/build/building/best-practices/), and [Kubernetes probe boundaries](https://kubernetes.io/docs/concepts/configuration/liveness-readiness-startup-probes/).
+
+## Review handoff: explain a changed condition
+
+A candidate passes overall evaluation but fails one required slice and its approval names an older artifact digest. Can it replace the active model?
+
+**Keep for review:** The gate results, approval binding/expiry checks and unchanged active pointer after rejection. A reviewer name or content digest alone does not authenticate an approver.
+
+Write your prediction before opening the reference implementation. Distinguish what the existing checker verifies from your proposed extension; record any extension command, actual output and limitation separately. A reviewer should be able to locate the first failed contract from your saved evidence.

@@ -142,6 +142,11 @@
       "connection": "The matrix-vector product produces one value per observation, and the scalar bias is added to each value. Holding the weights fixed while removing the bias therefore shifts all predictions by the same amount.\n\nFor bias \\(0\\), the prediction-minus-target residual is \\(-1\\) on every row. Squaring and averaging gives \\((1+1+1)/3=1\\). With bias \\(1\\), all residuals are zero and the mean squared loss is zero. Read the gaps between bars to understand the loss; do not average the bar heights themselves.",
       "alt": "A scalar bias shifts every prediction. Each group of bars corresponds to one observation. The vertical axis contains targets and predictions, not losses. Within each group, compare the target with predictions using bias \\(1\\) and bias \\(0\\). With bias \\(1\\), the predictions \\((3,0,2)\\) have the same heights as the targets. With bias \\(0\\), they become \\((2,-1,1)\\): every prediction is exactly one unit lower. The negative bar in the middle group is a negative prediction, not a negative squared error.",
       "code": "visual_data = {'kind': 'bar', 'labels': ['observation 0', 'observation 1', 'observation 2'], 'ylabel': 'target / prediction', 'series': [{'label': 'target', 'y': targets.tolist()}, {'label': 'bias 1', 'y': predict(w, 1.0, X).tolist()}, {'label': 'bias 0', 'y': predict(w, 0.0, X).tolist()}]}"
-    }
+    },
+    "optionFeedback": [
+      "Subtracting \\((n,)\\) from \\((n,1)\\) broadcasts into an \\((n,n)\\) array. Check the residual shape before taking its mean.",
+      "Use matching \\((n,)\\) shapes. A column target can silently broadcast into pairwise residuals.",
+      "The targets are indexed by observations, not features. There must be one target for each of the n predictions."
+    ]
   }
 }

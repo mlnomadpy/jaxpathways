@@ -224,7 +224,7 @@ visual_data = {'kind': 'field', 'values': prob.tolist(), 'extent': [-1.6, 1.6, -
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:21:01.475954+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:28:18.403080+00:00. JAX 0.9.2.
 
 ```text
 Training loss: 0.7047799825668335 -> 0.0015878621488809586 held-out accuracy: 1.0
@@ -424,9 +424,17 @@ Why does the two-layer XOR model need a nonlinear activation?
 
 <details><summary>Answer and explanation</summary>
 
-Without it the composition is still affine
+**1. Without it the composition is still affine (correct)**
 
 The optimizer can change coefficients but cannot enlarge the affine function class. The activation supplies nonlinear intermediate features.
+
+**2. Two affine layers always separate XOR**
+
+Two affine layers compose into another affine map. Write their combined matrix and bias to see why another layer alone is insufficient.
+
+**3. Cross-entropy itself changes the prediction boundary**
+
+The loss changes how parameters are fitted, not which functions the architecture can represent. Inspect the forward map for a nonlinearity.
 
 </details>
 

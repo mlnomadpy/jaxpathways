@@ -267,7 +267,7 @@ visual_data={"panels":[*visual_data.get("panels",[visual_data]),extra_panel]}
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:26:55.630118+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:34:41.782947+00:00. JAX 0.9.2.
 
 ```text
 LoRA initial/final: 0.043869297951459885 2.466217665642034e-07 ; trainable: 10 base: 24
@@ -536,9 +536,17 @@ Does LoRA require updating the base weights during adapter training?
 
 <details><summary>Answer and explanation</summary>
 
-No. The base is frozen; the selected adapter parameters receive updates.
+**1. No. The base is frozen; the selected adapter parameters receive updates. (correct)**
 
-Freeze ownership should be checked in code, not inferred from an adapter-shaped parameter name.
+LoRA freezes the base parameters while optimizing the named adapter parameters. Verify parameter ownership and actual before/after deltas. Frozen base storage does not imply unchanged behavior or retained capability.
+
+**2. Yes, because initializing factor $B=0$ blocks all gradients until the base matrix moves.**
+
+With zero B and nonzero A, the B gradient can be nonzero while A initially receives zero gradient. Inspect both adapter gradients.
+
+**3. No, and freezing the base weights guarantees that adapted outputs cannot forget the source task.**
+
+Adapters can alter behavior even when the base weights are frozen. Test retention and task quality rather than inferring them from frozen storage.
 
 </details>
 

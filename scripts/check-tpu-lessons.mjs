@@ -26,10 +26,25 @@ test('tpu-02 validates checkpoint integrity, compatibility, missing and complete
 test('tpu-03 memory ledger matches explicit bytes per parameter', () => {
   const extra = `budget = namespace['estimate_memory_gib'](7.0, 8192)\nassert budget['fp32_train_state_gib'] == 104.308\nassert budget['mixed_bf16_train_state_gib'] == 117.347\nassert budget['kv_bf16_gib'] == 1.0`;
   runPython('tpu-03', extra);
+  runPython('tpu-03', `specs = {item['gen']: item for item in namespace['TPU_SPECS']}\nassert specs['v6e']['bw_gbs'] == 1638.0\nassert abs(specs['v6e']['ridge_flops_per_byte'] - 560.4) < 0.01\nassert specs['v5e']['ridge_flops_per_byte'] == 240.5\nassert specs['v5p']['ridge_flops_per_byte'] == 166.0`);
   const file = path.join(root, 'phases/21-tpu-systems/01-tpu-generations-and-hbm-memory-budgeting/lesson.json');
   const lesson = JSON.parse(readFileSync(file, 'utf8'));
   assert.equal(lesson.content.visual.kind, 'analytic');
   assert.match(lesson.content.visual.connection, /not device measurements/i);
+});
+
+test('v5e Flex-start instructions keep a bounded queue and explicit owner cleanup', () => {
+  const lesson = JSON.parse(readFileSync('phases/19-tpu/01-get-a-tpu-running-and-verify-the-runtime/lesson.json', 'utf8'));
+  const commands = lesson.content.sections.flatMap(section => section.commands || []).map(command => command.code).join('\n');
+  assert.match(commands, /queued-resources create/);
+  assert.match(commands, /--max-run-duration=1h/);
+  assert.match(commands, /--valid-until-duration=30m/);
+  assert.match(commands, /queued-resources delete/);
+  assert.match(commands, /--force --quiet/);
+  assert.match(commands, /queued-resources list/);
+  assert.doesNotMatch(commands, /resize-requests|instance-templates/);
+  const prose = lesson.content.sections.map(section => section.body).join('\n');
+  assert.doesNotMatch(prose, /READY.*STOPPED|complete every TPU verification/);
 });
 
 test('tpu-04 labels the four-device result as calculated expectation', () => {

@@ -45,3 +45,13 @@ Follow the [Hub workflow](../embedding-model-300m/RELEASE.md) with fixed-seed im
 Do not promote until source image/caption rights, entity/near-duplicate groups, preprocessing, condition inventory and holdout prompts are frozen. Record VAE/encoder, denoiser, EMA, optimizer, RNG and sampler lineage; evaluate fixed real holdouts and report memorization/nearest-neighbor checks, while synthetic images only validate schedule arithmetic.
 
 Before this plan can change from **planned** to **authored**, provide independently checkable dataset/recipe manifests, staged parent-to-child checkpoint records with full resume state, real held-out evaluation outputs, and runnable plan-specific starter/reference/checks. Keep small CPU fixtures labeled as correctness evidence; they do not establish target-scale training, quality or production readiness.
+
+## Recipe decision rehearsal before target-scale training
+
+Samples look sharper after a recipe change, but rare conditions disappear and validation loss barely changes.
+
+**Decide:** Freeze the sampling schedule, seeds, conditioning and evaluation set before visual comparison. Compare coverage and conditional fidelity separately from average reconstruction/denoising loss. Track memorization and near-duplicates; any automatic metric needs its exact model/preprocessing/sample-count protocol.
+
+**Review packet:** Matched-seed sample grids, conditioning metadata, coverage/failure slices, metric protocol and a cold-load sampler test. Do not present selected attractive images as a complete generative evaluation.
+
+This is a design exercise for a planned implementation. Record a hypothesis, a controlled pilot, a stopping criterion and the evidence needed to reject the recipe before requesting target-scale compute. Do not mark the capstone implemented or publish a model card with invented metrics.

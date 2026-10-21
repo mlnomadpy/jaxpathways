@@ -44,7 +44,7 @@
     "text",
     "image"
   ],
-  "studyAdvice": "Start by connecting each jaxpr primitive to the function that produced it. Revisit directional derivatives and the chain rule before studying JVPs, VJPs and custom rules. Keep an independent derivative reference beside every transformation. Finish the derivative audit, then extend the tiny interpreter in the synthesis assessment and explain its unsupported cases.",
+  "studyAdvice": "Start by connecting each jaxpr primitive to the function that produced it. Revisit directional derivatives and the chain rule before studying JVPs, VJPs and custom rules. Keep an independent derivative reference beside every transformation. Finish the derivative audit, then extend the tiny interpreter in the synthesis assessment and explain its unsupported cases. For review, bring a nonzero-base-point tangent counterexample, a linearity test and an independent primal derivative. Explain why a trace or a passing tangent-one case is insufficient.",
   "engineeringLessonIds": [
     "deployment-07"
   ]

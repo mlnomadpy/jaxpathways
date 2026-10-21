@@ -11,7 +11,12 @@
         "The collected actions, return targets and behavior-policy log probabilities"
       ],
       "correct": 2,
-      "explanation": "The probability ratio compares the changing candidate with the policy that actually generated the batch. Replacing its denominator destroys that comparison."
+      "explanation": "The probability ratio compares the changing candidate with the policy that actually generated the batch. Replacing its denominator destroys that comparison.",
+      "optionFeedback": [
+        "The candidate policy changes during optimization; the collected actions and behavior log probabilities describe the fixed rollout.",
+        "Recomputing old probabilities with the updated policy destroys the importance ratio. Save them when the rollout is collected.",
+        "The probability ratio compares the changing candidate with the policy that actually generated the batch. Replacing its denominator destroys that comparison."
+      ]
     }
   ]
 }

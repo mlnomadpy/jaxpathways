@@ -87,3 +87,11 @@ No GPU/TPU performance, general control capability, production PPO equivalence o
 ## Synthesis assessment
 
 After the project, use the RL synthesis questions and reviewer guide under `assessments/rl.md` and `assessments/rl-reviewer.md` in the complete course workspace. Explain one failure and its repair; passing public assertions alone is insufficient evidence of understanding.
+
+## Review handoff: explain a changed condition
+
+Add a proposed time-limit wrapper to the environment contract. Distinguish an absorbing terminal transition, a collection cutoff and the observation after reset before writing the wrapper.
+
+**Keep for review:** A three-transition hand-worked target table with discount, terminal/truncation flags and the bootstrap observation. The existing absorbing-state tests do not establish every wrapper convention.
+
+Write your prediction before opening the reference implementation. Distinguish what the existing checker verifies from your proposed extension; record any extension command, actual output and limitation separately. A reviewer should be able to locate the first failed contract from your saved evidence.

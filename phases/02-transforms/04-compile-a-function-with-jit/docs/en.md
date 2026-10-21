@@ -185,15 +185,15 @@ visual_data = {'kind': 'bar', 'labels': ['eager', 'first compiled', 'repeat comp
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:20:10.581450+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:27:06.518873+00:00. JAX 0.9.2.
 
 ```text
 Loss: 0.46000000834465027
-First/repeat seconds: 0.014060375280678272 1.7832964658737183e-05
-eager median / min / max seconds: 2.3916596546769142e-05 2.150004729628563e-05 3.854092210531235e-05
-compiled median / min / max seconds: 3.5830307751893997e-06 3.375113010406494e-06 5.084089934825897e-06
+First/repeat seconds: 0.027464875020086765 2.8207898139953613e-05
+eager median / min / max seconds: 3.749970346689224e-05 3.474997356534004e-05 5.954178050160408e-05
+compiled median / min / max seconds: 5.729496479034424e-06 5.33275306224823e-06 8.167233318090439e-06
 backend / shapes / dtype: cpu (4, 3) (3,) (4,) float32
-compiled value-and-grad median seconds: 7.062684744596481e-06
+compiled value-and-grad median seconds: 9.666429832577705e-06
 PASS: transforms-04
 
 ```
@@ -395,9 +395,17 @@ Why wait with block_until_ready when timing a computation?
 
 <details><summary>Answer and explanation</summary>
 
-To include completion of device work in elapsed time
+**1. To change its gradient**
+
+Waiting changes when the host proceeds, not the derivative. Compare the numerical results before and after synchronization.
+
+**2. To include completion of device work in elapsed time (correct)**
 
 Without waiting, elapsed time can primarily measure dispatch rather than the completion of the numerical work.
+
+**3. To force a different result**
+
+Synchronization waits for completion; it does not choose or constrain the answer. Without it, a timer can mostly measure dispatch.
 
 </details>
 

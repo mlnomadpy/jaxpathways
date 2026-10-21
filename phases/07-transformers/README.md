@@ -38,11 +38,11 @@ Review: [Attention from small pieces](01-attention-from-small-pieces/docs/en.md)
 
 ### Try a changed condition
 
-Two documents are packed into one sequence. Causal masking passes, but one document still changes the other’s predictions. What is missing?
+Pack document A at positions 0 and 1 and document B at positions 2 and 3. Which keys may B’s first query use? What if A changes?
 
 <details><summary>Compare an approach</summary>
 
-Causality only blocks future positions. Require matching segment identities too, align targets within each document, and exclude padding or invalid boundaries from the loss. Test a change to the other document while holding the target document fixed.
+With causal and same-segment masking, query 2 may use key 2 only, assuming it is a valid input. A pure causal mask incorrectly permits keys 0 and 1. Change A while keeping B fixed and require B outputs to remain unchanged. Align shifted targets so an end-of-document position does not learn the next document’s first token.
 
 </details>
 

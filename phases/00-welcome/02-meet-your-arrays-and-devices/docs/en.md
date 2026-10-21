@@ -162,7 +162,7 @@ visual_data = {'kind': 'heatmap', 'values': x.tolist(), 'rows': ['row 0', 'row 1
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:19:53.950321+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:26:38.011988+00:00. JAX 0.9.2.
 
 ```text
 Shape: (2, 3)
@@ -366,9 +366,17 @@ For an array of shape $(2, 3)$, what shape results from `sum(axis=0)`?
 
 <details><summary>Answer and explanation</summary>
 
-$(3,)$
+**1. $(2,)$**
+
+This would describe reducing the columns within each row. Axis zero runs down the observations; write the two row vectors and add them element by element.
+
+**2. $(3,)$ (correct)**
 
 Axis $0$ is reduced. The three columns remain, so the result has shape $(3,)$.
+
+**3. $(2, 3)$**
+
+A reduction removes the selected axis unless keepdims is requested. Count the three column sums left after combining the two rows.
 
 </details>
 

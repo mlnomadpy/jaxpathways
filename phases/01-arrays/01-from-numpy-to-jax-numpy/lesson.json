@@ -135,6 +135,11 @@
         "code": "assert jnp.allclose(mean, jnp.array([3., 14.]))\nassert jnp.allclose(centered.mean(axis=0), jnp.zeros(2))",
         "explanation": "The first check catches a wrong reduction axis; the second checks the defining property of mean-centering."
       }
+    ],
+    "optionFeedback": [
+      "A row average reduces axis one. Here axis zero combines observations at the same feature position. Trace the column sums by hand.",
+      "Axis \\(0\\) is the observation axis. Reducing it leaves one statistic for each feature column.",
+      "The number two comes from this input having two feature columns. Add a third column and the same reduction returns three means."
     ]
   }
 }

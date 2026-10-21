@@ -46,3 +46,13 @@ Apply the [Hub release protocol](../embedding-model-300m/RELEASE.md) with image-
 Do not promote until source images, class/instance labels, rights, duplicate/entity groups, processor settings and split identities are frozen. Link representation and task-head checkpoints to objective, full state and source exposure; real held-out task metrics and per-class/domain counts are required, while synthetic pixels only validate preprocessing and architecture.
 
 Before this plan can change from **planned** to **authored**, provide independently checkable dataset/recipe manifests, staged parent-to-child checkpoint records with full resume state, real held-out evaluation outputs, and runnable plan-specific starter/reference/checks. Keep small CPU fixtures labeled as correctness evidence; they do not establish target-scale training, quality or production readiness.
+
+## Recipe decision rehearsal before target-scale training
+
+A masked-image objective improves reconstruction but frozen-feature classification does not improve.
+
+**Decide:** Reconstruction, representation quality and downstream adaptation are different objectives. Keep the evaluation processor fixed and compare an independently trained supervised baseline, frozen linear probe and declared fine-tuning budget. Inspect whether pixel-space error rewards texture while the downstream task needs semantic grouping.
+
+**Review packet:** Masked/visible patches with reconstruction, per-class errors, probe/fine-tune tables, data-group overlap checks and parent/processor identities. Reject a general visual-quality claim supported only by reconstruction loss.
+
+This is a design exercise for a planned implementation. Record a hypothesis, a controlled pilot, a stopping criterion and the evidence needed to reject the recipe before requesting target-scale compute. Do not mark the capstone implemented or publish a model card with invented metrics.

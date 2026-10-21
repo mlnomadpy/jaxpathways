@@ -38,11 +38,11 @@ Review: [Pallas grids and BlockSpecs](01-pallas-grids-and-blockspecs/docs/en.md)
 
 ### Try a changed condition
 
-Interpret mode passes all numerical tests. Can you use its timings to choose the fastest TPU tile?
+For an output of length 10 and block width 4, which lanes of the final block are valid? Does a CPU interpretation prove the chosen block is fast?
 
 <details><summary>Compare an approach</summary>
 
-No. Interpretation supports bounded semantic checks. Compile and measure supported candidates on the named TPU with equivalent work and synchronization, including numerical verification there.
+The third block starts at 8; lanes for indices 8 and 9 are valid while 10 and 11 must not perform invalid loads/stores. Verify boundary handling and sentinel values with the API supported by the kernel. Interpretation can test semantics, but only supported target lowering and synchronized target measurements can rank block performance.
 
 </details>
 

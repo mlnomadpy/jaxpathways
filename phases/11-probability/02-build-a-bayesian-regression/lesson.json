@@ -135,6 +135,11 @@
         "code": "# Step 3 — 3. Predict both the latent mean and a new observation\ndef predictive(design,mean,cov,sigma):\n    center = design@mean\n    latent_variance = jnp.einsum('ni,ij,nj->n',design,cov,design)\n    return center,latent_variance,latent_variance+sigma**2\nquery = jnp.array([[1.,0.],[1.,2.]])\ncenter,latent_var,observation_var = predictive(query,mean,cov,sigma)\nassert jnp.allclose(latent_var,jnp.array([4/13,4/13+16/9]),atol=1e-6)\nassert jnp.allclose(observation_var-latent_var,1.)\nprint('posterior mean:',mean,'covariance:',cov)\nprint('latent variance:',latent_var,'observation variance:',observation_var)",
         "explanation": "The variance at the extrapolation input is larger because slope uncertainty contributes more strongly there."
       }
+    ],
+    "optionFeedback": [
+      "A future prediction depends on all relevant coefficient uncertainty at its input, including covariance, plus observation noise.",
+      "Both the unknown line and a new independent observation error contribute. Omitting the latter gives an interval for the latent mean, not for a future reading.",
+      "Training MSE divided by parameter count is not this posterior predictive calculation. Propagate the coefficient covariance through the new input."
     ]
   }
 }

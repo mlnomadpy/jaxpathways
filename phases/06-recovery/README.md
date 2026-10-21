@@ -42,11 +42,11 @@ Review: [Save model, optimizer, and random state](03-save-model-optimizer-and-ra
 
 ### Try a changed condition
 
-The checkpoint is valid, but the dataset was reordered without changing its filename. Is the saved cursor sufficient?
+Two restored parameter arrays both have norm 5: \((3,4)\) and \((0,5)\). Did the checkpoint replay pass?
 
 <details><summary>Compare an approach</summary>
 
-No. The cursor is meaningful relative to a dataset identity and ordering configuration. Verify content/version identity first; reject mismatches rather than silently resuming on different records.
+No. Equal norms discard direction. Elementwise differences are \((3,-1)\), and the arrays can produce different predictions. Compare every required state leaf, the next batch IDs and subsequent updates under a declared tolerance, not only a norm or final scalar loss.
 
 </details>
 

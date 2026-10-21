@@ -11,7 +11,12 @@
         "Catch every exception and return zero."
       ],
       "correct": 1,
-      "explanation": "A runtime decision belongs in the staged computation. Static configuration is useful for a small program choice, but making changing data static can create unnecessary specializations."
+      "explanation": "A runtime decision belongs in the staged computation. Static configuration is useful for a small program choice, but making changing data static can create unnecessary specializations.",
+      "optionFeedback": [
+        "Making a value static specializes on it and can trigger a new compilation when it changes. Use runtime control flow when the predicate is data.",
+        "A runtime decision belongs in the staged computation. Static configuration is useful for a small program choice, but making changing data static can create unnecessary specializations.",
+        "Returning zero hides the original contract failure and changes the function. Express both branches with compatible JAX values instead."
+      ]
     }
   ]
 }

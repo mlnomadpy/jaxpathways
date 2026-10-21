@@ -195,6 +195,11 @@
           ]
         ]
       }
-    }
+    },
+    "optionFeedback": [
+      "Behavior identity belongs to the collected data. Reference identity belongs to the regularized objective.",
+      "Behavior probabilities stay fixed within the collected rollout’s update epochs. The candidate policy changes; the reference remains frozen.",
+      "Keeping the old behavior forever makes later rollout ratios describe the wrong collection policy. Refresh behavior data for each new rollout."
+    ]
   }
 }

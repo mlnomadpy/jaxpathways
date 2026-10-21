@@ -669,7 +669,7 @@ visual_data={'kind':'bar','labels':['activate A','publish B','activate B','rejec
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:26:09.289097+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:33:58.695195+00:00. JAX 0.9.2.
 
 ```text
 first / second content IDs: 810b956e3376228ff3c1f03f469feb3ab26653b488ba51271e82277672590b80 aed1378a7842598237e59c5d189b13d486068b6284d9c1ca3d4e865866ba6990
@@ -904,9 +904,17 @@ What does a matching artifact digest establish?
 
 <details><summary>Answer and explanation</summary>
 
-The payload matches its recorded content identity
+**1. The payload matches its recorded content identity (correct)**
 
 A digest is an integrity/identity mechanism. Quality evaluation and authenticated authority require separate evidence and controls.
+
+**2. The model is accurate on all future data**
+
+A digest binds bytes, not future behavior. Evaluate quality under a defined data and runtime contract.
+
+**3. The publisher is authenticated and authorized**
+
+Anyone can hash an artifact. Publisher authentication requires a separate trusted identity or signing mechanism.
 
 </details>
 

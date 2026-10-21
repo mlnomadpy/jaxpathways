@@ -11,7 +11,12 @@
         "\\((2, 3)\\)"
       ],
       "correct": 1,
-      "explanation": "Axis \\(0\\) is reduced. The three columns remain, so the result has shape \\((3,)\\)."
+      "explanation": "Axis \\(0\\) is reduced. The three columns remain, so the result has shape \\((3,)\\).",
+      "optionFeedback": [
+        "This would describe reducing the columns within each row. Axis zero runs down the observations; write the two row vectors and add them element by element.",
+        "Axis \\(0\\) is reduced. The three columns remain, so the result has shape \\((3,)\\).",
+        "A reduction removes the selected axis unless keepdims is requested. Count the three column sums left after combining the two rows."
+      ]
     }
   ]
 }

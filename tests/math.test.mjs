@@ -35,7 +35,7 @@ test('Markdown math conversion preserves Python and inline code exactly', async 
   const source = String.raw`For \(x=2\), keep ` + '`' + String.raw`\(literal\)` + '`';
   assert.equal(markdownText(source), 'For $x=2$, keep `' + String.raw`\(literal\)` + '`');
   const code = String.raw`pattern = r"\(x\)"`;
-  const lesson = {id:'math-fixture',title:'Fixture',evidence:'Explain it.',content:{idea:source,code,solution:code,exercise:source,question:source,options:[source],answer:0,explanation:source}};
+  const lesson = {id:'math-fixture',title:'Fixture',evidence:'Explain it.',content:{idea:source,code,solution:code,exercise:source,question:source,options:[source],answer:0,explanation:source,optionFeedback:[source]}};
   const cells = lessonCells(lesson);
   assert(cells.some(([type,text]) => type === 'markdown' && text.includes('$x=2$')));
   assert(cells.filter(([type]) => type === 'code').some(([,text])=>text === code));

@@ -264,7 +264,7 @@ visual_data={'panels':[{'kind':'line','x':indices,'xlabel':'completed updates','
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:22:57.997762+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:30:59.965943+00:00. JAX 0.9.2.
 
 ```text
 Initial/fitted rate: 1.4 0.7000000090128304
@@ -276,7 +276,7 @@ Initial/final loss: 0.11676630453561089 1.9484774169068916e-32
 Held-out RMSE: 4.572895313141112e-16 finer-grid RMSE: 7.282689372293896e-09
 Initial-time-only gradient: 0.0
 True rate: 0.7 perfect coarse Euler rate: 0.5906238205625731
-batch, median milliseconds, milliseconds per trajectory: [(1, 0.005291774868965149, 0.005291774868965149), (16, 0.005333218723535538, 0.0003333261702209711), (256, 0.03358395770192146, 0.00013118733477313071)]
+batch, median milliseconds, milliseconds per trajectory: [(1, 0.004500150680541992, 0.004500150680541992), (16, 0.005416106432676315, 0.0003385066520422697), (256, 0.03458419814705849, 0.00013509452401194721)]
 Changed true/recovered rate: 0.4 0.40000000054230433
 Recovered initial amplitude: 2.8000000000000003
 Noisy grid-search estimate: 0.7 residual MSE: 2.6000611439697964e-05
@@ -514,7 +514,15 @@ You fit only observations at time zero and every rate gives zero loss. What is t
 
 <details><summary>Answer and explanation</summary>
 
-The observations contain no information about the cooling rate.
+**1. The batch is too small for a TPU.**
+
+A larger accelerator batch repeats the same uninformative time-zero observations. Add measurements that depend on the unknown rate.
+
+**2. The step size is too accurate.**
+
+A smaller integration step cannot make a time-zero observation informative about dynamics. Inspect parameter sensitivity of the data.
+
+**3. The observations contain no information about the cooling rate. (correct)**
 
 The initial state is independent of rate. No optimizer can recover a rate from data whose predictions do not depend on it.
 

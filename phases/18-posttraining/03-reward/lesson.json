@@ -147,6 +147,11 @@
     "takeaways": [
       "Pairwise preference loss depends only on score margins \\(r_\\theta(x,y^+)-r_\\theta(x,y^-)\\), starting at \\(\\log 2\\) for tied scores and weighting feature differences by \\(\\sigma(m)-1\\).",
       "Common additive reward offsets cancel in pairwise comparisons while positive weight rescaling sharpens confidence and alters the downstream reward-versus-KL balance."
+    ],
+    "optionFeedback": [
+      "A shared additive offset cancels from every pairwise probability.",
+      "Pairwise losses are unchanged by a shared score offset for each compared pair. They do not identify an absolute utility zero.",
+      "Changing reward scale changes its balance with the KL penalty. Compare the terms in the actual policy objective."
     ]
   }
 }

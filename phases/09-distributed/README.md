@@ -38,11 +38,11 @@ Review: [A sharded training step](02-a-sharded-training-step/docs/en.md).
 
 ### Try a changed condition
 
-A final batch leaves one partition empty. Should it contribute a zero mean, be omitted, or fail?
+Three shards have valid counts 2, 6 and 0 and local gradient sums 6, 6 and 0. Predict the global mean and the empty-shard contribution.
 
 <details><summary>Compare an approach</summary>
 
-Do not compute an undefined local mean. Accumulate a zero numerator and zero valid count for the empty partition, reduce globally and reject a globally empty batch. Compare the result with the valid unpartitioned examples.
+Reduce sums and counts separately: the global mean is \((6+6+0)/(2+6+0)=1.5\). The empty shard contributes a zero numerator and zero count; it must not compute \(0/0\). Reject a globally empty batch. Compare with an independent unsharded calculation.
 
 </details>
 

@@ -239,7 +239,7 @@ visual_data = {'kind': 'panels', 'panels': panels}
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:22:20.038431+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:30:23.157834+00:00. JAX 0.9.2.
 
 ```text
 Row-shard shapes: [(2, 4), (2, 4), (2, 4), (2, 4)]
@@ -519,9 +519,17 @@ With row sharding, why does a global column sum need results from other devices?
 
 <details><summary>Answer and explanation</summary>
 
-Each device initially holds only some rows.
+**1. Each device initially holds only some rows. (correct)**
 
 The reduction spans the partitioned row dimension, so partial contributions must be combined.
+
+**2. Every sum requires host Python.**
+
+The array reduction can execute as device collectives. Global semantics do not require collecting the rows into a Python list.
+
+**3. Partitioning changes the mathematical definition of sum.**
+
+The sum is still over the same global observations. Placement changes the required communication, not the mathematical definition.
 
 </details>
 

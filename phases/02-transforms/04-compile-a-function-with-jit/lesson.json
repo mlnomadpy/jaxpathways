@@ -139,6 +139,11 @@
         "code": "first_seconds = time.perf_counter() - t0\nt0 = time.perf_counter()\n# Wait for device work to finish before timing it or comparing its result on the host.\nsecond = compiled(w, x, y).block_until_ready()\nrepeat_seconds = time.perf_counter() - t0\nassert jnp.allclose(first, loss(w, x, y))\nassert jnp.allclose(second, first)",
         "explanation": "The repeated call can reuse the compiled executable for matching shapes and dtypes. These timings are observations for this run, not a portable speed claim."
       }
+    ],
+    "optionFeedback": [
+      "Waiting changes when the host proceeds, not the derivative. Compare the numerical results before and after synchronization.",
+      "Without waiting, elapsed time can primarily measure dispatch rather than the completion of the numerical work.",
+      "Synchronization waits for completion; it does not choose or constrain the answer. Without it, a timer can mostly measure dispatch."
     ]
   }
 }

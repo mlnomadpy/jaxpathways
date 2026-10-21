@@ -296,7 +296,7 @@ visual_data={'kind':'line','x':list(range(8)),'xlabel':'observation row','ylabel
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T00:07:49.331943+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:26:42.232197+00:00. JAX 0.9.2.
 
 ```text
 {
@@ -505,9 +505,17 @@ The values match NumPy, but the output array is on CPU when the requested platfo
 
 <details><summary>Answer and explanation</summary>
 
-The arithmetic matches the reference on the fallback CPU backend, so the requested TPU backend was not active.
+**1. The TPU installation and its execution are validated.**
+
+Backend qualification is a separate claim. A matching CPU result checks those numerical cases; it cannot show that a TPU executed the program.
+
+**2. The arithmetic matches the reference on the fallback CPU backend, so the requested TPU backend was not active. (correct)**
 
 A correct value can be produced on the wrong device. Require both reference agreement and the output placement before recording a successful target run.
+
+**3. The model must be numerically wrong.**
+
+Different hardware is not itself a mathematical failure. Compare the requested and observed backend before diagnosing the model.
 
 </details>
 

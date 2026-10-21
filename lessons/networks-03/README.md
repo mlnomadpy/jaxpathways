@@ -239,7 +239,7 @@ visual_data = {'kind': 'field', 'values': prob.tolist(), 'extent': [-3.0, 3.0, -
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:21:14.543674+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:28:31.748997+00:00. JAX 0.9.2.
 
 ```text
 Updates: 80 held-out loss: 0.018426384776830673 accuracy: 1.0
@@ -450,9 +450,17 @@ The train step returns a loss before optimizer.update. Which parameters does it 
 
 <details><summary>Answer and explanation</summary>
 
-The parameters entering that update
+**1. The parameters entering that update (correct)**
 
 The order of statements matters: value_and_grad runs before applying the update. Use a fresh evaluation call to measure final parameters.
+
+**2. The final parameters after all updates**
+
+The computed loss belongs to the parameters used before that update. Recompute after updating if you want a post-update loss.
+
+**3. A separate held-out model**
+
+The data used in the loss determines whether it is held out. Calling optimizer.update does not create a validation split.
 
 </details>
 

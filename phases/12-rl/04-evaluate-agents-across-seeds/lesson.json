@@ -146,6 +146,11 @@
         "code": "# Step 3 — Train several agents and retain every result\ntraining_seeds = [0,7,23,41,59]\nevaluation_seeds = [1000,1001,1002,1003]\npolicies, histories, reports = [], [], []\nfor seed in training_seeds:\n    policy, history = train(seed=seed)\n    policies.append(policy)\n    histories.append(history)\n    reports.append(evaluate(policy,evaluation_seeds))\ntrained_means = np.array([r['mean'] for r in reports])\nexact_means = np.array([r['exact'] for r in reports])\nbaseline = evaluate(jnp.zeros(3),evaluation_seeds)\nassert np.all(trained_means > baseline['mean'] + .4)\nassert np.all(np.abs(trained_means-exact_means) < .03)\nprint('training seeds:', training_seeds)\nprint('held-out mean per agent:', trained_means)\nprint('exact mean per agent:', exact_means)\nprint('uniform baseline mean:', baseline['mean'])\nprint('across-agent mean / sample sd:', trained_means.mean(),trained_means.std(ddof=1))",
         "explanation": "Each agent receives a separate training key; all use the declared held-out evaluation streams."
       }
+    ],
+    "optionFeedback": [
+      "Repeated episodes can estimate the return of this fitted policy. They do not measure variation across independently trained policies.",
+      "More evaluation episodes estimate one policy more precisely. To study training variability, repeat training with different seeds and preserve those runs as separate units.",
+      "Episode variation is exactly what those repeated evaluations observe. Add separate training seeds to measure training variability."
     ]
   }
 }

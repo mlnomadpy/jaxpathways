@@ -159,6 +159,11 @@
         "code": "# Step 5 — Run a healthy job and a controlled incident\n# Keep this run’s database and artifacts in a scratch directory removed on exit.\nwith tempfile.TemporaryDirectory(prefix='ops-signals-') as folder:\n    observed=launch(Path(folder)/'healthy',dict(steps=12))\n    interrupted=launch(Path(folder)/'failed',dict(steps=12,fail_after=5))\nhealthy=summarize(observed)\nincident=summarize(interrupted)\nprogress=[e for e in observed['events'] if e['event']=='progress']\nassert healthy['examples']==96 and healthy['updates']==12\nassert incident['last_step']==5 and incident['checkpoint_step']==4\nassert incident['uncheckpointed_updates']==1\nassert healthy['job_examples_per_s'] < healthy['update_examples_per_s']\nprint('healthy:',healthy)\nprint('incident:',incident)",
         "explanation": "Both summaries are derived from real child output; failures are not invented status rows."
       }
+    ],
+    "optionFeedback": [
+      "Wall time inside an update is not a hardware occupancy counter. Use a device profiler for utilization claims.",
+      "A local loop does not measure a fleet. State the measured process, device and timing boundary.",
+      "The numerator and denominator describe an application timing boundary. They do not measure device occupancy, memory bandwidth or fleet allocation."
     ]
   }
 }

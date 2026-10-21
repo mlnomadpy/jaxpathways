@@ -446,7 +446,7 @@ visual_data = {'kind':'bar','labels':[str(s) for s in training_seeds],'xlabel':'
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:23:33.386062+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:31:34.495446+00:00. JAX 0.9.2.
 
 ```text
 training seeds: [0, 7, 23, 41, 59]
@@ -647,9 +647,17 @@ What does evaluating one policy on many episodes fail to measure?
 
 <details><summary>Answer and explanation</summary>
 
-Sensitivity to training randomness across independently fitted policies
+**1. Its mean return on those sampled episodes**
+
+Repeated episodes can estimate the return of this fitted policy. They do not measure variation across independently trained policies.
+
+**2. Sensitivity to training randomness across independently fitted policies (correct)**
 
 More evaluation episodes estimate one policy more precisely. To study training variability, repeat training with different seeds and preserve those runs as separate units.
+
+**3. Variation in returns between the sampled episodes**
+
+Episode variation is exactly what those repeated evaluations observe. Add separate training seeds to measure training variability.
 
 </details>
 

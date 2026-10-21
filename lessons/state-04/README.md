@@ -158,7 +158,7 @@ visual_data = {'kind': 'line', 'x': grid.tolist(), 'xlabel': 'input', 'ylabel': 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:20:19.283709+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:27:20.467904+00:00. JAX 0.9.2.
 
 ```text
 3.0
@@ -365,9 +365,17 @@ Can one cond branch return a scalar and the other a length-three array?
 
 <details><summary>Answer and explanation</summary>
 
-No, branch result types and shapes must be compatible
+**1. Yes, any shapes are allowed**
+
+Both branches are traced into one conditional contract. A scalar and a length-three vector cannot be alternative results of that contract.
+
+**2. No, branch result types and shapes must be compatible (correct)**
 
 Compiled control flow requires compatible output structures and array types across branches.
+
+**3. Only if the predicate is negative**
+
+The sign selects the runtime branch but does not remove the need to trace and type-check the other branch.
 
 </details>
 

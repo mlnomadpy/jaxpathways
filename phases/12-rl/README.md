@@ -38,11 +38,11 @@ Review: [Write a functional environment](01-write-a-functional-environment/docs/
 
 ### Try a changed condition
 
-You evaluate one trained agent over many episodes and report a tiny uncertainty interval. Does this measure sensitivity to training randomness?
+With discount 0.9, reward 1 and next-state value 10, compare a true terminal target with a time-limit cutoff in a continuing task.
 
 <details><summary>Compare an approach</summary>
 
-No. Those episodes characterize that agent under the evaluation distribution. Train independent agents to assess training variation, retain agent-level means and state the experimental unit.
+The true terminal target is 1. A cutoff that only ends data collection can retain bootstrap value, giving \(1+0.9\cdot10=10\). Use the final pre-reset observation, not a new episode’s reset observation. Declare the task semantics: a genuinely finite-horizon terminal objective can require a different contract. This is a transfer exercise; the small existing environment does not implement every time-limit case.
 
 </details>
 

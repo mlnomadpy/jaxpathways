@@ -280,7 +280,7 @@ visual_data={"panels":[*visual_data.get("panels",[visual_data]),extra_panel]}
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:26:48.912284+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:34:33.194040+00:00. JAX 0.9.2.
 
 ```text
 Paired contrastive initial/final: 0.564157247543335 0.013556718826293945 ; all four nearest pairs correct
@@ -481,9 +481,17 @@ What does successful retrieval on the training pairs establish?
 
 <details><summary>Answer and explanation</summary>
 
-The encoder solves those pairs under that pairing and augmentation contract.
+**1. The encoder solves those pairs under that pairing and augmentation contract. (correct)**
 
-It is separate from downstream task quality or robustness to a new data distribution.
+Training-pair retrieval shows that this objective and implementation can fit the observed pairs. It does not establish held-out semantic retrieval, robustness, or the absence of duplicate-positive problems. Keep the evaluation candidate pool and split identities separate.
+
+**2. Lowering the temperature parameter $\tau$ improves the nearest-neighbor ranking order of the cosine matrix.**
+
+Temperature rescales logits but does not change a fixed embedding’s cosine ranking. Training effects require a separate comparison.
+
+**3. Diagonal-only supervision automatically merges duplicate semantic examples into a single positive target.**
+
+A diagonal label still penalizes duplicate positives in other columns. Use a multi-positive objective or data policy when the task requires it.
 
 </details>
 

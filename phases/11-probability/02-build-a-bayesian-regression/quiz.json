@@ -11,7 +11,12 @@
         "The training mean squared error divided by the number of weights"
       ],
       "correct": 1,
-      "explanation": "Both the unknown line and a new independent observation error contribute. Omitting the latter gives an interval for the latent mean, not for a future reading."
+      "explanation": "Both the unknown line and a new independent observation error contribute. Omitting the latter gives an interval for the latent mean, not for a future reading.",
+      "optionFeedback": [
+        "A future prediction depends on all relevant coefficient uncertainty at its input, including covariance, plus observation noise.",
+        "Both the unknown line and a new independent observation error contribute. Omitting the latter gives an interval for the latent mean, not for a future reading.",
+        "Training MSE divided by parameter count is not this posterior predictive calculation. Propagate the coefficient covariance through the new input."
+      ]
     }
   ]
 }

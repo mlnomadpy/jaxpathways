@@ -427,7 +427,7 @@ visual_data={'kind':'line','x':[1,2,3],'xlabel':'update after checkpoint','ylabe
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:22:27.523105+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:30:28.854658+00:00. JAX 0.9.2.
 
 ```text
 Recorded backend/processes/devices: cpu 1 4
@@ -435,13 +435,13 @@ Restored step/cursor: 1 8
 Next sample IDs across epoch boundary: [[12, 5, 4, 1, 8, 13, 2, 11], [9, 0, 7, 15, 11, 13, 8, 14], [1, 6, 5, 4, 3, 12, 2, 10]]
 Uninterrupted losses: [0.5069587826728821, 0.19637340307235718, 0.1798383891582489]
 Restored losses: [0.5069587826728821, 0.19637340307235718, 0.1798383891582489]
-Checkpoint: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-distributed-recovery-y8y7yj2j/step-one
+Checkpoint: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-distributed-recovery-sjtnbuyi/step-one
 Recorded backend/processes/devices: cpu 1 4
 Restored step/cursor: 1 8
 Next sample IDs across epoch boundary: [[12, 5, 4, 1, 8, 13, 2, 11], [9, 0, 7, 15, 11, 13, 8, 14], [1, 6, 5, 4, 3, 12, 2, 10]]
 Uninterrupted losses: [0.5069587826728821, 0.19637340307235718, 0.1798383891582489]
 Restored losses: [0.5069587826728821, 0.19637340307235718, 0.1798383891582489]
-Checkpoint: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-distributed-recovery-0l68di22/step-one
+Checkpoint: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-distributed-recovery-4rdbza1i/step-one
 Same next sample IDs, different weights after missing momentum: 0.0195157527923584
 Five resumed transitions and all addressable parameter replicas agree.
 Current-epoch batch matches; next-epoch batch exposes the wrong key.
@@ -589,9 +589,17 @@ The first resumed batch and update match, but sample IDs differ at the next epoc
 
 <details><summary>Answer and explanation</summary>
 
-The random key used to construct the next permutation.
+**1. Only the learning-rate constant.**
+
+A learning rate changes updates, not the next permutation. Compare the saved random key and loader cursor first.
+
+**2. The random key used to construct the next permutation. (correct)**
 
 The current order can reproduce the rest of one epoch while an incorrect saved key changes the next shuffle. Check complete random state at the accepted boundary.
+
+**3. The display formatting of the loss.**
+
+Print formatting cannot change IDs. Inspect the actual next-epoch order and the key used to generate it.
 
 </details>
 

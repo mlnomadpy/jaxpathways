@@ -46,13 +46,13 @@
     {
       "id": "checkpoint-feedback",
       "priority": "P2",
-      "title": "Every lesson checkpoint uses one explanation for all answer choices",
+      "title": "Choice-specific checkpoint reasoning is implemented; learner validation remains open",
       "evidence": [
         "src/scripts/reader.js",
         "phases"
       ],
-      "action": "Author misconception-specific feedback and pilot changed-condition tasks. Option shuffling alone does not repair an assessment.",
-      "status": "open"
+      "action": "Review the three rationales in every lesson and pilot changed-condition tasks. Author revision is not independent teaching acceptance.",
+      "status": "partly-addressed"
     },
     {
       "id": "starter-contract",
@@ -424,5 +424,11 @@
       "strength": "A real-text CPU Transformer pilot with continuation, held-out perplexity and export; quality is weak.",
       "contribution": "Improve baseline-relative held-out quality and tokenizer/data decisions before scaling or publishing a production model."
     }
-  ]
+  ],
+  "revisionFollowUp": {
+    "date": "2026-10-21",
+    "baseCommit": "86b9874d86ca764e70f9764f3fe6f408460b4da6",
+    "guide": "docs/review-guide-2026-10-21.md",
+    "scope": "Author revision of all lesson checkpoint rationales, phase transfer cases, project/assessment review tasks, routes, capstone recipe decisions and TPU guidance. Original audit provenance is retained; no independent review or new hardware qualification is asserted."
+  }
 }

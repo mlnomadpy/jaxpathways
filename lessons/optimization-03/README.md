@@ -175,7 +175,7 @@ visual_data = {'kind': 'line', 'x': list(range(12)), 'xlabel': 'completed update
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:20:35.780899+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:27:46.124799+00:00. JAX 0.9.2.
 
 ```text
 Final weight: 1.9999969005584717
@@ -381,9 +381,17 @@ What makes rate $1.1$ unstable for this particular quadratic?
 
 <details><summary>Answer and explanation</summary>
 
-The error multiplier has magnitude greater than one
+**1. The error multiplier has magnitude greater than one (correct)**
 
 The recurrence multiplies the error by $-1.2$, so its magnitude grows while its sign alternates.
+
+**2. scan cannot differentiate scalar weights**
+
+scan repeats the update you give it. Derive the one-step error factor; the instability is already present in that recurrence.
+
+**3. All learning rates above $0.01$ are unstable**
+
+A safe learning rate depends on curvature. For this quadratic, use the magnitude of the error multiplier rather than a universal threshold.
 
 </details>
 

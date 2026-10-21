@@ -130,6 +130,11 @@
       "code": "# Count parameters in each leaf of the extracted NNX `param_state`:\nleaves_vis = jax.tree.leaves(param_state)\nvisual_data = {'kind': 'bar', 'x': list(range(len(leaves_vis))), 'labels': [f'leaf {i}' for i in range(len(leaves_vis))], 'xlabel': 'NNX state parameter leaf index', 'ylabel': 'element count', 'series': [{'label': 'parameter elements', 'y': [float(a.size) for a in leaves_vis]}]}",
       "reading": "Each bar shows the exact element count of a parameter leaf extracted by `nnx.state(model, nnx.Param)`.",
       "connection": "Splitting an NNX module into its graph definition and state PyTree makes every parameter leaf inspectable and transformable by standard JAX functions."
-    }
+    },
+    "optionFeedback": [
+      "Trainability and mutability are different properties. Filtering controls differentiation; the forward function still controls state updates.",
+      "Excluding a value from nnx.Param does not freeze it. State such as a counter can still change in the forward computation.",
+      "State classification does not persist anything to disk. Saving and restoring requires an explicit checkpoint contract."
+    ]
   }
 }

@@ -131,6 +131,11 @@
       "connection": "The data rule assigns label \\(1\\) when \\(x_0+0.5x_1>0\\), whose boundary is \\(x_1=-2x_0\\). That explains the overall downward slant. The network approximates this separation; its transition need not be perfectly straight everywhere.\n\nTo inspect a mistake in a changed run, look for a triangle where the probability is below \\(0.5\\), or a circle where it is above \\(0.5\\), and check the model at that exact point. Grid colors are sampled approximations. Perfect accuracy on this small synthetic set is separate from accuracy outside it, and extreme probabilities do not by themselves establish calibration.",
       "alt": "Inspect predictions on held-out inputs. The horizontal and vertical axes are input features. The background is the trained model’s probability of label \\(1\\), from pale near \\(0\\) to dark purple near \\(1\\). Circles mark held-out examples with label \\(0\\), and triangles mark held-out examples with label \\(1\\). A slanted transition separates a mostly pale left side from a dark right side. The circles lie on the low-probability side and the triangles on the high-probability side. The example’s direct evaluation reports accuracy \\(1\\) on this fixed held-out set; the figure shows where those correct decisions occur.",
       "code": "axis = jnp.linspace(-3.0, 3.0, 61)\ngx, gy = jnp.meshgrid(axis, axis)\ngrid = jnp.stack([gx.ravel(), gy.ravel()], axis=-1)\n# Rearrange tensor axes to match the required layout for `prob`.\nprob = jax.nn.sigmoid(model(grid)).reshape(gx.shape)\nvisual_data = {'kind': 'field', 'values': prob.tolist(), 'extent': [-3.0, 3.0, -3.0, 3.0], 'xlabel': 'feature 0', 'ylabel': 'feature 1', 'unit': 'P(label 1)', 'points': test_x.tolist(), 'labels': test_y.tolist()}"
-    }
+    },
+    "optionFeedback": [
+      "The order of statements matters: value_and_grad runs before applying the update. Use a fresh evaluation call to measure final parameters.",
+      "The computed loss belongs to the parameters used before that update. Recompute after updating if you want a post-update loss.",
+      "The data used in the loss determines whether it is held out. Calling optimizer.update does not create a validation split."
+    ]
   }
 }

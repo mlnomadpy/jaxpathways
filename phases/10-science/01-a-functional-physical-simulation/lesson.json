@@ -143,6 +143,11 @@
       "Accuracy and stability are different requirements",
       "Make a convergence table before fitting parameters"
     ],
-    "output": "Euler final 0.3570125; analytic final 0.49319393. The endpoint errors decrease as the step is halved."
+    "output": "Euler final 0.3570125; analytic final 0.49319393. The endpoint errors decrease as the step is halved.",
+    "optionFeedback": [
+      "The geometric sequence is the exact solution of the chosen discrete update. Its difference from the continuous exponential is discretization error.",
+      "An optimizer learning rate does not explain a forward solver discrepancy. Compare the discrete recurrence before differentiating it.",
+      "The geometric sequence is an oracle for the discrete method. The exponential is a separate oracle for the differential equation. They answer different questions."
+    ]
   }
 }

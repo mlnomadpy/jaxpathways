@@ -254,7 +254,7 @@ visual_data={'kind':'panels','panels':panels}
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:22:18.455961+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:30:21.532254+00:00. JAX 0.9.2.
 
 ```text
 Saved residual descriptions:
@@ -276,7 +276,7 @@ f32[16] output of tanh from <string>:15:20 (layer)
 f32[16] output of tanh from <string>:15:20 (layer)
 f32[16] output of tanh from <string>:15:20 (layer)
 Compiler memory estimates: [{'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}, {'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}]
-Synchronized gradient samples: [[5.7625118643045425e-05, 4.0416140109300613e-05, 4.675006493926048e-05, 4.9625057727098465e-05, 1.833401620388031e-05], [2.370774745941162e-05, 1.233397051692009e-05, 9.917188435792923e-06, 9.125098586082458e-06, 8.66735354065895e-06]]
+Synchronized gradient samples: [[5.758320912718773e-05, 1.8292106688022614e-05, 9.874813258647919e-06, 4.650000482797623e-05, 4.716683179140091e-05], [3.841705620288849e-05, 4.245806485414505e-05, 2.9375310987234116e-05, 1.4625024050474167e-05, 1.2874603271484375e-05]]
 Independent reverse recurrence agrees with both gradients.
 plain 
 f32[16,16] from a constant
@@ -296,7 +296,7 @@ f32[16] output of tanh from <string>:15:20 (layer)
 f32[16] output of tanh from <string>:15:20 (layer)
 f32[16] output of tanh from <string>:15:20 (layer)
 Compiler memory estimates: [{'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}, {'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}]
-Synchronized gradient samples: [[5.7625118643045425e-05, 4.0416140109300613e-05, 4.675006493926048e-05, 4.9625057727098465e-05, 1.833401620388031e-05], [2.370774745941162e-05, 1.233397051692009e-05, 9.917188435792923e-06, 9.125098586082458e-06, 8.66735354065895e-06]]
+Synchronized gradient samples: [[5.758320912718773e-05, 1.8292106688022614e-05, 9.874813258647919e-06, 4.650000482797623e-05, 4.716683179140091e-05], [3.841705620288849e-05, 4.245806485414505e-05, 2.9375310987234116e-05, 1.4625024050474167e-05, 1.2874603271484375e-05]]
 Saved residual descriptions:
 plain 
 f32[16,16] from a constant
@@ -316,7 +316,7 @@ f32[16] output of tanh from <string>:81:20 (layer)
 f32[16] output of tanh from <string>:81:20 (layer)
 f32[16] output of tanh from <string>:81:20 (layer)
 Compiler memory estimates: [{'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}, {'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}]
-Synchronized gradient samples: [[2.5208108127117157e-05, 1.4833174645900726e-05, 1.1416152119636536e-05, 1.1333264410495758e-05, 9.832903742790222e-06], [2.3250002413988113e-05, 4.2708124965429306e-05, 5.6167133152484894e-05, 6.591575220227242e-05, 4.27919439971447e-05]]
+Synchronized gradient samples: [[2.7832575142383575e-05, 1.9374769181013107e-05, 1.1874828487634659e-05, 1.0540708899497986e-05, 8.124858140945435e-06], [2.3958273231983185e-05, 2.4499837309122086e-05, 1.195911318063736e-05, 1.0124873369932175e-05, 1.070881262421608e-05]]
 Independent reverse recurrence agrees with both gradients.
 Whole-objective residuals: ['f32[16,16] from a constant', 'f32[16] from the argument v']
 Whole-objective memory estimate: CompiledMemoryStats(generated_code_size_in_bytes=0, argument_size_in_bytes=64, output_size_in_bytes=64, alias_size_in_bytes=0, temp_size_in_bytes=256, host_generated_code_size_in_bytes=0, host_argument_size_in_bytes=0, host_output_size_in_bytes=0, host_alias_size_in_bytes=0, host_temp_size_in_bytes=0)
@@ -444,9 +444,17 @@ Rematerialization reduces the number of saved residual descriptions but the comp
 
 <details><summary>Answer and explanation</summary>
 
-The differentiation strategy changed, but this evidence does not show reduced compiled temporary storage.
+**1. The compiler’s report must be wrong.**
+
+AD residuals and compiler temporary-buffer estimates describe different stages. Fewer saved intermediates need not lower the reported buffer peak.
+
+**2. The differentiation strategy changed, but this evidence does not show reduced compiled temporary storage. (correct)**
 
 Residual lists and compiler buffer estimates describe different levels. Report the observed equality and investigate the real target workload before claiming a memory or speed benefit.
+
+**3. The model must train faster because fewer values were listed.**
+
+Rematerialization trades storage for recomputation. Measure latency and peak memory separately before claiming an improvement.
 
 </details>
 

@@ -16,7 +16,7 @@ Train a tiny next-token model, resume it correctly and serve reproducible genera
 
 ## Figures to explain
 
-Read the measured training curve and final held-out comparison separately: a single final-model line is not a validation trajectory. Inspect one actual causal attention head, allocated cache bytes and isolated cache logit errors. Keep generation failures alongside aggregate metrics.
+Plot token-weighted held-out NLL under one tokenizer and split, with a uniform or stated baseline. Show valid-token counts and distinguish pre-update, post-update and evaluation losses. For generation, display the prompt, actual continuation and decoding settings beside the metric; a lower perplexity alone does not establish useful instruction following.
 
 ## 1. Define the data contract
 

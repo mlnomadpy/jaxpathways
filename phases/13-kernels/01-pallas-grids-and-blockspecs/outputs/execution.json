@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "kernels-01",
-  "contentHash": "387bd503296b3fa5c6a18372f86ecb56ef0cff1c608aa3c402396a0905270cd0",
-  "executedAt": "2026-10-20T22:23:35.944346+00:00",
+  "contentHash": "b82305aa59f8f4070ca8a6c5d791048e2438f7ae06cfed1f5c8344896fc0d5ef",
+  "executedAt": "2026-10-21T11:35:32.777095+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,

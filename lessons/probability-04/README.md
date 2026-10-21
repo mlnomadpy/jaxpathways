@@ -205,7 +205,7 @@ visual_data={"kind":"bar","x":[0,1,2],"labels":["weight 1","weight 2","sum of we
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:23:15.474979+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:31:16.033812+00:00. JAX 0.9.2.
 
 ```text
 VI mean: [ 0.99999994 -0.99999994] variances: [0.36000016 0.36000016] remaining KL: 0.5108256340026855
@@ -402,9 +402,17 @@ The variational mean is correct and the optimization gradient is tiny. Why can p
 
 <details><summary>Answer and explanation</summary>
 
-The diagonal family cannot represent the correlated target, even at its optimum
+**1. The diagonal family cannot represent the correlated target, even at its optimum (correct)**
 
 For this KL direction and correlated target, the optimal diagonal variances are 0.36 rather than the target marginal variances of one. This is approximation error, not an unfinished optimizer.
+
+**2. Any Gaussian model necessarily produces wrong uncertainty**
+
+A Gaussian target can still have correlated coordinates that a diagonal variational family cannot represent.
+
+**3. The number of optimizer iterations defines posterior variance**
+
+More iterations can optimize the chosen family but cannot add missing covariance structure. Compare its uncertainty with the exact posterior.
 
 </details>
 

@@ -246,7 +246,7 @@ visual_data={'kind':'line','x':list(range(129)),'xlabel':'logical column','ylabe
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:23:39.064266+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:31:43.134289+00:00. JAX 0.9.2.
 
 ```text
 Interpretation max error: 0.0
@@ -451,9 +451,17 @@ What does a successful CPU interpret run establish for this target-oriented kern
 
 <details><summary>Answer and explanation</summary>
 
-The tested numerical Ref/grid semantics agree with the reference; target lowering and performance remain separate checks.
+**1. The TPU kernel has measured high throughput.**
+
+Interpret mode executes a semantic reference and cannot establish TPU throughput. Time a supported compiled kernel on the target.
+
+**2. The tested numerical Ref/grid semantics agree with the reference; target lowering and performance remain separate checks. (correct)**
 
 Interpretation is useful correctness evidence. It does not execute the target compiler or hardware, so those claims require a separate guarded target run.
+
+**3. Every TPU generation accepts all block sizes.**
+
+The tested grid and shapes do not cover every generation or block choice. Extend cases and qualify each claimed target explicitly.
 
 </details>
 

@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "candidateVersion": "0.10.0",
+  "baseCommit": "86b9874d86ca764e70f9764f3fe6f408460b4da6",
+  "scope": "Local author verification; no independent acceptance or publication",
+  "summary": {
+    "byKind": {
+      "lessons": 103,
+      "phases": 22,
+      "projects": 31,
+      "plans": 10,
+      "assessments": 11,
+      "pathways": 10,
+      "careers": 7,
+      "tracks": 4,
+      "guides": 3,
+      "book": 1
+    },
+    "phaseLevels": {
+      "available-draft": 9,
+      "in-development": 13
+    },
+    "itemLevels": {
+      "available-draft": 164,
+      "in-development": 28,
+      "planned": 10
+    },
+    "tasks": 529,
+    "lessonTasks": 403,
+    "projectStages": 126,
+    "currentCpuLessons": 103,
+    "currentProjectReferences": 31,
+    "expertReviewedLessons": 0,
+    "novicePilotedLessons": 0,
+    "choiceSpecificFeedbackLessons": 103,
+    "boundedHardwareQualifications": 4
+  },
+  "bookArtifacts": {
+    "jax-foundations.epub": "0a5c36b5970c877cffcc275d75a2120da7c1281d4f0f8e0c6f23a58414ee6a4c"
+  },
+  "localChecks": [
+    "npm run check",
+    "npm run check:deployment",
+    "python3 scripts/smoke-lessons.py",
+    "python3 scripts/render-lesson-figures.py",
+    "python3 scripts/check-projects.py",
+    "python3 assessments/check_assessments.py",
+    "node --test scripts/check-tpu-lessons.mjs"
+  ]
+}

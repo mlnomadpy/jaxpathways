@@ -173,3 +173,11 @@ To inspect the provided implementation after your attempt:
 # Run run command in terminal using the course Python environment
 python3 projects/training-methods/tests/check.py --implementation solution --stage all
 ```
+
+## Review handoff: explain a changed condition
+
+Trace one example through input visibility, target eligibility and the objective denominator for MLM, causal SFT and paired contrastive learning.
+
+**Keep for review:** Three explicit input/target tables and independent scalar losses. A shared word such as mask does not mean these objectives use the same visibility or reduction contract.
+
+Write your prediction before opening the reference implementation. Distinguish what the existing checker verifies from your proposed extension; record any extension command, actual output and limitation separately. A reviewer should be able to locate the first failed contract from your saved evidence.

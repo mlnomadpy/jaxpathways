@@ -70,3 +70,11 @@ python3 projects/bayesian-regression/tests/check.py --stage all --implementation
 Reference solutions are public. Passing their tests, completing a quiz and submitting your own independently reasoned report are different kinds of evidence. Attempt the probability synthesis assessment to connect model assumptions, sampler behavior, variational approximation and posterior predictive checks.
 
 A real-data extension should freeze data provenance, license, cleaning rules and split identifiers before fitting. Estimate unknown noise under a stated model, use an inference implementation with modern diagnostics, and report group-specific predictive checks with sample counts. Those extensions are not silently claimed by this bounded project.
+
+## Review handoff: explain a changed condition
+
+Shift the nonconstant design column by one and compare the full posterior covariance with the original design. Why can similar means hide different prediction uncertainty?
+
+**Keep for review:** The independent precision/solve calculation, covariance including off-diagonal terms and predictive intervals at two inputs. Diagnose a diagonal approximation separately from sampler convergence.
+
+Write your prediction before opening the reference implementation. Distinguish what the existing checker verifies from your proposed extension; record any extension command, actual output and limitation separately. A reviewer should be able to locate the first failed contract from your saved evidence.

@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "recovery-03",
-  "contentHash": "533dd935b0e441a387312fd3ad92ecb77b962d20f41bdb9ae096d24155a7eea0",
-  "executedAt": "2026-10-21T10:05:22.060810+00:00",
+  "contentHash": "a1a37fdad5ac92073bfb48bb1881c3dc8488e26ab64e148d1cd7a0604c202091",
+  "executedAt": "2026-10-21T11:29:11.083378+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,

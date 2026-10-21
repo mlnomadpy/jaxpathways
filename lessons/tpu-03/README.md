@@ -37,7 +37,7 @@ $$
 
 *Architecture and dataflow mechanism diagram.*
 
-Read top to bottom: HBM stores master `fp32` parameters and Adam moments (`m`, `v`) alongside `bf16` activations and KV cache; operands are cast to `bf16` (or `int8`) to stream across the HBM bandwidth bottleneck into the MXU, which accumulates dot products in `fp32` before writing updated state back.
+Follow the assumed mixed-precision ledger from HBM to compute: FP32 master weights and moments coexist with BF16 compute weights. A dot can request BF16 inputs and FP32 accumulation. A quantized path additionally needs its own scale and accumulation contract. The diagram names memory/compute boundaries; it does not show an observed kernel placement or prove an INT8 speedup.
 
 ### Pause and reason
 
@@ -51,12 +51,12 @@ The estimate is 7e9 × 18 / 2^30 ≈ 117.4 GiB. It excludes activations, communi
 
 ## 1. Compare TPU generations (`v5e`, `v5p`, `v6e`, Ironwood) and calculate HBM budgets
 
-Published per-chip TPU specifications determine which slice fits your model:
+Published per-chip specifications bound an initial capacity estimate. Actual fit also depends on per-device sharding, activations, buffers and runtime allocations:
 
 - **TPU v5e (`v5litepod`)**: $16$ GiB HBM per chip, $819$ GB/s HBM bandwidth, $197$ BF16 TFLOP/s (`240.5` FLOP/byte ridge point). Single-host slices: `1`, `4` (`64` GiB), or `8` (`128` GiB) chips.
 - **TPU v5p**: $95$ GiB HBM per chip, $2765$ GB/s HBM bandwidth, $459$ BF16 TFLOP/s (`166.0` FLOP/byte ridge point).
-- **TPU v6e (Trillium)**: $32$ GiB HBM per chip, $1600$ GB/s HBM bandwidth, $918$ BF16 TFLOP/s (`573.8` FLOP/byte ridge point). Single-host slices: `1`, `4` (`128` GiB), or `8` (`256` GiB) chips.
-- **TPU Ironwood (7th-gen scale)**: $192$ GiB HBM per chip, $7370$ GB/s HBM bandwidth.
+- **TPU v6e (Trillium)**: $32$ GiB HBM per chip, $1638$ GB/s HBM bandwidth, $918$ BF16 TFLOP/s (`560.4` FLOP/byte ridge point). Single-host slices: `1`, `4` (`128` GiB), or `8` (`256` GiB) chips.
+- **TPU Ironwood (7th-gen scale)**: $192$ GiB HBM per chip, $7380$ GB/s HBM bandwidth.
 
 **Run the TPU generation & HBM budgeting verifier on your TPU VM or workstation**
 
@@ -68,6 +68,10 @@ gcloud compute tpus tpu-vm ssh "$TPU_NAME" --zone="$ZONE" \
 ```
 
 **Expected:** Prints the TPU ridge points (FLOP/byte) and the 7B and 1.5B training + KV-cache HBM budgets in GiB.
+
+## Use chip specifications without confusing them with a runtime contract
+
+Specifications checked on 2026-10-21 give v6e HBM bandwidth as 1638 GB/s. The comparison lesson uses the published cross-generation GiB capacity table. TPU7x is documented for both Compute Engine and GKE, with 192 GiB and 7380 GB/s per chip; its two chiplets are exposed as two JAX devices per chip. Therefore device count cannot universally be treated as chip count. Record machine type, topology, API and observed device kinds separately. Peak low-precision throughput is a hardware capability, not proof that a particular JAX expression or exported model uses that native path.
 
 ## Define TPU generation specs and compute Roofline ridge points
 
@@ -82,13 +86,13 @@ import numpy as np
 TPU_SPECS = [
     {"gen": "v5e", "hbm_gib": 16.0, "bw_gbs": 819.0, "bf16_tflops": 197.0},
     {"gen": "v5p", "hbm_gib": 95.0, "bw_gbs": 2765.0, "bf16_tflops": 459.0},
-    {"gen": "v6e", "hbm_gib": 32.0, "bw_gbs": 1600.0, "bf16_tflops": 918.0},
+    {"gen": "v6e", "hbm_gib": 32.0, "bw_gbs": 1638.0, "bf16_tflops": 918.0},
 ]
 for s in TPU_SPECS:
     s["ridge_flops_per_byte"] = round((s["bf16_tflops"] * 1e12) / (s["bw_gbs"] * 1e9), 1)
 ```
 
-Dividing peak BF16 FLOP/s by HBM bandwidth (B/s) gives the minimum FLOPs per byte needed to saturate the MXU.
+Converting TFLOP/s to FLOP/s and GB/s to byte/s introduces a factor of 1000. Their ratio is the ideal Roofline intersection, not a guarantee that a kernel saturates the MXU.
 
 ## Estimate training-state and KV-cache HBM budgets across precisions
 
@@ -144,7 +148,7 @@ import numpy as np
 TPU_SPECS = [
     {"gen": "v5e", "hbm_gib": 16.0, "bw_gbs": 819.0, "bf16_tflops": 197.0},
     {"gen": "v5p", "hbm_gib": 95.0, "bw_gbs": 2765.0, "bf16_tflops": 459.0},
-    {"gen": "v6e", "hbm_gib": 32.0, "bw_gbs": 1600.0, "bf16_tflops": 918.0},
+    {"gen": "v6e", "hbm_gib": 32.0, "bw_gbs": 1638.0, "bf16_tflops": 918.0},
 ]
 for s in TPU_SPECS:
     s["ridge_flops_per_byte"] = round((s["bf16_tflops"] * 1e12) / (s["bw_gbs"] * 1e9), 1)
@@ -175,7 +179,7 @@ print("7B memory budget (GiB):", budget_7b)
 print("1.5B memory budget (GiB):", budget_1p5b)
 ```
 
-Expected: Prints the ridge-point FLOP/byte ratios for v5e (240.5), v5p (166.0), and v6e (573.8) along with the 7B and 1.5B memory budgets in GiB.
+Expected: Prints the ridge-point FLOP/byte ratios for v5e (240.5), v5p (166.0), and v6e (560.4) along with the 7B and 1.5B memory budgets in GiB.
 
 ## Calculated TPU memory capacity and theoretical ridge point
 
@@ -187,7 +191,7 @@ Expected: Prints the ridge-point FLOP/byte ratios for v5e (240.5), v5p (166.0), 
 
 ### Read the figure
 
-Two panels show per-chip HBM capacity in GiB and theoretical BF16 ridge point in FLOP/byte for the same TPU generations. Read the panels independently; their heights are not comparable.
+The left panel shows per-chip HBM: v5e 16, v5p 95 and v6e 32 GiB. The right panel shows calculated BF16 ridge points: about 240.5, 166.0 and 560.4 FLOP/byte. v5p has more memory than v6e but a lower ridge point. A taller ridge bar means more arithmetic per HBM byte is needed to reach the compute ceiling, not automatically a faster workload. The panels use different units; compare values within each panel.
 
 ### Connect it to the computation
 
@@ -207,18 +211,19 @@ visual_data = {
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:27:14.917346+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:35:35.439963+00:00. JAX 0.9.2.
 
 ```text
-TPU ridge points (FLOP/byte): {'v5e': 240.5, 'v5p': 166.0, 'v6e': 573.8}
+TPU ridge points (FLOP/byte): {'v5e': 240.5, 'v5p': 166.0, 'v6e': 560.4}
 7B memory budget (GiB): {'fp32_train_state_gib': 104.308, 'mixed_bf16_train_state_gib': 117.347, 'kv_fp32_gib': 2.0, 'kv_bf16_gib': 1.0, 'kv_int8_gib': 0.5}
 1.5B memory budget (GiB): {'fp32_train_state_gib': 22.352, 'mixed_bf16_train_state_gib': 25.146, 'kv_fp32_gib': 1.0, 'kv_bf16_gib': 0.5, 'kv_int8_gib': 0.25}
-TPU ridge points (FLOP/byte): {'v5e': 240.5, 'v5p': 166.0, 'v6e': 573.8}
+TPU ridge points (FLOP/byte): {'v5e': 240.5, 'v5p': 166.0, 'v6e': 560.4}
 7B memory budget (GiB): {'fp32_train_state_gib': 104.308, 'mixed_bf16_train_state_gib': 117.347, 'kv_fp32_gib': 2.0, 'kv_bf16_gib': 1.0, 'kv_int8_gib': 0.5}
 1.5B memory budget (GiB): {'fp32_train_state_gib': 22.352, 'mixed_bf16_train_state_gib': 25.146, 'kv_fp32_gib': 1.0, 'kv_bf16_gib': 0.5, 'kv_int8_gib': 0.25}
 KV cache GiB (FP32 / BF16 / INT8): 2.0 1.0 0.5
 7B mixed train state GiB: 117.347 Minimum chips at 80% usable HBM: 10
-1.5B state plus BF16 KV cache (GiB): 25.646
+Assumed training state (GiB): 25.146
+Separate inference BF16 KV cache (GiB): 0.5
 Arithmetic intensity: 341.3333333333333 FLOPs/byte
 v6e-4 80% usable GiB: 102.4 Fits 7B state estimate: False
 PASS: tpu-03
@@ -238,7 +243,7 @@ print("KV cache GiB (FP32 / BF16 / INT8):", budget_7b["kv_fp32_gib"], budget_7b[
 
 **Expected:** For 8192 tokens, KV cache drops from 2.0 GiB (FP32) to 1.0 GiB (BF16) and 0.5 GiB (INT8).
 
-Halving bytes per element halves both the HBM capacity consumed by the KV cache and the HBM bytes read on every decode step.
+This tensor-element ledger halves storage at each step. A real INT8 cache also needs scales and supported kernels; actual decode traffic and latency depend on reuse and the implementation. This does not measure quantized inference.
 
 ## Verify how many v5e chips are needed to hold a 7B mixed-precision training state
 
@@ -259,7 +264,7 @@ The estimate includes 2-byte BF16 weights, 4-byte FP32 master weights, 4-byte gr
 
 ## Make it yours
 
-Compute `estimate_memory_gib` for a `1.5`B parameter model with `4096` KV tokens and verify that its mixed-precision training-state estimate is below `30` GiB and that state plus BF16 KV cache is below `80%` of a single-host `v5litepod-4` (`64` GiB total HBM).
+Compute estimate_memory_gib for a 1.5B parameter model with 4096 KV tokens. Check that the assumed mixed-precision training state is below 30 GiB and below 80% of a four-chip v5e slice. Separately report the BF16 KV-cache estimate for an inference scenario. Do not assume training normally retains an inference KV cache, or that aggregate HBM guarantees per-device fit.
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
@@ -272,10 +277,13 @@ Compute `estimate_memory_gib` for a `1.5`B parameter model with `4096` KV tokens
 ```python
 budget_check = estimate_memory_gib(...)  # TODO: compute budget_check
 usable_hbm_gib = ...  # TODO: compute usable_hbm_gib
-state_and_kv_gib = ...  # TODO: compute state_and_kv_gib
-print("1.5B state plus BF16 KV cache (GiB):", state_and_kv_gib)
-assert budget_check["mixed_bf16_train_state_gib"]  # TODO: complete assertion check
-assert state_and_kv_gib  # TODO: complete assertion check
+training_state_gib = ...  # TODO: compute training_state_gib
+inference_kv_gib = ...  # TODO: compute inference_kv_gib
+print("Assumed training state (GiB):", training_state_gib)
+print("Separate inference BF16 KV cache (GiB):", inference_kv_gib)
+assert training_state_gib  # TODO: complete assertion check
+assert training_state_gib  # TODO: complete assertion check
+assert np.isclose(inference_kv_gib, 0.5)  # TODO: complete assertion check
 ```
 
 <details><summary>Reference solution</summary>
@@ -283,10 +291,13 @@ assert state_and_kv_gib  # TODO: complete assertion check
 ```python
 budget_check = estimate_memory_gib(params_billions=1.5, kv_tokens=4096)
 usable_hbm_gib = 4 * 16.0 * 0.8
-state_and_kv_gib = budget_check["mixed_bf16_train_state_gib"] + budget_check["kv_bf16_gib"]
-print("1.5B state plus BF16 KV cache (GiB):", state_and_kv_gib)
-assert budget_check["mixed_bf16_train_state_gib"] < 30.0
-assert state_and_kv_gib < usable_hbm_gib
+training_state_gib = budget_check["mixed_bf16_train_state_gib"]
+inference_kv_gib = budget_check["kv_bf16_gib"]
+print("Assumed training state (GiB):", training_state_gib)
+print("Separate inference BF16 KV cache (GiB):", inference_kv_gib)
+assert training_state_gib < 30.0
+assert training_state_gib < usable_hbm_gib
+assert np.isclose(inference_kv_gib, 0.5)
 ```
 
 </details>
@@ -329,7 +340,7 @@ assert intensity == n / 3.0
 assert intensity > TPU_SPECS[0]["ridge_flops_per_byte"]
 ```
 
-The matrix multiply performs about 341.3 FLOPs per byte. That exceeds the v5e ridge point of 240.5 FLOPs/byte, so this idealized operation is compute-bound by the Roofline comparison. Actual kernels may have different data reuse and overhead.
+The idealized operation has about 341.3 FLOP/byte. It is above v5e’s 240.5 ridge and below v6e’s 560.4 ridge, assuming exactly the stated two BF16 input reads and one BF16 output write. That assigns different ideal ceilings; padding, actual output dtype, cache reuse and measured traffic can change the comparison.
 
 </details>
 
@@ -375,17 +386,25 @@ A 4-chip v6e slice has 128 GiB total HBM and 102.4 GiB at an 80% budget. The 117
 
 ## Check your understanding
 
-What does a TPU generation's Roofline ridge point (`bf16_tflops / bw_gbs` in FLOPs/byte) tell you about a kernel?
+What does the theoretical BF16 Roofline ridge point, $1000 \times \text{TFLOP/s} / \text{GB/s}$ in FLOP/byte, describe?
 
 1. How many SSH keys can connect to the TPU VM
-2. The minimum FLOPs performed per byte transferred from HBM required to become MXU compute-bound rather than HBM bandwidth-bound
+2. The arithmetic intensity where the ideal HBM-bandwidth ceiling meets the ideal BF16-compute ceiling
 3. How long `gcloud compute tpus tpu-vm create` takes to provision
 
 <details><summary>Answer and explanation</summary>
 
-The minimum FLOPs performed per byte transferred from HBM required to become MXU compute-bound rather than HBM bandwidth-bound
+**1. How many SSH keys can connect to the TPU VM**
 
-Below the ridge point, execution speed is limited by HBM memory bandwidth; above the ridge point, execution is limited by MXU matrix compute throughput.
+A roofline ratio describes compute and memory rates. Authentication and SSH limits belong to a different control-plane contract.
+
+**2. The arithmetic intensity where the ideal HBM-bandwidth ceiling meets the ideal BF16-compute ceiling (correct)**
+
+Convert both rates to FLOP/s and byte/s first. The ratio locates the intersection of two ideal ceilings. Below it the bandwidth ceiling is lower; above it the compute ceiling is lower. Actual performance can fall below either ceiling because of tiling, communication, vector work or launch overhead.
+
+**3. How long `gcloud compute tpus tpu-vm create` takes to provision**
+
+Provisioning wait depends on capacity and scheduling, not this compute-to-bandwidth ratio. Keep capacity planning separate from kernel analysis.
 
 </details>
 
@@ -396,7 +415,7 @@ If your TPU job fails with `RESOURCE_EXHAUSTED: Out of memory while trying to al
 ## Carry forward
 
 - Size your TPU slice (`v5e`, `v5p`, `v6e`) from explicit HBM byte budgets for training state and KV caches before launching.
-- Compare your workload's FLOPs/byte against the chip's ridge point to know whether fusion/quantization (bandwidth) or MXU tiling (compute) will speed it up.
+- Use the Roofline comparison to propose a bottleneck hypothesis, then check actual target traces, traffic, precision and synchronized timing before choosing fusion, quantization or a tile.
 
 ## Keep your evidence
 
@@ -408,4 +427,5 @@ Save your predictions, modified code, terminal outputs, and reasoning in your en
 
 - [Cloud TPU v5e, v5p, and v6e (Trillium) specifications](https://cloud.google.com/tpu/docs/v6e)
 - [Cloud TPU performance guide](https://cloud.google.com/tpu/docs/performance-guide)
+- [TPU7x cross-generation specifications and chiplet exposure (checked 2026-10-21)](https://docs.cloud.google.com/tpu/docs/tpu7x)
 

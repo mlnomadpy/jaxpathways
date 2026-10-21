@@ -72,7 +72,8 @@ with ZipFile(OUT/'jax-foundations.epub') as book:
     assert f'course reader {release["version"]}' in ''.join(package.find('o:metadata/dc:title',ns).itertext())
     assert package.find('o:metadata/o:meta[@property="dcterms:modified"]',ns).text==release['date']+'T00:00:00Z'
     assert all(f'OEBPS/{name}.xhtml' in book.namelist() for name in ['solutions','appendix-workflow','appendix-experiments'])
-    solutions_text=''.join(ET.fromstring(book.read('OEBPS/solutions.xhtml')).itertext())
+    solutions=ET.fromstring(book.read('OEBPS/solutions.xhtml'))
+    solutions_text=''.join(solutions.itertext())
     assert all(lesson['content']['solution'] in solutions_text and lesson['content']['code'] in solutions_text for lesson in authored)
     for index, lesson in enumerate(authored):
         chapter=ET.fromstring(book.read(f'OEBPS/chapter-{index}.xhtml'))
@@ -120,6 +121,9 @@ with ZipFile(OUT/'jax-foundations.epub') as book:
         for experiment in lesson['content'].get('experiments',[]):
             assert experiment['code'] in text, f'{lesson["id"]}: missing book experiment'
         assert all(practice['solution'] in solutions_text for practice in lesson['content'].get('practice',[]))
+        for feedback in lesson['content']['optionFeedback']:
+            for paragraph in feedback.split('\n\n'):
+                assert_narrative(paragraph, solutions_text, solutions)
     for name in book.namelist():
         if name.endswith('.xhtml'):
             for a in ET.fromstring(book.read(name)).iter('{http://www.w3.org/1999/xhtml}a'):

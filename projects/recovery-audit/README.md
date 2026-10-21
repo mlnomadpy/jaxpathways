@@ -25,3 +25,11 @@ Stage 2 compares two updates in one process with one update, a saved checkpoint,
 Stage 3 rejects a changed learning-rate configuration and altered checkpoint bytes, then writes the diagnosis to `runs/recovery-audit/recovery-audit-evidence.json`. Checkpoints are replaced atomically within the destination directory. This local example does not claim power-loss durability or distributed checkpoint safety. Stage 4 runs all checks. Passing output begins `PASS recovery-audit stage N`.
 
 Without `--evidence-dir`, evidence uses a temporary directory. Reference command: `python3 projects/recovery-audit/tests/check.py --implementation solution --stage 4`.
+
+## Review handoff: explain a changed condition
+
+Change dataset order without changing the filename, then attempt to reuse a saved cursor.
+
+**Keep for review:** The old/new data identities, configuration compatibility decision and next-batch comparison. A cursor is meaningful only within its original ordering contract.
+
+Write your prediction before opening the reference implementation. Distinguish what the existing checker verifies from your proposed extension; record any extension command, actual output and limitation separately. A reviewer should be able to locate the first failed contract from your saved evidence.

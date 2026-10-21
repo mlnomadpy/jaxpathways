@@ -38,11 +38,11 @@ Review: [TPU generations and HBM memory budgeting](01-tpu-generations-and-hbm-me
 
 ### Try a changed condition
 
-An XProf trace on your TPU VM shows a 12-second host compile block followed by five 9-millisecond step blocks. How do you get a clean steady-state profile?
+At the stated ideal byte count, a BF16 1024-square matmul has about 341.3 FLOP/byte. Compare v5e’s 240.5 ridge with v6e’s 560.4 ridge.
 
 <details><summary>Compare an approach</summary>
 
-Run at least one warmup call and call jax.block_until_ready() before entering with jax.profiler.trace(trace_dir): so only steady-state execution is recorded.
+The operation is above v5e’s ideal intersection and below v6e’s. That selects the lower of theoretical ceilings, not measured bottlenecks or a device ranking. Record actual precision, output bytes and traffic assumptions; validate the hypothesis with target timing and a trace before claiming a speedup.
 
 </details>
 

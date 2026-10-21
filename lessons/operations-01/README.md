@@ -521,7 +521,7 @@ visual_data={'kind':'bar','labels':['completed','runtime rejected','timed out'],
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:25:29.598681+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:33:28.528230+00:00. JAX 0.9.2.
 
 ```text
 statuses: completed failed timed_out
@@ -703,9 +703,17 @@ What must a timeout handler do beyond recording a timeout status?
 
 <details><summary>Answer and explanation</summary>
 
-Terminate or kill as required, then wait for the actual child to exit
+**1. Leave the child running so it might finish later**
+
+A timed-out parent can leave the child consuming resources. Terminate the process group, escalate if needed and reap its exit.
+
+**2. Terminate or kill as required, then wait for the actual child to exit (correct)**
 
 The supervisor must resolve the actual process lifetime. A status label does not stop computation or release process resources.
+
+**3. Delete the last log line**
+
+Editing a log does not stop a process. Check process termination and the resulting exit status.
 
 </details>
 

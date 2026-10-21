@@ -130,6 +130,11 @@
       "connection": "The loss here has curvature \\(28/3\\). A step multiplies the weight error by \\(1-\\eta(28/3)\\). At rate \\(0.1\\), this factor is \\(1/15\\); at rate \\(0.3\\), it is \\(-1.8\\). The larger rate crosses the optimum and increases the error’s magnitude, so squared loss grows by a factor of \\(3.24\\) per update.\n\nThe derivative can be correct while the update is unstable. That is the diagnosis this comparison isolates: change the step size before assuming a rising loss proves broken autodiff. The loss curve itself hides the sign alternation; the update equation explains it.",
       "alt": "Correct gradients can still produce unstable training. The horizontal axis is the pre-update step: step \\(0\\) shows the initial loss before training. The vertical axis is mean squared loss on a logarithmic scale. Both runs start at approximately \\(18.67\\), but the solid rate-\\(0.1\\) curve falls while the dashed rate-\\(0.3\\) curve rises. After the first update, the smaller rate gives loss about \\(0.083\\), whereas the larger rate gives about \\(60.48\\). By the last plotted step, the losses differ by many orders of magnitude. Equal vertical distances represent equal ratios, not equal absolute changes.",
       "code": "visual_data = {'kind': 'line', 'x': list(range(len(good))), 'xlabel': 'pre-update step', 'ylabel': 'mean squared loss', 'yscale': 'log', 'series': [{'label': 'rate 0.1', 'y': good[:, 1].tolist()}, {'label': 'rate 0.3', 'y': bad[:, 1].tolist()}]}"
-    }
+    },
+    "optionFeedback": [
+      "Both the residual scale and its weight derivative scale by ten, so the gradient and curvature scale by \\(100\\). This is specific to the squared objective and paired scaling.",
+      "Scaling inputs changes gradient curvature even when AD remains correct. Derive the squared input factor in the Hessian.",
+      "Multiplying values does not add observations. Compare the data shape with the scale of the quadratic loss."
+    ]
   }
 }

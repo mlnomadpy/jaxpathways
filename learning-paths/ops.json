@@ -4,7 +4,7 @@
   "description": "Operate reproducible model workloads from tracked experiments to containerized inference. Practice failure recovery, MLOps release gates, LLMOps evaluation and tracing, and ModelOps ownership, approval and rollback.",
   "prerequisites": "Shared foundations and a runnable training system",
   "outcome": "An observable, restartable local workload",
-  "libraries": "JAX distributed \u00b7 Grain \u00b7 Orbax \u00b7 XProf \u00b7 MLflow \u00b7 Docker",
+  "libraries": "JAX distributed · Grain · Orbax · XProf · MLflow · Docker",
   "source": "https://docs.jax.dev/en/latest/",
   "phaseIds": [
     "welcome",
@@ -55,7 +55,7 @@
     "audio",
     "cross-modal"
   ],
-  "studyAdvice": "First reproduce the next update after a local interruption. Then inspect workload traces and placement so an incident has interpretable signals. Work through the operations project\u2019s process, event, restore, release and capacity stages. Keep a runbook naming the accepted checkpoint and rollback decision; validate an actual cluster separately before claiming accelerator operations experience. After the deployment bridge, complete engineering-release to connect MLflow, a verified container and application/release policy. Keep local Docker evidence separate from cloud and accelerator qualification.",
+  "studyAdvice": "First reproduce the next update after a local interruption. Then inspect workload traces and placement so an incident has interpretable signals. Work through the operations project’s process, event, restore, release and capacity stages. Keep a runbook naming the accepted checkpoint and rollback decision; validate an actual cluster separately before claiming accelerator operations experience. After the deployment bridge, complete engineering-release to connect MLflow, a verified container and application/release policy. Keep local Docker evidence separate from cloud and accelerator qualification. For review, show an injected failure that leaves the prior accepted artifact active. Connect the process exit, checkpoint identity, gate decision and release pointer in one inspectable timeline.",
   "engineeringLessonIds": [
     "recovery-06",
     "deployment-07",

@@ -56,3 +56,11 @@ Try your implementation before reading `projects/regression-audit/solution/model
 
 Keep your implementation in `projects/regression-audit/starter/model.py`, the commands, environment details, passing stage output, learning curve, unstable-rate failure run, and a brief explanation of what the checks establish. Passing public checks supports this bounded synthetic task; it is verified separately from production training, TPU operation, expert review, or career readiness.
 
+
+## Review handoff: explain a changed condition
+
+Convert a target vector from shape (n,) to (n, 1) before subtraction. Predict the residual shape and explain why a decreasing broadcasted loss can still fit the wrong task.
+
+**Keep for review:** A shape assertion before reduction, a hand-computed two-row loss, and the first incorrect intermediate. Restore one target per observation before comparing held-out predictions.
+
+Write your prediction before opening the reference implementation. Distinguish what the existing checker verifies from your proposed extension; record any extension command, actual output and limitation separately. A reviewer should be able to locate the first failed contract from your saved evidence.

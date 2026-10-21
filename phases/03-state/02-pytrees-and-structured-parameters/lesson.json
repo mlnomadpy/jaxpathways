@@ -125,6 +125,11 @@
       "connection": "For the input \\((2,1)\\), the initial prediction is \\(1\\), below the target \\(3\\). The parameter gradients are \\((-8,-4,-4)\\). Subtracting them with learning rate \\(0.05\\) adds \\((0.4,0.2,0.2)\\), exactly the changes visible between the paired bars.\n\nThe updated prediction is \\(2.2\\), so squared error falls from \\(4\\) to \\(0.64\\). The tree structure lets each gradient reach its corresponding parameter leaf. The chart’s vertical axis is parameter value, not loss; you need the prediction calculation to establish improvement.",
       "alt": "A gradient tree matches parameter leaves. Each pair of bars compares one parameter before and after a gradient step. Read the categories as the two weight coordinates followed by the bias. The weights move from \\((1,-1)\\) to \\((1.4,-0.8)\\), and the bias moves from \\(0\\) to \\(0.2\\). The second weight’s bar remains below zero, but becomes less negative. All three parameters increased; an upward update does not require the parameter itself to be positive.",
       "code": "visual_data = {'kind': 'bar', 'labels': ['weight[0]', 'weight[1]', 'bias'], 'ylabel': 'parameter value', 'series': [{'label': 'before', 'y': [float(params['weight'][0]), float(params['weight'][1]), float(params['bias'])]}, {'label': 'after', 'y': [float(updated['weight'][0]), float(updated['weight'][1]), float(updated['bias'])]}]}"
-    }
+    },
+    "optionFeedback": [
+      "The loss is scalar, but there is one gradient leaf for each differentiable parameter leaf. Compare tree structures and leaf shapes.",
+      "The differentiated input determines the gradient structure. Each floating-point parameter leaf gets a corresponding gradient leaf.",
+      "Automatic differentiation follows array operations, not source line numbers. Inspect the gradient pytree alongside the parameter pytree."
+    ]
   }
 }

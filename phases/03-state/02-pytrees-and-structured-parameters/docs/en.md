@@ -162,7 +162,7 @@ visual_data = {'kind': 'bar', 'labels': ['weight[0]', 'weight[1]', 'bias'], 'yla
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:20:15.991069+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:27:15.892416+00:00. JAX 0.9.2.
 
 ```text
 Before/after: 4.0 0.6399999260902405
@@ -359,9 +359,17 @@ What structure does `grad(loss)(params)` have?
 
 <details><summary>Answer and explanation</summary>
 
-A pytree corresponding to params
+**1. One scalar regardless of parameters**
+
+The loss is scalar, but there is one gradient leaf for each differentiable parameter leaf. Compare tree structures and leaf shapes.
+
+**2. A pytree corresponding to params (correct)**
 
 The differentiated input determines the gradient structure. Each floating-point parameter leaf gets a corresponding gradient leaf.
+
+**3. A list of Python source lines**
+
+Automatic differentiation follows array operations, not source line numbers. Inspect the gradient pytree alongside the parameter pytree.
 
 </details>
 

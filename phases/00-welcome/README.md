@@ -38,11 +38,11 @@ Review: [Set up your learning workspace](01-set-up-your-learning-workspace/docs/
 
 ### Try a changed condition
 
-A colleague gets the right sums but a different device count. Decide whether the arithmetic is wrong and how to compare the runs.
+You have identical predictions on two computers, but one receipt says CPU and the other TPU. Which statements can you keep?
 
 <details><summary>Compare an approach</summary>
 
-Compare values and shapes first, then backend, process startup flags and environment. Device enumeration is a runtime property; equal arithmetic does not imply equal hardware or performance.
+Keep the tested numerical agreement and both environment records. Reject any claim of equal device performance: different compilation, synchronization and timing boundaries could explain differences. Reproduce one changed input before expanding the numerical claim.
 
 </details>
 

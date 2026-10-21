@@ -83,3 +83,9 @@ If no physical target is available, mark this task **not demonstrated on target*
 For each task mark accept, revise or not demonstrated. An accepted CPU artifact needs actual source-bound outputs and independent checks. Physical target acceptance additionally needs the named device/process evidence, not screenshots of a CPU result inside a cloud notebook.
 
 After your attempt, read [reviewer notes](tpu-reviewer.md).
+
+## Reviewer discussion: distinguish evidence from a plausible claim
+
+A CPU run is correct and a cloud receipt enumerates TPU devices, but the submitted throughput timer ends before synchronization.
+
+Before opening the reviewer notes, name the first unsupported claim and the smallest additional artifact that would resolve it. Keep correct partial reasoning even when the overall submission needs repair.

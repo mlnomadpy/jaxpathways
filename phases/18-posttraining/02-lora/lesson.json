@@ -104,7 +104,7 @@
       "No, and freezing the base weights guarantees that adapted outputs cannot forget the source task."
     ],
     "answer": 0,
-    "explanation": "Freeze ownership should be checked in code, not inferred from an adapter-shaped parameter name.",
+    "explanation": "LoRA freezes the base parameters while optimizing the named adapter parameters. Verify parameter ownership and actual before/after deltas. Frozen base storage does not imply unchanged behavior or retained capability.",
     "diagnosis": "If neither factor moves, inspect initialization. If merged predictions drift, check factor orientation, rank scaling, dropout, base identity and accidental repeated merges.",
     "references": [
       {
@@ -245,6 +245,11 @@
         "height": 9,
         "width": 10
       }
-    }
+    },
+    "optionFeedback": [
+      "LoRA freezes the base parameters while optimizing the named adapter parameters. Verify parameter ownership and actual before/after deltas. Frozen base storage does not imply unchanged behavior or retained capability.",
+      "With zero B and nonzero A, the B gradient can be nonzero while A initially receives zero gradient. Inspect both adapter gradients.",
+      "Adapters can alter behavior even when the base weights are frozen. Test retention and task quality rather than inferring them from frozen storage."
+    ]
   }
 }

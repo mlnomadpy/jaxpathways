@@ -199,10 +199,13 @@ function showLesson(phase, lesson, options = {}) {
     const checkpointForm = /** @type {HTMLFormElement} */ (requireElement('#lesson-checkpoint'));
     checkpointForm.onsubmit = (e) => {
       e.preventDefault();
-      const selected = Number(new FormData(checkpointForm).get('answer'));
+      const answer = new FormData(checkpointForm).get('answer');
+      if (typeof answer !== 'string' || !/^(0|[1-9]\d*)$/.test(answer)) return;
+      const selected = Number(answer);
+      if (!Number.isInteger(selected) || selected < 0 || selected >= content.options.length) return;
       const passed = selected === content.answer;
       requireElement('#checkpoint-result').innerHTML = inlineMath(
-        (passed ? 'You’ve got it. ' : 'Let’s work through it. ') + content.explanation,
+        (passed ? 'You’ve got it. ' : 'Let’s work through it. ') + content.optionFeedback[selected],
       );
       if (passed) {
         entry.checkpointPassed = true;

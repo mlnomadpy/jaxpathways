@@ -129,6 +129,11 @@
         "code": "# Step 4 — Keep runtime observations separate\nexecutable(a,b).block_until_ready()\ntimes=[]\nfor _ in range(5):\n    # Wait for device work to finish before timing it or comparing its result on the host.\n    # Wait for device work to finish before timing it or comparing its result on the host.\n    # Wait for device work to finish before timing it or comparing its result on the host.\n    start=time.perf_counter()\n    executable(a,b).block_until_ready()\n    times.append(time.perf_counter()-start)\nflops,minimum_bytes,ai=contract(32,16,8)\nprint('Local CPU samples seconds:',times)\nprint('Matmul-only accounting:',{'flops':flops,'minimum_bytes':minimum_bytes,'flops_per_byte':ai})\nprint('Hypothetical ceilings GFLOP/s:',(roofline/1e9).tolist())",
         "explanation": "Warm samples measure the current CPU, while the work count remains a matmul-only convention. The code never asserts a speedup or hardware saturation."
       }
+    ],
+    "optionFeedback": [
+      "An HLO operation and a theoretical ceiling do not measure achieved throughput. Run the target workload with a defined synchronized boundary.",
+      "A typed intermediate representation and an optimistic ceiling do not measure execution. Workload equivalence, synchronization, device evidence and appropriate model assumptions are still required.",
+      "Source line counts do not describe data traffic or hardware utilization. Inspect operation shapes, precision and measured execution."
     ]
   }
 }

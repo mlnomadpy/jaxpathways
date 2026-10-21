@@ -178,7 +178,7 @@ visual_data = {'kind': 'line', 'x': list(range(21)), 'xlabel': 'completed update
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:20:33.744025+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:27:43.117717+00:00. JAX 0.9.2.
 
 ```text
 final weights / loss: [ 0.12157664 -0.        ] 0.0073904395
@@ -366,9 +366,17 @@ A smooth function has zero gradient at a point. What can we conclude?
 
 <details><summary>Answer and explanation</summary>
 
-It is stationary; curvature or other evidence is needed
+**1. It is a global minimum**
+
+Stationarity alone does not establish global optimality. Inspect curvature, nearby values and any convexity assumptions.
+
+**2. It is stationary; curvature or other evidence is needed (correct)**
 
 A zero gradient is compatible with a minimum, maximum or saddle. Even second-order information can be inconclusive in flat directions.
+
+**3. The optimizer implementation is broken**
+
+A valid stationary point can have a zero gradient. Check the derivative independently before blaming the optimizer.
 
 </details>
 

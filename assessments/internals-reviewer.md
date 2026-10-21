@@ -29,3 +29,11 @@ DG(z)[v]=\sum_i\left(e^{z_i}+\sin z_i+z_i\cos z_i\right)v_i.
 Moderate test inputs avoid overflow without claiming the primitive remains finite for arbitrarily large arguments. Examine constant tangents, reduction axes, tuple output contracts, and actual lower/compile calls. A source search for an autodiff call alone is weak evidence; read the new rule and inspect changed-condition behavior.
 
 The interpreter is intentionally incomplete. A clear rejection is correct outside its documented subset. StableHLO text and transformation structure may vary across JAX versions; numerical comparisons and semantic explanations should not depend on variable names or exact IR text length.
+
+## Discussion-case review notes
+
+A custom derivative passes tangent one at base point zero and fails a directional finite difference elsewhere.
+
+Base point zero and a single direction can conceal a wrong linear map. Require a nonzero base point, multiple directions and independent primal checks. Linearity tests and value agreement are complementary requirements.
+
+Record the learner’s original explanation, the requested evidence and the revised claim. This discussion is qualitative review; it adds no automatic score and is not an independent teaching-review receipt.

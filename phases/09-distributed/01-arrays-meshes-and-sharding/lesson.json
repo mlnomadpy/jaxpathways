@@ -144,6 +144,11 @@
       "connection": "Each device owns eight scalar entries in either layout, but their local shapes differ: \\((2,4)\\) for row partitioning and \\((8,1)\\) for column partitioning. Equal local element counts do not mean that the same operations will have the same communication needs.\n\nFor example, a whole row is locally available in the upper layout but split across devices in the lower one. A row-wise reduction therefore has different placement implications. The figure establishes ownership only; communication volume and execution time are not measured, and these four logical devices share one CPU host.",
       "alt": "Row sharding and column sharding place the same array differently. Both panels represent the same global array with shape \\((8,4)\\). Each cell’s number and color identify its owning logical device, not the array value stored there. Device colors are categorical and do not rank speed or capacity. In the upper panel, each device owns two complete rows: device \\(0\\) owns rows \\(0\\) and \\(1\\), for example. In the lower panel, each device owns one complete column across all eight rows. The horizontal bands become vertical bands when the partitioned axis changes.",
       "code": "panels = []\nfor name, array in [('Row partition', x), ('Column partition', x_columns)]:\n    owner = np.empty(host.shape, dtype=int)\n    for s in array.addressable_shards:\n        owner[s.index] = s.device.id\n    panels.append({'kind': 'heatmap', 'title': name, 'values': owner.tolist(), 'unit': 'logical CPU device ID'})\nvisual_data = {'kind': 'panels', 'panels': panels}"
-    }
+    },
+    "optionFeedback": [
+      "The reduction spans the partitioned row dimension, so partial contributions must be combined.",
+      "The array reduction can execute as device collectives. Global semantics do not require collecting the rows into a Python list.",
+      "The sum is still over the same global observations. Placement changes the required communication, not the mathematical definition."
+    ]
   }
 }

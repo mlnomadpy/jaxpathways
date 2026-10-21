@@ -11,7 +11,12 @@
         "The model must be numerically wrong."
       ],
       "correct": 1,
-      "explanation": "A correct value can be produced on the wrong device. Require both reference agreement and the output placement before recording a successful target run."
+      "explanation": "A correct value can be produced on the wrong device. Require both reference agreement and the output placement before recording a successful target run.",
+      "optionFeedback": [
+        "Backend qualification is a separate claim. A matching CPU result checks those numerical cases; it cannot show that a TPU executed the program.",
+        "A correct value can be produced on the wrong device. Require both reference agreement and the output placement before recording a successful target run.",
+        "Different hardware is not itself a mathematical failure. Compare the requested and observed backend before diagnosing the model."
+      ]
     }
   ]
 }

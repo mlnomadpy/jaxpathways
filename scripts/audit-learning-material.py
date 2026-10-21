@@ -169,8 +169,15 @@ def build():
                 novicePiloted=novice,
                 missing=missing,
                 missingFiles=missing_files,
-                choiceSpecificFeedback=bool(
-                    content.get("optionFeedback") or content.get("feedback")
+                choiceSpecificFeedback=(
+                    len(content.get("optionFeedback", []))
+                    == len(content.get("options", []))
+                    and len(set(content.get("optionFeedback", [])))
+                    == len(content.get("options", []))
+                    and all(
+                        isinstance(item, str) and item.strip()
+                        for item in content.get("optionFeedback", [])
+                    )
                 ),
             )
             item = add(

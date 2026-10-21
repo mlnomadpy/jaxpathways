@@ -451,7 +451,7 @@ visual_data={'kind':'bar','labels':list(errors),'xlabel':'operation in execution
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:24:38.522273+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:32:47.623944+00:00. JAX 0.9.2.
 
 ```text
 Maximum absolute error per layer: {'hidden': 2.384185791015625e-07, 'norm': 3.5762786865234375e-07, 'activation': 3.5762786865234375e-07, 'output': 1.1920928955078125e-07}
@@ -639,9 +639,17 @@ The first linear layer agrees, but LayerNorm is the first mismatch. What should 
 
 <details><summary>Answer and explanation</summary>
 
-Normalization axes, variance calculation, epsilon and affine parameters.
+**1. Normalization axes, variance calculation, epsilon and affine parameters. (correct)**
 
 The earliest mismatch narrows the investigation. Downstream error is often the propagated effect of that first difference.
+
+**2. Relax every tolerance until the final outputs pass.**
+
+A large early mismatch is diagnostic evidence. Check the normalization definition before changing tolerances.
+
+**3. Assume successful checkpoint loading proves parity.**
+
+Successful loading only verifies a structural path. Compare intermediate activations to locate the first numerical divergence.
 
 </details>
 

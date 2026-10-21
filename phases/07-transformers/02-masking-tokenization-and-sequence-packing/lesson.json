@@ -141,6 +141,11 @@
       "connection": "The allowed scores are equal in this constructed example, so each row averages its visible prefix. The causal mask determines which entries must be zero; it does not generally make the remaining entries uniform. Learned scores can distribute weight unevenly within the allowed region.\n\nFor values \\((2,4,8,16)\\), query \\(2\\) returns \\((2+4+8)/3=14/3\\), not the full-sequence average \\(7.5\\). The zero in its last column is what prevents the future value \\(16\\) from influencing that result. Verify normalization across rows, not down columns.",
       "alt": "A causal mask blocks future information. Rows select query positions and columns select key positions. The diagonal and cells to its left are allowed; the white cells to the right of the diagonal have exactly zero attention weight because they refer to future tokens. Query \\(0\\) puts all its weight on key \\(0\\). Query \\(1\\) splits weight equally across keys \\(0\\) and \\(1\\). The last row assigns \\(1/4\\) to every key because, at the last position, all four positions are available.",
       "code": "visual_data = {'kind': 'heatmap', 'values': weights.tolist(), 'rows': ['query ' + str(i) for i in range(4)], 'columns': ['key ' + str(i) for i in range(4)], 'unit': 'attention weight'}"
-    }
+    },
+    "optionFeedback": [
+      "A causal mask still allows earlier tokens from another packed example. Require the same segment as well as a valid causal position.",
+      "Packing combines positions in storage, not their semantic context. Segment and validity constraints retain example boundaries.",
+      "Equal token IDs do not imply the same example or a valid attention edge. Use segment IDs, positions and padding validity."
+    ]
   }
 }

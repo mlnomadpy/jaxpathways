@@ -243,7 +243,7 @@ visual_data={'kind':'heatmap','values':owner.tolist(),'unit':'program ID (catego
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:23:35.944346+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:35:32.777095+00:00. JAX 0.9.2.
 
 ```text
 Shape and boundary: (5, 11) -3.75 7.050000190734863
@@ -451,9 +451,17 @@ For block shape (2,4), what does a BlockSpec index map returning (i,j) select?
 
 <details><summary>Answer and explanation</summary>
 
-A block whose element origin is (2i,4j).
+**1. A block whose element origin is (2i,4j). (correct)**
 
 BlockSpec coordinates select blocks. Pallas scales them by the block dimensions; an extra multiplication in the map would skip windows.
+
+**2. One scalar element at (i,j).**
+
+The index map returns block coordinates; BlockSpec scales them by block dimensions. Distinguish a program index from an element origin.
+
+**3. A block whose origin must be multiplied by block sizes again inside the index map.**
+
+Applying the scale twice skips blocks. Write the element interval for program $(1,1)$ before implementing the map.
 
 </details>
 

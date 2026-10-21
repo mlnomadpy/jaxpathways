@@ -25,3 +25,11 @@ Stage 2 sums simulated participant values \([1,2,3]\). The full sum is 6; omitti
 Stage 3 retains backend, device names, storage dtype and operand/result dtype in `runs/tpu-runtime-audit/tpu-runtime-audit-evidence.json`, with a scope statement. Stage 4 integrates all checks. Without `--evidence-dir`, stage evidence is temporary. Passing output begins `PASS tpu-runtime-audit stage N`.
 
 Only CPU discovery and local arithmetic are observed. TPU topology, native BF16 execution and accelerator collectives need separate execution evidence. Reference command: `python3 projects/tpu-runtime-audit/tests/check.py --implementation solution --stage 4`.
+
+## Review handoff: explain a changed condition
+
+Review a receipt with four local devices but missing machine type and topology. Which hardware claim remains unknown?
+
+**Keep for review:** Observed backend/device kinds plus requested machine type, process count and local/global device counts. Do not universally equate devices and chips or infer performance from arithmetic.
+
+Write your prediction before opening the reference implementation. Distinguish what the existing checker verifies from your proposed extension; record any extension command, actual output and limitation separately. A reviewer should be able to locate the first failed contract from your saved evidence.

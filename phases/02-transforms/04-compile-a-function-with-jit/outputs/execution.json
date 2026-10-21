@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "transforms-04",
-  "contentHash": "58ee043b76ff4e66f63967bcfaa06ab999c063aeebaa607c7404bae97675f56a",
-  "executedAt": "2026-10-20T22:20:10.581450+00:00",
+  "contentHash": "3cc83bffe28e858f9a8bf014ae3435e94d05e4664fb0f86f210852a81fb67a69",
+  "executedAt": "2026-10-21T11:27:06.518873+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -11,7 +11,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Loss: 0.46000000834465027\nFirst/repeat seconds: 0.014060375280678272 1.7832964658737183e-05\neager median / min / max seconds: 2.3916596546769142e-05 2.150004729628563e-05 3.854092210531235e-05\ncompiled median / min / max seconds: 3.5830307751893997e-06 3.375113010406494e-06 5.084089934825897e-06\nbackend / shapes / dtype: cpu (4, 3) (3,) (4,) float32\ncompiled value-and-grad median seconds: 7.062684744596481e-06\nPASS: transforms-04\n",
+  "stdout": "Loss: 0.46000000834465027\nFirst/repeat seconds: 0.027464875020086765 2.8207898139953613e-05\neager median / min / max seconds: 3.749970346689224e-05 3.474997356534004e-05 5.954178050160408e-05\ncompiled median / min / max seconds: 5.729496479034424e-06 5.33275306224823e-06 8.167233318090439e-06\nbackend / shapes / dtype: cpu (4, 3) (3,) (4,) float32\ncompiled value-and-grad median seconds: 9.666429832577705e-06\nPASS: transforms-04\n",
   "notebookCells": [
     {
       "sourceHash": "804d1fb2173681aa29e6cc555464b209a33a5dfc21c699342755c4856344a511",
@@ -33,7 +33,7 @@
           "name": "stdout",
           "text": [
             "Loss: 0.46000000834465027\n",
-            "First/repeat seconds: 0.013492625206708908 1.712515950202942e-05\n"
+            "First/repeat seconds: 0.02886591712012887 2.6499852538108826e-05\n"
           ]
         }
       ]
@@ -68,8 +68,8 @@
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "eager median / min / max seconds: 2.3603904992341995e-05 2.2541731595993042e-05 3.5416800528764725e-05\n",
-            "compiled median / min / max seconds: 4.084315150976181e-06 3.62517312169075e-06 5.000270903110504e-06\n",
+            "eager median / min / max seconds: 3.510434180498123e-05 3.220932558178902e-05 5.8542005717754364e-05\n",
+            "compiled median / min / max seconds: 5.500158295035362e-06 5.333218723535538e-06 7.125083357095718e-06\n",
             "backend / shapes / dtype: cpu (4, 3) (3,) (4,) float32\n"
           ]
         }
@@ -102,7 +102,7 @@
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "compiled value-and-grad median seconds: 6.395392119884491e-06\n"
+            "compiled value-and-grad median seconds: 1.1041294783353806e-05\n"
           ]
         }
       ]

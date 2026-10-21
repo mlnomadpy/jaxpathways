@@ -240,7 +240,7 @@ visual_data = {'kind': 'bar', 'labels': ['initial', 'new values', 'new gain', 'n
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:22:12.954258+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:30:16.632828+00:00. JAX 0.9.2.
 
 ```text
 {
@@ -356,8 +356,8 @@ CPU run: 2026-10-20T22:22:12.954258+00:00. JAX 0.9.2.
   ]
 }
 Static branch trace observations: [{'shape': [8], 'square': True}, {'shape': [8], 'square': False}]
-Per-step host reads seconds: 8.750008419156075e-05
-Final-only wait seconds: 2.1750107407569885e-05
+Per-step host reads seconds: 8.16253013908863e-05
+Final-only wait seconds: 2.0875129848718643e-05
 Added ledger row: {'label': 'new length sixteen', 'shape': [16], 'dtype': 'float32', 'observed_trace_delta': 1, 'result': 1240.0}
 Masked versus unmasked padded objective: 55.0 58.0
 Observed runtime-Python-branch tracing failure
@@ -614,9 +614,17 @@ What does an append to a Python list inside a jitted function demonstrate?
 
 <details><summary>Answer and explanation</summary>
 
-An observed Python tracing event, which is not an executable compilation count
+**1. One recorded event per device execution**
+
+Python runs during tracing and can run without a corresponding steady-state device event. Do not count appends as executed device steps.
+
+**2. An observed Python tracing event, which is not an executable compilation count (correct)**
 
 Python executes during tracing; compiled array computation may run repeatedly without that append. Correlate with public compiler logs or traces before claiming recompilation.
+
+**3. An exact measure of compiler duration**
+
+A side effect does not measure compiler duration. Use compile logs or an explicit timing boundary to investigate compilation.
 
 </details>
 

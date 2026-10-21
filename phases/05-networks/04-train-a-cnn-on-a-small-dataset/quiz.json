@@ -11,7 +11,12 @@
         "All orientation-sensitive features"
       ],
       "correct": 0,
-      "explanation": "Pooling summarizes each feature channel over positions. This can support orientation classification, but it cannot preserve exact bar coordinates."
+      "explanation": "Pooling summarizes each feature channel over positions. This can support orientation classification, but it cannot preserve exact bar coordinates.",
+      "optionFeedback": [
+        "Pooling summarizes each feature channel over positions. This can support orientation classification, but it cannot preserve exact bar coordinates.",
+        "A mean over spatial axes preserves the channel axis. Inspect which axes disappear from the output shape.",
+        "Convolutional channels can encode orientation responses before pooling. The direct information lost here is the exact spatial arrangement."
+      ]
     }
   ]
 }
