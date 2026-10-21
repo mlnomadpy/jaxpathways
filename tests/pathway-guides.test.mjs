@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs';
 import { pathwayCoverage, careerPlanMarkdown } from '../src/lib/careers.js';
 import { assessmentContent } from '../src/lib/server/assessment-content.js';
 import { projectGuide } from '../src/lib/server/project-guide.js';
+import { bookGuide } from '../src/lib/server/book-guides.js';
 const course = JSON.parse(readFileSync(new URL('../public/curriculum.json', import.meta.url)));
 
 test('shared preparation cannot inflate specialist availability', () => {
@@ -69,7 +70,7 @@ test('project guides render real figures, math and course links outside the down
   assert(optimizer.body.includes('class="math-display"'));
   assert(optimizer.body.includes('/project-assets/optimizer-audit/outputs/conditioning.png'));
   assert(optimizer.body.includes('/project-guides/regression-audit.html'));
-  assert(optimizer.body.includes('/course.html#phase-optimization'));
+  assert(optimizer.body.includes('/phase-guides/optimization.html'));
   assert(optimizer.body.includes('/assessments/foundations.html'));
   const audio=projectGuide(projects.find(p=>p.id==='audio-harness'),course);
   assert(audio.body.includes('/project-assets/audio-harness/outputs/error-example.wav'));
@@ -96,4 +97,13 @@ test('planned capstones have valid preparation and stay outside runnable availab
     }
     assert(!content.body.includes('href="../'), `${plan.id}: unresolved source link`);
   }
+});
+
+
+test('offline practical chapters link permanent lessons and phase guides on the website', () => {
+  const html = bookGuide('content/guides/project-workflow.md', course);
+  assert(html.includes('href="https://www.tahabouhsine.com/jaxpathways/lesson-recovery-06.html"'));
+  assert(html.includes('href="https://www.tahabouhsine.com/jaxpathways/phase-guides/recovery.html"'));
+  assert(!html.includes('blob/main/content/guides/lesson-'));
+  assert(!html.includes('blob/main/content/guides/phase-guides/'));
 });

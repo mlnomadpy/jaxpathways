@@ -7,7 +7,7 @@ import registry from '../../../public/api/v1/projects.json';
 import { course } from '../../lib/course-data.js';
 import { inlineMath } from '../../lib/math.js';
 import { courseTypeCue } from '../../lib/runtime.js';
-import { siteUrl } from '../../lib/urls.js';
+import { lessonLink, siteUrl } from '../../lib/urls.js';
 import { projectFileLayout } from '../../lib/views/project.js';
 
 export function getStaticPaths() {
@@ -61,7 +61,7 @@ const lesson = (id: string) => phase.lessons.find((item) => item.id === id)!;
       <strong>Runtime:</strong> <Fragment set:html={inlineMath(phase.hardware)} />
     </p>
     <div class="assessment-actions">
-      <a class="button primary" href={siteUrl(`lesson.html?lesson=${phase.lessons[0].id}`)}>
+      <a class="button primary" href={siteUrl(lessonLink(phase.lessons[0].id))}>
         Start the phase
       </a>
       <a class="button" href={siteUrl(`project-guides/${phase.projectId}.html`)}>
@@ -96,7 +96,7 @@ const lesson = (id: string) => phase.lessons.find((item) => item.id === id)!;
     </details>
     <p>
       If this is unfamiliar, work through{' '}
-      <a href={siteUrl(`lesson.html?lesson=${guide.readiness.lessonId}`)}>
+      <a href={siteUrl(lessonLink(guide.readiness.lessonId))}>
         {lesson(guide.readiness.lessonId).title}
       </a>{' '}
       before attempting the project.
@@ -111,7 +111,7 @@ const lesson = (id: string) => phase.lessons.find((item) => item.id === id)!;
         <ul>
           {stage.lessonIds.map((id) => (
             <li>
-              <a href={siteUrl(`lesson.html?lesson=${id}`)}>{lesson(id).title}</a>
+              <a href={siteUrl(lessonLink(id))}>{lesson(id).title}</a>
             </li>
           ))}
         </ul>

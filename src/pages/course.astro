@@ -80,6 +80,7 @@ const eraSections = eraOrder
           </a>
           <a href={siteUrl('pathways.html')}>Explore paths</a>
           <a href={siteUrl('projects.html#modality-tracks')}>Connect lessons in a project guide</a>
+          <a href="#assessments">Find a synthesis assessment</a>
         </div>
       </div>
       <p class="course-tools-link">
@@ -256,6 +257,23 @@ const eraSections = eraOrder
       <p id="empty" hidden>
         No available lessons in this view.
       </p>
+    </section>
+    <section id="assessments" aria-labelledby="assessments-title">
+      <h2 id="assessments-title">Put your learning to the test</h2>
+      <p>
+        After a project, use its synthesis assessment to explain your decisions, check changed
+        inputs and collect evidence for your portfolio.
+      </p>
+      <ul class="assessment-list">
+        {assessmentRegistry.map((assessment) => (
+          <li>
+            <a href={siteUrl(assessment.url)}>
+              <span>{assessment.title}</span>
+              <span class="badge">Open assessment ↗</span>
+            </a>
+          </li>
+        ))}
+      </ul>
     </section>
     <SiteFooter />
   </main>

@@ -25,7 +25,7 @@ export function bookGuide(source, course, { mathOutput = 'htmlAndMathml' } = {})
     const project = /^projects\/([^/]+)\/README\.md$/.exec(target);
     if (project) return canonical(`project-guides/${project[1]}.html`);
     if (
-      /^(?:lesson|course|pathways|project|tracks|project-guides|downloads|developer|assessments|project-workflow)(?:\/|\.|\?)/.test(
+      /^(?:lesson(?:-[a-z0-9-]+)?|phase-guides|course|pathways|project|tracks|project-guides|downloads|developer|assessments|project-workflow)(?:\/|\.|\?)/.test(
         href,
       )
     )

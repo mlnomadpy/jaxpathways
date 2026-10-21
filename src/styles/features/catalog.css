@@ -4,6 +4,19 @@
   color: var(--muted);
   margin: 12px 0;
 }
+.assessment-list {
+  list-style: none;
+  padding: 0;
+}
+.assessment-list a {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px 20px;
+  min-height: 52px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--line);
+}
 .course-core-sequence {
   display: flex;
   flex-wrap: wrap;

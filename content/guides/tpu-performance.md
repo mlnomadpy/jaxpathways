@@ -2,7 +2,7 @@
 
 You have a model and access to a TPU. Should you change the batch size, use smaller numbers, shard across more chips, or choose another generation? Start by finding what limits the workload. A faster matrix unit cannot fix a stalled input pipeline.
 
-By the end, you will have a **hardware and precision report**: a workload description, memory estimate, explicit precision policy, numerical comparisons, synchronized timings and a short profile. Begin with [TPU and Google Cloud setup](tpu-gcp.html), [honest benchmarking](lesson.html?lesson=performance-01) and [reading an XProf trace](lesson.html?lesson=performance-03). The [practice workspace](downloads/jax-tpu-gcp.zip) contains the executable lab below.
+By the end, you will have a **hardware and precision report**: a workload description, memory estimate, explicit precision policy, numerical comparisons, synchronized timings and a short profile. Begin with [TPU and Google Cloud setup](tpu-gcp.html), [honest benchmarking](lesson-performance-01.html) and [reading an XProf trace](lesson-performance-03.html). The [practice workspace](downloads/jax-tpu-gcp.zip) contains the executable lab below.
 
 The recorded figure and reference outputs below use JAX 0.9.2 and NumPy 2.4.4 on CPU, with hardware specification tables checked against Google Cloud TPU documentation. Separate bounded real-target runs cover a v5e1 launcher, precision runner and four Pallas cases, a single-host four-device v5e collective path, and a four-VM-worker sixteen-device synthetic checkpoint-recovery test. Their scope is summarized in [the dated qualification report](https://github.com/mlnomadpy/jaxpathways/blob/main/docs/tpu-qualification-2026-10-20.md).
 
@@ -243,7 +243,7 @@ The first term represents arithmetic; the second represents moving bytes. It exc
 
 **Worked example:** for \(m=1,k=n=1024\), BF16 input/weights and FP32 output give \(F=2{,}097{,}152\) and \(A_{\min}=2{,}103{,}296\) bytes. Arithmetic intensity is approximately one FLOP per byte. Increasing to \(m=64\) raises reuse of the weight matrix: \(F=134{,}217{,}728\), \(A_{\min}=2{,}490{,}368\) and intensity is about 53.9 FLOPs per byte. This explains why batching is worth testing, while queueing latency may stop you from choosing a large batch.
 
-On TPU, HBM capacity, HBM bandwidth, on-chip memory and interconnect each constrain a different part. ICI connects chips within a slice; DCN connects slices. More devices can introduce communication and replicated state. A bigger slice should follow an actual memory or throughput requirement and an inspected sharding layout. Connect this estimate to the [HLO and roofline lesson](lesson.html?lesson=performance-04) and [distributed phase](course.html?phase=distributed).
+On TPU, HBM capacity, HBM bandwidth, on-chip memory and interconnect each constrain a different part. ICI connects chips within a slice; DCN connects slices. More devices can introduce communication and replicated state. A bigger slice should follow an actual memory or throughput requirement and an inspected sharding layout. Connect this estimate to the [HLO and roofline lesson](lesson-performance-04.html) and [distributed phase](course.html?phase=distributed).
 
 ## 7. Submit a decision report, not a precision slogan
 

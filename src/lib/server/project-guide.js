@@ -1,7 +1,7 @@
 import path from 'node:path';
 import { existsSync } from 'node:fs';
 import { assessmentContent } from './assessment-content.js';
-import { siteUrl } from '../urls.js';
+import { lessonLink, siteUrl } from '../urls.js';
 import projectPlans from '../../../curriculum/project-plans.json' with { type: 'json' };
 
 /** Resolve repository Markdown links into the static course, including Pages bases. */
@@ -21,11 +21,11 @@ export function projectGuide(project, course, plannedIds = projectPlans.map((pla
     const phase = course.phases.find(
       (phase) => target === `phases/${phase.number}-${phase.id}/README.md`,
     );
-    if (phase) return siteUrl(`course.html#phase-${phase.id}`);
+    if (phase) return siteUrl(`phase-guides/${phase.id}.html`);
     const lesson = course.phases
       .flatMap((phase) => phase.lessons)
       .find((lesson) => target.startsWith(lesson.path + '/'));
-    if (lesson) return siteUrl(`lesson.html?lesson=${lesson.id}`);
+    if (lesson) return siteUrl(lessonLink(lesson.id));
     const projectAsset = /^projects\/([^/]+)\/(.+)$/.exec(target);
     if (
       projectAsset &&

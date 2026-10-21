@@ -50,6 +50,10 @@ for(const location of locations){
  for(const [attribute,name] of [['property','og:description'],['name','twitter:description']])
   assert.equal(doc.querySelector(`meta[${attribute}="${name}"]`)?.content,description,`sharing description mismatch: ${file}`);
  assert.equal(doc.querySelectorAll('h1').length,1,`heading count: ${file}`);
+ for(const anchor of doc.querySelectorAll('a[href]')){
+  const target=new URL(anchor.getAttribute('href'),location);
+  assert(!(target.origin===site&&target.pathname===base+'lesson.html'&&target.searchParams.has('lesson')),`legacy lesson reader detour: ${file} links to ${target.href}`);
+ }
  linksByPage.set(location,[...doc.querySelectorAll('a[href]')].map(anchor=>{const url=new URL(anchor.getAttribute('href'),location);url.hash='';url.search='';if(url.pathname.endsWith('/index.html'))url.pathname=url.pathname.slice(0,-10);return url.href;}).filter(url=>locations.includes(url)));
  const data=JSON.parse(doc.querySelector('script[type="application/ld+json"]')?.textContent||'null');
  assert.equal(data?.['@context'],'https://schema.org',file);
@@ -81,6 +85,12 @@ const depths=new Map([[site+base,0]]), queue=[site+base];
 for(let index=0;index<queue.length;index++)for(const link of linksByPage.get(queue[index])||[])if(!depths.has(link)){depths.set(link,depths.get(queue[index])+1);queue.push(link);}
 for(const location of locations){assert(depths.has(location),`orphan page: ${location}`);assert(depths.get(location)<=3,`more than three clicks from home: ${location}`);}
 const catalog=read('course.html');
+const assessmentLinks=[...catalog.document.querySelectorAll('#assessments a[href]')];
+for(const assessment of JSON.parse(fs.readFileSync('curriculum/assessments.json','utf8'))){
+ const anchor=assessmentLinks.find(anchor=>anchor.getAttribute('href')===base+assessment.url);
+ assert(anchor,`assessment missing from catalog: ${assessment.id}`);
+ assert(!anchor.closest('details,[hidden]'),`assessment catalog link hidden: ${assessment.id}`);
+}
 const list=JSON.parse(catalog.document.querySelector('script[type="application/ld+json"]').textContent)['@graph'].find(item=>item['@type']==='ItemList');
 assert.equal(list.itemListElement.length,course.phases.length);
 list.itemListElement.forEach((entry,index)=>{assert.equal(entry.position,index+1);assert.equal(entry.item['@type'],'Course');assert(locations.includes(entry.item.url));});

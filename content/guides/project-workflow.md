@@ -2,7 +2,7 @@
 
 You have a notebook that works. A week later, you change the data and cannot explain which version produced your best result. The next skill is making the experiment inspectable: someone should be able to find its inputs, run it, and understand what changed.
 
-**Before you start:** complete [workspace setup](lesson.html?lesson=welcome-01). Basic Python and a terminal are enough. This guide is shared preparation for every project, then a reference during training, recovery, and deployment.
+**Before you start:** complete [workspace setup](lesson-welcome-01.html). Basic Python and a terminal are enough. This guide is shared preparation for every project, then a reference during training, recovery, and deployment.
 
 **Your result:** a small project with two separate run directories, saved input snapshots, a tested command-line interface (CLI), and a written comparison. The included CLI prepares experiments; training and accelerator execution come from the linked course lessons.
 
@@ -80,7 +80,7 @@ python3 run.py prepare --config configs/lower-rate.json --run-id lower-rate-01
 
 Compare the two manifests. The saved config hashes should differ; the source and data hashes should match. Both runs are still `prepared`. There is no loss curve yet and no evidence that the smaller learning rate is better.
 
-Write your hypothesis in each run's notes before connecting the [training loop lesson](lesson.html?lesson=networks-03). For an actual comparison, make training consume the saved configuration and identified data, record metrics with step numbers, and retain the final checkpoint. Do not save one config and quietly train with defaults from another file.
+Write your hypothesis in each run's notes before connecting the [training loop lesson](lesson-networks-03.html). For an actual comparison, make training consume the saved configuration and identified data, record metrics with step numbers, and retain the final checkpoint. Do not save one config and quietly train with defaults from another file.
 
 This diagram is a conceptual workflow, not a measured training result:
 
@@ -155,7 +155,7 @@ A config is a record of intent, not a checkpoint. Exact continuation can require
 
 Keep deployment artifacts separate from training checkpoints. An inference bundle needs the expected input/output contract, preprocessing/tokenizer, weights, precision, runtime dependencies and validation evidence. A container packages software; it does not automatically include your data or prove compatible accelerator drivers.
 
-Continue with [MLflow lineage](lesson.html?lesson=recovery-06), the [recovery phase guide](phase-guides/recovery.html), and the [operations phase guide](phase-guides/operations.html). Use the [modality projects](projects.html#modality-tracks) to apply the same structure to different model families.
+Continue with [MLflow lineage](lesson-recovery-06.html), the [recovery phase guide](phase-guides/recovery.html), and the [operations phase guide](phase-guides/operations.html). Use the [modality projects](projects.html#modality-tracks) to apply the same structure to different model families.
 
 ## 7. Diagnose the failure before adding another tool
 

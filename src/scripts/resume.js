@@ -1,6 +1,7 @@
 import { $ } from '../lib/dom.js';
 import { courseState, lessonById } from '../lib/course-state.js';
 import { escapeHtml } from '../lib/html.js';
+import { lessonLink } from '../lib/urls.js';
 
 function renderHomeContinue() {
   const panel = /** @type {HTMLElement | null} */ ($('#home-continue'));
@@ -22,7 +23,7 @@ function renderHomeContinue() {
     courseState.readingState.lessons[found.lesson.id]?.sectionId ||
     courseState.readingState.sectionId ||
     '';
-  const url = `lesson.html?lesson=${encodeURIComponent(found.lesson.id)}${path === 'all' ? '' : '&path=' + encodeURIComponent(path)}${/^section-\d+$/.test(section) ? '#' + section : ''}`;
+  const url = `${lessonLink(found.lesson.id, path)}${/^section-\d+$/.test(section) ? '#' + section : ''}`;
   document.body.classList.add('has-reading');
   panel.hidden = false;
   panel.innerHTML = `<div><p class="edition">Welcome back</p><h2>${escapeHtml(found.lesson.title)}</h2><p>${escapeHtml(routeTitle)}. Return to your reading position; evidence and checkpoints are tracked separately.</p></div><a class="button primary" href="${url}">Resume lesson</a><a href="course.html${path === 'all' ? '' : '?path=' + encodeURIComponent(path)}">View the course</a>`;

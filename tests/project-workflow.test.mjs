@@ -12,6 +12,6 @@ test('workflow guide links resolve beneath a deployment base and contain the run
   const content = assessmentContent('content/guides/project-workflow.md', (href) => /^(https?:|#)/.test(href) ? href : '/jaxpathways/' + href);
   assert.equal(content.sections.length, 8);
   assert.match(content.body, /href="\/jaxpathways\/downloads\/jax-project-workspace.zip"/);
-  assert.match(content.body, /href="\/jaxpathways\/lesson.html\?lesson=recovery-06"/);
+  assert.match(content.body, /href="\/jaxpathways\/lesson-recovery-06\.html"/);
   assert.match(content.body, /prepare --config configs\/baseline.json --run-id baseline-01/);
 });

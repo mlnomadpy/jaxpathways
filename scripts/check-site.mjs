@@ -78,7 +78,7 @@ for(const phase of course.phases){
  const doc=documentFor(`phase-guides/${phase.id}.html`),g=phase.studyGuide;
  assert(doc.querySelector('h1').textContent.includes(g.question),phase.id+': missing guide heading');
  for(const id of ['readiness','milestones','transfer','completion'])assert(doc.getElementById(id),phase.id+': missing guide section');
- for(const lesson of phase.lessons)assert([...doc.querySelectorAll('a')].some(a=>a.getAttribute('href')===base+'lesson.html?lesson='+lesson.id),phase.id+': lesson omitted from guide');
+ for(const lesson of phase.lessons)assert([...doc.querySelectorAll('a')].some(a=>a.getAttribute('href')===base+'lesson-'+lesson.id+'.html'),phase.id+': permanent lesson link omitted from guide');
  for(const value of [g.completion,g.furtherWork,g.transfer.approach])assert(doc.body.textContent.includes(value)||doc.body.innerHTML.includes(value.replace(/`([^`]+)`/g,'<code>$1</code>')),phase.id+': missing phase evidence or limits');
  assert.equal(doc.querySelectorAll('input,select,textarea').length,0,phase.id+': study guide should not require form entry');
  await releaseDocuments();

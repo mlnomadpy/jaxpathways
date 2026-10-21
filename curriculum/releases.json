@@ -1,5 +1,16 @@
 [
   {
+    "version": "0.8.2",
+    "date": "2026-10-21",
+    "title": "Direct routes to assessments and course material",
+    "summary": "Make synthesis assessments easier to find and link guides straight to permanent course and lesson pages.",
+    "changes": [
+      "Added an always-visible synthesis assessment directory to the course catalog with direct links to all eleven assessments.",
+      "Replaced legacy lesson reader links in study guides, practical guides, projects and career views with permanent lesson URLs, and linked project preparation directly to phase study guides.",
+      "Added checks for direct catalog assessment links and legacy reader detours in indexable pages."
+    ]
+  },
+  {
     "version": "0.8.1",
     "date": "2026-10-21",
     "title": "Distinct assessment summaries for search and sharing",

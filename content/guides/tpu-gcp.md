@@ -32,7 +32,7 @@ There are three different limits: a resource's lifetime, a Python process timeou
 
 ## 2. Rehearse locally and inspect the folder
 
-Download the [practice workspace](downloads/jax-tpu-gcp.zip) and extract it. Open a terminal in the extracted `jax-tpu-gcp` directory. These commands use a Bash-compatible shell on macOS or Linux. Windows learners can use WSL. Follow the [setup lesson](lesson.html?lesson=welcome-01) if Python or your terminal is unfamiliar.
+Download the [practice workspace](downloads/jax-tpu-gcp.zip) and extract it. Open a terminal in the extracted `jax-tpu-gcp` directory. These commands use a Bash-compatible shell on macOS or Linux. Windows learners can use WSL. Follow the [setup lesson](lesson-welcome-01.html) if Python or your terminal is unfamiliar.
 
 ```text
 jax-tpu-gcp/
@@ -221,7 +221,7 @@ The v5e1 receipt covers the single-device launcher and resume path, the precisio
 
 Read `compile_warmup_s` separately from steady-state update timing: `job_examples_per_s` includes process startup, compilation, and checkpoint overhead, whereas `update_examples_per_s` measures synchronized updates after compilation.
 
-Repeat the four-step recovery exercise on the same target backend in a new folder. Compare same-backend uninterrupted and resumed states. For a cross-backend CPU-versus-TPU comparison, define an explicit numerical tolerance budget and evaluate held-out outputs as taught in [numerical parity](lesson.html?lesson=deployment-08).
+Repeat the four-step recovery exercise on the same target backend in a new folder. Compare same-backend uninterrupted and resumed states. For a cross-backend CPU-versus-TPU comparison, define an explicit numerical tolerance budget and evaluate held-out outputs as taught in [numerical parity](lesson-deployment-08.html).
 
 ## 7. Retrieve evidence, then delete the owned resources
 

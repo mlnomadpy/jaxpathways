@@ -40,7 +40,7 @@ test('home retains saved reading position, copies exact tutor text and controls 
   try {
     await loadCourse();initExperience();renderHomeContinue();initHomeCopy();
     assert.equal(p.$('#home-continue').hidden,false);
-    assert.match(p.$('#home-continue .primary').href,/lesson=first-gradient&path=foundations#section-2$/);
+    assert.match(p.$('#home-continue .primary').href,/lesson-first-gradient\.html\?path=foundations#section-2$/);
     const copied=[];Object.defineProperty(navigator,'clipboard',{value:{writeText:async text=>copied.push(text)},configurable:true});
     p.$('[data-home-copy="tutor-install"]').click();await Promise.resolve();
     assert.equal(copied[0],p.$('#tutor-install').textContent);
