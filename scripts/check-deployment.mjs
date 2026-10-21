@@ -9,6 +9,8 @@ try {
  run('scripts/check-site.mjs',[],{...process.env,BASE_PATH:base});
  run('scripts/check-seo.mjs',[],{...process.env,BASE_PATH:base});
  run('tests/browser-migration.test.mjs',[],{...process.env,BASE_PATH:base});
+ const book=spawnSync('python3',['scripts/check-distribution.py'],{stdio:'inherit',env:{...process.env,BASE_PATH:base}});
+ if(book.status!==0)throw Error(`Book distribution check failed under ${base} (${book.status ?? book.error})`);
 } finally {
  // Leave the normal local preview build in place, even when a subpath check fails.
  run('node_modules/astro/bin/astro.mjs',['build'],{...process.env,BASE_PATH:'/'});

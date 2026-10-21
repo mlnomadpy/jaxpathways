@@ -1,6 +1,5 @@
 """Check downloadable books and bundles, including EPUB internal references."""
 import json
-import os
 import re
 from html.parser import HTMLParser
 from pathlib import Path
@@ -12,7 +11,6 @@ OUT=ROOT/'public/downloads'
 course=json.loads((ROOT/'public/curriculum.json').read_text())
 authored=[l for p in course['phases'] for l in p['lessons'] if l['status']=='authored']
 release=json.loads((ROOT/'curriculum/releases.json').read_text())[0]
-base=(os.environ.get('BASE_PATH','/') or '/').rstrip('/')+'/'
 site_hosts={'www.tahabouhsine.com','tahabouhsine.com'}
 
 class IdCollector(HTMLParser):
@@ -28,8 +26,8 @@ def check_published_link(href, source):
         return
     site_prefix='/jaxpathways/'
     assert link.path.startswith(site_prefix), f'{source}: same-site URL outside deployment prefix: {href}'
-    mapped=base+link.path[len(site_prefix):]
-    target=ROOT/'dist'/mapped.lstrip('/')
+    # Astro's URL base does not introduce a matching directory inside dist.
+    target=ROOT/'dist'/link.path[len(site_prefix):]
     assert target.is_file(), f'{source}: same-site target missing from built site: {href}'
     if link.fragment and target.suffix=='.html':
         parser=IdCollector()
