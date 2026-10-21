@@ -1,0 +1,62 @@
+{
+  "status": "pass",
+  "scope": "Training checkpoint identity and raw full-state replay byte equality only; not evaluation, consumer, quality or human acceptance.",
+  "pilotIndexSha256": "a58a9096fe7c035339197f5c5dde3ad1a7b968f7b1458bf6e88888d6eb2b1742",
+  "candidateSourceSha256": "5eecb336095e4607b59a1c63987ec69a056b0cff1958b7dfe261237ebbd67573",
+  "currentSourceSha256": {
+    "config.py": "53e0990fcf6d8fb08486398097919a9430f768cda54540740b3a453a21ed1db9",
+    "model.py": "efec0774f84e19f870368f7965e3e779641935f4670140065226ec8a27e71932",
+    "training.py": "87cd3754268552ed5ce4f3d95774591c57c3546afc352768324e459a86e5caf7",
+    "run_pilot.py": "ff570c4431c9fd326d0ee163b01d35d3354a2c8ec45b58ff280b73f3e9812303"
+  },
+  "branches": [
+    {
+      "branch": "base",
+      "checkpointSha256": "ec0f551dfcfda9c137c720976967bb1cfb9cf771a3fa54b36aed9f0d3ca8ca2b",
+      "replayByteEqual": true,
+      "updates": 32,
+      "validTargets": 65536
+    },
+    {
+      "branch": "continuation_general_control",
+      "checkpointSha256": "d2bf158c2493e13e27198f402804fc05f158f7122fc71380564128b4655f32c4",
+      "replayByteEqual": true,
+      "updates": 15,
+      "validTargets": 38400
+    },
+    {
+      "branch": "continuation_mixture",
+      "checkpointSha256": "ead2c93f1b55c5b4d17de77b1d7d52289a99c5f3dc6b78d03c37e3eed6fffd9e",
+      "replayByteEqual": true,
+      "updates": 15,
+      "validTargets": 38400
+    },
+    {
+      "branch": "sft_full_from_domain",
+      "checkpointSha256": "8c7c7e1db0d9a64e4cf3eb975d131ab8a44062aa92f173e0dd715bac74565cf3",
+      "replayByteEqual": true,
+      "updates": 32,
+      "validTargets": 1688
+    },
+    {
+      "branch": "sft_full_from_general",
+      "checkpointSha256": "c8cf6ea183c799c311803aa174fc18a3b5d2c6dd95ccaeb4bdb9e5ed20b4a8a6",
+      "replayByteEqual": true,
+      "updates": 32,
+      "validTargets": 1688
+    },
+    {
+      "branch": "sft_lora_from_domain",
+      "checkpointSha256": "dbc57536aecd4b28d28a091601055c68898e9594f46383b3d349fb9e52ac2e4f",
+      "replayByteEqual": true,
+      "updates": 32,
+      "validTargets": 1688
+    }
+  ],
+  "rawLeafControls": {
+    "loraFrozenBaseLeavesIdentical": 23,
+    "fullFineTuneChangedBaseLeaves": 23,
+    "loraNonzeroBLeaves": 4,
+    "loraBCombinedNorm": 0.06830690853404488
+  }
+}
