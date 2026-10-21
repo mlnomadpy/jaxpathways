@@ -1,0 +1,88 @@
+{
+  "scope": "Independent periodic-Hann/HTK-spaced, Hz-area-normalized triangular bank construction and uncentered log-mel forward/reduction on synthetic 16 kHz inputs. No raw codec or polyphase-resampler acceptance, fitting statistics, corpus execution or task quality.",
+  "audio_source_sha256": "7627823e827271d444b9358ff8da4fcba82f1dff6af9b3cd196f632f9924a165",
+  "cases": [
+    {
+      "padded_samples": 400,
+      "valid_samples": [
+        400,
+        221,
+        0
+      ],
+      "valid_frames": [
+        1,
+        0,
+        0
+      ],
+      "max_log_mel_absolute_error": 9.221474908116534e-07
+    },
+    {
+      "padded_samples": 559,
+      "valid_samples": [
+        559,
+        380,
+        0
+      ],
+      "valid_frames": [
+        1,
+        0,
+        0
+      ],
+      "max_log_mel_absolute_error": 7.262588059830932e-07
+    },
+    {
+      "padded_samples": 560,
+      "valid_samples": [
+        560,
+        381,
+        0
+      ],
+      "valid_frames": [
+        2,
+        0,
+        0
+      ],
+      "max_log_mel_absolute_error": 7.304897913229524e-07
+    },
+    {
+      "padded_samples": 1600,
+      "valid_samples": [
+        1600,
+        1421,
+        0
+      ],
+      "valid_frames": [
+        8,
+        7,
+        0
+      ],
+      "max_log_mel_absolute_error": 1.215104058260863e-06
+    },
+    {
+      "padded_samples": 1601,
+      "valid_samples": [
+        1601,
+        1422,
+        0
+      ],
+      "valid_frames": [
+        8,
+        7,
+        0
+      ],
+      "max_log_mel_absolute_error": 1.053237646431171e-06
+    }
+  ],
+  "amplitude_control": {
+    "amplitude_ratio": 2,
+    "expected_log_power_shift": 1.3862943611198906,
+    "checked_cells": 32
+  },
+  "negative_control": {
+    "mutation": "Rectangular window, in memory only",
+    "max_log_mel_absolute_delta": 2.508970577580092,
+    "rejected": true
+  },
+  "status": "pass",
+  "checker_sha256": "81a6ba605300a97bf1f2a72aa5559dbc4e0700ab8b11b25409bb9c6347450d37"
+}
