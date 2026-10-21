@@ -119,14 +119,56 @@ test('TPU staging guidance keeps CPU examples and target qualification separate'
   const phase = manifest.phases.find((item) => item.id === 'tpu-workflows');
   const staged = phase.lessons.find((item) => item.id === 'tpu-05');
   const authored = JSON.parse(readFileSync(`${staged.path}/lesson.json`, 'utf8'));
-  assert.deepEqual(staged.content, authored.content, 'stale embedded content must not contradict the authored execution matrix');
-  for (const prose of [phase.learningAdvice, staged.objective, staged.exercise,
-    authored.content.problem, ...authored.content.takeaways]) {
+  assert.deepEqual(
+    staged.content,
+    authored.content,
+    'stale embedded content must not contradict the authored execution matrix',
+  );
+  for (const prose of [
+    phase.learningAdvice,
+    staged.objective,
+    staged.exercise,
+    authored.content.problem,
+    ...authored.content.takeaways,
+  ]) {
     assert.doesNotMatch(prose, /(?:run|stage|upload) any (?:lesson|course|public\/exercises)/i);
   }
   assert.match(authored.content.idea, /distributed-02.*CPU-only/);
-  assert.match(authored.content.idea, /backend selection, dependencies, topology assumptions, and data ownership/);
+  assert.match(
+    authored.content.idea,
+    /backend selection, dependencies, topology assumptions, and data ownership/,
+  );
   assert.match(authored.content.sections[2].body, /discovery check only/);
+});
+
+test('onboarding uses bounded, reviewed TPU targets instead of arbitrary lesson uploads', () => {
+  const manifest = JSON.parse(readFileSync('curriculum/course.json', 'utf8'));
+  const welcome = manifest.phases.find((phase) =>
+    phase.lessons.some((lesson) => lesson.id === 'welcome-03'),
+  );
+  const lesson = welcome.lessons.find((item) => item.id === 'welcome-03');
+  const authored = JSON.parse(readFileSync(`${lesson.path}/lesson.json`, 'utf8'));
+  assert.deepEqual(lesson.content, authored.content);
+  const advice = manifest.phases.map((phase) => phase.learningAdvice).join('\n');
+  assert.doesNotMatch(advice, /run (?:subsequent lessons|every course|any accelerator phase)/i);
+  const commands = authored.content.sections
+    .flatMap((section) => section.commands || [])
+    .map((command) => command.code)
+    .join('\n');
+  assert.match(commands, /queued-resources create/);
+  assert.match(commands, /--provisioning-model=FLEX_START --max-run-duration=1h/);
+  assert.match(commands, /--valid-until-duration=30m/);
+  assert.match(commands, /uv venv --python 3\.12\.13 --managed-python/);
+  assert.match(commands, /requirements-qualification\.txt/);
+  assert.match(commands, /launch\.py --platform tpu/);
+  assert.match(commands, /precision_profile\.py --platform tpu/);
+  assert.match(commands, /queued-resources delete/);
+  assert.doesNotMatch(commands, /JAX_PLATFORMS=tpu .*exercises\//);
+  assert.match(authored.content.sections[4].body, /CPU reference/);
+  assert.match(
+    authored.content.sections[5].body,
+    /source, dependencies, backend assertion, topology, and input ownership/,
+  );
 });
 
 test('downloaded notebooks and Markdown preserve the same runtime boundaries as the reader', () => {

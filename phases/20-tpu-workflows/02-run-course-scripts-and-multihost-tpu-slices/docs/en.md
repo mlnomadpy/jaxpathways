@@ -23,7 +23,7 @@ Use a per-script execution matrix. `distributed-02` is CPU-only because it expli
 
 `--worker=all` starts a process on each host, and `jax.distributed.initialize()` lets those processes discover the global topology. These steps establish process and device discovery only. They do not create a training mesh, distribute data, perform a collective update, or prove checkpoint recovery.
 
-**Execution matrix:** `distributed-02` → CPU-only (its source requests `jax.devices("cpu")`); do not set `JAX_PLATFORMS=tpu`. Other lesson scripts → inspect-required until a source review identifies device selection, dependencies, topology assumptions, and data ownership. A TPU-compatible single-host script may run only after that review, with a backend assertion and matching pinned environment. Multi-host-qualified requires all hosts, distinct process-owned inputs, and a verified global result. Existing bounded receipts cover only the v5e1 launcher and precision target and the four-device single-host collective target; no generic “run any script” command is valid.
+**Execution matrix:** `distributed-02` → CPU-only (its source requests `jax.devices("cpu")`); do not set `JAX_PLATFORMS=tpu`. Other lesson scripts → inspect-required until a source review identifies device selection, dependencies, topology assumptions, and data ownership. A TPU-compatible single-host script may run only after that review, with a backend assertion and matching pinned environment. Multi-host-qualified requires all hosts, distinct process-owned inputs, and a verified global result. Existing bounded receipts cover the v5e1 launcher and precision target, four single-device Pallas cases, the four-device single-host collective fixture, and a separate sixteen-device fixture across four VM workers. That last target checks distinct process-owned data and same-process Orbax checkpoint restore and replay; it does not qualify this lesson’s discovery example, a fresh TPU process-group restart, or production model training. Each receipt applies only to its recorded source, environment, cases, and hardware; no generic “run any script” command is valid.
 
 $$
 g_{\text{global}} = \frac{1}{P}\sum_{p=0}^{P-1} g^{(p)} = \operatorname{psum}(g^{(p)}, \texttt{'data'}) / P
@@ -301,7 +301,7 @@ visual_data = {
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T23:45:50.961449+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T00:02:36.742376+00:00. JAX 0.9.2.
 
 ```text
 CPU route: python public/exercises/distributed-02.py

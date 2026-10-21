@@ -15,6 +15,10 @@ Edition: **0.8.0**. The [original review](full-review-2026-10-20.md) describes t
 | #53, #54 | Added desktop/mobile Chromium CI checks, manifest-driven project environments, a minimal beginner environment, layered dependencies, duplicate ZIP-entry checks and source-matching environment instructions. |
 | #31 | Formatted the affected project Python; a pinned Black gate covers the repaired files and new causal pilot (34 files). |
 
+A native browser check also exposed a broken historical `lesson.html?lesson=…` entry: startup required an embedded lesson before its redirect could run. The compatibility entry now resolves from compact navigation, preserves pathway/search/section context and shows a useful result for unknown IDs. DOM and live Chromium regressions cover the actual bootstrap path.
+
+The onboarding TPU branch now uses the tested pinned Python environment, bounded Flex Start provisioning and queued-resource cleanup. Its reviewed launcher and precision targets are separate from the CPU lesson example; phase summaries require a source and topology review for each additional program.
+
 The final integration checks exposed and repaired a textarea-versus-input guard that prevented notebook saves, a learner checker bound to the reference file instead of the learner's implementation, and a project-guide link that resolved a planned capstone as an available guide. Hosted checks also exposed a missing browser assertion argument and Windows separators in nested asset paths. Browser tests now have their own type gate, generated paths use portable identifiers, and checkout attributes preserve checksum-bound data bytes across platforms.
 
 The compatible Vite dependency was updated to 8.3.4 after the [Windows editor-launch advisory](https://github.com/advisories/GHSA-587h-7wmj-h5pm). The dependency audit reports zero vulnerabilities.
@@ -34,7 +38,7 @@ A final reader inspection found residual comments that confused optimizer output
 - Regenerated every lesson's primary figure and its mechanism diagram where present. The six performance-related image changes reflect actual repeated timing measurements, not fixed illustrative values.
 - All **31** registered reference project suites passed. Every project source hash still matches that complete receipt. The new causal pilot also passed separate learner-file stage 1 and stage 2 invocations, including predecessor rejection and fresh-process inference.
 - A freshly extracted beginner ZIP installed only its JAX/NumPy environment and dependencies into an isolated Python 3.14.3 environment. Its original program printed `Sum: 6.0`; the learner's range and assertion changes printed `Sum: 15.0` from that same folder.
-- `npm run check` passed Astro (**138 files, zero diagnostics**), strict browser/domain types, lint, formatting, curriculum validation, build, unit/DOM tests, distribution fidelity and site/SEO checks. The build contains **214 pages**, 22 phase guides and **209** canonical URLs reachable within three clicks. The final unit/DOM suite covers 121 tests, including beginner-book, Windows-path and downloaded runtime-guidance regressions.
+- `npm run check` passed Astro (**138 files, zero diagnostics**), strict browser/domain types, lint, formatting, curriculum validation, build, unit/DOM tests, distribution fidelity and site/SEO checks. The build contains **214 pages**, 22 phase guides and **209** canonical URLs reachable within three clicks. The final unit/DOM suite covers 123 tests, including beginner-book, Windows-path and downloaded runtime-guidance regressions.
 - Native Chrome checks used desktop **1456×867** and mobile **390×844** views. Both optimizer Build jumps leave the heading about 50px below the sticky bar and show Stage 2 of 5. On mobile, Phase 01's direct entry is at y≈641, before the optional TPU branch. Project filtering shows the eight model projects with zero visible unnamed links. A disposable notebook artifact was saved, recovered after reload, then removed through the real UI.
 - Reader navigation is **280,193 bytes raw / 73,440 gzip**, versus **3,009,326 / 649,104** for the cleaned full corpus. The checked optimizer lesson embeds about 24KB of lesson data. The release-notice bundle is about 1.1KB. These file-size checks are not measured Core Web Vitals.
 
@@ -53,3 +57,5 @@ On the same 4,954 held-out targets, perplexity is **797.32** after pretraining, 
 ![Mobile catalog with direct CPU setup, Phase 01 and Phase 02 entry links](evidence/review-repairs-2026-10-20/mobile-course.png)
 
 ![Desktop reader stage jump with the outline and heading visible](evidence/review-repairs-2026-10-20/desktop-reader.png)
+
+![TPU onboarding after a historical query link redirects with pathway, search and section preserved](evidence/review-repairs-2026-10-20/tpu-onboarding.png)

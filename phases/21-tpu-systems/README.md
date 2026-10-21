@@ -4,7 +4,7 @@ Start here.
 
 Step 3 of the 3-part Cloud TPU mini-course. Compare TPU v5e, v5p, and v6e specifications and ridge points, budget training and KV-cache HBM before provisioning, measure BF16 and INT8 numerical error, and capture warmed XProf traces.
 
-After completing this third TPU mini-course, you are ready to run any accelerator phase (Transformers, Performance, Distributed, Kernels, Deployment, Operations, Pretraining, Post-training) on a Cloud TPU VM.
+After completing this third TPU mini-course, you can plan a candidate accelerator workload and interpret hardware evidence. Before running a program on TPU, review its exact source, dependencies, backend assertion, topology, and data ownership; then qualify that program and configuration with target-specific evidence. Existing receipts do not authorize other accelerator phases by association.
 
 **Prerequisites:** 20: TPU Workflows: Launching Jobs & Checkpointed Experiments.
 

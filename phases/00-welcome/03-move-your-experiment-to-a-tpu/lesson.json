@@ -6,10 +6,10 @@
     "problem": "Your notebook imports JAX successfully, but is the prediction actually running on a TPU? We will build a portable device check with an independent numerical answer, then require the requested backend so an unavailable accelerator cannot silently become a successful CPU demonstration.",
     "idea": "Moving an experiment to a TPU gives us two questions: did it calculate the intended result, and did it actually execute on the requested device? We answer the first with an independent numerical reference and the second with an observed device receipt.",
     "objectives": [
-      "Verify the device of a completed prediction and its independent numerical reference.",
-      "Provision a hosted TPU notebook or single-host Google Cloud TPU VM and verify device discovery.",
-      "Launch an explicit TPU target path over SSH that fails when TPU is unavailable, then clean up the resource.",
-      "Run subsequent course lessons and companion labs on TPU in parallel with local CPU practice."
+      "Verify the requested platform, observed device, completed prediction, and independent numerical reference.",
+      "Provision a single-host Cloud TPU VM for a named qualification target and verify device discovery without treating it as workload evidence.",
+      "Run the downloadable launcher or precision target with the pinned qualification environment and retain its observed TPU-backend receipt.",
+      "Review each additional program’s source, dependencies, topology, and data ownership before considering a TPU run."
     ],
     "sections": [
       {
@@ -33,58 +33,57 @@
           {
             "label": "Run the CPU reference",
             "shell": "bash",
-            "code": "# Run run the cpu reference using the course Python environment\npython main.py",
+            "code": "# Run the CPU reference using the course Python environment\npython main.py",
             "expected": "The report names cpu, shape [8], float32, a completed output device and a small maximum absolute error. The first prediction is 0.34375."
           }
         ]
       },
       {
-        "title": "Get a TPU running: hosted notebook or Google Cloud TPU VM",
-        "body": "You do not need to wait until the end of the course to use a TPU. There are two practical ways to get a TPU running right now so you can run experiments alongside the course:\n\n1. Hosted notebook TPU (Google Colab or Kaggle): open Runtime -> Change runtime type, select a TPU accelerator (such as TPU v5e-1 or v6e-1), and restart the kernel before importing JAX so the process does not lock in a CPU backend.\n\n2. Google Cloud single-host TPU VM: install the Google Cloud CLI on your laptop, authenticate with `gcloud auth login`, and create a single-host TPU VM (such as `v5litepod-1`, `v5litepod-4` or `v6e-1`) in an approved project and zone. Wait until the VM state is `READY`. Remember that a Cloud TPU VM is a billable machine whose lifetime is separate from your Python process: when Python exits, the VM keeps running until you delete it or its bounded max-run-duration expires.",
+        "title": "Set up a single-host TPU VM for reviewed targets",
+        "body": "For the first physical TPU practice, use only the qualification targets in the [downloadable TPU qualification workspace](https://www.tahabouhsine.com/jaxpathways/downloads/jax-tpu-gcp.zip) (`jax-tpu-gcp.zip`) on a single-host v5e1 TPU VM. This lesson’s `main.py` is a CPU-validated reference; its recorded output is not a physical TPU result. Other course scripts need their own source, dependency, topology, and data-ownership review before target execution.\n\nA Cloud TPU VM is billable and stays active after Python exits. Choose an approved project and zone, verify access and quota, and set a bounded lifetime before provisioning. Follow the same cleanup steps after collecting the target receipts.",
         "commands": [
           {
-            "label": "From your laptop: provision a single-host Cloud TPU VM and check READY state",
+            "label": "From your laptop: request a bounded Flex Start TPU and inspect the queue",
             "shell": "bash",
-            "code": "# From your laptop: provision a single-host Cloud TPU VM and check READY state\nexport PROJECT_ID=\"REPLACE_WITH_YOUR_PROJECT\"\nexport ZONE=\"us-central1-a\"\nexport TPU_NAME=\"jax-course-tpu-01\"\ngcloud compute tpus tpu-vm create \"$TPU_NAME\" \\\n  --project=\"$PROJECT_ID\" --zone=\"$ZONE\" \\\n  --accelerator-type=\"v5litepod-1\" --version=\"v2-alpha-tpuv5-lite\"\ngcloud compute tpus tpu-vm describe \"$TPU_NAME\" \\\n  --project=\"$PROJECT_ID\" --zone=\"$ZONE\" --format=\"value(state)\"",
-            "expected": "The Cloud TPU VM is created in your project/zone and describe prints READY. For bounded Flex-start templates or queued resources, see the TPU and Google Cloud practical guide."
+            "code": "# Use your approved project; this recorded v5e setup uses us-west4-a.\nexport PROJECT_ID=\"REPLACE_WITH_YOUR_PROJECT\"\nexport ZONE=\"us-west4-a\"\nexport TPU_NAME=\"jax-course-tpu-01\"\ngcloud alpha compute tpus queued-resources create \"$TPU_NAME\" \\\n  --project=\"$PROJECT_ID\" --zone=\"$ZONE\" --node-id=\"$TPU_NAME\" \\\n  --accelerator-type=v5litepod-1 --runtime-version=v2-alpha-tpuv5-lite \\\n  --provisioning-model=FLEX_START --max-run-duration=1h \\\n  --valid-until-duration=30m --scopes=https://www.googleapis.com/auth/devstorage.read_only --async\ngcloud alpha compute tpus queued-resources describe \"$TPU_NAME\" \\\n  --project=\"$PROJECT_ID\" --zone=\"$ZONE\" --format=\"value(state.state)\"\n# Only after the queue reports ACTIVE:\ngcloud compute tpus tpu-vm describe \"$TPU_NAME\" \\\n  --project=\"$PROJECT_ID\" --zone=\"$ZONE\" --format=\"value(state)\"",
+            "expected": "The asynchronous request may report WAITING_FOR_RESOURCES or PROVISIONING before ACTIVE. Repeat describe and wait for ACTIVE and a READY VM before uploading or connecting. The request has a 30-minute queue window and a one-hour run cap. If it expires or fails, inspect its status and delete your queued request using the cleanup command below, even if no VM became active."
           },
           {
-            "label": "Inside the TPU VM or hosted TPU runtime: install JAX for TPU and verify devices",
+            "label": "From your laptop: upload the qualification workspace and connect",
             "shell": "bash",
-            "code": "# Run inside the tpu vm or hosted tpu runtime: install jax for tpu and verify devices using the course Python environment\npython3 -m venv .venv\n.venv/bin/python -m pip install --upgrade \"jax[tpu]\" numpy\n.venv/bin/python -c \"import jax; print(jax.default_backend(), jax.devices('tpu'))\"",
-            "expected": "The TPU environment installs compatible JAX and libtpu packages and prints tpu with the visible TpuDevice list. Record the resolved versions; installation alone is not the execution check."
+            "code": "# From the folder containing the downloaded jax-tpu-gcp.zip\ngcloud compute tpus tpu-vm scp jax-tpu-gcp.zip \"$TPU_NAME:~/jax-tpu-gcp.zip\" --project=\"$PROJECT_ID\" --zone=\"$ZONE\"\ngcloud compute tpus tpu-vm ssh \"$TPU_NAME\" --project=\"$PROJECT_ID\" --zone=\"$ZONE\"",
+            "expected": "Copy the ZIP from the folder containing the downloaded workspace, then SSH into the TPU VM and keep the session open for the following extraction and installation commands."
+          },
+          {
+            "label": "Inside the TPU VM: extract the workspace and install the pinned qualification environment",
+            "shell": "bash",
+            "code": "# Run inside the TPU VM after uploading jax-tpu-gcp.zip.\npython3 -m zipfile -e ~/jax-tpu-gcp.zip ~/\ncd ~/jax-tpu-gcp\npython3 -m pip install --user 'uv==0.11.11'\n~/.local/bin/uv venv --python 3.12.13 --managed-python .venv\n~/.local/bin/uv pip install --python .venv/bin/python \\\n  -r resources/tpu-gcp/requirements-qualification.txt \\\n  --find-links https://storage.googleapis.com/jax-releases/libtpu_releases.html\n~/.local/bin/uv pip freeze --python .venv/bin/python > tpu-environment.txt\n.venv/bin/python --version\nJAX_PLATFORMS=tpu .venv/bin/python -c \"import jax; devices=jax.devices(); assert jax.default_backend() == 'tpu' and devices and all(d.platform == 'tpu' for d in devices); print(jax.__version__, jax.local_device_count(), devices)\"",
+            "expected": "The base image Python extracts the ZIP and installs uv. uv creates the tested Python 3.12.13 environment and installs the pinned qualification packages. Keep tpu-environment.txt. Device discovery asserts the active backend is TPU; discovery alone is not a workload receipt."
           }
         ]
       },
       {
-        "title": "Launch the experiment on TPU, retrieve the receipt, and delete the VM",
-        "body": "Once your TPU environment is ready, copy `main.py` to the TPU host, launch it in a fresh process with `COURSE_EXPECT_PLATFORM=tpu` and `JAX_PLATFORMS=tpu`, and copy the output report back to your laptop. The call to `jax.devices(expected)` requests TPU explicitly and fails immediately if the TPU backend is unavailable.\n\nThis is a single-controller, single-device placement check even if the runtime exposes four or eight chips. Multi-chip sharding on one host and multi-host launches with `jax.distributed.initialize()` are covered in the virtual-CPU and distributed lessons. As soon as you copy your evidence back to your laptop, delete the Cloud TPU VM and verify that the instance list is empty.",
+        "title": "Run reviewed TPU targets, retrieve receipts, and delete the queued resource",
+        "body": "The lesson’s `main.py` remains a CPU reference; do not use it as evidence of physical TPU execution. For the reviewed first target run, upload and extract the ZIP workspace, install `resources/tpu-gcp/requirements-qualification.txt`, then run its launcher and precision target with the TPU backend explicitly required. The launcher receipt should show a `started` event with backend `tpu`, a completed run and checkpoint; the precision report should record `platform: tpu` and its one-device scope. These receipts apply only to the named targets and configurations. They do not qualify another lesson script, a multi-chip collective, a multi-host job, or production model quality.",
         "commands": [
           {
-            "label": "Require TPU execution inside an active TPU session",
+            "label": "Inside the TPU VM: run the reviewed launcher and precision targets",
             "shell": "bash",
-            "code": "# Require TPU execution inside an active TPU session\nCOURSE_EXPECT_PLATFORM=tpu JAX_PLATFORMS=tpu python main.py",
-            "expected": "On a functioning TPU runtime the report names tpu and all assertions pass. An unavailable TPU must raise an error instead of producing a CPU success report."
+            "code": "# Run inside the TPU VM from ~/jax-tpu-gcp after installing the pinned requirements\nset -o pipefail\n.venv/bin/python resources/tpu-gcp/launch.py --platform tpu --run-dir runs/tpu-first --steps 4 --timeout 180\n.venv/bin/python resources/tpu-gcp/launch.py --platform tpu --run-dir runs/tpu-first --steps 8 --timeout 180 --resume\n.venv/bin/python resources/tpu-gcp/precision_profile.py --platform tpu --run-dir runs/precision-tpu --steps 5 --trace",
+            "expected": "Inspect `runs/tpu-first/events.jsonl` and verify the started event names `backend: tpu`; the final summary should be completed at step 8, with the first attempt retained under history. Inspect `runs/precision-tpu/report.json` and verify `platform` is `tpu`, `local_device_count` is 1, and the five synchronized samples are present. Copy the evidence and `tpu-environment.txt` to your laptop before deleting the VM."
           },
           {
-            "label": "From your laptop: copy main.py, launch over SSH, copy back evidence, and delete the TPU VM",
+            "label": "From your laptop: retrieve receipts and delete your queued resource",
             "shell": "bash",
-            "code": "# From your laptop: copy main.py, launch over SSH, copy back evidence, and delete the TPU VM\ngcloud compute tpus tpu-vm scp main.py \"$TPU_NAME:~/main.py\" --project=\"$PROJECT_ID\" --zone=\"$ZONE\"\ngcloud compute tpus tpu-vm ssh \"$TPU_NAME\" --project=\"$PROJECT_ID\" --zone=\"$ZONE\" \\\n  --command=\"COURSE_EXPECT_PLATFORM=tpu JAX_PLATFORMS=tpu .venv/bin/python ~/main.py | tee ~/tpu-report.txt\"\ngcloud compute tpus tpu-vm scp \"$TPU_NAME:~/tpu-report.txt\" ./tpu-report.txt --project=\"$PROJECT_ID\" --zone=\"$ZONE\"\ngcloud compute tpus tpu-vm delete \"$TPU_NAME\" --project=\"$PROJECT_ID\" --zone=\"$ZONE\" --quiet\ngcloud compute tpus tpu-vm list --project=\"$PROJECT_ID\" --zone=\"$ZONE\"",
-            "expected": "The remote command runs on the TPU VM, writes tpu-report.txt locally, deletes the TPU VM, and confirms no running TPU VM remains."
+            "code": "# Run from your laptop after the target commands finish\nmkdir -p evidence/tpu-first\ngcloud compute tpus tpu-vm scp --recurse \"$TPU_NAME:~/jax-tpu-gcp/runs/tpu-first\" evidence/tpu-first/ --project=\"$PROJECT_ID\" --zone=\"$ZONE\"\ngcloud compute tpus tpu-vm scp --recurse \"$TPU_NAME:~/jax-tpu-gcp/runs/precision-tpu\" evidence/tpu-first/ --project=\"$PROJECT_ID\" --zone=\"$ZONE\"\ngcloud compute tpus tpu-vm scp \"$TPU_NAME:~/jax-tpu-gcp/tpu-environment.txt\" evidence/tpu-first/ --project=\"$PROJECT_ID\" --zone=\"$ZONE\"\n# Delete this request and its VM, including after a failed or expired attempt.\ngcloud alpha compute tpus queued-resources delete \"$TPU_NAME\" \\\n  --project=\"$PROJECT_ID\" --zone=\"$ZONE\" --force --quiet\ngcloud alpha compute tpus queued-resources list --project=\"$PROJECT_ID\" --zone=\"$ZONE\" \\\n  --filter=\"name~'(^|/)${TPU_NAME}$'\" --format=\"value(name)\"\ngcloud compute tpus tpu-vm list --project=\"$PROJECT_ID\" --zone=\"$ZONE\" \\\n  --filter=\"name~'(^|/)${TPU_NAME}$'\" --format=\"value(name)\"",
+            "expected": "Both target folders and the resolved environment are copied locally before cleanup. The forced queued-resource deletion removes this request and its VM. Both name-filtered lists should be empty; repeat the checks if deletion is still in progress. Other workloads in your project may remain active."
           }
         ]
       },
       {
-        "title": "Run the rest of the course on TPU in parallel",
-        "body": "Use this same launch pattern in parallel with every phase that follows. Every authored lesson in the course provides a standalone script under `exercises/<lesson-id>.py` (and a notebook under `exercises/<lesson-id>.ipynb`). As you work through Arrays (Phase 01), Transforms (Phase 02), State (Phase 03), Optimization (Phase 04), Networks (Phase 05) and Recovery (Phase 06), run the CPU reference locally first, then upload the workspace or script to your TPU runtime and run it with `JAX_PLATFORMS=tpu`.\n\nIn parallel with the early phases, work through the two standalone TPU guides included in the course workspace (`jax-tpu-gcp.zip`): use `resources/tpu-gcp/launch.py` to practice supervised TPU job lifecycles and checkpoint recovery, and use `resources/tpu-gcp/precision_profile.py` to measure BF16/INT8 numerical error and capture XProf device traces before you scale up to full Transformers and distributed training.",
-        "commands": [
-          {
-            "label": "Run any course lesson script and the companion TPU labs on a TPU host",
-            "shell": "bash",
-            "code": "# Run any course lesson script and the companion TPU labs on a TPU host\nJAX_PLATFORMS=tpu .venv/bin/python exercises/arrays-01.py\n.venv/bin/python resources/tpu-gcp/launch.py --platform tpu --run-dir runs/tpu-first --steps 8 --timeout 180\n.venv/bin/python resources/tpu-gcp/precision_profile.py --platform tpu --run-dir runs/precision-tpu --steps 20 --trace",
-            "expected": "The lesson script and companion TPU labs run on the TPU backend, writing verifiable device receipts, checkpoints, numerical error reports and XProf trace files."
-          }
-        ]
+        "title": "Keep CPU lessons separate from reviewed TPU targets",
+        "body": "Continue the course using its recorded CPU references. The ZIP launcher and precision target provide bounded physical TPU practice with pinned dependencies and explicit backend receipts; use only the exact programs and configurations described by those receipts. Do not upload arbitrary lesson scripts or infer compatibility from a successful CPU run. Before another TPU workload, review its source, dependencies, backend assertion, topology, and input ownership, then collect target-specific evidence.",
+        "commands": []
       },
       {
         "title": "Diagnose the boundary that failed",
@@ -127,7 +126,7 @@
     "explanation": "A correct value can be produced on the wrong device. Require both reference agreement and the output placement before recording a successful target run.",
     "diagnosis": "Read the first failing boundary: interpreter/import, explicit backend discovery, output placement or numerical comparison. Keep the original error and requested platform in the report. Restart a stale notebook kernel before trying the target again.",
     "takeaways": [
-      "Provision a hosted TPU runtime or single-host Cloud TPU VM early and run course experiments in parallel with your CPU baseline.",
+      "Keep the recorded CPU baseline separate from physical TPU evidence. For first TPU practice, use the pinned downloadable launcher and precision targets; review other programs before a target run.",
       "Check an actual completed array, not only the installed package.",
       "Request TPU explicitly so its absence produces an error, and delete Cloud TPU VMs after copying your evidence."
     ],

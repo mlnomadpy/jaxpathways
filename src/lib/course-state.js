@@ -157,7 +157,7 @@ async function loadCourse() {
       phase.lessons = phase.lessons.map((lesson) =>
         lesson.id === payload.lesson.id ? payload.lesson : lesson,
       );
-    } else {
+    } else if (document.querySelector('#lesson-page')?.hasAttribute('data-static-lesson')) {
       throw new Error('The current lesson was not embedded in this page');
     }
   } else {

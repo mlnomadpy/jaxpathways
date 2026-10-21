@@ -122,3 +122,11 @@ test('a failed navigation manifest leaves server-rendered lesson content readabl
   await expect(page.locator('article')).toBeVisible();
   await expect(page.locator('h1').first()).toBeVisible();
 });
+
+test('legacy lesson URLs redirect to the canonical page and preserve route, search, and section', async ({
+  page,
+}) => {
+  await page.goto('/lesson.html?lesson=welcome-03&path=foundations&find=backend#section-2');
+  await expect(page).toHaveURL(/\/lesson-welcome-03\.html\?path=foundations&find=backend#section-2$/);
+  await expect(page.locator('#lesson-title')).toContainText('Move your experiment to a TPU');
+});

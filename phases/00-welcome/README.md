@@ -2,9 +2,9 @@
 
 Start here.
 
-Run a saved program and explain its environment, array output and device placement. Start on one CPU, practice sharding on four logical CPU devices, and learn how to get a TPU running, launch a TPU job, and run course experiments on TPU in parallel from Phase 00 onward.
+Run and inspect saved programs in a CPU environment, then learn how to prepare and verify explicit, source-reviewed TPU targets. TPU jobs are optional and separate from the course’s CPU practice.
 
-Keep a first-run log that another learner can reproduce, then pair each phase's CPU baseline with the parallel TPU launch and precision guides.
+Start with each lesson’s recorded CPU baseline. For first physical TPU practice, use only the bounded launcher and precision targets in the downloadable `jax-tpu-gcp.zip` workspace with its pinned qualification requirements; inspect their receipts for the observed TPU backend. Review each additional program’s source, dependencies, topology, and data ownership before considering a separate target run.
 
 **Prerequisites:** Basic Python; no previous JAX experience.
 
@@ -102,9 +102,9 @@ Status: authored lesson with CPU exercise.
 
 Status: authored lesson with CPU exercise.
 
-**Intended outcome:** Provision a hosted TPU runtime or single-host Cloud TPU VM, launch an explicit TPU target path over SSH that fails when TPU is unavailable, verify the device of a completed prediction against NumPy, and set up parallel TPU execution for the rest of the course.
+**Intended outcome:** Use the recorded CPU reference to check arithmetic and placement, then run only a named, source-reviewed TPU target with pinned dependencies and verify its observed backend receipt.
 
-**Evidence:** Keep separate CPU and TPU reports with requested/observed platform, package versions, completed predictions, NumPy error and changed-bias and row-permutation checks. Until the target command succeeds, TPU execution remains unverified.
+**Evidence:** Keep the lesson’s CPU output separate from physical TPU evidence. For TPU practice, retain the launcher events/checkpoint, precision report/trace, and resolved environment from the downloadable qualification workspace. The lesson’s recorded `main.py` output is CPU-only evidence.
 
 **Checkpoint:** The values match NumPy, but the output array is on CPU when the requested platform was TPU. What has been demonstrated?
 

@@ -2,7 +2,7 @@
   {
     "version": "0.8.0",
     "date": "2026-10-20",
-    "hash": "bdc4879fee020b1a6d7bf17fe7951d024c4c35546ae809e47739baefe916284d",
+    "hash": "99767d4930bb375fbc32db3e58f4aaea1e7edf82e08893f9200f19f115f711f5",
     "notes": {
       "version": "0.8.0",
       "date": "2026-10-20",
@@ -41,7 +41,7 @@
       },
       "welcome-03": {
         "title": "Move your experiment to a TPU",
-        "hash": "34646c7d3266db161fd36870fd06f0ca53f0ff5720f77fd02cf64d698e97c16e",
+        "hash": "13791022d5ba9a71156ba4ccb114dfa3225c027f415e80dee4dcf813b5e70c58",
         "version": "0.8.0",
         "date": "2026-10-20"
       },
@@ -623,7 +623,7 @@
       },
       "tpu-05": {
         "title": "Review scripts before TPU staging",
-        "hash": "f628f83fc7ce1334b86276a6898f8c795f5f49b2cb707fa88f394ba2026a2f6c",
+        "hash": "77ff1eae839a6ea002827d8f83d4ed6970998a7fab223b7a7a89bf030d6cfdef",
         "version": "0.8.0",
         "date": "2026-10-20"
       },
@@ -643,7 +643,7 @@
     "phases": {
       "welcome": {
         "title": "Setup & first steps",
-        "hash": "53818f690ce925332d1c7c23536d96db573102c2a10ee14b739c13fc5eeb1848",
+        "hash": "4deb43292c7e8200f4562f76f35185acd2e5fa6ccab5eb0b6747ae95feb7bc1f",
         "version": "0.8.0",
         "date": "2026-10-20"
       },
@@ -763,13 +763,13 @@
       },
       "tpu-workflows": {
         "title": "TPU Workflows: Launching Jobs & Checkpointed Experiments",
-        "hash": "1524ac46d794eb05e0270519d568d5b1bcca4230e9d31f3642f67a00ac6e99a3",
+        "hash": "61867382eb93ffc4ce86f5bc4dcc7f95eddaabacd8642ddcfdfed56295204da7",
         "version": "0.8.0",
         "date": "2026-10-20"
       },
       "tpu-systems": {
         "title": "TPU Systems: Generations, Memory, Precision & XProf",
-        "hash": "c4a99e23bbd50709211c8af4475dddf290596b9ee1ae065bbb6522de31fbf106",
+        "hash": "fa6c59f8700e443a0f944ec69dd73ed09b83e759ed44393674c4337b377cafb5",
         "version": "0.8.0",
         "date": "2026-10-20"
       }

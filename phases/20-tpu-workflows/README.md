@@ -2,9 +2,9 @@
 
 Start here.
 
-Step 2 of the 3-part Cloud TPU mini-course. Rehearse checkpointed jobs on CPU, then use only source-reviewed TPU targets with matching backend and dependency contracts. Separate single-host receipts from multi-host discovery and training qualification.
+Step 2 of the 3-part Cloud TPU mini-course. Rehearse checkpointed jobs on CPU, then use only source-reviewed TPU targets with matching backend and dependency contracts. Separate single-host receipts, bounded multi-host recovery, and broader multi-host training qualification.
 
-Do not run arbitrary lesson scripts on TPU. `distributed-02` is CPU-only; inspect every other source before considering a target. Existing receipts qualify only their named programs and recorded shapes, environments, and topologies: the one-device v5e1 launcher and precision target, and the four-device single-host v5e collective target. None qualifies multi-host execution or authorizes Transformers, Pallas, or other lesson scripts by association.
+Do not run arbitrary lesson scripts on TPU. `distributed-02` is CPU-only; inspect every other source before considering a target. Existing receipts qualify only their named programs and recorded shapes, environments, and topologies: the one-device v5e1 launcher and precision target, the four-device single-host collective target, and the sixteen-device/four-worker synthetic checkpoint-recovery target. That multi-host receipt qualifies its recovery path only; it does not establish general multi-host training, worker-loss or elastic recovery, production model quality, or compatibility for other lessons.
 
 **Prerequisites:** 19: TPU Setup: Provisioning & Runtime Verification.
 

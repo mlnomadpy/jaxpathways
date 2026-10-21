@@ -2,7 +2,8 @@ import { bootCourse } from '../boot.js';
 import { courseState, lessonById } from '../../lib/course-state.js';
 import { initReaderEvents, showLesson } from '../reader.js';
 import { legacyLessonUrl } from '../../lib/urls.js';
-bootCourse(() => {
+
+export function initializeLessonPage() {
   const params = new URLSearchParams(location.search);
   const page = document.querySelector('#lesson-page');
   const body = document.querySelector('#lesson-body');
@@ -12,6 +13,12 @@ bootCourse(() => {
   const found = requestedId ? lessonById(requestedId) : undefined;
   if (!staticId && found?.lesson.status === 'authored') {
     location.replace(legacyLessonUrl(found.lesson.id, location.href));
+    return;
+  }
+  if (!staticId) {
+    body.innerHTML = found
+      ? '<h1>Lesson not available</h1><p>This lesson has not been authored yet. <a href="course.html">Browse the course roadmap</a>.</p>'
+      : '<h1>Lesson not found</h1><p><a href="course.html">Browse the course</a>.</p>';
     return;
   }
   if (!found) {
@@ -31,4 +38,6 @@ bootCourse(() => {
       sidebar.classList.toggle('is-open');
       menu.setAttribute('aria-expanded', String(sidebar.classList.contains('is-open')));
     };
-}, '#lesson-body');
+}
+
+export const ready = bootCourse(initializeLessonPage, '#lesson-body');

@@ -175,21 +175,31 @@ test('permanent lesson pages retain pathway, section and existing learner eviden
   } finally {await p.close();}
 });
 
-test('legacy reader requests redirect to the canonical SSR lesson and preserve context', async()=>{
-  const p=await page('lesson','?lesson=welcome-01&path=foundations&find=workspace#section-2');
+test('legacy reader boots from navigation data and redirects authored lessons with context', async()=>{
+  const p=await page('lesson','?lesson=welcome-03&path=tpu&find=backend#section-2');
   try {
-    const fullCourse=JSON.parse(fs.readFileSync('dist/curriculum.json','utf8'));
-    courseState.standalone=true;
-    courseState.course=fullCourse;
-    courseState.curriculum=fullCourse.pathways.map(route=>({...route,lessons:route.phaseIds.flatMap(id=>fullCourse.phases.find(phase=>phase.id===id)?.lessons||[])}));
-    courseState.activePath='foundations';
-    const phase=fullCourse.phases.find(item=>item.lessons.some(lesson=>lesson.id==='welcome-01'));
-    const lesson=phase.lessons.find(item=>item.id==='welcome-01');
+    assert.equal(p.$('#current-lesson-data'),null,'legacy entry intentionally has no full lesson payload');
     const originalBody=p.$('#lesson-body').innerHTML;
     const redirects=[];
     p.window.location.replace=(href)=>redirects.push(href);
-    showLesson(phase,lesson);
-    assert.deepEqual(redirects,['https://example.org/jaxpathways/lesson-welcome-01.html?path=foundations&find=workspace#section-2']);
+    const entry=await import('../src/scripts/entries/lesson.js?legacy-authored');
+    await entry.ready;
+    assert.deepEqual(p.requests,['/jaxpathways/api/v1/course-navigation.json']);
+    assert.deepEqual(redirects,['https://example.org/jaxpathways/lesson-welcome-03.html?path=tpu&find=backend#section-2']);
     assert.equal(p.$('#lesson-body').innerHTML,originalBody);
+  } finally {await p.close();}
+});
+
+test('legacy reader handles unknown lesson IDs without fetching the full curriculum', async()=>{
+  const p=await page('lesson','?lesson=not-a-course-lesson&path=foundations&find=shape#section-4');
+  try {
+    const redirects=[];
+    p.window.location.replace=(href)=>redirects.push(href);
+    const entry=await import('../src/scripts/entries/lesson.js?legacy-unknown');
+    await entry.ready;
+    assert.deepEqual(p.requests,['/jaxpathways/api/v1/course-navigation.json']);
+    assert.deepEqual(redirects,[]);
+    assert.equal(p.$('#lesson-body h1').textContent,'Lesson not found');
+    assert.match(p.$('#lesson-body a').getAttribute('href'),/course\.html/);
   } finally {await p.close();}
 });

@@ -12,7 +12,7 @@
     "orbax-checkpoint": "0.11.34",
     "matplotlib": "3.10.8"
   },
-  "validatedAt": "2026-10-20T23:45:51.610531+00:00",
+  "validatedAt": "2026-10-21T00:07:50.144667+00:00",
   "scope": "Worked examples and reference solutions executed in fresh processes. No TPU validation or learner assessment.",
   "lessons": [
     {
@@ -47,7 +47,7 @@
     },
     {
       "lessonId": "welcome-03",
-      "contentHash": "15e58b86df9f49f4f437222938dd714cb36d0517aafb54e53b4e76e216d8ac4a",
+      "contentHash": "577ebf51bb2c464cf12996eccc1a348642d9d51e234e36fd19077f6816e96156",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -1017,7 +1017,7 @@
     },
     {
       "lessonId": "tpu-05",
-      "contentHash": "6fd3a25d72afe288a2f9c237849c8741468644eb64b7d82480e1de319461b76f",
+      "contentHash": "03288bfb6ed07aa3a7f57499217b4e6dfd416cce7f49e6f2d8ec93ada44841ed",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
