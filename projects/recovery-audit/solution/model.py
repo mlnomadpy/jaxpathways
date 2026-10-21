@@ -29,11 +29,20 @@ STATE_ARRAYS = {
     "update_ends",
     "optimizer_step",
 }
-FAILPOINTS = {"during_temp_write", "after_temp_create", "after_payload", "after_manifest", "before_publish", "after_publish"}
+FAILPOINTS = {
+    "during_temp_write",
+    "after_temp_create",
+    "after_payload",
+    "after_manifest",
+    "before_publish",
+    "after_publish",
+}
 
 
 def _json_bytes(value):
-    return json.dumps(value, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()
+    return json.dumps(
+        value, sort_keys=True, separators=(",", ":"), allow_nan=False
+    ).encode()
 
 
 def _array_digest(arrays):
@@ -68,8 +77,14 @@ def _validate_config(config):
         raise ValueError("invalid noise scale")
     if "parameter_shape" in config:
         shape = config["parameter_shape"]
-        if not isinstance(shape, list) or not shape or any(not isinstance(dim, int) or dim <= 0 for dim in shape):
-            raise ValueError("parameter_shape must be a nonempty list of positive dimensions")
+        if (
+            not isinstance(shape, list)
+            or not shape
+            or any(not isinstance(dim, int) or dim <= 0 for dim in shape)
+        ):
+            raise ValueError(
+                "parameter_shape must be a nonempty list of positive dimensions"
+            )
 
 
 def _validate_legacy_state(state, config):
@@ -117,7 +132,12 @@ def _random_vector(key, size):
 def _order_for(source_ids, seed, epoch):
     ids = [int(x) for x in np.asarray(source_ids, dtype=np.int64)]
     return np.asarray(
-        sorted(ids, key=lambda sample_id: hashlib.sha256(f"{seed}:{epoch}:{sample_id}".encode()).hexdigest()),
+        sorted(
+            ids,
+            key=lambda sample_id: hashlib.sha256(
+                f"{seed}:{epoch}:{sample_id}".encode()
+            ).hexdigest(),
+        ),
         dtype=np.int64,
     )
 
@@ -152,7 +172,10 @@ def stream_step(state, targets_by_id, config):
     """
     _validate_config(config)
     _validate_structural_state(state, config)
-    out = {k: np.array(v, copy=True) if isinstance(v, np.ndarray) else v for k, v in state.items()}
+    out = {
+        k: np.array(v, copy=True) if isinstance(v, np.ndarray) else v
+        for k, v in state.items()
+    }
     source_ids = np.asarray(out["source_ids"], dtype=np.int64)
     epoch = int(out["epoch"])
     cursor = int(out["cursor"])
@@ -167,7 +190,9 @@ def stream_step(state, targets_by_id, config):
     ids = order[cursor:stop]
     if len(ids) == 0:
         raise ValueError("empty training batch")
-    targets = np.stack([np.asarray(targets_by_id[int(i)], dtype=np.float32) for i in ids])
+    targets = np.stack(
+        [np.asarray(targets_by_id[int(i)], dtype=np.float32) for i in ids]
+    )
     weight = np.asarray(out["weight"], dtype=np.float32)
     velocity = np.asarray(out["velocity"], dtype=np.float32)
     per_example = weight[None, :] - targets
@@ -180,7 +205,9 @@ def stream_step(state, targets_by_id, config):
     out["rng_key"] = next_key
     out["cursor"] = np.asarray(stop, dtype=np.int64)
     out["consumed_ids"] = np.concatenate((out["consumed_ids"], ids)).astype(np.int64)
-    out["update_ends"] = np.append(out["update_ends"], len(out["consumed_ids"])).astype(np.int64)
+    out["update_ends"] = np.append(out["update_ends"], len(out["consumed_ids"])).astype(
+        np.int64
+    )
     out["optimizer_step"] = np.asarray(int(out["optimizer_step"]) + 1, dtype=np.int64)
     return out
 
@@ -197,7 +224,13 @@ def save_checkpoint(path, step, config, arrays):
     fd, tmp = tempfile.mkstemp(prefix=path.name + ".", suffix=".tmp", dir=path.parent)
     try:
         with os.fdopen(fd, "wb") as f:
-            np.savez(f, step=np.int64(step), config=np.array(_json_bytes(config).decode()), digest=np.array(digest), **arrays)
+            np.savez(
+                f,
+                step=np.int64(step),
+                config=np.array(_json_bytes(config).decode()),
+                digest=np.array(digest),
+                **arrays,
+            )
             f.flush()
             os.fsync(f.fileno())
         os.replace(tmp, path)
@@ -224,16 +257,30 @@ def load_checkpoint(path, expected_config):
     return {"step": step, "config": config, "arrays": arrays}
 
 
-def initial_stream_state(source_ids, config, shape=(2,), initial_weight=None, initial_velocity=None):
+def initial_stream_state(
+    source_ids, config, shape=(2,), initial_weight=None, initial_velocity=None
+):
     """Create a tiny, explicit full state for the instructional stream."""
     _validate_stream_config(config)
     ids = np.asarray(source_ids, dtype=np.int64)
     if ids.ndim != 1 or len(ids) == 0 or len(np.unique(ids)) != len(ids):
         raise ValueError("source IDs must be a nonempty unique vector")
-    weight = np.array([1.0, -1.0], np.float32) if initial_weight is None else np.asarray(initial_weight, dtype=np.float32)
-    velocity = np.array([0.2, -0.3], np.float32) if initial_velocity is None else np.asarray(initial_velocity, dtype=np.float32)
+    weight = (
+        np.array([1.0, -1.0], np.float32)
+        if initial_weight is None
+        else np.asarray(initial_weight, dtype=np.float32)
+    )
+    velocity = (
+        np.array([0.2, -0.3], np.float32)
+        if initial_velocity is None
+        else np.asarray(initial_velocity, dtype=np.float32)
+    )
     expected_shape = tuple(int(x) for x in config["parameter_shape"])
-    if tuple(shape) != expected_shape or weight.shape != expected_shape or velocity.shape != expected_shape:
+    if (
+        tuple(shape) != expected_shape
+        or weight.shape != expected_shape
+        or velocity.shape != expected_shape
+    ):
         raise ValueError("initial parameter shapes do not match")
     key = np.asarray(config["initial_rng_key"], dtype=np.uint32)
     _key_words(key)
@@ -259,8 +306,14 @@ def _validate_stream_config(config):
     if int(config["batch_size"]) <= 0:
         raise ValueError("batch size must be positive")
     shape = config["parameter_shape"]
-    if not isinstance(shape, list) or not shape or any(not isinstance(dim, int) or dim <= 0 for dim in shape):
-        raise ValueError("parameter_shape must be a nonempty list of positive dimensions")
+    if (
+        not isinstance(shape, list)
+        or not shape
+        or any(not isinstance(dim, int) or dim <= 0 for dim in shape)
+    ):
+        raise ValueError(
+            "parameter_shape must be a nonempty list of positive dimensions"
+        )
     _key_words(config["initial_rng_key"])
 
 
@@ -291,7 +344,9 @@ def _read_current(root):
     return json.loads(p.read_text())
 
 
-def save_generation(root, state, config, identities, expected_parent=None, failpoint=None):
+def save_generation(
+    root, state, config, identities, expected_parent=None, failpoint=None
+):
     """Prepare an immutable generation, then arbitrate atomic publication.
 
     Competing POSIX processes use an expected-parent compare-and-swap under
@@ -359,8 +414,14 @@ def save_generation(root, state, config, identities, expected_parent=None, failp
     final_dir = generations / generation
     os.replace(temp_dir, final_dir)
     _fsync_dir(generations)
-    manifest_hash = hashlib.sha256((final_dir / "manifest.json").read_bytes()).hexdigest()
-    pointer = {"schema_version": SCHEMA_VERSION, "generation": generation, "manifest_sha256": manifest_hash}
+    manifest_hash = hashlib.sha256(
+        (final_dir / "manifest.json").read_bytes()
+    ).hexdigest()
+    pointer = {
+        "schema_version": SCHEMA_VERSION,
+        "generation": generation,
+        "manifest_sha256": manifest_hash,
+    }
     _safe_failpoint(failpoint, "before_publish")
     lock_path = root / ".publish.lock"
     with open(lock_path, "a+b") as lock:
@@ -368,14 +429,20 @@ def save_generation(root, state, config, identities, expected_parent=None, failp
         current = _read_current(root)
         actual_parent = None if current is None else current["generation"]
         if actual_parent != expected_parent:
-            raise RuntimeError("generation conflict: expected parent is no longer current")
+            raise RuntimeError(
+                "generation conflict: expected parent is no longer current"
+            )
         tmp_pointer = root / (".CURRENT-" + uuid.uuid4().hex + ".tmp")
         _write_json_sync(tmp_pointer, pointer)
         os.replace(tmp_pointer, root / "CURRENT.json")
         _fsync_dir(root)
         fcntl.flock(lock.fileno(), fcntl.LOCK_UN)
     _safe_failpoint(failpoint, "after_publish")
-    return {"generation": generation, "parent_generation": expected_parent, "manifest_sha256": manifest_hash}
+    return {
+        "generation": generation,
+        "parent_generation": expected_parent,
+        "manifest_sha256": manifest_hash,
+    }
 
 
 def _validate_state(arrays, config, identities):
@@ -386,13 +453,22 @@ def _validate_state(arrays, config, identities):
     order = arrays["epoch_order"]
     consumed = arrays["consumed_ids"]
     update_ends = arrays["update_ends"]
-    if source_ids.ndim != 1 or len(source_ids) == 0 or len(np.unique(source_ids)) != len(source_ids):
+    if (
+        source_ids.ndim != 1
+        or len(source_ids) == 0
+        or len(np.unique(source_ids)) != len(source_ids)
+    ):
         raise ValueError("checkpoint source IDs invalid")
     if len(arrays["epoch_order"]) != len(source_ids):
         raise ValueError("checkpoint epoch order length mismatch")
-    if int(arrays["epoch"]) < 0 or not 0 <= int(arrays["cursor"]) <= len(arrays["epoch_order"]):
+    if int(arrays["epoch"]) < 0 or not 0 <= int(arrays["cursor"]) <= len(
+        arrays["epoch_order"]
+    ):
         raise ValueError("checkpoint epoch/cursor range mismatch")
-    if identities.get("ordered_source_ids_sha256") != hashlib.sha256(source_ids.tobytes()).hexdigest():
+    if (
+        identities.get("ordered_source_ids_sha256")
+        != hashlib.sha256(source_ids.tobytes()).hexdigest()
+    ):
         raise ValueError("checkpoint ordered source identity mismatch")
     step = int(arrays["optimizer_step"])
     if step != len(update_ends) or np.any(np.diff(update_ends) <= 0):
@@ -411,18 +487,27 @@ def _validate_state(arrays, config, identities):
     expected_ids = []
     for ep in range((len(consumed) + n - 1) // n):
         expected_ids.extend(_order_for(source_ids, config["order_seed"], ep).tolist())
-    if not np.array_equal(consumed, np.asarray(expected_ids[: len(consumed)], dtype=np.int64)):
+    if not np.array_equal(
+        consumed, np.asarray(expected_ids[: len(consumed)], dtype=np.int64)
+    ):
         raise ValueError("checkpoint sample-order history mismatch")
     if len(consumed) == 0:
         expected_epoch, expected_cursor = 0, 0
     else:
         expected_epoch = (len(consumed) - 1) // n
         expected_cursor = (len(consumed) - 1) % n + 1
-    if int(arrays["epoch"]) != expected_epoch or int(arrays["cursor"]) != expected_cursor:
+    if (
+        int(arrays["epoch"]) != expected_epoch
+        or int(arrays["cursor"]) != expected_cursor
+    ):
         raise ValueError("checkpoint epoch cursor mismatch")
-    if not np.array_equal(order, _order_for(source_ids, config["order_seed"], expected_epoch)):
+    if not np.array_equal(
+        order, _order_for(source_ids, config["order_seed"], expected_epoch)
+    ):
         raise ValueError("checkpoint current epoch order mismatch")
-    if not np.all(np.isfinite(arrays["weight"])) or not np.all(np.isfinite(arrays["velocity"])):
+    if not np.all(np.isfinite(arrays["weight"])) or not np.all(
+        np.isfinite(arrays["velocity"])
+    ):
         raise ValueError("checkpoint parameter state is nonfinite")
     # Key advancement depends on consumed optimizer updates. Recompute from the
     # frozen initial key without trusting the saved key as its own oracle.
@@ -454,10 +539,15 @@ def _validate_structural_state(arrays, config):
         raise ValueError("checkpoint scalar clock rank mismatch")
     if any(np.asarray(arrays[k]).ndim != 1 for k in vector_fields):
         raise ValueError("checkpoint vector history rank mismatch")
-    if any(np.asarray(arrays[k]).dtype != np.dtype("int64") for k in (*scalar_fields, *vector_fields)):
+    if any(
+        np.asarray(arrays[k]).dtype != np.dtype("int64")
+        for k in (*scalar_fields, *vector_fields)
+    ):
         raise ValueError("checkpoint integer state dtype mismatch")
     _validate_parameter_shapes(arrays, config)
-    if np.asarray(arrays["rng_key"]).dtype != np.dtype("uint32") or np.asarray(arrays["rng_key"]).shape != (2,):
+    if np.asarray(arrays["rng_key"]).dtype != np.dtype("uint32") or np.asarray(
+        arrays["rng_key"]
+    ).shape != (2,):
         raise ValueError("checkpoint PRNG schema mismatch")
 
 
@@ -473,9 +563,16 @@ def restore_generation(root, expected_config, expected_identities):
     if hashlib.sha256(manifest_bytes).hexdigest() != pointer.get("manifest_sha256"):
         raise ValueError("published manifest integrity failure")
     manifest = json.loads(manifest_bytes)
-    if manifest.get("generation") != pointer["generation"] or manifest.get("schema_version") != SCHEMA_VERSION:
+    if (
+        manifest.get("generation") != pointer["generation"]
+        or manifest.get("schema_version") != SCHEMA_VERSION
+    ):
         raise ValueError("checkpoint generation schema mismatch")
-    if manifest.get("config") != expected_config or manifest.get("config_sha256") != hashlib.sha256(_json_bytes(expected_config)).hexdigest():
+    if (
+        manifest.get("config") != expected_config
+        or manifest.get("config_sha256")
+        != hashlib.sha256(_json_bytes(expected_config)).hexdigest()
+    ):
         raise ValueError("checkpoint configuration mismatch")
     if manifest.get("identities") != expected_identities:
         raise ValueError("checkpoint source identity mismatch")
@@ -486,8 +583,17 @@ def restore_generation(root, expected_config, expected_identities):
         arrays = {name: z[name] for name in z.files}
     if _array_digest(arrays) != manifest.get("array_sha256"):
         raise ValueError("checkpoint array integrity failure")
-    schema = {name: {"dtype": arr.dtype.str, "shape": list(arr.shape)} for name, arr in sorted(arrays.items())}
+    schema = {
+        name: {"dtype": arr.dtype.str, "shape": list(arr.shape)}
+        for name, arr in sorted(arrays.items())
+    }
     if schema != manifest.get("array_schema"):
         raise ValueError("checkpoint array schema mismatch")
     _validate_state(arrays, expected_config, expected_identities)
-    return {"state": arrays, "config": manifest["config"], "identities": manifest["identities"], "generation": manifest["generation"], "parent_generation": manifest["parent_generation"]}
+    return {
+        "state": arrays,
+        "config": manifest["config"],
+        "identities": manifest["identities"],
+        "generation": manifest["generation"],
+        "parent_generation": manifest["parent_generation"],
+    }

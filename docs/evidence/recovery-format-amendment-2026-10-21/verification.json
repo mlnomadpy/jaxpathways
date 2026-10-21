@@ -1,0 +1,29 @@
+{
+  "observed_at": "2026-10-21T22:13:40.917702+00:00",
+  "baseline_commit": "a3df5706b43355a8f218d86fdd100c74ff17ec94",
+  "source_hashes": {
+    "projects/recovery-audit/README.md": "e15032716d1e6965767def5b1f98f9083c974c4f8b1ce6b406fa428f5d875af8",
+    "projects/recovery-audit/project.json": "c3963e8b7f1acec882f3ab81cdbf363de9ca014a91fe2d438740dfd13bbeedb1",
+    "projects/recovery-audit/starter/model.py": "d69b3113e583f262952e9aa7886b0c00c6df149a32257efd5f56b5218aa3ce70",
+    "projects/recovery-audit/solution/model.py": "bcb7fdf96ad705709b0ee3acddc2b9d5d21e1b2cd5d3fe76e4d601e0467eaa45",
+    "projects/recovery-audit/tests/check.py": "d3bb84bcd31ef23e290aa8883f4b6c32ce0e3bcd97bde0174997be08831de7fb"
+  },
+  "reference_model": "AST identical to baseline; formatting only",
+  "checker_scope": "AST unchanged outside new ast import and approved _semantic_negative_controls function; unique AST-located wrong-order mutation requires epoch_order or consumed_ids mismatch; unchanged/no-op controls retained",
+  "checks": {
+    "black26.5.1_full_CI_list": {
+      "exit_code": 0,
+      "files": 49
+    },
+    "recovery_all_from_integration": {
+      "exit_code": 0,
+      "stage_keys": ["1", "2", "3", "5", "6", "7", "negative_controls"],
+      "receipt_sha256": "f51b13578741ced3230e09056ef37f58b7f86b1a7f71a252357fd43be16304f3"
+    }
+  },
+  "historical_receipts": "Retained unchanged; current local source qualification is this separate record",
+  "limits": [
+    "local single-filesystem process protocol only",
+    "no power-loss, network-filesystem, multihost, or accelerator qualification"
+  ]
+}

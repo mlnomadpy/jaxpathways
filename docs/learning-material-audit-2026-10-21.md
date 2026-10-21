@@ -8,7 +8,7 @@ Base revision: `7554817ed19a26dabfb1e183220cf84308382906`. This is an internal e
 
 The book is a substantial collection of bounded, runnable practice drafts. It is not yet a fully reviewed curriculum or a set of production-model releases. The foundational mechanisms and numerical contracts are stronger than the broader model-lifecycle, target deployment and career-readiness evidence.
 
-104 current CPU lesson references; 31 source-matching public project receipts; 4 bounded physical target qualifications. 0 independent expert reviews and 0 novice pilots are recorded.
+104 current CPU lesson references; 30 source-matching public project receipts; 4 bounded physical target qualifications. 0 independent expert reviews and 0 novice pilots are recorded.
 
 The inventory covers 203 material entries, 409 lesson exercises/checkpoints and 130 project stages. Section counts describe coverage, not quality scores. Duration estimates have not been calibrated with learners.
 
@@ -142,7 +142,7 @@ Evidence: [src/pages/projects.astro](../src/pages/projects.astro), [src/pages/bo
 | [welcome-audit: Check the CPU environment and a saved matrix arithmetic identity](https://www.tahabouhsine.com/jaxpathways/project-guides/welcome-audit.html) | available-draft | CPU reference checker passed for current sources. Environment evidence and independent arithmetic with learner-owned implementation. | Run an unaided novice walkthrough and review the retained environment record. |
 | [arrays-audit: Audit masked batch moments and padding-sensitive denominators](https://www.tahabouhsine.com/jaxpathways/project-guides/arrays-audit.html) | available-draft | CPU reference checker passed for current sources. Array shape, statistics and changed-input diagnostics. | Add ragged/masked data and assess the learner explanation of each axis. |
 | [transforms-audit: Compare scalar, vmap, autodiff, and changed-shape JIT behavior](https://www.tahabouhsine.com/jaxpathways/project-guides/transforms-audit.html) | available-draft | CPU reference checker passed for current sources. Differentiation, batching and tracing invariants. | Add composed transformations with a deliberately incorrect derivative boundary. |
-| [recovery-audit: Resume a complete training stream across a process failure](https://www.tahabouhsine.com/jaxpathways/project-guides/recovery-audit.html) | available-draft | CPU reference checker passed for current sources. Local checkpoint contract and independent continuation checks. | Inject incomplete writes, stale manifests and incompatible input state in separate processes. |
+| [recovery-audit: Resume a complete training stream across a process failure](https://www.tahabouhsine.com/jaxpathways/project-guides/recovery-audit.html) | in-development | Reference check pending for this source. Local checkpoint contract and independent continuation checks. | Inject incomplete writes, stale manifests and incompatible input state in separate processes. |
 | [performance-audit: Measure CPU JIT latency and changed-shape traces with retained JAXPR evidence](https://www.tahabouhsine.com/jaxpathways/project-guides/performance-audit.html) | available-draft | CPU reference checker passed for current sources. Compilation/timing distinctions and retained evidence. | Add a target-backed workload and a reviewed trace, not a generic timing improvement claim. |
 | [posttraining-audit: Audit response-token SFT masking and preference-pair loss](https://www.tahabouhsine.com/jaxpathways/project-guides/posttraining-audit.html) | available-draft | CPU reference checker passed for current sources. Bounded adaptation and preference-contract checks. | Transfer the contracts to a saved Transformer and document retained behavior. |
 | [tpu-runtime-audit: Inspect CPU device inventory, BF16 storage, and collective participant arithmetic](https://www.tahabouhsine.com/jaxpathways/project-guides/tpu-runtime-audit.html) | available-draft | CPU reference checker passed for current sources. CPU-verifiable runtime and participation evidence contracts. | Observe a learner-owned TPU receipt on a declared topology and keep the exact numerical reference. |
@@ -850,13 +850,13 @@ These are public practice tasks, not independently administered exams. A referen
 | `transforms-audit:stage-2` | Changed condition and diagnosis | available-draft | Public reference stage checked; no independent learner assessment |
 | `transforms-audit:stage-3` | Retained evidence | available-draft | Public reference stage checked; no independent learner assessment |
 | `transforms-audit:stage-4` | Integrated project check | available-draft | Public reference stage checked; no independent learner assessment |
-| `recovery-audit:stage-1` | Contract and independent calculation | available-draft | Public reference stage checked; no independent learner assessment |
-| `recovery-audit:stage-2` | Changed condition and diagnosis | available-draft | Public reference stage checked; no independent learner assessment |
-| `recovery-audit:stage-3` | Retained evidence | available-draft | Public reference stage checked; no independent learner assessment |
-| `recovery-audit:stage-4` | Integrated recovery protocol | available-draft | Public reference stage checked; no independent learner assessment |
-| `recovery-audit:stage-5` | Fresh-process epoch-tail replay and semantic schema | available-draft | Public reference stage checked; no independent learner assessment |
-| `recovery-audit:stage-6` | Crash-safe generation publication | available-draft | Public reference stage checked; no independent learner assessment |
-| `recovery-audit:stage-7` | Concurrent expected-parent arbitration | available-draft | Public reference stage checked; no independent learner assessment |
+| `recovery-audit:stage-1` | Contract and independent calculation | in-development | Current reference stage check pending |
+| `recovery-audit:stage-2` | Changed condition and diagnosis | in-development | Current reference stage check pending |
+| `recovery-audit:stage-3` | Retained evidence | in-development | Current reference stage check pending |
+| `recovery-audit:stage-4` | Integrated recovery protocol | in-development | Current reference stage check pending |
+| `recovery-audit:stage-5` | Fresh-process epoch-tail replay and semantic schema | in-development | Current reference stage check pending |
+| `recovery-audit:stage-6` | Crash-safe generation publication | in-development | Current reference stage check pending |
+| `recovery-audit:stage-7` | Concurrent expected-parent arbitration | in-development | Current reference stage check pending |
 | `performance-audit:stage-1` | Contract and independent calculation | available-draft | Public reference stage checked; no independent learner assessment |
 | `performance-audit:stage-2` | Changed condition and diagnosis | available-draft | Public reference stage checked; no independent learner assessment |
 | `performance-audit:stage-3` | Retained evidence | available-draft | Public reference stage checked; no independent learner assessment |

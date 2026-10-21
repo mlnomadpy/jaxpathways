@@ -1,0 +1,99 @@
+{
+  "observed_at": "2026-10-21T22:05:00.903324+00:00",
+  "commit": "a3df5706b43355a8f218d86fdd100c74ff17ec94",
+  "pull_request": "https://github.com/mlnomadpy/jaxpathways/pull/66",
+  "checks": [
+    {
+      "name": "tpu-dependencies",
+      "status": "COMPLETED",
+      "conclusion": "SUCCESS",
+      "url": "https://github.com/mlnomadpy/jaxpathways/actions/runs/39681498030/job/119504814020"
+    },
+    {
+      "name": "powershell",
+      "status": "COMPLETED",
+      "conclusion": "SUCCESS",
+      "url": "https://github.com/mlnomadpy/jaxpathways/actions/runs/39681498023/job/119504813622"
+    },
+    {
+      "name": "site",
+      "status": "COMPLETED",
+      "conclusion": "FAILURE",
+      "url": "https://github.com/mlnomadpy/jaxpathways/actions/runs/39681498030/job/119504814109"
+    },
+    {
+      "name": "browser",
+      "status": "COMPLETED",
+      "conclusion": "SUCCESS",
+      "url": "https://github.com/mlnomadpy/jaxpathways/actions/runs/39681498030/job/119504814008"
+    },
+    {
+      "name": "lessons",
+      "status": "COMPLETED",
+      "conclusion": "SUCCESS",
+      "url": "https://github.com/mlnomadpy/jaxpathways/actions/runs/39681498030/job/119504813747"
+    },
+    {
+      "name": "projects (0)",
+      "status": "COMPLETED",
+      "conclusion": "SUCCESS",
+      "url": "https://github.com/mlnomadpy/jaxpathways/actions/runs/39681498030/job/119504814251"
+    },
+    {
+      "name": "projects (1)",
+      "status": "COMPLETED",
+      "conclusion": "SUCCESS",
+      "url": "https://github.com/mlnomadpy/jaxpathways/actions/runs/39681498030/job/119504814276"
+    },
+    {
+      "name": "projects (2)",
+      "status": "COMPLETED",
+      "conclusion": "SUCCESS",
+      "url": "https://github.com/mlnomadpy/jaxpathways/actions/runs/39681498030/job/119504814242"
+    },
+    {
+      "name": "projects (3)",
+      "status": "COMPLETED",
+      "conclusion": "SUCCESS",
+      "url": "https://github.com/mlnomadpy/jaxpathways/actions/runs/39681498030/job/119504814955"
+    },
+    {
+      "name": "c01-embedding-pilot",
+      "status": "COMPLETED",
+      "conclusion": "SUCCESS",
+      "url": "https://github.com/mlnomadpy/jaxpathways/actions/runs/39681498030/job/119504814188"
+    },
+    {
+      "name": "c02-causal-pilot",
+      "status": "COMPLETED",
+      "conclusion": "SUCCESS",
+      "url": "https://github.com/mlnomadpy/jaxpathways/actions/runs/39681498030/job/119504814019"
+    },
+    {
+      "name": "loggers",
+      "status": "COMPLETED",
+      "conclusion": "SUCCESS",
+      "url": "https://github.com/mlnomadpy/jaxpathways/actions/runs/39681498030/job/119504813993"
+    },
+    {
+      "name": "numpyro",
+      "status": "COMPLETED",
+      "conclusion": "SUCCESS",
+      "url": "https://github.com/mlnomadpy/jaxpathways/actions/runs/39681498030/job/119504814263"
+    },
+    {
+      "name": "diffrax",
+      "status": "COMPLETED",
+      "conclusion": "SUCCESS",
+      "url": "https://github.com/mlnomadpy/jaxpathways/actions/runs/39681498030/job/119504814162"
+    },
+    {
+      "name": "decoder-foundations",
+      "status": "COMPLETED",
+      "conclusion": "SUCCESS",
+      "url": "https://github.com/mlnomadpy/jaxpathways/actions/runs/39681498030/job/119504814186"
+    }
+  ],
+  "qualification": "14 hosted checks pass; site fails Black formatting of recovery solution/model.py and tests/check.py; frozen commit is not fully green",
+  "source_log": "/private/tmp/jaxpathways-pr66-site-job.log"
+}

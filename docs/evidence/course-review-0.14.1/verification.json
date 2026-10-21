@@ -1,0 +1,68 @@
+{
+  "schema": 1,
+  "edition": "0.14.1",
+  "verified_source_commit": "e6cd34698b1118727e168812a6a37a7dc302193f",
+  "observed_at": "2026-10-21T22:20:09.770285+00:00",
+  "release_source_fingerprint": "cd815ce7b58f49afcd60159181576076aec275d4771e54c3ffadb040752ccc5e",
+  "changedLessons": [],
+  "changedPhases": [],
+  "checks": {
+    "main": {
+      "command": "npm run check",
+      "exit_code": 0,
+      "tests": 163
+    },
+    "black": {
+      "command": "xargs /Users/tahabsn/.pixi/envs/python/bin/python3 -m black --check < scripts/python-format-files.txt",
+      "version": "26.5.1",
+      "exit_code": 0,
+      "files": 49
+    },
+    "recovery": {
+      "command": "python3 projects/recovery-audit/tests/check.py --implementation solution --stage all",
+      "exit_code": 0,
+      "verification": "../recovery-format-amendment-2026-10-21/verification.json"
+    },
+    "browser": {
+      "command": "CI=1 PLAYWRIGHT_BROWSERS_PATH=/private/tmp/jaxpathways-playwright PLAYWRIGHT_PORT=4210 npm run test:browser",
+      "exit_code": 0,
+      "tests": 46
+    },
+    "deployment": {
+      "command": "npm run check:deployment",
+      "exit_code": 0,
+      "bases": ["/", "/jaxpathways"]
+    },
+    "epubcheck": {
+      "version": "5.4.0",
+      "exit_code": 0,
+      "fatal": 0,
+      "error": 0,
+      "warning": 0
+    }
+  },
+  "artifact_sha256": {
+    "book.html": "a702f61598b0e861e1df19ab03cc9dce5acb3dd9dbb5d824b24a9f21fc405611",
+    "downloads/jax-foundations.html": "8ce0530aa845fb332c62b7d00dc66bbd8d313d74e642bc2487bd1766562a355e",
+    "downloads/jax-foundations.epub": "0c1e9bddc7f2702aada83d6934c09b5a2800f8dcb16b3f9981d53728edd6c8e2",
+    "downloads/recovery-audit.zip": "2c4390727f2a0fec74d5ef164e623539ad862efe187dea8f3ed3ca54fcfc136e"
+  },
+  "log_sha256": {
+    "browser.log": "2dfe400be6d781d8526715d47a59bdfc727329a6070cb3cb5b4566073bead236",
+    "deployment.log": "779d76ebd52d6b88a79bf23ad91f5865dd5c64e57f95bbc9339559f045038dc5",
+    "epubcheck.log": "a0ccb9442db4808c4a4f1d51310a27603a09f8c0b0a35c49073cc63fb18fcb86",
+    "main-check.log": "751aaaadad17a6c33717c90fe229d2528a0d5e9da25d789cb00cdb475a9124f8"
+  },
+  "retained_scope": "104 unchanged lesson sources retain earlier source-matching CPU receipts; no claim of fresh execution of every lesson or unaffected project for this formatting patch",
+  "native_scope": "0.14.0 bounded browser/Books sample retained separately; not a new full-reader qualification for 0.14.1",
+  "hosted_scope": "Not yet dispatched for this source commit; previous frozen PR66 has14passing jobs and1Blackfailure",
+  "open_work": [
+    "13 developing phases",
+    "10 Planned full model/retrieval capstones",
+    "Image/audio/multi-controller repairs excluded from this patch",
+    "Independent teaching/career calibration",
+    "Additional native readers, disclosures, print and actual assistive technology",
+    "Target-scale model/hardware/service qualification",
+    "Production deployment"
+  ]
+}
