@@ -136,6 +136,40 @@ jobs:
         with:
           name: project-cpu-receipt-${{ matrix.shard }}
           path: /tmp/projects-${{ matrix.shard }}.json
+  c01-embedding-pilot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.14'
+          cache: pip
+          cache-dependency-path: projects/embedding-model-300m/requirements-embedding-lock.txt
+      - run: python -m pip install --no-deps --index-url https://download.pytorch.org/whl/cpu 'torch==2.11.0'
+      - run: python -m pip install -r projects/embedding-model-300m/requirements-embedding-lock.txt
+      - name: Download frozen SciFact archive
+        run: |
+          curl -fL https://scifact.s3-us-west-2.amazonaws.com/release/latest/data.tar.gz -o /tmp/scifact-c01.tar.gz
+          echo "11c621288d41ac144d29b13b0f8503b3820b7d6e8b1f6ff24dff335c196d76be  /tmp/scifact-c01.tar.gz" | sha256sum --check
+      - name: Check generic phase plotting
+        run: python projects/embedding-model-300m/tests/test_plots.py
+      - name: Prepare frozen data and run full current checker
+        run: |
+          python projects/embedding-model-300m/data/prepare.py --archive /tmp/scifact-c01.tar.gz --output /tmp/jaxpathways-scifact-c01-data
+          python projects/embedding-model-300m/tests/check.py --implementation solution --stage all --data /tmp/jaxpathways-scifact-c01-data --output /tmp/jaxpathways-embedding-c01-check
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: c01-embedding-pilot-check
+          path: |
+            /tmp/jaxpathways-embedding-c01-check/independent-check.json
+            /tmp/jaxpathways-embedding-c01-check/full-run/sourcebound-receipt.json
+            /tmp/jaxpathways-embedding-c01-check/full-run/pilot-report.json
+            /tmp/jaxpathways-embedding-c01-check/full-run/baseline-receipt.json
+          if-no-files-found: ignore
   loggers:
     runs-on: ubuntu-latest
     timeout-minutes: 25

@@ -6,7 +6,7 @@
   "levels": {
     "available-draft": "Material is available for its stated practice scope. Teaching review and learner validation are still pending.",
     "in-development": "Useful material exists, but important parts of this course or project are still being developed. Read its stated scope before starting.",
-    "planned": "A specification or brief exists; no runnable capstone implementation is supplied.",
+    "planned": "The full capstone is not yet implemented and qualified. A separately scoped pilot may be available.",
     "needs-repair": "Required material is missing or its current checks fail. Do not rely on it until repaired."
   },
   "findings": [

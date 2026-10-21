@@ -1,0 +1,214 @@
+{
+  "baseline": {
+    "architecture": "MiniLM-L6-v2 base encoder; 6 layers; 384 output dimensions",
+    "download_bytes": "approximately 90.9 MB for model.safetensors plus pinned tokenizer/config files",
+    "dtype": "float32",
+    "exposure_note": "model metadata lists S2ORC and MS MARCO among training data; possible SciFact corpus overlap is unresolved and this baseline is contextual, not contamination-free evidence",
+    "loader": "sentence-transformers model modules: Transformer -> mean Pooling -> Normalize",
+    "max_length": 256,
+    "max_length_source": "sentence_bert_config.json at the pinned revision; 256",
+    "model_id": "sentence-transformers/all-MiniLM-L6-v2",
+    "normalization": "Sentence Transformers Normalize module; float32 normalized embeddings",
+    "pooling_config": {
+      "pooling_mode_cls_token": false,
+      "pooling_mode_max_tokens": false,
+      "pooling_mode_mean_sqrt_len_tokens": false,
+      "pooling_mode_mean_tokens": true,
+      "word_embedding_dimension": 384
+    },
+    "query_document_prefixes": "none",
+    "reported_license": "Apache-2.0",
+    "revision": "1110a243fdf4706b3f48f1d95db1a4f5529b4d41",
+    "tokenizer_sha256": "be50c3628f2bf5bb5e3a7f17b1f74611b2561a3a27eeab05e5aa30f411572037",
+    "weights_bytes": 90868376,
+    "weights_sha256": "53aa51172d142c89d9012cce15ae4d6cc0ca6895895114379cacb4fab128d9db"
+  },
+  "inventory_sha256": {
+    "corpus_ids": "af82ddadf7f7aa79c0d05627941e3afae29d4863205b1729d156d2c535b94ac6",
+    "final_heldout_doc_ids": "40bc4d484de72830fbf47a7c6780149a5831c6dd60fddfb45133925d9808c6b3",
+    "final_query_ids": "e4abdc1340353aed89c8a886e2a5b1a3c24f52b02810bede5910e90706d1d03c",
+    "fit_query_ids": "f6b2251e5104c27783e27bd310f7f8d21f8c2769f7dea264905327d75c7cd115",
+    "fit_train_doc_ids": "0a6c76b873be31b2fd24820b39ddad25aa76446f519e453568fc14629b39d30b",
+    "official_test_unjudged_query_ids": "d56cc08dc5db095b8d9750939e958ea150aacb5d1a47514bb2b82406c08cc0f7",
+    "pretraining_doc_ids": "9737ad53151444b302e2282537ac3d6cd6bd97b9dd6303424183019ade7eb85e",
+    "recipe_dev_train_doc_ids": "e7a2bbcceffbfa02db1ed0d732d7ac3b469b66a2c74d8448324400176ef1bedc",
+    "recipe_development_query_ids": "01cf4125ecc3222f28be3d8dd0404d751fc8b73118ce31e771fc562bf207f5f2"
+  },
+  "observed_counts": {
+    "corpus_documents": 5183,
+    "exact_duplicate_document_groups": 0,
+    "final_connected_holdout_documents": 295,
+    "final_direct_cited_or_evidence_documents": 283,
+    "final_heldout_cited_or_evidence_documents": 283,
+    "fit_claims": 478,
+    "fit_components": 298,
+    "fit_evidence_document_links": 315,
+    "fit_judged_claims": 281,
+    "official_dev_claims": 300,
+    "official_dev_evidence_document_links": 209,
+    "official_dev_judged_claims": 188,
+    "official_dev_no_evidence_excluded": 112,
+    "official_test_claims_unjudged": 300,
+    "official_train_claims": 809,
+    "official_train_evidence_document_links": 564,
+    "official_train_judged_claims": 505,
+    "pretraining_eligible_documents": 4888,
+    "quarantined_train_claims": 278,
+    "recipe_development_claims": 53,
+    "recipe_development_components": 27,
+    "recipe_development_evidence_document_links": 37,
+    "recipe_development_judged_claims": 36,
+    "transitive_or_normalized_query_quarantines": 6
+  },
+  "pilot": {
+    "architecture": {
+      "dropout": 0.1,
+      "heads": 4,
+      "layers": 2,
+      "max_length": 64,
+      "mlp_width": 64,
+      "tied_mlm_head": true,
+      "vocab_size": 512,
+      "width": 32
+    },
+    "evaluation": {
+      "baselines": [
+        "BM25 exact lexical score",
+        "random-initialized encoder",
+        "frozen sentence-transformers/all-MiniLM-L6-v2 revision 1110a243fdf4706b3f48f1d95db1a4f5529b4d41 where local model download succeeds"
+      ],
+      "candidate_inventory": "all 5,183 corpus docs, exact cosine search",
+      "decision": "a short CPU pilot can pass mechanics only; the stated quality floors are release target gates, and failure remains a measured non-promotion",
+      "final_query_inventory": "all 300 official dev queries; evaluate metrics over 188 judged queries only and publish all 300 per-query status rows",
+      "metrics": [
+        "Recall@1",
+        "Recall@5",
+        "Recall@10",
+        "MRR",
+        "nDCG@10"
+      ],
+      "precommitted_pilot_gates": {
+        "Recall@10_minimum": 0.3,
+        "maximum_retention_regression_from_phase1": 0.05,
+        "nDCG@10_minimum": 0.1
+      }
+    },
+    "optimizer": "AdamW; separate optimizer and LR schedule reset at each phase; checkpoint preserves params, first/second moments, schedule/global step, dropout/masking keys, sampler permutation/epoch/cursor, code/data/tokenizer/config/objective and parent identities",
+    "phase1_mlm": {
+      "batch_size": 4,
+      "learning_rate": 0.0003,
+      "mlm_weight": 1.0,
+      "objective": "selected-token cross entropy summed over selected positions and divided by selected-token count",
+      "parent": "random initialization",
+      "updates": 8,
+      "warmup_steps": 1,
+      "weight_decay": 0.01
+    },
+    "phase2_ablation": {
+      "batch_size": 4,
+      "branches": [
+        "contrastive_only",
+        "contrastive_plus_retained_mlm"
+      ],
+      "contrastive_weight": 1.0,
+      "learning_rate": 0.0001,
+      "main_branch_for_phase3": "contrastive_plus_retained_mlm",
+      "negative_policy": "other documents in the minibatch are unlabeled in-batch negatives; they are not asserted irrelevant; known human evidence positives for these weak pairs are excluded from negative slots",
+      "pair_budget": "exact same 32 weak pairs, batch order and PRNG seeds in both branches",
+      "pair_selection": "sort generated weak pairs by SHA256(\"scifact-c01-weak-pair-20261021:\" + group_id + \":\" + source + \":\" + left_text + \"\\0\" + right_text), take the first 32; save exact pair-ID inventory and hash",
+      "parent": "phase1 MLM checkpoint for both branches",
+      "retained_mlm_weight": 0.1,
+      "updates_each": 8,
+      "warmup_steps": 1,
+      "weak_pair_sources": [
+        "same-document title to abstract",
+        "two disjoint spans from same abstract"
+      ],
+      "weight_decay": 0.01
+    },
+    "phase3_human_pairs": {
+      "batch_size": 4,
+      "checkpoint_reset": "initialize new Adam moments and phase schedule; retain parent model parameters and complete parent lineage",
+      "learning_rate": 5e-05,
+      "negative_policy": "mask all known evidence positives from negative slots; remaining unlabeled in-batch documents are unjudged candidates, not proven negatives",
+      "objective": "multi-positive supervised in-batch contrastive loss using only documented fit evidence IDs",
+      "parent": "phase2 contrastive_plus_retained_mlm",
+      "updates": 71,
+      "updates_note": "one deterministic pass over 281 judged fit queries at batch size 4, with a final partial batch of 1; positive union padded to 16 slots for stable shapes",
+      "warmup_steps": 1,
+      "weight_decay": 0.01
+    },
+    "pretraining_sample": {
+      "eligible_doc_inventory": "pretraining_doc_ids from frozen inventories; all 5,183 candidate docs minus the 295-document final-connected holdout group",
+      "mask_replacement": "80% MASK, 10% random non-special vocabulary token, 10% unchanged; keyed deterministically by epoch/document/mask-position",
+      "maximum_sequence_length": 64,
+      "mlm_mask_rate": 0.15,
+      "pilot_document_ids": "select 128 eligible docs in ascending SHA256(\"scifact-c01-pilot-doc-20261021:\" + decimal doc_id)",
+      "truncation": "tail truncation after BPE; report tokens omitted"
+    },
+    "processor": {
+      "fit_records": "all 4,888 pretraining_doc_ids; no claim text is used to fit tokenizer",
+      "kind": "byte-level BPE with byte fallback",
+      "normalization": "none; preserve UTF-8 text and use ByteLevel pre-tokenizer",
+      "special_ids": {
+        "BOS": 2,
+        "EOS": 3,
+        "MASK": 4,
+        "PAD": 0,
+        "UNK": 1
+      },
+      "vocab_size": 512,
+      "exposure_disclosure": "The train-only tokenizer and eligible unsupervised corpus include all 4,888 pretraining documents, including 29 documents associated with recipe-development components; the deterministic 128-document MLM sample includes 3 of those 29. Recipe-development query text and human query/evidence pairs are never training examples. This permits document-text transduction in the recipe-development population and must be considered when interpreting its metrics."
+    },
+    "status": "recipe frozen before training; bounded CPU pilot execution pending",
+    "target_parameter_count": 302090240,
+    "target_training_or_quality_qualified": false,
+    "target_with_tied_mlm_head_parameter_count": 303191040
+  },
+  "protocol": "scifact-c01-custom-grouped-fit-dev-final-v1",
+  "seed": "scifact-c01-seed-20261021",
+  "selection": {
+    "candidate_corpus": "all official corpus documents; the final heldout document group remains available for ranking and is disclosed as transductive candidate exposure",
+    "final": "all 300 official dev claims; judged retrieval denominator is only claims with at least one documented evidence document",
+    "final_heldout_documents": "all cited/evidence document IDs from official dev plus every document linked through any train/final connected component; entire component is excluded from tokenizer and training",
+    "grouping": "connected components across original train and official dev claims sharing cited/evidence document IDs or normalized claim text; exact-normalized duplicate corpus document text grouped first; quarantine all train members of final-containing components before deterministic train-fit/train-development split",
+    "human_positive": "only evidence map document IDs; SUPPORT and CONTRADICT both count as evidence-retrieval relevant; cited_doc_ids alone are not positives",
+    "recipe_development": "SHA-256 order of whole remaining train components with seed scifact-c01-seed-20261021; add groups until at least round(10% of remaining train claims)",
+    "text_normalization_for_grouping": "Unicode casefold, non-word runs to spaces, collapse whitespace",
+    "train_quarantine": "remove every original train claim whose cited/evidence document IDs intersect final heldout documents",
+    "training_exposure": "Final query text and all 295 documents in final-connected groups are excluded from tokenizer and every training objective. Recipe-development query text and human query/evidence pairs are excluded from all training objectives. The 4,888 eligible corpus documents include 29 recipe-development component documents; the fixed 128-document MLM sample includes 3. This is disclosed tokenizer/unsupervised document-text exposure, not claim/evidence supervision.",
+    "unjudged": "queries without evidence are excluded from retrieval metric denominators and counted explicitly; no synthetic negatives",
+    "weak_pairs": "span/section and title-abstract pairs are marked weak and never substituted for evidence annotations"
+  },
+  "source": {
+    "archive_bytes": 3115079,
+    "archive_file_sha256": {
+      "data/claims_dev.jsonl": "86f0435d08fdb65d1aa41d1472684f57e6e71930626497bdf4d7a9ec1a632217",
+      "data/claims_test.jsonl": "558930d75215c73f84a28fe538307d6d397c9de1ec7239514cf45f80d75d2ca3",
+      "data/claims_train.jsonl": "f4c8fa82d8bd0653a9cc8d61a6ea48c25eacea64e90af5dbf390ebb1b74372f0",
+      "data/corpus.jsonl": "b8d6c89624cb2ed74dee8938effc4f5d8bd2086887880af8110d64be4ceade62"
+    },
+    "archive_sha256": "11c621288d41ac144d29b13b0f8503b3820b7d6e8b1f6ff24dff335c196d76be",
+    "archive_url": "https://scifact.s3-us-west-2.amazonaws.com/release/latest/data.tar.gz",
+    "archive_version_id": "8LiW3OUBLBvhehDzrRdGD1ibIaXL.6PQ",
+    "last_modified": "2021-01-26T02:28:59Z",
+    "license_file_sha256": "56ee69bc639cbab8f0b2e4b67091ec5e9390aa99a1d65f0a35e4274686c9a806",
+    "licenses": {
+      "claims_and_evidence": "CC BY 4.0",
+      "corpus_abstracts": "S2ORC ODC-By 1.0",
+      "upstream_code": "Apache-2.0"
+    },
+    "repository": "https://github.com/allenai/scifact",
+    "repository_commit": "68b98a56d93e0f9da0d2aab4e6c3294699a0f72e",
+    "schema_file_sha256": "f8f4cc2f7bf32347dd47d419be731a5d0eeb60ebb75423619e02919c7f337df7"
+  },
+  "prepared_output_sha256": {
+    "claims_final.jsonl": "595c766813a3039c6f88e107cd5fa3f7a0da41cd4885b0db2d6fc2d7e3d385ce",
+    "claims_fit.jsonl": "e4728bf15294fdce739bf046e4e6086d69bb7679cbc552889609a52b88f09167",
+    "claims_official_test_unjudged.jsonl": "de1d212dc9bc705fffde8311b064145bbc29bfa32cbb7ec75fd445583eecacd8",
+    "claims_recipe_dev.jsonl": "15bb37077d961a39b1c9f946c654965202bf2770698b0f4573eafe82860648ed",
+    "claims_train_original.jsonl": "de67a2e6387a2b76469f5f2fe7f6b4d322a0bfe1bccda5a089aaf3eaf22c4554",
+    "corpus.jsonl": "bbf4cce92d03ec6da75520175e487a2a9d8d8cddac2a0afee3c2c0c51604ecbb",
+    "inventories.json": "ad3c591ee802baab34a5b7b03c842ce26acbacd8dcf735625f9a8ac1bb7e294f"
+  }
+}

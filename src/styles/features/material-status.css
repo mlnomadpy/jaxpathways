@@ -38,6 +38,9 @@
   margin: 0;
   max-width: 85ch;
 }
+.material-status p > span {
+  overflow-wrap: anywhere;
+}
 .material-status p + p {
   margin-top: 6px;
 }

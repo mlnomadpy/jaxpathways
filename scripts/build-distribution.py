@@ -17,6 +17,114 @@ PROJECT_EXTRA_FILES = {
     # kernel-audit's README documents this optional, separately pinned TPU environment.
     "kernel-audit": ("resources/tpu-gcp/requirements-qualification.txt",),
 }
+C01_SOURCE_FILES = {
+    "README.md",
+    "EVALUATION.md",
+    "MODALITIES.md",
+    "MONITORING.md",
+    "RELEASE.md",
+    "TRAINING_RECIPE.md",
+    "baseline.py",
+    "config.py",
+    "evaluation.py",
+    "model.py",
+    "objectives.py",
+    "package_runtime.py",
+    "plots.py",
+    "run.py",
+    "trainer.py",
+    "requirements-embedding-lock.txt",
+    "requirements-embedding.txt",
+    "data/LICENSES.md",
+    "data/RECIPE_AMENDMENTS.md",
+    "data/dataset.py",
+    "data/frozen_recipe.json",
+    "data/prepare.py",
+    "data/recipe-history/c01-original-pretraining-recipe.json",
+    "tools/build_evidence_index.py",
+    "tools/pack_reference_evidence.py",
+    "tools/render_teaching_objectives.py",
+    "starter/README.md",
+    "starter/model.py",
+    "tests/check.py",
+    "tests/resume_worker.py",
+    "tests/test_plots.py",
+}
+
+
+def c01_pilot_packet(root):
+    """Return the explicitly allowlisted C01 source and public evidence files."""
+    project = root / "projects" / "embedding-model-300m"
+    index_path = project / "reference" / "evidence-index.json"
+    if not index_path.is_file():
+        raise FileNotFoundError(f"Required C01 public evidence index is missing: {index_path}")
+    index = json.loads(index_path.read_text())
+    public_files = index.get("public_files")
+    source_files = index.get("source_files_sha256")
+    if not isinstance(public_files, dict) or not public_files:
+        raise ValueError("C01 evidence index must contain a nonempty public_files map")
+    if not isinstance(source_files, dict) or not source_files:
+        raise ValueError("C01 evidence index must contain a nonempty source_files_sha256 map")
+
+    def verified(relative, expected):
+        candidate = (project / relative).resolve()
+        if project.resolve() not in candidate.parents or not candidate.is_file():
+            raise ValueError(f"C01 evidence path is missing or unsafe: {relative}")
+        actual = hashlib.sha256(candidate.read_bytes()).hexdigest()
+        if actual != expected:
+            raise ValueError(f"C01 evidence hash mismatch: {relative}")
+        return candidate
+
+    files = {index_path}
+    for relative, expected in source_files.items():
+        if not isinstance(relative, str) or not isinstance(expected, str):
+            raise ValueError("C01 source hash entries must map paths to SHA-256 strings")
+        project_relative = relative.removeprefix("projects/embedding-model-300m/")
+        files.add(verified(project_relative, expected))
+    for relative, expected in public_files.items():
+        if (
+            not isinstance(relative, str)
+            or not relative.startswith("reference/")
+            or ".." in Path(relative).parts
+            or not isinstance(expected, str)
+            or len(expected) != 64
+        ):
+            raise ValueError(f"Unsafe C01 public evidence entry: {relative}")
+        lowered = relative.lower()
+        payload_names = {
+            "model.safetensors",
+            "tokenizer.json",
+            "tokenizer_config.json",
+            "special_tokens_map.json",
+            "vocab.txt",
+        }
+        payload_suffixes = {".safetensors", ".ckpt", ".pt", ".pth", ".onnx", ".gguf", ".msgpack", ".bin"}
+        if (
+            Path(lowered).name in payload_names
+            or Path(lowered).suffix in payload_suffixes
+            or "baseline_snapshot" in Path(lowered).parts
+            or ("checkpoints" in Path(lowered).parts and Path(lowered).suffix != ".json")
+        ):
+            raise ValueError(f"C01 source package cannot include model payload: {relative}")
+        files.add(verified(relative, expected))
+    for key in ("historical_receipt", "checker_amendment"):
+        reference = index.get(key)
+        if not isinstance(reference, dict) or not isinstance(reference.get("path"), str):
+            raise ValueError(f"C01 evidence index is missing {key}")
+        if reference["path"] not in public_files:
+            raise ValueError(f"C01 {key} must be included in public_files")
+        if public_files[reference["path"]] != reference.get("sha256"):
+            raise ValueError(f"C01 {key} digest does not match public_files")
+    source_files_to_bundle = {project / relative for relative in C01_SOURCE_FILES}
+    for path in source_files_to_bundle:
+        if not path.is_file():
+            raise FileNotFoundError(f"Required C01 source file is missing: {path.relative_to(project)}")
+    for relative in source_files:
+        project_relative = relative.removeprefix("projects/embedding-model-300m/")
+        if Path(project_relative).as_posix() not in C01_SOURCE_FILES:
+            raise ValueError(f"C01 source receipt names a file outside the package allowlist: {relative}")
+    files.update(source_files_to_bundle)
+    return project, index_path, index, files
 course = json.loads((ROOT / 'public/curriculum.json').read_text())
 release = json.loads((ROOT / 'curriculum/releases.json').read_text())[0]
 lessons = [lesson for phase in course['phases'] for lesson in phase['lessons'] if lesson['status'] == 'authored']
@@ -188,6 +296,18 @@ with ZipFile(OUT/'jax-tutor-skills.zip','w',compression=ZIP_DEFLATED) as bundle:
     bundle.write(ROOT/'skills/README.md','README.md')
 print(f'Built offline HTML/EPUB ({len(lessons)} lessons), staged project, and tutor bundles.')
 
+# C01 remains a planned full capstone. This separate source-only ZIP exposes its
+# bounded CPU workflow and only the public, hash-verified reference packet.
+c01_root, c01_index_path, c01_index, c01_files = c01_pilot_packet(ROOT)
+c01_public_paths = {
+    (c01_root / relative).resolve()
+    for relative in c01_index["public_files"]
+}
+c01_public_paths.add(c01_index_path.resolve())
+with ZipFile(OUT / "embedding-model-300m-pilot.zip", "w", compression=ZIP_DEFLATED) as bundle:
+    for path in sorted(c01_files):
+        bundle.write(path, path.relative_to(ROOT).as_posix())
+
 setup=next(l for l in lessons if l['id']=='welcome-01')
 with ZipFile(OUT/'jax-start-here.zip','w',compression=ZIP_DEFLATED) as bundle:
     bundle.writestr('jax-start-here/first_experiment.py',setup['content']['code']+'\n')
@@ -206,6 +326,7 @@ workspace_files = {ROOT/'requirements-cpu.txt', ROOT/'requirements-beginner.txt'
 for directory in ('curriculum', 'learning-paths', 'phases', 'projects', 'skills', 'assessments', 'resources/tpu-gcp', 'content/guides'):
     workspace_files.update(path for path in (ROOT/directory).rglob('*')
                            if path.is_file() and path.suffix in ('.md', '.json', '.py', '.ipynb', '.txt', '.svg', '.png')
+                           and not (directory == 'projects' and path.is_relative_to(c01_root / 'reference'))
                            and '__pycache__' not in path.parts)
 # Keep the coordinated multi-host target repository-only. Its rendezvous and shared
 # GCS checkpoint setup are not part of the portable workspace contract.
@@ -216,7 +337,9 @@ workspace_files = {
 # Registered project bundles include their executed binary artifacts and media.
 for manifest in json.loads((ROOT/'curriculum/projects.json').read_text()):
     workspace_files.update(path for path in (ROOT/manifest).parent.rglob('*')
-                           if path.is_file() and '__pycache__' not in path.parts)
+                           if path.is_file() and '__pycache__' not in path.parts
+                           and not (Path(manifest).parts[1] == 'embedding-model-300m' and path.is_relative_to(c01_root / 'reference')))
+workspace_files.update(c01_public_paths)
 for directory in ('public/figures','public/executions','public/guides'):
     workspace_files.update(path for path in (ROOT/directory).glob('*') if path.is_file())
 start_guide = '''# Start JAX Pathways with your agent

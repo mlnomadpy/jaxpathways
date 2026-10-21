@@ -1,0 +1,58 @@
+{
+  "document_count": 5183,
+  "judged_query_count": 188,
+  "methods": {
+    "bm25": {
+      "all_full_rank_permutations_valid": true,
+      "max_absolute_metric_or_per_query_difference": 0.0,
+      "metrics_reconstructed_from_full_ranks_and_shared_qrels": true,
+      "metrics_sha256": "65ce3736a0a3cbe7f66bca371bde50b536fb341d94001d4961f1186a82517e8e",
+      "rank_indices_sha256": "902a7ffb49013e8dbf98b58c3b40aa7b628462458608db6620c77900aef7acf4"
+    },
+    "external_minilm_l6_v2": {
+      "all_full_rank_permutations_valid": true,
+      "max_absolute_metric_or_per_query_difference": 0.0,
+      "metrics_reconstructed_from_full_ranks_and_shared_qrels": true,
+      "metrics_sha256": "957fa029b15846033df3a970a1fded6b69ce758d95569e86ad5bebf6f081a9d5",
+      "rank_indices_sha256": "0e2c0ff52ac66fc9b5479b334a91db40ca9c0a128d99575015d2e5e294362dab"
+    },
+    "phase1_mlm": {
+      "all_full_rank_permutations_valid": true,
+      "max_absolute_metric_or_per_query_difference": 0.0,
+      "metrics_reconstructed_from_full_ranks_and_shared_qrels": true,
+      "metrics_sha256": "e154b2729bff78edc00a433d6e13f74476eb9c01debbefee01c9a3151224da96",
+      "rank_indices_sha256": "ecbb81d19d614c8544cd2fe4cbcc86426ec71fbcb82aa00a0fcae09edae1fc29"
+    },
+    "phase2_contrastive_only": {
+      "all_full_rank_permutations_valid": true,
+      "max_absolute_metric_or_per_query_difference": 0.0,
+      "metrics_reconstructed_from_full_ranks_and_shared_qrels": true,
+      "metrics_sha256": "dccdfd8e9e26d85e8bf63630ebdeb3eb7665641a2b3243d149a7d90c941019bc",
+      "rank_indices_sha256": "c60c6cb5e0c715c0d060cc51b767c7343caac067c0cbd86a822965167a1abeb0"
+    },
+    "phase2_contrastive_plus_retained_mlm": {
+      "all_full_rank_permutations_valid": true,
+      "max_absolute_metric_or_per_query_difference": 0.0,
+      "metrics_reconstructed_from_full_ranks_and_shared_qrels": true,
+      "metrics_sha256": "8a27d3ecde30f96cf2b4296df9962051553cc2e67c13b7a1199aedc463c731d5",
+      "rank_indices_sha256": "cb6d39c45f02990b6b1ecc8bd518c10b94288cc7213dae4d17b2a9d8cae13603"
+    },
+    "phase3_human_pairs": {
+      "all_full_rank_permutations_valid": true,
+      "max_absolute_metric_or_per_query_difference": 0.0,
+      "metrics_reconstructed_from_full_ranks_and_shared_qrels": true,
+      "metrics_sha256": "313f01c9998a741c5f14671b9ad965aff794405cb15012affddab1f23c45d8a5",
+      "rank_indices_sha256": "67ed78120def8a0c1461d3398cfde19f82cfb1e75f72c6cd711e3ae5eea78167"
+    },
+    "random_initialization": {
+      "all_full_rank_permutations_valid": true,
+      "max_absolute_metric_or_per_query_difference": 0.0,
+      "metrics_reconstructed_from_full_ranks_and_shared_qrels": true,
+      "metrics_sha256": "7f113cf2c422b9252e30b79080c6ffc2cb71b6ec3775e872ad3462344a1f20c2",
+      "rank_indices_sha256": "83b37eeba2d682d555798b9ec55f3d7ac413ae478b8ddd61d021912452fa6962"
+    }
+  },
+  "protocol": "final_official_dev_custom_protocol",
+  "query_count": 300,
+  "schema": "jaxpathways.c01.independent-rank-metric-check.v1"
+}

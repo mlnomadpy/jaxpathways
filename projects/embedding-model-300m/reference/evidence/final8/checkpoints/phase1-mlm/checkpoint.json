@@ -1,0 +1,643 @@
+{
+  "cursor": 32,
+  "epoch": 0,
+  "global_step": 8,
+  "identity": {
+    "backend": "cpu",
+    "branch": "phase1-mlm",
+    "code_sha256": {
+      "baseline.py": "9ae760fd52ed76acfac4131087fd25b09af0ad4b5b96b9594edc4e21d1f0749c",
+      "config.py": "e61e01ad3f56d2fbcdbed72874de727bd9038c042d0070c6b907f5d49fd06a49",
+      "data/LICENSES.md": "fe7d1ba6e253521377a66d0cfc9e5488b1f82545513050aa221fa248ba184625",
+      "data/RECIPE_AMENDMENTS.md": "d1383661680d17d8014c07a686574dd7cbf6ee95ee6873e573de0b417844af36",
+      "data/dataset.py": "de8a207682b9ce55a13868068df3854a50bc119d7a91ad754f1ed7662cdb797d",
+      "data/frozen_recipe.json": "70649244860d731f92d09e805b025e05a731dbef90463d62b0428d0cb7e21134",
+      "data/prepare.py": "533431a5f56ba51274e1f5169c4b7b9c51584698efa316fbb41ed6372b558f62",
+      "data/recipe-history/c01-original-pretraining-recipe.json": "c74bf0e06cc6dc6f8972c6fecae6c86ed03623f60cfa2b91cff9e141e002e5a3",
+      "evaluation.py": "ba3c22efb2eb0ea8ed8afef012c329eb185a39dda84c629b27b81308d3d2dced",
+      "model.py": "0d50093ea497730be48007265b3db25b9044fa13b88a4485cfce7e4c45266f90",
+      "objectives.py": "b6970a4015c6646b39b89f77c129e37b2c8ce0a6f612bdddd9074d86f3239738",
+      "package_runtime.py": "1ab45e32baa18b05af7c651a9c81001b0846e9c8ec5302c88390730a78f60f57",
+      "plots.py": "6c0a67da4e5a6f1510ddcbd081715d54de6419571fd11df6c531a685679cd5f4",
+      "requirements-embedding-lock.txt": "ca59464c7c5e6ef56b7a952d26d6d97de7612e378ab70876dac17d91f1f265d3",
+      "requirements-embedding.txt": "f83afe66ff40961b580b6c40cf19b35c1f222f037f4148d12b56c26111dd3008",
+      "run.py": "d00008fec0cc11170e5253e4285ed2c4d2412f429204e696430022896455e55e",
+      "tests/check.py": "ea60a601024e75851a9a5fcbb0698a26e01fabbb8fab04e65daad8f76b3bd3d1",
+      "tests/resume_worker.py": "8ee26a7370d73e9a982beae059f7f7d4a51efc9b6f419d8e1ffeaf52bbb5a562",
+      "trainer.py": "8b40db81209571d48e209d983e04879f502ce65031bc51152c978f7944608f90"
+    },
+    "dataset_sha256": "4a4b30373d1ecac7176b243ce154c924bc630b9834937b9b6c4eabe4465359f6",
+    "jax_version": "0.9.2",
+    "model_config_sha256": "dfd4a35d0f9e4b17119a199c889eab528603b3eeaead3cd00a8197011b606545",
+    "objective": {
+      "mask_rate": 0.15,
+      "name": "masked_language_modeling",
+      "selected_count_normalized": true
+    },
+    "parent_checkpoint_sha256": null,
+    "processor_sha256": "3ee66ed8d8f87bf2dde100ac9b0ca130fb977ce677c117d10e128306f0c9aac0",
+    "training_config_sha256": "2c86e7c0e31e96dd0a386b0fb3cd48d5cb81d8c97cb13daa97cc70c84c157e12"
+  },
+  "leaves": [
+    {
+      "dtype": "int32",
+      "shape": []
+    },
+    {
+      "dtype": "int32",
+      "shape": []
+    },
+    {
+      "dtype": "int32",
+      "shape": []
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        64,
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32,
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32,
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32,
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32,
+        64
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32,
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        64,
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32,
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32,
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32,
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32,
+        64
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32,
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32,
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        512
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        512,
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        64,
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32,
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32,
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32,
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32,
+        64
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32,
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        64,
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32,
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32,
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32,
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32,
+        64
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32,
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32,
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        512
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        512,
+        32
+      ]
+    },
+    {
+      "dtype": "int32",
+      "shape": [
+        128
+      ]
+    },
+    {
+      "dtype": "uint32",
+      "shape": [
+        2
+      ]
+    },
+    {
+      "dtype": "int32",
+      "shape": []
+    },
+    {
+      "dtype": "int32",
+      "shape": []
+    },
+    {
+      "dtype": "int32",
+      "shape": []
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        64,
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32,
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32,
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32,
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32,
+        64
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32,
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        64,
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32,
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32,
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32,
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32,
+        64
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32,
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32,
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        32
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        512
+      ]
+    },
+    {
+      "dtype": "float32",
+      "shape": [
+        512,
+        32
+      ]
+    }
+  ],
+  "parent": null,
+  "schema": 1,
+  "state_keys": [
+    "params",
+    "m",
+    "v",
+    "step",
+    "total_step",
+    "global_step",
+    "rng",
+    "permutation",
+    "epoch",
+    "cursor",
+    "schedule_total_steps"
+  ],
+  "state_sha256": "24baa016c31894580c6c280dc179192882d7c54e7531a1e9d59eb45e9db22cba",
+  "step": 8,
+  "total_step": 8
+}
