@@ -71,6 +71,10 @@ export function projectFileLayout(p) {
     : p.workspaceFile;
   const copiesStarter = starterFile !== p.workspaceFile;
   const requirementsPath = p.environment.requirementsPath;
+  const workspaceFiles = [
+    ...new Set([p.workspaceFile, ...p.stages.map((s) => s.workspaceFile || p.workspaceFile)]),
+  ];
+  const additionalFiles = workspaceFiles.filter((file) => file !== p.workspaceFile);
   const treeLines = [
     '<extracted-zip-or-repo-root>/          # 1. Run all terminal commands from here',
     `├── ${requirementsPath} # 2. Install this project's pinned CPU dependencies in .venv`,
@@ -84,12 +88,24 @@ export function projectFileLayout(p) {
       : [
           `    ├── ${workspaceRelative.padEnd(30, ' ')} # <-- PUT YOUR CODE HERE (starter with TODOs)`,
         ]),
-    `    ├── tests/check.py                 # Automated verifier (--stage 1 .. ${p.stages.length})`,
+    ...additionalFiles.map(
+      (file) =>
+        `    ├── ${file.startsWith(prefix) ? file.slice(prefix.length) : file} # Edit for the stage that names this file`,
+    ),
+    '    ├── tests/                         # Run the exact verifier command shown for each stage',
+    ...additionalFiles
+      .filter((file) => file.startsWith(`${prefix}starter/`))
+      .map(
+        (file) =>
+          `    ├── ${file.slice(prefix.length).replace(/^starter\//, 'solution/')} # Stage reference solution`,
+      ),
     `    └── solution/${starterBasename.padEnd(21, ' ')} # Reference solution (--implementation solution)`,
   ];
   return {
     starterFile,
     workspaceFile: p.workspaceFile,
+    workspaceFiles,
+    additionalFiles,
     requirementsPath,
     pythonCompatibility: p.environment.pythonCompatibility,
     solutionFile,
@@ -129,7 +145,7 @@ ${materialNotice('projects', p.id)}
     </div>
     <div class="project-blueprint-card">
     <h3>2. Where to put your code</h3>
-    <p class="code-target-callout">Write your code in: <code>${escape(layout.workspaceFile)}</code></p>
+    <p class="code-target-callout">Start in: <code>${escape(layout.workspaceFile)}</code>${layout.additionalFiles.length ? `. Later stages also use ${layout.additionalFiles.map((file) => `<code>${escape(file)}</code>`).join(', ')}` : ''}</p>
     <p>${
       layout.copiesStarter
         ? `Copy the starter scaffold <code>${escape(layout.starterFile)}</code> into <code>${escape(layout.workspaceFile)}</code> before editing. Keep <code>${escape(layout.starterFile)}</code> untouched so you can always compare against the original function signatures.`
@@ -141,7 +157,7 @@ ${materialNotice('projects', p.id)}
     <ol class="project-workflow-strip">
     <li><strong>Step 1 · Unpack &amp; activate</strong><span>Extract <code>downloads/${escape(p.id)}.zip</code> (or open the repository root) and install <code>${escape(layout.requirementsPath)}</code> in your <code>.venv</code>.</span></li>
     <li><strong>Step 2 · Prepare your file</strong><span>${layout.copiesStarter ? `Copy <code>${escape(layout.starterFile)}</code> to <code>${escape(layout.workspaceFile)}</code> and open <code>${escape(layout.workspaceFile)}</code> in your editor.` : `Open <code>${escape(layout.workspaceFile)}</code> in your editor and locate the Stage 1 function.`}</span></li>
-    <li><strong>Step 3 · Implement &amp; check each stage</strong><span>Write the code for Stage 1 in <code>${escape(layout.workspaceFile)}</code>, run <code>${escape(layout.checkerFile)}</code> from the top folder, and repeat through Stage ${p.stages.length}.</span></li>
+    <li><strong>Step 3 · Implement &amp; check each stage</strong><span>Use the edit file and exact check command listed for each stage. Run commands from the top folder and repeat through Stage ${p.stages.length}.</span></li>
     <li><strong>Step 4 · Record evidence</strong><span>Save the passing terminal output and changed-condition diagnosis in your <a href="notebook.html?project=${escape(p.id)}&route=${escape(p.pathwayId)}#portfolio">Notebook Portfolio</a>.</span></li>
     </ol>
     </section>
@@ -164,8 +180,8 @@ ${materialNotice('projects', p.id)}
     <option value="windows">Windows PowerShell</option>
     </select>
     <div id="project-environment"></div>
-    <p>Use Python ${escape(layout.pythonCompatibility)} for this environment. Work in <code>${escape(p.workspaceFile)}</code>. Implement the TODO functions before running the stage checks. The untouched starter deliberately fails.</p>${p.prepare ? `<h3>Prepare your own file</h3>${p.prepare.map((c) => command(c.command, c.label)).join('')}` : ''}<details class="project-reference">
-    <summary>Check the reference implementation separately</summary>${command(p.referenceCommand || `python3 projects/${p.id}/tests/check.py --implementation solution --stage all`, 'Reference command')}<p>Run this command to inspect the reference solution output before testing your own implementation in <code>${escape(p.workspaceFile)}</code>.</p>
+    <p>Use Python ${escape(layout.pythonCompatibility)} for this environment. Begin in <code>${escape(p.workspaceFile)}</code>, then follow each stage's edit file. Implement its TODO functions before running the stage check. The untouched starter deliberately fails.</p>${p.prepare ? `<h3>Prepare your own file</h3>${p.prepare.map((c) => command(c.command, c.label)).join('')}` : ''}<details class="project-reference">
+    <summary>Check the reference implementation separately</summary>${command(p.referenceCommand || `python3 projects/${p.id}/tests/check.py --implementation solution --stage all`, 'Reference command')}<p>Run this command to inspect the reference solution output separately from checking your own stage implementations.</p>
     </details>
     </details>
     <ol class="project-stages">${p.stages
@@ -173,7 +189,7 @@ ${materialNotice('projects', p.id)}
         (s) => `<li id="stage-${escape(s.id)}">
     <h2>${inlineMath(s.title)}</h2>
     <p>
-    <strong>Edit in <code>${escape(p.workspaceFile)}</code> · Keep as evidence:</strong> ${inlineMath(s.evidence)}</p>${renderStageCodeWalkthrough(s, p.workspaceFile)}${command(s.command, 'Stage ' + s.id + ' · macOS / Linux')}<p class="expected-output">
+    <strong>Edit in <code>${escape(s.workspaceFile || p.workspaceFile)}</code> · Keep as evidence:</strong> ${inlineMath(s.evidence)}</p>${renderStageCodeWalkthrough(s, s.workspaceFile || p.workspaceFile)}${command(s.command, 'Stage ' + s.id + ' · macOS / Linux')}<p class="expected-output">
     <strong>Successful check:</strong>
     <br>
     <code>${escape(s.expected)}</code>

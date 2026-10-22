@@ -55,7 +55,7 @@ const guideBody = introMatch ? content.body.slice(introMatch[0].length) : conten
           <strong>
             <code>{layout.workspaceFile}</code>
           </strong>{' '}
-          and write all of your code in <code>{layout.workspaceFile}</code>.
+          and begin your implementation there.
         </Fragment>
       ) : (
         <Fragment>
@@ -66,8 +66,20 @@ const guideBody = introMatch ? content.body.slice(introMatch[0].length) : conten
           in your editor and implement the functions marked with <code>NotImplementedError</code>.
         </Fragment>
       )}{' '}
-      Run <code>{layout.checkerFile}</code> from the extracted top folder after each of the{' '}
-      {project.stages.length} stages.
+      Follow each stage's edit file and exact verifier command from the extracted top folder.
+      {layout.additionalFiles.length > 0 && (
+        <Fragment>
+          {' '}
+          Later stages also use{' '}
+          {layout.additionalFiles.map((file, index) => (
+            <Fragment>
+              {index > 0 ? ', ' : ''}
+              <code>{file}</code>
+            </Fragment>
+          ))}
+          .
+        </Fragment>
+      )}
     </p>
   </aside>
   <GuideContents sections={content.sections} label="Project guide sections" title="In this guide" />

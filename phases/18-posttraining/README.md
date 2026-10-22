@@ -68,7 +68,7 @@ Complete stages 4–8 of training-methods. Retain shifted token-mask checks, fro
 
 ### Further work
 
-The PPO lab is a terminal synthetic preference bandit, not full language-model RLHF. Human preference collection, sequence PPO/value models, large-model PEFT and held-out human evaluation remain separate work. For the learned-reward PPO lesson, complete rl-01 through rl-04 first. Response-only SFT and dense LoRA do not require the RL phase.
+The PPO lesson uses a terminal synthetic preference bandit. Optional project stage 5 adds a separate synthetic sequence PPO exercise with a learned table critic and a declared deterministic continuation target at the collection boundary. Neither is full language-model RLHF. Saved Transformer lineage, real preference provenance, large-model PEFT, task quality, retention and held-out human evaluation remain separate work. Complete rl-01 through rl-04 before the learned-reward PPO lesson; rl-05 is useful optional preparation for project stage 5. Response-only SFT and dense LoRA do not require the RL phase.
 
 ## Lesson sequence
 
@@ -134,11 +134,11 @@ Status: authored lesson with CPU exercise.
 
 ## Phase project
 
-Audit response-token SFT masking and preference-pair loss.
+Audit SFT, DPO and sequence PPO.
 
 **Demonstrate:** Complete stages 4–8 of training-methods. Retain shifted token-mask checks, frozen-base/merge evidence, preference oracles, signed PPO clipping and fixed-reference DPO comparisons.
 
-Project status: implemented staged practice · [Open source](../../projects/posttraining-audit/README.md). Use stages 1, 2, 3, 4 for this phase. Work in projects/posttraining-audit/starter/model.py. Complete stages 1 and 2 for independent calculations and changed-condition diagnosis, then retain the stage 3 evidence with --evidence-dir runs/posttraining-audit. Stage 4 integrates the checks. Learner commands explicitly select the starter; --implementation solution is instructor reference execution. This bounded practice does not certify the entire phase or target hardware.
+Project status: implemented staged practice · [Open source](../../projects/posttraining-audit/README.md). Use stages 1, 2, 3, 4, 5 for this phase. Begin in projects/posttraining-audit/starter/model.py for the response-mask and preference-pair checks. Stages 1 and 2 compare independent calculations and changed conditions; stage 3 retains evidence, and stage 4 integrates those checks. Stage 5 uses starter/sequence_ppo.py to collect synthetic responses, fit a critic, distinguish EOS from truncation, freeze rollout snapshots across PPO epochs and retain token-level evidence. Each stage lists its own edit file and command. This local mechanics exercise does not qualify a Transformer, human preferences, the full capstone or target hardware.
 
 Additional project: [Audit pretraining and post-training objectives](../../projects/training-methods/README.md).
 

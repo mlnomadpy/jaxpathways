@@ -1,0 +1,2 @@
+PASS posttraining-audit stage 4: masked SFT, changed preference pairs, and saved slice evidence
+PASS posttraining-audit stage all: sequence PPO masks, GAE, clipping, frozen rollouts, reload and heldout evidence

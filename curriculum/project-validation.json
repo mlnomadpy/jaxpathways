@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "executedAt": "2026-10-21T21:34:41.369063+00:00",
-  "scope": "Registered public reference checkers only; not learner assessment or accelerator validation.",
+  "scope": "Source-bound registered project checker receipts. The posttraining-audit entry was rerun for this candidate; other entries retain their earlier execution evidence. This is not learner assessment, model quality, target hardware or human teaching qualification.",
   "projects": [
     {
       "projectId": "regression-audit",
@@ -173,10 +173,12 @@
     },
     {
       "projectId": "posttraining-audit",
-      "sourceHash": "d364b0a354c4c55b43269d6880b283b0e6013e2f340021f495da9685657d7d00",
-      "command": "python3 projects/posttraining-audit/tests/check.py --implementation solution --stage 4",
-      "stdout": "PASS posttraining-audit stage 4: masked SFT, changed preference pairs, and saved slice evidence\n",
-      "status": "passed"
+      "sourceHash": "81241dd77091be0b274675ef46e417ecd7176179d4948188d268f119b20b33de",
+      "command": "python3 projects/posttraining-audit/tests/check_sequence_ppo.py --implementation solution --stage all",
+      "stdout": "PASS posttraining-audit stage 4: masked SFT, changed preference pairs, and saved slice evidence\nPASS posttraining-audit stage all: sequence PPO masks, GAE, clipping, frozen rollouts, reload and heldout evidence\n",
+      "status": "passed",
+      "executedAt": "2026-10-22T00:57:31.644681+00:00",
+      "evidence": "docs/evidence/sequence-ppo-2026-10-22/root-clean-final3.json"
     },
     {
       "projectId": "tpu-runtime-audit",

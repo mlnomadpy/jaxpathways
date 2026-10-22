@@ -10,7 +10,7 @@ The book is a substantial collection of bounded, runnable practice drafts. It is
 
 104 current CPU lesson references; 29 source-matching public project receipts; 4 bounded physical target qualifications. 0 independent expert reviews and 0 novice pilots are recorded.
 
-The inventory covers 203 material entries, 409 lesson exercises/checkpoints and 130 project stages. Section counts describe coverage, not quality scores. Duration estimates have not been calibrated with learners.
+The inventory covers 203 material entries, 409 lesson exercises/checkpoints and 131 project stages. Section counts describe coverage, not quality scores. Duration estimates have not been calibrated with learners.
 
 10 full model-lifecycle capstones remain planned; 3 of 3 separately scoped optional pilots have source-matching public evidence packets.
 
@@ -144,7 +144,7 @@ Evidence: [src/pages/projects.astro](../src/pages/projects.astro), [src/pages/bo
 | [transforms-audit: Compare scalar, vmap, autodiff, and changed-shape JIT behavior](https://www.tahabouhsine.com/jaxpathways/project-guides/transforms-audit.html) | available-draft | CPU reference checker passed for current sources. Differentiation, batching and tracing invariants. | Add composed transformations with a deliberately incorrect derivative boundary. |
 | [recovery-audit: Resume a complete training stream across a process failure](https://www.tahabouhsine.com/jaxpathways/project-guides/recovery-audit.html) | in-development | Reference check pending for this source. Local checkpoint contract and independent continuation checks. | Inject incomplete writes, stale manifests and incompatible input state in separate processes. |
 | [performance-audit: Measure CPU JIT latency and changed-shape traces with retained JAXPR evidence](https://www.tahabouhsine.com/jaxpathways/project-guides/performance-audit.html) | available-draft | CPU reference checker passed for current sources. Compilation/timing distinctions and retained evidence. | Add a target-backed workload and a reviewed trace, not a generic timing improvement claim. |
-| [posttraining-audit: Audit response-token SFT masking and preference-pair loss](https://www.tahabouhsine.com/jaxpathways/project-guides/posttraining-audit.html) | available-draft | CPU reference checker passed for current sources. Bounded adaptation and preference-contract checks. | Transfer the contracts to a saved Transformer and document retained behavior. |
+| [posttraining-audit: Audit SFT, DPO and sequence PPO](https://www.tahabouhsine.com/jaxpathways/project-guides/posttraining-audit.html) | available-draft | CPU reference checker passed for current sources. Bounded adaptation and preference-contract checks. | Transfer the contracts to a saved Transformer and document retained behavior. |
 | [tpu-runtime-audit: Inspect CPU device inventory, BF16 storage, and collective participant arithmetic](https://www.tahabouhsine.com/jaxpathways/project-guides/tpu-runtime-audit.html) | available-draft | CPU reference checker passed for current sources. CPU-verifiable runtime and participation evidence contracts. | Observe a learner-owned TPU receipt on a declared topology and keep the exact numerical reference. |
 | [tpu-workflow-audit: Gate simulated multi-worker checkpoint publication on complete receipts](https://www.tahabouhsine.com/jaxpathways/project-guides/tpu-workflow-audit.html) | available-draft | CPU reference checker passed for current sources. Launch, checkpoint and recovery evidence contracts. | Add a fresh-process multi-host restart and failure-injection qualification. |
 | [tpu-systems-audit: Estimate optimizer-state bytes and calculate supplied-rate scaling efficiency](https://www.tahabouhsine.com/jaxpathways/project-guides/tpu-systems-audit.html) | available-draft | CPU reference checker passed for current sources. Precision/memory/profiling contracts with bounded assumptions. | Attach actual native low-bit execution and an interpreted target trace. |
@@ -865,6 +865,7 @@ These are public practice tasks, not independently administered exams. A referen
 | `posttraining-audit:stage-2` | Changed condition and diagnosis | available-draft | Public reference stage checked; no independent learner assessment |
 | `posttraining-audit:stage-3` | Retained evidence | available-draft | Public reference stage checked; no independent learner assessment |
 | `posttraining-audit:stage-4` | Integrated project check | available-draft | Public reference stage checked; no independent learner assessment |
+| `posttraining-audit:stage-5` | Synthetic sequence PPO with frozen rollouts | available-draft | Public reference stage checked; no independent learner assessment |
 | `tpu-runtime-audit:stage-1` | Contract and independent calculation | available-draft | Public reference stage checked; no independent learner assessment |
 | `tpu-runtime-audit:stage-2` | Changed condition and diagnosis | available-draft | Public reference stage checked; no independent learner assessment |
 | `tpu-runtime-audit:stage-3` | Retained evidence | available-draft | Public reference stage checked; no independent learner assessment |

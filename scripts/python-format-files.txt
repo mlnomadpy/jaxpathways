@@ -47,3 +47,7 @@ projects/text-harness/foundations/starter.py
 projects/text-harness/foundations/tests/check_foundations.py
 projects/text-harness/foundations/train.py
 phases/21-tpu-systems/02-bfloat16-int8-precision-and-xprof-profiling/labs/precision_contract_probe.py
+projects/posttraining-audit/starter/sequence_ppo.py
+projects/posttraining-audit/solution/sequence_ppo.py
+projects/posttraining-audit/tests/check_sequence_ppo.py
+projects/posttraining-audit/figures/render_gae.py

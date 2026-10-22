@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "scope": "Tiny synthetic CPU sequence-PPO mechanics; not human preference data or a language-model alignment result.",
+  "tokens": {
+    "pad": 0,
+    "bos": 1,
+    "promptA": 2,
+    "promptB": 3,
+    "responseA": 4,
+    "responseB": 5,
+    "responseC": 6,
+    "eos": 7,
+    "vocabularySize": 8
+  },
+  "promptInstances": [
+    { "id": 0, "split": "train", "task": 0, "tokens": [2, 3] },
+    { "id": 1, "split": "train", "task": 1, "tokens": [3, 2] },
+    { "id": 2, "split": "heldout", "task": 0, "tokens": [2, 2] },
+    { "id": 3, "split": "heldout", "task": 1, "tokens": [3, 3] }
+  ],
+  "preferencePairs": [
+    {
+      "promptId": 0,
+      "chosen": [4, 6, 7],
+      "rejected": [5, 6, 7]
+    },
+    {
+      "promptId": 1,
+      "chosen": [6, 7],
+      "rejected": [4, 7]
+    }
+  ],
+  "rewardFit": {
+    "objective": "mean softplus(-chosen_minus_rejected_reward_margin) plus 0.01 times mean squared reward weight",
+    "updates": 120,
+    "learningRate": 0.25,
+    "seed": 44
+  },
+  "rollout": {
+    "trainingPromptIds": [0, 1, 0, 1, 0, 1, 0, 1],
+    "heldoutPromptIds": [2, 3, 2, 3, 2, 3, 2, 3],
+    "maxResponseTokens": 4,
+    "minimumResponseTokens": 2,
+    "seed": 20261021,
+    "updates": 16,
+    "innerEpochs": 3,
+    "batchSize": 8,
+    "learningRate": 0.03,
+    "gamma": 0.9,
+    "gaeLambda": 0.8,
+    "policyClip": 0.2,
+    "valueClip": 0.2,
+    "klCoefficient": 0.03,
+    "heldoutRewardMustExceedReference": true,
+    "maximumHeldoutExactKlPerToken": 0.35
+  },
+  "rewardSemantics": {
+    "model": "fitted linear prompt-task by token-count reward model",
+    "sequenceRewardPlacement": "The frozen fitted reward score for the observed response is placed only on its final valid action. For an EOS response it is placed on EOS; for max-token truncation it scores the observed partial response on the final generated token.",
+    "klShaping": "Each valid action receives -klCoefficient * (frozen old-policy selected log probability - frozen reference selected log probability). This sampled rollout-shaping estimate is reported separately from the exact categorical KL at sampled visited contexts; the latter is not full sequence-distribution KL.",
+    "padding": "Padding has zero reward, value target, advantage, policy loss and critic loss.",
+    "timeoutContinuation": "For the critic bootstrap only, a max-token timeout has one declared deterministic synthetic continuation action: task 0 continues with responseA and task 1 continues with responseC, then ends. The post-timeout critic row is fitted to the frozen reward-model score of that continuation token for every response-token context. This tiny continuation contract makes the timeout bootstrap nonzero and testable; it is not sampled language generation."
+  }
+}

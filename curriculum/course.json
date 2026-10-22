@@ -3776,7 +3776,7 @@
         "pretraining"
       ],
       "hardware": "Executed CPU synthetic objectives; large-scale and human-feedback evaluation remain separate",
-      "project": "Audit response-token SFT masking and preference-pair loss",
+      "project": "Audit SFT, DPO and sequence PPO",
       "checkpoint": "Complete stages 4–8 of training-methods. Retain shifted token-mask checks, frozen-base/merge evidence, preference oracles, signed PPO clipping and fixed-reference DPO comparisons.",
       "source": "https://docs.jax.dev/en/latest/",
       "lessons": [
@@ -3926,7 +3926,8 @@
         "1",
         "2",
         "3",
-        "4"
+        "4",
+        "5"
       ],
       "studyGuide": {
         "question": "Which parameters and signals change during adaptation?",
@@ -3982,9 +3983,9 @@
           "check": "Check whether old log probabilities are incorrectly recomputed from the changing policy."
         },
         "completion": "Complete stages 4–8 of training-methods. Retain shifted token-mask checks, frozen-base/merge evidence, preference oracles, signed PPO clipping and fixed-reference DPO comparisons. Add the new lesson evidence: ragged likelihood oracle, rank-capacity counterexample, conflicting preferences, exact bandit optimum and a DPO ratio improvement with lower chosen probability. State which model integrations remain absent.",
-        "furtherWork": "The PPO lab is a terminal synthetic preference bandit, not full language-model RLHF. Human preference collection, sequence PPO/value models, large-model PEFT and held-out human evaluation remain separate work. For the learned-reward PPO lesson, complete rl-01 through rl-04 first. Response-only SFT and dense LoRA do not require the RL phase."
+        "furtherWork": "The PPO lesson uses a terminal synthetic preference bandit. Optional project stage 5 adds a separate synthetic sequence PPO exercise with a learned table critic and a declared deterministic continuation target at the collection boundary. Neither is full language-model RLHF. Saved Transformer lineage, real preference provenance, large-model PEFT, task quality, retention and held-out human evaluation remain separate work. Complete rl-01 through rl-04 before the learned-reward PPO lesson; rl-05 is useful optional preparation for project stage 5. Response-only SFT and dense LoRA do not require the RL phase."
       },
-      "projectNote": "Work in projects/posttraining-audit/starter/model.py. Complete stages 1 and 2 for independent calculations and changed-condition diagnosis, then retain the stage 3 evidence with --evidence-dir runs/posttraining-audit. Stage 4 integrates the checks. Learner commands explicitly select the starter; --implementation solution is instructor reference execution. This bounded practice does not certify the entire phase or target hardware.",
+      "projectNote": "Begin in projects/posttraining-audit/starter/model.py for the response-mask and preference-pair checks. Stages 1 and 2 compare independent calculations and changed conditions; stage 3 retains evidence, and stage 4 integrates those checks. Stage 5 uses starter/sequence_ppo.py to collect synthetic responses, fit a critic, distinguish EOS from truncation, freeze rollout snapshots across PPO epochs and retain token-level evidence. Each stage lists its own edit file and command. This local mechanics exercise does not qualify a Transformer, human preferences, the full capstone or target hardware.",
       "additionalProjectIds": [
         "training-methods"
       ]
@@ -4036,7 +4037,7 @@
           "prerequisites": [
             "tpu-01"
           ],
-      "exercise": "Compute closed_form_sum_of_squares(4) and closed_form_sum_of_squares(8), verify that the results are 10416.0 and 85344.0, and assert receipt['verified'] is True.",
+          "exercise": "Compute closed_form_sum_of_squares(4) and closed_form_sum_of_squares(8), verify that the results are 10416.0 and 85344.0, and assert receipt['verified'] is True.",
           "evidence": "Keep the JSON runtime receipt fields (backend, local_device_count, per_device_sums, observed_total, expected_total, verified, receipt_sha256). Label the 1-, 4-, and 8-device closed-form values as calculated expectations; only the receipt's local-device result is observed execution.",
           "check": "Why does build_runtime_receipt() synchronize the pmap reduction and compare observed_total with closed_form_sum_of_squares(local_device_count, 8)?",
           "path": "phases/19-tpu/02-bootstrap-venv-and-verify-tpu-runtime-receipt",
