@@ -1,0 +1,112 @@
+{
+  "artifacts": {
+    "allWorkerListedOutputFileHashesVerified": true,
+    "logPath": "/private/tmp/transformer-lineage-campaign-v5.log",
+    "logSha256": "1c0ce54ba1fcd3c8572a8cfd4928e2e05439405de284e9c1d888471e1cdb1d5c",
+    "rawEvidencePath": "/private/tmp/transformer-lineage-campaign-v5/lineage-evidence.json",
+    "rawEvidenceSha256": "966fe2d13eb22508e21080f7e8fa007dc51d04e197ba01e00d575ec13187f10e",
+    "resumeResultSha256": "69574ada29a8f67d48e348b80ce1380be4c7d10eadb9da2aeef7f7bf7a5f1c4d",
+    "workerReceiptPath": "/private/tmp/transformer-lineage-campaign-v5-result-receipt.json",
+    "workerReceiptSha256": "6a45955dac4e08c173fec3475c3af977c40f88142461c7ce76dcc53f4ad74a3d"
+  },
+  "authority": {
+    "approvalPath": "/private/tmp/sol-transformer-lineage-run-approval-v5.json",
+    "approvalSha256": "a47bc625a1a372273f20ddace82d0c3b3ce0d4d5f1336cb448614ace9662eaf9",
+    "boundSourceFiles": 15,
+    "candidateSha256": "df56c036a57e8ad1c7be61341290422e7dfa47ea3326b3c82e5cecad5806b569",
+    "checkerSha256": "12f6709ef0683067ee10d871891bb4d67736c6d5039d5a2809d2dfa92115a0e3",
+    "fixtureSha256": "6a47dbe54012ed3013753ca8089fbcd51e57b3d0cbd61ffdb50a6877e0a534ff",
+    "recipeSha256": "8411afc4412c59973d56b2cceae530dd642a5aa1c9e6f57a5dbb7f6ba110bc57"
+  },
+  "checkpointAndLifecycle": {
+    "finalActorTreeDiffersFromParent": true,
+    "fittedRewardTreeSha256": "16032ed9d6610fc4c85bc005a5eba35e30f370ca20b674faf6b49464bd7e26c2",
+    "initialActorEqualsPinnedParent": true,
+    "initialClockCursor": 0,
+    "oneFittedRewardHeadColdLoadedByBothLanes": true,
+    "primaryAndFreshProcessReplayFinalJsonNpzByteEqual": true,
+    "primaryAndReplaySplitJsonNpzByteEqual": true,
+    "rawPrimaryAndReplayUpdateRecordsExactlyEqual": true,
+    "rewardFitSteps": 120
+  },
+  "decision": {
+    "failedFloor": "heldout mean child reward > matched parent mean",
+    "mechanicsAndReplayAccepted": true,
+    "noRetuneRetryResumeOrPromotionAuthorized": true,
+    "publicationScope": "numeric-only bounded synthetic teaching evidence; no child checkpoint, raw source corpus, or full-vocabulary/RLHF claim",
+    "qualityGatePassed": false,
+    "recordedStatus": "QUALITY_GATE_FAILED"
+  },
+  "exposure": {
+    "cumulativeOuterUpdateExecutions": 24,
+    "cumulativeRewardOptimizerSteps": 240,
+    "v1DurableCheckpointUpdateClock": 4,
+    "v1Evaluation": "one development child rollout in memory; baseline then failed; no matched pair/heldout/quality result",
+    "v1InProcessOuterUpdates": 8,
+    "v5PrimaryOuterUpdates": 8,
+    "v5ReplayOuterUpdates": 8,
+    "v5RewardOptimizerSteps": 120
+  },
+  "independentReconstruction": {
+    "actorTreeChanged": true,
+    "evaluation": {
+      "dev": {
+        "childMeanReward": 0.025779224932193756,
+        "exactConditionalKlPerAction": 0.00018276125473644714,
+        "matchedEpisodePairs": 8,
+        "pairwiseAccuracy": 0.0,
+        "pairwiseMargins": [
+          -0.06480157375335693,
+          -0.08249294757843018
+        ],
+        "parentMeanReward": 0.025779224932193756,
+        "sameActionSequences": 8,
+        "sampledKlPerAction": -0.005805212875892376,
+        "validActions": 29
+      },
+      "heldout": {
+        "childMeanReward": -0.009211033582687378,
+        "exactConditionalKlPerAction": 0.00012319699604192684,
+        "matchedEpisodePairs": 8,
+        "pairwiseAccuracy": 1.0,
+        "pairwiseMargins": [
+          0.0923154354095459,
+          0.029475927352905273
+        ],
+        "parentMeanReward": -0.009211033582687378,
+        "sameActionSequences": 8,
+        "sampledKlPerAction": -0.002672750374366497,
+        "validActions": 29
+      }
+    },
+    "maxNumericError": {
+      "conditional_kl": 5.8566906794774165e-08,
+      "critic": 2.1604147355629155e-10,
+      "gae": 1.5145134944771765e-08,
+      "old_selected": 6.244196915083933e-08,
+      "parent_selected": 5.818100268228932e-08,
+      "policy": 9.66193199752885e-09,
+      "shaping": 2.682209010451686e-09,
+      "value": 1.7007780100941616e-08
+    },
+    "primaryAndReplayRawUpdatesExactlyEqual": true,
+    "qualityFailReason": "heldout reward equality violates strict improvement",
+    "qualityPassed": false,
+    "rewardHeadSha256": "16032ed9d6610fc4c85bc005a5eba35e30f370ca20b674faf6b49464bd7e26c2",
+    "trainingCounts": {
+      "changed_epoch_logps": 8,
+      "eos": 13,
+      "padding": 7,
+      "timeout": 11,
+      "valid": 89
+    }
+  },
+  "kind": "sol-transformer-lineage-v5-independent-postrun-review",
+  "limitations": [
+    "Eight matched child and parent action sequences are identical on each evaluation split despite changed actor tree and nonzero conditional KL; sampled decisions did not improve fitted reward in this fixture.",
+    "Heldout pairwise accuracy 1.0 covers two synthetic diagnostic pairs and does not substitute for strict reward improvement; dev pairwise accuracy is 0.0.",
+    "Reported exact categorical KL is over four eligible actions at sampled visited contexts, not full-vocabulary or full-sequence distribution KL.",
+    "No human-preference, real corpus, saved-parent optimizer continuity, target-scale, or deployed-model qualification."
+  ],
+  "reviewScope": "exact local CPU synthetic v5 campaign; no optimizer run during independent review"
+}

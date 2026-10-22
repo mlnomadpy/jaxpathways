@@ -1,0 +1,12 @@
+{
+  "finalChangedLeafCount": 28,
+  "finalLeavesFinite": true,
+  "finalStateNpzSha256": "6b52bed1faa55f1b4fb782ce465db31445fbd7f16cf62bcc4336bf58d3061306",
+  "finalVsParentMaxAbs": 0.001513466238975525,
+  "initialStateNpzSha256": "ea7306890c5b8cc48efaa4660925de3b4768b5f8d5fea6e7d7d7617a672f2ae7",
+  "initialVsParentMaxAbs": 0.0,
+  "kind": "sol-transformer-lineage-v5-actor-tree-independent-leaf-comparison",
+  "leafCount": 28,
+  "noOptimizerRunDuringReview": true,
+  "parentPackageSha256": "271cb6457de5da3f727c343c64b7bd350c00e503ea7ac847eecf51fbd5558802"
+}

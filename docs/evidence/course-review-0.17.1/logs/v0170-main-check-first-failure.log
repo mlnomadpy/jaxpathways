@@ -1,0 +1,71 @@
+
+> jaxpathways@0.17.0 check
+> npm run content:build && npm run check:astro && npm run check:types && npm run lint && npm run format:check && node scripts/validate-curriculum.mjs && npm run build && npm test && npm run check:epub-identity && python3 scripts/check-distribution.py && npm run check:site
+
+
+> jaxpathways@0.17.0 content:build
+> node scripts/render-curriculum.mjs && python3 scripts/audit-learning-material.py && python3 scripts/build-distribution.py && python3 scripts/build-assessments.py && python3 scripts/build-project-workspace.py && python3 scripts/build-tpu-workspace.py && python3 scripts/build-experiment-workshop.py
+
+{
+  "byKind": {
+    "lessons": 104,
+    "phases": 22,
+    "projects": 31,
+    "plans": 10,
+    "assessments": 11,
+    "pathways": 10,
+    "careers": 7,
+    "tracks": 4,
+    "guides": 3,
+    "book": 1
+  },
+  "phaseLevels": {
+    "available-draft": 9,
+    "in-development": 13
+  },
+  "itemLevels": {
+    "available-draft": 162,
+    "in-development": 31,
+    "planned": 10
+  },
+  "tasks": 540,
+  "lessonTasks": 409,
+  "projectStages": 131,
+  "currentCpuLessons": 104,
+  "currentProjectReferences": 28,
+  "expertReviewedLessons": 0,
+  "novicePilotedLessons": 0,
+  "choiceSpecificFeedbackLessons": 104,
+  "boundedHardwareQualifications": 4,
+  "fullCapstonesPlanned": 10,
+  "optionalPilots": 3,
+  "verifiedOptionalPilots": 3
+}
+Built offline HTML/EPUB (104 lessons), staged project, and tutor bundles.
+Built course workspace with canonical lessons, projects and tutor skills.
+Exported 11 synthesis assessment drafts for Astro and download.
+Built project workflow guide and portable CLI practice workspace.
+Built TPU/GCP guides, precision figures and practice bundle; no cloud resources created.
+Verified workshop: six recorded CPU runs, frozen source/config/data, metrics, artifacts and figure provenance; optional adapters checked separately.
+
+> jaxpathways@0.17.0 check:astro
+> astro check
+
+05:49:48 [types] Generated 33ms
+05:49:48 [check] Getting diagnostics for Astro files in /private/tmp/jaxpathways-transformer-bridge-review...
+[96msrc/pages/downloads/jax-foundations.astro[0m:[93m269[0m:[93m13[0m - [91merror[0m[90m ts(2345): [0mArgument of type 'URL' is not assignable to parameter of type 'string'.
+
+[7m269[0m             new URL(
+[7m   [0m [91m            ~~~~~~~~[0m
+[7m270[0m               '../../../projects/posttraining-audit/transformer_lineage/TEACHING.md',
+[7m   [0m [91m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[7m271[0m               import.meta.url,
+[7m   [0m [91m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[7m272[0m             ),
+[7m   [0m [91m~~~~~~~~~~~~~[0m
+
+Result (148 files): 
+- 1 error
+- 0 warnings
+- 0 hints
+

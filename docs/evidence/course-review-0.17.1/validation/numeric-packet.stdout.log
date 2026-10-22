@@ -1,0 +1,69 @@
+{
+  "asRunByteIdenticalShippingFiles": 14,
+  "asRunFilesHistoricallyBound": 15,
+  "boundaryProbeChecks": [
+    "eos",
+    "timeout"
+  ],
+  "changedShippingFile": "projects/posttraining-audit/transformer_lineage/starter.py",
+  "evaluation": {
+    "dev": {
+      "meanChildReward": 0.025779224932193756,
+      "meanConditionalKlPerAction": 0.00018276125473644714,
+      "meanParentReward": 0.025779224932193756,
+      "pairwiseAccuracy": 0.0,
+      "sameActionSequenceCount": 8,
+      "validActionDenominator": 29
+    },
+    "heldout": {
+      "meanChildReward": -0.009211033582687378,
+      "meanConditionalKlPerAction": 0.00012319699604192684,
+      "meanParentReward": -0.009211033582687378,
+      "pairwiseAccuracy": 1.0,
+      "sameActionSequenceCount": 8,
+      "validActionDenominator": 29
+    }
+  },
+  "payloads": {
+    "boundary-probes.json": {
+      "bytes": 3231,
+      "sha256": "0521d449442b1a29a70df5a3b37af869dd9b3a98640afd84d46ec5089d5a0e34"
+    },
+    "build_numeric_packet.py": {
+      "bytes": 28442,
+      "sha256": "9d1fa77b365268689c6604fb4fd28a235603cfd7c8e7f9301655afcf4b6889fb"
+    },
+    "check_numeric_packet.py": {
+      "bytes": 32029,
+      "sha256": "6751075e6512b44576362bfb5c1d8e111a260f8c9bcbe560a648bd2931a0d466"
+    },
+    "evaluation.json": {
+      "bytes": 12636,
+      "sha256": "adedff08747a25ffcd0535b51466d68cfc66c4b1d911a755d1d0a245182cecea"
+    },
+    "figure.svg": {
+      "bytes": 5393,
+      "sha256": "cadb82d712650be2483285e654e5132f91ab84b4b7d502be184f980adceb964f"
+    },
+    "training-trace.csv": {
+      "bytes": 2053,
+      "sha256": "a6076e135cc070b0ae2b848c1a433a2bac2a2f57a795a1a28d97c88e5b63a451"
+    }
+  },
+  "qualityStatus": "QUALITY_GATE_FAILED",
+  "shippingFilesVerified": 15,
+  "status": "passed",
+  "tamperControlsRejected": [
+    "prompt-schedule-mutation",
+    "early-eos-action-grammar",
+    "payload-byte-tamper",
+    "rehash-metric-tamper",
+    "balanced-rehashed-episode-mutation",
+    "terminal-trace-reset-mutant",
+    "forbidden-logit-payload",
+    "misleading-quality-pass",
+    "source-inventory-tamper",
+    "extra-payload"
+  ],
+  "trainingUpdates": 8
+}

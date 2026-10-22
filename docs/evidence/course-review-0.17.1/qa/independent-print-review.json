@@ -1,0 +1,36 @@
+{
+  "status": "accepted-bounded-chromium-print",
+  "recordedAt": "2026-10-22T14:02:27.219992+00:00",
+  "scope": "0.17.1 full unpruned 104-lesson Chromium A4 and Letter PDF source/layout only; not native EPUB, assistive-technology speech, or human review of every page",
+  "implementationCommit": "e2bf42de26dfe8c3da00af7a07bcc3ce3bd4df78",
+  "frozenManifestSha256": "294092b6cdae1f1eca63ca992433ca77794ce7a9f05848ae9a427162cd18f593",
+  "frozenHtmlSha256": "2d216ce34b83e208a9dc1b0f14d63e1e0f7f539048d242ed04fe968123c584bc",
+  "printReceiptSha256": "95b687f7b5e8830f3e274de2ef2aee26ab0b796d03b373f75f98ea597e74a330",
+  "geometryReceiptSha256": "b29c9a6b3e223d2652cdcadc3f5d77b72063e51763b783af3bee2834546ded3a",
+  "visualSamples": [
+    "A4 1269-1272",
+    "Letter 1392-1396"
+  ],
+  "checks": {
+    "A4": {
+      "pdfSha256": "72924b2f84b064218dcefea18c383e796437c2f10ad6b0725189ae161cc38700",
+      "pages": 1272,
+      "allPageGeometry": "zero out-of-media glyphs and zero empty-text pages",
+      "allFoliosVerified": true,
+      "powerShellCompletePage": 1271,
+      "figureGroupedPage": 1272,
+      "posixCompletePage": 1271
+    },
+    "Letter": {
+      "pdfSha256": "94d27d266b2340e77cb6994d9e7a079eb26ed0badf9a29f4f2eee3f0a5c75c5c",
+      "pages": 1396,
+      "allPageGeometry": "zero out-of-media glyphs and zero empty-text pages",
+      "allFoliosVerified": true,
+      "powerShellCompletePage": 1395,
+      "figureGroupedPage": 1396,
+      "posixCompletePage": 1394
+    }
+  },
+  "historicalRejectedR1": "Letter PowerShell split retained in /private/tmp/sol-print-0171-appendix-visual-review.json",
+  "frozenSourceMatched": true
+}

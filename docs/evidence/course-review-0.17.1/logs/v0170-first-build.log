@@ -1,0 +1,109 @@
+
+> jaxpathways@0.17.0 build
+> npm run release:check && npm run content:build && astro build
+
+
+> jaxpathways@0.17.0 release:check
+> node scripts/release.mjs
+
+Release 0.17.0: 104 lessons and 22 phases match the recorded source snapshot.
+
+> jaxpathways@0.17.0 content:build
+> node scripts/render-curriculum.mjs && python3 scripts/audit-learning-material.py && python3 scripts/build-distribution.py && python3 scripts/build-assessments.py && python3 scripts/build-project-workspace.py && python3 scripts/build-tpu-workspace.py && python3 scripts/build-experiment-workshop.py
+
+{
+  "byKind": {
+    "lessons": 104,
+    "phases": 22,
+    "projects": 31,
+    "plans": 10,
+    "assessments": 11,
+    "pathways": 10,
+    "careers": 7,
+    "tracks": 4,
+    "guides": 3,
+    "book": 1
+  },
+  "phaseLevels": {
+    "available-draft": 9,
+    "in-development": 13
+  },
+  "itemLevels": {
+    "available-draft": 162,
+    "in-development": 31,
+    "planned": 10
+  },
+  "tasks": 540,
+  "lessonTasks": 409,
+  "projectStages": 131,
+  "currentCpuLessons": 104,
+  "currentProjectReferences": 28,
+  "expertReviewedLessons": 0,
+  "novicePilotedLessons": 0,
+  "choiceSpecificFeedbackLessons": 104,
+  "boundedHardwareQualifications": 4,
+  "fullCapstonesPlanned": 10,
+  "optionalPilots": 3,
+  "verifiedOptionalPilots": 3
+}
+Built offline HTML/EPUB (104 lessons), staged project, and tutor bundles.
+Built course workspace with canonical lessons, projects and tutor skills.
+Exported 11 synthesis assessment drafts for Astro and download.
+Built project workflow guide and portable CLI practice workspace.
+Built TPU/GCP guides, precision figures and practice bundle; no cloud resources created.
+Verified workshop: six recorded CPU runs, frozen source/config/data, metrics, artifacts and figure provenance; optional adapters checked separately.
+05:43:09 [vite] Re-optimizing dependencies because vite config has changed
+05:43:09 [types] Generated 149ms
+05:43:09 [build] output: "static"
+05:43:09 [build] mode: "static"
+05:43:09 [build] directory: /private/tmp/jaxpathways-transformer-bridge-review/dist/
+05:43:09 [build] Collecting build info...
+05:43:09 [build] ✓ Completed in 188ms.
+05:43:09 [build] Building static entrypoints...
+05:43:10 [vite] ✓ built in 392ms
+05:43:11 [vite] ✓ built in 1.05s
+05:43:11 [build] Rearranging server assets...
+
+ generating static routes 
+05:43:11   ├─ /assessments/foundations.html (+30ms) 
+05:43:11   ├─ /assessments/models.html (+8ms) 
+05:43:11   ├─ /assessments/math.html (+6ms) 
+05:43:11   ├─ /assessments/science.html (+8ms) 
+05:43:11   ├─ /assessments/rl.html (+4ms) 
+05:43:11   ├─ /assessments/probability.html (+5ms) 
+05:43:11   ├─ /assessments/internals.html (+6ms) 
+05:43:11   ├─ /assessments/ship.html (+3ms) 
+05:43:11   ├─ /assessments/ops.html (+4ms) 
+05:43:11   ├─ /assessments/scale.html (+3ms) 
+05:43:11   ├─ /assessments/tpu.html (+2ms) 
+05:43:11   ├─ /book.html (+2ms) 
+05:43:11   ├─ /career-guides/training-engineer.html (+2ms) 
+05:43:11   ├─ /career-guides/research-engineer.html (+1ms) 
+05:43:11   ├─ /career-guides/scientific-ml.html (+1ms) 
+05:43:11   ├─ /career-guides/rl-engineer.html (+1ms) 
+05:43:11   ├─ /career-guides/performance-engineer.html (+1ms) 
+05:43:11   ├─ /career-guides/inference-engineer.html (+1ms) 
+05:43:11   ├─ /career-guides/operations-engineer.html (+1ms) 
+05:43:11   ├─ /careers.html (+2ms) 
+05:43:11   ├─ /content-status.html (+12ms) 
+05:43:11   ├─ /course.html (+9ms) 
+05:43:11   ├─ /developer.html (+3ms) 
+05:43:11   ├─ /downloads/jax-foundations.html05:43:11 [ERROR] TypeError [ERR_INVALID_ARG_TYPE]: The "path" argument must be of type string. Received an instance of URL
+    at Object.isAbsolute (node:path:1338:5)
+    at repositorySource (file:///private/tmp/jaxpathways-transformer-bridge-review/dist/.prerender/chunks/jax-foundations_DO76LbVJ.mjs:79:24)
+    at bookGuide (file:///private/tmp/jaxpathways-transformer-bridge-review/dist/.prerender/chunks/jax-foundations_DO76LbVJ.mjs:86:21)
+    at guideMarkup (file:///private/tmp/jaxpathways-transformer-bridge-review/dist/.prerender/chunks/jax-foundations_DO76LbVJ.mjs:134:47)
+    at default (file:///private/tmp/jaxpathways-transformer-bridge-review/dist/.prerender/chunks/jax-foundations_DO76LbVJ.mjs:144:1807)
+    at renderFragmentComponent (file:///private/tmp/jaxpathways-transformer-bridge-review/dist/.prerender/chunks/server_2DLrTcS_.mjs:2497:28)
+    at renderComponent (file:///private/tmp/jaxpathways-transformer-bridge-review/dist/.prerender/chunks/server_2DLrTcS_.mjs:2524:45)
+    at file:///private/tmp/jaxpathways-transformer-bridge-review/dist/.prerender/chunks/jax-foundations_DO76LbVJ.mjs:144:1698
+    at jax-foundations (file:///private/tmp/jaxpathways-transformer-bridge-review/dist/.prerender/chunks/seo_B1rp0a10.mjs:17:10)
+    at callComponentAsTemplateResultOrResponse (file:///private/tmp/jaxpathways-transformer-bridge-review/dist/.prerender/chunks/server_2DLrTcS_.mjs:2228:30)
+05:43:11 [ERROR] [build] Caught error rendering /downloads/jax-foundations: TypeError [ERR_INVALID_ARG_TYPE]: The "path" argument must be of type string. Received an instance of URL
+The "path" argument must be of type string. Received an instance of URL
+  Stack trace:
+    at Object.isAbsolute (node:path:1338:5)
+    at bookGuide (file:///private/tmp/jaxpathways-transformer-bridge-review/dist/.prerender/chunks/jax-foundations_DO76LbVJ.mjs:86:21)
+    at default (file:///private/tmp/jaxpathways-transformer-bridge-review/dist/.prerender/chunks/jax-foundations_DO76LbVJ.mjs:144:1807)
+    at renderComponent (file:///private/tmp/jaxpathways-transformer-bridge-review/dist/.prerender/chunks/server_2DLrTcS_.mjs:2524:45)
+    at jax-foundations (file:///private/tmp/jaxpathways-transformer-bridge-review/dist/.prerender/chunks/seo_B1rp0a10.mjs:17:10)

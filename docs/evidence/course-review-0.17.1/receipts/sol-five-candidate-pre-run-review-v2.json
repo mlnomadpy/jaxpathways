@@ -1,0 +1,46 @@
+{
+  "astProofSha256": "3028c683662437f79fc6bfb68871d0348f8cbb55d11553049ec9191b26d12e32",
+  "budget": {
+    "actorOptimizerSteps": 10,
+    "criticOptimizerSteps": 10,
+    "heldoutQualityScores": 0,
+    "outerUpdateExecutions": 5,
+    "rewardHeadOptimizerSteps": 20
+  },
+  "candidateIdsAndSha256": {
+    "alternate-spelling-positive": "5499d91e0ffd721472932f9d694dcf56dc4a5691aa014541c785ae5e826a235f",
+    "completed-six-positive": "02503c4b04cbf4a4bd026a2df830c7db9ad419bad89eaff1bc0328f52cc80849",
+    "unchanged-train-negative": "1b29533b39f4c01f0d3e04b362c423abfac39659c1365c92147e4f9b60b095db",
+    "wrong-actor-update-negative": "a3d28424ccbcb8bbc64a5d944878f51fe9f1fd96c38885269371e5a66bf4048a",
+    "wrong-reward-rate-negative": "4111af91275a1c0d15f6048fc9bfb582625cd777983019e7d14eea2649ad7c2f"
+  },
+  "cleanEnvironmentProofSha256": "d42c409e6f6b057dceb8cc776f6c78696af97f9d9eaf3c8f2065d8a117c88d30",
+  "kind": "sol-transformer-lineage-clean-zip-five-candidate-pre-run-review",
+  "limits": [
+    "Exactly five listed --stage learner-check invocations, each using its frozen candidate hash, command environment, mechanics approval and unique output.",
+    "No campaign --stage all/resume-child, heldout quality scoring, source/recipe change, retry, cloud or child-weight release.",
+    "Record actual optimizer exposure at each early rejection; do not infer every negative consumed full per-slot budget.",
+    "The prior first freeze is superseded, preserved for audit, and not authorized."
+  ],
+  "manifestFileSha256": "13864993bb881d4dc0f454c2f48d5517d4c22c7fbe5caabe4e7866085d836b74",
+  "manifestPath": "/private/tmp/transformer-lineage-v5-five-candidate-freeze-v2-20261022/candidate-freeze-manifest.json",
+  "manifestSelfHash": "cea95a3a225fb0a243d23bfdc871aaa5700179b149be95f5f0f08e467aa7f0e3",
+  "mechanicsApprovalSha256": "72ecd919095e2fcc4bc095afee6f27a74571ba61aa1a56ae7c9ca442399c3c48",
+  "optimizerExecutedUnderThisApproval": false,
+  "planSha256": "155e3cda31b066ca441d9844588e4960815c09a694ca8aab2766d47bf41f7cc7",
+  "preflightIndependentChecks": [
+    "manifest self-hash and file hash",
+    "all 40 ZIP members unique and byte-identical to extracted files",
+    "15 approved shipping source hashes",
+    "26-function module inventory; 20 helper ASTs equal repaired starter",
+    "completed-six module AST equals reference",
+    "alternate differs in genuine reverse-loop GAE and sign-branched PPO clipping only",
+    "three negatives have one target-function AST delta each",
+    "all five candidate SHA-256 values and unique fresh output paths",
+    "clean non-system-site venv exact four direct pins, CPU backend, pip check passes",
+    "alternate no-update semantic/evaluation smoke passed with optimizer_updates=0"
+  ],
+  "semanticAlternateProofSha256": "6b6f1f2e6a52a9ccb29c94eaf3d263c3e10a8af60abccbd7906b8550b641601d",
+  "status": "approved-exact-five-mechanics-invocations-only",
+  "zipSha256": "3de18328abfc8499f6c2c785aae39d075a48fe01325e9aa7feff31ed408fcb30"
+}
