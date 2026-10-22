@@ -1,0 +1,305 @@
+{
+  "candidate": "/Users/tahabsn/Documents/ChatGPT/jaxpathways/projects/sharded-training/multiprocess/solution/model.py",
+  "candidate_sha256": "a7a7c1aca9009d284c41014ea1c6d1f5b7a9b4b1b60991491f5073f1a46ea8a5",
+  "checkpoint_replay": {
+    "changed_config_negative": {
+      "current_sha256": "d5049d2e7eaa30cf49c62df432900d80a0ee855ba3faa5e9f126967629547813",
+      "expected_error": "approved experiment/config/data identity mismatch",
+      "filesystem_unchanged": true,
+      "kind": "changed_total_steps_rejected_before_jax_or_restore",
+      "rank_info_for_attempt": [],
+      "requested_total_steps": 5,
+      "returncode": 1,
+      "stdout_stderr": "Traceback (most recent call last):\n  File \"/Users/tahabsn/Documents/ChatGPT/jaxpathways/projects/sharded-training/multiprocess/worker.py\", line 339, in <module>\n    raise SystemExit(main())\n                     ~~~~^^\n  File \"/Users/tahabsn/Documents/ChatGPT/jaxpathways/projects/sharded-training/multiprocess/worker.py\", line 64, in main\n    raise ValueError(\"approved experiment/config/data identity mismatch\")\nValueError: approved experiment/config/data identity mismatch\n",
+      "transition_2_exists": false
+    },
+    "changed_rank_ownership_negative": {
+      "attempt_id": "dbefd6820b1346ac8aaca74f1df8e2f6",
+      "expected_error": "checkpoint is missing or reorders a rank shard",
+      "kind": "negative-changed-rank-ownership_rejected",
+      "logs": {
+        "0": "Traceback (most recent call last):\n  File \"/Users/tahabsn/Documents/ChatGPT/jaxpathways/projects/sharded-training/multiprocess/worker.py\", line 339, in <module>\n    raise SystemExit(main())\n                     ~~~~^^\n  File \"/Users/tahabsn/Documents/ChatGPT/jaxpathways/projects/sharded-training/multiprocess/worker.py\", line 313, in main\n    state = load_current()\n  File \"/Users/tahabsn/Documents/ChatGPT/jaxpathways/projects/sharded-training/multiprocess/worker.py\", line 169, in load_current\n    raise ValueError(\"checkpoint is missing or reorders a rank shard\")\nValueError: checkpoint is missing or reorders a rank shard\n",
+        "1": "Traceback (most recent call last):\n  File \"/Users/tahabsn/Documents/ChatGPT/jaxpathways/projects/sharded-training/multiprocess/worker.py\", line 339, in <module>\n    raise SystemExit(main())\n                     ~~~~^^\n  File \"/Users/tahabsn/Documents/ChatGPT/jaxpathways/projects/sharded-training/multiprocess/worker.py\", line 313, in main\n    state = load_current()\n  File \"/Users/tahabsn/Documents/ChatGPT/jaxpathways/projects/sharded-training/multiprocess/worker.py\", line 169, in load_current\n    raise ValueError(\"checkpoint is missing or reorders a rank shard\")\nValueError: checkpoint is missing or reorders a rank shard\n"
+      },
+      "processes": [
+        {
+          "pid": 76182,
+          "rank": 0,
+          "returncode": 1
+        },
+        {
+          "pid": 76183,
+          "rank": 1,
+          "returncode": 1
+        }
+      ]
+    },
+    "changed_world_negative": {
+      "attempt_id": "911f96e31253496997ef2b68ad2276c4",
+      "expected_error": "checkpoint world size identity mismatch",
+      "kind": "negative-changed-world_rejected",
+      "logs": {
+        "0": "Traceback (most recent call last):\n  File \"/Users/tahabsn/Documents/ChatGPT/jaxpathways/projects/sharded-training/multiprocess/worker.py\", line 339, in <module>\n    raise SystemExit(main())\n                     ~~~~^^\n  File \"/Users/tahabsn/Documents/ChatGPT/jaxpathways/projects/sharded-training/multiprocess/worker.py\", line 313, in main\n    state = load_current()\n  File \"/Users/tahabsn/Documents/ChatGPT/jaxpathways/projects/sharded-training/multiprocess/worker.py\", line 166, in load_current\n    raise ValueError(\"checkpoint world size identity mismatch\")\nValueError: checkpoint world size identity mismatch\n",
+        "1": "Traceback (most recent call last):\n  File \"/Users/tahabsn/Documents/ChatGPT/jaxpathways/projects/sharded-training/multiprocess/worker.py\", line 339, in <module>\n    raise SystemExit(main())\n                     ~~~~^^\n  File \"/Users/tahabsn/Documents/ChatGPT/jaxpathways/projects/sharded-training/multiprocess/worker.py\", line 313, in main\n    state = load_current()\n  File \"/Users/tahabsn/Documents/ChatGPT/jaxpathways/projects/sharded-training/multiprocess/worker.py\", line 166, in load_current\n    raise ValueError(\"checkpoint world size identity mismatch\")\nValueError: checkpoint world size identity mismatch\n"
+      },
+      "processes": [
+        {
+          "pid": 76047,
+          "rank": 0,
+          "returncode": 1
+        },
+        {
+          "pid": 76049,
+          "rank": 1,
+          "returncode": 1
+        }
+      ]
+    },
+    "fresh_restore": {
+      "boundary": {
+        "pid": 75931,
+        "step": 1
+      },
+      "next_ids": [
+        1,
+        4
+      ],
+      "next_state": {
+        "cursor": 5,
+        "epoch": 0,
+        "key": 17,
+        "momentum": [
+          -3.0085999965667725,
+          2.2204666137695312
+        ],
+        "step": 2,
+        "weights": [
+          0.28729668259620667,
+          -0.13322333991527557
+        ]
+      },
+      "processes": {
+        "attempt_id": "6df366326ed44af790eea1717c0f1967",
+        "processes": [
+          {
+            "pid": 76011,
+            "rank": 0,
+            "returncode": 0
+          },
+          {
+            "pid": 76012,
+            "rank": 1,
+            "returncode": 0
+          }
+        ],
+        "rank_info": [
+          {
+            "attempt_id": "6df366326ed44af790eea1717c0f1967",
+            "backend": "cpu",
+            "global_device_count": 2,
+            "global_devices": [
+              "TFRT_CPU_0",
+              "TFRT_CPU_2048"
+            ],
+            "jax": "0.9.2",
+            "jaxlib": "0.9.2",
+            "local_device_count": 1,
+            "local_devices": [
+              "TFRT_CPU_0"
+            ],
+            "pid": 76011,
+            "process_count": 2,
+            "process_index": 0
+          },
+          {
+            "attempt_id": "6df366326ed44af790eea1717c0f1967",
+            "backend": "cpu",
+            "global_device_count": 2,
+            "global_devices": [
+              "TFRT_CPU_0",
+              "TFRT_CPU_2048"
+            ],
+            "jax": "0.9.2",
+            "jaxlib": "0.9.2",
+            "local_device_count": 1,
+            "local_devices": [
+              "TFRT_CPU_2048"
+            ],
+            "pid": 76012,
+            "process_count": 2,
+            "process_index": 1
+          }
+        ]
+      },
+      "stop_results": [
+        {
+          "pid": 75931,
+          "rank": 0,
+          "returncode": -6
+        },
+        {
+          "pid": 75932,
+          "rank": 1,
+          "returncode": -9
+        }
+      ],
+      "termination": {
+        "pid": 75932,
+        "rank": 1,
+        "returncode": -9,
+        "signal": "SIGKILL"
+      },
+      "verified": {
+        "candidate_sha256": "a7a7c1aca9009d284c41014ea1c6d1f5b7a9b4b1b60991491f5073f1a46ea8a5",
+        "current_generation": "attempts/6df366326ed44af790eea1717c0f1967/gen-0004",
+        "final_step": 4,
+        "momentum": [
+          -3.1627399921417236,
+          1.697509765625
+        ],
+        "weights": [
+          0.6384541392326355,
+          -0.31735193729400635
+        ],
+        "world": 2
+      }
+    },
+    "missing_identity_negative": {
+      "current_sha256": "8e5662169ef3e4e646916807d33e743d818367bc8bedb12dcc55b58651e45be3",
+      "expected_error": "approved experiment identity is missing for existing checkpoint state",
+      "filesystem_unchanged": true,
+      "kind": "missing_identity_sidecar_rejected_before_startup",
+      "rank_info_files": [
+        "rank-info-f92458204b884f63b7417a21166d8d3e-0.json",
+        "rank-info-f92458204b884f63b7417a21166d8d3e-1.json"
+      ],
+      "sidecar_created": false,
+      "transition_files": [
+        "transition-1.json"
+      ]
+    },
+    "runtime": {
+      "implementation": "CPython",
+      "jax": "0.9.2",
+      "jaxlib": "0.9.2",
+      "numpy": "2.4.4",
+      "python": "3.14.3"
+    },
+    "schema": "l10b-checkpoint-replay-stage-v1",
+    "source_hashes": {
+      "check.py": "f9ffbef4d9f38de45c0bff63f25119aec6e1cbcc5beaca635118f79f8c7e72ad",
+      "solution/model.py": "a7a7c1aca9009d284c41014ea1c6d1f5b7a9b4b1b60991491f5073f1a46ea8a5",
+      "starter/model.py": "166311a5dd9f47b77e0fdbed1cc4e116c4d0a96932fede3c7463f6af4770272d",
+      "supervisor.py": "30c0e9724565089e9796b8be39e6c763a3f874ad3fd8c9b8c8de0a877d1db330",
+      "worker.py": "f9838429d447308e54588c82523de0370e0525d92c748367e2a6fdccb94bbb03"
+    },
+    "source_mutation_negative": {
+      "approved_worker_sha256": "f9838429d447308e54588c82523de0370e0525d92c748367e2a6fdccb94bbb03",
+      "changed_worker_sha256": "0ca3cd0f9a7f259d4baba3b374d868b31877a63a8b2df6c86fbf66b144208f25",
+      "expected_error": "approved executable source inventory mismatch",
+      "kind": "changed_worker_source_rejected_before_jax_or_restore",
+      "returncode": 1,
+      "stdout_stderr": "Traceback (most recent call last):\n  File \"/private/tmp/l10b-final-preflight-checkpoint-v2-20261021/source-mutation/multiprocess/worker.py\", line 339, in <module>\n    raise SystemExit(main())\n                     ~~~~^^\n  File \"/private/tmp/l10b-final-preflight-checkpoint-v2-20261021/source-mutation/multiprocess/worker.py\", line 73, in main\n    raise ValueError(\"approved executable source inventory mismatch\")\nValueError: approved executable source inventory mismatch\n"
+    },
+    "uninterrupted": {
+      "processes": {
+        "attempt_id": "355defabc8cd4c6aae8dbe31eaf90149",
+        "processes": [
+          {
+            "pid": 75924,
+            "rank": 0,
+            "returncode": 0
+          },
+          {
+            "pid": 75926,
+            "rank": 1,
+            "returncode": 0
+          }
+        ],
+        "rank_info": [
+          {
+            "attempt_id": "355defabc8cd4c6aae8dbe31eaf90149",
+            "backend": "cpu",
+            "global_device_count": 2,
+            "global_devices": [
+              "TFRT_CPU_0",
+              "TFRT_CPU_2048"
+            ],
+            "jax": "0.9.2",
+            "jaxlib": "0.9.2",
+            "local_device_count": 1,
+            "local_devices": [
+              "TFRT_CPU_0"
+            ],
+            "pid": 75924,
+            "process_count": 2,
+            "process_index": 0
+          },
+          {
+            "attempt_id": "355defabc8cd4c6aae8dbe31eaf90149",
+            "backend": "cpu",
+            "global_device_count": 2,
+            "global_devices": [
+              "TFRT_CPU_0",
+              "TFRT_CPU_2048"
+            ],
+            "jax": "0.9.2",
+            "jaxlib": "0.9.2",
+            "local_device_count": 1,
+            "local_devices": [
+              "TFRT_CPU_2048"
+            ],
+            "pid": 75926,
+            "process_count": 2,
+            "process_index": 1
+          }
+        ]
+      },
+      "verified": {
+        "candidate_sha256": "a7a7c1aca9009d284c41014ea1c6d1f5b7a9b4b1b60991491f5073f1a46ea8a5",
+        "current_generation": "attempts/355defabc8cd4c6aae8dbe31eaf90149/gen-0004",
+        "final_step": 4,
+        "momentum": [
+          -3.1627399921417236,
+          1.697509765625
+        ],
+        "weights": [
+          0.6384541392326355,
+          -0.31735193729400635
+        ],
+        "world": 2
+      }
+    }
+  },
+  "equivalent_candidate": {
+    "math_passed": true,
+    "no_op_source_edit": "trailing comment",
+    "sha256": "b840ef314737c7c3ddf2cb130b6f5659abeeb0af00f058dfa94ab7978c3d12b3"
+  },
+  "math": {
+    "global_gradient": [
+      -0.9500000178813934,
+      -0.3999999761581421
+    ],
+    "loss_numerator": 0.48250002443790496,
+    "negative_controls": [
+      "local-mean",
+      "weight-only",
+      "stale-key",
+      "stale-cursor",
+      "duplicate-shard",
+      "missing-rank-early-commit"
+    ],
+    "next_momentum": [
+      -0.8540000200271607,
+      -0.45599997639656065
+    ],
+    "next_weights": [
+      0.342700012922287,
+      -0.1772000041604042
+    ]
+  },
+  "schema": "l10b-check-report-v1",
+  "stage": "checkpoint",
+  "work": "/private/tmp/l10b-final-preflight-checkpoint-v2-20261021"
+}

@@ -1,0 +1,66 @@
+{
+  "config_supervisor_error": "approved experiment/config/data identity mismatch",
+  "config_tree_unchanged": true,
+  "config_worker_error": "approved experiment/config/data identity mismatch",
+  "config_worker_returncode": 1,
+  "fresh_boundary_step": 1,
+  "fresh_death": {
+    "pid": 79149,
+    "rank": 1,
+    "returncode": -9,
+    "signal": "SIGKILL"
+  },
+  "fresh_stop": [
+    {
+      "pid": 79148,
+      "rank": 0,
+      "returncode": -6
+    },
+    {
+      "pid": 79149,
+      "rank": 1,
+      "returncode": -9
+    }
+  ],
+  "missing_sidecar_error": "approved experiment identity is missing for existing checkpoint state",
+  "missing_sidecar_tree_unchanged": true,
+  "pointer_unchanged_before_positive_restore": true,
+  "preflight_rank_info_absent": true,
+  "preflight_transition_2_absent": true,
+  "same_identity_restore": {
+    "attempt_id": "8486020540cc4d7eafafa7b02784b79f",
+    "processes": [
+      {
+        "pid": 79409,
+        "rank": 0,
+        "returncode": 0
+      },
+      {
+        "pid": 79410,
+        "rank": 1,
+        "returncode": 0
+      }
+    ],
+    "verified": {
+      "candidate_sha256": "a7a7c1aca9009d284c41014ea1c6d1f5b7a9b4b1b60991491f5073f1a46ea8a5",
+      "current_generation": "attempts/8486020540cc4d7eafafa7b02784b79f/gen-0004",
+      "final_step": 4,
+      "momentum": [
+        -3.1627399921417236,
+        1.697509765625
+      ],
+      "weights": [
+        0.6384541392326355,
+        -0.31735193729400635
+      ],
+      "world": 2
+    }
+  },
+  "source_hashes": {
+    "check.py": "f9ffbef4d9f38de45c0bff63f25119aec6e1cbcc5beaca635118f79f8c7e72ad",
+    "solution/model.py": "a7a7c1aca9009d284c41014ea1c6d1f5b7a9b4b1b60991491f5073f1a46ea8a5",
+    "starter/model.py": "166311a5dd9f47b77e0fdbed1cc4e116c4d0a96932fede3c7463f6af4770272d",
+    "supervisor.py": "30c0e9724565089e9796b8be39e6c763a3f874ad3fd8c9b8c8de0a877d1db330",
+    "worker.py": "f9838429d447308e54588c82523de0370e0525d92c748367e2a6fdccb94bbb03"
+  }
+}

@@ -1,0 +1,70 @@
+---
+import GuideContents from '../../components/shared/GuideContents.astro';
+import MaterialStatus from '../../components/shared/MaterialStatus.astro';
+import PageIntro from '../../components/shared/PageIntro.astro';
+import GuideLayout from '../../layouts/GuideLayout.astro';
+import { course } from '../../lib/course-data.js';
+import { projectGuide } from '../../lib/server/project-guide.js';
+import { siteUrl } from '../../lib/urls.js';
+
+const content = projectGuide(
+  { id: 'sharded-training', source: 'projects/sharded-training/multiprocess/README.md' },
+  course,
+);
+---
+
+<GuideLayout
+  title="Two-controller JAX recovery: weighted updates and worker loss"
+  description="Build a count-weighted JAX update across two local CPU controllers, inspect checkpoint publication and recover a complete job after an observed worker kill."
+  active="projects"
+  skipLabel="Skip to two-controller recovery"
+  mainClass="project-guide"
+>
+  <PageIntro
+    backHref="project-guides/sharded-training.html"
+    backLabel="Sharded training guide"
+    edition="Optional extension · local POSIX CPU processes"
+    intro="Make the global denominator and the restart boundary visible before moving to a remote cluster."
+  >
+    <Fragment slot="title" set:html={content.heading} />
+    <p>
+      Complete two learner APIs, predict an uneven tail update and inspect two actual worker-loss
+      experiments. Recovery starts a fresh pair of controllers. This local process exercise leaves
+      remote networking, TPU execution and storage durability open.
+    </p>
+    <p>
+      Worker-loss stages use POSIX signals. Current retained runs are from macOS; the separate Linux
+      workflow is opt-in. Windows process recovery remains unqualified.
+    </p>
+    <a class="button" href={siteUrl('downloads/sharded-training.zip')} download>
+      Download the project and optional extension
+    </a>
+  </PageIntro>
+  <section aria-labelledby="preparation-project-status-heading">
+    <h2 id="preparation-project-status-heading">Preparation project status</h2>
+    <p>
+      This optional extension uses the canonical sharded-training preparation project as its local
+      fixture: <a href={siteUrl('project-guides/sharded-training.html')}>Sharded training guide</a>.
+    </p>
+    <MaterialStatus kind="projects" id="sharded-training" />
+  </section>
+  <aside
+    class="material-status extension-status"
+    aria-label="Two-controller optional extension status"
+    data-material-key="extension:sharded-training-multiprocess"
+  >
+    <p>
+      <span class="material-badge" data-maturity="in-development">
+        In development
+      </span>
+      <span> Current local all-stage checks passed.</span>
+    </p>
+    <p>Teaching and remote Linux qualification pending.</p>
+  </aside>
+  <GuideContents
+    sections={content.sections}
+    label="Two-controller recovery sections"
+    title="In this exercise"
+  />
+  <article set:html={content.body} />
+</GuideLayout>

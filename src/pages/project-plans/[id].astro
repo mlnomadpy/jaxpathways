@@ -14,7 +14,8 @@ export function getStaticPaths() {
   return plans.map((project) => ({ params: { id: project.id }, props: { project } }));
 }
 const { project } = Astro.props;
-const pageTitle = project.pilot
+const hasPilot = Boolean(project.pilot);
+const pageTitle = hasPilot
   ? `${project.title}: CPU pilot and project plan`
   : `${project.title}: project plan`;
 const pageDescription = project.pilot
@@ -40,14 +41,14 @@ const content = projectGuide(
     backHref="projects.html#alignment-retrieval"
     backLabel="Model lifecycle projects"
     edition={
-      project.pilot
+      hasPilot
         ? 'Full capstone planned · bounded CPU pilot available'
         : 'Planned capstone · implementation pending'
     }
     intro={project.summary}
   >
     <Fragment slot="title" set:html={content.heading} />
-    {project.pilot ? (
+    {hasPilot ? (
       <p>
         The full capstone remains planned. A separately scoped CPU pilot is available for learning
         the workflow and inspecting its measured results. Read its scope and quality results before
@@ -88,11 +89,16 @@ const content = projectGuide(
       <p>{project.pilot.scope}</p>
       <div class="actions">
         <a class="button primary" href={siteUrl(`downloads/${project.pilot.download}`)} download>
-          Download optional CPU pilot
+          {project.pilot.downloadLabel || 'Download optional CPU pilot'}
         </a>
         <a class="button" href={siteUrl(`project-assets/${project.id}/${project.pilot.evidence}`)}>
-          Read the pilot evidence index
+          {project.pilot.evidenceLabel || 'Read the pilot evidence index'}
         </a>
+        {project.pilot.guide && (
+          <a class="button" href={siteUrl(project.pilot.guide.path)}>
+            {project.pilot.guide.label}
+          </a>
+        )}
       </div>
       <p>
         These files provide a bounded research workflow and evidence. They are not a completed
@@ -101,7 +107,10 @@ const content = projectGuide(
       </p>
     </section>
   )}
-  <MaterialStatus kind="plans" id={project.id} />
+  <section class="project-capstone-status" aria-labelledby="capstone-status-heading">
+    <h2 id="capstone-status-heading">Full capstone status</h2>
+    <MaterialStatus kind="plans" id={project.id} />
+  </section>
   <GuideContents sections={content.sections} label="Project plan sections" title="In this plan" />
   <section aria-labelledby="preparation-heading">
     <h2 id="preparation-heading">Available preparation lessons</h2>

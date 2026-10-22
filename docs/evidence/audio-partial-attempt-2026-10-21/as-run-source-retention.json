@@ -1,0 +1,190 @@
+{
+  "all_hashes_match_as_run_map": true,
+  "failed_harness": {
+    "path": "/private/tmp/c04-v6-final-original-cpu-attempt-20261021/check_negatives.py",
+    "sha256": "406e0dc67af843a17801717bbb16450d34f7c95098afb79ee4bd1dbc697e9b1c"
+  },
+  "partial_attempt_artifacts_preserved": "/private/tmp/c04-v6-final-original-cpu-attempt-20261021/normal-run-must-not-exist",
+  "raw_timeout_traceback": "unavailable; subprocess.run(timeout=30) was invoked with capture_output=True and the wrapper did not persist the TimeoutExpired object or captured stdout/stderr. Termination is inferred from the timeout contract and Sol read-only process inspection confirming no active runner/checker/C04 process.",
+  "retained_files": [
+    {
+      "bytes": 5114,
+      "path": "audio.py",
+      "sha256": "7627823e827271d444b9358ff8da4fcba82f1dff6af9b3cd196f632f9924a165"
+    },
+    {
+      "bytes": 16216,
+      "path": "checkpoint.py",
+      "sha256": "d06503d2cbd25e7ecbb75d33f614e6e51342397484c661b1e5abde16a37e31e9"
+    },
+    {
+      "bytes": 2587,
+      "path": "cnn_control.py",
+      "sha256": "4be20920a10d8d651e165e985a05b51489b13d97e59f23854b882d0a7f5cfc1a"
+    },
+    {
+      "bytes": 759,
+      "path": "config.py",
+      "sha256": "3b0ade57a5afefbbab7208333eae62a6db6da7299da43837765f490405f0d947"
+    },
+    {
+      "bytes": 15608,
+      "path": "consumer.py",
+      "sha256": "a27a81a024cc5bac611efbf9632e17e6a946f3ed4d0677c0818621ef314ba2cd"
+    },
+    {
+      "bytes": 5799,
+      "path": "ctc.py",
+      "sha256": "fc6cc895c1739c033afd593c8edccdb11adaccb9bd6e3d036ba918174fc0b23f"
+    },
+    {
+      "bytes": 2963,
+      "path": "data_integrity.py",
+      "sha256": "30fc653bcf0c2538699f8eafb8ab0bd22fe71094cb1fab03272518150ad7ed40"
+    },
+    {
+      "bytes": 3728,
+      "path": "exposure.py",
+      "sha256": "44237870c0a2714a65bbe328f102345d3210566299e4262f94aa725b5c588db3"
+    },
+    {
+      "bytes": 9559,
+      "path": "freeze_recipe.py",
+      "sha256": "7abd0396434f9fea4afe453ffb05568281749a07019ccbb254e4f0f47d5b2673"
+    },
+    {
+      "bytes": 3088,
+      "path": "metrics.py",
+      "sha256": "e86c0626a8b66f7768af7a2f7d1cfa44108819712c8cf76b383a143c129e7345"
+    },
+    {
+      "bytes": 8098,
+      "path": "model.py",
+      "sha256": "33fb88568cd60e4084b88927de7e7be4a53b8f847d999175ab5ae7a62ee348f9"
+    },
+    {
+      "bytes": 4427,
+      "path": "objectives.py",
+      "sha256": "1886c085bd0d30939791647f0b93cbf1f13823da8add8e7a810638e4b688ccae"
+    },
+    {
+      "bytes": 14832,
+      "path": "prepare_sources.py",
+      "sha256": "b90b4511679c5b45d6e86214f1d196433aea28dcb7f5efa3a345f7f383a50cc4"
+    },
+    {
+      "bytes": 27504,
+      "path": "project_lock.py",
+      "sha256": "c3c9943e6d87f15e3193040ddd49ef0428fb4612dc118439891b4d76ae21ba81"
+    },
+    {
+      "bytes": 8725,
+      "path": "recipe-v2.json",
+      "sha256": "3f1e71fd5a1e66be03bf6150a35909309b5383045b064ca6cf4e63f3298dd713"
+    },
+    {
+      "bytes": 6678,
+      "path": "reference/oracles.py",
+      "sha256": "708e6bd73a22c2e11e5d464460f508081b2c6ea6e1818955bd4832d33cf97769"
+    },
+    {
+      "bytes": 102,
+      "path": "requirements-audio-lock.txt",
+      "sha256": "2fcf1f71f6fdda82dce4e43ebd5bfdc6fd87cffcbc6673ade3da38e941984f3f"
+    },
+    {
+      "bytes": 6907,
+      "path": "run_pilot.py",
+      "sha256": "7d57ced2ca2f413bca6dae1f37dcab227392af5d0bf50075e1a7f06eb8ecbc5f"
+    },
+    {
+      "bytes": 23298,
+      "path": "run_synthetic.py",
+      "sha256": "cd04f23cf02bb101aa78655c117a0bf3aacf631d846ca94c9793f954e09f1e49"
+    },
+    {
+      "bytes": 37337,
+      "path": "runner.py",
+      "sha256": "c9d0e39a0ffafcac0c1faff5114538275ed33c72d70dd6f486d7c2bbc48bd6c5"
+    },
+    {
+      "bytes": 804,
+      "path": "starter/sequence.py",
+      "sha256": "62054567258957ea9d2dd9a2dde99f5f50620cc9b1d9acc7abe36b676dc17366"
+    },
+    {
+      "bytes": 2577,
+      "path": "tests/check_bundle.py",
+      "sha256": "708a0cd0f40c59b057863b9e7bb5fcbbb63f00eb76160509f95aff87d3525752"
+    },
+    {
+      "bytes": 10601,
+      "path": "tests/check_candidate.py",
+      "sha256": "79f7a6fb5cbbb9067aeea46b06aecd7bda0758955eab1ccaf49102ed3f329849"
+    },
+    {
+      "bytes": 2535,
+      "path": "tests/check_inventory.py",
+      "sha256": "fb4317a67ea11dae804fab9684d80cdb0d657f8c786130d388e3b3b7439aa56f"
+    },
+    {
+      "bytes": 3614,
+      "path": "tests/check_lifecycle.py",
+      "sha256": "948c81dd187641dd360086c96a71edebcefe5a0dc19b7015ef3807b32defdb73"
+    },
+    {
+      "bytes": 23920,
+      "path": "tests/check_mechanics.py",
+      "sha256": "b0345d7f33bb683bf81b2b6441d23f5636cb9d5f620077707fd10a881df166fb"
+    },
+    {
+      "bytes": 6249,
+      "path": "tests/check_runner_graph.py",
+      "sha256": "cbdb13d1516ee0b3133c7291d89024e300bde5e432a362602ceb1d48fc5c67aa"
+    },
+    {
+      "bytes": 1571,
+      "path": "tests/check_service.py",
+      "sha256": "59982dba79977acbf3e059a3eb160fa64f07a78bbaa3ee4831bb681883761689"
+    },
+    {
+      "bytes": 1018,
+      "path": "tests/cold_consumer_worker.py",
+      "sha256": "23f61523b8851bbb257a86bdc204c9b09e6f5a370d7b481dbae960e95892b347"
+    },
+    {
+      "bytes": 125,
+      "path": "tests/fixtures/synthetic-runner-v1.json",
+      "sha256": "36cb4e3dd56b9f93bd1dc71366d81abd697e8c755298c2a29391e39aca6ee181"
+    },
+    {
+      "bytes": 2449,
+      "path": "tests/resume_lifecycle_worker.py",
+      "sha256": "f6a7df998cb2c0a0ae990ca210681d4d9c6db1dce8505a9135573e316beaf7f1"
+    },
+    {
+      "bytes": 1770,
+      "path": "tests/resume_worker.py",
+      "sha256": "7ce9c4e7f8f47db18c47ef80ae5bbe1bbdf6608798825dfc5e96dd7437c830a4"
+    },
+    {
+      "bytes": 8248,
+      "path": "tests/synthetic_runner_packet.py",
+      "sha256": "03999cd089d16765c766c6c5aaa8edbc715a6883586bba325dbdfced1215ce88"
+    },
+    {
+      "bytes": 9267,
+      "path": "training.py",
+      "sha256": "e6e814651ab94d3352c13fa742088c8d3b8471c8a227299be3fda18166477516"
+    }
+  ],
+  "retained_tree": "/private/tmp/c04-v6-final-original-cpu-attempt-20261021/as-run-source",
+  "schema": "c04-c04-as-run-source-retention-v1",
+  "source_map": {
+    "file_count": 34,
+    "path": "/private/tmp/c04-sol-v6-final-activation-plan-20261021/source-contract-flag-on.json",
+    "sha256": "74474219b635b82a7310953986739810ebbc03788a6903b149d1fd1cc70dc85e",
+    "source_map_schema": "c04-audio-source-contract-v2"
+  },
+  "status": "all exact source files retained before safety restore"
+}

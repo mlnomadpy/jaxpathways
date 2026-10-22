@@ -1,0 +1,196 @@
+{
+  "all_arm_metrics": {
+    "baseline-cnn": {
+      "dev_balanced_accuracy": 0.2883682800572039,
+      "final_balanced_accuracy": 0.25015970398069187,
+      "final_nll": 1.574125227998981
+    },
+    "baseline-vit": {
+      "dev_balanced_accuracy": 0.3220160331943521,
+      "final_balanced_accuracy": 0.3185224830158059,
+      "final_nll": 1.508965291041416
+    },
+    "finetune-mae": {
+      "dev_balanced_accuracy": 0.22583630430841742,
+      "final_balanced_accuracy": 0.2437975789747889,
+      "final_nll": 1.7505823921639794
+    },
+    "finetune-simclr": {
+      "dev_balanced_accuracy": 0.18039277297721915,
+      "final_balanced_accuracy": 0.1745403896043885,
+      "final_nll": 1.8736398927761324
+    },
+    "fit-color-centroid": {
+      "dev_balanced_accuracy": 0.39412995749994967,
+      "final_balanced_accuracy": 0.3638358559328016,
+      "final_nll": 1.4427198678984643
+    },
+    "fit-majority": {
+      "dev_balanced_accuracy": 0.2,
+      "final_balanced_accuracy": 0.2,
+      "final_nll": 521.5544662193095
+    },
+    "partial-selected": {
+      "dev_balanced_accuracy": 0.16105373940016515,
+      "final_balanced_accuracy": 0.15800209563552292,
+      "final_nll": 2.359939471860335
+    },
+    "probe-mae": {
+      "dev_balanced_accuracy": 0.20801619433198382,
+      "final_balanced_accuracy": 0.21501309835675161,
+      "final_nll": 2.29890158139344
+    },
+    "probe-random": {
+      "dev_balanced_accuracy": 0.23176365137873386,
+      "final_balanced_accuracy": 0.23948105727274896,
+      "final_nll": 1.910612401916617
+    },
+    "probe-simclr": {
+      "dev_balanced_accuracy": 0.21151549942594722,
+      "final_balanced_accuracy": 0.21144761088918013,
+      "final_nll": 1.984376049672007
+    },
+    "probe-supervised": {
+      "dev_balanced_accuracy": 0.2670791790037666,
+      "final_balanced_accuracy": 0.23079144135749652,
+      "final_nll": 1.7710211735705332
+    },
+    "uniform": {
+      "dev_balanced_accuracy": 0.2,
+      "final_balanced_accuracy": 0.2,
+      "final_nll": 1.6094379124340998
+    }
+  },
+  "all_output_hashes_match": true,
+  "brightness_balanced_accuracy_drop": 0.02490262683114214,
+  "calibrated_nll": 1.5087931145497713,
+  "checkpoint_count": 384,
+  "dev_choice": "baseline-vit",
+  "fixed_color_centroid_balanced_accuracy": 0.3638358559328016,
+  "handoff_sha256": "0c728bd80eb0d6537fa885d6f560fd08095a7b7a7ee278522d7547e97239d28d",
+  "journal_sha256": "965b7e7963ca56fe7df7f42b1354362801df91104303060768a882689ef56dc0",
+  "optimizer_rerun": false,
+  "output_file_count": 1183,
+  "output_total_bytes": 185670744,
+  "quality_floors": {
+    "balanced_accuracy": false,
+    "beats_color": false,
+    "brightness_drop": true,
+    "calibration_nll_delta": true
+  },
+  "raw_nll": 1.508965291041416,
+  "retrieval": {
+    "baseline-vit": {
+      "mean_average_precision": 0.23465095738800937,
+      "queries": 547
+    },
+    "finetune-mae": {
+      "mean_average_precision": 0.22972499337957383,
+      "queries": 547
+    },
+    "finetune-simclr": {
+      "mean_average_precision": 0.23556515597311875,
+      "queries": 547
+    },
+    "partial-selected": {
+      "mean_average_precision": 0.23564773235413858,
+      "queries": 547
+    }
+  },
+  "run_report_sha256": "a92f35c18287375c267b0f945f95d28f72d466ae3bfa555a5a27a4c217ff9eef",
+  "schema": "c03-sol-v14-independent-postrun-audit-v1",
+  "selected_final_balanced_accuracy": 0.3185224830158059,
+  "selected_temperature": 1.0201723141714116,
+  "stage_summary": [
+    {
+      "input_images": 512,
+      "parameters_changed": true,
+      "parent": "seeded-init-cnn-1731",
+      "stage": "baseline-cnn",
+      "steps": 64,
+      "views": 512
+    },
+    {
+      "input_images": 512,
+      "parameters_changed": true,
+      "parent": "seeded-init-vit-1729",
+      "stage": "baseline-vit",
+      "steps": 64,
+      "views": 512
+    },
+    {
+      "input_images": 128,
+      "parameters_changed": true,
+      "parent": "seeded-init-vit-1729",
+      "stage": "mae-pretrain",
+      "steps": 16,
+      "views": 128
+    },
+    {
+      "input_images": 128,
+      "parameters_changed": true,
+      "parent": "seeded-init-vit-1729",
+      "stage": "simclr-pretrain",
+      "steps": 16,
+      "views": 256
+    },
+    {
+      "input_images": 256,
+      "parameters_changed": true,
+      "parent": "seeded-init-vit-1729",
+      "stage": "probe-random",
+      "steps": 32,
+      "views": 256
+    },
+    {
+      "input_images": 256,
+      "parameters_changed": true,
+      "parent": "mae-pretrain",
+      "stage": "probe-mae",
+      "steps": 32,
+      "views": 256
+    },
+    {
+      "input_images": 256,
+      "parameters_changed": true,
+      "parent": "simclr-pretrain",
+      "stage": "probe-simclr",
+      "steps": 32,
+      "views": 256
+    },
+    {
+      "input_images": 256,
+      "parameters_changed": true,
+      "parent": "baseline-vit",
+      "stage": "probe-supervised",
+      "steps": 32,
+      "views": 256
+    },
+    {
+      "input_images": 256,
+      "parameters_changed": true,
+      "parent": "mae-pretrain",
+      "stage": "finetune-mae",
+      "steps": 32,
+      "views": 256
+    },
+    {
+      "input_images": 256,
+      "parameters_changed": true,
+      "parent": "simclr-pretrain",
+      "stage": "finetune-simclr",
+      "steps": 32,
+      "views": 256
+    },
+    {
+      "input_images": 256,
+      "parameters_changed": true,
+      "parent": "the MAE or SimCLR pretrained encoder selected using frozen-probe recipe_dev balanced accuracy; exact tie selects MAE",
+      "stage": "partial-selected",
+      "steps": 32,
+      "views": 256
+    }
+  ],
+  "status": "passed_numerical_protocol_failed_quality_floors",
+  "stored_selected_probabilities_temperature": 1.0
+}

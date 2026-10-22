@@ -5,6 +5,7 @@ import json
 import subprocess
 from pathlib import Path
 from zipfile import ZipFile, ZIP_DEFLATED, ZIP_STORED
+from epub_identity import FINGERPRINT_PROPERTY, modified_at, primary_identifier, rendered_fingerprint
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / 'public/downloads'
@@ -209,6 +210,91 @@ def c02_pilot_packet(root):
     return project, index_path, index, files
 
 
+def c03_pilot_packet(root):
+    """Verify the accepted C03 source freeze and numeric-only public packet."""
+    project = root / "projects/image-model-300m"
+    packet = project / "reference/evidence/v14"
+    manifest_path = packet / "packet-manifest.json"
+    manifest = json.loads(manifest_path.read_text())
+    recipe_path = packet / "approved-v14-recipe.json"
+    approval_path = packet / "approved-v14-approval.json"
+    recipe = json.loads(recipe_path.read_text())
+    approval = json.loads(approval_path.read_text())
+    identity = json.loads((packet / "source-and-run-identities.json").read_text())
+    expected_recipe = "df0a1a138f0635a39fcaa1b03f154403ed272560df9181fb5ad37722614d3c4c"
+    expected_approval = "f4fb56a70ec453ffd995c36c56c9b80cbd7cd9f739deb59f4db1fdd95c91f82b"
+    expected_manifest = "3b1dcfe589fffc25a43da336beb07d82334b6f8971a73084e2b989b6e8f2a794"
+
+    def verified(relative, expected):
+        candidate = (project / relative).resolve()
+        if not candidate.is_relative_to(project.resolve()) or not candidate.is_file():
+            raise ValueError(f"C03 evidence path is missing or unsafe: {relative}")
+        actual = hashlib.sha256(candidate.read_bytes()).hexdigest()
+        if actual != expected:
+            raise ValueError(f"C03 evidence hash mismatch: {relative}")
+        return candidate
+
+    if hashlib.sha256(recipe_path.read_bytes()).hexdigest() != expected_recipe:
+        raise ValueError("C03 recipe differs from the accepted v14 bytes")
+    if hashlib.sha256(approval_path.read_bytes()).hexdigest() != expected_approval:
+        raise ValueError("C03 approval differs from the accepted v14 bytes")
+    if hashlib.sha256(manifest_path.read_bytes()).hexdigest() != expected_manifest:
+        raise ValueError("C03 packet manifest differs from the accepted v14 bytes")
+    if approval.get("recipe_sha256") != expected_recipe or approval.get("source_files_sha256") != recipe.get("source_sha256"):
+        raise ValueError("C03 approval does not bind the accepted recipe and source inventory")
+    source_sha256 = recipe.get("source_sha256")
+    if not isinstance(source_sha256, dict) or len(source_sha256) != 28:
+        raise ValueError("C03 accepted recipe must enumerate exactly 28 source files")
+    if set(identity.get("as_run_source_inventory", {})) != set(source_sha256):
+        raise ValueError("C03 run identity source inventory differs from the accepted recipe")
+    if len(identity.get("as_run_candidate_python_inventory", {})) != 11:
+        raise ValueError("C03 candidate source inventory must contain exactly 11 Python files")
+    if approval.get("candidate_api_source_sha256") != {
+        path.split("/", 1)[1]: row["sha256"]
+        for path, row in identity["as_run_candidate_python_inventory"].items()
+    }:
+        raise ValueError("C03 candidate source inventory differs from accepted approval")
+    if not isinstance(manifest.get("files"), dict) or len(manifest["files"]) != 29:
+        raise ValueError("C03 public packet manifest must enumerate exactly 29 files")
+
+    expected_files = {manifest_path}
+    for relative, digest in source_sha256.items():
+        if not isinstance(relative, str) or relative.startswith("/") or ".." in Path(relative).parts:
+            raise ValueError(f"Unsafe C03 source entry: {relative}")
+        expected_files.add(verified(relative, digest))
+    for relative, digest in manifest["files"].items():
+        if (
+            not isinstance(relative, str)
+            or not (relative == "TEACHING.md" or relative.startswith("reference/") or relative.startswith("tools/"))
+            or ".." in Path(relative).parts
+            or not isinstance(digest, str)
+            or len(digest) != 64
+        ):
+            raise ValueError(f"Unsafe C03 public evidence entry: {relative}")
+        lowered = relative.lower()
+        if Path(lowered).suffix not in {".md", ".json", ".svg", ".png", ".py", ".txt"}:
+            raise ValueError(f"C03 public evidence is outside the numeric packet allowlist: {relative}")
+        if lowered.startswith("tools/") and Path(lowered).suffix not in {".py", ".txt"}:
+            raise ValueError(f"C03 tool file is outside the checker allowlist: {relative}")
+        if Path(lowered).suffix == ".png" and "figures" not in Path(lowered).parts:
+            raise ValueError(f"C03 PNG is outside the checked figure directory: {relative}")
+        if any(token in Path(lowered).name for token in ("weight", "checkpoint", "feature-vector", "embedding")):
+            raise ValueError(f"C03 model payload is not public evidence: {relative}")
+        expected_files.add(verified(relative, digest))
+    actual_project_files = {
+        path.resolve()
+        for path in project.rglob("*")
+        if path.is_file() and "__pycache__" not in path.parts and path.suffix != ".pyc"
+    }
+    if actual_project_files != expected_files:
+        raise ValueError(
+            "C03 source directory differs from the exact accepted package set: "
+            f"extra={sorted(str(p.relative_to(root)) for p in actual_project_files - expected_files)}, "
+            f"missing={sorted(str(p.relative_to(root)) for p in expected_files - actual_project_files)}"
+        )
+    return project, manifest_path, manifest, expected_files
+
+
 course = json.loads((ROOT / 'public/curriculum.json').read_text())
 release = json.loads((ROOT / 'curriculum/releases.json').read_text())[0]
 lessons = [lesson for phase in course['phases'] for lesson in phase['lessons'] if lesson['status'] == 'authored']
@@ -323,35 +409,50 @@ for phase in phases:
     guide_bodies.append(maturity('phases', phase['id']) + f'<h1>Phase {esc(phase["number"])}: {esc(phase["title"])}</h1><h2>{rich(guide.get("question","Phase guide"))}</h2><p>{rich(guide.get("why",""))}</p><h2>Prepare and work through the phase</h2><ol>{milestones}</ol><h2>Readiness check</h2><p>{rich(guide.get("readiness",{}).get("prompt",""))}</p><p>Answer: {rich(guide.get("readiness",{}).get("answer",""))}</p><h2>Transfer question</h2><p>{rich(guide.get("transfer",{}).get("prompt",""))}</p><p>Approach: {rich(guide.get("transfer",{}).get("approach",""))}</p><h2>Common pitfall</h2><p><strong>{rich(guide.get("pitfall",{}).get("symptom",""))}</strong> {rich(guide.get("pitfall",{}).get("check",""))}</p><h2>Phase artifact</h2><p>{rich(guide.get("completion",""))}</p><p>{rich(guide.get("furtherWork",""))}</p><p><strong>Phase project:</strong> {esc(phase.get("project",""))}. {esc(phase.get("checkpoint",""))}{stage_note}</p><ul>{project_links}</ul>')
 nav = '<nav><h2>Contents</h2><ol><li><a href="intro.xhtml">About this edition and routes</a></li>' + ''.join(f'<li><a href="phase-{i}.xhtml">Phase {esc(p["number"])}: {esc(p["title"])}</a><ol>'+''.join(f'<li><a href="chapter-{lessons.index(l)}.xhtml">{esc(l["title"])}</a></li>' for l in p['lessons'] if l['status']=='authored')+'</ol></li>' for i,p in enumerate(phases)) + '<li><a href="appendix-workflow.xhtml">Appendix: project structure and evidence</a></li><li><a href="appendix-experiments.xhtml">Appendix: reproducible experiments workshop</a></li><li><a href="solutions.xhtml">Solutions</a></li></ol></nav>'
 xhtml = lambda body, title='JAX Pathways: course reader': '<?xml version="1.0" encoding="utf-8"?><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><title>'+esc(title)+'</title><link rel="stylesheet" href="style.css"/></head><body>'+body+'</body></html>'
-identity = hashlib.sha256(json.dumps(lessons,sort_keys=True).encode()).hexdigest()
+identity = primary_identifier(release, lessons)
+payload = {
+    'mimetype': b'application/epub+zip',
+    'META-INF/container.xml': b'<?xml version="1.0"?><container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container"><rootfiles><rootfile full-path="OEBPS/package.opf" media-type="application/oebps-package+xml"/></rootfiles></container>',
+    'OEBPS/style.css': style.encode(),
+    'OEBPS/intro.xhtml': xhtml(intro).encode(),
+    'OEBPS/nav.xhtml': xhtml(nav.replace('<nav>','<nav xmlns:epub="http://www.idpf.org/2007/ops" epub:type="toc">',1)).encode(),
+}
+for i,body in enumerate(guide_bodies): payload[f'OEBPS/phase-{i}.xhtml'] = xhtml(body, f'Phase {phases[i]["number"]}: {phases[i]["title"]}').encode()
+for i,body in enumerate(chapters): payload[f'OEBPS/chapter-{i}.xhtml'] = xhtml(body, lessons[i]['title']).encode()
+workflow=book_guides['workflow']+'<p><a href="https://www.tahabouhsine.com/jaxpathways/project-workflow.html">Online guide and linked resources</a></p>'
+workshop=book_guides['experiments']+'<p><a href="https://www.tahabouhsine.com/jaxpathways/project-guides/reproducible-experiments.html">Online workshop and workspace</a></p>'
+payload['OEBPS/appendix-workflow.xhtml'] = xhtml('<h1>Appendix: project structure and evidence</h1>'+workflow, 'Appendix: project structure and evidence').encode()
+payload['OEBPS/appendix-experiments.xhtml'] = xhtml('<h1>Appendix: reproducible experiments workshop</h1>'+workshop, 'Appendix: reproducible experiments workshop').encode()
+payload['OEBPS/solutions.xhtml'] = xhtml('<h1>Solutions</h1><p>Attempt each exercise and checkpoint before reading this appendix.</p>'+''.join(solutions), 'Solutions').encode()
+items=''.join(f'<item id="p{i}" href="phase-{i}.xhtml" media-type="application/xhtml+xml"'+(' properties="mathml"' if '<math ' in body else '')+'/>' for i,body in enumerate(guide_bodies))
+items += ''.join(f'<item id="c{i}" href="chapter-{i}.xhtml" media-type="application/xhtml+xml"'+(' properties="mathml"' if '<math ' in body else '')+'/>' for i,body in enumerate(chapters))
+for name, body in [('appendix-workflow', workflow), ('appendix-experiments', workshop), ('solutions', ''.join(solutions))]:
+    properties = ' properties="mathml"' if '<math ' in body else ''
+    items += f'<item id="{name}" href="{name}.xhtml" media-type="application/xhtml+xml"{properties}/>'
+for lesson in lessons:
+    if lesson.get('visualArtifact'):
+        payload['OEBPS/figures/'+lesson['id']+'.png'] = (ROOT/'public'/lesson['visualArtifact']['png']).read_bytes()
+        items += '<item id="figure-'+lesson['id']+'" href="figures/'+lesson['id']+'.png" media-type="image/png"/>'
+    if lesson.get('visualArtifact',{}).get('mechanismPng'):
+        payload['OEBPS/figures/'+lesson['id']+'-mechanism.png'] = (ROOT/'public'/lesson['visualArtifact']['mechanismPng']).read_bytes()
+        items += '<item id="mechanism-'+lesson['id']+'" href="figures/'+lesson['id']+'-mechanism.png" media-type="image/png"/>'
+spine='<itemref idref="intro"/>' + ''.join(f'<itemref idref="p{i}"/>'+''.join(f'<itemref idref="c{lessons.index(l)}"/>' for l in p['lessons'] if l['status']=='authored') for i,p in enumerate(phases)) + '<itemref idref="appendix-workflow"/><itemref idref="appendix-experiments"/><itemref idref="solutions"/>'
+modified = modified_at(release)
+package_template = f'<?xml version="1.0"?><package xmlns="http://www.idpf.org/2007/opf" xmlns:dc="http://purl.org/dc/elements/1.1/" version="3.0" unique-identifier="book-id" prefix="jp: https://www.tahabouhsine.com/jaxpathways/epub-meta#"><metadata><dc:identifier id="book-id">{esc(identity)}</dc:identifier><dc:title>JAX Pathways: course reader {esc(release["version"])} · {esc(release.get("title", ""))}</dc:title><dc:language>en</dc:language><dc:creator>Taha Bouhsine</dc:creator><dc:publisher>JAX Pathways</dc:publisher><dc:description>A free JAX and Flax book with worked math, explained figures, executable Python examples and staged projects.</dc:description><dc:source>https://www.tahabouhsine.com/jaxpathways/book.html</dc:source><dc:date>{esc(release["date"])}</dc:date><meta property="dcterms:modified">{modified}</meta><meta property="belongs-to-collection" id="collection">JAX Pathways</meta><meta refines="#collection" property="group-position">{esc(release["version"])}</meta><meta property="{FINGERPRINT_PROPERTY}">sha256:pending</meta></metadata><manifest><item id="intro" href="intro.xhtml" media-type="application/xhtml+xml"/><item id="nav" href="nav.xhtml" media-type="application/xhtml+xml" properties="nav"/><item id="style" href="style.css" media-type="text/css"/>{items}</manifest><spine>{spine}</spine></package>'
+fingerprint = rendered_fingerprint(payload, package_template.encode())
+package = package_template.replace('sha256:pending', 'sha256:' + fingerprint)
 with ZipFile(OUT / 'jax-foundations.epub','w',compression=ZIP_DEFLATED) as book:
-    book.writestr('mimetype','application/epub+zip',compress_type=ZIP_STORED)
-    book.writestr('META-INF/container.xml','<?xml version="1.0"?><container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container"><rootfiles><rootfile full-path="OEBPS/package.opf" media-type="application/oebps-package+xml"/></rootfiles></container>')
-    book.writestr('OEBPS/style.css',style)
-    book.writestr('OEBPS/intro.xhtml',xhtml(intro))
-    book.writestr('OEBPS/nav.xhtml',xhtml(nav.replace('<nav>','<nav xmlns:epub="http://www.idpf.org/2007/ops" epub:type="toc">',1)))
-    for i,body in enumerate(guide_bodies): book.writestr(f'OEBPS/phase-{i}.xhtml',xhtml(body, f'Phase {phases[i]["number"]}: {phases[i]["title"]}'))
-    for i,body in enumerate(chapters): book.writestr(f'OEBPS/chapter-{i}.xhtml',xhtml(body, lessons[i]['title']))
-    workflow=book_guides['workflow']+'<p><a href="https://www.tahabouhsine.com/jaxpathways/project-workflow.html">Online guide and linked resources</a></p>'
-    workshop=book_guides['experiments']+'<p><a href="https://www.tahabouhsine.com/jaxpathways/project-guides/reproducible-experiments.html">Online workshop and workspace</a></p>'
-    book.writestr('OEBPS/appendix-workflow.xhtml',xhtml('<h1>Appendix: project structure and evidence</h1>'+workflow, 'Appendix: project structure and evidence'))
-    book.writestr('OEBPS/appendix-experiments.xhtml',xhtml('<h1>Appendix: reproducible experiments workshop</h1>'+workshop, 'Appendix: reproducible experiments workshop'))
-    book.writestr('OEBPS/solutions.xhtml',xhtml('<h1>Solutions</h1><p>Attempt each exercise and checkpoint before reading this appendix.</p>'+''.join(solutions), 'Solutions'))
-    items=''.join(f'<item id="p{i}" href="phase-{i}.xhtml" media-type="application/xhtml+xml"'+(' properties="mathml"' if '<math ' in body else '')+'/>' for i,body in enumerate(guide_bodies))
-    items += ''.join(f'<item id="c{i}" href="chapter-{i}.xhtml" media-type="application/xhtml+xml"'+(' properties="mathml"' if '<math ' in body else '')+'/>' for i,body in enumerate(chapters))
-    for name, body in [('appendix-workflow', workflow), ('appendix-experiments', workshop), ('solutions', ''.join(solutions))]:
-        properties = ' properties="mathml"' if '<math ' in body else ''
-        items += f'<item id="{name}" href="{name}.xhtml" media-type="application/xhtml+xml"{properties}/>'
-    for lesson in lessons:
-        if lesson.get('visualArtifact'):
-            book.write(ROOT/'public'/lesson['visualArtifact']['png'], 'OEBPS/figures/'+lesson['id']+'.png')
-            items += '<item id="figure-'+lesson['id']+'" href="figures/'+lesson['id']+'.png" media-type="image/png"/>'
-        if lesson.get('visualArtifact',{}).get('mechanismPng'):
-            book.write(ROOT/'public'/lesson['visualArtifact']['mechanismPng'], 'OEBPS/figures/'+lesson['id']+'-mechanism.png')
-            items += '<item id="mechanism-'+lesson['id']+'" href="figures/'+lesson['id']+'-mechanism.png" media-type="image/png"/>'
-    spine='<itemref idref="intro"/>' + ''.join(f'<itemref idref="p{i}"/>'+''.join(f'<itemref idref="c{lessons.index(l)}"/>' for l in p['lessons'] if l['status']=='authored') for i,p in enumerate(phases)) + '<itemref idref="appendix-workflow"/><itemref idref="appendix-experiments"/><itemref idref="solutions"/>'
-    modified=release['date']+'T00:00:00Z'
-    book.writestr('OEBPS/package.opf',f'<?xml version="1.0"?><package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="book-id"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/"><dc:identifier id="book-id">urn:sha256:{identity}</dc:identifier><dc:title>JAX Pathways: course reader {esc(release["version"])}</dc:title><dc:language>en</dc:language><dc:creator>Taha Bouhsine</dc:creator><dc:publisher>JAX Pathways</dc:publisher><dc:description>A free JAX and Flax book with worked math, explained figures, executable Python examples and staged projects.</dc:description><dc:source>https://www.tahabouhsine.com/jaxpathways/book.html</dc:source><dc:date>{esc(release["date"])}</dc:date><meta property="dcterms:modified">{modified}</meta><meta property="belongs-to-collection" id="collection">JAX Pathways</meta><meta refines="#collection" property="group-position">{esc(release["version"])}</meta></metadata><manifest><item id="intro" href="intro.xhtml" media-type="application/xhtml+xml"/><item id="nav" href="nav.xhtml" media-type="application/xhtml+xml" properties="nav"/><item id="style" href="style.css" media-type="text/css"/>{items}</manifest><spine>{spine}</spine></package>')
+    book.writestr('mimetype', payload.pop('mimetype'), compress_type=ZIP_STORED)
+    for name in sorted(payload):
+        book.writestr(name, payload[name])
+    book.writestr('OEBPS/package.opf', package)
+(OUT / 'jax-foundations.build.json').write_text(json.dumps({
+    'schema': 'jaxpathways-epub-build-v1',
+    'releaseVersion': release['version'],
+    'primaryPublicationId': identity,
+    'renderedEditionFingerprint': 'sha256:' + fingerprint,
+    'modifiedAt': modified,
+}, indent=2, sort_keys=True) + '\n')
 for manifest in json.loads((ROOT/'curriculum/projects.json').read_text()):
     project_path = ROOT/manifest
     project = json.loads(project_path.read_text())
@@ -395,6 +496,10 @@ c02_root, c02_index_path, c02_index, c02_files = c02_pilot_packet(ROOT)
 with ZipFile(OUT / "causal-model-300m-pilot.zip", "w", compression=ZIP_DEFLATED) as bundle:
     for path in sorted(c02_files):
         bundle.write(path, path.relative_to(ROOT).as_posix())
+c03_root, c03_manifest_path, c03_manifest, c03_files = c03_pilot_packet(ROOT)
+with ZipFile(OUT / "image-model-300m-pilot.zip", "w", compression=ZIP_DEFLATED) as bundle:
+    for path in sorted(c03_files):
+        bundle.write(path, path.relative_to(ROOT).as_posix())
 
 setup=next(l for l in lessons if l['id']=='welcome-01')
 with ZipFile(OUT/'jax-start-here.zip','w',compression=ZIP_DEFLATED) as bundle:
@@ -416,6 +521,7 @@ for directory in ('curriculum', 'learning-paths', 'phases', 'projects', 'skills'
                            if path.is_file() and path.suffix in ('.md', '.json', '.py', '.ipynb', '.txt', '.svg', '.png')
                            and not (directory == 'projects' and path.is_relative_to(c01_root / 'reference'))
                            and not (directory == 'projects' and path.is_relative_to(c02_root / 'reference'))
+                           and not (directory == 'projects' and path.is_relative_to(c03_root))
                            and '__pycache__' not in path.parts)
 # Keep the coordinated multi-host target repository-only. Its rendezvous and shared
 # GCS checkpoint setup are not part of the portable workspace contract.
@@ -430,6 +536,7 @@ for manifest in json.loads((ROOT/'curriculum/projects.json').read_text()):
                            and not (Path(manifest).parts[1] == 'embedding-model-300m' and path.is_relative_to(c01_root / 'reference')))
 workspace_files.update(c01_public_paths)
 workspace_files.update(c02_files)
+workspace_files.update(c03_files)
 for directory in ('public/figures','public/executions','public/guides'):
     workspace_files.update(path for path in (ROOT/directory).glob('*') if path.is_file())
 start_guide = '''# Start JAX Pathways with your agent

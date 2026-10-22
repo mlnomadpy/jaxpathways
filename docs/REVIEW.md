@@ -15,8 +15,9 @@ The 0.14 review guide below still describes the substantive course upgrade.
 
 Local checks pass: 163 automated tests, 49-file Black check, fresh complete
 recovery protocol, 46 desktop/mobile browser checks, root/Pages deployment and
-EPUBCheck with zero errors or warnings. Hosted checks for PR67 are pending and
-must be inspected independently of the earlier PR66 results.
+EPUBCheck with zero errors or warnings. All 15 hosted checks passed for final PR67 head
+`615be5fda0bda99e39292447a94508117b3accd2`. The later [follow-up receipt](evidence/review-qualification-followup-2026-10-21/verification.json)
+retains these results separately from the frozen packet and earlier PR66 results.
 
 Native 0.14.0 browser and Apple Books samples show readable math, plot labels,
 code and working TOC navigation. The [compatibility matrix](book-compatibility.md)

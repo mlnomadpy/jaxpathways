@@ -12,6 +12,12 @@ export function projectGuide(project, course, plannedIds = projectPlans.map((pla
     if (target === 'projects/text-harness/foundations/README.md') {
       return siteUrl('project-guides/text-harness-foundations.html');
     }
+    if (target === 'projects/sharded-training/multiprocess/README.md') {
+      return siteUrl('project-guides/sharded-training-multiprocess.html');
+    }
+    if (target === 'projects/image-model-300m/TEACHING.md') {
+      return siteUrl('project-guides/image-model-300m-pilot.html');
+    }
     const projectReadme = /^projects\/([^/]+)\/README\.md$/.exec(target);
     if (projectReadme) {
       const directory = plannedIds.includes(projectReadme[1]) ? 'project-plans' : 'project-guides';
@@ -38,6 +44,9 @@ export function projectGuide(project, course, plannedIds = projectPlans.map((pla
         course.projectIds.includes(projectAsset[1]))
     ) {
       return siteUrl(`project-assets/${projectAsset[1]}/${projectAsset[2]}`);
+    }
+    if (project.id === 'image-model-300m' && projectAsset?.[1] === project.id) {
+      return `https://github.com/mlnomadpy/jaxpathways/blob/main/${target.split('/').map(encodeURIComponent).join('/')}`;
     }
     if (target.startsWith('docs/') && existsSync(target)) {
       return `https://github.com/mlnomadpy/jaxpathways/blob/main/${target.split('/').map(encodeURIComponent).join('/')}`;

@@ -1,0 +1,21 @@
+{
+  "retained_receipts": {
+    "independent-r4.json": "13b48b5d84d49883d2d4d11d3e698f21424a3f85988ce198b822783cb5c7d2f9",
+    "worker-r4.json": "4b597c3e2e13bc124a7a22d15965508464887ca2acefcb2747630ee29ca67f63",
+    "release-guard.json": "5ebcffac6e4c0a3b59bbfdf6a274d3772e5fbaaf9a68c104a796ddf1dda34b57"
+  },
+  "scope": "Explicit publication edition key and pinned UTC modification time from 0.15.0; deterministic rendered payload fingerprint separate from persistent primary identity. No evidence of universal native reader compatibility.",
+  "accepted_identity_patch_sha256": {
+    "scripts/build-distribution.py": "2485246ca92d3595855cb8101438cf153e820db1439ff3ef460fc05ce36103c1",
+    "scripts/check-distribution.py": "b090554de88f77b9a18738601f6fa7f443fbeca82cb02169c0ae0fb839191b99",
+    "scripts/epub_identity.py": "4057d0a947d8311044c5c45b40f619ce257d5bfe727a1012ae7874498d452c29",
+    "tests/test_epub_identity.py": "3e9778420b5571f873e0c7d156e316b34e369aee38d6a94d32d08f21f16485f5"
+  },
+  "final_integrated_sha256": {
+    "scripts/build-distribution.py": "cdf8bfd6b7dc9fdd9394afb681afdaa3359dbd3cd36b269d6395c9561f3cf0ae",
+    "scripts/check-distribution.py": "a70194c4dfcdd1371d992ad526ad82008da2b6378e9b9364f9fd695843907edc",
+    "scripts/epub_identity.py": "d4293eac26d3217229d4b9690555c3022ebfcd378b6835c9abba75a8fc468787",
+    "tests/test_epub_identity.py": "3e9778420b5571f873e0c7d156e316b34e369aee38d6a94d32d08f21f16485f5"
+  },
+  "later_reviewed_delta": "C03 curated archive/workspace packaging added to builder and checker after identity-only R4 acceptance, independently reviewed in image-pilot receipts. A final extra blank line at helper EOF was removed with AST equality verified; the focused identity tests remain byte-identical."
+}

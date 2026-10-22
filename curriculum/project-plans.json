@@ -3,11 +3,7 @@
     "id": "clip-model",
     "title": "Train a CLIP image\u2013text model",
     "summary": "Learn paired representations, test zero-shot classification, and qualify both retrieval directions before releasing the encoders.",
-    "trackIds": [
-      "image",
-      "text",
-      "cross-modal"
-    ],
+    "trackIds": ["image", "text", "cross-modal"],
     "harnessId": "cross-modal-harness",
     "lessonIds": [
       "pretraining-03",
@@ -23,18 +19,9 @@
     "id": "siglip-model",
     "title": "Train and compare a SigLIP model",
     "summary": "Replace the softmax objective with pairwise sigmoid training. Audit labels, reduction, negatives and distributed gradients against a controlled CLIP baseline.",
-    "trackIds": [
-      "image",
-      "text",
-      "cross-modal"
-    ],
+    "trackIds": ["image", "text", "cross-modal"],
     "harnessId": "cross-modal-harness",
-    "lessonIds": [
-      "pretraining-03",
-      "optimization-02",
-      "distributed-02",
-      "deployment-05"
-    ],
+    "lessonIds": ["pretraining-03", "optimization-02", "distributed-02", "deployment-05"],
     "status": "planned",
     "source": "projects/siglip-model/README.md"
   },
@@ -42,12 +29,7 @@
     "id": "retrieval-system",
     "title": "Build a measured retrieval service",
     "summary": "Take a qualified text or cross-modal encoder through exact search, approximate indexes, hybrid retrieval, reranking, evaluation and safe index migration.",
-    "trackIds": [
-      "text",
-      "image",
-      "audio",
-      "cross-modal"
-    ],
+    "trackIds": ["text", "image", "audio", "cross-modal"],
     "harnessId": "cross-modal-harness",
     "lessonIds": [
       "pretraining-03",
@@ -63,16 +45,9 @@
     "id": "embedding-model-300m",
     "title": "Build a staged embedding model",
     "summary": "MLM to contrastive pretraining and retrieval fine-tuning, with frozen data, MTEB evaluation and release gates.",
-    "trackIds": [
-      "text"
-    ],
+    "trackIds": ["text"],
     "harnessId": "text-harness",
-    "lessonIds": [
-      "pretraining-01",
-      "pretraining-03",
-      "recovery-04",
-      "deployment-05"
-    ],
+    "lessonIds": ["pretraining-01", "pretraining-03", "recovery-04", "deployment-05"],
     "status": "planned",
     "source": "projects/embedding-model-300m/README.md",
     "pilot": {
@@ -87,15 +62,9 @@
     "id": "causal-model-300m",
     "title": "Build a causal language model",
     "summary": "Connect tokenizer/data preparation, next-token pretraining, adaptation, generation evaluation and model publication.",
-    "trackIds": [
-      "text"
-    ],
+    "trackIds": ["text"],
     "harnessId": "text-harness",
-    "lessonIds": [
-      "transformers-04",
-      "posttraining-01",
-      "recovery-04"
-    ],
+    "lessonIds": ["transformers-04", "posttraining-01", "recovery-04"],
     "status": "planned",
     "source": "projects/causal-model-300m/README.md",
     "pilot": {
@@ -110,31 +79,34 @@
     "id": "image-model-300m",
     "title": "Build an image understanding model",
     "summary": "Carry a frozen image recipe through representation learning, task adaptation and measured evaluation.",
-    "trackIds": [
-      "image"
-    ],
+    "trackIds": ["image"],
     "harnessId": "image-harness",
-    "lessonIds": [
-      "networks-04",
-      "pretraining-02",
-      "pretraining-03"
-    ],
+    "lessonIds": ["networks-04", "pretraining-02", "pretraining-03"],
     "status": "planned",
-    "source": "projects/image-model-300m/README.md"
+    "source": "projects/image-model-300m/README.md",
+    "pilot": {
+      "title": "C03 flower-model CPU pilot",
+      "scope": "A source-bound flower-image CPU run measured a selected classifier at 0.318522 macro balanced accuracy, below the predeclared 0.40 floor and the 0.363836 color control. Calibration and brightness checks passed; retrieval mAP was 0.234651. The classification quality gate failed. This does not qualify the full approximately-300M capstone, target training, or production release.",
+      "anchor": "cpu-pilot",
+      "download": "image-model-300m-pilot.zip",
+      "archiveLabel": "Source and numeric evidence archive",
+      "downloadLabel": "Download source and numeric evidence",
+      "evidence": "reference/evidence/v14/packet-manifest.json",
+      "evidenceSha256": "3b1dcfe589fffc25a43da336beb07d82334b6f8971a73084e2b989b6e8f2a794",
+      "evidenceLabel": "Read the public packet manifest",
+      "guide": {
+        "path": "project-guides/image-model-300m-pilot.html",
+        "label": "Read the flower-model pilot guide and figures"
+      }
+    }
   },
   {
     "id": "image-generation-model",
     "title": "Build an image generation pipeline",
     "summary": "Qualify image representations, denoising training, conditioning and sampling with separate quality and runtime evidence.",
-    "trackIds": [
-      "image"
-    ],
+    "trackIds": ["image"],
     "harnessId": "image-harness",
-    "lessonIds": [
-      "networks-04",
-      "state-03",
-      "optimization-04"
-    ],
+    "lessonIds": ["networks-04", "state-03", "optimization-04"],
     "status": "planned",
     "source": "projects/image-generation-model/README.md"
   },
@@ -142,15 +114,9 @@
     "id": "audio-model-300m",
     "title": "Build an audio understanding model",
     "summary": "Version waveform and acoustic representations through training, recognition or event adaptation and robustness evaluation.",
-    "trackIds": [
-      "audio"
-    ],
+    "trackIds": ["audio"],
     "harnessId": "audio-harness",
-    "lessonIds": [
-      "state-03",
-      "networks-03",
-      "recovery-04"
-    ],
+    "lessonIds": ["state-03", "networks-03", "recovery-04"],
     "status": "planned",
     "source": "projects/audio-model-300m/README.md"
   },
@@ -158,15 +124,9 @@
     "id": "audio-generation-model",
     "title": "Build an audio generation pipeline",
     "summary": "Connect codec qualification, sequence or denoising training, conditioning and waveform evaluation.",
-    "trackIds": [
-      "audio"
-    ],
+    "trackIds": ["audio"],
     "harnessId": "audio-harness",
-    "lessonIds": [
-      "state-03",
-      "transformers-04",
-      "recovery-04"
-    ],
+    "lessonIds": ["state-03", "transformers-04", "recovery-04"],
     "status": "planned",
     "source": "projects/audio-generation-model/README.md"
   },
@@ -174,18 +134,9 @@
     "id": "multimodal-model",
     "title": "Build a grounded multimodal model",
     "summary": "Qualify encoders, connector alignment, instruction adaptation and grounded evaluation, keeping retrieval a distinct outcome.",
-    "trackIds": [
-      "image",
-      "audio",
-      "text",
-      "cross-modal"
-    ],
+    "trackIds": ["image", "audio", "text", "cross-modal"],
     "harnessId": "cross-modal-harness",
-    "lessonIds": [
-      "pretraining-03",
-      "transformers-04",
-      "posttraining-01"
-    ],
+    "lessonIds": ["pretraining-03", "transformers-04", "posttraining-01"],
     "status": "planned",
     "source": "projects/multimodal-model/README.md"
   }

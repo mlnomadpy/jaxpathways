@@ -1,0 +1,233 @@
+---
+import GuideContents from '../../components/shared/GuideContents.astro';
+import PageIntro from '../../components/shared/PageIntro.astro';
+import GuideLayout from '../../layouts/GuideLayout.astro';
+import { course } from '../../lib/course-data.js';
+import { projectGuide } from '../../lib/server/project-guide.js';
+import { siteUrl } from '../../lib/urls.js';
+
+const content = projectGuide(
+  { id: 'image-model-300m', source: 'projects/image-model-300m/TEACHING.md' },
+  course,
+);
+const figureRoot = 'project-assets/image-model-300m/reference/evidence/v14/figures/';
+---
+
+<GuideLayout
+  title="Flower image model: bounded CPU pilot and public evidence"
+  description="Read the source-bound evidence from a short CPU image-model pilot, including its failed classification gate, staged training traces, retrieval results and seven reproducible figures."
+  active="projects"
+  skipLabel="Skip to the flower-model CPU pilot"
+  mainClass="project-guide"
+>
+  <PageIntro
+    backHref="project-plans/image-model-300m.html"
+    backLabel="Full 300M image-model plan"
+    edition="Optional workflow · bounded CPU pilot · quality gate failed"
+    intro="Use this short flower-image run to learn how source freezes, staged objectives and public evidence fit together."
+  >
+    <Fragment slot="title" set:html={content.heading} />
+    <p>
+      The selected pilot classifier reached 0.318522 macro balanced accuracy, below its predeclared
+      0.40 floor and the 0.363836 color control. Calibration and brightness checks passed, but the
+      classification gate failed. The planned full 300M capstone remains Planned.
+    </p>
+    <p>
+      This guide publishes source and numeric evidence for study. It does not include the photos,
+      fitted weights or consumer package. A reader can review the public checks without downloading
+      data or running training.
+    </p>
+    <p>
+      The downloaded as-run README records the source-freeze pre-run state. Completed v14 outcomes
+      are documented here and in the byte-exact TEACHING.md, with the exact receipt retained in the
+      public packet.
+    </p>
+    <a class="button primary" href={siteUrl('downloads/image-model-300m-pilot.zip')} download>
+      Download source and numeric evidence
+    </a>
+    <a class="button" href={siteUrl('project-plans/image-model-300m.html')}>
+      Read the full capstone plan
+    </a>
+  </PageIntro>
+  <aside
+    class="material-status image-pilot-status"
+    aria-label="Flower-model CPU pilot status"
+    data-material-key="pilot:image-model-300m"
+  >
+    <p>
+      <span class="material-badge" data-maturity="in-development">
+        In development
+      </span>
+      <span> Source and numeric checks passed; the classification quality gate failed.</span>
+    </p>
+    <p>Teaching review pending.</p>
+  </aside>
+  <GuideContents
+    sections={content.sections}
+    label="Flower-model pilot sections"
+    title="In this workflow"
+  />
+  <article set:html={content.body} />
+
+  <section aria-labelledby="pilot-figures">
+    <h2 id="pilot-figures">Seven public figures, with their units and limits</h2>
+    <p>
+      Every figure is rebuilt from the checked-in numeric packet. The loss objectives use different
+      units, so compare each curve only within its own phase and objective.
+    </p>
+
+    <figure class="lesson-visual">
+      <div class="figure-scroll" tabindex="0" aria-label="Scrollable MAE loss figure">
+        <a
+          href={siteUrl(`${figureRoot}loss-mae.svg`)}
+          aria-label="Open full-size figure: MAE masked reconstruction loss by one-based update, measured as mean squared normalized-pixel target."
+          title="Open full-size figure: MAE masked reconstruction loss by one-based update, measured as mean squared normalized-pixel target."
+        >
+          <img
+            src={siteUrl(`${figureRoot}loss-mae.svg`)}
+            alt="MAE masked reconstruction loss by one-based update, measured as mean squared normalized-pixel target."
+            width="900"
+            height="500"
+            loading="lazy"
+          />
+        </a>
+      </div>
+      <figcaption>
+        MAE falls across its local updates. Its y-axis is mean squared error on the selected
+        normalized-pixel reconstruction targets, not classification loss.
+      </figcaption>
+    </figure>
+
+    <figure class="lesson-visual">
+      <div class="figure-scroll" tabindex="0" aria-label="Scrollable SimCLR loss figure">
+        <a
+          href={siteUrl(`${figureRoot}loss-simclr.svg`)}
+          aria-label="Open full-size figure: SimCLR NT-Xent contrastive loss by one-based update, measured in nats per anchor."
+          title="Open full-size figure: SimCLR NT-Xent contrastive loss by one-based update, measured in nats per anchor."
+        >
+          <img
+            src={siteUrl(`${figureRoot}loss-simclr.svg`)}
+            alt="SimCLR NT-Xent contrastive loss by one-based update, measured in nats per anchor."
+            width="900"
+            height="500"
+            loading="lazy"
+          />
+        </a>
+      </div>
+      <figcaption>
+        SimCLR optimizes agreement between two augmented views. Read this curve in nats per anchor;
+        its numeric scale is not comparable to the MAE or supervised curves.
+      </figcaption>
+    </figure>
+
+    <figure class="lesson-visual">
+      <div class="figure-scroll" tabindex="0" aria-label="Scrollable supervised loss figure">
+        <a
+          href={siteUrl(`${figureRoot}loss-supervised.svg`)}
+          aria-label="Open full-size figure: Supervised cross-entropy by one-based update, measured in nats per example."
+          title="Open full-size figure: Supervised cross-entropy by one-based update, measured in nats per example."
+        >
+          <img
+            src={siteUrl(`${figureRoot}loss-supervised.svg`)}
+            alt="Supervised cross-entropy by one-based update, measured in nats per example."
+            width="900"
+            height="500"
+            loading="lazy"
+          />
+        </a>
+      </div>
+      <figcaption>
+        This is supervised cross-entropy in nats per example. The x-axis restarts at one for each
+        phase, so it does not show one continuous training history.
+      </figcaption>
+    </figure>
+
+    <figure class="lesson-visual">
+      <div class="figure-scroll" tabindex="0" aria-label="Scrollable classification quality figure">
+        <a
+          href={siteUrl(`${figureRoot}quality-classification.svg`)}
+          aria-label="Open full-size figure: Final macro balanced accuracy for the selected baseline ViT and fixed color-centroid control, with the predeclared 0.40 floor."
+          title="Open full-size figure: Final macro balanced accuracy for the selected baseline ViT and fixed color-centroid control, with the predeclared 0.40 floor."
+        >
+          <img
+            src={siteUrl(`${figureRoot}quality-classification.svg`)}
+            alt="Final macro balanced accuracy for the selected baseline ViT and fixed color-centroid control, with the predeclared 0.40 floor."
+            width="900"
+            height="500"
+            loading="lazy"
+          />
+        </a>
+      </div>
+      <figcaption>
+        The selected baseline ViT scores 0.318522 and the fixed color control scores 0.363836. Both
+        are below the 0.40 floor, so the pilot classification result fails its gate.
+      </figcaption>
+    </figure>
+
+    <figure class="lesson-visual">
+      <div class="figure-scroll" tabindex="0" aria-label="Scrollable brightness robustness figure">
+        <a
+          href={siteUrl(`${figureRoot}quality-brightness.svg`)}
+          aria-label="Open full-size figure: Balanced accuracy before and after a brightness increase, with the allowed maximum drop."
+          title="Open full-size figure: Balanced accuracy before and after a brightness increase, with the allowed maximum drop."
+        >
+          <img
+            src={siteUrl(`${figureRoot}quality-brightness.svg`)}
+            alt="Balanced accuracy before and after a brightness increase, with the allowed maximum drop."
+            width="900"
+            height="500"
+            loading="lazy"
+          />
+        </a>
+      </div>
+      <figcaption>
+        A brightness increase lowers balanced accuracy by 0.024903, within the declared 0.15 maximum
+        drop. This robustness pass does not change the failed classification result.
+      </figcaption>
+    </figure>
+
+    <figure class="lesson-visual">
+      <div class="figure-scroll" tabindex="0" aria-label="Scrollable calibration figure">
+        <a
+          href={siteUrl(`${figureRoot}quality-calibration.svg`)}
+          aria-label="Open full-size figure: Raw and development-temperature-calibrated final negative log likelihood against the allowed degradation."
+          title="Open full-size figure: Raw and development-temperature-calibrated final negative log likelihood against the allowed degradation."
+        >
+          <img
+            src={siteUrl(`${figureRoot}quality-calibration.svg`)}
+            alt="Raw and development-temperature-calibrated final negative log likelihood against the allowed degradation."
+            width="900"
+            height="500"
+            loading="lazy"
+          />
+        </a>
+      </div>
+      <figcaption>
+        The development-selected temperature is 1.020172. Calibrated final NLL is 1.508793 versus
+        1.508965 raw, within the 0.05 degradation limit.
+      </figcaption>
+    </figure>
+
+    <figure class="lesson-visual">
+      <div class="figure-scroll" tabindex="0" aria-label="Scrollable retrieval figure">
+        <a
+          href={siteUrl(`${figureRoot}quality-retrieval.svg`)}
+          aria-label="Open full-size figure: Final retrieval mAP for four representation arms over 547 queries."
+          title="Open full-size figure: Final retrieval mAP for four representation arms over 547 queries."
+        >
+          <img
+            src={siteUrl(`${figureRoot}quality-retrieval.svg`)}
+            alt="Final retrieval mAP for four representation arms over 547 queries."
+            width="900"
+            height="500"
+            loading="lazy"
+          />
+        </a>
+      </div>
+      <figcaption>
+        Selected retrieval mAP is 0.234651 across 547 final queries. The public ranked IDs and class
+        and component labels allow this value to be reconstructed without publishing embeddings.
+      </figcaption>
+    </figure>
+  </section>
+</GuideLayout>

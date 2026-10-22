@@ -1,0 +1,10 @@
+{
+  "id": "sharded-training-multiprocess",
+  "title": "Restart a real two-controller JAX job",
+  "description": "A local CPU extension that checks global weighted gradients, all-rank checkpoint publication, actual worker termination and fresh whole-cluster recovery.",
+  "status": "draft",
+  "starter": "starter/model.py",
+  "solution": "solution/model.py",
+  "checker": "check.py",
+  "scope": "Local CPU process recovery only. No multi-machine, TPU, performance, or production durability qualification."
+}

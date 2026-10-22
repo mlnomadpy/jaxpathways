@@ -1,0 +1,327 @@
+{
+  "candidate": "/Users/tahabsn/Documents/ChatGPT/jaxpathways/projects/sharded-training/multiprocess/solution/model.py",
+  "candidate_sha256": "a7a7c1aca9009d284c41014ea1c6d1f5b7a9b4b1b60991491f5073f1a46ea8a5",
+  "equivalent_candidate": {
+    "math_passed": true,
+    "no_op_source_edit": "trailing comment",
+    "sha256": "b840ef314737c7c3ddf2cb130b6f5659abeeb0af00f058dfa94ab7978c3d12b3"
+  },
+  "math": {
+    "global_gradient": [
+      -0.9500000178813934,
+      -0.3999999761581421
+    ],
+    "loss_numerator": 0.48250002443790496,
+    "negative_controls": [
+      "local-mean",
+      "weight-only",
+      "stale-key",
+      "stale-cursor",
+      "duplicate-shard",
+      "missing-rank-early-commit"
+    ],
+    "next_momentum": [
+      -0.8540000200271607,
+      -0.45599997639656065
+    ],
+    "next_weights": [
+      0.342700012922287,
+      -0.1772000041604042
+    ]
+  },
+  "schema": "l10b-check-report-v1",
+  "stage": "worker-loss",
+  "work": "/private/tmp/l10b-final-preflight-worker-loss-20261021",
+  "worker_loss": {
+    "committed_boundary": {
+      "all_processes": [
+        {
+          "pid": 77837,
+          "rank": 0,
+          "returncode": -6
+        },
+        {
+          "pid": 77838,
+          "rank": 1,
+          "returncode": -9
+        }
+      ],
+      "attempt_id": "372e50d70a984dcf9725d1a80acce9e7",
+      "logs": {
+        "0": "E1021 15:20:16.559030 133054710 coordination_service.cc:1653] Shutdown barrier in coordination service has failed:\nDEADLINE_EXCEEDED: Barrier timed out. Id: Shutdown::4490202586736703801::0. This usually happens because a task triggered the barrier too early or too slowly. Please look at the task logs (both timed out and first task) to debug further.\n# of tasks that reached the barrier: 1/2.\nThe first task at the barrier: 0. Some timed out task names:\n1\n [type.googleapis.com/tensorflow.CoordinationServiceError=''] [type.googleapis.com/tensorflow.BarrierError='\\n\\x1dShutdown::4490202586736703801']\nThis suggests that the workers are out of sync. Either at least one worker (a) crashed early due to program error or scheduler events (e.g. preemption, eviction), (b) was too fast in its execution, or (c) too slow / hanging. Check the logs (both the program and scheduler events) for an earlier error to identify the root cause.\nE1021 15:20:16.559121 133054710 coordination_service.cc:1681] Use error polling to propagate the following error to all tasks: INTERNAL: Shutdown barrier has failed.\nBarrier result: 'DEADLINE_EXCEEDED: Barrier timed out. Id: Shutdown::4490202586736703801::0. This usually happens because a task triggered the barrier too early or too slowly. Please look at the task logs (both timed out and first task) to debug further.\n# of tasks that reached the barrier: 1/2.\nThe first task at the barrier: 0. Some timed out task names:\n1\n [type.googleapis.com/tensorflow.CoordinationServiceError=''] [type.googleapis.com/tensorflow.BarrierError='\\n\\x1dShutdown::4490202586736703801'] [type.googleapis.com/tensorflow.CoordinationServiceError='']\nE1021 15:20:16.559381 133054751 coordination_service_agent.cc:281] Polled an error from coordination service (this can be an error from this or another task).\nF1021 15:20:16.559401 133054698 client.h:80] Terminating process because the JAX distributed service detected fatal errors. This most likely indicates that another task died; see the other task logs for more details. Disable Python buffering, i.e. `python -u`, to be sure to see all the previous output. absl::Status: INTERNAL: Failed to disconnect from coordination service with status: INTERNAL: Shutdown barrier has failed.\nBarrier result: 'DEADLINE_EXCEEDED: Barrier timed out. Id: Shutdown::4490202586736703801::0. This usually happens because a task triggered the barrier too early or too slowly. Please look at the task logs (both timed out and first task) to debug further.\n# of tasks that reached the barrier: 1/2.\nThe first task at the barrier: 0. Some timed out task names:\n1\n [type.googleapis.com/tensorflow.CoordinationServiceError=''] [type.googleapis.com/tensorflow.BarrierError='\\n\\x1dShutdown::4490202586736703801']\n\nRPC: /tensorflow.CoordinationService/ShutdownTask [type.googleapis.com/tensorflow.CoordinationServiceError='']Proceeding with agent shutdown anyway. This is usually caused by an earlier error during execution. Check the logs of (a) this task, (b) the leader (usually slice 0 task 0) and (c) the scheduler (e.g. preemption, eviction) for an earlier error to debug further. [type.googleapis.com/tensorflow.CoordinationServiceError='']\n*** Check failure stack trace: ***\n    @        0x321f580a4  absl::lts_20250814::log_internal::LogMessage::Flush()\n    @        0x321fa1d40  std::__1::__function::__func<>::operator()()\n    @        0x31eab01fc  std::__1::__function::__func<>::operator()()\n    @        0x31eac70a8  xla::CoordinationServiceAgent::SetError()\n    @        0x31eac8df4  xla::CoordinationServiceAgent::Shutdown()\n    @        0x31eaaef0c  xla::DistributedRuntimeCoordinationServiceClient::Shutdown()\n    @        0x321f9df98  nanobind::detail::func_create<>()::{lambda()#1}::__invoke()\n    @        0x31ea03db0  nanobind::detail::nb_func_vectorcall_simple_1()\n    @        0x1020be878  PyObject_Vectorcall\n    @        0x10221d968  _TAIL_CALL_CALL\n    @        0x102219c94  _PyEval_EvalFrameDefault\n    @        0x10222da98  _PyEval_Vector\n    @        0x1022e8c3c  atexit_callfuncs\n    @        0x1022aa154  _Py_Finalize\n    @        0x1022ae2ec  Py_Exit\n    @        0x1022b2e38  _PyErr_PrintEx\n    @        0x1022b3860  _PyRun_SimpleFileObject\n    @        0x1022b264c  _PyRun_AnyFileObject\n    @        0x1022e5f28  pymain_run_file\n    @        0x1022e57d4  Py_RunMain\n    @        0x1022e6e40  pymain_main\n    @        0x102038d80  main\n    @        0x182f57e00  start\n",
+        "1": ""
+      },
+      "rank_info": [
+        {
+          "attempt_id": "372e50d70a984dcf9725d1a80acce9e7",
+          "backend": "cpu",
+          "global_device_count": 2,
+          "global_devices": [
+            "TFRT_CPU_0",
+            "TFRT_CPU_2048"
+          ],
+          "jax": "0.9.2",
+          "jaxlib": "0.9.2",
+          "local_device_count": 1,
+          "local_devices": [
+            "TFRT_CPU_0"
+          ],
+          "pid": 77837,
+          "process_count": 2,
+          "process_index": 0
+        },
+        {
+          "attempt_id": "372e50d70a984dcf9725d1a80acce9e7",
+          "backend": "cpu",
+          "global_device_count": 2,
+          "global_devices": [
+            "TFRT_CPU_0",
+            "TFRT_CPU_2048"
+          ],
+          "jax": "0.9.2",
+          "jaxlib": "0.9.2",
+          "local_device_count": 1,
+          "local_devices": [
+            "TFRT_CPU_2048"
+          ],
+          "pid": 77838,
+          "process_count": 2,
+          "process_index": 1
+        }
+      ],
+      "ready": {
+        "pid": 77837,
+        "step": 1
+      },
+      "restart_processes": {
+        "attempt_id": "9029988b908743e08163e872a6bee642",
+        "processes": [
+          {
+            "pid": 77860,
+            "rank": 0,
+            "returncode": 0
+          },
+          {
+            "pid": 77861,
+            "rank": 1,
+            "returncode": 0
+          }
+        ],
+        "rank_info": [
+          {
+            "attempt_id": "9029988b908743e08163e872a6bee642",
+            "backend": "cpu",
+            "global_device_count": 2,
+            "global_devices": [
+              "TFRT_CPU_0",
+              "TFRT_CPU_2048"
+            ],
+            "jax": "0.9.2",
+            "jaxlib": "0.9.2",
+            "local_device_count": 1,
+            "local_devices": [
+              "TFRT_CPU_0"
+            ],
+            "pid": 77860,
+            "process_count": 2,
+            "process_index": 0
+          },
+          {
+            "attempt_id": "9029988b908743e08163e872a6bee642",
+            "backend": "cpu",
+            "global_device_count": 2,
+            "global_devices": [
+              "TFRT_CPU_0",
+              "TFRT_CPU_2048"
+            ],
+            "jax": "0.9.2",
+            "jaxlib": "0.9.2",
+            "local_device_count": 1,
+            "local_devices": [
+              "TFRT_CPU_2048"
+            ],
+            "pid": 77861,
+            "process_count": 2,
+            "process_index": 1
+          }
+        ]
+      },
+      "stop_results": [
+        {
+          "pid": 77837,
+          "rank": 0,
+          "returncode": -6
+        },
+        {
+          "pid": 77838,
+          "rank": 1,
+          "returncode": -9
+        }
+      ],
+      "survivor_before_stop": {
+        "alive": true,
+        "pid": 77837,
+        "rank": 0
+      },
+      "termination": {
+        "pid": 77838,
+        "rank": 1,
+        "returncode": -9,
+        "signal": "SIGKILL"
+      },
+      "verified": {
+        "candidate_sha256": "a7a7c1aca9009d284c41014ea1c6d1f5b7a9b4b1b60991491f5073f1a46ea8a5",
+        "current_generation": "attempts/9029988b908743e08163e872a6bee642/gen-0004",
+        "final_step": 4,
+        "momentum": [
+          -3.1627399921417236,
+          1.697509765625
+        ],
+        "weights": [
+          0.6384541392326355,
+          -0.31735193729400635
+        ],
+        "world": 2
+      }
+    },
+    "incomplete_generation": {
+      "boundary": {
+        "pid": 77865,
+        "step": 1
+      },
+      "current_generation": "attempts/70a2e8f3cd0a4e19b31c3366253c816e/gen-0001",
+      "current_step": 1,
+      "first_kill": {
+        "pid": 77866,
+        "rank": 1,
+        "returncode": -9,
+        "signal": "SIGKILL"
+      },
+      "first_stop_results": [
+        {
+          "pid": 77865,
+          "rank": 0,
+          "returncode": -6
+        },
+        {
+          "pid": 77866,
+          "rank": 1,
+          "returncode": -9
+        }
+      ],
+      "kill": {
+        "pid": 77920,
+        "rank": 1,
+        "returncode": -9,
+        "signal": "SIGKILL"
+      },
+      "manifest_exists": false,
+      "rank0_temp_exists": true,
+      "rank1_final_exists": false,
+      "restart_processes": {
+        "attempt_id": "2e9db597b8654d53a8dbaf2f67c52d42",
+        "processes": [
+          {
+            "pid": 77927,
+            "rank": 0,
+            "returncode": 0
+          },
+          {
+            "pid": 77928,
+            "rank": 1,
+            "returncode": 0
+          }
+        ],
+        "rank_info": [
+          {
+            "attempt_id": "2e9db597b8654d53a8dbaf2f67c52d42",
+            "backend": "cpu",
+            "global_device_count": 2,
+            "global_devices": [
+              "TFRT_CPU_0",
+              "TFRT_CPU_2048"
+            ],
+            "jax": "0.9.2",
+            "jaxlib": "0.9.2",
+            "local_device_count": 1,
+            "local_devices": [
+              "TFRT_CPU_0"
+            ],
+            "pid": 77927,
+            "process_count": 2,
+            "process_index": 0
+          },
+          {
+            "attempt_id": "2e9db597b8654d53a8dbaf2f67c52d42",
+            "backend": "cpu",
+            "global_device_count": 2,
+            "global_devices": [
+              "TFRT_CPU_0",
+              "TFRT_CPU_2048"
+            ],
+            "jax": "0.9.2",
+            "jaxlib": "0.9.2",
+            "local_device_count": 1,
+            "local_devices": [
+              "TFRT_CPU_2048"
+            ],
+            "pid": 77928,
+            "process_count": 2,
+            "process_index": 1
+          }
+        ]
+      },
+      "staged": {
+        "pid": 77919,
+        "rank": 0,
+        "step": 2
+      },
+      "stop_results": [
+        {
+          "pid": 77919,
+          "rank": 0,
+          "returncode": 0
+        },
+        {
+          "pid": 77920,
+          "rank": 1,
+          "returncode": -9
+        }
+      ],
+      "survivor": {
+        "alive": true,
+        "pid": 77919,
+        "rank": 0
+      },
+      "verified": {
+        "candidate_sha256": "a7a7c1aca9009d284c41014ea1c6d1f5b7a9b4b1b60991491f5073f1a46ea8a5",
+        "current_generation": "attempts/2e9db597b8654d53a8dbaf2f67c52d42/gen-0004",
+        "final_step": 4,
+        "momentum": [
+          -3.1627399921417236,
+          1.697509765625
+        ],
+        "weights": [
+          0.6384541392326355,
+          -0.31735193729400635
+        ],
+        "world": 2
+      }
+    },
+    "runtime": {
+      "implementation": "CPython",
+      "jax": "0.9.2",
+      "jaxlib": "0.9.2",
+      "numpy": "2.4.4",
+      "python": "3.14.3"
+    },
+    "schema": "l10b-worker-loss-stage-v1",
+    "source_hashes": {
+      "check.py": "f9ffbef4d9f38de45c0bff63f25119aec6e1cbcc5beaca635118f79f8c7e72ad",
+      "solution/model.py": "a7a7c1aca9009d284c41014ea1c6d1f5b7a9b4b1b60991491f5073f1a46ea8a5",
+      "starter/model.py": "166311a5dd9f47b77e0fdbed1cc4e116c4d0a96932fede3c7463f6af4770272d",
+      "supervisor.py": "30c0e9724565089e9796b8be39e6c763a3f874ad3fd8c9b8c8de0a877d1db330",
+      "worker.py": "f9838429d447308e54588c82523de0370e0525d92c748367e2a6fdccb94bbb03"
+    }
+  }
+}

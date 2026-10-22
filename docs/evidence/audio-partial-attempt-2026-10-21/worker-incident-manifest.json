@@ -1,0 +1,96 @@
+{
+  "activation_plan": {
+    "path": "/private/tmp/c04-sol-v6-final-activation-plan-20261021/plan.json",
+    "sha256": "55b06c4bc1e5e4be64ae4e9a8570413b2c6d1e6322347a3ae526bac7679acf1f"
+  },
+  "actual_command": "/private/tmp/jaxpathways-c04-luna-20261021/env/venv/bin/python /Users/tahabsn/Documents/ChatGPT/jaxpathways/projects/audio-model-300m/run_pilot.py --lock /private/tmp/c04-v6-final-original-cpu-attempt-20261021/approved-run-lock.json --output /private/tmp/c04-v6-final-original-cpu-attempt-20261021/normal-run-must-not-exist",
+  "actual_quality_report": "unavailable; run did not produce run-report.json or development/final quality metrics",
+  "gate": {
+    "enabled": true,
+    "expected_project_lock_sha256": "c3c9943e6d87f15e3193040ddd49ef0428fb4612dc118439891b4d76ae21ba81",
+    "only_source_change": "CORPUS_EXECUTION_ENABLED False->True",
+    "project_lock_sha256": "c3c9943e6d87f15e3193040ddd49ef0428fb4612dc118439891b4d76ae21ba81"
+  },
+  "lock": {
+    "expected_sha256": "b5828ae7cb02c514ddc28ddebacef0da89660292a3aefd00f096e493c0e79ae1",
+    "path": "/private/tmp/c04-v6-final-original-cpu-attempt-20261021/approved-run-lock.json",
+    "sha256": "b5828ae7cb02c514ddc28ddebacef0da89660292a3aefd00f096e493c0e79ae1"
+  },
+  "negative_harness": {
+    "final_negative_receipt_present": false,
+    "path": "/private/tmp/c04-v6-final-original-cpu-attempt-20261021/check_negatives.py",
+    "sha256": "406e0dc67af843a17801717bbb16450d34f7c95098afb79ee4bd1dbc697e9b1c"
+  },
+  "no_update_preflight": {
+    "archive_bytes_opened": false,
+    "candidate_imported": false,
+    "model_imported": false,
+    "model_initialized": false,
+    "output_created": false,
+    "path": "/private/tmp/c04-v6-final-original-cpu-attempt-20261021/approved-public-preflight.json",
+    "role_rows": 2998,
+    "sha256": "521db3ac31de4ecaa6116e26a9b4493d961a867b974af0ca4294e9bec811cee1",
+    "stages": 9,
+    "status": "validated-no-updates",
+    "updates": 0
+  },
+  "observed_progress": {
+    "last_stage": "masked_reconstruction",
+    "last_update": 2,
+    "latest": {
+      "directory": "update-000002",
+      "state_sha256": "91736f308b3a1be89c386fdcceaadf35a212be130836463ee11d7b0fe0c11ed9",
+      "update": 2
+    },
+    "run_report_present": false,
+    "update_rows": 2
+  },
+  "origin": "negative harness mistakenly invoked ordinary approved route with gate true; the route defaulted to all stages. subprocess.run had timeout=30 seconds.",
+  "partial_artifacts": [
+    {
+      "bytes": 136,
+      "path": "/private/tmp/c04-v6-final-original-cpu-attempt-20261021/normal-run-must-not-exist/checkpoints/masked_reconstruction/latest.json",
+      "sha256": "ab9e52bccbfde1e2aa8351df9d56566b54986fa6379acbe055d747bf34add0b7"
+    },
+    {
+      "bytes": 13933,
+      "path": "/private/tmp/c04-v6-final-original-cpu-attempt-20261021/normal-run-must-not-exist/checkpoints/masked_reconstruction/update-000001/metadata.json",
+      "sha256": "ae3ed2f9925f2bef22c86883b9e00fd7652f153d59a98a374b74a654d47cda49"
+    },
+    {
+      "bytes": 21055,
+      "path": "/private/tmp/c04-v6-final-original-cpu-attempt-20261021/normal-run-must-not-exist/checkpoints/masked_reconstruction/update-000001/receipt.json",
+      "sha256": "eee986aa455e8deada8900e06193e060d0b897d36f51709ccb03b37343981d57"
+    },
+    {
+      "bytes": 387666,
+      "path": "/private/tmp/c04-v6-final-original-cpu-attempt-20261021/normal-run-must-not-exist/checkpoints/masked_reconstruction/update-000001/state.npz",
+      "sha256": "7fbed1299f701592182f966354b8d9e9d7c002ad3de7c1990695921e12180c4b"
+    },
+    {
+      "bytes": 14053,
+      "path": "/private/tmp/c04-v6-final-original-cpu-attempt-20261021/normal-run-must-not-exist/checkpoints/masked_reconstruction/update-000002/metadata.json",
+      "sha256": "8fcffb01cc370754c549e50010f4606f8712eb370ed5d7387e271f1a18ce7494"
+    },
+    {
+      "bytes": 21243,
+      "path": "/private/tmp/c04-v6-final-original-cpu-attempt-20261021/normal-run-must-not-exist/checkpoints/masked_reconstruction/update-000002/receipt.json",
+      "sha256": "fdfbb4773f67df767f8543b6ea6f4f51e0aa0dddcf3fec972a11a6e69aa0268c"
+    },
+    {
+      "bytes": 388621,
+      "path": "/private/tmp/c04-v6-final-original-cpu-attempt-20261021/normal-run-must-not-exist/checkpoints/masked_reconstruction/update-000002/state.npz",
+      "sha256": "91736f308b3a1be89c386fdcceaadf35a212be130836463ee11d7b0fe0c11ed9"
+    },
+    {
+      "bytes": 1342,
+      "path": "/private/tmp/c04-v6-final-original-cpu-attempt-20261021/normal-run-must-not-exist/checkpoints/masked_reconstruction/updates.jsonl",
+      "sha256": "2a6c25ad593f1527db5362612a65d98e4e7939e9e69814be6b23eba4a02ddd57"
+    }
+  ],
+  "preserved_output_path": "/private/tmp/c04-v6-final-original-cpu-attempt-20261021/normal-run-must-not-exist",
+  "schema": "c04-v6-single-authorized-attempt-early-interruption-v1",
+  "second_attempt_started": false,
+  "session_handle": "not captured by the wrapper; root process inspection confirmed no active run_pilot.py/check_negatives.py/C04 attempt process; timeout killed/reaped the direct child.",
+  "status": "early interruption; no second attempt issued"
+}

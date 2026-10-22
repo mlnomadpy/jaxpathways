@@ -1,0 +1,20 @@
+{
+  "scope": "Single bounded local CPU image pilot and independently reconstructed public numeric teaching packet. Failed classification floor; no model promotion or rights clearance.",
+  "actual_stages": 11,
+  "actual_optimizer_updates": 384,
+  "quality_gate": "FAIL",
+  "selected_balanced_accuracy": 0.3185224830158059,
+  "minimum": 0.4,
+  "fixed_color_balanced_accuracy": 0.3638358559328016,
+  "files": {
+    "final-run-handoff.json": "0c728bd80eb0d6537fa885d6f560fd08095a7b7a7ee278522d7547e97239d28d",
+    "independent-public-review.json": "26f12e72aa0275079a35d091bcf1f693558e627eee2fc2647a475a57c23f005e",
+    "independent-canonical-discovery-review.json": "fa79b5e5e41b3db056a04a83cb7aef4183b12670a4c25e3884754c8a3c83aa66",
+    "public-packet-index.json": "3f692a60df929af9d18f25691a15e3015afa3da038ca2e2c4679ccf3e4ca9361",
+    "independent-site-package-review.json": "d5c2db7837e1dce4ec250684197a9d5a5e05594493cd82b986e911893ac31de1",
+    "independent-ancestry.json": "6fdc7386b366b75492377699e2fe26893a72a2384d76bc934329c693fdce8a15",
+    "independent-coldload.json": "6a12b0023090ad9ba11e3af48054fa534782e205727171c397f04626f242956a",
+    "independent-postrun.json": "6f9166d77a91f54517dce31c84b956de4b42ffd51e99a670d8e8024256d5060c"
+  },
+  "canonical_discovery": "Three descriptor-driven optional pilots; all ten full capstones remain Planned. Pinned C03 renderer/audit tamper checks and corrected scoped UI labels independently reviewed."
+}

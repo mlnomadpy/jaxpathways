@@ -1,5 +1,35 @@
 [
   {
+    "version": "0.15.1",
+    "date": "2026-10-21",
+    "editionKey": "jaxpathways-2026-review-edition",
+    "modifiedAt": "2026-10-22T00:11:05Z",
+    "title": "Describe optional pilots consistently across the course",
+    "summary": "Scope pilot and preparation status labels accurately and register the image workflow in shared discovery metadata without changing its frozen source or measurements.",
+    "changes": [
+      "Registered the image CPU pilot in the canonical project-plan descriptor, agent-facing discovery and learning-material audit. Its guide, evidence archive and pinned public manifest now come from the same metadata as the parent page and catalog link. Three optional CPU pilots are discoverable; all ten full capstones remain Planned.",
+      "Separated the image pilot's In development label from the full capstone's Planned status and removed an unrelated preparation harness checker badge. Scoped the two-controller extension and its parent preparation project separately. Added a direct source-and-numeric-evidence download and retained full-size keyboard figure access.",
+      "Verified the exact 28 as-run image sources and 29 public packet files before publishing the curated 26 loose documentation/numeric/figure assets. Renderer and audit reject changed manifests, source, numeric evidence or descriptor pins. The image classification failure and the separate partial audio incident remain unchanged.",
+      "Preserved the prior 0.15.0 snapshot and publication edition key. This patch updates the pinned modification timestamp and rendered fingerprint while retaining the publication identity. The 104 lesson bodies, their retained CPU receipts and phase maturity levels are unchanged."
+    ]
+  },
+  {
+    "version": "0.15.0",
+    "date": "2026-10-21",
+    "editionKey": "jaxpathways-2026-review-edition",
+    "modifiedAt": "2026-10-21T23:55:41Z",
+    "title": "Study image outcomes and recover a two-controller training job",
+    "summary": "Add explained image-pilot evidence and a local multi-controller recovery exercise, with explicit EPUB edition metadata and honest limits for ongoing work.",
+    "changes": [
+      "Added the exact 25,605-parameter flower-image CPU source freeze and public numeric packet for eleven stages and 384 updates. The selected classifier fails its 0.40 balanced-accuracy floor and trails its fixed color control. All ten full model/retrieval capstones remain Planned.",
+      "Added a discoverable image-pilot guide with seven explained figures, separate objective units, development-only selection and calibration, raw uncalibrated probabilities and reconstructible retrieval rankings. Full-size keyboard links, intrinsic figure geometry and mobile checks support reading the plots. Source and numeric downloads exclude photos, features, fitted processors and weights.",
+      "Added an optional two-controller local POSIX CPU recovery exercise with count-weighted uneven batches, an independent NumPy oracle, full training-state replay and observed worker loss at committed and incomplete checkpoint boundaries. Whole-cluster restart does not qualify remote networking, TPU execution, Windows recovery or storage durability.",
+      "Introduced an explicit publication edition key, pinned UTC modification time and separate deterministic rendered-content fingerprint for EPUB. Minor revisions retain the publication identity. Release preparation rejects incomplete or invalid new metadata before writing an immutable snapshot; legacy releases retain their historical fallback.",
+      "Retained source-bound independent checks, the frozen 0.14.1 patch hosted results and bounded browser/native-reader evidence. All 104 lesson bodies remain unchanged; independent teaching, broader native-reader and assistive-technology qualification remain open.",
+      "Recorded an audio validation incident separately: a stale harness started the single local attempt, with two committed masked-reconstruction updates and no final evaluation. Exact as-run sources and partial artifacts are retained privately; the gate is closed and the validation wrapper is preflight-only. No replacement attempt, model promotion or C04 runtime inclusion is part of this candidate."
+    ]
+  },
+  {
     "version": "0.14.1",
     "date": "2026-10-21",
     "title": "Keep recovery checks stable across Python formatting",

@@ -1,0 +1,5 @@
+# Two-controller recovery qualification
+
+The [verification](verification.json) binds current runtime sources and the [fresh root all-stage run](root-all.json). Worker all/checkpoint/worker-loss receipts use the same sources. Independent probes reject changed executable source, missing approval and changed configuration before JAX startup with checkpoint state unchanged; a valid fresh two-process restore matches the independent NumPy trajectory. The retained earlier config-timing counterexample is historical. An earlier missing-sidecar counterexample receipt was unavailable during collection; its original bytes are not claimed retained. The current independent rejection is retained.
+
+Worker deaths are observed local process events. Killing rank1 ends that process; the committed-boundary survivor later exits during JAX shutdown. Recovery restarts both controllers. This local CPU instructional protocol does not qualify remote execution, TPU, storage durability, survivor continuity, scaling or human learning. Copied raw receipts remain byte-for-byte.

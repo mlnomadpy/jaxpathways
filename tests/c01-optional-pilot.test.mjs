@@ -8,7 +8,7 @@ const projectId = 'embedding-model-300m';
 const projectRoot = `projects/${projectId}`;
 const indexPath = `${projectRoot}/reference/evidence-index.json`;
 
-test('C01 and C02 are scoped pilots while all ten full capstones stay planned', () => {
+test('C01, C02 and C03 are scoped pilots while all ten full capstones stay planned', () => {
   const plans = JSON.parse(readFileSync('curriculum/project-plans.json', 'utf8'));
   const projects = JSON.parse(readFileSync('curriculum/projects.json', 'utf8')).map((path) =>
     JSON.parse(readFileSync(path, 'utf8')),
@@ -18,7 +18,7 @@ test('C01 and C02 are scoped pilots while all ten full capstones stay planned', 
   const pilotPlans = plans.filter((plan) => plan.pilot);
   assert.deepEqual(
     pilotPlans.map((plan) => plan.id),
-    [projectId, 'causal-model-300m'],
+    [projectId, 'causal-model-300m', 'image-model-300m'],
   );
   assert.equal(
     projects.some((project) => project.id === projectId),
@@ -33,6 +33,19 @@ test('C01 and C02 are scoped pilots while all ten full capstones stay planned', 
   });
   assert.match(pilotPlans[0].pilot.scope, /floors failed/i);
   assert.match(pilotPlans[0].pilot.scope, /does not qualify/i);
+  const c03 = pilotPlans[2];
+  assert.match(c03.pilot.scope, /0\.318522.*0\.40.*0\.363836/);
+  assert.equal(c03.pilot.anchor, 'cpu-pilot');
+  assert.equal(c03.pilot.download, 'image-model-300m-pilot.zip');
+  assert.equal(c03.pilot.evidence, 'reference/evidence/v14/packet-manifest.json');
+  assert.equal(
+    c03.pilot.evidenceSha256,
+    '3b1dcfe589fffc25a43da336beb07d82334b6f8971a73084e2b989b6e8f2a794',
+  );
+  assert.deepEqual(c03.pilot.guide, {
+    path: 'project-guides/image-model-300m-pilot.html',
+    label: 'Read the flower-model pilot guide and figures',
+  });
 });
 
 test('audit reports optional pilot evidence separately from full-capstone status', () => {
@@ -41,15 +54,18 @@ test('audit reports optional pilot evidence separately from full-capstone status
   assert.equal(result.status, 0, result.stderr);
   const audit = JSON.parse(result.stdout);
   const c01 = audit.items.find((item) => item.kind === 'plans' && item.id === projectId);
+  const c03 = audit.items.find((item) => item.kind === 'plans' && item.id === 'image-model-300m');
   assert(c01);
+  assert(c03);
   assert.equal(c01.level, 'planned');
   assert.equal(audit.summary.fullCapstonesPlanned, 10);
-  assert.equal(audit.summary.optionalPilots, 2);
+  assert.equal(audit.summary.optionalPilots, 3);
   const finding = audit.findings.find((item) => item.id === 'production-capstones');
   assert.equal(finding.status, 'open');
   assert.match(finding.title, /all ten full model-lifecycle capstones remain planned/i);
   assert.match(finding.action, /retrieval-quality floors failed/i);
   assert.match(finding.action, /all six branches failed their frozen QA quality floors/i);
+  assert.match(finding.action, /C03.*0\.318522.*quality gate failed/);
   assert.equal(typeof c01.pilotAvailable, 'boolean');
   assert.equal(c01.pilotAvailable, existsSync(indexPath));
   if (!c01.pilotAvailable) {
@@ -60,6 +76,15 @@ test('audit reports optional pilot evidence separately from full-capstone status
     assert(Object.keys(c01.pilotSourceHashes).length > 0);
     assert(Object.keys(c01.pilotPublicFiles).length > 0);
   }
+  assert.equal(c03.level, 'planned');
+  assert.equal(c03.pilotAvailable, true);
+  assert.equal(
+    c03.pilotEvidenceSha256,
+    '3b1dcfe589fffc25a43da336beb07d82334b6f8971a73084e2b989b6e8f2a794',
+  );
+  assert.equal(Object.keys(c03.pilotSourceHashes).length, 28);
+  assert.equal(Object.keys(c03.pilotPublicFiles).length, 26);
+  assert.match(c03.validation, /evidence index.*3b1dcfe/);
 });
 
 test('built C01 route and source archive expose only hash-verified public evidence', () => {
