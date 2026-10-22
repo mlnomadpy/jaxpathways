@@ -2,7 +2,7 @@
   "kind": "course-review-0.16.1",
   "recordedAt": "2026-10-22T03:09:19.221534+00:00",
   "baseCommit": "f858816ead940aeb969e23fbc32df232da51196f",
-  "sourceIdentity": "Source SHA-256 map below; implementation commit recorded separately after committing this packet.",
+  "sourceIdentity": "Implementation commit above and exact source SHA-256 map below. This later metadata-only commit pins the reviewed implementation.",
   "sourceSha256": {
     "src/lib/code-teaching.js": "21f63ed37e23f838fc5551ce8235712950405cde09342483e01d74545899cb12",
     "tests/code-teaching-api.test.mjs": "5cf3147cfb077350782c4ef048780506b2dcda5bda8368fd7da5d12deabae268",
@@ -177,7 +177,8 @@
     "preview": "http://127.0.0.1:4201/book.html",
     "samples": [
       "book overview version and scope label",
-      "rl-03 figure, provenance, interpretation and API building block text"
+      "rl-03 figure, provenance, interpretation and API building block text",
+      "offline HTML post-training chapter title, status and preparation text"
     ],
     "result": "readable sampled layout and explicit available-draft scope; frozen preview handoff opened"
   },
@@ -222,5 +223,6 @@
     "print-independent-review.json": "8917490f06075da93fda72c132d92b6e43835ea33ca80752e06e6753935e7041",
     "print-receipt.json": "080abdf631544eadef18d141dbc982b4cb3df55d6d863d500acc4e6b5cd445af",
     "print.log": "c53bd555ef581b5ff347d6e47f50a84c70de12fd58a354dcb0e94a92127c269d"
-  }
+  },
+  "implementationCommit": "9f123dd92f18f910486b4da13b360aeea10e6054"
 }

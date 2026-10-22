@@ -1,6 +1,6 @@
 # Author review guide: 0.16.1
 
-Open the [frozen book preview](http://127.0.0.1:4201/book.html) and keep your observations in [blank feedback notes](review-notes-0.16.1.md). This patch builds on [draft PR #69](https://github.com/mlnomadpy/jaxpathways/pull/69). It has not been merged or deployed. The [qualification packet](evidence/course-review-0.16.1/verification.json) records exact source hashes and artifact identity.
+Open the [frozen book preview](http://127.0.0.1:4201/book.html) and keep your observations in [blank feedback notes](review-notes-0.16.1.md). Implementation commit `9f123dd92f18f910486b4da13b360aeea10e6054` is pinned for review. This patch builds on [draft PR #69](https://github.com/mlnomadpy/jaxpathways/pull/69). It has not been merged or deployed. The [qualification packet](evidence/course-review-0.16.1/verification.json) records exact source hashes and artifact identity.
 
 ## Read the code guidance
 
