@@ -1,3 +1,13 @@
+# Author review: 0.16.0
+
+Start with the [frozen book preview](http://127.0.0.1:4200/book.html), [sequence PPO guide](http://127.0.0.1:4200/project-guides/posttraining-audit.html), and [review guide](review-guide-0.16.0.md). Keep feedback in the new [blank notes](review-notes-0.16.0.md).
+
+The source and evidence are pinned at `a0715b45b0caa03729e9d17680f258bbc36e3ef1` on the [review branch](https://github.com/mlnomadpy/jaxpathways/tree/codex/sequence-ppo-review), based on draft PR #68. Local qualification passed 177 Node tests, 11 Python identity tests, 52 desktop/mobile browser cases, 53 formatter inputs, root/Pages-path checks and EPUBCheck with zero messages. The extracted 14-member project ZIP passed in a fresh CPU environment. [Exact sources, artifacts and raw checks](evidence/course-review-0.16.0/verification.json) are retained.
+
+This is a synthetic sequence PPO extension with an explained GAE figure, a complete learner scaffold, semantic grading and per-stage edit files. It does not complete full RLHF or the ten full capstones. The 104 lesson bodies remain unchanged. Native reader, human teaching and target qualification remain separate open requirements. This candidate has not been merged or deployed; the frozen 0.15.1 source now has all 15 hosted checks green, while hosted 0.16 checks remain separate.
+
+---
+
 # Author review: 0.15.1
 
 Start with the [frozen book preview](http://127.0.0.1:4199/book.html).
