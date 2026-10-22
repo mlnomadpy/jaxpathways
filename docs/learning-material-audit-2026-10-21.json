@@ -123,15 +123,15 @@
       "in-development": 13
     },
     "itemLevels": {
-      "available-draft": 163,
-      "in-development": 30,
+      "available-draft": 162,
+      "in-development": 31,
       "planned": 10
     },
     "tasks": 540,
     "lessonTasks": 409,
     "projectStages": 131,
     "currentCpuLessons": 104,
-    "currentProjectReferences": 29,
+    "currentProjectReferences": 28,
     "expertReviewedLessons": 0,
     "novicePilotedLessons": 0,
     "choiceSpecificFeedbackLessons": 104,
@@ -2798,7 +2798,7 @@
       "source": "phases/18-posttraining/01-sft/lesson.json",
       "level": "available-draft",
       "summary": "Align predictions with their target tokens. Separate the attention mask from the loss mask.",
-      "contribution": "Adapt a real saved Transformer and compare target quality, retained behavior and reference drift; sequence PPO/value models and human preferences are not supplied.",
+      "contribution": "The saved-decoder extension failed its strict heldout reward quality floor. Human preference quality, retained behavior and target-quality evaluation remain open and need separately reviewed evidence.",
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "posttraining",
@@ -2823,7 +2823,7 @@
       "source": "phases/18-posttraining/02-lora/lesson.json",
       "level": "available-draft",
       "summary": "Separate the frozen base from trainable adapters. Understand initialization and the first gradient.",
-      "contribution": "Adapt a real saved Transformer and compare target quality, retained behavior and reference drift; sequence PPO/value models and human preferences are not supplied.",
+      "contribution": "The saved-decoder extension failed its strict heldout reward quality floor. Human preference quality, retained behavior and target-quality evaluation remain open and need separately reviewed evidence.",
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "posttraining",
@@ -2848,7 +2848,7 @@
       "source": "phases/18-posttraining/03-reward/lesson.json",
       "level": "available-draft",
       "summary": "Represent a preference as a comparison. Fit score differences with a stable likelihood.",
-      "contribution": "Adapt a real saved Transformer and compare target quality, retained behavior and reference drift; sequence PPO/value models and human preferences are not supplied.",
+      "contribution": "The saved-decoder extension failed its strict heldout reward quality floor. Human preference quality, retained behavior and target-quality evaluation remain open and need separately reviewed evidence.",
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "posttraining",
@@ -2873,7 +2873,7 @@
       "source": "phases/18-posttraining/04-rlhf/lesson.json",
       "level": "available-draft",
       "summary": "Keep three identities separate. Collect actions before optimizing them.",
-      "contribution": "Adapt a real saved Transformer and compare target quality, retained behavior and reference drift; sequence PPO/value models and human preferences are not supplied.",
+      "contribution": "The saved-decoder extension failed its strict heldout reward quality floor. Human preference quality, retained behavior and target-quality evaluation remain open and need separately reviewed evidence.",
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "posttraining",
@@ -2898,7 +2898,7 @@
       "source": "phases/18-posttraining/05-dpo/lesson.json",
       "level": "available-draft",
       "summary": "Compare chosen and rejected response log probabilities. Subtract the reference preference.",
-      "contribution": "Adapt a real saved Transformer and compare target quality, retained behavior and reference drift; sequence PPO/value models and human preferences are not supplied.",
+      "contribution": "The saved-decoder extension failed its strict heldout reward quality floor. Human preference quality, retained behavior and target-quality evaluation remain open and need separately reviewed evidence.",
       "validation": "CPU reference checked",
       "review": "Expert review pending; learner pilot pending",
       "phaseId": "posttraining",
@@ -2922,8 +2922,8 @@
       "url": "phase-guides/posttraining.html",
       "source": "curriculum/course.json",
       "level": "in-development",
-      "summary": "Response masks, dense LoRA, learned rewards, PPO-bandit and DPO mechanics are implemented.",
-      "contribution": "Adapt a real saved Transformer and compare target quality, retained behavior and reference drift; sequence PPO/value models and human preferences are not supplied.",
+      "summary": "Response masks, dense LoRA, learned rewards, PPO-bandit and DPO mechanics are implemented, with a registered Stage 5 table-policy exercise and a separate saved-decoder sequence-PPO extension whose local mechanics and replay passed review.",
+      "contribution": "The saved-decoder extension failed its strict heldout reward quality floor. Human preference quality, retained behavior and target-quality evaluation remain open and need separately reviewed evidence.",
       "validation": "5/5 current CPU references",
       "review": "Teaching review pending",
       "metrics": {
@@ -3567,15 +3567,15 @@
       "title": "Audit SFT, DPO and sequence PPO",
       "url": "project-guides/posttraining-audit.html",
       "source": "projects/posttraining-audit/README.md",
-      "level": "available-draft",
+      "level": "in-development",
       "summary": "Bounded adaptation and preference-contract checks.",
       "contribution": "Transfer the contracts to a saved Transformer and document retained behavior.",
-      "validation": "CPU reference checker passed for current sources",
+      "validation": "Reference check pending for this source",
       "review": "Teaching review pending",
-      "sourceHash": "81241dd77091be0b274675ef46e417ecd7176179d4948188d268f119b20b33de",
+      "sourceHash": "15adc8f72ed91d3ac044bed0c4c06a980e3f0cac679aff99cd2de582c1d703d2",
       "metrics": {
         "stages": 5,
-        "currentReference": true,
+        "currentReference": false,
         "missingFiles": []
       }
     },
@@ -9611,8 +9611,8 @@
       "title": "Contract and independent calculation",
       "prompt": "Match a hand-computed response-only token loss and DPO margin.",
       "source": "projects/posttraining-audit/README.md",
-      "level": "available-draft",
-      "validation": "Public reference stage checked; no independent learner assessment"
+      "level": "in-development",
+      "validation": "Current reference stage check pending"
     },
     {
       "id": "posttraining-audit:stage-2",
@@ -9621,8 +9621,8 @@
       "title": "Changed condition and diagnosis",
       "prompt": "Swap chosen and rejected scores and diagnose an empty response mask.",
       "source": "projects/posttraining-audit/README.md",
-      "level": "available-draft",
-      "validation": "Public reference stage checked; no independent learner assessment"
+      "level": "in-development",
+      "validation": "Current reference stage check pending"
     },
     {
       "id": "posttraining-audit:stage-3",
@@ -9631,8 +9631,8 @@
       "title": "Retained evidence",
       "prompt": "Retain token count, loss, margin, and DPO loss as inspectable JSON evidence.",
       "source": "projects/posttraining-audit/README.md",
-      "level": "available-draft",
-      "validation": "Public reference stage checked; no independent learner assessment"
+      "level": "in-development",
+      "validation": "Current reference stage check pending"
     },
     {
       "id": "posttraining-audit:stage-4",
@@ -9641,8 +9641,8 @@
       "title": "Integrated project check",
       "prompt": "Run all prior checks and preserve their failure boundaries.",
       "source": "projects/posttraining-audit/README.md",
-      "level": "available-draft",
-      "validation": "Public reference stage checked; no independent learner assessment"
+      "level": "in-development",
+      "validation": "Current reference stage check pending"
     },
     {
       "id": "posttraining-audit:stage-5",
@@ -9651,8 +9651,8 @@
       "title": "Synthetic sequence PPO with frozen rollouts",
       "prompt": "Retain ragged token actions, role and padding masks, EOS or timeout boundaries, frozen old and reference log probabilities, learned reward scores, GAE, value targets, per-epoch PPO metrics, hashes, and fixed heldout reward and exact categorical KL at sampled visited contexts.",
       "source": "projects/posttraining-audit/README.md",
-      "level": "available-draft",
-      "validation": "Public reference stage checked; no independent learner assessment"
+      "level": "in-development",
+      "validation": "Current reference stage check pending"
     },
     {
       "id": "tpu-runtime-audit:stage-1",

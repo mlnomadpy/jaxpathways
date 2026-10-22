@@ -1,6 +1,7 @@
 """Check downloadable books and bundles, including EPUB internal references."""
 import json
 import hashlib
+import base64
 import re
 from html.parser import HTMLParser
 from pathlib import Path
@@ -10,6 +11,18 @@ from urllib.parse import urlsplit
 from epub_identity import FINGERPRINT_PROPERTY, modified_at, primary_identifier, rendered_fingerprint
 ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT/'public/downloads'
+POSTTRAINING_RECIPE = 'projects/posttraining-audit/transformer_lineage/recipe.json'
+POSTTRAINING_RECIPE_SHA256 = '8411afc4412c59973d56b2cceae530dd642a5aa1c9e6f57a5dbb7f6ba110bc57'
+POSTTRAINING_PARENT_SHA256 = {
+    'projects/text-harness/foundations/config.py': '5c05801a7ec1a15b3978c87c77ac4e64d1b056c60487cbcff3cdf72475c8bb64',
+    'projects/text-harness/foundations/data.py': 'ff8ff698090866d46bc1f2b3540393b9a16db2121ad824110bd2ba53db645bd8',
+    'projects/text-harness/foundations/model.py': '94a88ae7fd6a251b5b190b4631496e04bb71a31c1bfe418511fdd37ffef034c9',
+    'projects/text-harness/foundations/train.py': 'ee9f3bc73505ce8e00fe9680589d97805593e5c8c035cba4709b5f334eb27a2b',
+    'projects/text-harness/foundations/reference/run/inference-package/package.json': '02b92a9f56325e5a38be2c40bf263d2ca91db6122ba84dd4df266339457bf278',
+    'projects/text-harness/foundations/reference/run/inference-package/params.npz': '271cb6457de5da3f727c343c64b7bd350c00e503ea7ac847eecf51fbd5558802',
+    'projects/text-harness/foundations/reference/run/inference-package/tokenizer.json': 'c92b534443cc6a1eacd5e78406b2c42e59553df704a07102a03c639d3694f586',
+}
+POSTTRAINING_FOUNDATION_ROOT = 'projects/text-harness/foundations/'
 course=json.loads((ROOT/'public/curriculum.json').read_text())
 authored=[l for p in course['phases'] for l in p['lessons'] if l['status']=='authored']
 release=json.loads((ROOT/'curriculum/releases.json').read_text())[0]
@@ -54,6 +67,82 @@ def assert_narrative(source, text, chapter):
         cursor = match.end()
     assert source[cursor:].replace('**', '') in text, 'missing narrative text'
 
+def check_posttraining_parent_bundle(bundle, root):
+    """Check the child ZIP contains exactly the seven recipe-pinned parent files."""
+    recipe_path = root / POSTTRAINING_RECIPE
+    recipe_bytes = recipe_path.read_bytes()
+    assert hashlib.sha256(recipe_bytes).hexdigest() == POSTTRAINING_RECIPE_SHA256, 'posttraining-audit frozen bridge recipe changed'
+    parent = json.loads(recipe_bytes).get('parent', {})
+    package_root = 'projects/text-harness/foundations/reference/run/inference-package'
+    expected_package = {
+        path.removeprefix(package_root + '/'): digest
+        for path, digest in POSTTRAINING_PARENT_SHA256.items()
+        if path.startswith(package_root + '/')
+    }
+    expected_foundation = {
+        Path(path).name: digest
+        for path, digest in POSTTRAINING_PARENT_SHA256.items()
+        if path.startswith(POSTTRAINING_FOUNDATION_ROOT)
+        and not path.startswith(package_root + '/')
+    }
+    assert parent.get('packagePath') == package_root, 'posttraining-audit parent package path changed'
+    assert parent.get('packageFilesSha256') == expected_package, 'posttraining-audit package pins differ from frozen bridge recipe'
+    assert parent.get('foundationSourceSha256') == expected_foundation, 'posttraining-audit source pins differ from frozen bridge recipe'
+
+    names = bundle.namelist()
+    assert len(names) == len(set(names)), 'posttraining-audit ZIP contains duplicate paths'
+    dependency_members = {name for name in names if name.startswith(POSTTRAINING_FOUNDATION_ROOT)}
+    assert dependency_members == set(POSTTRAINING_PARENT_SHA256), (
+        'posttraining-audit ZIP parent dependency paths differ from the exact seven-file allowlist'
+    )
+    for relative, expected in POSTTRAINING_PARENT_SHA256.items():
+        source = (root / relative).resolve()
+        assert source.is_relative_to(root.resolve()) and source.is_file(), f'posttraining-audit parent source missing or unsafe: {relative}'
+        source_bytes = source.read_bytes()
+        assert hashlib.sha256(source_bytes).hexdigest() == expected, f'posttraining-audit parent source hash mismatch: {relative}'
+        archive_bytes = bundle.read(relative)
+        assert hashlib.sha256(archive_bytes).hexdigest() == expected, f'posttraining-audit ZIP parent hash mismatch: {relative}'
+        assert archive_bytes == source_bytes, f'posttraining-audit ZIP/source bytes differ: {relative}'
+
+def check_posttraining_appendix_figure(bridge, expected_svg, expected_alt):
+    """Require one final-caption SVG figure whose bytes match the recorded source."""
+    namespace = '{http://www.w3.org/1999/xhtml}'
+    figures = bridge.findall(f'.//{namespace}figure[@class="print-visual-intro"]')
+    assert len(figures) == 1, 'saved-decoder appendix must have exactly one grouped figure'
+    figure = figures[0]
+    images = figure.findall(f'.//{namespace}img')
+    assert len(images) == 1, 'saved-decoder appendix group must contain exactly one SVG image'
+    image = images[0]
+    source = image.attrib.get('src', '')
+    prefix = 'data:image/svg+xml;base64,'
+    assert source.startswith(prefix), 'saved-decoder appendix SVG must be embedded as a data URI'
+    try:
+        embedded = base64.b64decode(source.removeprefix(prefix), validate=True)
+    except ValueError as error:
+        raise AssertionError('saved-decoder appendix has invalid embedded SVG base64') from error
+    assert embedded == expected_svg, 'saved-decoder appendix embedded SVG differs from the pinned source figure'
+    assert image.attrib.get('alt') == expected_alt, 'saved-decoder appendix SVG alt text changed'
+    children = list(figure)
+    heading = figure.find(f'{namespace}h3')
+    caption = figure.find(f'{namespace}figcaption')
+    assert heading is not None and ''.join(heading.itertext()) == 'Recorded v5 result'
+    assert caption is not None and children[-1] is caption, 'saved-decoder appendix caption must be the final figure child'
+    caption_text = ''.join(caption.itertext())
+    assert caption_text.startswith('Figure 1.')
+    svg_text = expected_svg.decode()
+    assert 'Mean reward improvement' in svg_text
+    assert 'Primary policy loss · epoch 2' in svg_text
+    assert 'strict positive improvement floor therefore fails' in caption_text
+
+def check_math_annotations(source, annotations, context):
+    """Compare TeX source and EPUB annotations while ignoring outer whitespace only."""
+    annotation_set = {annotation.strip() for annotation in annotations if annotation is not None}
+    matches = re.finditer(r'\\\((.*?)\\\)|\\\[(.*?)\\\]', source, re.S)
+    expressions = [next(group for group in match.groups() if group is not None).strip() for match in matches]
+    for expression in expressions:
+        assert expression in annotation_set, f'{context} equation missing from EPUB MathML'
+    return len(expressions)
+
 with ZipFile(OUT/'jax-foundations.epub') as book:
     assert book.infolist()[0].filename=='mimetype'
     assert book.infolist()[0].compress_type==ZIP_STORED
@@ -88,7 +177,27 @@ with ZipFile(OUT/'jax-foundations.epub') as book:
     assert len(modified_nodes)==1
     assert modified_nodes[0].text==modified_at(release)==build_receipt['modifiedAt']
     assert package.find('o:metadata/dc:date',ns).text==release['date']
-    assert all(f'OEBPS/{name}.xhtml' in book.namelist() for name in ['solutions','appendix-workflow','appendix-experiments'])
+    assert all(f'OEBPS/{name}.xhtml' in book.namelist() for name in ['solutions','appendix-workflow','appendix-experiments','appendix-posttraining-lineage'])
+    nav = ET.fromstring(book.read('OEBPS/nav.xhtml'))
+    assert any(a.attrib.get('href') == 'appendix-posttraining-lineage.xhtml' for a in nav.iter('{http://www.w3.org/1999/xhtml}a'))
+    spine_ids = [item.attrib['idref'] for item in package.findall('o:spine/o:itemref',ns)]
+    assert spine_ids.index('appendix-experiments') < spine_ids.index('appendix-posttraining-lineage') < spine_ids.index('solutions')
+    bridge_source = (ROOT/'projects/posttraining-audit/transformer_lineage/TEACHING.md').read_text()
+    bridge = ET.fromstring(book.read('OEBPS/appendix-posttraining-lineage.xhtml'))
+    bridge_text = ''.join(bridge.itertext())
+    assert 'a saved decoder enters sequence PPO' in bridge_text
+    assert 'strict heldout reward quality floor failed' in bridge_text
+    assert '10,880 parameters' in bridge_text
+    bridge_annotations = [node.text for node in bridge.iter('{http://www.w3.org/1998/Math/MathML}annotation')]
+    check_math_annotations(bridge_source, bridge_annotations, 'saved-decoder appendix')
+    bridge_item = items['appendix-posttraining-lineage']
+    assert 'mathml' in bridge_item.attrib.get('properties','').split()
+    expected_bridge_svg = (ROOT/'projects/posttraining-audit/transformer_lineage/teaching/v5/figure.svg').read_bytes()
+    check_posttraining_appendix_figure(
+        bridge,
+        expected_bridge_svg,
+        'Mean child-minus-parent fitted-reward change is zero on dev and heldout; the strict positive heldout floor fails. Primary signed policy loss from inner epoch 2 by update, averaged per valid action. Exact restricted KL per valid action is 0.000123197, below its 0.8 ceiling.',
+    )
     solutions=ET.fromstring(book.read('OEBPS/solutions.xhtml'))
     solutions_text=''.join(solutions.itertext())
     assert all(lesson['content']['solution'] in solutions_text and lesson['content']['code'] in solutions_text for lesson in authored)
@@ -162,6 +271,8 @@ for manifest in json.loads((ROOT/'curriculum/projects.json').read_text()):
             'kernel-audit': ('resources/tpu-gcp/requirements-qualification.txt',),
         }.get(project['id'], ()):
             assert bundle.read(extra)==(ROOT/extra).read_bytes(), f'{project["id"]}: missing extra environment file {extra}'
+        if project['id'] == 'posttraining-audit':
+            check_posttraining_parent_bundle(bundle, ROOT)
         assert set(project['requiredLessonIds'])<=set(l['id'] for l in authored)
 with ZipFile(OUT/'jax-tutor-skills.zip') as bundle:
     for path in (ROOT/'skills').rglob('*.md'):
@@ -176,7 +287,7 @@ html_book=(ROOT/'dist/downloads/jax-foundations.html').read_text()
 assert all('src="'+value+'"' in html_book for value in re.findall(r'<img\b[^>]*\bsrc="([^"]+)"',html_book))
 assert not re.search(r'<img\b[^>]*\bsrc="(?!data:image/)',html_book), 'standalone book has an external image dependency'
 assert '<link rel="stylesheet"' not in html_book, 'standalone book has an external stylesheet dependency'
-assert 'appendix-project-workflow' in html_book and 'appendix-experiments' in html_book
+assert 'appendix-project-workflow' in html_book and 'appendix-experiments' in html_book and 'appendix-posttraining-lineage' in html_book
 assert f'v{release["version"]}' in html_book
 print('OK: standalone HTML has embedded figure assets and course appendices.')
 

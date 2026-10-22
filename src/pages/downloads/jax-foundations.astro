@@ -29,7 +29,11 @@ const experimentsWorkshop = readFileSync(
   new URL('../../../projects/reproducible-experiments/README.md', import.meta.url),
   'utf8',
 );
-const guideMarkup = (_source: string, sourceFile: string) => bookGuide(sourceFile, course);
+const transformerLineage = readFileSync(
+  new URL('../../../projects/posttraining-audit/transformer_lineage/TEACHING.md', import.meta.url),
+  'utf8',
+);
+const guideMarkup = (_source: string, sourceFile: string | URL) => bookGuide(sourceFile, course);
 const phases = course.phases
   .map((phase) => ({
     ...phase,
@@ -136,6 +140,9 @@ const chapterIndex = new Map(authoredLessons.map((lesson, index) => [lesson.id, 
         </li>
         <li>
           <a href="#appendix-experiments">Appendix: reproducible experiments workshop</a>
+        </li>
+        <li>
+          <a href="#appendix-posttraining-lineage">Optional appendix: saved-decoder sequence PPO</a>
         </li>
       </ol>
     </nav>
@@ -244,6 +251,25 @@ const chapterIndex = new Map(authoredLessons.map((lesson, index) => [lesson.id, 
             experimentsWorkshop,
             new URL('../../../projects/reproducible-experiments/README.md', import.meta.url)
               .pathname,
+          )}
+        />
+      </section>
+      <section id="appendix-posttraining-lineage">
+        <h1>Optional appendix: a saved decoder enters sequence PPO</h1>
+        <p>
+          This appendix is separate from registered Stage 5. Independent review accepted its
+          mechanics and replay checks, but the strict heldout reward quality floor failed. It does
+          not establish language-model quality. The optional extension and its evidence are
+          available{' '}
+          <a href={online('project-guides/posttraining-transformer-lineage.html')}>online</a>.
+        </p>
+        <Fragment
+          set:html={guideMarkup(
+            transformerLineage,
+            new URL(
+              '../../../projects/posttraining-audit/transformer_lineage/TEACHING.md',
+              import.meta.url,
+            ),
           )}
         />
       </section>

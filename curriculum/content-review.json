@@ -217,8 +217,8 @@
     {
       "id": "posttraining",
       "level": "in-development",
-      "strength": "Response masks, dense LoRA, learned rewards, PPO-bandit and DPO mechanics are implemented.",
-      "contribution": "Adapt a real saved Transformer and compare target quality, retained behavior and reference drift; sequence PPO/value models and human preferences are not supplied."
+      "strength": "Response masks, dense LoRA, learned rewards, PPO-bandit and DPO mechanics are implemented, with a registered Stage 5 table-policy exercise and a separate saved-decoder sequence-PPO extension whose local mechanics and replay passed review.",
+      "contribution": "The saved-decoder extension failed its strict heldout reward quality floor. Human preference quality, retained behavior and target-quality evaluation remain open and need separately reviewed evidence."
     },
     {
       "id": "tpu",

@@ -1,0 +1,396 @@
+{
+  "historyDisclosure": {
+    "cumulativeCampaignExposure": {
+      "outerUpdateExecutionsAcrossV1AndV5": 24,
+      "rewardHeadOptimizerStepsAcrossV1AndV5": 240
+    },
+    "mechanicsChecks": "Five candidate-agnostic invocations under the historical pre-shipping checker formed a separate bounded mechanics exercise. They are not quality evaluations or part of campaign update totals. The new clean-archive shipping qualification remains pending and is not counted as executed.",
+    "noFurtherRun": true,
+    "shippingLearnerMechanicsQualification": "pending separate source-bound approval and clean-archive verification; no invocations counted in this packet",
+    "v1": "The first attempt completed eight outer updates in process and durably saved only update clock 4. It failed during the first paired development evaluation after one child rollout for seed 20261023 / prompt 4; no matched parent episode, remaining development episode, heldout evaluation, or replay result was produced.",
+    "v5": "The second attempt completed eight primary updates and an eight-update split/restore replay lane; only the uninterrupted primary lane was quality scored."
+  },
+  "kind": "transformer-lineage-v5-public-evaluation",
+  "klScope": "Exact categorical KL over the eligible four-action subset at sampled child-visited contexts, averaged per valid action. It is not full-vocabulary or full-sequence KL.",
+  "qualityGate": {
+    "failureReason": "Heldout child reward equals matched parent reward, so the strict improvement floor fails.",
+    "heldoutRestrictedConditionalKlCeilingPassed": true,
+    "heldoutRestrictedConditionalKlCeilingPerValidAction": 0.8,
+    "heldoutRewardFloorPassed": false,
+    "overallPassed": false,
+    "status": "QUALITY_GATE_FAILED",
+    "strictHeldoutRewardFloor": "mean child fitted reward > mean matched frozen-parent fitted reward"
+  },
+  "schemaVersion": 1,
+  "scope": "Synthetic prompts and four restricted actions; per-episode IDs are paired by fixed seed. Scores use the once-fitted synthetic reward head.",
+  "splits": {
+    "dev": {
+      "episodes": [
+        {
+          "childActionIds": [
+            4,
+            4,
+            2
+          ],
+          "childFittedRewardScore": 0.0,
+          "exactRestrictedConditionalKlSumAtChildVisitedContexts": 0.0004739046562463045,
+          "parentActionIds": [
+            4,
+            4,
+            2
+          ],
+          "parentFittedRewardScore": 0.0,
+          "promptId": 4,
+          "sampledKlSum": -0.011250972747802734,
+          "samplingSeed": 20261023,
+          "validActionDenominator": 3
+        },
+        {
+          "childActionIds": [
+            4,
+            383,
+            4,
+            2
+          ],
+          "childFittedRewardScore": 0.04124659299850464,
+          "exactRestrictedConditionalKlSumAtChildVisitedContexts": 0.0009354071225970984,
+          "parentActionIds": [
+            4,
+            383,
+            4,
+            2
+          ],
+          "parentFittedRewardScore": 0.04124659299850464,
+          "promptId": 5,
+          "sampledKlSum": -0.049834609031677246,
+          "samplingSeed": 20261023,
+          "validActionDenominator": 4
+        },
+        {
+          "childActionIds": [
+            381,
+            4,
+            383,
+            383
+          ],
+          "childFittedRewardScore": -0.03240048885345459,
+          "exactRestrictedConditionalKlSumAtChildVisitedContexts": 0.0005214349366724491,
+          "parentActionIds": [
+            381,
+            4,
+            383,
+            383
+          ],
+          "parentFittedRewardScore": -0.03240048885345459,
+          "promptId": 4,
+          "sampledKlSum": -0.00037932395935058594,
+          "samplingSeed": 20261023,
+          "validActionDenominator": 4
+        },
+        {
+          "childActionIds": [
+            383,
+            383,
+            4,
+            4
+          ],
+          "childFittedRewardScore": 0.08249318599700928,
+          "exactRestrictedConditionalKlSumAtChildVisitedContexts": 0.0007302373414859176,
+          "parentActionIds": [
+            383,
+            383,
+            4,
+            4
+          ],
+          "parentFittedRewardScore": 0.08249318599700928,
+          "promptId": 5,
+          "sampledKlSum": -0.05861771106719971,
+          "samplingSeed": 20261023,
+          "validActionDenominator": 4
+        },
+        {
+          "childActionIds": [
+            381,
+            383,
+            2
+          ],
+          "childFittedRewardScore": 2.384185791015625e-07,
+          "exactRestrictedConditionalKlSumAtChildVisitedContexts": 0.00035858084447681904,
+          "parentActionIds": [
+            381,
+            383,
+            2
+          ],
+          "parentFittedRewardScore": 2.384185791015625e-07,
+          "promptId": 4,
+          "sampledKlSum": -0.00861358642578125,
+          "samplingSeed": 20261024,
+          "validActionDenominator": 3
+        },
+        {
+          "childActionIds": [
+            4,
+            383,
+            4,
+            383
+          ],
+          "childFittedRewardScore": 0.08249318599700928,
+          "exactRestrictedConditionalKlSumAtChildVisitedContexts": 0.0009354071225970984,
+          "parentActionIds": [
+            4,
+            383,
+            4,
+            383
+          ],
+          "parentFittedRewardScore": 0.08249318599700928,
+          "promptId": 5,
+          "sampledKlSum": -0.04897642135620117,
+          "samplingSeed": 20261024,
+          "validActionDenominator": 4
+        },
+        {
+          "childActionIds": [
+            383,
+            381,
+            381,
+            2
+          ],
+          "childFittedRewardScore": 0.032401084899902344,
+          "exactRestrictedConditionalKlSumAtChildVisitedContexts": 0.000414774171076715,
+          "parentActionIds": [
+            383,
+            381,
+            381,
+            2
+          ],
+          "parentFittedRewardScore": 0.032401084899902344,
+          "promptId": 4,
+          "sampledKlSum": 0.02470219135284424,
+          "samplingSeed": 20261024,
+          "validActionDenominator": 4
+        },
+        {
+          "childActionIds": [
+            4,
+            4,
+            2
+          ],
+          "childFittedRewardScore": 0.0,
+          "exactRestrictedConditionalKlSumAtChildVisitedContexts": 0.0009303301922045648,
+          "parentActionIds": [
+            4,
+            4,
+            2
+          ],
+          "parentFittedRewardScore": 0.0,
+          "promptId": 5,
+          "sampledKlSum": -0.01538074016571045,
+          "samplingSeed": 20261024,
+          "validActionDenominator": 3
+        }
+      ],
+      "summary": {
+        "matchedEpisodeCount": 8,
+        "meanChildFittedRewardPerEpisode": 0.025779224932193756,
+        "meanExactRestrictedConditionalKlPerValidActionAtChildVisitedContexts": 0.00018276125473644714,
+        "meanParentFittedRewardPerEpisode": 0.025779224932193756,
+        "meanSampledKlPerValidAction": -0.005805212875892376,
+        "rewardHeadDiagnostic": {
+          "diagnosticOnly": true,
+          "pairCount": 2,
+          "positiveMarginAccuracy": 0.0,
+          "signedMargins": [
+            -0.06480157375335693,
+            -0.08249294757843018
+          ]
+        },
+        "sameChildParentActionSequenceCount": 8,
+        "validActionDenominator": 29
+      }
+    },
+    "heldout": {
+      "episodes": [
+        {
+          "childActionIds": [
+            4,
+            4,
+            2
+          ],
+          "childFittedRewardScore": 0.0,
+          "exactRestrictedConditionalKlSumAtChildVisitedContexts": 0.0005654037231579423,
+          "parentActionIds": [
+            4,
+            4,
+            2
+          ],
+          "parentFittedRewardScore": 0.0,
+          "promptId": 6,
+          "sampledKlSum": -0.02609884738922119,
+          "samplingSeed": 20261023,
+          "validActionDenominator": 3
+        },
+        {
+          "childActionIds": [
+            4,
+            383,
+            4,
+            2
+          ],
+          "childFittedRewardScore": -0.014737844467163086,
+          "exactRestrictedConditionalKlSumAtChildVisitedContexts": 0.00040911206451710314,
+          "parentActionIds": [
+            4,
+            383,
+            4,
+            2
+          ],
+          "parentFittedRewardScore": -0.014737844467163086,
+          "promptId": 7,
+          "sampledKlSum": -0.029949545860290527,
+          "samplingSeed": 20261023,
+          "validActionDenominator": 4
+        },
+        {
+          "childActionIds": [
+            381,
+            4,
+            383,
+            383
+          ],
+          "childFittedRewardScore": 0.0461580753326416,
+          "exactRestrictedConditionalKlSumAtChildVisitedContexts": 0.000554870319319889,
+          "parentActionIds": [
+            381,
+            4,
+            383,
+            383
+          ],
+          "parentFittedRewardScore": 0.0461580753326416,
+          "promptId": 6,
+          "sampledKlSum": -0.00047707557678222656,
+          "samplingSeed": 20261023,
+          "validActionDenominator": 4
+        },
+        {
+          "childActionIds": [
+            383,
+            383,
+            4,
+            4
+          ],
+          "childFittedRewardScore": -0.029475688934326172,
+          "exactRestrictedConditionalKlSumAtChildVisitedContexts": 0.0003536304138833657,
+          "parentActionIds": [
+            383,
+            383,
+            4,
+            4
+          ],
+          "parentFittedRewardScore": -0.029475688934326172,
+          "promptId": 7,
+          "sampledKlSum": -0.024806618690490723,
+          "samplingSeed": 20261023,
+          "validActionDenominator": 4
+        },
+        {
+          "childActionIds": [
+            381,
+            383,
+            2
+          ],
+          "childFittedRewardScore": 2.384185791015625e-07,
+          "exactRestrictedConditionalKlSumAtChildVisitedContexts": 0.00045861193211749196,
+          "parentActionIds": [
+            381,
+            383,
+            2
+          ],
+          "parentFittedRewardScore": 2.384185791015625e-07,
+          "promptId": 6,
+          "sampledKlSum": 0.002322077751159668,
+          "samplingSeed": 20261024,
+          "validActionDenominator": 3
+        },
+        {
+          "childActionIds": [
+            4,
+            383,
+            4,
+            383
+          ],
+          "childFittedRewardScore": -0.029475688934326172,
+          "exactRestrictedConditionalKlSumAtChildVisitedContexts": 0.00040911206451710314,
+          "parentActionIds": [
+            4,
+            383,
+            4,
+            383
+          ],
+          "parentFittedRewardScore": -0.029475688934326172,
+          "promptId": 7,
+          "sampledKlSum": -0.028075218200683594,
+          "samplingSeed": 20261024,
+          "validActionDenominator": 4
+        },
+        {
+          "childActionIds": [
+            383,
+            381,
+            381,
+            2
+          ],
+          "childFittedRewardScore": -0.0461573600769043,
+          "exactRestrictedConditionalKlSumAtChildVisitedContexts": 0.0004948403220623732,
+          "parentActionIds": [
+            383,
+            381,
+            381,
+            2
+          ],
+          "parentFittedRewardScore": -0.0461573600769043,
+          "promptId": 6,
+          "sampledKlSum": 0.03379011154174805,
+          "samplingSeed": 20261024,
+          "validActionDenominator": 4
+        },
+        {
+          "childActionIds": [
+            4,
+            4,
+            2
+          ],
+          "childFittedRewardScore": 0.0,
+          "exactRestrictedConditionalKlSumAtChildVisitedContexts": 0.00032713204564061016,
+          "parentActionIds": [
+            4,
+            4,
+            2
+          ],
+          "parentFittedRewardScore": 0.0,
+          "promptId": 7,
+          "sampledKlSum": -0.004214644432067871,
+          "samplingSeed": 20261024,
+          "validActionDenominator": 3
+        }
+      ],
+      "summary": {
+        "matchedEpisodeCount": 8,
+        "meanChildFittedRewardPerEpisode": -0.009211033582687378,
+        "meanExactRestrictedConditionalKlPerValidActionAtChildVisitedContexts": 0.00012319699604192684,
+        "meanParentFittedRewardPerEpisode": -0.009211033582687378,
+        "meanSampledKlPerValidAction": -0.002672750374366497,
+        "rewardHeadDiagnostic": {
+          "diagnosticOnly": true,
+          "pairCount": 2,
+          "positiveMarginAccuracy": 1.0,
+          "signedMargins": [
+            0.0923154354095459,
+            0.029475927352905273
+          ]
+        },
+        "sameChildParentActionSequenceCount": 8,
+        "validActionDenominator": 29
+      }
+    }
+  }
+}
