@@ -177,6 +177,34 @@ export function inspectPdf(
         `Appendix figure title, both plotted labels and caption must share exactly one PDF page; found ${matchingPages.length} matching pages`,
       );
     }
+    const commandBlocks = [
+      {
+        label: 'POSIX learner command block',
+        cues: [
+          'POSIX shell',
+          'ROOT=projects/posttraining-audit/transformer_lineage',
+          '--output "$OUT"',
+        ],
+      },
+      {
+        label: 'PowerShell learner command block',
+        cues: [
+          'PowerShell',
+          "$root = 'projects/posttraining-audit/transformer_lineage'",
+          '--output $output',
+        ],
+      },
+    ];
+    for (const { label, cues } of commandBlocks) {
+      const pagesWithCompleteBlock = normalizedPages.flatMap((page, index) =>
+        cues.every((cue) => page.includes(cue)) ? [index] : [],
+      );
+      if (pagesWithCompleteBlock.length !== 1) {
+        throw new Error(
+          `Appendix ${label} heading, first command and final --output command must share exactly one PDF page; found ${pagesWithCompleteBlock.length} matching pages`,
+        );
+      }
+    }
   }
   return { pageCount, numberedPages, extractedTextBytes: Buffer.byteLength(extractedText) };
 }
