@@ -1,0 +1,11 @@
+{
+  "version": "0.16.1",
+  "frozenAt": "2026-10-22T03:07:47.430836+00:00",
+  "root": "/private/tmp/jaxpathways-review-0.16.1-final",
+  "sha256": {
+    "book.html": "b14e7840bf3f5e56c95541e0c70135cb69419b044ad13c95874ba0ad58dc4157",
+    "downloads/jax-foundations.html": "a1be409d553d7f19d2567a7bd8b9f2d0b145c2dacfa0e3f5c748bbf194c1f7b1",
+    "downloads/jax-foundations.epub": "669539f2009465153efb14200705e04ad45a50ee719a8daa8dfa064ededa02a0",
+    "downloads/posttraining-audit.zip": "49d7bcbcfefa438faf042235ade73f14a3f2e32e40facacf8b7e0cf23d4149f0"
+  }
+}

@@ -493,7 +493,7 @@ Run REINFORCE with a different training seed and retain the initial and final ex
 - Use exact expected return for this tiny environment, not a noisy training batch mean.
 
 **Key functions & syntax to use:**
-- `jnp.zeros / jnp.ones(shape, dtype=...)` — Allocates a tensor of the given `shape` initialized with constants.
+- `jnp.zeros(shape, dtype=...)` — Creates a JAX array of the requested shape filled with zeros.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -613,7 +613,7 @@ From position $0$, two moves earn $-0.02$. From position $1$, they earn $0.99$.
 - Write each path’s transition rewards before taking their mean.
 
 **Key functions & syntax to use:**
-- `jnp.zeros / jnp.ones(shape, dtype=...)` — Allocates a tensor of the given `shape` initialized with constants.
+- `jnp.full(shape, fill_value, dtype=...)` — Creates an array of the requested shape with every element set to `fill_value`.
 
 **Starter code scaffold (fill in the TODOs):**
 

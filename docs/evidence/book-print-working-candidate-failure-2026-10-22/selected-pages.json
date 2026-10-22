@@ -1,0 +1,60 @@
+{
+  "book-all-a4.pdf": {
+    "pages": 1302,
+    "selected": [
+      {
+        "title": "Least squares, rank, and conditioning",
+        "page": 214
+      },
+      {
+        "title": "Least squares, rank, and conditioning: reference solutions and checkpoint reasoning",
+        "page": 222
+      },
+      {
+        "title": "A Transformer block and mixed precision",
+        "page": 466
+      },
+      {
+        "title": "A Transformer block and mixed precision: reference solutions and checkpoint reasoning",
+        "page": 476
+      },
+      {
+        "title": "bfloat16, int8 precision, and XProf profiling on TPU",
+        "page": 1279
+      },
+      {
+        "title": "bfloat16, int8 precision, and XProf profiling on TPU: reference solutions and checkpoint reasoning",
+        "page": 1289
+      }
+    ]
+  },
+  "book-all-letter.pdf": {
+    "pages": 1445,
+    "selected": [
+      {
+        "title": "Least squares, rank, and conditioning",
+        "page": 230
+      },
+      {
+        "title": "Least squares, rank, and conditioning: reference solutions and checkpoint reasoning",
+        "page": 239
+      },
+      {
+        "title": "A Transformer block and mixed precision",
+        "page": 509
+      },
+      {
+        "title": "A Transformer block and mixed precision: reference solutions and checkpoint reasoning",
+        "page": 520
+      },
+      {
+        "title": "bfloat16, int8 precision, and XProf profiling on TPU",
+        "page": 1420
+      },
+      {
+        "title": "bfloat16, int8 precision, and XProf profiling on TPU: reference solutions and checkpoint reasoning",
+        "page": 1431
+      }
+    ]
+  }
+}

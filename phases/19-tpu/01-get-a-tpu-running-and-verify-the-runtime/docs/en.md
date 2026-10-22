@@ -555,9 +555,6 @@ Sum `np.arange(32, dtype=np.float64) ** 2`.
 - Use the closed-form sum-of-squares identity or an integer reference sum.
 - Run the pmap assertion on a real four-chip TPU to qualify runtime behavior.
 
-**Key functions & syntax to use:**
-- `Mesh + PartitionSpec + NamedSharding` — Maps logical tensor axes onto physical device mesh axes for SPMD data, tensor, or pipeline parallelism.
-
 **Starter code scaffold (fill in the TODOs):**
 
 ```python

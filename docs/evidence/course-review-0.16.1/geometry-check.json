@@ -1,0 +1,64 @@
+{
+  "recordedAt": "2026-10-22T03:00:05.588706+00:00",
+  "scope": "All PDF pages checked for text glyphs outside the media box; this is not full visual review.",
+  "documents": [
+    {
+      "file": "book-all-a4.pdf",
+      "sha256": "d7cc1ced9838aa4a63b0dd2641b0d1edccf521711f009a1c9ffe8188bf92051a",
+      "pages": 1268,
+      "characters": 2665989,
+      "outsideMediaBox": [],
+      "emptyTextPages": [],
+      "chapterPages": {
+        "Least squares, rank, and conditioning": [
+          213,
+          220
+        ],
+        "Least squares balances unavoidable residuals": [
+          214
+        ],
+        "A Transformer block and mixed precision": [
+          459,
+          468
+        ],
+        "Train, checkpoint, and generate": [
+          470,
+          481
+        ],
+        "bfloat16, int8 precision, and XProf": [
+          1245,
+          1255
+        ]
+      }
+    },
+    {
+      "file": "book-all-letter.pdf",
+      "sha256": "b9a242d9f186af9e8f9ea9a437f4014fcd4b9c31c365ca104bfa58a0e4b862fd",
+      "pages": 1391,
+      "characters": 2667444,
+      "outsideMediaBox": [],
+      "emptyTextPages": [],
+      "chapterPages": {
+        "Least squares, rank, and conditioning": [
+          227,
+          236
+        ],
+        "Least squares balances unavoidable residuals": [
+          229
+        ],
+        "A Transformer block and mixed precision": [
+          501,
+          512
+        ],
+        "Train, checkpoint, and generate": [
+          514,
+          527
+        ],
+        "bfloat16, int8 precision, and XProf": [
+          1366,
+          1377
+        ]
+      }
+    }
+  ]
+}

@@ -491,7 +491,7 @@ The two start states need different numbers of actions. Compare each return agai
 - A deterministic limit is a behavioral check, not a return benchmark.
 
 **Key functions & syntax to use:**
-- `jnp.zeros / jnp.ones(shape, dtype=...)` — Allocates a tensor of the given `shape` initialized with constants.
+- `jnp.full(shape, fill_value, dtype=...)` — Creates an array of the requested shape with every element set to `fill_value`.
 
 **Starter code scaffold (fill in the TODOs):**
 
