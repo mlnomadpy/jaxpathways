@@ -56,6 +56,11 @@ const optionalPilotGuide = projectPlans.find(
           Two-controller recovery exercise
         </a>
       )}
+      {project.id === 'posttraining-audit' && (
+        <a class="button" href={siteUrl('project-guides/posttraining-transformer-lineage.html')}>
+          Saved decoder PPO appendix
+        </a>
+      )}
       {optionalPilotGuide && (
         <a class="button" href={siteUrl(optionalPilotGuide.path)}>
           {optionalPilotGuide.label}

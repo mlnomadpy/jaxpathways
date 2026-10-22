@@ -86,12 +86,18 @@ test('the final lesson sends its last activity to the course map', async ({ page
   const course = JSON.parse(
     readFileSync(new URL('../curriculum/course.json', import.meta.url), 'utf8'),
   ) as {
-    phases: { lessons: { id: string; status: string }[] }[];
+    phases: { id: string; lessons: { id: string; status: string }[] }[];
   };
   const finalLesson = course.phases
     .flatMap((phase) => phase.lessons)
     .filter((lesson) => lesson.status === 'authored')
     .at(-1)!;
+  const initialVisiblePhase = course.phases.find((phase) =>
+    phase.lessons.some((lesson) => lesson.status === 'authored'),
+  )!;
+  const firstVisibleLesson = initialVisiblePhase.lessons.find(
+    (lesson) => lesson.status === 'authored',
+  )!;
   await page.goto(`/lesson-${finalLesson.id}.html`);
   const dock = page.locator('#lesson-stage-bar');
   await dock.locator('[data-stage-pill="Evidence"]').click();
@@ -100,5 +106,15 @@ test('the final lesson sends its last activity to the course map', async ({ page
   await expect(next).toHaveAttribute('href', 'course.html');
   await next.focus();
   await page.keyboard.press('Enter');
-  await expect(page).toHaveURL(/\/course\.html$/);
+  await expect(page).toHaveURL((url) => {
+    return (
+      url.pathname === '/course.html' &&
+      url.searchParams.get('phase') === initialVisiblePhase.id &&
+      [...url.searchParams.keys()].every((key) => key === 'phase')
+    );
+  });
+  const phaseCard = page.locator(`#phase-${initialVisiblePhase.id}`);
+  await expect(phaseCard).toBeVisible();
+  await expect(phaseCard).toHaveAttribute('open', '');
+  await expect(phaseCard.locator(`#${firstVisibleLesson.id}`)).toBeVisible();
 });

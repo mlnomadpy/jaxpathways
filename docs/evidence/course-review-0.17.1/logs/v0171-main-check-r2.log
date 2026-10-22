@@ -1,0 +1,27 @@
+
+> jaxpathways@0.17.1 check
+> npm run content:build && npm run check:astro && npm run check:types && npm run lint && npm run format:check && node scripts/validate-curriculum.mjs && npm run build && npm test && npm run check:epub-identity && python3 scripts/check-distribution.py && npm run check:site
+
+
+> jaxpathways@0.17.1 content:build
+> node scripts/render-curriculum.mjs && python3 scripts/audit-learning-material.py && python3 scripts/build-distribution.py && python3 scripts/build-assessments.py && python3 scripts/build-project-workspace.py && python3 scripts/build-tpu-workspace.py && python3 scripts/build-experiment-workshop.py
+
+node:fs:3090
+  binding.copyFile(
+          ^
+
+Error: ENOSPC: no space left on device, copyfile 'phases/00-welcome/01-set-up-your-learning-workspace/outputs/mechanism.png' -> 'public/figures/welcome-01-mechanism.png'
+    at copyFileSync (node:fs:3090:11)
+    at loadLessonEvidence (file:///private/tmp/jaxpathways-transformer-bridge-review/scripts/figure-artifacts.mjs:15:42)
+    at file:///private/tmp/jaxpathways-transformer-bridge-review/scripts/render-curriculum.mjs:41:7
+    at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:681:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5) {
+  errno: -28,
+  code: 'ENOSPC',
+  syscall: 'copyfile',
+  path: 'phases/00-welcome/01-set-up-your-learning-workspace/outputs/mechanism.png',
+  dest: 'public/figures/welcome-01-mechanism.png'
+}
+
+Node.js v22.22.3

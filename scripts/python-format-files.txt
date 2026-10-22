@@ -51,3 +51,7 @@ projects/posttraining-audit/starter/sequence_ppo.py
 projects/posttraining-audit/solution/sequence_ppo.py
 projects/posttraining-audit/tests/check_sequence_ppo.py
 projects/posttraining-audit/figures/render_gae.py
+projects/posttraining-audit/transformer_lineage/check.py
+projects/posttraining-audit/transformer_lineage/solution.py
+projects/posttraining-audit/transformer_lineage/starter.py
+tests/test_posttraining_appendix_distribution.py

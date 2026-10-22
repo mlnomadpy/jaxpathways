@@ -32,7 +32,9 @@ These are objective mechanics on synthetic values. They do not demonstrate a tra
 
 Stage 5 extends the token-level preference exercise into short autoregressive responses. It uses a tiny table policy conditioned on task, previous token and response position, plus a learned table critic. The reference policy is copied before updates. A linear reward model is fitted with pairwise softplus loss on the two fixed synthetic preference pairs, then frozen. This is a small mechanics fixture: its preference labels are not human data, and the policy is not a Transformer.
 
-Optional preparation: [learned values and GAE](../../phases/12-rl/05-learn-values-and-gae/README.md) works through fitted values and a hand-calculated recursion. It is useful background, but it is outside this project’s required lesson route.
+Optional appendix: [trace sequence PPO with the saved 10,880-parameter decoder](transformer_lineage/TEACHING.md). Registered Stage 5 remains the table-policy exercise. The separate decoder mechanics and replay checks passed independent review, while its strict heldout reward quality floor failed; it does not establish language-model quality.
+
+Optional preparation: the [learned values and GAE lesson](https://www.tahabouhsine.com/jaxpathways/lesson-rl-05.html) works through fitted values and a hand-calculated recursion. It is useful background, but it is outside this project’s required lesson route.
 
 Use `projects/posttraining-audit/starter/sequence_ppo.py` for this stage. It includes the checked-in recipe, token/model helpers, frozen component checks, evaluation and serialization scaffold. Implement the six marked functions: `fit_reward_model`, `rollout`, `generalized_advantage_estimate`, `ppo_policy_loss`, `clipped_value_loss`, and `train`. The rollout record uses time-major `[time, batch]` arrays; target and input role masks are separate; the two loss functions return scalar means over valid response targets. The fixed recipe is loaded from `reference/sequence_ppo/recipe.json`. The project pins its CPU dependencies in `projects/posttraining-audit/requirements.txt`.
 
@@ -105,7 +107,7 @@ The evaluation uses fixed held-out prompt instances, but both splits share the s
 
 Nonfinite or empty evaluations remain failures. The report also records failure when reward does not exceed the frozen reference or conditional KL exceeds its declared limit. Keep a failed result in the evidence instead of changing the recipe after seeing it. Reload the saved tiny state in a fresh Python process to reconstruct the same evaluation.
 
-This stage covers synthetic sequence PPO mechanics. Human preference quality, alignment, saved Transformer lineage, C02 qualification and full capstone evaluation still require their own work.
+This stage covers synthetic sequence PPO mechanics, not model-quality qualification. The optional saved-decoder appendix records bounded mechanics and replay checks that passed, while its strict heldout reward-quality floor failed. Human-preference quality, retained behavior, human evaluation, C02 qualification, and full capstone evaluation still need separate evidence.
 
 ## Review handoff: explain a changed condition
 

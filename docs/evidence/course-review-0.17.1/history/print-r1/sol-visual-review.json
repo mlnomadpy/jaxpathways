@@ -1,0 +1,37 @@
+{
+  "a4Pages": 1272,
+  "a4PdfSha256": "bd754862b5818a45c81d836cdc449de3759fd25f5a66fc68384361ff0bf42ed7",
+  "figureCoLocated": [
+    "a4:1272",
+    "letter:1395"
+  ],
+  "kind": "sol-0171-full-print-appendix-visual-review",
+  "letterPages": 1396,
+  "letterPdfSha256": "f796550f342c17fdbbbabfcb7b67474f9adca4cea42e58a46bc13dcc44426988",
+  "mathAndHandExampleLegible": [
+    "a4:1269",
+    "letter:1392"
+  ],
+  "rasterSha256": {
+    "a4-1269.png": "902d9ed8d5a7e3ce3b472ade52313a13909a7c5de25e2239e70ac023ac6954b8",
+    "a4-1270.png": "98eba3cece4510e5af755e278f0dd50f6eca41904a6f3d96dd35c33d563da068",
+    "a4-1271.png": "7845edc1f95adcc3c0737c64520bf3ed13df6169431c9129e7b1be7ac7fceab4",
+    "a4-1272.png": "7079f0db2a2d8a3ad8ac7a7cf503519a9b5c349e63c85158c283a28ec0d984cb",
+    "letter-1392.png": "47e213b598be3c9d9ad03644b1429037389f9e263d95affb4c3499be5338be5f",
+    "letter-1393.png": "a1432f402055b81aefeae66fe96d8c4c5d025ecda892dc0bd42718d8e0b00c26",
+    "letter-1394.png": "ad753286e1cee47fb8e756cefb97d2768f1fb9e7d48abf2be4992ff038f8ab47",
+    "letter-1395.png": "39b348faf93503c621de132bdb707157687b8027a5f8ac15d321746a8609ef89"
+  },
+  "receiptSha256": "ef5a35282669e4dc7fbb775ab4d785978aa773e55d8f2ce1c5727a856a5f38cc",
+  "requiredRepair": "Keep only the saved-decoder appendix short pre/code block together; rerender full A4/Letter PDFs and assert PowerShell first/last commands share one page without overflow.",
+  "scaffoldTableLegible": [
+    "a4:1270",
+    "letter:1393"
+  ],
+  "status": "requires-pagination-repair",
+  "visualFindings": [
+    "PowerShell code block fits A4 page 1271 but splits across Letter pages 1394-1395.",
+    "Letter page 1394 contains the heading and first commands; Letter page 1395 contains the final --output $output command.",
+    "Figure title, both chart panels and caption are co-located and legible on A4 1272 and Letter 1395."
+  ]
+}

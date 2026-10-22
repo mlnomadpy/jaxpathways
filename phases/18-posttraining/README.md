@@ -68,7 +68,7 @@ Complete stages 4–8 of training-methods. Retain shifted token-mask checks, fro
 
 ### Further work
 
-The PPO lesson uses a terminal synthetic preference bandit. Optional project stage 5 adds a separate synthetic sequence PPO exercise with a learned table critic and a declared deterministic continuation target at the collection boundary. Neither is full language-model RLHF. Saved Transformer lineage, real preference provenance, large-model PEFT, task quality, retention and held-out human evaluation remain separate work. Complete rl-01 through rl-04 before the learned-reward PPO lesson; rl-05 is useful optional preparation for project stage 5. Response-only SFT and dense LoRA do not require the RL phase.
+The PPO lesson uses a terminal synthetic preference bandit. The optional, registered project Stage 5 table-policy exercise adds a separate synthetic sequence PPO exercise with a learned table critic and a declared deterministic continuation target at the collection boundary. The [optional saved-decoder appendix](https://www.tahabouhsine.com/jaxpathways/project-guides/posttraining-transformer-lineage.html) demonstrates bounded sequence-PPO mechanics and replay, but its strict heldout reward quality floor failed; this is not evidence of language-model quality. Keep it separate from registered Stage 5. Neither exercise is full language-model RLHF. Real preference provenance, large-model PEFT, task quality, retention and held-out human evaluation remain separate work. Complete rl-01 through rl-04 before the learned-reward PPO lesson; rl-05 is useful optional preparation for project Stage 5. Response-only SFT and dense LoRA do not require the RL phase.
 
 ## Lesson sequence
 

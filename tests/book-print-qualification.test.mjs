@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
+import { readFileSync } from 'node:fs';
 import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -8,6 +9,7 @@ import { chromium } from '@playwright/test';
 import postcss from 'postcss';
 import { inspectPdf, parseQualificationOptions } from '../scripts/qualify-book-print.mjs';
 import { lessonMechanism, lessonVisual } from '../src/lib/lesson-visuals.js';
+import { bookGuide } from '../src/lib/server/book-guides.js';
 
 test('print qualification defaults to four chapters and supports full-book format options', () => {
   const defaults = parseQualificationOptions([]);
@@ -38,6 +40,17 @@ test('print qualification defaults to four chapters and supports full-book forma
   assert.throws(() => parseQualificationOptions(['--all', '--format']), /Expected a value/);
 });
 
+test('EPUB distribution checker requires the exact final grouped appendix SVG', () => {
+  const checker = readFileSync('scripts/check-distribution.py', 'utf8');
+  assert.match(checker, /len\(figures\) == 1/);
+  assert.match(checker, /len\(images\) == 1/);
+  assert.match(checker, /base64\.b64decode\([^\n]+validate=True/);
+  assert.match(checker, /embedded == expected_svg/);
+  assert.match(checker, /children\[-1\] is caption/);
+  assert.match(checker, /Mean reward improvement/);
+  assert.match(checker, /Primary policy loss · epoch 2/);
+});
+
 test('print stylesheet reserves a footer and keeps complete visual intros together', async () => {
   const css = await readFile(new URL('../src/styles/print.css', import.meta.url), 'utf8');
   const root = postcss.parse(css);
@@ -45,6 +58,9 @@ test('print stylesheet reserves a footer and keeps complete visual intros togeth
   let introRule = false;
   let figureRule = false;
   let imageRule = false;
+  let appendixHeadingRule = false;
+  let appendixCommandRule = false;
+  let broadCommandAvoidRule = false;
 
   root.walkAtRules('page', (pageRule) => {
     pageRule.walkAtRules('bottom-center', (marginBox) => {
@@ -54,10 +70,10 @@ test('print stylesheet reserves a footer and keeps complete visual intros togeth
     });
   });
   root.walkRules((rule) => {
+    const values = Object.fromEntries(
+      rule.nodes.filter((node) => node.type === 'decl').map((node) => [node.prop, node.value]),
+    );
     if (rule.selector === '.print-visual-intro') {
-      const values = Object.fromEntries(
-        rule.nodes.filter((node) => node.type === 'decl').map((node) => [node.prop, node.value]),
-      );
       introRule =
         values['break-inside'] === 'avoid-page' && values['page-break-inside'] === 'avoid';
     }
@@ -67,16 +83,27 @@ test('print stylesheet reserves a footer and keeps complete visual intros togeth
         .map((selector) => selector.trim())
         .includes('figure:not(.lesson-mechanism):not(.print-visual-intro)')
     ) {
-      const values = Object.fromEntries(
-        rule.nodes.filter((node) => node.type === 'decl').map((node) => [node.prop, node.value]),
-      );
       figureRule = values['break-inside'] === 'avoid';
     }
     if (rule.selector === '.print-visual-intro .figure-scroll img') {
-      const values = Object.fromEntries(
-        rule.nodes.filter((node) => node.type === 'decl').map((node) => [node.prop, node.value]),
-      );
       imageRule = values['max-height'] === '175mm' && values['object-fit'] === 'contain';
+    }
+    if (rule.selector === '#appendix-posttraining-lineage p:has(+ pre)') {
+      appendixHeadingRule =
+        values['break-after'] === 'avoid-page' && values['page-break-after'] === 'avoid';
+    }
+    if (rule.selector === '#appendix-posttraining-lineage pre') {
+      appendixCommandRule =
+        values['break-inside'] === 'avoid-page' && values['page-break-inside'] === 'avoid';
+    }
+    if (
+      rule.selector
+        .split(',')
+        .map((selector) => selector.trim())
+        .includes('pre') &&
+      (values['break-inside'] === 'avoid-page' || values['page-break-inside'] === 'avoid')
+    ) {
+      broadCommandAvoidRule = true;
     }
   });
 
@@ -84,6 +111,9 @@ test('print stylesheet reserves a footer and keeps complete visual intros togeth
   assert(introRule, 'the title, prediction, image and caption stay in one print group');
   assert(figureRule, 'figures outside mechanism diagrams stay intact when they fit');
   assert(imageRule, 'tall print figures fit the page while preserving aspect ratio');
+  assert(appendixHeadingRule, 'only the appendix command headings avoid a following page break');
+  assert(appendixCommandRule, 'the appendix command blocks stay together when they fit');
+  assert(!broadCommandAvoidRule, 'other code blocks do not receive appendix pagination rules');
   assert.match(css, /margin:\s*18mm 18mm 24mm;/);
 });
 
@@ -291,4 +321,160 @@ test('print CSS groups tall visuals and mechanism prompts and numbers every PDF 
     `fixture extraction exceeds Node's default 1 MiB buffer (${largeInspection.extractedTextBytes} bytes)`,
   );
   assert.equal(largeInspection.numberedPages.length, largeInspection.pageCount);
+});
+
+test('saved-decoder appendix figure is embedded, grouped, and rejected when its group breaks', async (context) => {
+  const sourcePath = 'projects/posttraining-audit/transformer_lineage/TEACHING.md';
+  const source = bookGuide(sourcePath, JSON.parse(readFileSync('curriculum/course.json', 'utf8')), {
+    mathOutput: 'mathml',
+  });
+  const figure = source.match(/<figure class="print-visual-intro"[\s\S]*?<\/figure>/)?.[0];
+  assert.ok(figure, 'the actual appendix renderer emits a grouped figure');
+  assert.equal((source.match(/<figure class="print-visual-intro"/g) || []).length, 1);
+  assert.match(figure, /<h3[^>]*>Recorded v5 result<\/h3>/);
+  assert.match(figure, /<figcaption><strong>Figure 1\.<\/strong>/);
+  assert.ok(figure.endsWith('</figcaption></figure>'));
+  const imageMatch = figure.match(/<img[^>]+src="(data:image\/svg\+xml;base64,[^"]+)"/);
+  assert.ok(imageMatch, 'appendix SVG is embedded as a data URI');
+  const svgText = Buffer.from(imageMatch[1].split(',')[1], 'base64').toString('utf8');
+  const expectedSvg = readFileSync(
+    'projects/posttraining-audit/transformer_lineage/teaching/v5/figure.svg',
+  );
+  assert.deepEqual(
+    Buffer.from(svgText),
+    expectedSvg,
+    'embedded SVG bytes match the frozen public figure',
+  );
+  assert.match(svgText, /Mean reward improvement/);
+  assert.match(svgText, /Primary policy loss · epoch 2/);
+
+  const commandBlock = (heading) => {
+    const headingMarkup = `<p><strong>${heading}</strong></p>`;
+    const headingStart = source.indexOf(headingMarkup);
+    const codeStart = source.indexOf('<pre ', headingStart);
+    const codeEnd = source.indexOf('</pre>', codeStart);
+    assert(headingStart >= 0 && codeStart > headingStart && codeEnd > codeStart);
+    return source.slice(headingStart, codeEnd + '</pre>'.length);
+  };
+  const posixBlock = commandBlock('POSIX shell');
+  const powershellBlock = commandBlock('PowerShell');
+  assert.match(posixBlock, /ROOT=projects\/posttraining-audit\/transformer_lineage/);
+  assert.match(posixBlock, /--output &quot;\$OUT&quot;/);
+  assert.match(
+    powershellBlock,
+    /\$root = &#39;projects\/posttraining-audit\/transformer_lineage&#39;/,
+  );
+  assert.match(powershellBlock, /--output \$output/);
+
+  const executable = execFileSync('which', ['pdftotext'], { encoding: 'utf8' }).trim();
+  assert(executable, 'pdftotext is required for page-level appendix assertions');
+  const css = await readFile(new URL('../src/styles/print.css', import.meta.url), 'utf8');
+  const browser = await chromium.launch({
+    headless: true,
+    ...(process.env.CHROME_BIN ? { executablePath: process.env.CHROME_BIN } : {}),
+  });
+  const directory = await mkdtemp(join(tmpdir(), 'jaxpathways-appendix-print-'));
+  context.after(async () => {
+    await browser.close();
+    await rm(directory, { recursive: true, force: true });
+  });
+  const page = await browser.newPage();
+  await page.setContent(`<!doctype html><html><body>
+    <div class="boundary-spacer"></div>
+    <section id="appendix-posttraining-lineage">
+      ${figure}
+      <div class="command-boundary"></div>
+      ${posixBlock}
+      <div class="command-boundary"></div>
+      ${powershellBlock}
+    </section>
+  </body></html>`);
+  await page.addStyleTag({ content: css });
+  await page.addStyleTag({
+    content: `.boundary-spacer, .command-boundary { height: 210mm; }
+      #appendix-posttraining-lineage { margin: 0; padding: 0; }
+      .print-visual-intro { margin: 0; }
+      .print-visual-intro h3 { margin: 0; font: 12pt/1.2 Arial, sans-serif; }
+      .print-visual-intro .figure-scroll { margin: 0; }
+      .print-visual-intro .figure-scroll img { width: auto; max-width: 100%; max-height: 175mm; }
+      .print-visual-intro figcaption { margin: 0; font: 9pt/1.2 Arial, sans-serif; }`,
+  });
+  await page.emulateMedia({ media: 'print' });
+  await page.waitForFunction(() => Array.from(document.images).every((image) => image.complete));
+
+  const pageContaining = (pages, phrase) => {
+    const found = pages.flatMap((text, index) => (text.includes(phrase) ? [index] : []));
+    assert.equal(found.length, 1, `${phrase} appears on exactly one PDF page`);
+    return found[0];
+  };
+  const activePath = join(directory, 'appendix-grouped.pdf');
+  await page.pdf({ path: activePath, format: 'Letter', displayHeaderFooter: false });
+  const active = inspectPdf(activePath, { expectedAppendixFigure: true });
+  const activeText = execFileSync('pdftotext', ['-layout', activePath, '-'], {
+    encoding: 'utf8',
+  });
+  const activePages = activeText.split('\f').filter((text) => text.trim());
+  const activeTitlePage = pageContaining(activePages, 'Recorded v5 result');
+  for (const cue of [
+    'Mean reward improvement',
+    'Primary policy loss',
+    'Figure 1.',
+    'strict positive improvement floor therefore fails',
+  ]) {
+    assert.equal(
+      pageContaining(activePages, cue),
+      activeTitlePage,
+      `${cue} shares the appendix page`,
+    );
+  }
+  for (const [label, cues] of [
+    [
+      'POSIX shell',
+      ['POSIX shell', 'ROOT=projects/posttraining-audit/transformer_lineage', '--output "$OUT"'],
+    ],
+    [
+      'PowerShell',
+      [
+        'PowerShell',
+        "$root = 'projects/posttraining-audit/transformer_lineage'",
+        '--output $output',
+      ],
+    ],
+  ]) {
+    const pageIndex = pageContaining(activePages, cues[0]);
+    for (const cue of cues.slice(1)) {
+      assert.equal(pageContaining(activePages, cue), pageIndex, `${label}: ${cue} stays together`);
+    }
+  }
+  assert.equal(active.numberedPages.length, active.pageCount);
+
+  await page.addStyleTag({
+    content: `@media print {
+      #appendix-posttraining-lineage p:has(+ pre) {
+        break-after: auto !important;
+        page-break-after: auto !important;
+      }
+      #appendix-posttraining-lineage pre {
+        break-inside: auto !important;
+        page-break-inside: auto !important;
+      }
+    }`,
+  });
+  const splitPath = join(directory, 'appendix-split.pdf');
+  await page.pdf({ path: splitPath, format: 'Letter', displayHeaderFooter: false });
+  assert.throws(
+    () => inspectPdf(splitPath, { expectedAppendixFigure: true }),
+    /Appendix (POSIX|PowerShell) learner command block heading, first command and final --output command must share exactly one PDF page/,
+  );
+  const splitText = execFileSync('pdftotext', ['-layout', splitPath, '-'], {
+    encoding: 'utf8',
+  });
+  const splitPages = splitText.split('\f').filter((text) => text.trim());
+  const commandBlockWasSplit = (heading, finalCommand) =>
+    pageContaining(splitPages, heading) !== pageContaining(splitPages, finalCommand);
+  assert(
+    commandBlockWasSplit('POSIX shell', '--output "$OUT"') ||
+      commandBlockWasSplit('PowerShell', '--output $output'),
+    'disabling the appendix command-block grouping reproduces a first/last command split',
+  );
 });

@@ -53,7 +53,10 @@ export function parseQualificationOptions(argv) {
 }
 
 /** @param {string} pdfPath */
-export function inspectPdf(pdfPath, { expectedVisuals = 0, expectedMechanismTitles = [] } = {}) {
+export function inspectPdf(
+  pdfPath,
+  { expectedVisuals = 0, expectedMechanismTitles = [], expectedAppendixFigure = false } = {},
+) {
   const info = execFileSync('pdfinfo', [pdfPath], { encoding: 'utf8' });
   const pageCount = Number(info.match(/^Pages:\s+(\d+)$/m)?.[1]);
   if (!Number.isInteger(pageCount) || pageCount < 1) {
@@ -157,6 +160,52 @@ export function inspectPdf(pdfPath, { expectedVisuals = 0, expectedMechanismTitl
       }
     }
   }
+  if (expectedAppendixFigure) {
+    const appendixCues = [
+      'Recorded v5 result',
+      'Mean reward improvement',
+      'Primary policy loss',
+      'Figure 1.',
+      'strict positive improvement floor therefore fails',
+    ];
+    const normalizedPages = pages.map((page) => page.replace(/\s+/g, ' ').trim());
+    const matchingPages = normalizedPages.flatMap((page, index) =>
+      appendixCues.every((cue) => page.includes(cue)) ? [index] : [],
+    );
+    if (matchingPages.length !== 1) {
+      throw new Error(
+        `Appendix figure title, both plotted labels and caption must share exactly one PDF page; found ${matchingPages.length} matching pages`,
+      );
+    }
+    const commandBlocks = [
+      {
+        label: 'POSIX learner command block',
+        cues: [
+          'POSIX shell',
+          'ROOT=projects/posttraining-audit/transformer_lineage',
+          '--output "$OUT"',
+        ],
+      },
+      {
+        label: 'PowerShell learner command block',
+        cues: [
+          'PowerShell',
+          "$root = 'projects/posttraining-audit/transformer_lineage'",
+          '--output $output',
+        ],
+      },
+    ];
+    for (const { label, cues } of commandBlocks) {
+      const pagesWithCompleteBlock = normalizedPages.flatMap((page, index) =>
+        cues.every((cue) => page.includes(cue)) ? [index] : [],
+      );
+      if (pagesWithCompleteBlock.length !== 1) {
+        throw new Error(
+          `Appendix ${label} heading, first command and final --output command must share exactly one PDF page; found ${pagesWithCompleteBlock.length} matching pages`,
+        );
+      }
+    }
+  }
   return { pageCount, numberedPages, extractedTextBytes: Buffer.byteLength(extractedText) };
 }
 
@@ -204,11 +253,17 @@ export async function qualifyBookPrint(argv = process.argv.slice(2)) {
     const sourceResponse = await page.request.get(options.url);
     if (!sourceResponse.ok()) throw new Error(`Book request failed: ${sourceResponse.status()}`);
     const sourceHtml = await sourceResponse.body();
+    const appendixSvg = await readFile(
+      new URL(
+        '../projects/posttraining-audit/transformer_lineage/teaching/v5/figure.svg',
+        import.meta.url,
+      ),
+    );
     const response = await page.goto(options.url, { waitUntil: 'load', timeout: 90000 });
     if (!response?.ok()) throw new Error(`Book request failed: ${response?.status()}`);
 
     const selection = await page.evaluate(
-      ({ all, wanted, expectedCount }) => {
+      ({ all, wanted, expectedCount, expectedAppendixSvgBase64 }) => {
         const articles = Array.from(document.querySelectorAll('article'));
         const selected = all
           ? articles
@@ -239,11 +294,48 @@ export async function qualifyBookPrint(argv = process.argv.slice(2)) {
           ),
           printedAppendix: article.querySelector('.print-solutions')?.id || null,
         }));
+        const appendixSection = all
+          ? document.querySelector('#appendix-posttraining-lineage')
+          : null;
+        let appendixFigure = null;
+        if (all) {
+          if (!appendixSection)
+            throw new Error('Full-book print is missing the saved-decoder appendix');
+          const figures = appendixSection.querySelectorAll('figure.print-visual-intro');
+          if (figures.length !== 1) {
+            throw new Error(
+              `Expected one grouped saved-decoder appendix figure, found ${figures.length}`,
+            );
+          }
+          const figure = figures[0];
+          const image = figure.querySelector('img');
+          const caption = figure.querySelector('figcaption');
+          const heading = figure.querySelector('h3');
+          const expectedSource = `data:image/svg+xml;base64,${expectedAppendixSvgBase64}`;
+          if (
+            figure.querySelectorAll('img').length !== 1 ||
+            figure.lastElementChild !== caption ||
+            heading?.textContent.trim() !== 'Recorded v5 result' ||
+            !caption?.textContent.trim().startsWith('Figure 1.') ||
+            image?.getAttribute('src') !== expectedSource
+          ) {
+            throw new Error(
+              'Saved-decoder appendix figure must contain the exact SVG, accessible title, and final caption',
+            );
+          }
+          appendixFigure = {
+            title: heading.textContent.trim(),
+            imageAlt: image.getAttribute('alt'),
+            caption: caption.textContent.trim(),
+            groupedFigureCount: figures.length,
+          };
+        }
         if (!all) {
           const prune = (node) => {
-            if (selected.includes(node)) return;
+            if (selected.includes(node) || node === appendixSection) return;
             for (const child of Array.from(node.childNodes)) {
-              if (selected.some((article) => child.contains(article))) prune(child);
+              if (selected.some((article) => child.contains(article)) || child === appendixSection)
+                prune(child);
               else child.remove();
             }
           };
@@ -256,9 +348,15 @@ export async function qualifyBookPrint(argv = process.argv.slice(2)) {
           documentArticleCount: articles.length,
           visualIntroCount: metadata.reduce((sum, article) => sum + article.visualIntros, 0),
           mechanismTitles: metadata.flatMap((article) => article.mechanismTitles),
+          appendixFigure,
         };
       },
-      { all: options.all, wanted: options.chapterIds, expectedCount: FULL_BOOK_ARTICLE_COUNT },
+      {
+        all: options.all,
+        wanted: options.chapterIds,
+        expectedCount: FULL_BOOK_ARTICLE_COUNT,
+        expectedAppendixSvgBase64: appendixSvg.toString('base64'),
+      },
     );
 
     await page.waitForFunction(
@@ -288,6 +386,13 @@ export async function qualifyBookPrint(argv = process.argv.slice(2)) {
         ),
         predictionBreakAfter: prediction ? getComputedStyle(prediction).breakAfter : null,
         figureBreakInside: figure ? getComputedStyle(figure).breakInside : null,
+        appendixBreakInside: document.querySelector(
+          '#appendix-posttraining-lineage figure.print-visual-intro',
+        )
+          ? getComputedStyle(
+              document.querySelector('#appendix-posttraining-lineage figure.print-visual-intro'),
+            ).breakInside
+          : null,
       };
     });
     if (
@@ -295,7 +400,8 @@ export async function qualifyBookPrint(argv = process.argv.slice(2)) {
       !printState.appendicesVisible ||
       selection.metadata.some((chapter) => !chapter.printedAppendix) ||
       !printState.predictionBreakAfter?.includes('avoid') ||
-      printState.figureBreakInside !== 'avoid'
+      printState.figureBreakInside !== 'avoid' ||
+      (options.all && printState.appendixBreakInside !== 'avoid')
     ) {
       throw new Error(
         'Print mode must keep lesson visuals together and show separate answer appendices',
@@ -324,6 +430,7 @@ export async function qualifyBookPrint(argv = process.argv.slice(2)) {
       const inspected = inspectPdf(pdfPath, {
         expectedVisuals: selection.visualIntroCount,
         expectedMechanismTitles: selection.mechanismTitles,
+        expectedAppendixFigure: Boolean(selection.appendixFigure),
       });
       records.push({
         format,
@@ -335,10 +442,11 @@ export async function qualifyBookPrint(argv = process.argv.slice(2)) {
         footerNumberedPages: inspected.numberedPages,
         verifiedVisualIntros: selection.visualIntroCount,
         verifiedMechanismIntros: selection.mechanismTitles.length,
+        verifiedAppendixFigures: selection.appendixFigure ? 1 : 0,
       });
     }
     const record = {
-      schemaVersion: 2,
+      schemaVersion: 3,
       executedAt: new Date().toISOString(),
       browser: await browser.version(),
       operatingSystem: { platform: platform(), release: release() },
@@ -350,6 +458,11 @@ export async function qualifyBookPrint(argv = process.argv.slice(2)) {
           path: 'src/styles/print.css',
           sha256: sha256(printCss),
           bytes: printCss.length,
+        },
+        appendixFigureSvg: {
+          path: 'projects/posttraining-audit/transformer_lineage/teaching/v5/figure.svg',
+          sha256: sha256(appendixSvg),
+          bytes: appendixSvg.length,
         },
         loadedStylesheets: stylesheets,
         script: {
@@ -368,6 +481,7 @@ export async function qualifyBookPrint(argv = process.argv.slice(2)) {
       selectedArticleCount: selection.selectedCount,
       documentArticleCount: selection.documentArticleCount,
       printState,
+      appendixFigure: selection.appendixFigure,
       settings: {
         scale: 1,
         printBackground: true,

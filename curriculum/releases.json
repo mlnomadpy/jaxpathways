@@ -1,5 +1,33 @@
 [
   {
+    "version": "0.17.1",
+    "date": "2026-10-22",
+    "editionKey": "jaxpathways-2026-review-edition",
+    "modifiedAt": "2026-10-22T13:04:35Z",
+    "title": "Make the saved-decoder appendix easier to run and review",
+    "summary": "Repair portable hash instructions and parent-manifest links while preserving the independently checked executable source.",
+    "changes": [
+      "Use Python hashlib for candidate hashes so the learner instructions work on stock macOS and paths containing spaces. Link the parent package manifest to its immutable source commit instead of a missing loose download.",
+      "Clarify that saved-decoder mechanics and recovery are implemented, while the recorded quality gate failed and retention and human review remain open.",
+      "Preserve all 104 canonical lesson bodies, prior release snapshots, numeric packet and executable bridge bytes. The final archive differs from the optimizer-tested archive only in three Markdown documents; its extracted no-update checks are recorded separately. No additional optimizer runs, quality retries, cloud work or child-weight releases are authorized."
+    ]
+  },
+  {
+    "version": "0.17.0",
+    "date": "2026-10-22",
+    "editionKey": "jaxpathways-2026-review-edition",
+    "modifiedAt": "2026-10-22T12:36:48Z",
+    "title": "Trace a saved decoder through sequence PPO",
+    "summary": "Add an optional saved-decoder appendix with explained objectives, learner contracts, recovery checks and a recorded failed quality gate.",
+    "changes": [
+      "Connected the post-training project to a separate optional appendix using a saved 10,880-parameter decoder, a restricted four-action policy, a fitted synthetic reward head, a learned critic and multi-epoch sequence PPO. Registered Stage 5 keeps its existing table-policy edit path.",
+      "Added worked EOS/timeout GAE and signed clipping calculations in KaTeX, an explained source-bound figure, a numeric-only packet checker and a complete learner scaffold. The HTML reader and EPUB share the optional appendix and its embedded figure.",
+      "Recorded the completed synthetic CPU experiment honestly: mechanics and replay passed independent review, but child and parent sampled rewards tied and the strict heldout reward-improvement gate failed. All eight sampled responses matched per split despite changed actor parameters. The earlier evaluator failure remains separate.",
+      "Disclosed a one-argument postrun starter-helper repair while retaining the original as-run identities. Added exact parent dependencies and source-bound no-update and bounded learner-check records to the project archive. Clean extracted learner qualification is a separate gate from the recorded training result.",
+      "Kept all 104 canonical lesson bodies and prior release history unchanged. The book and optional extension remain in development; independent human teaching, native-reader/assistive review, target-scale models, retention and full capstones remain open. No child weights or new quality-training authority are distributed."
+    ]
+  },
+  {
     "version": "0.16.1",
     "date": "2026-10-21",
     "editionKey": "jaxpathways-2026-review-edition",

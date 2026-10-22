@@ -1,12 +1,13 @@
 import path from 'node:path';
 import { existsSync } from 'node:fs';
 import { assessmentContent } from './assessment-content.js';
+import { groupTransformerLineageFigure } from './posttraining-lineage-figure.js';
 import { lessonLink, siteUrl } from '../urls.js';
 import projectPlans from '../../../curriculum/project-plans.json' with { type: 'json' };
 
 /** Resolve repository Markdown links into the static course, including Pages bases. */
 export function projectGuide(project, course, plannedIds = projectPlans.map((plan) => plan.id)) {
-  return assessmentContent(project.source, (href) => {
+  const rendered = assessmentContent(project.source, (href) => {
     if (/^(https?:|#)/.test(href)) return href;
     const target = path.posix.normalize(path.posix.join(path.posix.dirname(project.source), href));
     if (target === 'projects/text-harness/foundations/README.md') {
@@ -17,6 +18,9 @@ export function projectGuide(project, course, plannedIds = projectPlans.map((pla
     }
     if (target === 'projects/image-model-300m/TEACHING.md') {
       return siteUrl('project-guides/image-model-300m-pilot.html');
+    }
+    if (target === 'projects/posttraining-audit/transformer_lineage/TEACHING.md') {
+      return siteUrl('project-guides/posttraining-transformer-lineage.html');
     }
     const projectReadme = /^projects\/([^/]+)\/README\.md$/.exec(target);
     if (projectReadme) {
@@ -53,4 +57,8 @@ export function projectGuide(project, course, plannedIds = projectPlans.map((pla
     }
     throw new Error(`Unresolved project guide link: ${project.id}: ${href}`);
   });
+  if (project.source === 'projects/posttraining-audit/transformer_lineage/TEACHING.md') {
+    return { ...rendered, body: groupTransformerLineageFigure(rendered.body) };
+  }
+  return rendered;
 }

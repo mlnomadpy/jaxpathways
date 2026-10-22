@@ -1,0 +1,137 @@
+book-all-a4.pdf 100
+book-all-a4.pdf 200
+book-all-a4.pdf 300
+book-all-a4.pdf 400
+book-all-a4.pdf 500
+book-all-a4.pdf 600
+book-all-a4.pdf 700
+book-all-a4.pdf 800
+book-all-a4.pdf 900
+book-all-a4.pdf 1000
+book-all-a4.pdf 1100
+book-all-a4.pdf 1200
+book-all-letter.pdf 100
+book-all-letter.pdf 200
+book-all-letter.pdf 300
+book-all-letter.pdf 400
+book-all-letter.pdf 500
+book-all-letter.pdf 600
+book-all-letter.pdf 700
+book-all-letter.pdf 800
+book-all-letter.pdf 900
+book-all-letter.pdf 1000
+book-all-letter.pdf 1100
+book-all-letter.pdf 1200
+book-all-letter.pdf 1300
+{
+  "recordedAt": "2026-10-22T13:15:51.505442+00:00",
+  "scope": "All PDF pages checked for text glyphs outside the media box; this is not full visual review.",
+  "documents": [
+    {
+      "file": "book-all-a4.pdf",
+      "sha256": "bd754862b5818a45c81d836cdc449de3759fd25f5a66fc68384361ff0bf42ed7",
+      "pages": 1272,
+      "characters": 2685125,
+      "outsideMediaBox": [],
+      "emptyTextPages": [],
+      "chapterPages": {
+        "Least squares, rank, and conditioning": [
+          213,
+          220
+        ],
+        "Least squares balances unavoidable residuals": [
+          214
+        ],
+        "A Transformer block and mixed precision": [
+          459,
+          468
+        ],
+        "Train, checkpoint, and generate": [
+          470,
+          481
+        ],
+        "Optional saved-decoder": [
+          1121
+        ],
+        "bfloat16, int8 precision, and XProf": [
+          1245,
+          1255
+        ],
+        "Optional appendix: a saved decoder enters sequence PPO": [
+          1268
+        ],
+        "Predict the boundaries": [
+          1268
+        ],
+        "Calculate EOS and timeout by hand": [
+          1269
+        ],
+        "Implement the six learner contracts": [
+          1270
+        ],
+        "Recorded v5 result": [
+          1272
+        ],
+        "Mean reward improvement": [
+          1272
+        ],
+        "Treat this as a small synthetic mechanics experiment": [
+          1272
+        ]
+      }
+    },
+    {
+      "file": "book-all-letter.pdf",
+      "sha256": "f796550f342c17fdbbbabfcb7b67474f9adca4cea42e58a46bc13dcc44426988",
+      "pages": 1396,
+      "characters": 2686594,
+      "outsideMediaBox": [],
+      "emptyTextPages": [],
+      "chapterPages": {
+        "Least squares, rank, and conditioning": [
+          227,
+          236
+        ],
+        "Least squares balances unavoidable residuals": [
+          229
+        ],
+        "A Transformer block and mixed precision": [
+          501,
+          512
+        ],
+        "Train, checkpoint, and generate": [
+          514,
+          527
+        ],
+        "Optional saved-decoder": [
+          1223
+        ],
+        "bfloat16, int8 precision, and XProf": [
+          1366,
+          1377
+        ],
+        "Optional appendix: a saved decoder enters sequence PPO": [
+          1391
+        ],
+        "Predict the boundaries": [
+          1392
+        ],
+        "Calculate EOS and timeout by hand": [
+          1392
+        ],
+        "Implement the six learner contracts": [
+          1393
+        ],
+        "Recorded v5 result": [
+          1395
+        ],
+        "Mean reward improvement": [
+          1395
+        ],
+        "Treat this as a small synthetic mechanics experiment": [
+          1396
+        ]
+      }
+    }
+  ]
+}

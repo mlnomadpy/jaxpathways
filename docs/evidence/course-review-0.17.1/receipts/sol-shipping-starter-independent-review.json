@@ -1,0 +1,28 @@
+{
+  "completedCandidateEntireModuleAstEqualsReference": true,
+  "completedPositiveZeroOptimizerUpdates": true,
+  "freshProcessDevHeldoutMatchedEpisodeCountEach": 8,
+  "historicalAsRunFileCount": 15,
+  "historicalStarterSha256": "b7fc9060123b474de92ac04a5480ef818ab296bc216351ed2f7701474741b03d",
+  "kind": "sol-transformer-lineage-shipping-starter-independent-review",
+  "noOptimizerRunDuringIndependentReview": true,
+  "oldHelperEvaluateOnlyMutantFailedWeightKey": true,
+  "onlyChangedFile": "projects/posttraining-audit/transformer_lineage/starter.py",
+  "onlyTodoFunctionDifferences": [
+    "clipped_value_loss",
+    "fit_pairwise_reward_head",
+    "generalized_advantage_estimate",
+    "ppo_policy_loss",
+    "rollout",
+    "train"
+  ],
+  "portableNonRunApprovalSha256": "28f625fa4a1e8f705ce6b0e4a4ae56e241ce33d7ec5f3ec091e8428df738838b",
+  "providedHelperAstEqualCount": 20,
+  "qualification": "zero-update learner scaffold only; no mechanics optimizer/campaign retry",
+  "shippingAsRunExactMatches": 14,
+  "shippingStarterSha256": "8196af0f989c382ab5c4833102f11a2d1fe2263614e35e8ac1be8ab1ce501d32",
+  "sourceBase": "/private/tmp/jaxpathways-transformer-bridge-review",
+  "untouchedStarterFailedTodo": true,
+  "workerAstProofSha256": "7db2a2b67097a5578ab59bd38333a4d52c2176ec0be23108fbde0faf4da57e60",
+  "workerSemanticReceiptSha256": "2cbce04767a1cd4557182a43ebad00feaa8cb37f81fedfc0b66d7252f02eddad"
+}

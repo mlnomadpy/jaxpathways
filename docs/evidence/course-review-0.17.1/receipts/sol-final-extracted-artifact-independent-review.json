@@ -1,0 +1,29 @@
+{
+  "actualLearnerMechanicsExposureOldZip": {
+    "actor": 6,
+    "critic": 6,
+    "outer": 3,
+    "reward": 20
+  },
+  "canonicalLessonJsonBytesUnchanged": true,
+  "cleanExtractNumericPacketPassed": true,
+  "cleanExtractPreflightPassed": true,
+  "cleanExtractZeroUpdateSemanticPassed": true,
+  "finalZipSha256": "fe1318990ce10144237612ab86e879cb14b7e5b871d536a99936cc98ebfbeb13",
+  "kind": "sol-transformer-lineage-0171-final-extracted-artifact-independent-review",
+  "limitations": [
+    "Final ZIP executable bytes are identical to optimizer-tested old ZIP, but final ZIP itself underwent only zero-update/non-run checks.",
+    "Synthetic one-update learner mechanics pass; v5 strict heldout reward-improvement gate remains failed.",
+    "No human preferences, full RLHF quality, retained behavior, target-scale, hardware, reader-native or weights-release claim."
+  ],
+  "markdownOnlyChangedCount": 3,
+  "memberCount": 40,
+  "nonrunValidationReceiptSha256": "52f7ec6d5d5aba8a01ea60147f2e1b81bec787263cc934b84fa68595cc333a90",
+  "oldZipMechanicsPostrunReceiptSha256": "38fa627ed6cd605f9301a52a846d24f961352735ec40864bc3b2c50bcd52138b",
+  "optimizerActionsFinalZip": 0,
+  "priorSnapshotsDecodedIdentical": true,
+  "qualityStatus": "QUALITY_GATE_FAILED",
+  "reconciliationReceiptSha256": "5fd62f2dedc35f2ae82f8650598671b59eb05267e625e8cdbf9ee5117d944e3e",
+  "status": "accepted-bounded-docs-reconciled-learner-artifact",
+  "unchangedExecutableAndNumericMembers": 37
+}

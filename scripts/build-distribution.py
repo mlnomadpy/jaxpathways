@@ -17,7 +17,67 @@ REPOSITORY_ONLY_TPU_FILES = {
 PROJECT_EXTRA_FILES = {
     # kernel-audit's README documents this optional, separately pinned TPU environment.
     "kernel-audit": ("resources/tpu-gcp/requirements-qualification.txt",),
+    "posttraining-audit": (
+        "projects/text-harness/foundations/config.py",
+        "projects/text-harness/foundations/data.py",
+        "projects/text-harness/foundations/model.py",
+        "projects/text-harness/foundations/train.py",
+        "projects/text-harness/foundations/reference/run/inference-package/package.json",
+        "projects/text-harness/foundations/reference/run/inference-package/params.npz",
+        "projects/text-harness/foundations/reference/run/inference-package/tokenizer.json",
+    ),
 }
+POSTTRAINING_RECIPE = "projects/posttraining-audit/transformer_lineage/recipe.json"
+POSTTRAINING_RECIPE_SHA256 = "8411afc4412c59973d56b2cceae530dd642a5aa1c9e6f57a5dbb7f6ba110bc57"
+POSTTRAINING_PARENT_SHA256 = {
+    "projects/text-harness/foundations/config.py": "5c05801a7ec1a15b3978c87c77ac4e64d1b056c60487cbcff3cdf72475c8bb64",
+    "projects/text-harness/foundations/data.py": "ff8ff698090866d46bc1f2b3540393b9a16db2121ad824110bd2ba53db645bd8",
+    "projects/text-harness/foundations/model.py": "94a88ae7fd6a251b5b190b4631496e04bb71a31c1bfe418511fdd37ffef034c9",
+    "projects/text-harness/foundations/train.py": "ee9f3bc73505ce8e00fe9680589d97805593e5c8c035cba4709b5f334eb27a2b",
+    "projects/text-harness/foundations/reference/run/inference-package/package.json": "02b92a9f56325e5a38be2c40bf263d2ca91db6122ba84dd4df266339457bf278",
+    "projects/text-harness/foundations/reference/run/inference-package/params.npz": "271cb6457de5da3f727c343c64b7bd350c00e503ea7ac847eecf51fbd5558802",
+    "projects/text-harness/foundations/reference/run/inference-package/tokenizer.json": "c92b534443cc6a1eacd5e78406b2c42e59553df704a07102a03c639d3694f586",
+}
+
+
+def posttraining_parent_files(root):
+    """Validate and return only the seven frozen parent files for the child archive."""
+    recipe_path = root / POSTTRAINING_RECIPE
+    recipe_bytes = recipe_path.read_bytes()
+    if hashlib.sha256(recipe_bytes).hexdigest() != POSTTRAINING_RECIPE_SHA256:
+        raise ValueError("posttraining-audit parent recipe differs from the frozen bridge recipe")
+    recipe = json.loads(recipe_bytes)
+    parent = recipe.get("parent", {})
+    package_root = "projects/text-harness/foundations/reference/run/inference-package"
+    expected_package = {
+        path.removeprefix(package_root + "/"): digest
+        for path, digest in POSTTRAINING_PARENT_SHA256.items()
+        if path.startswith(package_root + "/")
+    }
+    expected_foundation = {
+        Path(path).name: digest
+        for path, digest in POSTTRAINING_PARENT_SHA256.items()
+        if path.startswith("projects/text-harness/foundations/")
+        and not path.startswith(package_root + "/")
+    }
+    if parent.get("packagePath") != package_root:
+        raise ValueError("posttraining-audit parent package path differs from the frozen bridge recipe")
+    if parent.get("packageFilesSha256") != expected_package:
+        raise ValueError("posttraining-audit parent package pins differ from the frozen bridge recipe")
+    if parent.get("foundationSourceSha256") != expected_foundation:
+        raise ValueError("posttraining-audit foundation pins differ from the frozen bridge recipe")
+    if set(PROJECT_EXTRA_FILES["posttraining-audit"]) != set(POSTTRAINING_PARENT_SHA256):
+        raise ValueError("posttraining-audit extra-file allowlist differs from the frozen bridge recipe")
+
+    validated = {}
+    for relative, expected in POSTTRAINING_PARENT_SHA256.items():
+        candidate = (root / relative).resolve()
+        if not candidate.is_relative_to(root.resolve()) or not candidate.is_file():
+            raise ValueError(f"posttraining-audit parent file is missing or unsafe: {relative}")
+        if hashlib.sha256(candidate.read_bytes()).hexdigest() != expected:
+            raise ValueError(f"posttraining-audit parent file hash mismatch: {relative}")
+        validated[relative] = candidate
+    return validated
 C01_SOURCE_FILES = {
     "README.md",
     "EVALUATION.md",
@@ -407,7 +467,7 @@ for phase in phases:
     stage_ids=', '.join(str(value) for value in (phase.get('projectStageIds') or []))
     stage_note=f' Start with project stage{("s" if len(phase.get("projectStageIds") or []) != 1 else "")} {esc(stage_ids)}.' if stage_ids else ''
     guide_bodies.append(maturity('phases', phase['id']) + f'<h1>Phase {esc(phase["number"])}: {esc(phase["title"])}</h1><h2>{rich(guide.get("question","Phase guide"))}</h2><p>{rich(guide.get("why",""))}</p><h2>Prepare and work through the phase</h2><ol>{milestones}</ol><h2>Readiness check</h2><p>{rich(guide.get("readiness",{}).get("prompt",""))}</p><p>Answer: {rich(guide.get("readiness",{}).get("answer",""))}</p><h2>Transfer question</h2><p>{rich(guide.get("transfer",{}).get("prompt",""))}</p><p>Approach: {rich(guide.get("transfer",{}).get("approach",""))}</p><h2>Common pitfall</h2><p><strong>{rich(guide.get("pitfall",{}).get("symptom",""))}</strong> {rich(guide.get("pitfall",{}).get("check",""))}</p><h2>Phase artifact</h2><p>{rich(guide.get("completion",""))}</p><p>{rich(guide.get("furtherWork",""))}</p><p><strong>Phase project:</strong> {esc(phase.get("project",""))}. {esc(phase.get("checkpoint",""))}{stage_note}</p><ul>{project_links}</ul>')
-nav = '<nav><h2>Contents</h2><ol><li><a href="intro.xhtml">About this edition and routes</a></li>' + ''.join(f'<li><a href="phase-{i}.xhtml">Phase {esc(p["number"])}: {esc(p["title"])}</a><ol>'+''.join(f'<li><a href="chapter-{lessons.index(l)}.xhtml">{esc(l["title"])}</a></li>' for l in p['lessons'] if l['status']=='authored')+'</ol></li>' for i,p in enumerate(phases)) + '<li><a href="appendix-workflow.xhtml">Appendix: project structure and evidence</a></li><li><a href="appendix-experiments.xhtml">Appendix: reproducible experiments workshop</a></li><li><a href="solutions.xhtml">Solutions</a></li></ol></nav>'
+nav = '<nav><h2>Contents</h2><ol><li><a href="intro.xhtml">About this edition and routes</a></li>' + ''.join(f'<li><a href="phase-{i}.xhtml">Phase {esc(p["number"])}: {esc(p["title"])}</a><ol>'+''.join(f'<li><a href="chapter-{lessons.index(l)}.xhtml">{esc(l["title"])}</a></li>' for l in p['lessons'] if l['status']=='authored')+'</ol></li>' for i,p in enumerate(phases)) + '<li><a href="appendix-workflow.xhtml">Appendix: project structure and evidence</a></li><li><a href="appendix-experiments.xhtml">Appendix: reproducible experiments workshop</a></li><li><a href="appendix-posttraining-lineage.xhtml">Optional appendix: saved-decoder sequence PPO</a></li><li><a href="solutions.xhtml">Solutions</a></li></ol></nav>'
 xhtml = lambda body, title='JAX Pathways: course reader': '<?xml version="1.0" encoding="utf-8"?><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><title>'+esc(title)+'</title><link rel="stylesheet" href="style.css"/></head><body>'+body+'</body></html>'
 identity = primary_identifier(release, lessons)
 payload = {
@@ -421,12 +481,14 @@ for i,body in enumerate(guide_bodies): payload[f'OEBPS/phase-{i}.xhtml'] = xhtml
 for i,body in enumerate(chapters): payload[f'OEBPS/chapter-{i}.xhtml'] = xhtml(body, lessons[i]['title']).encode()
 workflow=book_guides['workflow']+'<p><a href="https://www.tahabouhsine.com/jaxpathways/project-workflow.html">Online guide and linked resources</a></p>'
 workshop=book_guides['experiments']+'<p><a href="https://www.tahabouhsine.com/jaxpathways/project-guides/reproducible-experiments.html">Online workshop and workspace</a></p>'
+lineage=book_guides['posttrainingTransformerLineage']+'<p>This optional saved-decoder appendix is separate from required Stage 5. Independent review accepted its mechanics and replay checks, but the strict heldout reward quality floor failed; it does not establish language-model quality. <a href="https://www.tahabouhsine.com/jaxpathways/project-guides/posttraining-transformer-lineage.html">Read the online appendix</a>.</p>'
 payload['OEBPS/appendix-workflow.xhtml'] = xhtml('<h1>Appendix: project structure and evidence</h1>'+workflow, 'Appendix: project structure and evidence').encode()
 payload['OEBPS/appendix-experiments.xhtml'] = xhtml('<h1>Appendix: reproducible experiments workshop</h1>'+workshop, 'Appendix: reproducible experiments workshop').encode()
+payload['OEBPS/appendix-posttraining-lineage.xhtml'] = xhtml('<h1>Optional appendix: a saved decoder enters sequence PPO</h1>'+lineage, 'Optional appendix: saved-decoder sequence PPO').encode()
 payload['OEBPS/solutions.xhtml'] = xhtml('<h1>Solutions</h1><p>Attempt each exercise and checkpoint before reading this appendix.</p>'+''.join(solutions), 'Solutions').encode()
 items=''.join(f'<item id="p{i}" href="phase-{i}.xhtml" media-type="application/xhtml+xml"'+(' properties="mathml"' if '<math ' in body else '')+'/>' for i,body in enumerate(guide_bodies))
 items += ''.join(f'<item id="c{i}" href="chapter-{i}.xhtml" media-type="application/xhtml+xml"'+(' properties="mathml"' if '<math ' in body else '')+'/>' for i,body in enumerate(chapters))
-for name, body in [('appendix-workflow', workflow), ('appendix-experiments', workshop), ('solutions', ''.join(solutions))]:
+for name, body in [('appendix-workflow', workflow), ('appendix-experiments', workshop), ('appendix-posttraining-lineage', lineage), ('solutions', ''.join(solutions))]:
     properties = ' properties="mathml"' if '<math ' in body else ''
     items += f'<item id="{name}" href="{name}.xhtml" media-type="application/xhtml+xml"{properties}/>'
 for lesson in lessons:
@@ -436,7 +498,7 @@ for lesson in lessons:
     if lesson.get('visualArtifact',{}).get('mechanismPng'):
         payload['OEBPS/figures/'+lesson['id']+'-mechanism.png'] = (ROOT/'public'/lesson['visualArtifact']['mechanismPng']).read_bytes()
         items += '<item id="mechanism-'+lesson['id']+'" href="figures/'+lesson['id']+'-mechanism.png" media-type="image/png"/>'
-spine='<itemref idref="intro"/>' + ''.join(f'<itemref idref="p{i}"/>'+''.join(f'<itemref idref="c{lessons.index(l)}"/>' for l in p['lessons'] if l['status']=='authored') for i,p in enumerate(phases)) + '<itemref idref="appendix-workflow"/><itemref idref="appendix-experiments"/><itemref idref="solutions"/>'
+spine='<itemref idref="intro"/>' + ''.join(f'<itemref idref="p{i}"/>'+''.join(f'<itemref idref="c{lessons.index(l)}"/>' for l in p['lessons'] if l['status']=='authored') for i,p in enumerate(phases)) + '<itemref idref="appendix-workflow"/><itemref idref="appendix-experiments"/><itemref idref="appendix-posttraining-lineage"/><itemref idref="solutions"/>'
 modified = modified_at(release)
 package_template = f'<?xml version="1.0"?><package xmlns="http://www.idpf.org/2007/opf" xmlns:dc="http://purl.org/dc/elements/1.1/" version="3.0" unique-identifier="book-id" prefix="jp: https://www.tahabouhsine.com/jaxpathways/epub-meta#"><metadata><dc:identifier id="book-id">{esc(identity)}</dc:identifier><dc:title>JAX Pathways: course reader {esc(release["version"])} · {esc(release.get("title", ""))}</dc:title><dc:language>en</dc:language><dc:creator>Taha Bouhsine</dc:creator><dc:publisher>JAX Pathways</dc:publisher><dc:description>A free JAX and Flax book with worked math, explained figures, executable Python examples and staged projects.</dc:description><dc:source>https://www.tahabouhsine.com/jaxpathways/book.html</dc:source><dc:date>{esc(release["date"])}</dc:date><meta property="dcterms:modified">{modified}</meta><meta property="belongs-to-collection" id="collection">JAX Pathways</meta><meta refines="#collection" property="group-position">{esc(release["version"])}</meta><meta property="{FINGERPRINT_PROPERTY}">sha256:pending</meta></metadata><manifest><item id="intro" href="intro.xhtml" media-type="application/xhtml+xml"/><item id="nav" href="nav.xhtml" media-type="application/xhtml+xml" properties="nav"/><item id="style" href="style.css" media-type="text/css"/>{items}</manifest><spine>{spine}</spine></package>'
 fingerprint = rendered_fingerprint(payload, package_template.encode())
@@ -456,6 +518,11 @@ with ZipFile(OUT / 'jax-foundations.epub','w',compression=ZIP_DEFLATED) as book:
 for manifest in json.loads((ROOT/'curriculum/projects.json').read_text()):
     project_path = ROOT/manifest
     project = json.loads(project_path.read_text())
+    validated_extras = (
+        posttraining_parent_files(ROOT)
+        if project['id'] == 'posttraining-audit'
+        else {}
+    )
     with ZipFile(OUT/(project['id']+'.zip'),'w',compression=ZIP_DEFLATED) as bundle:
         included=set()
         for path in sorted(project_path.parent.rglob('*')):
@@ -470,7 +537,7 @@ for manifest in json.loads((ROOT/'curriculum/projects.json').read_text()):
             bundle.write(ROOT/requirements_path,requirements_name)
             included.add(requirements_name)
         for relative in PROJECT_EXTRA_FILES.get(project['id'], ()):
-            extra_path = ROOT / relative
+            extra_path = validated_extras.get(relative, ROOT / relative)
             extra_name = Path(relative).as_posix()
             if extra_name not in included:
                 bundle.write(extra_path, extra_name)

@@ -1,0 +1,39 @@
+{
+  "allMembersUnique": true,
+  "approvalMembers": [
+    "projects/posttraining-audit/transformer_lineage/learner-mechanics-approval.json",
+    "projects/posttraining-audit/transformer_lineage/portable-nonrun-approval.json"
+  ],
+  "archiveMembers": 40,
+  "archivePath": "/private/tmp/jaxpathways-transformer-bridge-review/public/downloads/posttraining-audit.zip",
+  "archiveSha256": "3de18328abfc8499f6c2c785aae39d075a48fe01325e9aa7feff31ed408fcb30",
+  "cleanExtractPacketReportSha256": "a6d37c0cc644f90d3e902072b70e1782e78d64099222486830c48ff999ec5c27",
+  "cleanExtractPreflightReportSha256": "f0eac55cfc6bac760de53a5f03276b4c0d5207ecf27ab8b462051a7cbec0f55e",
+  "cleanExtractRoot": "/private/tmp/sol-transformer-lineage-zip-extract-review-20261022",
+  "kind": "sol-transformer-lineage-generated-zip-preoptimization-review",
+  "optimizationExecuted": false,
+  "packetMembers": [
+    "projects/posttraining-audit/transformer_lineage/teaching/v5/boundary-probes.json",
+    "projects/posttraining-audit/transformer_lineage/teaching/v5/build_numeric_packet.py",
+    "projects/posttraining-audit/transformer_lineage/teaching/v5/check_numeric_packet.py",
+    "projects/posttraining-audit/transformer_lineage/teaching/v5/evaluation.json",
+    "projects/posttraining-audit/transformer_lineage/teaching/v5/figure.svg",
+    "projects/posttraining-audit/transformer_lineage/teaching/v5/packet-manifest.json",
+    "projects/posttraining-audit/transformer_lineage/teaching/v5/training-trace.csv"
+  ],
+  "parentDependencyMembers": [
+    "projects/text-harness/foundations/config.py",
+    "projects/text-harness/foundations/data.py",
+    "projects/text-harness/foundations/model.py",
+    "projects/text-harness/foundations/reference/run/inference-package/package.json",
+    "projects/text-harness/foundations/reference/run/inference-package/params.npz",
+    "projects/text-harness/foundations/reference/run/inference-package/tokenizer.json",
+    "projects/text-harness/foundations/train.py"
+  ],
+  "qualificationLimits": [
+    "No five candidate SHA/AST freeze yet; no learner-check optimization authorized.",
+    "Final release/site/EPUB/print qualification remains open."
+  ],
+  "shipping15Exact": true,
+  "status": "accepted-for-five-candidate-freeze-only"
+}

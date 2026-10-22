@@ -1,0 +1,25 @@
+{
+  "recordedAt": "2026-10-22T13:13:00.407138+00:00",
+  "removedBytes": 463457736,
+  "removed": [
+    {
+      "path": "/private/tmp/jaxpathways-flower-photos.tgz",
+      "bytes": 230587552,
+      "fileCount": 1
+    },
+    {
+      "path": "/private/tmp/jaxpathways-flower-source",
+      "bytes": 232870184,
+      "fileCount": 3671
+    }
+  ],
+  "retainedPinnedArchive": {
+    "path": "/private/tmp/jaxpathways-flower-photos-clean.tgz",
+    "sha256": "4c54ace7911aaffe13a365c34f650e71dd5bf1be0a58b464e5a7183e3e595d9c"
+  },
+  "retainedVerifiedFrozenArrays": "/private/tmp/jaxpathways-c03-data-frozen-split-20261021-v7",
+  "fullLocalInventory": {
+    "path": "/private/tmp/jaxpathways-unused-data-cleanup-20261022.json",
+    "sha256": "efc7ce078762970d310c8a76429db2d03ad9b35620cccb4cb54180be994ca725"
+  }
+}

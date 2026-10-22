@@ -241,6 +241,14 @@ figcaption {
     break-inside: avoid-page;
     page-break-inside: avoid;
   }
+  #appendix-posttraining-lineage p:has(+ pre) {
+    break-after: avoid-page;
+    page-break-after: avoid;
+  }
+  #appendix-posttraining-lineage pre {
+    break-inside: avoid-page;
+    page-break-inside: avoid;
+  }
   details:not(.solution-reveal) > summary {
     display: none;
   }
