@@ -230,7 +230,7 @@ Write a compiled function that applies $2x$ when $x$ is positive and $x-2$ other
 - Pass x as the operand and use one scalar result from each branch.
 
 **Key functions & syntax to use:**
-- `jax.jit(fn) / @jax.jit` — Traces `fn` for its input signatures and compiles an executable. Changed shapes, dtypes or static arguments can trigger another compilation.
+- `jax.jit(fn) / @jax.jit` — Traces a function for its input signatures and compiles it; changed shapes, dtypes, or static arguments can trigger another compilation.
 
 **Starter code scaffold (fill in the TODOs):**
 

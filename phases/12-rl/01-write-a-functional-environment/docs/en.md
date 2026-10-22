@@ -414,7 +414,7 @@ Use ordinary min and max for the independent reference.
 - Compare next state, reward, and both ending flags.
 
 **Key functions & syntax to use:**
-- `jax.jit(fn) / @jax.jit` — Traces `fn` for its input signatures and compiles an executable. Changed shapes, dtypes or static arguments can trigger another compilation.
+- `jax.jit(fn) / @jax.jit` — Traces a function for its input signatures and compiles it; changed shapes, dtypes, or static arguments can trigger another compilation.
 
 **Starter code scaffold (fill in the TODOs):**
 

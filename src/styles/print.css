@@ -168,6 +168,9 @@ svg {
 figure {
   margin-inline: 0;
 }
+.lesson-mechanism > figure.print-visual-intro {
+  margin: 0;
+}
 figcaption {
   font-size: 0.9em;
 }
@@ -183,7 +186,16 @@ figcaption {
 }
 @media print {
   @page {
-    margin: 18mm;
+    margin: 18mm 18mm 24mm;
+
+    @bottom-center {
+      color: #555;
+      content: 'Page ' counter(page);
+      font:
+        9pt/1.2 Arial,
+        sans-serif;
+      padding-top: 3mm;
+    }
   }
   body {
     margin: 0;
@@ -221,8 +233,12 @@ figcaption {
   .reasoning-check,
   .learner-starter-contract,
   .expected-output,
-  figure {
+  figure:not(.lesson-mechanism):not(.print-visual-intro) {
     break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .print-visual-intro {
+    break-inside: avoid-page;
     page-break-inside: avoid;
   }
   details:not(.solution-reveal) > summary {
@@ -238,6 +254,29 @@ figcaption {
   h3,
   .code-panel-heading {
     break-after: avoid;
+  }
+  .visual-prediction {
+    break-after: avoid-page;
+    page-break-after: avoid;
+  }
+  .print-visual-intro .figure-scroll {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .print-visual-intro .figure-scroll img {
+    width: auto;
+    min-width: 0;
+    max-width: 100%;
+    max-height: 175mm;
+    height: auto;
+    margin-inline: auto;
+    object-fit: contain;
+  }
+  .print-visual-intro figcaption {
+    color: #222;
+    font-size: 9pt;
+    line-height: 1.35;
   }
   article > h2:last-of-type {
     break-after: avoid-page;

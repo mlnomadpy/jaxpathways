@@ -1,0 +1,70 @@
+{
+  "jax-pathways-0.16.0-full-letter.pdf": [
+    {
+      "title": "Least squares, rank, and conditioning",
+      "page": 222
+    },
+    {
+      "title": "Least squares, rank, and conditioning: reference solutions and checkpoint reasoning",
+      "page": 230
+    },
+    {
+      "title": "A Transformer block and mixed precision",
+      "page": 485
+    },
+    {
+      "title": "A Transformer block and mixed precision: reference solutions and checkpoint reasoning",
+      "page": 496
+    },
+    {
+      "title": "Train, checkpoint, and generate",
+      "page": 498
+    },
+    {
+      "title": "Train, checkpoint, and generate: reference solutions and checkpoint reasoning",
+      "page": 510
+    },
+    {
+      "title": "bfloat16, int8 precision, and XProf profiling on TPU",
+      "page": 1343
+    },
+    {
+      "title": "bfloat16, int8 precision, and XProf profiling on TPU: reference solutions and checkpoint reasoning",
+      "page": 1354
+    }
+  ],
+  "jax-pathways-0.16.0-full-a4.pdf": [
+    {
+      "title": "Least squares, rank, and conditioning",
+      "page": 209
+    },
+    {
+      "title": "Least squares, rank, and conditioning: reference solutions and checkpoint reasoning",
+      "page": 216
+    },
+    {
+      "title": "A Transformer block and mixed precision",
+      "page": 450
+    },
+    {
+      "title": "A Transformer block and mixed precision: reference solutions and checkpoint reasoning",
+      "page": 459
+    },
+    {
+      "title": "Train, checkpoint, and generate",
+      "page": 461
+    },
+    {
+      "title": "Train, checkpoint, and generate: reference solutions and checkpoint reasoning",
+      "page": 472
+    },
+    {
+      "title": "bfloat16, int8 precision, and XProf profiling on TPU",
+      "page": 1232
+    },
+    {
+      "title": "bfloat16, int8 precision, and XProf profiling on TPU: reference solutions and checkpoint reasoning",
+      "page": 1241
+    }
+  ]
+}

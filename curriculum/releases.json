@@ -1,5 +1,19 @@
 [
   {
+    "version": "0.16.1",
+    "date": "2026-10-21",
+    "editionKey": "jaxpathways-2026-review-edition",
+    "modifiedAt": "2026-10-22T01:45:51Z",
+    "title": "Read accurate code guidance and print numbered pages",
+    "summary": "Explain the API actually used in each build step and keep figure predictions with their charts in the printable book.",
+    "changes": [
+      "Replaced misleading grouped API cards with call-specific descriptions for JAX, NumPy, Flax NNX and Optax. The least-squares solver now explains its input, solution and residual shapes. Comments and strings do not produce API cards, and distinct calls appear in source order.",
+      "Kept printed figure headings, predictions and charts together when they fit on a page. Added a page-number footer and reserved bottom space in the HTML book print stylesheet.",
+      "Extended the print qualification command with full-book and paper-format options, exact source and artifact hashes, bounded large-text extraction and checks of every page number. Actual PDF tests include disabled-rule and disabled-footer negatives.",
+      "Preserved all 104 canonical lesson bodies, numerical source, maturity labels and existing model-pilot quality outcomes. The saved-Transformer PPO bridge remains separate ongoing work; this patch does not include it. Native EPUB engines, assistive-technology speech, independent teaching review, target-scale training and all ten full capstones remain open."
+    ]
+  },
+  {
     "version": "0.16.0",
     "date": "2026-10-21",
     "editionKey": "jaxpathways-2026-review-edition",
@@ -167,7 +181,7 @@
     "title": "Distinct assessment summaries for search and sharing",
     "summary": "Give all eleven synthesis assessments accurate, individual descriptions across search metadata, social previews and page schema.",
     "changes": [
-      "Replaced the shared generic assessment description with a summary of each assessment’s actual tasks in the canonical registry.",
+      "Replaced the shared generic assessment description with a summary of each assessment\u2019s actual tasks in the canonical registry.",
       "Added site-wide duplicate-description checks and verified that search, Open Graph, Twitter and WebPage schema descriptions agree."
     ]
   },

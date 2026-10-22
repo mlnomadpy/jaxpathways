@@ -1,0 +1,64 @@
+{
+  "recordedAt": "2026-10-22T01:26:34.382748+00:00",
+  "scope": "All PDF pages checked for text glyphs outside the media box; this is not full visual review.",
+  "documents": [
+    {
+      "file": "jax-pathways-0.16.0-full-a4.pdf",
+      "sha256": "4c92d69b99dcc9a780e2f053cf67b95a69ff265650693c0625315600f1377b0f",
+      "pages": 1254,
+      "characters": 2662581,
+      "outsideMediaBox": [],
+      "emptyTextPages": [],
+      "chapterPages": {
+        "Least squares, rank, and conditioning": [
+          209,
+          216
+        ],
+        "Least squares balances unavoidable residuals": [
+          210
+        ],
+        "A Transformer block and mixed precision": [
+          450,
+          459
+        ],
+        "Train, checkpoint, and generate": [
+          461,
+          472
+        ],
+        "bfloat16, int8 precision, and XProf": [
+          1232,
+          1241
+        ]
+      }
+    },
+    {
+      "file": "jax-pathways-0.16.0-full-letter.pdf",
+      "sha256": "c4868a66809d0d50d06e4119a3fa8d12ecf7741254f13ca0ced98907e082f0ae",
+      "pages": 1368,
+      "characters": 2662889,
+      "outsideMediaBox": [],
+      "emptyTextPages": [],
+      "chapterPages": {
+        "Least squares, rank, and conditioning": [
+          222,
+          230
+        ],
+        "Least squares balances unavoidable residuals": [
+          223
+        ],
+        "A Transformer block and mixed precision": [
+          485,
+          496
+        ],
+        "Train, checkpoint, and generate": [
+          498,
+          510
+        ],
+        "bfloat16, int8 precision, and XProf": [
+          1343,
+          1354
+        ]
+      }
+    }
+  ]
+}

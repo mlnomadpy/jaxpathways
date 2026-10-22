@@ -1,3 +1,13 @@
+# Author review: 0.16.1
+
+Start with the [frozen book preview](http://127.0.0.1:4201/book.html), [review guide](review-guide-0.16.1.md) and [blank feedback notes](review-notes-0.16.1.md). Exact source and artifact hashes are in the [qualification packet](evidence/course-review-0.16.1/verification.json). Implementation commit `9f123dd92f18f910486b4da13b360aeea10e6054` is pinned for review. This patch builds on draft PR #69; no merge or deployment.
+
+API explanations now describe recognized calls in the displayed source, with distinct namespaces and no comment/string false positives. Print grouping keeps all 104 visual prompts and 29 mechanism prompts with their figures in full A4 and Letter output, with correct page footers. All 2,659 PDF pages pass text geometry checks; raster legibility review is sampled. All 104 lesson bodies and 23 historical release snapshots are preserved.
+
+Local qualification passed 191 Node tests, 11 Python EPUB identity tests, 52 browser cases, 53 formatter inputs, root/Pages checks and EPUBCheck with zero messages. Hosted checks for this patch remain a separate gate. Apple Books remains unchecked because native control still reports the Mac locked. Human teaching, native/assistive reading, target validation, 13 developing phases and ten Planned full capstones remain open. The Transformer bridge is excluded while its failed campaign is repaired.
+
+---
+
 # Author review: 0.16.0
 
 Start with the [frozen book preview](http://127.0.0.1:4200/book.html), [sequence PPO guide](http://127.0.0.1:4200/project-guides/posttraining-audit.html), and [review guide](review-guide-0.16.0.md). Keep feedback in the new [blank notes](review-notes-0.16.0.md).
