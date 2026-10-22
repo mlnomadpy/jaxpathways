@@ -277,7 +277,7 @@ Training systems. Start after: 17: Self-supervised pretraining: masked and contr
 - RLHF mechanics: a frozen reward and PPO policy updates (lesson and exercise available)
 - Direct preference optimization and reference-corrected margins (lesson and exercise available)
 
-**Build:** Audit response-token SFT masking and preference-pair loss.
+**Build:** Audit SFT, DPO and sequence PPO.
 
 **Checkpoint:** Complete stages 4–8 of training-methods. Retain shifted token-mask checks, frozen-base/merge evidence, preference oracles, signed PPO clipping and fixed-reference DPO comparisons.
 

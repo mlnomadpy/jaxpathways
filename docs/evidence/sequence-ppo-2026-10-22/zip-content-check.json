@@ -1,0 +1,28 @@
+{
+  "archiveSha256": "54bb7a13c8a5fc150570d31ed87938f0487adfe6f89a507b20b4163b518b5eef",
+  "members": {
+    "projects/posttraining-audit/README.md": "6d0d533f6339d783c00ce190f318ba826de2d7c41e8c43565953038fb8af1341",
+    "projects/posttraining-audit/figures/gae-eos-timeout-fixture.json": "c6d2b035cc7f7a9bc5671b995a10b557c538ddedb608212a93ec9aec9f4845dd",
+    "projects/posttraining-audit/figures/gae-eos-timeout.png": "dd482b636491063aae0bcbc8ea944657b95653ed4b0ffd45ab2aa31a81cc2db6",
+    "projects/posttraining-audit/figures/gae-eos-timeout.svg": "bc36b65eaa2c0c44ab5e90302bb60d691efbc346ac07df035168a885ee51f851",
+    "projects/posttraining-audit/figures/render_gae.py": "848e7cdf318de0fd7df7bcc7cb1d27820e411b19d5f18adf54ea7363c7990177",
+    "projects/posttraining-audit/project.json": "11bddb0c265087eecdc855d0990ede92df68d84932ce95baeff92da08c036721",
+    "projects/posttraining-audit/reference/sequence_ppo/recipe.json": "1c9053b83f36b24dfe6f765700e2fab9a51bee87f30c902e35102d11e7cedcc8",
+    "projects/posttraining-audit/requirements.txt": "5c78d55f74b1cc11c55e2bd84b093f7dfbe2dd3290cdf04799affd8e84885126",
+    "projects/posttraining-audit/solution/model.py": "82810305599ea48173a87fb4251c2fa4347de11b0b39c1a27ac4e09abd927f05",
+    "projects/posttraining-audit/solution/sequence_ppo.py": "792eb35048b6299b467bea4625caf8ec5716150a8d423efdf73c77dc8a08cb26",
+    "projects/posttraining-audit/starter/model.py": "3170319c9ffc0a60c05d1a8c1622e5248244c21ae0dd26bdeedac17ed6f7d52f",
+    "projects/posttraining-audit/starter/sequence_ppo.py": "2e512607f84e54ad90f9d8dfe79064ed0ee661ec9c58c5072dfc50cd55e7fbf9",
+    "projects/posttraining-audit/tests/check.py": "ffb8f860173839e7f8fdf817ed00348e0e013a00451558a063e76a675b6addf8",
+    "projects/posttraining-audit/tests/check_sequence_ppo.py": "5320ad95be0bd58d00c8ce6010cdb8920661acaf5b88df5945666b5d7518a775"
+  },
+  "pins": [
+    "jax==0.9.2",
+    "numpy==2.4.4",
+    "optax==0.2.8",
+    "matplotlib==3.10.8"
+  ],
+  "extractedRoot": "/private/tmp/jaxpathways-sequence-ppo-extracted-016",
+  "sourceFilesExact": true,
+  "isolatedEnvironmentNoSystemPackages": true
+}

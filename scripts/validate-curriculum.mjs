@@ -140,6 +140,11 @@ for (const role of course.roles) {
 for(const project of JSON.parse(readFileSync(new URL('../public/api/v1/projects.json',import.meta.url))).projects){
   assert.ok(routes.has(project.pathwayId),`${project.id}: unknown project pathway ${project.pathwayId}`);
   for(const id of project.requiredLessonIds)assert.ok(authored.some(l=>l.id===id),`${project.id}: unavailable project prerequisite ${id}`);
+  for(const stage of project.stages)if(stage.workspaceFile!==undefined){
+    assert.equal(typeof stage.workspaceFile,'string');
+    assert(stage.workspaceFile.startsWith(`projects/${project.id}/`) && !stage.workspaceFile.split('/').includes('..') && !stage.workspaceFile.includes('\\'),`${project.id}: stage edit file must stay within the project`);
+    assert(readFileSync(new URL('../'+stage.workspaceFile,import.meta.url)).length,`${project.id}: stage edit file must exist`);
+  }
 }
 
 // Cross-cutting project plans must point to real preparation, not invented lessons.

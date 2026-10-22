@@ -474,7 +474,7 @@ for (const project of [
     }
   }
   for (const file of files) {
-    const linkedData = /\.(json|csv|txt)$/.test(file) && linkedAssets.has(file);
+    const linkedData = /\.(json|csv|txt|py)$/.test(file) && linkedAssets.has(file);
     const pilotFiles = pilotPublicFiles.get(project.id);
     if (project.id === 'image-model-300m' && pilotFiles && !pilotFiles.has(file)) continue;
     if (pilotFiles && file.startsWith('reference/') && !pilotFiles.has(file)) continue;

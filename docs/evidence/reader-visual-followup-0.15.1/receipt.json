@@ -1,0 +1,67 @@
+{
+  "recordedAt": "2026-10-22T00:31:21.313438+00:00",
+  "edition": "0.15.1",
+  "reviewHead": "7090e02890b7e3e7f42e46247396a32b510c9e30",
+  "url": "http://127.0.0.1:4199/downloads/jax-foundations.html",
+  "artifactSha256": {
+    "downloads/jax-foundations.html": "3fe34fba83b1887f3c839883e829809c3f1cbfdcf28f8fdc8b19a460bb1232ff",
+    "downloads/jax-foundations.epub": "beb260ff734a1149d92bfd44638fad901deb1d6188ac7019e39a33aae3102150"
+  },
+  "environment": {
+    "application": "ChatGPT in-app browser",
+    "viewport": {
+      "width": 1280,
+      "height": 720
+    },
+    "theme": "dark"
+  },
+  "observations": [
+    {
+      "sample": "transformers-04",
+      "result": "Bounded visual pass: probability heatmap rows, columns, legend and values readable; prose describes the same token order and rounded probabilities. Training-state code with syntax color and indentation visible without clipping in the inspected block."
+    },
+    {
+      "sample": "tpu-06",
+      "result": "Bounded visual pass: complete precision chart, axis labels, legend and values readable. Adjoining prose distinguishes the seeded CPU fixture, requested/returned result dtypes and internal partial sums. Image loaded; document had no horizontal overflow."
+    },
+    {
+      "sample": "table-of-contents",
+      "result": "Transformer link navigation observed. Two locator mouse clicks on the TPU link scrolled to the link but did not change the fragment. Enter on that link navigated to #chapter-103. Mouse result remains inconclusive; do not infer all pointer navigation passed."
+    },
+    {
+      "sample": "table-of-contents pointer follow-up",
+      "result": "A screenshot-grounded direct pointer click on the visible TPU chapter link navigated to #chapter-103. Both keyboard and direct pointer navigation passed for that link. Prior locator-click observations remain recorded; no website defect established."
+    }
+  ],
+  "native": {
+    "status": "pending",
+    "userReportedUnlock": true,
+    "attempt": "Fresh cua.getApp Finder call returned Mac locked and automatic unlock unavailable. No Apple Books rendering observed this follow-up. Earlier 0.14 sample is separate."
+  },
+  "scopeLimits": [
+    "No native EPUB pass",
+    "No second EPUB engine",
+    "No assistive-technology speech",
+    "No full-book or print qualification",
+    "No human teaching acceptance",
+    "No source or frozen preview changes"
+  ],
+  "screenshots": [
+    {
+      "path": "transformer-heatmap.png",
+      "sha256": "1bb3ab26d3ef426e2a006ec9df22f2cbf9b4f4b4a89f1dede6e13d577a601c09"
+    },
+    {
+      "path": "transformer-code.png",
+      "sha256": "a61b94bf7149da71bcbf07352230a7ac26ff78562e41b3d75e69af9ed151942a"
+    },
+    {
+      "path": "tpu-precision-plot.png",
+      "sha256": "9a067f0a8d16b9fead4dfdeb4071062a5651784ddd3847560d66d8de924280bd"
+    },
+    {
+      "path": "tpu-keyboard-and-pointer-target.png",
+      "sha256": "2cb51f4383450060d2c5b6fa36c5af138cc5a176a4be63b00041feeab4d20157"
+    }
+  ]
+}

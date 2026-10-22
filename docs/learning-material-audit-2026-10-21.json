@@ -127,9 +127,9 @@
       "in-development": 30,
       "planned": 10
     },
-    "tasks": 539,
+    "tasks": 540,
     "lessonTasks": 409,
-    "projectStages": 130,
+    "projectStages": 131,
     "currentCpuLessons": 104,
     "currentProjectReferences": 29,
     "expertReviewedLessons": 0,
@@ -3564,7 +3564,7 @@
     {
       "kind": "projects",
       "id": "posttraining-audit",
-      "title": "Audit response-token SFT masking and preference-pair loss",
+      "title": "Audit SFT, DPO and sequence PPO",
       "url": "project-guides/posttraining-audit.html",
       "source": "projects/posttraining-audit/README.md",
       "level": "available-draft",
@@ -3572,9 +3572,9 @@
       "contribution": "Transfer the contracts to a saved Transformer and document retained behavior.",
       "validation": "CPU reference checker passed for current sources",
       "review": "Teaching review pending",
-      "sourceHash": "d364b0a354c4c55b43269d6880b283b0e6013e2f340021f495da9685657d7d00",
+      "sourceHash": "81241dd77091be0b274675ef46e417ecd7176179d4948188d268f119b20b33de",
       "metrics": {
-        "stages": 4,
+        "stages": 5,
         "currentReference": true,
         "missingFiles": []
       }
@@ -9640,6 +9640,16 @@
       "phaseId": "",
       "title": "Integrated project check",
       "prompt": "Run all prior checks and preserve their failure boundaries.",
+      "source": "projects/posttraining-audit/README.md",
+      "level": "available-draft",
+      "validation": "Public reference stage checked; no independent learner assessment"
+    },
+    {
+      "id": "posttraining-audit:stage-5",
+      "projectId": "posttraining-audit",
+      "phaseId": "",
+      "title": "Synthetic sequence PPO with frozen rollouts",
+      "prompt": "Retain ragged token actions, role and padding masks, EOS or timeout boundaries, frozen old and reference log probabilities, learned reward scores, GAE, value targets, per-epoch PPO metrics, hashes, and fixed heldout reward and exact categorical KL at sampled visited contexts.",
       "source": "projects/posttraining-audit/README.md",
       "level": "available-draft",
       "validation": "Public reference stage checked; no independent learner assessment"
