@@ -1,0 +1,42 @@
+{
+  "all_retained_hashes_match_gate_on_lock": true,
+  "as_run_project_lock_sha256": "c3c9943e6d87f15e3193040ddd49ef0428fb4612dc118439891b4d76ae21ba81",
+  "corpus_model_archive_invocation_performed_by_this_review": false,
+  "current_project_lock_sha256": "efe813f712b32eff4f3c4ff022963eb719046ac62c7e0c23777a1c08e8e5937f",
+  "current_source_contract_sha256": "bc57e3c9bc72898f268d0635bb4daba4f458f936411b8d29e812d9c4c384359b",
+  "current_source_diff_from_as_run": [
+    "project_lock.py"
+  ],
+  "decision": "safety restore verified; corpus gate closed and stale gate-on lock fails; partial real attempt preserved, no new updates authorized",
+  "gate_currently_false": true,
+  "partial_checkpoint_preserved": {
+    "durable_trace_records": 2,
+    "last_durable_update": 2,
+    "latest_sha256": "ab9e52bccbfde1e2aa8351df9d56566b54986fa6379acbe055d747bf34add0b7",
+    "run_report_present": false,
+    "second_state_sha256": "91736f308b3a1be89c386fdcceaadf35a212be130836463ee11d7b0fe0c11ed9",
+    "updates_jsonl_sha256": "2a6c25ad593f1527db5362612a65d98e4e7939e9e69814be6b23eba4a02ddd57"
+  },
+  "raw_timeout_traceback": "unavailable; precise termination mechanism and possible unrecorded in-flight third update/audio read remain uncertain",
+  "relaunch_or_resume_authorized": false,
+  "retained_as_run_files": 34,
+  "retention_manifest_sha256": "caf32636c88d672104499702577d54977f7a3db5c218922cbd8c373c6af41a56",
+  "safe_harness": {
+    "additional_hostile_cases_rejected": 5,
+    "argv_validation": "exactly two tokens; user argv not forwarded; --lock, --fixture, --runner-fixture, --output and --resume rejected",
+    "built_in_hostile_cases_rejected": 6,
+    "path": "/private/tmp/c04-v6-final-original-cpu-attempt-20261021/safe_no_update_harness.py",
+    "review_scope": "current exact script bytes and user CLI arguments",
+    "sha256": "205a6b89a43d60215a86ffa886bed1f250778c0bce1f78d53251a7764dd624bc",
+    "single_subprocess_route": "fixed run_pilot.py --preflight-lock <exact approved lock>",
+    "source_inventory_member": false,
+    "spy_launches": 0
+  },
+  "schema": "c04-sol-v6-postincident-safety-verification-v1",
+  "stale_lock_public_preflight_negative": {
+    "diagnostic": "audio runtime source inventory changed after approval",
+    "path": "/private/tmp/c04-v6-final-original-cpu-attempt-20261021/safety-restore-preflight-negative.json",
+    "sha256": "d412caae620e36a54eab8cfa7e98bb3ab25d844072e8fab3e3ac6e7796ddba43"
+  },
+  "worker_safety_receipt_sha256": "97c3b456c316b799f1300c3ee67a99096e971fda237e23afacc40ce1fd6ccd64"
+}

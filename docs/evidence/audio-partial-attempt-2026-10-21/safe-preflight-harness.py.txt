@@ -1,0 +1,92 @@
+"""Fail-closed wrapper for one public no-update preflight rejection check."""
+from __future__ import annotations
+import ast
+import json
+import subprocess
+import sys
+from pathlib import Path
+
+ROOT = Path('/Users/tahabsn/Documents/ChatGPT/jaxpathways/projects/audio-model-300m')
+RUN_PILOT = ROOT / 'run_pilot.py'
+APPROVED_LOCK = Path('/private/tmp/c04-v6-final-original-cpu-attempt-20261021/approved-run-lock.json')
+FORBIDDEN = ('--lock', '--fixture', '--runner-fixture')
+
+
+def validate_argv(argv: list[str]) -> Path:
+    if any(token in FORBIDDEN or token.split('=', 1)[0] in FORBIDDEN for token in argv):
+        raise ValueError('unsafe public route rejected before subprocess')
+    if len(argv) != 2 or argv[0] != '--preflight-lock' or Path(argv[1]) != APPROVED_LOCK:
+        raise ValueError('only the exact approved --preflight-lock route is allowed')
+    return APPROVED_LOCK
+
+
+def verify_static_route() -> None:
+    tree = ast.parse(Path(__file__).read_text())
+    calls = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute):
+            if isinstance(node.func.value, ast.Name) and node.func.value.id == 'subprocess':
+                calls.append((node.func.attr, node.lineno))
+    assert calls == [('run', calls[0][1])] and len(calls) == 1, calls
+    invoke = next(node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == 'invoke_public_preflight')
+    subprocess_call = next(node for node in ast.walk(invoke) if isinstance(node, ast.Call) and
+        isinstance(node.func, ast.Attribute) and isinstance(node.func.value, ast.Name) and
+        node.func.value.id == 'subprocess' and node.func.attr == 'run')
+    assert len(subprocess_call.args) == 1 and isinstance(subprocess_call.args[0], ast.Name) and subprocess_call.args[0].id == 'command'
+    command_assignment = next(node for node in ast.walk(invoke) if isinstance(node, ast.Assign) and
+        any(isinstance(target, ast.Name) and target.id == 'command' for target in node.targets) and
+        isinstance(node.value, ast.List))
+    literals = [node.value for node in command_assignment.value.elts if isinstance(node, ast.Constant)]
+    assert literals == ['--preflight-lock']
+    assert not any(isinstance(node, ast.Constant) and node.value in FORBIDDEN + ('--output', '--resume')
+                   for node in ast.walk(invoke))
+
+
+def invoke_public_preflight(lock_path: Path):
+    # User argv is not forwarded. The only subprocess route is this fixed parser mode.
+    command = [sys.executable, str(RUN_PILOT), '--preflight-lock', str(lock_path)]
+    return subprocess.run(command, text=True, capture_output=True, timeout=60)
+
+
+def dispatch(argv: list[str], runner):
+    lock_path = validate_argv(argv)
+    return runner(lock_path)
+
+
+def hostile_argv_tests() -> dict:
+    cases = [
+        ['--lock', str(APPROVED_LOCK)],
+        ['--fixture', str(APPROVED_LOCK)],
+        ['--runner-fixture', str(APPROVED_LOCK)],
+        ['--preflight-lock', str(APPROVED_LOCK), '--output', '/private/tmp/should-never-exist'],
+        ['--preflight-lock', str(APPROVED_LOCK), '--resume'],
+        ['--unknown', str(APPROVED_LOCK)],
+    ]
+    calls = []
+    def spy(lock_path): calls.append(str(lock_path)); raise AssertionError('subprocess spy must not run')
+    for case in cases:
+        try:
+            dispatch(case, spy)
+        except ValueError:
+            continue
+        raise AssertionError(f'hostile argv unexpectedly accepted: {case}')
+    assert calls == [], calls
+    return {'hostile_cases_rejected': len(cases), 'subprocess_spy_calls': len(calls)}
+
+
+def main(argv=None):
+    argv = list(sys.argv[1:] if argv is None else argv)
+    verify_static_route()
+    hostile = hostile_argv_tests()
+    proc = dispatch(argv, invoke_public_preflight)
+    last_error = proc.stderr.strip().splitlines()[-1] if proc.stderr.strip() else ''
+    if proc.returncode == 0 or 'audio runtime source inventory changed after approval' not in last_error:
+        raise SystemExit(json.dumps({'status': 'unexpected-public-result', 'returncode': proc.returncode,
+                                     'stderr': proc.stderr, 'stdout': proc.stdout}, sort_keys=True))
+    print(json.dumps({'status': 'old-true-lock-rejected-by-public-no-update-preflight',
+        'public_command': [sys.executable, str(RUN_PILOT), '--preflight-lock', str(APPROVED_LOCK)],
+        'returncode': proc.returncode, 'error': last_error, 'hostile_argv_tests': hostile,
+        'output_created': False}, sort_keys=True))
+
+
+if __name__ == '__main__': main()

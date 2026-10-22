@@ -1,0 +1,42 @@
+{
+  "approved_activation_sha256": "db638b8907892e920dafea5744ec93e883e28d908eaa7e7d5da48ddef6a419be",
+  "approved_artifact_sha256": "8157844bb0a75e842cc158a8c0a6caa365813158cde9f11120fae54c4f42bb4f",
+  "current_project_lock_sha256": "efe813f712b32eff4f3c4ff022963eb719046ac62c7e0c23777a1c08e8e5937f",
+  "current_source_contract_path": "/private/tmp/c04-v6-original-pin-recheck-20261021/source-contract-v6-postpin.json",
+  "current_source_contract_sha256": "bc57e3c9bc72898f268d0635bb4daba4f458f936411b8d29e812d9c4c384359b",
+  "current_source_file_count": 34,
+  "expected_project_lock_sha256": "efe813f712b32eff4f3c4ff022963eb719046ac62c7e0c23777a1c08e8e5937f",
+  "failed_harness_path": "/private/tmp/c04-v6-final-original-cpu-attempt-20261021/check_negatives.py",
+  "failed_harness_sha256": "406e0dc67af843a17801717bbb16450d34f7c95098afb79ee4bd1dbc697e9b1c",
+  "gate": false,
+  "preserved_partial_attempt": {
+    "last_stage": "masked_reconstruction",
+    "last_update": 2,
+    "new_updates_after_restore": 0,
+    "path": "/private/tmp/c04-v6-final-original-cpu-attempt-20261021/normal-run-must-not-exist",
+    "run_report_present": false,
+    "updates_jsonl_sha256": "2a6c25ad593f1527db5362612a65d98e4e7939e9e69814be6b23eba4a02ddd57"
+  },
+  "raw_timeout_traceback": "unavailable; see as-run-source-retention-manifest.json; termination inferred from timeout behavior and independent process inspection.",
+  "real_corpus_updates_authorized": false,
+  "retained_as_run_source": {
+    "all_34_match_flag_on_map": true,
+    "count": 34,
+    "manifest_path": "/private/tmp/c04-v6-final-original-cpu-attempt-20261021/as-run-source-retention-manifest.json",
+    "manifest_sha256": "caf32636c88d672104499702577d54977f7a3db5c218922cbd8c373c6af41a56",
+    "path": "/private/tmp/c04-v6-final-original-cpu-attempt-20261021/as-run-source"
+  },
+  "safe_harness": {
+    "fake_subprocess_calls": 0,
+    "hostile_argv_cases": 6,
+    "output_created": false,
+    "path": "/private/tmp/c04-v6-final-original-cpu-attempt-20261021/safe_no_update_harness.py",
+    "public_route": "--preflight-lock only",
+    "result_path": "/private/tmp/c04-v6-final-original-cpu-attempt-20261021/safety-restore-preflight-negative.json",
+    "result_sha256": "d412caae620e36a54eab8cfa7e98bb3ab25d844072e8fab3e3ac6e7796ddba43",
+    "sha256": "205a6b89a43d60215a86ffa886bed1f250778c0bce1f78d53251a7764dd624bc",
+    "stale_true_lock_rejected": true
+  },
+  "schema": "c04-v6-postincident-safety-restore-receipt-v1",
+  "status": "safety restore passed; no further optimization updates"
+}

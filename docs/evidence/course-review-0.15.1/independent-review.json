@@ -1,0 +1,55 @@
+{
+  "all_packet_hashes_match": true,
+  "checked_packet_hashes": 23,
+  "checks_confirmed": {
+    "browser_chromium": 50,
+    "deployment_bases": [
+      "/",
+      "/jaxpathways/"
+    ],
+    "epubcheck": {
+      "error": 0,
+      "fatal": 0,
+      "warning": 0
+    },
+    "identity_python": 11,
+    "main_node": 173
+  },
+  "formatter_current_files_match": 49,
+  "limits": [
+    "The full main check preceded a helper EOF-only source edit; retained AST comparison and 11 later focused tests cover that delta, not a second full main run.",
+    "The packet and docs/book-compatibility.md are currently uncommitted evidence/documentation.",
+    "Browser screenshot inspection is a bounded sample, not native EPUB or assistive-technology qualification."
+  ],
+  "release_identity": {
+    "fingerprints_distinct": true,
+    "frozen_0150_snapshot_sha256": "5d42e86f7632c3ad1efc5932b1ff450c14f25e5a96037de1443535d289f291da",
+    "lesson_maps_identical": true,
+    "new_snapshot_count": 22,
+    "old_and_new_primary_publication_id": "urn:uuid:31fc1c76-2a99-5d82-bfae-b46e5b1a4d3e",
+    "old_snapshot_count": 21,
+    "old_snapshots_identical": true,
+    "phase_maps_identical": true,
+    "prior_20_rows_identical": true,
+    "prior_20_snapshot_file": "/private/tmp/jaxpathways-v015-prior-snapshots.json",
+    "prior_20_snapshot_sha256": "fa75e9c1a14a39aee04ecc548840d6f076d832054d0003bd73edf7cd8b209ba4",
+    "prior_21_snapshot_file": "/private/tmp/jaxpathways-v0151-prior-snapshots.json"
+  },
+  "result": "accepted_bounded_local_packet",
+  "reviewed_source_commit": "1660731fb3877d193d8a017ec6ee91394cc868a6",
+  "schema": "sol-0151-qualification-review-v1",
+  "scope": {
+    "audio_partial_attempt_durable_updates": [
+      1,
+      2
+    ],
+    "audio_quality_result": false,
+    "canonical_optional_pilots": 3,
+    "full_capstones_planned": 10,
+    "hosted_0151": "not dispatched",
+    "image_quality_gate": "FAIL",
+    "native_0151": "pending",
+    "production_deployment": false
+  },
+  "verification_sha256": "54fc2e1e5ab9ea9fec4531a4d871eab47973fa4041fff737361f81b549206a80"
+}

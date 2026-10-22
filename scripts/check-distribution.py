@@ -1,11 +1,13 @@
 """Check downloadable books and bundles, including EPUB internal references."""
 import json
+import hashlib
 import re
 from html.parser import HTMLParser
 from pathlib import Path
 from zipfile import ZipFile, ZIP_STORED
 import xml.etree.ElementTree as ET
 from urllib.parse import urlsplit
+from epub_identity import FINGERPRINT_PROPERTY, modified_at, primary_identifier, rendered_fingerprint
 ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT/'public/downloads'
 course=json.loads((ROOT/'public/curriculum.json').read_text())
@@ -65,12 +67,27 @@ with ZipFile(OUT/'jax-foundations.epub') as book:
     assert package.find('o:metadata/dc:publisher',ns).text=='JAX Pathways'
     assert package.find('o:metadata/dc:source',ns).text=='https://www.tahabouhsine.com/jaxpathways/book.html'
     assert package.find('o:metadata/dc:description',ns).text
+    build_receipt=json.loads((OUT/'jax-foundations.build.json').read_text())
+    assert build_receipt['schema']=='jaxpathways-epub-build-v1'
+    assert build_receipt['releaseVersion']==release['version']
+    expected_identifier=primary_identifier(release, authored)
+    actual_identifier=package.find('o:metadata/dc:identifier[@id="book-id"]',ns).text
+    assert actual_identifier==expected_identifier==build_receipt['primaryPublicationId']
+    fingerprint_nodes=package.findall(f'o:metadata/o:meta[@property="{FINGERPRINT_PROPERTY}"]',ns)
+    assert len(fingerprint_nodes)==1
+    package_bytes=book.read('OEBPS/package.opf')
+    payload={name:book.read(name) for name in book.namelist() if name!='OEBPS/package.opf'}
+    actual_fingerprint='sha256:'+rendered_fingerprint(payload,package_bytes)
+    assert fingerprint_nodes[0].text==actual_fingerprint==build_receipt['renderedEditionFingerprint']
     items={item.attrib['id']:item for item in package.findall('o:manifest/o:item',ns)}
     for item in items.values(): assert 'OEBPS/'+item.attrib['href'] in book.namelist()
     for item in package.findall('o:spine/o:itemref',ns): assert item.attrib['idref'] in items
     assert len([name for name in book.namelist() if name.startswith('OEBPS/chapter-')])==len(authored)
     assert f'course reader {release["version"]}' in ''.join(package.find('o:metadata/dc:title',ns).itertext())
-    assert package.find('o:metadata/o:meta[@property="dcterms:modified"]',ns).text==release['date']+'T00:00:00Z'
+    modified_nodes=package.findall('o:metadata/o:meta[@property="dcterms:modified"]',ns)
+    assert len(modified_nodes)==1
+    assert modified_nodes[0].text==modified_at(release)==build_receipt['modifiedAt']
+    assert package.find('o:metadata/dc:date',ns).text==release['date']
     assert all(f'OEBPS/{name}.xhtml' in book.namelist() for name in ['solutions','appendix-workflow','appendix-experiments'])
     solutions=ET.fromstring(book.read('OEBPS/solutions.xhtml'))
     solutions_text=''.join(solutions.itertext())
@@ -232,6 +249,28 @@ with ZipFile(OUT/'jax-course-workspace.zip') as bundle:
         assert 'jaxpathways/'+repository_only not in names, f'multi-host target requires coordinated workers and shared GCS, so it remains repository-only: {repository_only}'
     assert all(name.startswith('jaxpathways/') and not any(part in ('.git','.venv','__pycache__','LEARNING.md') for part in Path(name).parts) for name in names)
 print('OK: course workspace includes tutor prerequisites, authored lesson artifacts and project sources without local learner state.')
+
+c03_root = ROOT/'projects/image-model-300m'
+c03_packet = c03_root/'reference/evidence/v14'
+c03_recipe = json.loads((c03_packet/'approved-v14-recipe.json').read_text())
+c03_manifest = json.loads((c03_packet/'packet-manifest.json').read_text())
+c03_sources = {'projects/image-model-300m/'+relative: digest for relative, digest in c03_recipe['source_sha256'].items()}
+c03_public = {'projects/image-model-300m/'+relative: digest for relative, digest in c03_manifest['files'].items()}
+c03_expected = set(c03_sources)|set(c03_public)|{'projects/image-model-300m/reference/evidence/v14/packet-manifest.json'}
+with ZipFile(OUT/'image-model-300m-pilot.zip') as bundle:
+    names=set(bundle.namelist())
+    assert bundle.testzip() is None
+    assert names==c03_expected, f'C03 pilot archive differs from the accepted source and public packet: {names^c03_expected}'
+    for relative,digest in {**c03_sources,**c03_public}.items():
+        assert hashlib.sha256(bundle.read(relative)).hexdigest()==digest, f'C03 archive bytes differ: {relative}'
+    assert hashlib.sha256(bundle.read('projects/image-model-300m/reference/evidence/v14/packet-manifest.json')).hexdigest()=='3b1dcfe589fffc25a43da336beb07d82334b6f8971a73084e2b989b6e8f2a794'
+    assert not any(Path(name).suffix.lower() in {'.jpg','.jpeg','.webp','.npy','.npz','.ckpt','.pt','.pth','.safetensors','.msgpack'} for name in names)
+with ZipFile(OUT/'jax-course-workspace.zip') as bundle:
+    workspace_names=set(bundle.namelist())
+    assert {f'jaxpathways/{name}' for name in c03_expected}<=workspace_names
+    actual_c03={name.removeprefix('jaxpathways/') for name in workspace_names if name.startswith('jaxpathways/projects/image-model-300m/')}
+    assert actual_c03==c03_expected, f'course workspace contains unlisted C03 files: {actual_c03^c03_expected}'
+print('OK: C03 pilot ZIP and course workspace contain only the exact 28-file source freeze and 30-file public packet.')
 
 with ZipFile(OUT/'jax-tpu-gcp.zip') as bundle:
     names=bundle.namelist()

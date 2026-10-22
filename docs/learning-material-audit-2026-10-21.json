@@ -30,7 +30,7 @@
         "projects/embedding-lineage/README.md",
         "projects/causal-lineage/README.md"
       ],
-      "action": "C01 has a bounded CPU workflow; its precommitted retrieval-quality floors failed. C02 has a bounded CPU lifecycle; all six branches failed their frozen QA quality floors. Complete the full-scale and quality gates for all ten capstones, including the remaining implementations. Keep scoped CPU workflows separate from target-scale, task-quality and production claims.",
+      "action": "C01 has a bounded CPU workflow; its precommitted retrieval-quality floors failed. C02 has a bounded CPU lifecycle; all six branches failed their frozen QA quality floors. C03 has a bounded flower-image CPU pilot; its selected classifier scored 0.318522 below the 0.40 floor and 0.363836 color control, so the classification quality gate failed. Complete the full-scale and quality gates for all ten capstones, including the remaining implementations. Keep scoped CPU workflows separate from target-scale, task-quality and production claims.",
       "status": "open"
     },
     {
@@ -123,22 +123,22 @@
       "in-development": 13
     },
     "itemLevels": {
-      "available-draft": 164,
-      "in-development": 29,
+      "available-draft": 163,
+      "in-development": 30,
       "planned": 10
     },
     "tasks": 539,
     "lessonTasks": 409,
     "projectStages": 130,
     "currentCpuLessons": 104,
-    "currentProjectReferences": 30,
+    "currentProjectReferences": 29,
     "expertReviewedLessons": 0,
     "novicePilotedLessons": 0,
     "choiceSpecificFeedbackLessons": 104,
     "boundedHardwareQualifications": 4,
     "fullCapstonesPlanned": 10,
-    "optionalPilots": 2,
-    "verifiedOptionalPilots": 2
+    "optionalPilots": 3,
+    "verifiedOptionalPilots": 3
   },
   "hardware": [
     {
@@ -3369,15 +3369,15 @@
       "title": "Resume and profile a sharded training run",
       "url": "project-guides/sharded-training.html",
       "source": "projects/sharded-training/README.md",
-      "level": "available-draft",
+      "level": "in-development",
       "summary": "Logical CPU ownership, weighted updates, recovery and trace evidence.",
       "contribution": "Qualify fresh-process multi-host data and recovery behavior on an explicitly named target.",
-      "validation": "CPU reference checker passed for current sources",
+      "validation": "Reference check pending for this source",
       "review": "Teaching review pending",
-      "sourceHash": "5aa14b841e2f59083a303665cb970ad4ba71fc0cadbe57aada4b975d70a73a3f",
+      "sourceHash": "bf7389b083e3a736f24d8a8d48b76c7e020fd21cfbd108ff9c3014f4912aff0e",
       "metrics": {
         "stages": 4,
-        "currentReference": true,
+        "currentReference": false,
         "missingFiles": []
       }
     },
@@ -3922,9 +3922,71 @@
       "level": "planned",
       "summary": "Carry a frozen image recipe through representation learning, task adaptation and measured evaluation.",
       "contribution": "Implement the scoped data recipe, architecture, training stages, independent evaluation and exported reload before attempting the target scale.",
-      "validation": "Specification only; no runnable capstone",
+      "validation": "Bounded CPU pilot evidence verified; full capstone remains planned; evidence index projects/image-model-300m/reference/evidence/v14/packet-manifest.json (SHA-256 3b1dcfe589fffc25a43da336beb07d82334b6f8971a73084e2b989b6e8f2a794)",
       "review": "Implementation and review pending",
-      "sourceHash": "e1a70ddb5f99fbd30a0061c88654f7662f1175d1028802471ae2ca96b518e41f"
+      "sourceHash": "1656521c4d85b363cc95efdc0016d3a72064f2c764304c3df1a65e8ae253abd9",
+      "pilotAvailable": true,
+      "pilotEvidencePath": "projects/image-model-300m/reference/evidence/v14/packet-manifest.json",
+      "pilotEvidenceSha256": "3b1dcfe589fffc25a43da336beb07d82334b6f8971a73084e2b989b6e8f2a794",
+      "pilotSourceHashes": {
+        "projects/image-model-300m/README.md": "1656521c4d85b363cc95efdc0016d3a72064f2c764304c3df1a65e8ae253abd9",
+        "projects/image-model-300m/data/LICENSE.txt": "701e91b9e9f46d1f9623fc793a00fd444fe2821f66b01f3a0ff4a73d82f49507",
+        "projects/image-model-300m/data/frozen-memberships.json": "1d2b7c42bdd43d1fd2c261ebe26d832c016c600403ca8fd285efa57c3aa58dca",
+        "projects/image-model-300m/data/prepare.py": "1966186ff252b236c1dae2236027907385c1d8e263b4563fcd698322ecd76020",
+        "projects/image-model-300m/data/processor.py": "022c389ee9ebe50fdf54ddfc3c73e9cdeff66e29bf12a322fe0a5949b0c7813b",
+        "projects/image-model-300m/data/verify.py": "2d792d937816ab873f8a188e87c97037cc07456321c21e4b0fe0d95e024c3bd9",
+        "projects/image-model-300m/requirements-image-lock.txt": "4c5d6e77226e38dad7befb41ce1fa4449eb3890c767130ec385cbc107b950a5e",
+        "projects/image-model-300m/requirements-image.txt": "4834bafd2193bb76cb463e3f352eb36ab3ef6b2318c3f6a6998a528107cc7a39",
+        "projects/image-model-300m/run.py": "52f73b5a1ecccbbbbd848e5f8bd45207c5116c7cfde7ff87f99b8d72bfdf178f",
+        "projects/image-model-300m/solution/augment.py": "f4dc02a2820eb97d654bc06c124167ba66f8702f6ae474ff8d18231fce3f0f9a",
+        "projects/image-model-300m/solution/consumer.py": "f6a1cbe6d9f97b5d6eac8749e9f9ae816d325d93b19399b222d29742dcaaf7df",
+        "projects/image-model-300m/solution/consumer_runtime.py": "e0362d7743227eb7d3e0e5b51b3cb62e1d83490993ea59a576b77f2a9c433dca",
+        "projects/image-model-300m/solution/evaluate.py": "9c7d0413e75dab17b304b4582e19638e7a8074be3590c17f5b1fe32ea7f6beba",
+        "projects/image-model-300m/solution/model.py": "7de863c5abc6c6e2b5e398815d3689dae509b9405e7734b644548374526c59a0",
+        "projects/image-model-300m/solution/model_card.py": "1cd868c98ea1c34696684e1fb6e8e96cced1e22046d37ed5d734d59be8fdb2ef",
+        "projects/image-model-300m/solution/objectives.py": "fb2e6e8ab47620ea86a18b15eae4bce1eff4cb4d033834ed14a8040a69962073",
+        "projects/image-model-300m/solution/pipeline.py": "8b0dfc39bf91bf0e151504abcd6be31856a8dce83633dff1e067673083f45203",
+        "projects/image-model-300m/solution/runner.py": "e77b18725fbfa2c69dadbd61780b6efa8106f030131be8cfc0910c1e41fcb29a",
+        "projects/image-model-300m/solution/train_steps.py": "13ced16d1d463e8d48064ca098a7ad2f8e3d671b9dab3008aaacdaa81c4967d2",
+        "projects/image-model-300m/solution/training.py": "45e4de8c73e76e63bfb4c4bd7f620d754de6c150f510281ff32253fb9352e1c1",
+        "projects/image-model-300m/starter/augment.py": "4f6f705e6888daf057a24db2cf4af47b7ffeda7989758b0c9177e86c1879f9c1",
+        "projects/image-model-300m/starter/evaluate.py": "6b051f494dea69a5aab77aa99c31571fdcce77dc84a840a182c273eeec5373f2",
+        "projects/image-model-300m/starter/model.py": "55e8257aa8eae1315194aae06597f8920039b8ceef5f72a9c08d4871533591ff",
+        "projects/image-model-300m/starter/objectives.py": "a3e1c1b3d88e9717c8a363f623a07c51aa26b923df127a21562aaa35a6e14ac2",
+        "projects/image-model-300m/starter/runner.py": "8291cb55e324bc8a5b5891df0bb20f3748cebb3994b01db9ec0b9ffc55b26902",
+        "projects/image-model-300m/starter/training.py": "81b238cddd8c154559f9d6fff51cf567b1f561470498ae9c4afc605f9a1636ba",
+        "projects/image-model-300m/tests/check.py": "86912563c522422dd6f3c48b13c41b9753fad8c8aa2c8439abf2dbf5ad45d154",
+        "projects/image-model-300m/tests/oracles.py": "84f8dbd295ca2a180d90aa97f07542c8531abdd28d2adf8f486212d7b008208a"
+      },
+      "pilotPublicFiles": {
+        "TEACHING.md": "9b6a17055bebe2002aed5049da73e091787a2a7c9e5869aacd5b580a29c35b3e",
+        "reference/README.md": "a4942ee39b0b99b983535de703a55832a850521491b988665dc8f2ef165c6163",
+        "reference/evidence/v14/approved-v14-approval.json": "f4fb56a70ec453ffd995c36c56c9b80cbd7cd9f739deb59f4db1fdd95c91f82b",
+        "reference/evidence/v14/approved-v14-recipe.json": "df0a1a138f0635a39fcaa1b03f154403ed272560df9181fb5ad37722614d3c4c",
+        "reference/evidence/v14/figure-data.json": "a829434f3172227f226efb4930f0b06976fe097dd1a1b030792b1ff72bb64469",
+        "reference/evidence/v14/figures/loss-mae.png": "0c3886afdf3f802144366dba9e8eda94687e8891fe734707a837d5c0ca185706",
+        "reference/evidence/v14/figures/loss-mae.svg": "e0fd9b2bbdb3fc2b25d6eaee321134b5b7e86303ec759ba2974b9141a534768c",
+        "reference/evidence/v14/figures/loss-simclr.png": "e9b3a0dd2bf199e596dcfe7eaaca2b91c6d2b149866023a8303fb6bdc7d2715b",
+        "reference/evidence/v14/figures/loss-simclr.svg": "e87b7d1b3fbf7c2b05730d4dda9ea478f1bc7d8dd6f74f4dc92466bda2f457ab",
+        "reference/evidence/v14/figures/loss-supervised.png": "f1b11110cd95f112df0583886ef52265dd9da7c1c5eb441c6e201a42b3910385",
+        "reference/evidence/v14/figures/loss-supervised.svg": "131b0d03a369674448a8fe98279ed357b115511dd7d83f3c8b4d6aadaa4277e0",
+        "reference/evidence/v14/figures/quality-brightness.png": "fd468311288becf21b7a4c5919ee3d9bc8c5887e861c29843cff9cdf9bf30aa8",
+        "reference/evidence/v14/figures/quality-brightness.svg": "d1920f14b42aad59894c5bf1f30b72620240e4061b921a2a1cc76f90306792c7",
+        "reference/evidence/v14/figures/quality-calibration.png": "ff409a24d1957c1e212beec941041d10203e72ead1e4cba918654dbf487aee3e",
+        "reference/evidence/v14/figures/quality-calibration.svg": "d24f3289b156b5ef12fc2aa8b395141b6839173da70b95b0c417032bf10c1daa",
+        "reference/evidence/v14/figures/quality-classification.png": "e5a88dd9a6d8c49af7606ae32655d6c4cc4f230348396219ddacd8ec082f73de",
+        "reference/evidence/v14/figures/quality-classification.svg": "d2c2047a2670dc0626c4f121ee5bed8cbc6bf56980f446f8ae38543ab6c17c3b",
+        "reference/evidence/v14/figures/quality-retrieval.png": "384e1dd2f08152ef17153ebb13c00add6e974f8af2e5f691a1edd78ed98beeb9",
+        "reference/evidence/v14/figures/quality-retrieval.svg": "6566cb018481a0bf2682b2715e05b5e353c3698c2cd7bddfa4f993a4c98ae51d",
+        "reference/evidence/v14/omitted-private-artifacts.json": "a672606808021d6f1fe76df27ba2c1ffe80c9a7cd59c1c30432ca0c9b9ab22c0",
+        "reference/evidence/v14/public-numeric-evidence.json": "fbad3320410a6a702b12cdebadaee0dfb63f36c6423f5ad35299a516ea93f045",
+        "reference/evidence/v14/public-training-traces.json": "f9695f42872c0bf041207acde33922e471d4efc1df86107652e304eae3603aa3",
+        "reference/evidence/v14/source-and-run-identities.json": "6959fec326e25d3e94cc2faa21f85afe88f7697d3cc170c46e1b0a29078ad4e2",
+        "README.md": "1656521c4d85b363cc95efdc0016d3a72064f2c764304c3df1a65e8ae253abd9",
+        "data/LICENSE.txt": "701e91b9e9f46d1f9623fc793a00fd444fe2821f66b01f3a0ff4a73d82f49507",
+        "reference/evidence/v14/packet-manifest.json": "3b1dcfe589fffc25a43da336beb07d82334b6f8971a73084e2b989b6e8f2a794"
+      },
+      "pilotMissing": []
     },
     {
       "kind": "plans",
@@ -9039,8 +9101,8 @@
       "title": "State and input ownership",
       "prompt": "Immutable sampler, exact epoch coverage, replay, row placement and tails",
       "source": "projects/sharded-training/README.md",
-      "level": "available-draft",
-      "validation": "Public reference stage checked; no independent learner assessment"
+      "level": "in-development",
+      "validation": "Current reference stage check pending"
     },
     {
       "id": "sharded-training:stage-2",
@@ -9049,8 +9111,8 @@
       "title": "Count-weighted sharded updates",
       "prompt": "Actual four-device collectives, independent global/partition gradient oracles and replicated optimizer state",
       "source": "projects/sharded-training/README.md",
-      "level": "available-draft",
-      "validation": "Public reference stage checked; no independent learner assessment"
+      "level": "in-development",
+      "validation": "Current reference stage check pending"
     },
     {
       "id": "sharded-training:stage-3",
@@ -9059,8 +9121,8 @@
       "title": "Fresh-process complete recovery",
       "prompt": "Durable full-state checkpoint, independent process replay across epochs, reset faults and corrupt-contract rejection",
       "source": "projects/sharded-training/README.md",
-      "level": "available-draft",
-      "validation": "Public reference stage checked; no independent learner assessment"
+      "level": "in-development",
+      "validation": "Current reference stage check pending"
     },
     {
       "id": "sharded-training:stage-4",
@@ -9069,8 +9131,8 @@
       "title": "Trace-backed performance evidence",
       "prompt": "Actual StableHLO, synchronized compiled single/four-device baselines, XPlane/Perfetto trace and explained plots",
       "source": "projects/sharded-training/README.md",
-      "level": "available-draft",
-      "validation": "Public reference stage checked; no independent learner assessment"
+      "level": "in-development",
+      "validation": "Current reference stage check pending"
     },
     {
       "id": "text-harness:stage-1",

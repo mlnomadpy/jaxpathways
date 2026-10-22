@@ -1,0 +1,18 @@
+{
+  "task": "release preparation edition metadata guard R4",
+  "changed_sources": {
+    "scripts/release.mjs": "6013b75a6d7f90bd4cab020d05bebdc8ca484e8caaaa07b29dd5767f970845a4",
+    "tests/release-receipts.test.mjs": "22b970d55659fb989a87d5e553060ed0235cd0027267a6a30ba0982a72d2b923",
+    "tests/release-edition-metadata.test.mjs": "636d022d2fc00aa7e6bc297785f5e2ddb27a85ee542279b3103a9058de52c972"
+  },
+  "patch": "/private/tmp/jaxpathways-release-edition-guard-r4-20261021.patch",
+  "patch_sha256": "7e7476bead2413d6b20798c1e61fe8666f2d6df3981d1badc33b72c7062d0fac",
+  "checks": [
+    {
+      "command": "node --test tests/release-edition-metadata.test.mjs tests/release-receipts.test.mjs",
+      "exit_code": 0,
+      "output": "TAP version 13\n# Subtest: invalid edition metadata is rejected before any release snapshot is written\nok 1 - invalid edition metadata is rejected before any release snapshot is written\n  ---\n  duration_ms: 538.979\n  type: 'test'\n  ...\n# Subtest: legacy and explicit edition records prepare once and rerun with an unchanged snapshot\nok 2 - legacy and explicit edition records prepare once and rerun with an unchanged snapshot\n  ---\n  duration_ms: 241.040875\n  type: 'test'\n  ...\n# Subtest: rerunning execution receipts preserves a release while canonical source changes require a new one\nok 3 - rerunning execution receipts preserves a release while canonical source changes require a new one\n  ---\n  duration_ms: 456.463834\n  type: 'test'\n  ...\n1..3\n# tests 3\n# suites 0\n# pass 3\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 826.177625"
+    }
+  ],
+  "test_scope": "Real release.mjs is invoked in temporary fixtures; invalid metadata is rejected before first snapshot write and cannot rewrite an existing snapshot. Legacy 0.14.1 and explicit 0.15.0/1.0.0 prepare and repeat stably."
+}

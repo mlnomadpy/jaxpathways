@@ -7,9 +7,35 @@ const read = path => JSON.parse(readFileSync(path, 'utf8'));
 const stable = value => Array.isArray(value) ? value.map(stable) : value && typeof value === 'object'
   ? Object.fromEntries(Object.keys(value).sort().map(key => [key, stable(value[key])])) : value;
 const hash = value => createHash('sha256').update(JSON.stringify(stable(value))).digest('hex');
+
+const releaseVersionPattern = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/;
+const modifiedAtPattern = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})Z$/;
+function validateReleaseIdentity(release) {
+  const match = typeof release.version === 'string' ? releaseVersionPattern.exec(release.version) : null;
+  assert(match, 'Release version must be plain semantic major.minor.patch without leading zeroes or suffixes');
+  const [major, minor] = match.slice(1, 3).map(Number);
+  const hasEditionKey = Object.hasOwn(release, 'editionKey');
+  const hasModifiedAt = Object.hasOwn(release, 'modifiedAt');
+  assert.equal(hasEditionKey, hasModifiedAt, 'Release editionKey and modifiedAt must be provided together');
+  if (!hasEditionKey) {
+    assert(!(major > 0 || minor >= 15), 'Release version 0.15.0 and later requires editionKey and modifiedAt');
+    return;
+  }
+  assert(typeof release.editionKey === 'string' && release.editionKey.length > 0
+    && release.editionKey.trim() === release.editionKey, 'Release editionKey must be a non-empty trimmed string');
+  const dateMatch = typeof release.modifiedAt === 'string' ? modifiedAtPattern.exec(release.modifiedAt) : null;
+  assert(dateMatch, 'Release modifiedAt must use UTC YYYY-MM-DDThh:mm:ssZ');
+  const [year, month, day, hour, minute, second] = dateMatch.slice(1).map(Number);
+  const leapYear = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+  const daysInMonth = [31, leapYear ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  assert(year > 0 && month >= 1 && month <= 12 && day >= 1 && day <= daysInMonth[month - 1]
+    && hour <= 23 && minute <= 59 && second <= 59,
+  'Release modifiedAt must be a valid UTC calendar date and time');
+}
+
 const notes = read('curriculum/releases.json');
 const release = notes[0];
-assert.match(release.version, /^\d+\.\d+\.\d+$/);
+validateReleaseIdentity(release);
 assert.match(release.date, /^\d{4}-\d{2}-\d{2}$/);
 assert.equal(new Set(notes.map(note => note.version)).size, notes.length, 'Release versions must be unique');
 assert.equal(read('package.json').version, release.version, 'Package and release versions must agree');

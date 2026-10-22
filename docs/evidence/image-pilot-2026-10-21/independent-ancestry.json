@@ -1,0 +1,23 @@
+{
+  "child_parent_matches": {
+    "baseline-vit": "seeded-init-vit-1729",
+    "finetune-mae": "mae-pretrain",
+    "finetune-simclr": "simclr-pretrain",
+    "mae-pretrain": "seeded-init-vit-1729",
+    "partial-selected": "simclr-pretrain",
+    "probe-mae": "mae-pretrain",
+    "probe-random": "seeded-init-vit-1729",
+    "probe-simclr": "simclr-pretrain",
+    "probe-supervised": "baseline-vit",
+    "simclr-pretrain": "seeded-init-vit-1729"
+  },
+  "optimizer_updates": 0,
+  "parents_sha256": {
+    "baseline-vit": "02e14fc21635ee6ef7957ca0071d26a32de85e726fe7a4f5443d773644081474",
+    "mae-pretrain": "361c6e5bf45333c51595a3d0bb22a7eb81a5240a158acf9db94a8e938438ed6d",
+    "seeded-init-vit-1729": "f01fb44d84625d00ee5b5ed9e9b044a3c771672d482c2a923fe4519d81a59baf",
+    "simclr-pretrain": "43159be5f35992d94e62614e62aa3c7ee6e0d4d4e66d1edfad3f5f54830a9366"
+  },
+  "schema": "c03-sol-v14-independent-ancestry-v1",
+  "status": "pass"
+}

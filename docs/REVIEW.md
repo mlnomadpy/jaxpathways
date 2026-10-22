@@ -1,4 +1,53 @@
-# Author review: 0.14.1
+# Author review: 0.15.1
+
+Start with the [frozen book preview](http://127.0.0.1:4199/book.html).
+The [review branch](https://github.com/mlnomadpy/jaxpathways/tree/codex/model-recovery-review)
+builds on draft PR #67. Implementation commit
+`1660731fb3877d193d8a017ec6ee91394cc868a6` is identified in the
+[pinned qualification packet](https://github.com/mlnomadpy/jaxpathways/blob/07a1fab3081302905322d480ea706ed209b24629/docs/evidence/course-review-0.15.1/verification.json).
+This candidate has not been merged or deployed to production.
+
+Use the [review guide](https://github.com/mlnomadpy/jaxpathways/blob/07a1fab3081302905322d480ea706ed209b24629/docs/review-guide-0.15.1.md)
+and [blank feedback notes](review-notes-0.15.1.md). Inspect the
+[image pilot and seven explained figures](http://127.0.0.1:4199/project-guides/image-model-300m-pilot.html)
+and [two-controller recovery exercise](http://127.0.0.1:4199/project-guides/sharded-training-multiprocess.html).
+The catalog, parent plan, audit and agent-facing discovery now expose the same
+three bounded CPU pilots. Pilot, preparation-project and full-capstone status
+labels describe their own scopes.
+
+Local qualification passed 173 Node tests, 11 focused Python identity tests,
+50 desktop/mobile Chromium cases, root/GitHub Pages path checks, and EPUBCheck
+5.4.0 with zero errors or warnings. The retained CI formatter pass applies to
+49 byte-identical current files. The packet records the exact source and the
+whitespace-only helper follow-up. Hosted checks for this new branch remain
+separate from the green frozen PR #67.
+
+The image run completed eleven stages and 384 updates, but its selected
+classifier failed quality: 0.3185 balanced accuracy versus a 0.40 floor and
+0.3638 fixed color control. Its public archive contains source and numeric
+evidence, excluding photos, feature vectors, fitted processors and weights.
+The recovery extension demonstrates two local POSIX CPU controllers and
+whole-cluster restart; remote, TPU, Linux-workflow and storage-durability
+qualification remain open.
+
+A separate audio validation incident retains two committed updates and no
+completed pilot or final evaluation. Its execution gate is closed, exact
+as-run sources and partial artifacts are preserved privately, and the
+validation wrapper is now preflight-only. No replacement run is authorized.
+Its runtime is excluded from this candidate.
+
+The browser sample shows readable math, a complete labeled plot, the plot
+interpretation, working reasoning reveal and code. The Mac relocked before
+the final native EPUB check; that check remains pending. Earlier bounded
+0.14 Apple Books evidence is retained separately. Thirteen phases remain
+In Development, all ten full capstones remain Planned, and independent
+teaching/career, broader reader, assistive-technology and target qualification
+remain open. The 104 unchanged lesson bodies retain prior matching CPU
+receipts; they were not all freshly executed locally for this candidate.
+
+---
+
+# Earlier review: 0.14.1
 
 Start with the [frozen patch preview](http://127.0.0.1:4197/book.html).
 The patch is [draft PR #67](https://github.com/mlnomadpy/jaxpathways/pull/67),
@@ -15,8 +64,9 @@ The 0.14 review guide below still describes the substantive course upgrade.
 
 Local checks pass: 163 automated tests, 49-file Black check, fresh complete
 recovery protocol, 46 desktop/mobile browser checks, root/Pages deployment and
-EPUBCheck with zero errors or warnings. Hosted checks for PR67 are pending and
-must be inspected independently of the earlier PR66 results.
+EPUBCheck with zero errors or warnings. All 15 hosted checks passed for final PR67 head
+`615be5fda0bda99e39292447a94508117b3accd2`. The later [follow-up receipt](evidence/review-qualification-followup-2026-10-21/verification.json)
+retains these results separately from the frozen packet and earlier PR66 results.
 
 Native 0.14.0 browser and Apple Books samples show readable math, plot labels,
 code and working TOC navigation. The [compatibility matrix](book-compatibility.md)

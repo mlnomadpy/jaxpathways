@@ -4,6 +4,8 @@ A checkpoint is useful when the next update means the same thing after a restart
 
 This is one connected project for the recovery, performance and distributed phases. The four devices are logical partitions of one CPU host. They execute real JAX sharding and collectives, but they do **not** establish four-machine speed, network behavior, accelerator throughput or multi-host recovery. The task needs no external data and uses `requirements-cpu.txt` from the repository root.
 
+After the single-controller stages, try the optional [two-controller recovery exercise](multiprocess/README.md). It uses two actual local JAX processes, unequal sample counts and an empty rank, then kills a worker and restarts both controllers from a committed generation. Its worked timeline and separate process checks qualify a bounded local CPU protocol; remote machines, physical TPUs and storage durability still need their own evidence.
+
 ## Start with the learner scaffold
 
 ```bash

@@ -1,0 +1,35 @@
+{
+  "observed_at": "2026-10-21T22:41:07.632673+00:00",
+  "integration_base": "615be5fd",
+  "source_hashes": {
+    "check.py": "f9ffbef4d9f38de45c0bff63f25119aec6e1cbcc5beaca635118f79f8c7e72ad",
+    "solution/model.py": "a7a7c1aca9009d284c41014ea1c6d1f5b7a9b4b1b60991491f5073f1a46ea8a5",
+    "starter/model.py": "166311a5dd9f47b77e0fdbed1cc4e116c4d0a96932fede3c7463f6af4770272d",
+    "supervisor.py": "30c0e9724565089e9796b8be39e6c763a3f874ad3fd8c9b8c8de0a877d1db330",
+    "worker.py": "f9838429d447308e54588c82523de0370e0525d92c748367e2a6fdccb94bbb03"
+  },
+  "receipt_sha256": {
+    "worker-loss.json": "fbf1a2838ac55497377c406aa64de443655d584c0569b7eba4b4ac855cccec0f",
+    "independent-preflight.json": "90d4fa1b0fe68ab7b5382fce9be0565cd0f4b64f1138e2b46cd6a3191a370c4c",
+    "independent-source-mutation.json": "06b372f3dbd356affdc24a744d29ef73aa9308dd11e3e7c4afe84f4bfce63891",
+    "worker-checkpoint.json": "2db86d16dad01375fc01aebfffdcac6156d2f9d8c35d28c7c8f0f16f265e8b15",
+    "root-all.json": "dcf5d4b4e6192cf9783ec3a64520a89ac956a15efbd7007c4ad0bfb5294e38fc",
+    "historical-config-timing.json": "7cbc7656ca143ce9f66ec2eb1394c849ea4df667f99faa49cbf07d974132044b",
+    "worker-all.json": "ba21af2c1e37d1862a53b119fc4ed56ac0a5f1172d6c13d78b73df16f30856d5"
+  },
+  "current_scope": "Real two-controller local JAX CPU weighted training, whole-cluster restart, complete checkpoint state and pre-JAX source/config/approval rejection",
+  "root_command": "python3 projects/sharded-training/multiprocess/check.py --stage all --candidate projects/sharded-training/multiprocess/solution/model.py --work /private/tmp/l10b-root-integration-20261021 --output /private/tmp/l10b-root-integration-20261021/report.json",
+  "root_exit_code": 0,
+  "historical_scope": "historical-config-timing.json is an earlier independently reproduced preflight gap, not a current passing qualification",
+  "unavailable_historical_receipt": "Earlier missing-sidecar-report.json was not present at root collection; historical bytes are not claimed retained. Current independent missing-sidecar rejection is in independent-preflight.json.",
+  "limits": [
+    "No multi-machine or physical TPU qualification",
+    "No network-filesystem or power-loss durability",
+    "No survivor-continuity or scaling-performance claim",
+    "No independent human teaching acceptance"
+  ],
+  "teaching_assets_sha256": {
+    "README.md": "889b060842b4d1e9ebe314cbff0c0701a2a9ddbfbd71f77213b2fbe583ffc156",
+    "figures/recovery-sequence.svg": "56c4f074e153b276f6c2b64d75b22a5d7adf501fa1fffc74032c3e59e37cb261"
+  }
+}

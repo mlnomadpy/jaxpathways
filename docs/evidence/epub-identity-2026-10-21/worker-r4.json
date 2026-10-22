@@ -1,0 +1,32 @@
+{
+  "task": "EPUB R4 strict plain release version",
+  "changed_sources": {
+    "scripts/epub_identity.py": "4057d0a947d8311044c5c45b40f619ce257d5bfe727a1012ae7874498d452c29",
+    "tests/test_epub_identity.py": "3e9778420b5571f873e0c7d156e316b34e369aee38d6a94d32d08f21f16485f5"
+  },
+  "public_distribution": {
+    "public/downloads/jax-foundations.epub": "004ca3501a8035c63024e39e03277c328913b79a524cf0795dc2f8fd0ed43202",
+    "public/downloads/jax-foundations.build.json": "770e00d0a138761072060bd8256bafb07b910449ae5a0ac0d3c8416290a10af8"
+  },
+  "previously_frozen_public_artifact_sha256": "004ca3501a8035c63024e39e03277c328913b79a524cf0795dc2f8fd0ed43202",
+  "previously_frozen_build_receipt_sha256": "770e00d0a138761072060bd8256bafb07b910449ae5a0ac0d3c8416290a10af8",
+  "patch": "/private/tmp/jaxpathways-epub-identity-r4-20261021.patch",
+  "patch_sha256": "b3a9921e59fcba2241f3d3e6adde5029574d4800295c35c15ebee0d72a8a6164",
+  "checks": [
+    {
+      "command": "python3 -m py_compile scripts/epub_identity.py tests/test_epub_identity.py",
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "command": "python3 tests/test_epub_identity.py",
+      "exit_code": 0,
+      "output": "...........\n----------------------------------------------------------------------\nRan 11 tests in 0.013s\n\nOK"
+    },
+    {
+      "command": "python3 scripts/check-distribution.py",
+      "exit_code": 0,
+      "output": "OK: 104 offline chapters, EPUB XML/references, project/tutor bundle fidelity, authored project prerequisites.\nOK: standalone HTML has embedded figure assets and course appendices.\nOK: beginner workspace source/package/instruction fidelity.\nOK: course workspace includes tutor prerequisites, authored lesson artifacts and project sources without local learner state.\nOK: TPU workspace has its pinned single-host target, checker and exact base lesson source; coordinated multi-host files remain repository-only.\nOK: 11 synthesis assessments match source, pathway and project."
+    }
+  ]
+}
