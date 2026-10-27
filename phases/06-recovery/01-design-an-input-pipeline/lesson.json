@@ -9,12 +9,12 @@
       {
         "id": "guided-reasoning",
         "title": "Preserve identity through shuffling and batching",
-        "body": "Imagine IDs A, B, C, D shuffled into C, A, D, B. Membership stays the same while order changes. A batch size of three leaves one example after the first batch. Dropping it, padding it or emitting a smaller batch are different policies.\n\nPadding requires a validity mask so an artificial slot does not become another observation. Dropping requires acknowledging the lost coverage. Fixed shape should not silently choose the statistical meaning of an epoch.\n\nRead the existing sample-ID plot as an ordering check. The height of an ID is not a physical measurement. Compare membership and multiplicities, then inspect exact order where continuation requires it.",
+        "body": "Imagine IDs A, B, C, D shuffled into C, A, D, B. Membership stays the same while order changes. A batch size of three leaves one example after the first batch. Dropping it, padding it or emitting a smaller batch are different policies.\n\nPadding requires a validity mask so an artificial slot does not become another observation. Dropping requires acknowledging the lost coverage. Fixed shape should not silently choose the statistical meaning of an epoch.\n\nRead the existing sample-ID plot as an ordering check. The height of an ID is not a physical measurement. Compare membership and multiplicities, then inspect exact order where continuation requires it.\n\nThe permutation \\(\\pi\\) changes order while preserving example membership; the validity mask \\(m_i\\in\\{0,1\\}\\) excludes padding and requires a positive denominator. For valid losses \\([2,4,6]\\) padded with zero to length four, the unmasked mean is \\(3\\), while the valid-example mean is \\(4\\). Input coverage alone does not prove replay. Later recovery lessons also save iterator state, optimizer state, keys and data/configuration identity at the same completed-update boundary.",
         "check": {
           "prompt": "Does the right epoch length prove every example occurred once?",
           "answer": "No. A duplicate and an omission preserve the count. Check identities and multiplicities against the intended membership."
         },
-        "math": "\\mathcal{C}_t = (\\Theta_t,\\; M_t,\\; k_t,\\; t), \\qquad \\text{restore}(\\mathcal{C}_t) \\implies \\Theta_{t+k}^{\\text{resumed}} = \\Theta_{t+k}^{\\text{uninterrupted}}"
+        "math": "\\operatorname{multiset}(\\pi(0),\\ldots,\\pi(N-1))=\\operatorname{multiset}(0,\\ldots,N-1),\\qquad \\bar\\ell=\\frac{\\sum_i m_i\\ell_i}{\\sum_i m_i}"
       },
       {
         "title": "Preserve identity across every transformation",

@@ -18,12 +18,12 @@
       {
         "id": "guided-reasoning",
         "title": "Time a completed result",
-        "body": "If a timer stops as soon as dispatch returns, it may exclude most of the computation. Blocking on the result inside the interval includes completion of the work required to produce that result.\n\nWarm up the intended specialization before measuring repeated execution, and retain startup separately if it matters to the application. Include preprocessing and transfers in a separately named end-to-end measurement when they belong to the request.\n\nThe first-call and warm bars represent different intervals. Their ratio depends on the workload and environment. A short dispatch time is not evidence of device throughput, and a warm kernel timing does not describe an entire service request.",
+        "body": "If a timer stops as soon as dispatch returns, it may exclude most of the computation. Blocking on the result inside the interval includes completion of the work required to produce that result.\n\nWarm up the intended specialization before measuring repeated execution, and retain startup separately if it matters to the application. Include preprocessing and transfers in a separately named end-to-end measurement when they belong to the request.\n\nThe first-call and warm bars represent different intervals. Their ratio depends on the workload and environment. A short dispatch time is not evidence of device throughput, and a warm kernel timing does not describe an entire service request.\n\nBoth observations start with already placed inputs and end with completed outputs. The first call can include tracing, lowering, compilation, dispatch and execution. The warm median is computed from separate repeated calls; subtracting it from the first call does not isolate exact compiler time. For warm observations \\([2,3,8]\\) milliseconds, report the median \\(3\\) and retain all samples. A first observation of \\(20\\) milliseconds establishes its own elapsed interval, not a measured \\(17\\)-millisecond compilation phase.",
         "check": {
           "prompt": "Where should synchronization occur in completed-result latency measurement?",
           "answer": "Before stopping the timer. Synchronizing afterward can omit unfinished work from the reported interval."
         },
-        "math": "T_{\\text{warm}} = \\operatorname{median}_{r=1 \\dots R}\\left(t_{\\text{ready}}^{(r)} - t_{\\text{start}}^{(r)}\\right), \\qquad T_{\\text{first}} = T_{\\text{compile}} + T_{\\text{warm}}"
+        "math": "T_{\\rm first}=t_{\\rm first,ready}-t_{\\rm first,start},\\qquad T_{\\rm warm}=\\operatorname{median}_r(t_{r,\\rm ready}-t_{r,\\rm start})"
       },
       {
         "title": "Draw the boundary before starting the clock",

@@ -9,12 +9,12 @@
       {
         "id": "guided-reasoning",
         "title": "Restore the next batch by identity",
-        "body": "Suppose batches are A/B, C/D and E/F. After training completes the C/D update, the next restored batch should be E/F. Returning another two-element array passes a shape check but may repeat or skip data.\n\nCapture the iterator state at the model's completed-update boundary. Do not substitute a guessed offset unless the pipeline contract makes it sufficient. Shuffling, filtering and prefetching can make requested batch counts differ from completed training work.\n\nCompare exact IDs and values before and after restore. Then change the dataset identity deliberately and require the restore process to detect the incompatible sequence. The same numeric cursor can point to different examples in another dataset.",
+        "body": "Suppose batches are A/B, C/D and E/F. After training completes the C/D update, the next restored batch should be E/F. Returning another two-element array passes a shape check but may repeat or skip data.\n\nCapture the iterator state at the model's completed-update boundary. Do not substitute a guessed offset unless the pipeline contract makes it sufficient. Shuffling, filtering and prefetching can make requested batch counts differ from completed training work.\n\nCompare exact IDs and values before and after restore. Then change the dataset identity deliberately and require the restore process to detect the incompatible sequence. The same numeric cursor can point to different examples in another dataset.\n\nHere \\(I_t\\) is the saved iterator state after completed update \\(t\\), \\(D\\) identifies the same data and \\(c\\) the same pipeline configuration. `restore` is schematic notation for constructing the loader and calling its state-restoration API. It is not a claim that a guessed numeric cursor restores a shuffled pipeline. If batches are A/B, C/D, E/F and update two consumed C/D, the restored next IDs must be E/F. Repeating C/D has the right shape but the wrong continuation.",
         "check": {
           "prompt": "Why can a correct cursor still produce an incorrect resume?",
           "answer": "Position only has meaning relative to its data sequence and configuration. Recovery needs those identities as well as the cursor."
         },
-        "math": "v_{t+1} = \\mu v_t + g_t, \\qquad \\theta_{t+1} = \\theta_t - \\eta v_{t+1}"
+        "math": "\\operatorname{IDs}\\!\\left(\\operatorname{next}(\\operatorname{restore}(I_t;D,c))\\right)=\\operatorname{IDs}(B_{t+1})"
       },
       {
         "title": "Map a record key to a testable source",

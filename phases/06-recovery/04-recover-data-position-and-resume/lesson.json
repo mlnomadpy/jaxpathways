@@ -9,12 +9,12 @@
       {
         "id": "guided-reasoning",
         "title": "Align model time with data time",
-        "body": "If saved weights include the C/D update but the iterator still points to C/D, recovery trains on that batch again. If the iterator is one batch too far ahead, it skips data. Both runs can continue without a shape error.\n\nDraw one vertical boundary after an update and align parameters, optimizer, key and cursor with it. The next restored arrow must consume the same examples as the uninterrupted run.\n\nWhen comparing loss trajectories, align measurement conventions too. A loss before an update and a loss after it describe different states. Compare IDs and state values alongside loss, because similar scalar losses can conceal different training histories.",
+        "body": "If saved weights include the C/D update but the iterator still points to C/D, recovery trains on that batch again. If the iterator is one batch too far ahead, it skips data. Both runs can continue without a shape error.\n\nDraw one vertical boundary after an update and align parameters, optimizer, key and cursor with it. The next restored arrow must consume the same examples as the uninterrupted run.\n\nWhen comparing loss trajectories, align measurement conventions too. A loss before an update and a loss after it describe different states. Compare IDs and state values alongside loss, because similar scalar losses can conceal different training histories.\n\nThe components are parameters \\(\\Theta_t\\), optimizer state \\(O_t\\), random key \\(k_t\\), completed step \\(t\\), opaque Grain iterator state \\(I_t\\), and configuration/data contract \\(c\\). The transition \\(F_c\\) consumes the iterator's next batch and then applies one update. A modulo position formula is insufficient for the shuffled, multi-epoch iterator below. Compare all future example IDs as well as the next state; matching one scalar loss can conceal a repeated or skipped batch.",
         "check": {
           "prompt": "Why reject a resume even when its first loss nearly matches the reference?",
           "answer": "Different data or optimizer state can coincidentally produce similar loss. Exact continuation requires the intended full state and data boundary."
         },
-        "math": "(k_{t+1}, k_{\\text{step}}) = \\operatorname{split}(k_t), \\qquad i_{t+1} = (i_t + B) \\bmod N"
+        "math": "C_t=(\\Theta_t,O_t,k_t,t,I_t,c),\\qquad (\\Theta_{t+1},O_{t+1},k_{t+1},I_{t+1})=F_c(\\Theta_t,O_t,k_t,I_t)"
       },
       {
         "title": "Commit one logical boundary",

@@ -27,12 +27,12 @@
       {
         "id": "guided-reasoning",
         "title": "Make a repeated call explainable",
-        "body": "Imagine a prediction function that receives features and weights but reads a global bias. You compile it, change that Python global, and call the compiled function again. The source file now displays the new bias, but the already-traced computation may still embody the old value. The hidden dependency makes the result difficult to reason about.\n\nPass the bias as an explicit argument instead. Then two calls with different bias arrays are visibly two computations with different data. For a linear prediction, increasing the bias by \\(1\\) must increase every output by \\(1\\), while changing the weight vector can affect rows differently.\n\nPurity does not mean a whole application has no state. It means the numerical function receives the state it needs and returns any new state. Files, logs and orchestration can live outside that numerical boundary.",
+        "body": "Imagine a prediction function that receives features and weights but reads a global bias. You compile it, change that Python global, and call the compiled function again. The source file now displays the new bias, but the already-traced computation may still embody the old value. The hidden dependency makes the result difficult to reason about.\n\nPass the bias as an explicit argument instead. Then two calls with different bias arrays are visibly two computations with different data. For a linear prediction, increasing the bias by \\(1\\) must increase every output by \\(1\\), while changing the weight vector can affect rows differently.\n\nPurity does not mean a whole application has no state. It means the numerical function receives the state it needs and returns any new state. Files, logs and orchestration can live outside that numerical boundary.\n\nHere \\(X\\) has one observation per row, \\(w\\) has one entry per feature, and \\(b\\) is an explicit scalar input. The vector \\(\\mathbf{1}\\) has one entry per observation. For a row \\([1,2]\\), weights \\([2,-1]\\) and bias \\(3\\), the prediction is \\(3\\). Changing only the bias to \\(4\\) makes it \\(4\\). This is a changed-input claim; it does not assume a mutable global is reread by an already traced function.",
         "check": {
           "prompt": "Where should a changing training step or random key live?",
           "answer": "In explicit state passed into the computation and returned when updated. Hiding it in a mutable Python global makes replay and transformed execution harder to verify."
         },
-        "math": "X'[i] = \\begin{cases} v & \\text{if } i = k \\\\ X[i] & \\text{otherwise} \\end{cases}"
+        "math": "f(X,w,b)=Xw+b\\mathbf{1},\\qquad f(X,w,b+1)-f(X,w,b)=\\mathbf{1}"
       },
       {
         "title": "Hidden state makes the signature incomplete",

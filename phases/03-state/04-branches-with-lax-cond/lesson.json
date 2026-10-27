@@ -21,12 +21,12 @@
       {
         "id": "guided-reasoning",
         "title": "Trace both possibilities, execute the selected rule",
-        "body": "Consider an absolute-value rule: return the input when it is nonnegative and its negation otherwise. Both branches return the same shape and dtype, even though only one scalar case determines a particular result. The function is continuous at zero, but its mathematical derivative is not uniquely defined there.\n\nThe plot of magnitudes shows what the branch computes, not the tracing process. During tracing, Python code in both branch functions can be visited. Avoid using Python side effects as evidence that one numerical branch executed on the device.\n\nAfter batching or other transformations, the implementation of control flow can change; for example, batching a conditional can turn it into selection. Keep claims about execution scope tied to the actual transformed program.",
+        "body": "Consider an absolute-value rule: return the input when it is nonnegative and its negation otherwise. Both branches return the same shape and dtype, even though only one scalar case determines a particular result. The function is continuous at zero, but its mathematical derivative is not uniquely defined there.\n\nThe plot of magnitudes shows what the branch computes, not the tracing process. During tracing, Python code in both branch functions can be visited. Avoid using Python side effects as evidence that one numerical branch executed on the device.\n\nAfter batching or other transformations, the implementation of control flow can change; for example, batching a conditional can turn it into selection. Keep claims about execution scope tied to the actual transformed program.\n\nThe predicate is a scalar Boolean; both branches accept and return the same scalar shape and dtype. Substituting \\(-3\\) selects the second expression and gives \\(3\\); substituting \\(2\\) selects the first and gives \\(2\\). At zero both values agree, but a mathematical derivative of absolute value is not uniquely defined. Python tracing of both branch functions is separate from selecting a numerical result.",
         "check": {
           "prompt": "Can one branch return a vector and the other a scalar if your current input only selects the vector?",
           "answer": "Not under the same conditional result contract. Both branches must produce compatible structures, shapes and dtypes so the transformed program has a well-defined result."
         },
-        "math": "\\mathcal{T} = (\\text{Leaves}(\\mathcal{T}),\\; \\text{TreeDef}(\\mathcal{T})), \\qquad \\operatorname{map}(g, \\mathcal{T})_k = g(\\mathcal{T}_k)"
+        "math": "\\operatorname{magnitude}(x)=\\begin{cases}x&x\\ge0\\\\-x&x<0\\end{cases}"
       },
       {
         "title": "Locate the decision boundary",

@@ -15,12 +15,12 @@
       {
         "id": "guided-reasoning",
         "title": "Trace a response through the system that produced it",
-        "body": "If a response is unsupported, first ask whether relevant evidence reached the model, whether the prompt requested grounded behavior and whether the evaluation checks the intended claim. Changing the model cannot necessarily repair a missing retrieval candidate.\n\nLink case IDs to prompt, retriever, model and evaluator versions. Re-run a fixed case set after a change and inspect both repaired cases and regressions. An average pass rate can conceal a newly broken critical case.\n\nThe lesson uses a bounded fixture to teach release logic. Preserve that scope: passing a mocked or non-LLM check is separate from actual model behavior. Qualify the full application with executed traces when replacing the fixture.",
+        "body": "If a response is unsupported, first ask whether relevant evidence reached the model, whether the prompt requested grounded behavior and whether the evaluation checks the intended claim. Changing the model cannot necessarily repair a missing retrieval candidate.\n\nLink case IDs to prompt, retriever, model and evaluator versions. Re-run a fixed case set after a change and inspect both repaired cases and regressions. An average pass rate can conceal a newly broken critical case.\n\nThe lesson uses a bounded fixture to teach release logic. Preserve that scope: passing a mocked or non-LLM check is separate from actual model behavior. Qualify the full application with executed traces when replacing the fixture.\n\nThe trace record \\(\\mathcal T_i\\) binds one case to the components and evidence that produced its answer. A container digest identifies container bytes; it does not fix remote data, service behavior, randomness or hardware arithmetic. Even with matching identities, reproduction remains an observed check under declared conditions. If the same case fails once because context is missing and once despite correct context, retaining both records makes those different failure mechanisms visible.",
         "check": {
           "prompt": "Why retain the retrieved context in an error trace?",
           "answer": "It distinguishes missing or wrong evidence from generation or instruction-following errors. Without that context, the same final response can support several incompatible diagnoses."
         },
-        "math": "\\text{Digest}(\\text{Image}) = \\operatorname{sha256}(\\text{Layers} \\;\\|\\; \\text{Lockfile}), \\qquad P(\\text{reproduce}) = 1"
+        "math": "\\mathcal T_i=(\\mathrm{case}_i,\\mathrm{prompt\\ id},\\mathrm{retriever\\ id},\\mathrm{model\\ id},\\mathrm{context}_i,\\mathrm{response}_i,\\mathrm{evaluator\\ id})"
       },
       {
         "title": "Version the application boundary",

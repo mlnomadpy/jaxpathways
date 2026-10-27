@@ -9,12 +9,12 @@
       {
         "id": "guided-reasoning",
         "title": "Save the inputs to the next update",
-        "body": "Two runs with identical weights but different Adam moments can receive the same gradient and take different next steps. Different random keys can change augmentation or dropout before the gradient is computed.\n\nThe existing diagram merges state components into one snapshot. Its arrows mean membership in the snapshot, not a sequence in which parameters must be computed before moments or randomness. Every component must agree on the completed-step boundary.\n\nLoading bytes successfully checks serialization. Test continuation by restoring into a fresh process and comparing the next transition with an uninterrupted run. Add iterator state through the data-recovery procedure that follows this lesson.",
+        "body": "Two runs with identical weights but different Adam moments can receive the same gradient and take different next steps. Different random keys can change augmentation or dropout before the gradient is computed.\n\nThe existing diagram merges state components into one snapshot. Its arrows mean membership in the snapshot, not a sequence in which parameters must be computed before moments or randomness. Every component must agree on the completed-step boundary.\n\nLoading bytes successfully checks serialization. Test continuation by restoring into a fresh process and comparing the next transition with an uninterrupted run. Add iterator state through the data-recovery procedure that follows this lesson.\n\nThe relation \\(\\simeq\\) means the same tree structure, shapes and dtypes, exact integer/key values and floating-point leaves within the declared tolerances. The digest \\(h_f\\) answers a different question: whether a particular artifact file has the expected bytes. An Orbax checkpoint can contain many files, so any integrity manifest must identify those files explicitly. Equal decoded arrays need not have byte-identical serializations. The lesson checks full training state and the next update on the same fixed batch; data-iterator continuation is added in the next lesson.",
         "check": {
           "prompt": "What is stronger evidence than matching loaded weights?",
           "answer": "Match the next example identities, random state, optimizer update and resulting parameters. This tests the checkpoint's purpose rather than only its stored parameter values."
         },
-        "math": "\\text{sha256}(\\text{serialize}(\\mathcal{C}_t)) = \\text{sha256}(\\text{deserialize}(\\text{path}))"
+        "math": "\\operatorname{restore}(\\operatorname{save}(C_t))\\simeq C_t,\\qquad h_f=\\operatorname{SHA256}(\\operatorname{bytes}(f))"
       },
       {
         "title": "Inventory everything the next step reads",

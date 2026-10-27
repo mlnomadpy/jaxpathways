@@ -157,7 +157,7 @@
         "why": "Start with one saved program and a known answer. The terminal, interpreter and working folder are part of the experiment: a notebook that imports a package is not yet proof that the downloaded script uses the same environment.",
         "readiness": {
           "prompt": "You saved a script in your course folder, but the terminal reports that the file does not exist. Which observation should you check first?",
-          "answer": "Check the terminal’s current folder and the exact filename, including its extension. Then run the environment’s Python explicitly. Reinstalling JAX will not repair a wrong path.",
+          "answer": "Check the terminal’s current folder and the exact filename, including its extension. Then run the environment’s Python explicitly. Reinstalling JAX will not repair a wrong path. After the first array lesson, a CPU learner can continue to Arrays & pure functions. Virtual-device and cloud setup can wait until the placement and transformation concepts are familiar.",
           "lessonId": "welcome-01"
         },
         "milestones": [
@@ -175,7 +175,7 @@
               "welcome-03"
             ],
             "title": "Separate local practice from parallel TPU execution",
-            "task": "Start a fresh process for virtual CPU devices and compare its device receipt with the ordinary process. Then learn how to get a TPU running (hosted TPU or single-host Cloud TPU VM), launch your experiment over SSH with explicit backend checks, and run subsequent course phases on TPU in parallel."
+            "task": "Optional advanced branch: start a fresh process for virtual CPU devices and compare row-sharded versus replicated placement receipts. Beginners can continue directly from welcome-02 to Arrays & pure functions on CPU, then return after the transformation and sharding lessons. For physical TPU practice use only the named source-reviewed targets, pinned environments and explicit expected backend/topology checks; classify any additional script before staging it."
           }
         ],
         "transfer": {
@@ -187,7 +187,7 @@
           "check": "Compare interpreter paths before changing packages; launch both from the intended environment."
         },
         "completion": "Keep a saved script, its command and actual output, plus an explanation of one repaired setup error. Use foundation-toolkit stage 1. A screenshot without a rerunnable file is incomplete.",
-        "furtherWork": "Fresh-machine Windows/Linux/macOS walkthroughs and novice usability sessions remain unverified; accelerator setup needs a separately observed device run."
+        "furtherWork": "Fresh-machine Windows/Linux/macOS walkthroughs and novice usability sessions remain unverified; accelerator setup needs a separately observed device run. The optional placement branch is not a prerequisite for ordinary CPU lessons. Before taking it, explain which axis is split, what a replica holds and why jit input shapes affect specialization."
       },
       "projectNote": "Work in projects/welcome-audit/starter/model.py. Complete stages 1 and 2 for independent calculations and changed-condition diagnosis, then retain the stage 3 evidence with --evidence-dir runs/welcome-audit. Stage 4 integrates the checks. Learner commands explicitly select the starter; --implementation solution is instructor reference execution. This bounded practice does not certify the entire phase or target hardware.",
       "additionalProjectIds": [
@@ -1624,8 +1624,8 @@
           "status": "authored",
           "objective": "Implement scaled dot-product attention and test its output shape.",
           "prerequisites": [],
-          "exercise": "Permute the three key/value pairs together, then permute only values. Verify invariance for the paired permutation and a changed result for the mismatched pairing.",
-          "evidence": "Save the Q/K/V axis diagram, uniform hand calculation, NumPy nonuniform reference, paired permutation check, and wrong-axis repair.",
+          "exercise": "Start from the explicit independent fixture below: q_ex = [[2, 0]], k_ex = [[1, 0], [0, 1], [1, 1]], and v_ex = [[2, 0], [0, 4], [4, 2]]. Implement `attend` using the declared starter. Show algebraically why permuting keys and their paired values together preserves the weighted sum. Then test order [2, 0, 1] for both the paired permutation and a value-only permutation. Compare each result to the original output with NumPy. State why the separate zero-query worked example cannot show a value-only change.",
+          "evidence": "Keep the Q/K/V axis diagram, zero-query hand mean, independent nonuniform fixture and NumPy output, paired permutation invariance and one value-only permutation result. Explain the zero-query exception and repair a wrong softmax axis.",
           "check": "Which dimension should softmax normalize for one query to combine all key/value pairs?",
           "path": "phases/07-transformers/01-attention-from-small-pieces",
           "runtime": {
@@ -2626,12 +2626,12 @@
           "id": "rl-05",
           "title": "Learn value functions and generalized advantage estimation",
           "status": "authored",
-          "objective": "Fit a tabular value function from retained trajectories and estimate GAE with terminal and collector-cutoff semantics explicit.",
+          "objective": "Fit sampled discounted return targets at gamma=0.9 over at most eight actions, then estimate GAE at gamma=0.9 and lambda=0.95 with terminal and collector-cutoff semantics explicit.",
           "prerequisites": [
             "rl-04"
           ],
-          "exercise": "Change the collection key, retain the value-fit error history, and check a hand-computed multi-step GAE trace across a reset.",
-          "evidence": "Keep two seed-specific learned value tables and loss histories, the pre-reset cutoff observation, independent terminal/cutoff calculations, and padding-mask checks.",
+          "exercise": "The task lasts at most eight actions and the value target is discounted return with gamma=0.9, matching GAE gamma. Change the collection key from 313 to 314. Before running, predict which of the fitted values and final MSE should remain identical. Then retain both error histories and explain why changed trajectories should change the fitted table.",
+          "evidence": "Keep the discounted target definition, seed-313/314 value tables and fit histories, independent two-transition TD residuals, terminal-versus-cutoff bootstrap/trace checks and a note on the position-only approximation. Critic-fit loss is not policy-improvement evidence.",
           "check": "At a continuing-task time limit, which observation supplies the bootstrap, and should the trace cross the reset?",
           "path": "phases/12-rl/05-learn-values-and-gae",
           "runtime": {

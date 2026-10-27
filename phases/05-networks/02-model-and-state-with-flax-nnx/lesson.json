@@ -15,12 +15,12 @@
       {
         "id": "guided-reasoning",
         "title": "Distinguish shared structure from changing values",
-        "body": "Imagine two attributes referring to the same layer object. They share one parameter set. Drawing two independent weight boxes would misrepresent the computation, even if the printed values initially match.\n\nSeparating graph structure and state lets us transform the numerical state while preserving the intended relationships. Compare paths and values before and after splitting, merging or cloning; copying a Python reference does not create independent model state.\n\nThe existing merge figure is a map of these roles. Use the actual NNX operations in the lesson to test the map, especially when a model has state beyond parameters. Evaluation should follow its declared state rules rather than silently repeating training updates.",
+        "body": "Imagine two attributes referring to the same layer object. They share one parameter set. Drawing two independent weight boxes would misrepresent the computation, even if the printed values initially match.\n\nSeparating graph structure and state lets us transform the numerical state while preserving the intended relationships. Compare paths and values before and after splitting, merging or cloning; copying a Python reference does not create independent model state.\n\nThe existing merge figure is a map of these roles. Use the actual NNX operations in the lesson to test the map, especially when a model has state beyond parameters. Evaluation should follow its declared state rules rather than silently repeating training updates.\n\nThe unfiltered call below returns two objects: graph definition \\(\\mathcal G\\) and complete numerical state \\(S\\). In this model, the state contains \\(13\\) trainable scalars and one call counter. `nnx.state(model, nnx.Param)` and its complement inspect those categories; they do not make the unfiltered split return three objects. A split with explicit filters can return several state partitions, but its unpacking must match those filters. Copying the complete state before merge makes the cloned counter independent while preserving the graph structure.",
         "check": {
           "prompt": "What should a diagram show when two attributes use the same layer?",
           "answer": "One shared parameter identity with two uses. Show independent copies only after an explicit operation and identity/value checks establish independence."
         },
-        "math": "(\\mathcal{G}, \\Theta, \\mathcal{S}) = \\operatorname{split}(M), \\qquad M' = \\operatorname{merge}(\\mathcal{G}, \\Theta', \\mathcal{S}')"
+        "math": "(\\mathcal G,S)=\\operatorname{nnx.split}(M),\\qquad M^{\\prime}=\\operatorname{nnx.merge}(\\mathcal G,S^{\\prime})"
       },
       {
         "title": "Move the explicit equations into a module",

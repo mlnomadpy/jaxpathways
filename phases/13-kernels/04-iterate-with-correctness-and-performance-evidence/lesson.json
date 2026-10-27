@@ -15,12 +15,12 @@
       {
         "id": "guided-reasoning",
         "title": "Use two references to locate a precision gap",
-        "body": "First compare the kernel with an independent computation using the same represented inputs. That isolates implementation behavior under the chosen numeric contract. Then compare the represented-input reference with the original high-precision calculation to estimate representation effects.\n\nIf the first comparison passes while the second shows a gap, changing indexing is unlikely to fix that gap. Investigate the precision policy and whether downstream quality tolerates it.\n\nThe error bars should keep those comparisons separate and state scale, dtype and tolerance. A passed numerical check also says nothing about speed. Keep workload identity, synchronization and target-device measurements with any optimization claim.",
+        "body": "First compare the kernel with an independent computation using the same represented inputs. That isolates implementation behavior under the chosen numeric contract. Then compare the represented-input reference with the original high-precision calculation to estimate representation effects.\n\nIf the first comparison passes while the second shows a gap, changing indexing is unlikely to fix that gap. Investigate the precision policy and whether downstream quality tolerates it.\n\nThe error bars should keep those comparisons separate and state scale, dtype and tolerance. A passed numerical check also says nothing about speed. Keep workload identity, synchronization and target-device measurements with any optimization claim.\n\nThe represented-input reference uses the same rounded operands and output-cast contract as the kernel; the original-data reference uses the original FP32 operands. With scalar original input \\(1.001\\), suppose the represented input is \\(1\\) and the operation doubles it. A correct represented result \\(2\\) has implementation error \\(0\\) but total error approximately \\(0.002\\). These two norms are separate comparisons, not an additive decomposition of error magnitudes.",
         "check": {
           "prompt": "Which comparison should you inspect before blaming quantization for a wrong output?",
           "answer": "Compare against an independent reference on the same represented inputs. A mismatch there may be an implementation error rather than unavoidable representation error."
         },
-        "math": "\\text{Speedup}(S_{\\text{total}}) = \\frac{1}{(1 - p) + p / s_{\\text{kernel}}}"
+        "math": "e_{\\rm impl}=\\lVert y_{\\rm kernel}-y_{\\rm represented\\ ref}\\rVert_\\infty,\\qquad e_{\\rm total}=\\lVert y_{\\rm kernel}-y_{\\rm original\\ FP32\\ ref}\\rVert_\\infty"
       },
       {
         "title": "Choose cases that challenge the contract",
@@ -45,6 +45,16 @@
       {
         "title": "Accept, revise or decline the optimization",
         "body": "Keep the change only when representative correctness and the declared target boundary improve enough to justify maintenance and specialization costs. If performance is unchanged or worse, retain the simpler baseline and record the experiment. If target hardware is unavailable, retain the tested kernel and its runnable target protocol, mark performance unverified, and do not fill the gap with interpret-mode timings. The scale synthesis assessment asks for profiling and partitioning evidence as well as the local kernel audit."
+      },
+      {
+        "id": "amdahl-opportunity",
+        "title": "Derive a conditional end-to-end bound",
+        "body": "For the later opportunity exercise, let \\(p\\) be the measured fraction of baseline elapsed time assigned to one local operation and \\(s\\) its hypothetical speedup. Hold all other work unchanged. A baseline taking \\(1\\) time unit becomes \\((1-p)+p/s\\). With \\(p=0.3\\), \\(s=2\\), the whole program speedup is about \\(1.176\\), and even eliminating that operation entirely cannot exceed \\(1/0.7\\approx1.429\\). These are conditional analytic bounds, not measured TPU speedups. Changes to communication or scheduling require a new profile.",
+        "math": "S_{\\rm total}=\\frac{1}{(1-p)+p/s},\\qquad S_{\\rm limit}=\\frac{1}{1-p}\\quad(0\\le p<1)",
+        "check": {
+          "prompt": "Why is a twofold local improvement not necessarily a twofold application improvement?",
+          "answer": "Only the fraction p changes in the model; the remaining fraction still takes time. Reprofile if the optimization also changes other work."
+        }
       }
     ],
     "output": "All eight shape/dtype cases exactly match the represented-input oracle. bfloat16 differs from original float32 values by a separately reported precision gap. The benchmark refuses CPU execution; no target speedup is reported.",

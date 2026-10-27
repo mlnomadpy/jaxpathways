@@ -27,12 +27,12 @@
       {
         "id": "guided-reasoning",
         "title": "Separate changing data from preparing a program",
-        "body": "Suppose you call a compiled function on a float32 vector, then call it on different values with the same shape and dtype. Those new values can flow through the prepared computation. If the next call changes a relevant shape or static choice, JAX may need a different specialization.\n\nThink of the first-call path as preparation followed by execution. A warm-call timing should describe the repeated workload after preparation, and it must wait for device work to finish. Timing only dispatch can make a slow computation look fast.\n\nFirst compare compiled and ordinary outputs on several inputs. Then, if speed is your question, state the input size, device, warmup and synchronization boundary. Three equal bars demonstrate agreement; they do not demonstrate acceleration.",
+        "body": "Suppose you call a compiled function on a float32 vector, then call it on different values with the same shape and dtype. Those new values can flow through the prepared computation. If the next call changes a relevant shape or static choice, JAX may need a different specialization.\n\nThink of the first-call path as preparation followed by execution. A warm-call timing should describe the repeated workload after preparation, and it must wait for device work to finish. Timing only dispatch can make a slow computation look fast.\n\nFirst compare compiled and ordinary outputs on several inputs. Then, if speed is your question, state the input size, device, warmup and synchronization boundary. Three equal bars demonstrate agreement; they do not demonstrate acceleration.\n\nThe code uses \\(X\\in\\mathbb{R}^{4\\times3}\\), \\(w\\in\\mathbb{R}^3\\) and \\(y\\in\\mathbb{R}^4\\). The residual has four entries; the gradient has three. JIT prepares another way to execute this same function. It does not change the denominator, objective or derivative. For a separate one-row check, \\(X=[1,2]\\), \\(w=[0,0]\\), \\(y=[1]\\) give loss \\(1\\) and gradient \\([-2,-4]\\).",
         "check": {
           "prompt": "Why can a tiny function be slower on its first compiled call?",
           "answer": "The call includes preparation costs that may exceed the work itself. Reuse can amortize those costs, but a speed claim still needs measurements of the intended workload."
         },
-        "math": "(s_{t+1}, y_t) = f(s_t, x_t), \\qquad t = 0, \\dots, T-1"
+        "math": "L(w;X,y)=\\frac{1}{n}\\lVert Xw-y\\rVert_2^2,\\qquad \\nabla_wL=\\frac{2}{n}X^{\\mathsf T}(Xw-y),\\qquad n=4"
       },
       {
         "title": "Separate the work hidden in one call",

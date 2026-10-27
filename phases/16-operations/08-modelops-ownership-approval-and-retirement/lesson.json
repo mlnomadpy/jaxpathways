@@ -15,12 +15,12 @@
       {
         "id": "guided-reasoning",
         "title": "Approval applies to a specific release",
-        "body": "Suppose a model passes review, then its tokenizer or weights change. Reusing the old approval would apply a decision to an object that was never evaluated under that identity. Bind approvals to the relevant model, processor, configuration and evaluation records.\n\nSpecify transitions for activation, expiration, rejection and retirement. Invalid transitions should leave the active state unchanged rather than partially applying a release. A retired artifact may remain archived for reproducibility while no longer being eligible for new use.\n\nThe acceptance bars are summaries of discrete policy decisions. Read the underlying state and reason for each result. The fixture demonstrates decision logic, not completion of an organization's actual review process.",
+        "body": "Suppose a model passes review, then its tokenizer or weights change. Reusing the old approval would apply a decision to an object that was never evaluated under that identity. Bind approvals to the relevant model, processor, configuration and evaluation records.\n\nSpecify transitions for activation, expiration, rejection and retirement. Invalid transitions should leave the active state unchanged rather than partially applying a release. A retired artifact may remain archived for reproducibility while no longer being eligible for new use.\n\nThe acceptance bars are summaries of discrete policy decisions. Read the underlying state and reason for each result. The fixture demonstrates decision logic, not completion of an organization's actual review process.\n\nThis expression sketches three necessary approval checks: exact bundle identity, unexpired time and allowed target. The policy can impose additional checks; satisfying this sketch alone is not a complete production approval system. If a token approves bundle A but the weights produce bundle B, matching the display name cannot make the first indicator true. Invalid activation must leave the current selection unchanged.",
         "check": {
           "prompt": "Does changing a display name require the same response as changing weights?",
           "answer": "Not necessarily. Define which identities and semantics the policy binds. A cosmetic label and a changed numerical artifact are different events, and the policy should distinguish them explicitly."
         },
-        "math": "S_{\\text{cos}}(q, d_i) = \\frac{\\langle E(q), E(d_i) \\rangle}{\\|E(q)\\|_2 \\, \\|E(d_i)\\|_2}"
+        "math": "\\operatorname{eligible}(b,a,t)=\\mathbf1[\\operatorname{id}(b)=a.\\mathrm{bundle\\ id}]\\,\\mathbf1[t<a.\\mathrm{expires}]\\,\\mathbf1[\\operatorname{target}(b)\\in a.\\mathrm{scope}]"
       },
       {
         "title": "Inventory the complete release",

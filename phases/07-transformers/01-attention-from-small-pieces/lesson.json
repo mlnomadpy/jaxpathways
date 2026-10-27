@@ -31,7 +31,7 @@
       },
       {
         "title": "Derive the uniform-query result",
-        "body": "Every dot product with a zero query is zero. Softmax of \\([0, 0, 0]\\) is \\([1/3, 1/3, 1/3]\\), so each output is the mean of the three value rows. Our values sum to \\([6, 6]\\); both queries therefore produce \\([2, 2]\\). This known answer checks score normalization and value mixing without using another attention implementation.\n\nThe output is a weighted average, not a selected row. With finite unmasked scores, multiple keys can contribute. More concentrated weights can approximate retrieval but do not create a discrete index operation."
+        "body": "Every dot product with a zero query is zero. Softmax of \\([0, 0, 0]\\) is \\([1/3, 1/3, 1/3]\\), so each output is the mean of the three value rows. Our values sum to \\([6, 6]\\); both queries therefore produce \\([2, 2]\\). This known answer checks score normalization and value mixing without using another attention implementation.\n\nThe output is a weighted average, not a selected row. With finite unmasked scores, multiple keys can contribute. More concentrated weights can approximate retrieval but do not create a discrete index operation.\n\nBecause both queries have the same zero scores, permuting only the values also leaves their mean unchanged. This is a special case, not a general attention rule. The permutation exercise below supplies nonuniform queries so one explicit value-only permutation can change an output."
       },
       {
         "title": "Scale scores and keep softmax stable",
@@ -39,7 +39,7 @@
       },
       {
         "title": "Test relationships that should survive a change",
-        "body": "Adding a constant value vector c to every value row shifts every output by c because each weight row sums to one. Permuting keys and their corresponding values together leaves the result unchanged. Permuting only values changes what each score retrieves.\n\nThese tests examine the mechanism under changed conditions rather than merely duplicating the implementation. The unmasked head allows every key to contribute; interpreting it as a next-token model would leak future information. That boundary belongs in the next lesson."
+        "body": "Adding a constant value vector c to every value row shifts every output by c because each weight row sums to one. Writing one output row as \\(o=\\sum_i a_i v_i\\), a paired permutation p gives \\(o'=\\sum_j a_{p^{-1}(j)}v_j=o\\): the score weights and value rows move in lockstep, so the same terms are summed. Permuting only values changes which content is paired with each score in general, but it need not change every possible output. For example, zero queries give uniform weights, so every value-only permutation has the same mean. The primary exercise uses an explicit nonuniform fixture and tests one value-only permutation that does change its output.\n\nThese tests examine the mechanism under changed conditions rather than merely duplicating the implementation. The unmasked head allows every key to contribute; interpreting it as a next-token model would leak future information. That boundary belongs in the next lesson."
       },
       {
         "title": "Read attention as matching, then mixing",
@@ -69,8 +69,8 @@
         "explanation": "Row-normalized attention preserves a shared value translation."
       }
     ],
-    "exercise": "Permute the three key/value pairs together, then permute only values. Verify invariance for the paired permutation and a changed result for the mismatched pairing.",
-    "solution": "# Exercise solution: Permute the three key/value pairs together, then permute only values.\norder = jnp.array([2, 0, 1])\npaired, _ = attend(q_new, k[order], v[order])\nmismatched, _ = attend(q_new, k, v[order])\nassert jnp.allclose(paired, actual)\nassert not jnp.allclose(mismatched, actual)",
+    "exercise": "Start from the explicit independent fixture below: q_ex = [[2, 0]], k_ex = [[1, 0], [0, 1], [1, 1]], and v_ex = [[2, 0], [0, 4], [4, 2]]. Implement `attend` using the declared starter. Show algebraically why permuting keys and their paired values together preserves the weighted sum. Then test order [2, 0, 1] for both the paired permutation and a value-only permutation. Compare each result to the original output with NumPy. State why the separate zero-query worked example cannot show a value-only change.",
+    "solution": "# Exercise solution: all inputs are declared here, independent of prior experiments.\nimport jax\nimport jax.numpy as jnp\nimport numpy as np\n\ndef attend(q, k, v):\n    scores = q @ k.T / jnp.sqrt(q.shape[-1])\n    weights = jax.nn.softmax(scores, axis=-1)\n    return weights @ v, weights\n\nq_ex = jnp.array([[2., 0.]])\nk_ex = jnp.array([[1., 0.], [0., 1.], [1., 1.]])\nv_ex = jnp.array([[2., 0.], [0., 4.], [4., 2.]])\norder = jnp.array([2, 0, 1])\noriginal, weights = attend(q_ex, k_ex, v_ex)\npaired, paired_weights = attend(q_ex, k_ex[order], v_ex[order])\nvalue_only, _ = attend(q_ex, k_ex, v_ex[order])\nassert jnp.allclose(paired, original)\nassert not jnp.allclose(value_only, original)\n\n# Independent NumPy reference for the original and both permutations.\ndef numpy_attend(q, k, v):\n    scores = q @ k.T / np.sqrt(q.shape[-1])\n    exp_scores = np.exp(scores - scores.max(axis=-1, keepdims=True))\n    w = exp_scores / exp_scores.sum(axis=-1, keepdims=True)\n    return w @ v\nnp.testing.assert_allclose(original, numpy_attend(np.asarray(q_ex), np.asarray(k_ex), np.asarray(v_ex)), rtol=1e-6, atol=1e-6)\nnp.testing.assert_allclose(paired, numpy_attend(np.asarray(q_ex), np.asarray(k_ex[order]), np.asarray(v_ex[order])), rtol=1e-6, atol=1e-6)\nnp.testing.assert_allclose(value_only, numpy_attend(np.asarray(q_ex), np.asarray(k_ex), np.asarray(v_ex[order])), rtol=1e-6, atol=1e-6)\n\n# For any permutation p, sum_i w_i V_{p(i)} generally changes when w is nonuniform.\n# With q=0, all w_i=1/3 and the output is mean(V), invariant under every permutation.\nzero_query, _ = attend(jnp.zeros((1, 2)), k_ex, v_ex)\nassert jnp.allclose(zero_query, v_ex.mean(axis=0, keepdims=True))\nprint(\"original / paired / value-only:\", original, paired, value_only)\nprint(\"zero-query mean:\", zero_query)",
     "practice": [
       {
         "title": "Use a different value dimension",
@@ -163,7 +163,7 @@
         "title": "3. Run and check",
         "instruction": "Append this block and run python main.py. Compare its output with your prediction. An assertion failure means a stated contract needs investigation.",
         "code": "# Step 3 — 3. Run and check: Uniform weights 1/3; both output rows [2, 2].\nq = jnp.zeros((2, 2))\nk = jnp.array([[1., 0.], [0., 1.], [1., 1.]])\nv = jnp.array([[2., 0.], [0., 4.], [4., 2.]])\noutput, weights = attend(q, k, v)\nprint(\"Weights / output:\", weights, output)\nassert jnp.allclose(weights, jnp.full((2, 3), 1/3))\nassert jnp.allclose(output, jnp.array([[2., 2.], [2., 2.]]))\nassert jnp.allclose(jnp.sum(weights, axis=-1), 1.)",
-        "explanation": "Uniform weights \\(1/3\\); both output rows \\([2, 2]\\)."
+        "explanation": "Uniform weights \\(1/3\\); both output rows \\([2, 2]\\). The separate permutation exercise declares its own nonuniform Q/K/V fixture and does not depend on the later `q_new` experiment."
       }
     ],
     "visual": {
@@ -182,19 +182,22 @@
     ],
     "learnerStarter": {
       "inputs": [
-        "Q/K/V arrays with explicit batch, query, key, and feature axes."
+        "Independent nonuniform fixture: q_ex=[[2,0]], k_ex=[[1,0],[0,1],[1,1]], v_ex=[[2,0],[0,4],[4,2]], and permutation order [2,0,1]."
       ],
       "outputs": [
-        "Attention outputs with one result per query and value feature."
+        "Original attention output, paired-permutation output, and value-only-permutation output compared with an independent NumPy reference."
       ],
       "invariants": [
-        "Softmax normalizes over keys; paired key/value permutations preserve the function."
+        "Permuting keys and their paired values together preserves the weighted sum.",
+        "A value-only permutation can change the result for this nonuniform fixture; this is not guaranteed for every query/value set.",
+        "Zero queries produce a uniform-weight mean that is invariant under value permutations."
       ],
       "hints": [
-        "Compute score scaling from the key feature width.",
-        "Check zero queries against the mean of the values."
+        "Implement scaled scores, softmax over keys, then weights @ values.",
+        "Write the paired permutation as a reindexing of the same sum.",
+        "Run the full solution using only the fixture declared in this starter."
       ],
-      "code": "import jax.numpy as jnp\n\ndef scaled_dot_product_attention(queries, keys, values):\n    \"\"\"Attention outputs with one result per query and value feature.\"\"\"\n    # TODO: Compute scaled query-key scores, normalize along keys, and combine the paired value vectors.\n    raise NotImplementedError\n"
+      "code": "import jax\nimport jax.numpy as jnp\n\ndef attend(q, k, v):\n    \"\"\"Return attention outputs and normalized key weights.\"\"\"\n    # TODO: compute scaled query-key scores, normalize over keys, and mix values.\n    raise NotImplementedError\n\nq_ex = jnp.array([[2., 0.]])\nk_ex = jnp.array([[1., 0.], [0., 1.], [1., 1.]])\nv_ex = jnp.array([[2., 0.], [0., 4.], [4., 2.]])\norder = jnp.array([2, 0, 1])"
     }
   }
 }

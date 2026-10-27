@@ -21,12 +21,12 @@
       {
         "id": "guided-reasoning",
         "title": "Read one array two ways",
-        "body": "Take the two rows \\([1,2,3]\\) and \\([4,5,6]\\). Summing across each row gives \\([6,15]\\): one answer per observation. Summing down the rows gives \\([5,7,9]\\): one answer per feature. The values are the same; the question determines the axis.\n\nIn Python, the row sums use `axis=1`, because the feature axis is reduced. The feature sums use `axis=0`, because the observation axis is reduced. The axis you name is the one you consume, not the one you keep.\n\nRead the heatmap by locating one row and one column before looking at its color. Color helps compare values, but labels establish which observation and feature you are comparing. A device label is a separate property; moving the same values to another device does not change what a row means.",
+        "body": "Take the two rows \\([1,2,3]\\) and \\([4,5,6]\\). Summing across each row gives \\([6,15]\\): one answer per observation. Summing down the rows gives \\([5,7,9]\\): one answer per feature. Within that example, the values are the same; the question determines the axis. The exact program below uses the same shape with entries starting at zero.\n\nIn Python, the row sums use `axis=1`, because the feature axis is reduced. The feature sums use `axis=0`, because the observation axis is reduced. The axis you name is the one you consume, not the one you keep.\n\nRead the heatmap by locating one row and one column before looking at its color. Color helps compare values, but labels establish which observation and feature you are comparing. A device label is a separate property; moving the same values to another device does not change what a row means.\n\nFor the exact program below, the entries start at \\(0\\), so the row sums are \\([3,12]\\) and the column sums are \\([3,5,7]\\). Adding \\(1\\) to every entry gives the earlier \\([1,2,3]\\), \\([4,5,6]\\) example: each row sum increases by \\(3\\), and each column sum increases by \\(2\\). The different answers come from different inputs, not different reduction rules.",
         "check": {
           "prompt": "If the batch gains a third observation with the same three features, which reduction still returns three values?",
           "answer": "The feature sums still return three values because `axis=0` removes the observation axis. Row sums now return three values too, but for a different reason. This is why unequal axis sizes make debugging easier."
         },
-        "math": "Y_{i,j} = \\alpha X_{i,j} + \\beta, \\qquad X \\in \\mathbb{R}^{M \\times N}"
+        "math": "r_i=\\sum_{j=0}^{2}X_{ij},\\qquad c_j=\\sum_{i=0}^{1}X_{ij},\\qquad X=\\begin{bmatrix}0&1&2\\\\3&4&5\\end{bmatrix}"
       },
       {
         "title": "Read the table before using an API",

@@ -27,12 +27,12 @@
       {
         "id": "guided-reasoning",
         "title": "Separate a new value from a new physical buffer",
-        "body": "Start with \\([2,4,6]\\). Setting the middle entry to \\(10\\) produces \\([2,10,6]\\). Adding \\(10\\) at that position produces \\([2,14,6]\\). Both operations begin from the same original values; the second is not automatically applied to the result of the first.\n\nDraw two arrows from the original array, one labeled set and one labeled add. If you want sequential updates, explicitly feed the first result into the second operation. This is the same state-flow idea we will use in optimization and recurrent loops.\n\nDo not infer allocation cost from that drawing. A compiler may reuse storage when it can preserve the program's semantics. First verify old/new values and duplicate-index behavior for the operation you use, then measure memory behavior separately.",
+        "body": "Start with \\([2,4,6]\\). Setting the middle entry to \\(10\\) produces \\([2,10,6]\\). Adding \\(10\\) at that position produces \\([2,14,6]\\). Both operations begin from the same original values; the second is not automatically applied to the result of the first.\n\nDraw two arrows from the original array, one labeled set and one labeled add. If you want sequential updates, explicitly feed the first result into the second operation. This is the same state-flow idea we will use in optimization and recurrent loops.\n\nDo not infer allocation cost from that drawing. A compiler may reuse storage when it can preserve the program's semantics. First verify old/new values and duplicate-index behavior for the operation you use, then measure memory behavior separately.\n\nThe index \\(i\\) is zero-based. On \\(x=[2,4,6]\\), the two expressions produce \\([2,10,6]\\) and \\([2,14,6]\\) from the same original value. The indicator \\(\\mathbf{1}_{i=1}\\) is \\(1\\) only at the middle entry and \\(0\\) elsewhere. This equation describes returned values, not whether the compiler allocates a new physical buffer.",
         "check": {
           "prompt": "You call an indexed update but keep using the original variable. Why might later predictions be unchanged?",
           "answer": "The returned updated value was discarded. Assign or pass that result into the next computation; do not expect the original array value to mutate."
         },
-        "math": "C_{i,k} = \\sum_{j=1}^{N} A_{i,j} B_{j,k} = \\text{einsum}(\\texttt{'ij,jk->ik'}, A, B)"
+        "math": "x^{\\mathrm{set}}_i=\\begin{cases}10&i=1\\\\x_i&i\\ne1\\end{cases},\\qquad x^{\\mathrm{add}}_i=x_i+10\\,\\mathbf{1}_{i=1}"
       },
       {
         "title": "A Python name and an array value are different",

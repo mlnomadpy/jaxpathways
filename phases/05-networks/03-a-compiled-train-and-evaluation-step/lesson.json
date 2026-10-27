@@ -15,12 +15,12 @@
       {
         "id": "guided-reasoning",
         "title": "Evaluation observes a frozen model",
-        "body": "Suppose validation loss improves after an accidental optimizer step on validation examples. The number is real, but it no longer evaluates the unchanged training result. The evaluation has influenced fitting.\n\nCapture parameter and relevant state values before evaluation and compare afterward. If the model has training-only randomness or running statistics, verify its evaluation convention too. Depict only the mechanisms the actual model uses.\n\nAggregate evaluation contributions with their counts. Unequal batch sizes make an average of batch means different from an example mean. Finally, inspect actual errors in the held-out prediction field: a visually attractive boundary cannot rule out leakage or a denominator mistake.",
+        "body": "Suppose validation loss improves after an accidental optimizer step on validation examples. The number is real, but it no longer evaluates the unchanged training result. The evaluation has influenced fitting.\n\nCapture parameter and relevant state values before evaluation and compare afterward. If the model has training-only randomness or running statistics, verify its evaluation convention too. Depict only the mechanisms the actual model uses.\n\nAggregate evaluation contributions with their counts. Unequal batch sizes make an average of batch means different from an example mean. Finally, inspect actual errors in the held-out prediction field: a visually attractive boundary cannot rule out leakage or a denominator mistake.\n\nThis classifier produces one binary logit \\(z_i\\) per example, not a vector of class probabilities. The implementation evaluates the softplus term stably with Optax; the NumPy reference uses `logaddexp`. A zero logit gives loss \\(\\log 2\\) for either label. A positive logit lowers loss for label \\(1\\) and raises it for label \\(0\\). Both logits and labels must have shape \\((B,)\\), otherwise broadcasting can create an unintended pairwise loss.",
         "check": {
           "prompt": "Why compare state before and after evaluation instead of checking only the score?",
           "answer": "A score can look plausible even if evaluation updates parameters or statistics. State comparison tests whether the measurement changed the object it was meant to evaluate."
         },
-        "math": "\\mathcal{L}(\\Theta) = -\\frac{1}{B}\\sum_{i=1}^{B} \\sum_{c=1}^{C} y_{i,c} \\log \\hat{p}_{i,c}(\\Theta)"
+        "math": "L=\\frac1B\\sum_{i=1}^B\\left[\\log(1+e^{z_i})-y_i z_i\\right],\\qquad z_i\\in\\mathbb R,\\quad y_i\\in\\{0,1\\}"
       },
       {
         "title": "Choose a transparent train and held-out split",

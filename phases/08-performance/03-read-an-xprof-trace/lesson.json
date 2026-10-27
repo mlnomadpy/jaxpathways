@@ -15,12 +15,12 @@
       {
         "id": "guided-reasoning",
         "title": "Do not add nested durations twice",
-        "body": "An outer step lasting \\(10\\) milliseconds can contain a preprocessing region lasting \\(3\\) milliseconds. Their sum is not \\(13\\) milliseconds of elapsed work: the smaller region is already inside the larger one.\n\nInspect event starts, ends, nesting and lanes before aggregating durations. A gap may be waiting or uninstrumented work; it needs context before being assigned a cause.\n\nThe host-region plot summarizes recorded annotations, not GPU kernel execution. State a hypothesis, change one workload component and collect a comparable trace. A useful explanation predicts which interval changes and why, rather than only celebrating a shorter bar.",
+        "body": "An outer step lasting \\(10\\) milliseconds can contain a preprocessing region lasting \\(3\\) milliseconds. Their sum is not \\(13\\) milliseconds of elapsed work: the smaller region is already inside the larger one.\n\nInspect event starts, ends, nesting and lanes before aggregating durations. A gap may be waiting or uninstrumented work; it needs context before being assigned a cause.\n\nThe host-region plot summarizes recorded annotations, not GPU kernel execution. State a hypothesis, change one workload component and collect a comparable trace. A useful explanation predicts which interval changes and why, rather than only celebrating a shorter bar.\n\nIn this fixture `input_wait` ends before `model_and_wait` begins, and both sit inside `learner_step`. The remainder \\(T_{\\rm other}\\) includes host work outside those child annotations. If the outer span is \\(10\\) milliseconds, its children are \\(3\\) and \\(6\\), the remainder is \\(1\\), not an extra device kernel. If two child intervals overlap or nest, first measure their union instead of adding their durations. These host spans do not isolate device-compute time or an asynchronous critical path.",
         "check": {
           "prompt": "What should accompany a claimed trace-based optimization?",
           "answer": "The event boundary, comparable workload, specific intervention and repeated completed measurements showing its predicted effect. A changed unrelated interval is insufficient."
         },
-        "math": "T_{\\text{step}} = T_{\\text{host\\_input}} + T_{\\text{device\\_compute}} + T_{\\text{sync}}"
+        "math": "T_{\\rm outer}=T_{\\rm input\\ wait}+T_{\\rm model\\ and\\ wait}+T_{\\rm other}\\quad\\text{(disjoint serial host regions only)}"
       },
       {
         "title": "Give the timeline a question",

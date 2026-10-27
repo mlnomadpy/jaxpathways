@@ -18,12 +18,12 @@
       {
         "id": "guided-reasoning",
         "title": "Distinguish new tracing from host waiting",
-        "body": "Change only array values while keeping shapes, dtypes and static choices fixed. Then change one signature component and record the observed trace behavior. Changing everything together makes the cause ambiguous.\n\nInspect host reads and logging next. Converting device results into Python values can force a wait even when no retracing occurs. That delay needs a different intervention from reducing signature variation.\n\nTrace counts describe observed Python tracing. They are not a universal count of compiler work or a guarantee of cache reuse after restart. Combine the ledger with a trace of completed work before deciding which change improves the actual workload.",
+        "body": "Change only array values while keeping shapes, dtypes and static choices fixed. Then change one signature component and record the observed trace behavior. Changing everything together makes the cause ambiguous.\n\nInspect host reads and logging next. Converting device results into Python values can force a wait even when no retracing occurs. That delay needs a different intervention from reducing signature variation.\n\nTrace counts describe observed Python tracing. They are not a universal count of compiler work or a guarantee of cache reuse after restart. Combine the ledger with a trace of completed work before deciding which change improves the actual workload.\n\nThe tuple \\(\\sigma_r\\) is the controlled signature ledger for call \\(r\\); \\(n_r\\) is the number of observed Python tracing events after that call. Value-only changes can leave \\(\\Delta n_r=0\\); a changed relevant shape or static option can increase it. This observation does not count every compiler stage. Hold the function and process fixed, change one factor, and read the actual trace records before assigning a cause.",
         "check": {
           "prompt": "If the trace count stays constant but a step is slow, what should you inspect?",
           "answer": "Inspect synchronization, transfers, data preparation and logging. A stable trace count does not rule out those boundaries."
         },
-        "math": "\\text{Arithmetic Intensity (AI)} = \\frac{W_{\\text{FLOPs}}}{Q_{\\text{bytes}}}, \\qquad \\text{Perf} \\le \\min(\\pi_{\\text{peak}},\\; \\beta_{\\text{BW}} \\cdot \\text{AI})"
+        "math": "\\sigma_r=(\\operatorname{shape}(x_r),\\operatorname{dtype}(x_r),c_{r,\\rm static}),\\qquad \\Delta n_r=n_r-n_{r-1}"
       },
       {
         "title": "A call signature is different from its numerical data",
