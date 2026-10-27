@@ -54,9 +54,9 @@ jobs:
             public/downloads/jax-foundations.html
             public/downloads/jax-foundations.epub
             public/downloads/jax-foundations.build.json
-            docs/review-guide-0.18.0.md
-            docs/review-notes-0.18.0.md
-            docs/evidence/course-review-0.18.0/verification.json
+            docs/review-guide-0.18.1.md
+            docs/review-notes-0.18.1.md
+            docs/evidence/course-review-0.18.1/verification.json
       - name: Validate EPUB with official W3C EPUBCheck
         run: |
           curl -fL https://github.com/w3c/epubcheck/releases/download/v5.4.0/epubcheck-5.4.0.zip -o /tmp/epubcheck.zip
