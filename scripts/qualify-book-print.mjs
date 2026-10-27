@@ -99,6 +99,8 @@ export function inspectPdf(
       ['Predict before looking:', 'visual-prediction'],
       ['Plot from a recorded CPU computation', 'visual-caption'],
       ['Calculated scenario; no device execution was performed', 'visual-caption'],
+      ['Recorded CPU computation', 'visual-caption'],
+      ['Calculated scenario; not a device measurement', 'visual-caption'],
       ['Conceptual workflow diagram', 'visual-caption'],
     ]);
     const visualCuePattern = new RegExp(

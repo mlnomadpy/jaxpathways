@@ -1,5 +1,19 @@
 [
   {
+    "version": "0.18.2",
+    "date": "2026-10-27",
+    "editionKey": "jaxpathways-2026-review-edition",
+    "modifiedAt": "2026-10-27T22:31:48Z",
+    "title": "A calmer reader with supporting details on demand",
+    "summary": "Keep explanations, worked examples and plot readings in the reading flow; open technical records and repeated guidance only when needed.",
+    "changes": [
+      "Keep core explanations, mathematical steps, essential code, figures, figure readings and exercise prompts visible. Keep measured versus calculated figure labels and chapter maturity visible.",
+      "Move repeated preparation and runtime guidance, complete execution logs, figure provenance, API reminders, exercise setup, hints, evidence checklists and references into named disclosures. Keep beginner setup commands expanded.",
+      "Make route selection, phase plans and chapter lists expandable in the illustrated HTML book. Preserve supporting material for printing and the separate reference solutions section.",
+      "This is a presentation update for author review. Lesson content, executable examples, recorded measurements and maturity levels are unchanged."
+    ]
+  },
+  {
     "version": "0.18.1",
     "date": "2026-10-27",
     "editionKey": "jaxpathways-2026-review-edition",
@@ -240,7 +254,7 @@
     "title": "Distinct assessment summaries for search and sharing",
     "summary": "Give all eleven synthesis assessments accurate, individual descriptions across search metadata, social previews and page schema.",
     "changes": [
-      "Replaced the shared generic assessment description with a summary of each assessment’s actual tasks in the canonical registry.",
+      "Replaced the shared generic assessment description with a summary of each assessment\u2019s actual tasks in the canonical registry.",
       "Added site-wide duplicate-description checks and verified that search, Open Graph, Twitter and WebPage schema descriptions agree."
     ]
   },

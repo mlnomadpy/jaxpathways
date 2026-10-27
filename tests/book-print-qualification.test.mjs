@@ -248,7 +248,7 @@ test('print CSS groups tall visuals and mechanism prompts and numbers every PDF 
   };
   assert.equal(
     pageContaining(activePages, 'TALL VISUAL HEADING'),
-    pageContaining(activePages, 'Calculated scenario; no device execution was performed'),
+    pageContaining(activePages, 'Calculated scenario; not a device measurement'),
     'the heading, prediction and plot provenance stay together even with a tall image',
   );
   assert.equal(activeInspection.numberedPages.length, activePageCount);
@@ -288,7 +288,7 @@ test('print CSS groups tall visuals and mechanism prompts and numbers every PDF 
   const splitPages = splitText.split('\f').filter((text) => text.trim());
   assert.notEqual(
     pageContaining(splitPages, 'TALL VISUAL HEADING'),
-    pageContaining(splitPages, 'Calculated scenario; no device execution was performed'),
+    pageContaining(splitPages, 'Calculated scenario; not a device measurement'),
     'disabling the grouping rule reproduces a split visual intro',
   );
 

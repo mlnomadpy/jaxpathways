@@ -33,7 +33,13 @@ const transformerLineage = readFileSync(
   new URL('../../../projects/posttraining-audit/transformer_lineage/TEACHING.md', import.meta.url),
   'utf8',
 );
-const guideMarkup = (_source: string, sourceFile: string | URL) => bookGuide(sourceFile, course);
+const guideMarkup = (_source: string, sourceFile: string | URL) =>
+  bookGuide(sourceFile, course)
+    .replace(
+      /<table>/g,
+      '<div class="reader-table-scroll" role="region" aria-label="Scrollable reference table" tabindex="0"><table>',
+    )
+    .replace(/<\/table>/g, '</table></div>');
 const phases = course.phases
   .map((phase) => ({
     ...phase,
@@ -84,55 +90,78 @@ const chapterIndex = new Map(authoredLessons.map((lesson, index) => [lesson.id, 
       <p class="book-description">
         Worked explanations, executable examples and evidence you can inspect.
       </p>
-    </header>
-    <p>
-      {authoredLessons.length} authored lessons from the shared course. Reference execution status
-      is recorded separately in validation.json. Bounded physical v5e target receipts qualify their
-      named experiments only; independent teaching review is still pending. The book is in
-      development.{' '}
-      <a href={online('content-status.html#book-reader')}>
-        Check scope and contribution priorities
-      </a>
-      .
-    </p>
-    <p>
-      Follow the phases in order when you are new to JAX. Each phase guide states what to prepare,
-      what to build, and what evidence to keep. Exercises and checkpoints are practice; project
-      completion and reviewed competency are separate. Try each task before opening its answer.
-    </p>
-    <p>
-      <a href={editionUrl(release.version)}>Read this edition’s changes online</a>
-    </p>
-    <nav aria-label="Choose a learning route">
-      <h2>Choose a route</h2>
-      <ul>
-        {course.pathways.map((route) => (
-          <li>
-            <a href={online(`course.html?path=${encodeURIComponent(route.id)}`)}>{route.title}</a> ·{' '}
-            {route.description}
-          </li>
-        ))}
-      </ul>
-      <p>
-        Career routes and their milestones are available in the{' '}
-        <a href={online('careers.html')}>online career guide</a>.
+      <p class="reader-actions">
+        <a href="#chapter-0">Start reading</a>
+        <a href="#book-contents">Browse chapters</a>
       </p>
-    </nav>
-    <nav aria-label="Book chapters">
+    </header>
+    <p class="reader-intro">
+      {authoredLessons.length} lessons ·{' '}
+      <a href={online('content-status.html#book-reader')}>In development</a>. Read the explanation,
+      make a prediction, then try the exercise before opening its answer.
+    </p>
+    <details class="reading-disclosure reader-introduction">
+      <summary>About this book and how to use it</summary>
+      <div class="disclosure-body">
+        <p>
+          {authoredLessons.length} authored lessons from the shared course. Reference execution
+          status is recorded separately in validation.json. Bounded physical v5e target receipts
+          qualify their named experiments only; independent teaching review is still pending. The
+          book is in development.{' '}
+          <a href={online('content-status.html#book-reader')}>
+            Check scope and contribution priorities
+          </a>
+          .
+        </p>
+        <p>
+          Follow the phases in order when you are new to JAX. Each phase guide states what to
+          prepare, what to build, and what evidence to keep. Exercises and checkpoints are practice;
+          project completion and reviewed competency are separate. Try each task before opening its
+          answer.
+        </p>
+        <p>
+          <a href={editionUrl(release.version)}>Read this edition’s changes online</a>
+        </p>
+      </div>
+    </details>
+    <details class="reading-disclosure book-routes">
+      <summary>Choose a different learning route</summary>
+      <nav aria-label="Choose a learning route">
+        <h2>Choose a route</h2>
+        <ul>
+          {course.pathways.map((route) => (
+            <li>
+              <a href={online(`course.html?path=${encodeURIComponent(route.id)}`)}>{route.title}</a>{' '}
+              · {route.description}
+            </li>
+          ))}
+        </ul>
+        <p>
+          Career routes and their milestones are available in the{' '}
+          <a href={online('careers.html')}>online career guide</a>.
+        </p>
+      </nav>
+    </details>
+    <nav aria-label="Book chapters" id="book-contents">
       <h2>Contents</h2>
       <ol>
         {phases.map((phase) => (
           <li>
-            <a href={`#phase-${phase.id}`}>
-              Phase {phase.number}: {phase.title}
-            </a>
-            <ol>
-              {phase.lessons.map((lesson) => (
-                <li>
-                  <a href={`#chapter-${chapterIndex.get(lesson.id)}`}>{lesson.title}</a>
-                </li>
-              ))}
-            </ol>
+            <details class="book-toc-phase">
+              <summary>
+                Phase {phase.number}: {phase.title}
+              </summary>
+              <p>
+                <a href={`#phase-${phase.id}`}>Read phase overview</a>
+              </p>
+              <ol>
+                {phase.lessons.map((lesson) => (
+                  <li>
+                    <a href={`#chapter-${chapterIndex.get(lesson.id)}`}>{lesson.title}</a>
+                  </li>
+                ))}
+              </ol>
+            </details>
           </li>
         ))}
         <li>
@@ -162,64 +191,74 @@ const chapterIndex = new Map(authoredLessons.map((lesson, index) => [lesson.id, 
               <h2>Phase question</h2>
               <p set:html={inlineMath(phase.studyGuide.question)} />
               <p set:html={inlineMath(phase.studyGuide.why)} />
-              <h2>Prepare and work through the phase</h2>
-              <ol>
-                {phase.studyGuide.milestones.map((milestone) => (
-                  <li>
-                    <h3>{milestone.title}</h3>
-                    <p set:html={inlineMath(milestone.task)} />
-                  </li>
-                ))}
-              </ol>
-              <h2>Readiness check</h2>
-              <p set:html={inlineMath(phase.studyGuide.readiness.prompt)} />
-              <details>
-                <summary>Compare your reasoning</summary>
-                <p set:html={inlineMath(phase.studyGuide.readiness.answer)} />
-              </details>
-              <h2>Transfer question</h2>
-              <p set:html={inlineMath(phase.studyGuide.transfer.prompt)} />
-              <details>
-                <summary>Compare your approach</summary>
-                <p set:html={inlineMath(phase.studyGuide.transfer.approach)} />
-              </details>
-              <h2>Common pitfall</h2>
-              <p>
-                <strong>{phase.studyGuide.pitfall.symptom}</strong> {phase.studyGuide.pitfall.check}
-              </p>
-              <h2>Phase artifact</h2>
-              <p set:html={inlineMath(phase.studyGuide.completion)} />
-              <p set:html={inlineMath(phase.studyGuide.furtherWork)} />
             </>
           )}
-          <p>
-            <strong>Phase project:</strong> {phase.project}. {phase.checkpoint}
-            {phase.projectStageIds?.length && (
-              <span>
-                {' '}
-                Start with project stage{phase.projectStageIds.length === 1 ? '' : 's'}{' '}
-                {phase.projectStageIds.join(', ')}.
-              </span>
-            )}
-          </p>
-          {phase.projectId && (
-            <p>
-              <a href={online(`project.html?id=${encodeURIComponent(phase.projectId)}`)}>
-                Open phase project workspace
-              </a>{' '}
-              ·{' '}
-              <a href={online(`project-guides/${encodeURIComponent(phase.projectId)}.html`)}>
-                Read project guide and figures
-              </a>
-            </p>
-          )}
-          {phase.additionalProjectIds?.map((id) => (
-            <p>
-              <a href={online(`project.html?id=${encodeURIComponent(id)}`)}>
-                Optional project: {id}
-              </a>
-            </p>
-          ))}
+          <details class="reading-disclosure phase-plan">
+            <summary>Phase plan, checkpoints and project</summary>
+            <div class="disclosure-body">
+              {phase.studyGuide && (
+                <>
+                  <h2>Prepare and work through the phase</h2>
+                  <ol>
+                    {phase.studyGuide.milestones.map((milestone) => (
+                      <li>
+                        <h3>{milestone.title}</h3>
+                        <p set:html={inlineMath(milestone.task)} />
+                      </li>
+                    ))}
+                  </ol>
+                  <h2>Readiness check</h2>
+                  <p set:html={inlineMath(phase.studyGuide.readiness.prompt)} />
+                  <details>
+                    <summary>Compare your reasoning</summary>
+                    <p set:html={inlineMath(phase.studyGuide.readiness.answer)} />
+                  </details>
+                  <h2>Transfer question</h2>
+                  <p set:html={inlineMath(phase.studyGuide.transfer.prompt)} />
+                  <details>
+                    <summary>Compare your approach</summary>
+                    <p set:html={inlineMath(phase.studyGuide.transfer.approach)} />
+                  </details>
+                  <h2>Common pitfall</h2>
+                  <p>
+                    <strong>{phase.studyGuide.pitfall.symptom}</strong>{' '}
+                    {phase.studyGuide.pitfall.check}
+                  </p>
+                  <h2>Phase artifact</h2>
+                  <p set:html={inlineMath(phase.studyGuide.completion)} />
+                  <p set:html={inlineMath(phase.studyGuide.furtherWork)} />
+                </>
+              )}
+              <p>
+                <strong>Phase project:</strong> {phase.project}. {phase.checkpoint}
+                {phase.projectStageIds?.length && (
+                  <span>
+                    {' '}
+                    Start with project stage{phase.projectStageIds.length === 1 ? '' : 's'}{' '}
+                    {phase.projectStageIds.join(', ')}.
+                  </span>
+                )}
+              </p>
+              {phase.projectId && (
+                <p>
+                  <a href={online(`project.html?id=${encodeURIComponent(phase.projectId)}`)}>
+                    Open phase project workspace
+                  </a>{' '}
+                  ·{' '}
+                  <a href={online(`project-guides/${encodeURIComponent(phase.projectId)}.html`)}>
+                    Read project guide and figures
+                  </a>
+                </p>
+              )}
+              {phase.additionalProjectIds?.map((id) => (
+                <p>
+                  <a href={online(`project.html?id=${encodeURIComponent(id)}`)}>
+                    Optional project: {id}
+                  </a>
+                </p>
+              ))}
+            </div>
+          </details>
           {phase.lessons.map((lesson) => (
             <ReaderChapter lesson={lesson} index={chapterIndex.get(lesson.id)!} offline />
           ))}

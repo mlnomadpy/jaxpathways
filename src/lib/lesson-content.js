@@ -31,10 +31,17 @@ function codePanel(code, label = 'Python') {
  */
 function deepConcepts(c, lesson) {
   return (c.sections || [])
-    .map(
-      (s) =>
-        `<section class="concept-section"><h2>${inlineMath(s.title)}</h2>${prose(s.body)}${s.id === 'guided-reasoning' && lesson ? lessonMechanism(lesson) : ''}${s.check ? `<aside class="reasoning-check"><h3>Pause and reason</h3>${prose(s.check.prompt)}<details><summary>Compare your reasoning</summary>${prose(s.check.answer)}</details></aside>` : ''}${(s.commands || []).map((cmd) => `<div class="terminal-step"><h3>${inlineMath(cmd.label)}</h3>${codePanel(cmd.code, cmd.shell || 'Terminal')}<p><strong>Expected:</strong></p>${prose(cmd.expected)}</div>`).join('')}${s.math ? renderMath(s.math, true) : ''}${s.formula ? `<pre class="lesson-equation" data-language="text"><code>${escapeHtml(s.formula)}</code></pre>` : ''}</section>`,
-    )
+    .map((s) => {
+      const commands = (s.commands || [])
+        .map((cmd) => {
+          const body = `${codePanel(cmd.code, cmd.shell || 'Terminal')}<p><strong>Expected:</strong></p>${prose(cmd.expected)}`;
+          return c.setupBundle
+            ? `<div class="terminal-step"><h3>${inlineMath(cmd.label)}</h3>${body}</div>`
+            : `<details class="reading-disclosure run-instructions"><summary>Run instructions: ${inlineMath(cmd.label)}</summary><div class="disclosure-body">${body}</div></details>`;
+        })
+        .join('');
+      return `<section class="concept-section"><h2>${inlineMath(s.title)}</h2>${prose(s.body)}${s.id === 'guided-reasoning' && lesson ? lessonMechanism(lesson) : ''}${s.check ? `<aside class="reasoning-check"><h3>Pause and reason</h3>${prose(s.check.prompt)}<details><summary>Compare your reasoning</summary>${prose(s.check.answer)}</details></aside>` : ''}${commands}${s.math ? renderMath(s.math, true) : ''}${s.formula ? `<pre class="lesson-equation" data-language="text"><code>${escapeHtml(s.formula)}</code></pre>` : ''}</section>`;
+    })
     .join('');
 }
 

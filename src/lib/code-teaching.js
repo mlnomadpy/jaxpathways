@@ -521,12 +521,12 @@ export function extractCodingSteps(source) {
 export function renderBuildStepCodeBreakdown(code) {
   const apis = extractCodeApis(code);
   if (!apis.length) return '';
-  return `<div class="code-teaching-guide build-code-breakdown">
-    <p class="code-guide-kicker">Code building blocks in this step</p>
+  return `<details class="code-teaching-guide build-code-breakdown reading-disclosure">
+    <summary>Explain the APIs in this step</summary>
     <ul class="code-api-list">${apis
-      .map((api) => `<li><code>${escapeHtml(api.token)}</code> — ${inlineMath(api.summary)}</li>`)
+      .map((api) => `<li><code>${escapeHtml(api.token)}</code>: ${inlineMath(api.summary)}</li>`)
       .join('')}</ul>
-  </div>`;
+  </details>`;
 }
 
 /**
