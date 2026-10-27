@@ -67,6 +67,74 @@ held_loss = float(
 assert held_loss < 0.2
 print('MLM initial/final/changed-mask:', history[0], history[-1], held_loss)
 
+# 4. Save the encoder, change one condition, and probe it
+# Changed condition + saved-encoder handoff + frozen probe (synthetic teaching fixture)
+import hashlib, json, tempfile
+from pathlib import Path
+
+def digest_arrays(*arrays):
+    h = hashlib.sha256()
+    for a in arrays:
+        h.update(np.ascontiguousarray(a).tobytes())
+    return h.hexdigest()
+
+# A changed corruption schedule selects two slots. Same clean targets and tokenizer.
+changed_mask = jnp.array([[True, False, True, False]] * 3)
+changed_input = corrupt_tokens(tokens, changed_mask, 3)
+changed_loss = float(masked_ce(mlm_logits(p, changed_input), tokens, changed_mask))
+uniform_baseline = float(np.log(3.0))
+assert np.isfinite(changed_loss) and changed_mask.sum() == 6
+
+# Source groups are explicit and disjoint; each held-out source repeats the frozen token map.
+train_group_ids, heldout_group_ids = ['g0','g1','g2'], ['g4','g5','g6']
+assert set(train_group_ids).isdisjoint(heldout_group_ids)
+processor_id = 'lesson-vocab:0=zero,1=one,2=two,3=MASK'
+source_split_id = 'synthetic-repeated-token-v1:g0-g2/g4-g6'
+encoder_before = np.asarray(p['embedding']).copy()
+head_before = np.asarray(p['head']).copy()
+parameter_hash = digest_arrays(encoder_before, head_before)
+manifest = {'model_id':'mlm-attention-4x6-v1','processor_id':processor_id,
+            'source_split_id':source_split_id,'objective':'selected-token-CE',
+            'mask_schedule':'two-of-four; positions 0 and 2','fit_group_ids':train_group_ids,'heldout_group_ids':['g4','g5','g6'],'seed':7,'parameter_sha256':parameter_hash}
+output_dir = Path(tempfile.mkdtemp(prefix='jaxpathways-mlm-transfer-'))
+artifact = output_dir / 'encoder.npz'
+
+np.savez(artifact, embedding=encoder_before, head=head_before,
+         manifest=np.array(json.dumps(manifest, sort_keys=True)))
+with np.load(artifact, allow_pickle=False) as saved:
+    loaded_manifest = json.loads(str(saved['manifest']))
+    loaded_encoder = saved['embedding'].copy()
+    loaded_head = saved['head'].copy()
+assert loaded_manifest == manifest
+assert digest_arrays(loaded_encoder, loaded_head) == manifest['parameter_sha256']
+checkpoint_hash=hashlib.sha256(artifact.read_bytes()).hexdigest()
+identity_path=output_dir/'identity.json'
+identity={**manifest,'checkpoint_sha256':checkpoint_hash}
+identity_path.write_text(json.dumps(identity,sort_keys=True))
+assert hashlib.sha256(artifact.read_bytes()).hexdigest()==identity['checkpoint_sha256']
+held_group_ids = ['g4','g5','g6']
+assert set(train_group_ids).isdisjoint(held_group_ids)
+held_tokens = jnp.array([[0,1,0,1],[1,2,1,2],[2,0,2,0]],jnp.int32)
+held_input = corrupt_tokens(held_tokens, changed_mask, 3)
+loaded_model = {'embedding':jnp.asarray(loaded_encoder),'head':jnp.asarray(loaded_head)}
+changed_loss = float(masked_ce(mlm_logits(loaded_model,held_input),held_tokens,changed_mask))
+# Frozen mean-token encoder representation. Fit probe weights on train groups only.
+x = np.asarray(tokens)
+features = loaded_encoder[x].mean(axis=1)
+y = np.asarray([0,1,2])
+design = np.c_[features, np.ones(len(features))]
+probe = np.linalg.solve(design.T @ design + 1e-3*np.eye(design.shape[1]), design.T @ y)
+held_tokens = np.asarray([[0,1,0,1],[1,2,1,2],[2,0,2,0]])
+held_features = loaded_encoder[held_tokens].mean(axis=1)
+held_pred = np.rint(np.c_[held_features, np.ones(3)] @ probe).astype(int)
+held_accuracy = float(np.mean(held_pred == y))
+assert np.allclose(loaded_encoder, encoder_before)
+print('MLM changed-mask loss / uniform baseline / frozen held-out probe accuracy:',
+      changed_loss, uniform_baseline, held_accuracy)
+print('Artifact path:', artifact)
+print('Identity sidecar:', identity_path)
+print('Saved identity:', manifest['model_id'], manifest['processor_id'], manifest['source_split_id'])
+
 # Step 1 — 1. Define corruption and the selected-token objective
 import jax
 import jax.numpy as jnp
@@ -179,6 +247,74 @@ sequence_mean = np.mean(
 )
 assert not np.isclose(observed, sequence_mean)
 print('Token-weighted / sequence-weighted:', observed, sequence_mean)
+
+# Experiment: Change the corruption schedule, reload the encoder, and fit a frozen probe
+# Changed condition + saved-encoder handoff + frozen probe (synthetic teaching fixture)
+import hashlib, json, tempfile
+from pathlib import Path
+
+def digest_arrays(*arrays):
+    h = hashlib.sha256()
+    for a in arrays:
+        h.update(np.ascontiguousarray(a).tobytes())
+    return h.hexdigest()
+
+# A changed corruption schedule selects two slots. Same clean targets and tokenizer.
+changed_mask = jnp.array([[True, False, True, False]] * 3)
+changed_input = corrupt_tokens(tokens, changed_mask, 3)
+changed_loss = float(masked_ce(mlm_logits(p, changed_input), tokens, changed_mask))
+uniform_baseline = float(np.log(3.0))
+assert np.isfinite(changed_loss) and changed_mask.sum() == 6
+
+# Source groups are explicit and disjoint; each held-out source repeats the frozen token map.
+train_group_ids, heldout_group_ids = ['g0','g1','g2'], ['g4','g5','g6']
+assert set(train_group_ids).isdisjoint(heldout_group_ids)
+processor_id = 'lesson-vocab:0=zero,1=one,2=two,3=MASK'
+source_split_id = 'synthetic-repeated-token-v1:g0-g2/g4-g6'
+encoder_before = np.asarray(p['embedding']).copy()
+head_before = np.asarray(p['head']).copy()
+parameter_hash = digest_arrays(encoder_before, head_before)
+manifest = {'model_id':'mlm-attention-4x6-v1','processor_id':processor_id,
+            'source_split_id':source_split_id,'objective':'selected-token-CE',
+            'mask_schedule':'two-of-four; positions 0 and 2','fit_group_ids':train_group_ids,'heldout_group_ids':['g4','g5','g6'],'seed':7,'parameter_sha256':parameter_hash}
+output_dir = Path(tempfile.mkdtemp(prefix='jaxpathways-mlm-transfer-'))
+artifact = output_dir / 'encoder.npz'
+
+np.savez(artifact, embedding=encoder_before, head=head_before,
+         manifest=np.array(json.dumps(manifest, sort_keys=True)))
+with np.load(artifact, allow_pickle=False) as saved:
+    loaded_manifest = json.loads(str(saved['manifest']))
+    loaded_encoder = saved['embedding'].copy()
+    loaded_head = saved['head'].copy()
+assert loaded_manifest == manifest
+assert digest_arrays(loaded_encoder, loaded_head) == manifest['parameter_sha256']
+checkpoint_hash=hashlib.sha256(artifact.read_bytes()).hexdigest()
+identity_path=output_dir/'identity.json'
+identity={**manifest,'checkpoint_sha256':checkpoint_hash}
+identity_path.write_text(json.dumps(identity,sort_keys=True))
+assert hashlib.sha256(artifact.read_bytes()).hexdigest()==identity['checkpoint_sha256']
+held_group_ids = ['g4','g5','g6']
+assert set(train_group_ids).isdisjoint(held_group_ids)
+held_tokens = jnp.array([[0,1,0,1],[1,2,1,2],[2,0,2,0]],jnp.int32)
+held_input = corrupt_tokens(held_tokens, changed_mask, 3)
+loaded_model = {'embedding':jnp.asarray(loaded_encoder),'head':jnp.asarray(loaded_head)}
+changed_loss = float(masked_ce(mlm_logits(loaded_model,held_input),held_tokens,changed_mask))
+# Frozen mean-token encoder representation. Fit probe weights on train groups only.
+x = np.asarray(tokens)
+features = loaded_encoder[x].mean(axis=1)
+y = np.asarray([0,1,2])
+design = np.c_[features, np.ones(len(features))]
+probe = np.linalg.solve(design.T @ design + 1e-3*np.eye(design.shape[1]), design.T @ y)
+held_tokens = np.asarray([[0,1,0,1],[1,2,1,2],[2,0,2,0]])
+held_features = loaded_encoder[held_tokens].mean(axis=1)
+held_pred = np.rint(np.c_[held_features, np.ones(3)] @ probe).astype(int)
+held_accuracy = float(np.mean(held_pred == y))
+assert np.allclose(loaded_encoder, encoder_before)
+print('MLM changed-mask loss / uniform baseline / frozen held-out probe accuracy:',
+      changed_loss, uniform_baseline, held_accuracy)
+print('Artifact path:', artifact)
+print('Identity sidecar:', identity_path)
+print('Saved identity:', manifest['model_id'], manifest['processor_id'], manifest['source_split_id'])
 
 # Reference solution. Try the exercise before reading this.
 # Exercise solution

@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "operations-04",
-  "contentHash": "fdfadbb1a3e40ca5fef95c02b2f369ec1a35a94868135fd4c44a92f0c576f90f",
-  "rendererHash": "a1bd5b648f4731ae5d5f0a24811c2540d1a0a132149ce589d17c4113509cbedf",
+  "contentHash": "052c5af2aae5ace6b88df4dd6fa9821116636ffcc5214d4bae664a05d6c537d0",
+  "rendererHash": "17e3bbad72ee4c43425845aaee76b86b85e84750551278be03d8c16842f4dc63",
   "kind": "executed",
-  "generatedAt": "2026-10-20T22:29:40.578519+00:00",
+  "generatedAt": "2026-10-27T17:01:50.736967+00:00",
   "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",
@@ -13,7 +13,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "first / second content IDs: 810b956e3376228ff3c1f03f469feb3ab26653b488ba51271e82277672590b80 aed1378a7842598237e59c5d189b13d486068b6284d9c1ca3d4e865866ba6990\nfailed gate kept selection: True rollback restored first: True\n",
+  "stdout": "consumer x=1 before B / after B / after rollback: 3.0 3.4 3.0\nA and B IDs: 60b1a27a0bf2091fc537d43ba2ddd2ae0911dc1090bc3631a3ac6559de1b2e62 25ba7e29e933613158e1472cea0a3e1316e8cb697114f8bf44b0f3bc33759aae\nrejected activation unchanged selection and behavior: True\nrollback selected A: True\n",
   "data": {
     "kind": "bar",
     "labels": [
@@ -41,7 +41,7 @@
   "diagram": {
     "title": "Rejected candidates do not become active",
     "prediction": "Should a rejected candidate change the active artifact pointer?",
-    "reading": "Candidate B can exist while A remains active. Only the passing branch permits activation under the policy; failure keeps A selected. Letters identify artifacts, not scores. Preserve compatible processor and configuration identities with the selected model.",
+    "reading": "Read the arrows as a release decision trace: published B flows to evaluation; a passing gate leads to activating B, while a failing gate leads to keeping A active. The worked consumer returns 3.0 for A and 3.4 for B at \\(x=1\\), so the pointer choice has an observable effect. After activation, rollback uses the previous compatible ID and returns the output to 3.0. Predict the failed-gate branch: it must leave the old pointer and its 3.0 response unchanged.",
     "alt": "Candidate B can exist while A remains active. Only the passing branch permits activation under the policy; failure keeps A selected. Letters identify artifacts, not scores. Preserve compatible processor and configuration identities with the selected model.",
     "scope": "Architecture and dataflow mechanism diagram.",
     "height": 6.3,

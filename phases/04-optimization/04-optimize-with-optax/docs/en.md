@@ -4,6 +4,8 @@ Phase 04: Math & optimization · about 80 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Minibatches, expectation, and gradient noise](https://www.tahabouhsine.com/jaxpathways/lesson-optimization-11.html).
+
 ## What you will be able to do
 
 - Distinguish gradients, updates, and parameters
@@ -44,6 +46,8 @@ A gradient describes local sensitivity; an update is the change the optimizer wa
 
 For our evenly spaced $x$ values, $\operatorname{mean}(x)=0$ and $\operatorname{mean}(x^2)=\frac{11}{30}$. At zero parameters, the weight derivative is $-4\cdot\frac{11}{30}=-\frac{22}{15}$ and the bias derivative is $-2$. With rate $0.2$, the first weight becomes $22/75$ and bias $0.4$. Compute these values before trusting a long run.
 
+For the first update, the initial residual is -y. The slope derivative is therefore -2 mean(xy). In this fixture $\operatorname{mean}(x)=0$ and $\operatorname{mean}(x^2)=11/30$; because $y=2x+1$, $\operatorname{mean}(xy)=2(11/30)+\operatorname{mean}(x)=11/15$, so the gradient is $-22/15$. The bias gradient is -2. SGD multiplies the negative gradient by rate 0.2, giving parameter changes $+22/75$ and +0.4.
+
 ```text
 params → loss → grads
 grads + old optimizer state → updates + new optimizer state
@@ -71,6 +75,8 @@ The 120-step fit is a small CPU regression example, not a TPU throughput benchma
 ## Preserve state when a gradient happens to be zero
 
 Momentum remembers earlier gradients. Under the convention $m_t=\beta m_{t-1}+g_t$, a zero current gradient can still produce a nonzero update. With $\beta=0.9$, a previous trace of $2$ becomes $1.8$ when the new gradient is zero. This is why an optimizer’s behavior cannot be reconstructed from the current gradient and weights alone. The next lesson builds on this state model to explain Adam and learning-rate schedules.
+
+A zero current gradient is not the same thing as zero optimizer state. With momentum trace $m_t=0.9m_{t-1}+g_t$, setting the current gradient to zero after a trace of 2 leaves $m_t=1.8$. At rate 0.1, the next parameter update is still $-0.18$. The gradient describes the present objective at this point; the momentum trace summarizes recent history.
 
 $$
 m_t=\beta m_{t-1}+g_t,\qquad \Delta w_t=-\eta m_t
@@ -176,13 +182,15 @@ Read the learned parameters from the geometry: the intercept is $1$, and increas
 
 This picture shows the final fit across the displayed inputs, not the optimizer’s path or its runtime. Agreement on an exact synthetic linear target is a useful correctness check. It is separate from performance on noisy data or on a different relationship.
 
+Before resuming from a checkpoint, predict the next update from both saved parameters and optimizer state; compare it with an uninterrupted transition.
+
 ```python
 visual_data = {'kind': 'line', 'x': x.tolist(), 'xlabel': 'input', 'ylabel': 'prediction', 'series': [{'label': 'target', 'y': y.tolist()}, {'label': 'initial model', 'y': jnp.zeros_like(x).tolist()}, {'label': 'trained model', 'y': (params['weight'] * x + params['bias']).tolist()}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:20:49.580340+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:04:02.216285+00:00. JAX 0.9.2.
 
 ```text
 Parameters: {'bias': Array(1., dtype=float32), 'weight': Array(1.9999996, dtype=float32)}
@@ -259,25 +267,30 @@ At the original zero parameters, compare the first Optax SGD update with an expl
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
-- `jax.tree.map(lambda p, g: ..., params, grads)` — Applies a function leaf-by-leaf across matching PyTrees (such as updating every parameter tensor with its gradient).
+**Inputs:**
+- A parameter pytree, an Optax transformation and its state, and a scalar loss.
 
-**Step-by-step implementation plan:**
-1. Exercise solution
+**Outputs:**
+- The updated parameter pytree and next optimizer state.
+
+**Invariants to check:**
+- Update leaves match parameter leaves; Optax updates are applied once and state is carried forward.
+
+**Hints:**
+- Use value_and_grad to get the gradient tree.
+- Keep optimizer state as a separate returned value so it can be replayed.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-start = ...  # TODO: compute start
-grads = jax.grad(...)  # TODO: compute grads
-updates, _ = optimizer.update(...)  # TODO: compute updates, _
-actual = optax.apply_updates(...)  # TODO: compute actual
-expected = jax.tree.map(...)  # TODO: compute expected
-assert all(jnp.allclose(a, b) for a, b  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+import optax
+
+def sgd_update(params, optimizer, opt_state, loss_fn):
+    """The updated parameter pytree and next optimizer state."""
+    # TODO: Initialize the Optax state, compute one gradient tree, request updates, and apply them once to the parameters.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -308,21 +321,28 @@ Optimizer transformations return new state; reuse the saved value for the replay
 
 ### How to write: Replay a momentum continuation — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- Save the state after the first update; run the next update twice from that state and compare every state leaf.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- Equal next parameters and state leaves from replayed continuations.
+
+**Invariants to check:**
+- Both continuations start from the same parameters, gradients, and saved optimizer state.
+
+**Hints:**
+- Optimizer transformations return new state; reuse the saved value for the replay.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Replay a momentum continuation (Transfer / diagnosis): This verifies an in-memory optimizer transition.
-replay_u, replay_state = momentum.update(...)  # TODO: compute replay_u, replay_state
-assert jnp.allclose(replay_u, u2)  # TODO: complete assertion check
-assert all(jnp.allclose(a,b) for a,b  # TODO: complete assertion check
+import jax.numpy as jnp
+import optax
+
+def practice_replay_a_momentum_continuation(params, opt_state, grads):
+    """Implement the replay a momentum continuation check."""
+    # TODO: Advance momentum once, snapshot every optimizer-state leaf, and compare two next updates restored from that snapshot.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -352,21 +372,28 @@ SGD updates already contain the minus sign.
 
 ### How to write: Catch double subtraction — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jax.tree.map(lambda p, g: ..., params, grads)` — Applies a function leaf-by-leaf across matching PyTrees (such as updating every parameter tensor with its gradient).
+**Inputs:**
+- At zero parameters, subtract SGD updates by mistake. Show the loss increases; repair using apply_updates.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- Correct and double-subtracted parameter trees with a loss comparison.
+
+**Invariants to check:**
+- Each update is applied with its documented sign exactly once.
+
+**Hints:**
+- SGD updates already contain the minus sign.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Catch double subtraction (Transfer / diagnosis)
-wrong = jax.tree.map(...)  # TODO: compute wrong
-right = optax.apply_updates(...)  # TODO: compute right
-assert loss(wrong)  # TODO: complete assertion check
-assert loss(right)  # TODO: complete assertion check
+import jax.numpy as jnp
+import optax
+
+def practice_catch_double_subtraction(params, opt_state, grads):
+    """Implement the catch double subtraction check."""
+    # TODO: Apply the Optax update with apply_updates, then deliberately subtract the update once more and compare losses.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -393,9 +420,17 @@ What should a training step retain besides updated parameters for a stateful opt
 
 <details><summary>Answer and explanation</summary>
 
-The new optimizer state returned by update
+**1. Only the final loss**
+
+The scalar loss does not contain the optimizer moments or update count. Keep the returned optimizer state with the parameters.
+
+**2. The new optimizer state returned by update (correct)**
 
 State carries momentum or adaptive statistics between steps. Reinitializing it discards that history.
+
+**3. A freshly initialized state every time**
+
+Reinitialization discards history and changes later updates. Compare two steps with retained state against two first-step updates.
 
 </details>
 

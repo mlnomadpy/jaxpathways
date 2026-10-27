@@ -11,7 +11,12 @@
         "\\((d,)\\)"
       ],
       "correct": 1,
-      "explanation": "Use matching \\((n,)\\) shapes. A column target can silently broadcast into pairwise residuals."
+      "explanation": "Use matching \\((n,)\\) shapes. A column target can silently broadcast into pairwise residuals.",
+      "optionFeedback": [
+        "Subtracting \\((n,)\\) from \\((n,1)\\) broadcasts into an \\((n,n)\\) array. Check the residual shape before taking its mean.",
+        "Use matching \\((n,)\\) shapes. A column target can silently broadcast into pairwise residuals.",
+        "The targets are indexed by observations, not features. There must be one target for each of the n predictions."
+      ]
     }
   ]
 }

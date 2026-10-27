@@ -11,7 +11,12 @@
         "Only if the loss is a scalar"
       ],
       "correct": 1,
-      "explanation": "The clipping threshold bounds the incoming gradient. Adam’s stateful rescaling and learning rate determine the final update."
+      "explanation": "The clipping threshold bounds the incoming gradient. Adam’s stateful rescaling and learning rate determine the final update.",
+      "optionFeedback": [
+        "Adam rescales coordinates using its moment estimates after clipping. Inspect the norm of the actual parameter delta separately.",
+        "The clipping threshold bounds the incoming gradient. Adam’s stateful rescaling and learning rate determine the final update.",
+        "A scalar loss can have a large or poorly scaled gradient. Compute the gradient norm and update norm rather than inferring them from loss shape."
+      ]
     }
   ]
 }

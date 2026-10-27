@@ -75,3 +75,11 @@ Paired bars compare compiled JAX derivatives with the independently calculated r
 Keep the environment report, hand-derived row sums, masked statistics, per-example derivative calculations, malformed-input diagnoses and a fresh-process continuation comparison. The figure receipt identifies the exact reference source and environment. Your own evidence should identify your implementation and modifications.
 
 The first four phases use stages one through four respectively. Completing the public reference checks does not prove an independent learner solution or award competency; explain the changed-condition exercises and have someone review the reasoning. Next, use the regression capstone to connect a checked derivative to repeated parameter fitting.
+
+## Review handoff: explain a changed condition
+
+Process a padded batch and then replay its random simulation from a saved midpoint. Which input and state values must be retained for both tasks?
+
+**Keep for review:** Valid-row counts, independent moments, explicit keys/carry and next-state equality. Distinguish preprocessing identity from continuation state.
+
+Write your prediction before opening the reference implementation. Distinguish what the existing checker verifies from your proposed extension; record any extension command, actual output and limitation separately. A reviewer should be able to locate the first failed contract from your saved evidence.

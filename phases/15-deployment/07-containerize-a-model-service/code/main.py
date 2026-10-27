@@ -129,11 +129,26 @@ with tempfile.TemporaryDirectory() as directory:
 print('Matching digest did not bypass model validation.')
 
 # Reference solution. Try the exercise before reading this.
-# Exercise solution
-original=json.dumps(MODEL,sort_keys=True).encode()
-mutated=json.dumps(dict(MODEL,bias=2.),sort_keys=True).encode()
-assert hashlib.sha256(original).hexdigest()!=hashlib.sha256(mutated).hexdigest()
-print('Changed artifact requires a new recorded digest.')
+# Exercise solution: send changed artifact bytes through the fresh-process service loader.
+# SERVICE is the service program defined earlier in this lesson. Its integrity check
+# runs before model parsing, request evaluation, or prediction output.
+original = json.dumps(MODEL, sort_keys=True).encode()
+recorded_digest = hashlib.sha256(original).hexdigest()
+mutated = json.dumps(dict(MODEL, bias=2.), sort_keys=True).encode()
+assert hashlib.sha256(mutated).hexdigest() != recorded_digest
+with tempfile.TemporaryDirectory(prefix='changed-artifact-exercise-') as folder:
+    artifact = Path(folder) / 'model.json'
+    service = Path(folder) / 'service.py'
+    artifact.write_bytes(mutated)  # altered bytes reach the actual loader
+    service.write_text(SERVICE)
+    env = dict(os.environ, MODEL_PATH=str(artifact), MODEL_SHA256=recorded_digest)
+    rejected = subprocess.run(
+        [sys.executable, str(service)], input=json.dumps({'inputs': [2.]}),
+        text=True, capture_output=True, env=env, timeout=30)
+    assert rejected.returncode != 0
+    assert 'artifact mismatch' in rejected.stderr
+    assert rejected.stdout == ''  # no prediction was activated or returned
+print('Changed artifact reached fresh-process loader: rejected before prediction; no output.')
 
 # Reference practice: Reject a nonfinite request
 # Reject a nonfinite request (transfer)

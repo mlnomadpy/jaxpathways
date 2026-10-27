@@ -14,7 +14,7 @@
       {
         "id": "guided-reasoning",
         "title": "Reward belongs to a transition",
-        "body": "Suppose entering the goal earns one reward. The transition into the goal counts once. Later padded steps in the terminal state should not repeatedly earn the same reward unless that is explicitly the task's intended reward rule.\n\nDraw separate arrows for an ordinary move, a goal-reaching move and terminal padding. A timeout is another condition whose treatment must be specified; it is not automatically the same learning signal as reaching a terminal goal.\n\nThe reward trace shows one event followed by absorbing padding. Read the event's time index against the transition convention. Then test actions after termination to ensure padding does not introduce extra rewards or unintended state changes.",
+        "body": "The goal reward belongs to the move that enters position 3. For example, `step` at position 2 with action 1 returns next position 3, reward 1, and `terminated=True`; calling it again returns reward 0 because `done` is already true. This distinction matters because a correct final position alone cannot reveal a reward counted repeatedly during padding.\n\nFollow the transition row in `step`: compute `active`, choose the new position, set the ending event, then choose the reward. Try one move into the goal and one call after it; compare both reward values.",
         "check": {
           "prompt": "Why can checking only the final state miss a reward bug?",
           "answer": "A rollout can end in the correct goal while counting its reward repeatedly during padding. Check transition rewards and accumulated return as well as final state."
@@ -22,25 +22,25 @@
       },
       {
         "title": "State contains what the next transition needs",
-        "body": "Our state holds position, elapsed steps and a done flag. Observation is position: enough for the stationary policy used here, but not the full finite-horizon decision state. A policy that needs to reason about time remaining should also observe elapsed time. Carrying elapsed time in environment state prevents a time limit from depending on a hidden Python counter. NamedTuple fields are JAX pytree leaves, so the same function can run directly, under jit, or under vmap."
+        "body": "`State(position, elapsed, done)` carries the information `step` needs without a hidden Python counter. A concrete path starts at `(1, 0, False)`: two right actions produce positions 2 then 3, and elapsed becomes 2. `observation` is only position, which suits the stationary policy here; a policy that must choose differently with one action left would also need time remaining in its observation. NamedTuple fields are pytree leaves, so the same transition can be transformed with `jit` or `vmap`."
       },
       {
         "title": "Walk through the reward before naming the return",
-        "body": "Start at position \\(1\\), then move right twice. The first action reaches position \\(2\\) and earns \\(-0.01\\). The second reaches the goal and earns \\(1\\). Total reward is \\(0.99\\). Starting at position \\(0\\) instead needs one extra move and earns \\(0.98\\). Return means the sum of rewards in this lesson; we do not discount future rewards. Averaging over our two equally likely starts gives the always-right policy return \\(0.985\\).",
+        "body": "First list transition rewards, then name their sum the return. Starting at position 1 and moving right gives rewards `(-0.01, 1)`, so this lesson's undiscounted return is 0.99. Starting at 0 adds one `-0.01` move and gives 0.98; averaging the two equally likely starts gives 0.985. A reward is attached to one transition, while a return is the sum over the episode. Here future rewards are not discounted.",
         "math": "G=\\sum_{t=0}^{H-1}r_t,\\qquad H=8"
       },
       {
         "title": "Ending is an event; finished is a state",
-        "body": "Terminated marks the transition that reaches the goal. Truncated marks an active transition that reaches the time limit without reaching the goal. A simultaneous goal and time limit counts as termination here. The done flag remains true afterward, but subsequent padded transitions emit neither event and pay zero. This lets us collect a fixed-size array without inventing extra episodes. We never auto-reset inside step: the returned position is the final observation, not a replacement start."
+        "body": "`terminated` and `truncated` describe this transition; `done` records that the episode is finished for later calls. Reaching the goal on the horizon wins as termination, as the deadline experiment confirms. A timeout away from the goal sets truncation. In either case this finite-horizon `step` keeps the final observation and does not auto-reset; later fixed-shape padding is a finished state with zero reward and no new event. The collector must explicitly reset before another episode."
       },
       {
         "title": "A timeout does not always mean a zero future value",
-        "body": "Here the task itself asks for the return during a fixed budget of actions, so truncation ends our finite-horizon objective and its future value is zero. In a continuing task interrupted only by a collection limit, the final observation can still have future value. A bootstrapped target would then mask true termination, not every timeout. For reward \\(-0.01\\), discount \\(0.9\\) and estimated next value \\(2\\), that continuing target is \\(1.79\\); replacing it with \\(-0.01\\) changes the learning problem.",
+        "body": "Ask what the time limit means before building a target. For this lesson's eight-action task, the deadline ends the objective, so there is no value after it. A collection cutoff in a continuing task only stops data collection: preserve the final pre-reset observation and bootstrap from it. With reward `-0.01`, discount 0.9 and next value 2, the continuing target is \\(-0.01 + 0.9\\cdot 2 = 1.79\\); masking that cutoff like a true terminal would incorrectly make it `-0.01`. A reset observation belongs to the next episode, not this target.",
         "math": "y=r+\\gamma(1-\\mathbb{1}_{\\mathrm{terminated}})V(s_{\\mathrm{next}})"
       },
       {
         "title": "Make the contract small enough to test",
-        "body": "The compiled transition assumes a binary integer action, positive horizon, and states produced by reset or step. We test those rules outside the hot loop rather than performing Python assertions on traced values. Randomness enters reset through a supplied key. Reusing that key deliberately reproduces a start; independent starts require split keys. The transition itself is deterministic. This is a teaching task, not evidence of skill on a realistic control benchmark."
+        "body": "The JAX transition is deterministic; only `reset(key)` draws a start. Reusing key 7 deliberately reproduces a start, while `split` supplies separate starts. Validate binary integer actions and a positive horizon before compiled calls, since Python assertions cannot inspect traced values. These tiny transition checks establish the environment contract; they do not measure policy skill."
       }
     ],
     "output": "Positions are \\((1,2,3,3,3)\\). Rewards are \\((-0.01,1,0,0)\\); elapsed time stops at \\(2\\).",
@@ -69,7 +69,25 @@
         "prompt": "Compute the continuing-task bootstrap target for a timeout and a true terminal transition when \\(r=-0.01\\), \\(\\gamma=0.9\\) and \\(V=2\\). Compare with our finite-horizon objective.",
         "hint": "Use the termination flag for the continuing task. The finite-horizon task assigns zero value after its own deadline.",
         "solution": "# Separate the two target meanings (Transfer / diagnosis): The arithmetic exposes a modeling choice.\nr, gamma, value = -.01, .9, 2.\ncontinuing_timeout = r + gamma * value\nterminal = r\nfinite_horizon_timeout = r\nassert abs(continuing_timeout - 1.79) < 1e-7\nassert terminal == finite_horizon_timeout == -.01",
-        "explanation": "The arithmetic exposes a modeling choice. Copying a done mask from a different task can silently change the objective."
+        "explanation": "The arithmetic exposes a modeling choice. Copying a done mask from a different task can silently change the objective.",
+        "learnerStarter": {
+          "inputs": [
+            "A transition reward of -0.01, discount 0.9, and next-state value 2.",
+            "Two meanings for the ending event: a continuing-task timeout and a true terminal."
+          ],
+          "outputs": [
+            "Both candidate targets and a comparison with the finite-horizon contract."
+          ],
+          "invariants": [
+            "A true terminal has no future value.",
+            "The finite-horizon deadline and a continuing-task collection cutoff express different objectives."
+          ],
+          "hints": [
+            "Write the one-step target before substituting the timeout or terminal mask.",
+            "Keep the reward term in both cases."
+          ],
+          "code": "import jax.numpy as jnp\n\ndef compare_ending_targets(reward, discount, next_value):\n    # TODO: compute the continuing-cutoff and terminal targets\n    timeout_target = ...\n    terminal_target = ...\n    raise NotImplementedError\n"
+        }
       },
       {
         "title": "Enumerate all one-step moves",
@@ -77,7 +95,25 @@
         "prompt": "Check both actions at every unfinished position with a Python reference, then compare the jitted function.",
         "hint": "Use ordinary min and max for the independent reference.",
         "solution": "# Enumerate all one-step moves (Transfer / diagnosis)\n# Wrap with `jax.jit` (`compiled`) so XLA traces and compiles the function.\ncompiled = jax.jit(step)\nfor position in range(3):\n    for action in [0, 1]:\n        s = State(jnp.int32(position), jnp.int32(0), jnp.bool_(False))\n        nxt, reward, term, trunc = compiled(s, jnp.int32(action))\n        expected = min(3, max(0, position + (1 if action else -1)))\n        assert int(nxt.position) == expected\n        assert bool(term) == (expected == 3)\n        assert abs(float(reward) - (1. if expected == 3 else -.01)) < 1e-6",
-        "explanation": "Enumeration checks boundary behavior separately from the vectorized implementation."
+        "explanation": "Enumeration checks boundary behavior separately from the vectorized implementation.",
+        "learnerStarter": {
+          "inputs": [
+            "Every unfinished corridor position and both binary actions.",
+            "The lesson’s transition function."
+          ],
+          "outputs": [
+            "A Python reference result and the compiled transition result for each case."
+          ],
+          "invariants": [
+            "Both action choices are checked at both boundaries.",
+            "The reference check does not call the JAX transition to compute its expected result."
+          ],
+          "hints": [
+            "Represent the independent reference using ordinary Python integers.",
+            "Compare next state, reward, and both ending flags."
+          ],
+          "code": "import jax\n\ndef compare_all_moves(step, State):\n    compiled_step = jax.jit(step)\n    # TODO: enumerate positions/actions and compare with an independent rule\n    raise NotImplementedError\n"
+        }
       }
     ],
     "question": "What should step emit when called on a finished state?",
@@ -97,8 +133,8 @@
       "title": "One goal reward, then absorbing padding",
       "kind": "executed",
       "prediction": "Will the reward stay at one after the goal?",
-      "reading": "The horizontal axis counts transitions, starting with the first action. The vertical axis is reward for that individual transition, not accumulated return. Moving right twice from position \\(1\\) produces \\(-0.01\\) followed by \\(1\\). The final two points sit at zero because the episode has already ended.",
-      "connection": "The positions printed by the program are \\((1,2,3,3,3)\\). The sharp reward peak occurs only when entering the goal. Summing the four plotted rewards gives \\(0.99\\), exactly the two-action return. A flat tail at \\(1\\) would expose repeated terminal rewards; this zero tail demonstrates the absorbing-state contract, not learning.",
+      "reading": "The x-axis is transition index (action number); the y-axis is reward on that transition. The plotted trace is `right, right, padded, padded`: from position 1 it visits 2, then goal 3, so rewards are `-0.01, 1, 0, 0`. Predict the sum before reading on: the first two rewards give return 0.99, while the last two are padding rather than new reward events.",
+      "connection": "The execution prints positions `(1,2,3,3,3)` and rewards `(-0.01,1,0,0)`, matching all four plotted points. Compare the single peak at transition 2 with the zero tail: the peak marks entry to the goal, and the tail is the absorbing-state behavior of `step`. If the tail were 1, repeated calls after `done` would be paying again. This figure checks reward semantics, not policy improvement.",
       "alt": "One goal reward, then absorbing padding. The horizontal axis counts transitions, starting with the first action. The vertical axis is reward for that individual transition, not accumulated return. Moving right twice from position \\(1\\) produces \\(-0.01\\) followed by \\(1\\). The final two points sit at zero because the episode has already ended.",
       "code": "visual_data = {'kind':'line','x':[1,2,3,4],'xlabel':'transition index','ylabel':'reward per transition','series':[{'label':'right, right, padded, padded','y':rewards}]}"
     },
@@ -143,6 +179,32 @@
         "code": "assert jnp.allclose(jnp.array(rewards), jnp.array([-.01, 1., 0., 0.]))\nassert int(s.elapsed) == 2",
         "explanation": "Checking these invariants confirms the computation is ready for the full worked experiment."
       }
-    ]
+    ],
+    "optionFeedback": [
+      "Repeated terminal rewards would change the return. Step the absorbing state again and check for zero additional reward.",
+      "An implicit reset would mix episodes and change the next observation contract. Reset explicitly after the terminal transition.",
+      "Absorbing padding preserves one episode. Reset is a separate explicit operation, and ending flags mark events rather than every later padded row."
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "Initial state is position 0, elapsed count 0, and not done.",
+        "The attempted action is left (0), and the horizon is 3.",
+        "Use the lesson’s `State` and `step` definitions."
+      ],
+      "outputs": [
+        "A trace with one next state, reward, termination flag, and truncation flag per transition.",
+        "A check for a repeated call after the state has finished."
+      ],
+      "invariants": [
+        "The step at the deadline remains part of the return.",
+        "A call after finishing emits no new reward or ending event.",
+        "Position and elapsed count follow the declared environment contract."
+      ],
+      "hints": [
+        "Keep event flags separate from the persistent `done` state.",
+        "Record the reward from each transition before checking the next state."
+      ],
+      "code": "from typing import NamedTuple\nimport jax.numpy as jnp\n\nclass State(NamedTuple):\n    position: jnp.ndarray\n    elapsed: jnp.ndarray\n    done: jnp.ndarray\n\ndef step(state, action, horizon=3):\n    # TODO: implement the transition contract from the lesson\n    raise NotImplementedError\n\ndef inspect_deadline():\n    state = State(jnp.int32(0), jnp.int32(0), jnp.bool_(False))\n    rewards = []\n    events = []\n    # TODO: record the three requested transitions and one call after done\n    raise NotImplementedError\n"
+    }
   }
 }

@@ -11,7 +11,12 @@
         "Its validation set is now an untouched test set."
       ],
       "correct": 1,
-      "explanation": "An experiment groups comparable runs. A run stores one configuration, a history of metrics and artifacts. Lineage is the connection between those results and the exact code, data and environment that produced them. Tracking records an experiment; it does not recover the optimizer state or prove that a model deserves deployment."
+      "explanation": "An alias points to a registered model version. It does not deploy that version or approve its quality. Resolve the alias to a version and artifact identity, then verify the actual runtime loads and evaluates that artifact.",
+      "optionFeedback": [
+        "An alias is a registry pointer. Deployment still needs an explicit artifact selection, loading and target prediction check.",
+        "An alias points to a registered model version. It does not deploy that version or approve its quality. Resolve the alias to a version and artifact identity, then verify the actual runtime loads and evaluates that artifact.",
+        "Renaming a registered model does not change the role of the evaluation data. Preserve the original split and selection protocol."
+      ]
     }
   ]
 }

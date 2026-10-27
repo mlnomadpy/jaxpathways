@@ -137,3 +137,11 @@ If a collection uses another sample rate or channels, perform a separately speci
 Choose the actual target device, runtime and supported operator set before conversion. FFT, logarithms and normalization may require floating fallback or separate host preprocessing; inspect partitions and compare raw golden waveforms through the complete device path. If a converter lacks an FFT operator, a dense-only export does not preserve this artifact's boundary. Measure capture/buffering, sustained compute, memory, energy and thermal behavior on the named device.
 
 Complete [the synthesis tasks](ASSESSMENT.md) and compare your reasoning with [reviewer notes](reviewer.md). Public fixture checks, your own report, human review and target-device evidence remain separate.
+
+## Review handoff: explain a changed condition
+
+A clip has the right array length but was sampled at a different rate. Predict the effect on physical frequency and duration before running the frontend.
+
+**Keep for review:** The sample-rate contract, decoded waveform metadata, spectral axes in Hz/seconds and an explicit resampling or rejection policy. Array shape alone does not establish the same signal.
+
+Write your prediction before opening the reference implementation. Distinguish what the existing checker verifies from your proposed extension; record any extension command, actual output and limitation separately. A reviewer should be able to locate the first failed contract from your saved evidence.

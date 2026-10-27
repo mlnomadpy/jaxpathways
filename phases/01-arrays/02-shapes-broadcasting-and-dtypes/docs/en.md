@@ -4,6 +4,8 @@ Phase 01: Arrays & pure functions · about 50 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [From NumPy to jax.numpy](https://www.tahabouhsine.com/jaxpathways/lesson-arrays-01.html).
+
 ## What you will be able to do
 
 - Apply the trailing-dimension broadcasting rule before execution.
@@ -21,11 +23,9 @@ Before adding or subtracting arrays, name what each axis represents. Broadcastin
 
 ## Catch the scalar that hides a shape mistake
 
-Take predictions $[1,3]$ and matching targets $[1,3]$. The intended residuals are $[0,0]$, so mean squared error is zero. If the targets are stored as a column, subtraction instead compares each target against both predictions. The residual matrix has entries $0,2,-2,0$, and its mean squared error is $2$.
+Take predictions $[1,3]$ and matching targets $[1,3]$. Their aligned residuals are $[0,0]$, so mean squared error is zero. If the same targets are stored as a column with shape $(2,1)$, subtraction broadcasts the two vectors into a $(2,2)$ matrix: $[[0,2],[-2,0]]$. Squaring and averaging those four residuals gives $2$, even though every target matches its corresponding prediction.
 
-Both calculations return a scalar after averaging. Looking only at the final loss, or checking that autodiff can differentiate it, will not expose the problem. Inspect the residual shape before reducing it and compare against a known aligned example.
-
-This is also why a reshape should express a data contract. A singleton feature axis can mean one offset per observation; a singleton observation axis can mean one offset per feature. They are different operations even when an unlucky square fixture makes both expressions run.
+Both routes end in a scalar, so checking only the loss value's type or whether it can be differentiated will miss the semantic error. Inspect the residual shape before reducing it, and first test an aligned example whose expected residuals are known. A singleton axis communicates which data should be reused; it is not a cosmetic reshape.
 
 $$
 (A + b)_{i,j} = A_{i,j} + b_j, \qquad A \in \mathbb{R}^{M \times N},\; b \in \mathbb{R}^{1 \times N}
@@ -71,9 +71,9 @@ Use distinguishable values, such as feature bias $[10, 20, 30]$ and row offsets 
 
 ## A legal broadcast can change your loss
 
-Predictions with shape $(B,)$ and targets with shape $(B, 1)$ broadcast to $(B, B)$. Each row then compares one target to every prediction. A mean over that matrix is a scalar, so a later gradient transform can accept it even though the objective is wrong.
+Predictions with shape $(B,)$ and targets with shape $(B,1)$ align as $(1,B)$ and $(B,1)$, producing all pairwise residuals of shape $(B,B)$. For the recorded three-element example, matching predictions and targets should give three zeros, but the broadcast matrix has rows $[0,2,4]$, $[-2,0,2]$, and $[-4,-2,0]$. The output scalar after a mean hides that extra pairwise comparison.
 
-For predictions $[1, 3, 5]$ and matching targets, the intended residual vector is all zero. A column target produces rows $[0, 2, 4]$, $[-2, 0, 2]$, $[-4, -2, 0]$, and a positive mean-squared error. Independent expected values expose the bug immediately. Validate prediction/target shape equality at the boundary where aligned examples are required.
+This is a plausible loss with the wrong meaning, not a numerical instability. Enforce shape equality at the boundary where each prediction must pair with one target, then reduce. For feature-wise bias, $(D,)$ repeats across rows; for row-wise offsets, $(B,1)$ repeats across features.
 
 ```text
 (B,) − (B,1) → (B,B)
@@ -168,7 +168,7 @@ visual_data = {'kind': 'heatmap', 'values': (y - batch).tolist(), 'rows': ['obse
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:19:59.580056+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:02:39.148607+00:00. JAX 0.9.2.
 
 ```text
 [[11. 22. 33.]
@@ -230,22 +230,31 @@ Add a different scalar offset to each row using offsets $[100., 200.]$. Make its
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- A `(2, 3)` batch and one scalar row offset per observation.
 
-**Step-by-step implementation plan:**
-1. Check tensor shape invariant: `offsets.shape == (2, 1)`
+**Outputs:**
+- An explicit offset shape and the row-offset result.
+
+**Invariants to check:**
+- The feature axis remains length three.
+- Each row receives its own scalar offset.
+- The batch shape is unchanged.
+
+**Hints:**
+- Make the singleton feature dimension explicit.
+- Keep row offsets distinct from feature biases.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Add a different scalar offset to each row using offsets [100., 200.].
-offsets = jnp.array(...)  # TODO: compute offsets
-z = ...  # TODO: compute z
-# Check tensor shape invariant: `offsets.shape == (2, 1)`
-assert offsets.shape  # TODO: complete assertion check
-assert jnp.allclose(z, jnp.array([[101.,102.,103.],[204.,205.,206.]]))  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def add_row_offsets(batch, row_offsets):
+    # TODO: arrange offsets to broadcast over features
+    offsets_by_row = ...
+    result = ...
+    return result, offsets_by_row
 ```
 
 <details><summary>Reference solution</summary>
@@ -275,22 +284,28 @@ Use bias shape $(3,)$ and offsets shape $(2, 1)$. Do not swap their semantic rol
 
 ### How to write: Use both kinds of offsets together — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- The lesson batch, feature bias, and two row offsets.
 
-**Step-by-step implementation plan:**
-1. Use both kinds of offsets together (Practice)
-2. Check tensor shape invariant: `combined.shape == (2, 3)`
+**Outputs:**
+- The combined table with both offsets applied.
+
+**Invariants to check:**
+- Feature bias and row offsets have different axes.
+- The output retains the original batch shape.
+
+**Hints:**
+- Give each offset an explicit shape before adding.
+- Verify every row and feature.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Use both kinds of offsets together (Practice)
-combined = ...  # TODO: compute combined
-# Check tensor shape invariant: `combined.shape == (2, 3)`
-assert combined.shape  # TODO: complete assertion check
-assert jnp.allclose(combined, jnp.array([[111., 122., 133.], [214., 225., 236.]]))  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def combine_offsets(batch, feature_bias, row_offsets):
+    # TODO: apply feature and observation offsets with distinct shapes
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -321,28 +336,28 @@ Raise a descriptive ValueError before subtracting. The check is based on shape m
 
 ### How to write: Reject an aligned-loss contract violation — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- Prediction and target arrays with matching vector shapes, then a column-shaped target.
 
-**Step-by-step implementation plan:**
-1. Reject an aligned-loss contract violation (Challenge)
+**Outputs:**
+- A scalar MSE for aligned vectors and a descriptive mismatch error.
+
+**Invariants to check:**
+- Shape metadata is checked before subtraction.
+- Do not silently reshape or broadcast mismatched data.
+
+**Hints:**
+- Compare shape tuples before arithmetic.
+- Use a clear exception for invalid alignment.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Reject an aligned-loss contract violation (Challenge)
+import jax.numpy as jnp
+
 def aligned_mse(prediction, target):
-    if prediction.shape != target.shape:
-        raise ValueError("aligned prediction and target shapes must match")
-    return ...  # TODO: return computed result
-assert jnp.allclose(aligned_mse(predictions, targets), 0.)  # TODO: complete assertion check
-try:
-    aligned_mse(predictions, targets[:, None])
-except ValueError:
-    pass
-else:
-    raise AssertionError("Column targets must be rejected")
+    # TODO: reject shape mismatch before computing scalar mean squared error
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -376,9 +391,17 @@ Which offset shape adds one scalar to each row of a $(2, 3)$ batch?
 
 <details><summary>Answer and explanation</summary>
 
-$(2, 1)$
+**1. $(2,)$**
+
+Broadcasting aligns trailing dimensions, so a length-two vector cannot match the trailing length-three axis. Add a singleton feature axis.
+
+**2. $(2, 1)$ (correct)**
 
 $(2, 1)$ broadcasts across the three columns. Shape $(2,)$ conflicts with the trailing dimension $3$.
+
+**3. $(3, 2)$**
+
+This has the axes reversed. Write one offset per row and repeat it across the three columns using shape $(2,1)$.
 
 </details>
 

@@ -1,0 +1,92 @@
+{
+  "semantic-equations": {
+    "number": 74,
+    "url": "https://github.com/mlnomadpy/jaxpathways/issues/74",
+    "title": "[P1][Content] Align displayed equations with the actual lessons and qualify replay/timing claims"
+  },
+  "attention-permutation": {
+    "number": 75,
+    "url": "https://github.com/mlnomadpy/jaxpathways/issues/75",
+    "title": "[P1][Content] Make the attention permutation exercise solvable from its stated inputs"
+  },
+  "rl-discount": {
+    "number": 76,
+    "url": "https://github.com/mlnomadpy/jaxpathways/issues/76",
+    "title": "[P1][Content] Align value-fitting targets with the discount used by the GAE example"
+  },
+  "tpu-readiness": {
+    "number": 77,
+    "url": "https://github.com/mlnomadpy/jaxpathways/issues/77",
+    "title": "[P1][Content] Make TPU readiness, launch and cleanup instructions agree with the tested scope"
+  },
+  "precision-ledger": {
+    "number": 78,
+    "url": "https://github.com/mlnomadpy/jaxpathways/issues/78",
+    "title": "[P1][Content] Report the actual storage and operand bytes for each precision policy"
+  },
+  "exercise-contracts": {
+    "number": 79,
+    "url": "https://github.com/mlnomadpy/jaxpathways/issues/79",
+    "title": "[P2][Content] Make worked solutions produce the evidence their exercises require"
+  },
+  "network-debugging": {
+    "number": 80,
+    "url": "https://github.com/mlnomadpy/jaxpathways/issues/80",
+    "title": "[P2][Content] Teach neural-network failure localization with an actual multilayer model"
+  },
+  "profiler-teaching": {
+    "number": 81,
+    "url": "https://github.com/mlnomadpy/jaxpathways/issues/81",
+    "title": "[P2][Content] Use a stable profiling workload and teach a real timeline interpretation task"
+  },
+  "placement-memory": {
+    "number": 82,
+    "url": "https://github.com/mlnomadpy/jaxpathways/issues/82",
+    "title": "[P2][Content] Connect model sharding to a per-device memory-fit exercise"
+  },
+  "framework-bridge": {
+    "number": 83,
+    "url": "https://github.com/mlnomadpy/jaxpathways/issues/83",
+    "title": "[P2][Content] Extend framework parity from Dense/MLP layers to attention and sequence semantics"
+  },
+  "pretraining-transfer": {
+    "number": 84,
+    "url": "https://github.com/mlnomadpy/jaxpathways/issues/84",
+    "title": "[P2][Content] Bridge masked and contrastive mechanics to held-out saved-encoder exercises"
+  },
+  "posttraining-transfer": {
+    "number": 85,
+    "url": "https://github.com/mlnomadpy/jaxpathways/issues/85",
+    "title": "[P2][Content] Provide a guided sequence-model handoff for SFT, reward learning and DPO"
+  },
+  "lora-identity": {
+    "number": 86,
+    "url": "https://github.com/mlnomadpy/jaxpathways/issues/86",
+    "title": "[P2][Content] Make the LoRA adapter artifact enforce the base identity taught in prose"
+  },
+  "ops-evaluation": {
+    "number": 87,
+    "url": "https://github.com/mlnomadpy/jaxpathways/issues/87",
+    "title": "[P2][Content] Connect MLOps and LLMOps gates to actual prediction and trace evidence"
+  },
+  "release-lifecycle": {
+    "number": 88,
+    "url": "https://github.com/mlnomadpy/jaxpathways/issues/88",
+    "title": "[P2][Content] Demonstrate behavioral rollback and model retirement in the release lessons"
+  },
+  "scaffold-load": {
+    "number": 89,
+    "url": "https://github.com/mlnomadpy/jaxpathways/issues/89",
+    "title": "[P2][Content] Stage long operations and recovery listings around the concept being learned"
+  },
+  "mechanism-figures": {
+    "number": 90,
+    "url": "https://github.com/mlnomadpy/jaxpathways/issues/90",
+    "title": "[P2][Content] Add concept-specific diagrams where current plots do not show the mechanism"
+  },
+  "prerequisite-handoffs": {
+    "number": 91,
+    "url": "https://github.com/mlnomadpy/jaxpathways/issues/91",
+    "title": "[P2][Content] Expose lesson-level prerequisites and a clear CPU-first setup route"
+  }
+}

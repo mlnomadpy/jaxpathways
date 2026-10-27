@@ -21,14 +21,12 @@ JAX can return an array handle before device work finishes. A benchmark must def
 
 ## Time a completed result
 
-If a timer stops as soon as dispatch returns, it may exclude most of the computation. Blocking on the result inside the interval includes completion of the work required to produce that result.
+A JAX call can return a handle before its device work is complete, so a timer that stops at return may measure dispatch rather than the finished result. Wait on the output before stopping the clock when the question is completed-result latency.
 
-Warm up the intended specialization before measuring repeated execution, and retain startup separately if it matters to the application. Include preprocessing and transfers in a separately named end-to-end measurement when they belong to the request.
-
-The first-call and warm bars represent different intervals. Their ratio depends on the workload and environment. A short dispatch time is not evidence of device throughput, and a warm kernel timing does not describe an entire service request.
+Separate first-call preparation from repeated calls, and name the boundary you care about. This lesson starts with inputs already placed; an end-to-end request would need a different interval that includes whichever preparation and transfers belong to that request.
 
 $$
-T_{\text{warm}} = \operatorname{median}_{r=1 \dots R}\left(t_{\text{ready}}^{(r)} - t_{\text{start}}^{(r)}\right), \qquad T_{\text{first}} = T_{\text{compile}} + T_{\text{warm}}
+T_{\rm first}=t_{\rm first,ready}-t_{\rm first,start},\qquad T_{\rm warm}=\operatorname{median}_r(t_{r,\rm ready}-t_{r,\rm start})
 $$
 
 ### Time the completed result
@@ -39,7 +37,7 @@ $$
 
 *Architecture and dataflow mechanism diagram.*
 
-The host dispatches and waits while device work proceeds. The measurement lane includes readiness. Lengths illustrate ordering only and are not measured durations. Compilation and data preparation need separately chosen boundaries when included in a benchmark.
+Read left to right: already-ready inputs reach the host, the host dispatches a call, and the device-work lane proceeds while the host waits. The timer bracket starts at dispatch and ends at result readiness, so the wait is inside the measurement. The arrows show dependency and elapsed ordering, not measured durations; input preparation and optional compilation need their own boundary if the question includes them.
 
 ### Pause and reason
 
@@ -53,9 +51,9 @@ Before stopping the timer. Synchronizing afterward can omit unfinished work from
 
 ## Draw the boundary before starting the clock
 
-For our workload, the input has shape $(64, 32)$, the weights have shape $(32, 16)$, and the result has shape $(64, 16)$. Matrix multiplication contracts the feature dimension, then tanh transforms each prediction. The timer starts after both input arrays are placed on CPU and ready. It stops after the output is ready.
+The workload maps $(64,32)$ times $(32,16)$ to $(64,16)$, then applies tanh. Both inputs are placed on CPU and ready before the timer starts; the timer stops after the output is ready. Thus the interval includes host dispatch and completion waiting, while input creation, initial placement and conversion to NumPy are outside it.
 
-That interval includes Python dispatch, execution and the final wait. It is not an isolated kernel duration. Data generation, initial placement and output conversion to NumPy are outside it. A serving request or data-loading benchmark would deliberately include different boundaries; specify which question your measurement answers.
+Use this boundary for the question “how long until this placed-input result is ready?” It is not a kernel-only duration or a full serving request.
 
 ```text
 prepare host arrays → place → wait | start → call → result handle → wait → stop | inspect host values
@@ -63,21 +61,23 @@ prepare host arrays → place → wait | start → call → result handle → wa
 
 ## A handle is not proof of completion
 
-Python can receive a JAX array before its contents finish computing. Reading shape or dtype can use metadata without reading the values. Calling block_until_ready on the result waits for readiness. Converting it to NumPy also requires the values, but adds a host-materialization boundary.
+Python can receive a JAX array while its values are still being computed. Shape and dtype are metadata; `block_until_ready` waits for the result, while conversion to NumPy also materializes values on the host. Put the wait inside the timed interval when reporting completed-result latency.
 
-CPU dispatch behavior and workload size may make the difference difficult to see. If a handle-only interval is close to a synchronized interval on this machine, that does not justify removing synchronization from a portable benchmark. Timing two independent calls cannot be subtracted to obtain an exact queue or execution cost.
+This CPU workload may make an unsynchronized and synchronized timing look similar. That observation does not turn a handle-return timer into a portable completion measurement, and subtracting separate calls cannot isolate exact queue or execution time.
 
 ## First call and steady state answer different questions
 
-A fresh jitted function can trace its Python body, lower the resulting program, obtain an executable and run it. The first-call timer combines these stages. Persistent caches and prior process activity can alter the result, so call it first-call latency for this process rather than an exact compilation measurement.
+The first jitted call can trace Python, lower the program, obtain an executable and run it. The first-call timer includes that combined interval. Later calls with the same signature can reuse the executable, so the warm samples answer a different question: how long does repeated completed work take in this process?
 
-We then run seven synchronized repeats with identical shapes and dtypes. The list reveals variation; the median gives a compact center. Seven samples are an instructional start, not a confidence interval. Increase repetitions and document contention, power state and process initialization before drawing deployment conclusions.
+For a worked conversion, suppose a first call took $40$ milliseconds and a warm call took $20$ microseconds. Converting both to seconds gives $0.04$ and $0.00002$, a ratio of $2000$. These illustrative values explain the unit conversion, not a promised speedup. Nor would their difference isolate compilation: the first interval can include other first-use work.
+
+Keep every warm sample beside the median. Seven observations show variation but do not establish a confidence interval or deployment behavior. The plot and the script receipt are separate captures; use each capture's own samples when calculating its summary.
 
 ## Correctness comes before a speed ratio
 
-The NumPy reference uses the same float32 inputs and computes the same matrix product and tanh. Floating-point reduction order can vary, so the comparison permits small absolute and relative differences rather than demanding bit equality. We record maximum absolute error as well.
+The NumPy reference uses the same float32 inputs, matrix product and tanh. The recorded maximum absolute error is about $2.38\times10^{-7}$, within the declared tolerance. Check this equivalence before comparing timing.
 
-Comparing a float64 reference against an unreported float32 JAX computation, or comparing different matrix sizes, would mix numerical work with implementation differences. A faster answer to a different problem is not evidence of optimization. Retain both workload contracts and both checks in the report.
+If dtype, shape or operation differs, a lower time answers a different question. Keep the workload contract and numerical error next to the timing report.
 
 ## Prepare and place the workload
 
@@ -233,15 +233,15 @@ Expected: A JSON benchmark report: input_shape $[64, 32]$, weight_shape $[32, 16
 
 ### Read the figure
 
-The upper panel measures the first synchronized call. The lower panel measures repeated warm calls, with sample number on the horizontal axis. Both report seconds, but they have independent vertical scales. Compare the tick values and any scientific-notation multiplier, not the physical heights of the panels.
+The upper panel has one bar for the first synchronized call; the lower panel has seven points for repeated synchronized calls of the same signature. Both vertical axes are seconds, but they use independent scales. Read the tick values and any scientific-notation multiplier before comparing heights across panels.
 
-The recorded first call is much longer than the warm calls. For orientation, $10^{-2}$ seconds is $10$ milliseconds, while $10^{-5}$ seconds is $10$ microseconds. A multiplier printed beside an axis applies to all its tick labels; overlooking it can hide a difference of orders of magnitude.
+The first-call interval is on the order of hundredths of a second in this local capture, while the warm points are much smaller. Each lower-panel dot is a repeated timing sample, not a training step, and its vertical movement is timing variation rather than an improving objective. Find the minimum and maximum dots, then locate the median among all seven values. One unusually low sample is not a repeatable latency estimate.
 
 ### Connect it to the computation
 
-The first measurement includes work needed to prepare this specialization, including tracing and compilation. Compatible warm calls reuse it. Each measurement waits for the result, so it includes completed computation rather than only the time needed to dispatch work. Inputs are already placed before this measured boundary.
+Inputs were already placed before both measurements, and each interval ends when the output is ready. The first interval can include preparation plus execution; the warm interval measures reuse of the same compiled signature. The separate execution receipt is another run of that protocol, so its individual timings need not equal the plotted capture.
 
-The warm line shows variation between individual samples. An isolated higher point is a slower sample, not proof of recompilation or a changing model. Read the recorded median alongside the full sample list, and rerun before comparing implementations. These measurements describe this small CPU workload; they are separate from accelerator speed or end-to-end request latency.
+Now change the question: if a user supplies a fresh NumPy input for every request, which preparation or placement costs belong inside the timer? Draw that new boundary before comparing it with this resident-input result. A valid timing comparison needs equivalent work as well as a common unit.
 
 ```python
 visual_data = {'kind': 'panels', 'panels': [{'kind': 'bar', 'title': 'First call', 'labels': ['first'], 'ylabel': 'seconds', 'series': [{'label': 'synchronized call', 'y': [first_call_seconds]}]}, {'kind': 'line', 'title': 'Warm calls', 'x': list(range(1, len(samples) + 1)), 'xlabel': 'warm sample', 'ylabel': 'seconds', 'series': [{'label': 'synchronized call', 'y': samples}]}]}
@@ -249,7 +249,7 @@ visual_data = {'kind': 'panels', 'panels': [{'kind': 'bar', 'title': 'First call
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:22:11.246292+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:13:51.978305+00:00. JAX 0.9.2.
 
 ```text
 {
@@ -267,17 +267,17 @@ CPU run: 2026-10-20T22:22:11.246292+00:00. JAX 0.9.2.
   ],
   "dtype": "float32",
   "boundary": "input already placed; call plus output synchronization",
-  "first_call_seconds": 0.02772512473165989,
+  "first_call_seconds": 0.057142124976962805,
   "warm_samples_seconds": [
-    7.50841572880745e-05,
-    2.8582755476236343e-05,
-    1.5583820641040802e-05,
-    1.0250136256217957e-05,
-    8.750241249799728e-06,
-    9.667128324508667e-06,
-    7.542315870523453e-06
+    0.00012704217806458473,
+    5.745887756347656e-05,
+    4.9666035920381546e-05,
+    1.4457851648330688e-05,
+    1.058308407664299e-05,
+    1.0292045772075653e-05,
+    9.458977729082108e-06
   ],
-  "warm_median_seconds": 1.0250136256217957e-05,
+  "warm_median_seconds": 1.4457851648330688e-05,
   "max_abs_error": 2.384185791015625e-07
 }
 {
@@ -295,25 +295,25 @@ CPU run: 2026-10-20T22:22:11.246292+00:00. JAX 0.9.2.
   ],
   "dtype": "float32",
   "boundary": "input already placed; call plus output synchronization",
-  "first_call_seconds": 0.018220333848148584,
+  "first_call_seconds": 0.030218500178307295,
   "warm_samples_seconds": [
-    3.875000402331352e-05,
-    3.062514588236809e-05,
-    2.5833025574684143e-05,
-    1.2707896530628204e-05,
-    1.0082963854074478e-05,
-    8.874572813510895e-06,
-    8.58306884765625e-06
+    0.00024641724303364754,
+    0.00013183290138840675,
+    0.0004402496851980686,
+    0.00034912489354610443,
+    0.00017945794388651848,
+    9.325006976723671e-05,
+    0.0001166253350675106
   ],
-  "warm_median_seconds": 1.2707896530628204e-05,
+  "warm_median_seconds": 0.00017945794388651848,
   "max_abs_error": 2.384185791015625e-07
 }
-Handle-only seconds: 9.416136890649796e-06
-Complete-call samples: [1.4209188520908356e-05, 8.459202945232391e-06, 7.4999406933784485e-06]
-Structured samples: [4.058331251144409e-05, 2.4874694645404816e-05, 1.712469384074211e-05]
-Changed workload: (96, 32) [3.424985334277153e-05, 9.708106517791748e-06, 8.708331733942032e-06, 9.874813258647919e-06, 6.9998204708099365e-06]
-Energy shape and samples: (64,) [2.49580480158329e-05, 1.2541655451059341e-05, 1.0833144187927246e-05, 9.665731340646744e-06, 8.333008736371994e-06]
-{'boundary': 'placed inputs; warm call plus output wait', 'samples': [7.207971066236496e-06, 9.458977729082108e-06, 7.667113095521927e-06, 8.875038474798203e-06, 1.2541655451059341e-05]}
+Handle-only seconds: 3.370782360434532e-05
+Complete-call samples: [3.7457793951034546e-05, 2.9458198696374893e-05, 1.7083249986171722e-05]
+Structured samples: [0.0005777501501142979, 0.00021449988707900047, 0.00011362507939338684]
+Changed workload: (96, 32) [7.704179733991623e-05, 2.133287489414215e-05, 3.7250109016895294e-05, 8.712522685527802e-05, 4.124967381358147e-05]
+Energy shape and samples: (64,) [9.020790457725525e-05, 8.579203858971596e-05, 3.191595897078514e-05, 1.8458813428878784e-05, 1.4250166714191437e-05]
+{'boundary': 'placed inputs; warm call plus output wait', 'samples': [4.637520760297775e-05, 0.00023041712120175362, 0.0006031668744981289, 0.00011795805767178535, 7.745902985334396e-05]}
 PASS: performance-01
 
 ```
@@ -365,33 +365,30 @@ Repeat the benchmark with $96$ rows while preserving the feature and output dime
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `Mesh + PartitionSpec + NamedSharding` — Maps logical tensor axes onto physical device mesh axes for SPMD data, tensor, or pipeline parallelism.
-- `jax.block_until_ready(output)` — Synchronizes with the accelerator/CPU device so asynchronous dispatch finishes before wall-clock timing.
+**Inputs:**
+- A JAX function, fixed workload, warmup count, and repeat count.
 
-**Step-by-step implementation plan:**
-1. Exercise solution
-2. Place `larger` explicitly onto the target JAX device.
-3. Wait for device work to finish before timing it or comparing its result on the host.
-4. Wait for device work to finish before timing it or comparing its result on the host.
-5. Transfer the device result to the host for an independent NumPy comparison.
+**Outputs:**
+- Raw synchronized timings with compilation separated from warmed execution.
+
+**Invariants to check:**
+- Every sample waits for completed output; workload shape/dtype and timing boundary are recorded.
+
+**Hints:**
+- Call block_until_ready inside each measured interval.
+- Use an independent NumPy result for the changed equivalent workload.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-larger_host = rng.normal(...)  # TODO: compute larger_host
-# Place `larger` explicitly onto the target JAX device.
-larger = jax.device_put(...)  # TODO: compute larger
-# Wait for device work to finish before timing it or comparing its result on the host.
-larger.block_until_ready()
-# Wait for device work to finish before timing it or comparing its result on the host.
-compiled_predict(larger, w).block_until_ready()
-larger_result, larger_times = synchronized_samples(...)  # TODO: compute larger_result, larger_times
-# Transfer the device result to the host for an independent NumPy comparison.
-np.testing.assert_allclose(np.asarray(larger_result), np.tanh(larger_host @ w_host), atol=2e-5, rtol=2e-5)
-print("Changed workload:", larger.shape, larger_times)
+import jax.numpy as jnp
+import time
+import statistics
+
+def synchronized_benchmark(function, arguments, warmup, repeats):
+    """Raw synchronized timings with compilation separated from warmed execution."""
+    # TODO: Warm the selected JAX function and synchronize every timed result while retaining raw samples.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -427,35 +424,30 @@ Square before reducing the output-feature axis; the result has shape $(64,)$.
 
 ### How to write: Benchmark a different equivalent workload — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.jit(fn) / @jax.jit` — Traces `fn` for its input signatures and compiles an executable. Changed shapes, dtypes or static arguments can trigger another compilation.
-- `jax.block_until_ready(output)` — Synchronizes with the accelerator/CPU device so asynchronous dispatch finishes before wall-clock timing.
+**Inputs:**
+- Replace tanh with a row-wise sum of squared predictions, returning one scalar per row. Derive the NumPy reference, warm this new function, collect five synchronized samples and record the changed output shape.
 
-**Step-by-step implementation plan:**
-1. Wrap with `jax.jit` (`energy`) so XLA traces and compiles the function.
-2. Wait for device work to finish before timing it or comparing its result on the host.
-3. Reduce along axis=1 to compute `energy_reference`.
-4. Check tensor shape invariant: `energy_result.shape == (64,)`
-5. Transfer the device result to the host for an independent NumPy comparison.
+**Outputs:**
+- Per-row scalar outputs, NumPy parity, and five completed timing samples.
+
+**Invariants to check:**
+- The benchmark synchronizes each output and records the changed output shape.
+
+**Hints:**
+- Square before reducing the output-feature axis; the result has shape $(64,)$.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Benchmark a different equivalent workload (Transfer): Changing the computation changes the performance question.
-# Wrap with `jax.jit` (`energy`) so XLA traces and compiles the function.
-energy = jax.jit(...)  # TODO: compute energy
-# Wait for device work to finish before timing it or comparing its result on the host.
-energy(x, w).block_until_ready()
-energy_result, energy_times = synchronized_samples(...)  # TODO: compute energy_result, energy_times
-# Reduce along axis=1 to compute `energy_reference`.
-energy_reference = np.sum(...)  # TODO: compute energy_reference
-# Check tensor shape invariant: `energy_result.shape == (64,)`
-assert energy_result.shape  # TODO: complete assertion check
-# Transfer the device result to the host for an independent NumPy comparison.
-np.testing.assert_allclose(np.asarray(energy_result), energy_reference, atol = ...  # TODO: compute np.testing.assert_allclose(np.asarray(energy_result), energy_reference, atol
-print("Energy shape and samples:", energy_result.shape, energy_times)
+import jax.numpy as jnp
+import numpy as np
+import time
+import statistics
+
+def practice_benchmark_a_different_equivalent_workload(features, weights):
+    """Implement the benchmark a different equivalent workload check."""
+    # TODO: Implement row-wise squared-sum predictions, derive a NumPy reference, warm the changed function, and collect five synchronized samples.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -494,32 +486,28 @@ Prepare and wait for inputs, reuse one compiled callable, warm it, then synchron
 
 ### How to write: Repair a timer that includes setup but omits completion — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.block_until_ready(output)` — Synchronizes with the accelerator/CPU device so asynchronous dispatch finishes before wall-clock timing.
+**Inputs:**
+- Inspect the broken timer below conceptually: start; create inputs; call `jit(predict)(inputs)`; stop. Write a repaired runner and show its explicit boundary. Explain which stages the broken interval mixes and misses.
 
-**Step-by-step implementation plan:**
-1. Repair a timer that includes setup but omits completion (Diagnosis)
-2. Wait for device work to finish before timing it or comparing its result on the host.
-3. Wait for device work to finish before timing it or comparing its result on the host.
-4. Transfer the device result to the host for an independent NumPy comparison.
+**Outputs:**
+- A runner with separately stated setup and completed-work timing boundaries.
+
+**Invariants to check:**
+- The measured interval contains the declared workload and waits for its result.
+
+**Hints:**
+- Prepare and wait for inputs, reuse one compiled callable, warm it, then synchronize the returned output inside every measured interval.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Repair a timer that includes setup but omits completion (Diagnosis)
-def repaired_benchmark(fn, args):
-    # Wait for device work to finish before timing it or comparing its result on the host.
-    jax.block_until_ready(args)
-    # Wait for device work to finish before timing it or comparing its result on the host.
-    jax.block_until_ready(fn(*args))
-    result, measured = synchronized_samples(...)  # TODO: compute result, measured
-    return ...  # TODO: return computed result
-fixed_report, fixed_result = repaired_benchmark(...)  # TODO: compute fixed_report, fixed_result
-# Transfer the device result to the host for an independent NumPy comparison.
-np.testing.assert_allclose(np.asarray(fixed_result), reference, atol = ...  # TODO: compute np.testing.assert_allclose(np.asarray(fixed_result), reference, atol
-assert len(fixed_report["samples"])  # TODO: complete assertion check
-print(fixed_report)
+import jax.numpy as jnp
+import time
+
+def practice_repair_a_timer_that_includes_setup_but_omits_completion(function, arguments):
+    """Implement the repair a timer that includes setup but omits completion check."""
+    # TODO: Move input creation outside the timed region and block on the output before stopping the clock.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -554,9 +542,17 @@ What does the synchronized warmed timer in this lesson measure?
 
 <details><summary>Answer and explanation</summary>
 
-A warmed call including dispatch and waiting for output readiness, excluding prior input placement
+**1. Only the accelerator kernel, with all dispatch overhead removed**
+
+The measured boundary includes host dispatch and the wait. Calling it pure device-kernel time requires a device trace.
+
+**2. A warmed call including dispatch and waiting for output readiness, excluding prior input placement (correct)**
 
 The boundary includes the call and its completion wait. It excludes input placement and does not isolate compiler or kernel stages.
+
+**3. Exactly the compiler duration**
+
+Warmup has already performed compilation for the tested signature. A new shape or static argument may still introduce another compilation.
 
 </details>
 

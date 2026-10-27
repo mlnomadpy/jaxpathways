@@ -1,0 +1,9 @@
+{
+  "recordedAt": "2026-10-22T13:21:27.500601+00:00",
+  "status": "unqualified",
+  "application": "Apple Books",
+  "observedExistingWindow": "JAX Pathways: course reader 0.14.0",
+  "attempt": "File > Import, select current EPUB using Go to Folder",
+  "result": "ScreenCaptureKit SCStreamErrorDomain -3812 invalid parameter during final path selection; subsequent app read also failed. No import completion or current-version reading verified.",
+  "scope": "No native EPUB or assistive-technology acceptance claimed."
+}

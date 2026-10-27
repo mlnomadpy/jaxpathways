@@ -15,7 +15,7 @@
       {
         "id": "guided-reasoning",
         "title": "A moving chain is not automatically a well-mixed chain",
-        "body": "Follow position and momentum through a leapfrog trajectory. A proposal can travel far without behaving like an independent posterior draw. Integration error and acceptance behavior provide one diagnostic, while between-chain agreement and autocorrelation provide others.\n\nStart multiple chains from meaningfully different positions where appropriate. Inspect the same retained sampling region across chains, and separate adaptation from retained draws. A trace that looks active may still stay in one region or be strongly correlated.\n\nThe lesson's trace plot uses a known posterior mean as a reference. Matching that mean is not sufficient: spread and dependence matter too. Compute diagnostics from the retained samples with their conventions recorded; plotting a thinned subset should not silently redefine the diagnostic sample.",
+        "body": "The trace figure follows the first parameter coordinate for four chains after a fixed discard of 400 transitions. The lines cross the known mean of 1, and the executed sample mean is about 0.984; this is evidence about the marginal average, not proof that successive draws are independent or that every possible mode was found.\n\nThe sampler retains rejected states as repeated values because each transition still contributes to the Markov chain's target distribution. The recorded acceptance rates are high, about 0.977 to 0.986, but high acceptance alone can accompany slow movement when the step is tiny. Compare trace behavior, covariance and chain diagnostics together; a thinned plot is for readability and does not change the samples used by the diagnostics.",
         "check": {
           "prompt": "Why can many saved samples still provide little effective information?",
           "answer": "Strong dependence or poor exploration can make them redundant. Sample count and effective sample size answer different questions; neither a smooth trace nor a correct mean alone establishes adequate mixing."
@@ -40,7 +40,11 @@
       },
       {
         "title": "Use the reference model to expose failure",
-        "body": "Here the exact mean, variance and covariance are known. Check all of them: getting both marginal means right can still hide missing correlation. Acceptance alone is insufficient; a tiny step can accept almost everything while exploring slowly. Effective sample size concerns the information in correlated draws, not the number of rows stored. Before using a library such as NumPyro on an unknown posterior, repeat an exact-model validation and inspect its documented diagnostics. This CPU fixture establishes neither multimodal exploration nor accelerator performance."
+        "body": "For this known correlated Gaussian, the retained sample mean is approximately \\([0.984,-1.019]\\), and the sampled covariance is about \\([[0.980,0.773],[0.773,0.986]]\\), close to the target's mean \\([1,-1]\\) and covariance with off-diagonal 0.8. Classical split R-hat is about 1.0002 for both coordinates. Those checks support this fixture's exploration but do not certify a different posterior, especially a multimodal one.\n\nThe deliberately damaged step size changes the situation: the recorded bad-run acceptance is zero and its maximum energy error is roughly \\(5.02\\times10^{10}\\). That is a numerical integration failure, distinct from ordinary Monte Carlo variation. If the step were reduced, acceptance would likely recover for this target, but movement per transition could become smaller; inspect effective information as well as acceptance."
+      },
+      {
+        "title": "Optional NumPyro check against a conjugate posterior",
+        "body": "The project extension at `projects/bayesian-regression/` adds a real NumPyro NUTS run in its own pinned optional CPU environment. It runs four chains, compares sampled means and covariance to a separate host NumPy precision solve using estimated Monte Carlo standard errors, and repeats after changing the random seed, number of observations and parameter dimension. Its diagnostics use rank-normalized split R-hat, bulk ESS, tail ESS and the sampler divergence count. These answer different questions: R-hat compares chains, ESS estimates information after serial correlation, and divergences flag problematic Hamiltonian transitions. None establishes that every mode was explored. The saved diagnostic plot and the exact values used to draw it are under `projects/bayesian-regression/reference/numpyro/`. The optional workflow does not replace the transparent sampler built in this lesson or validate TPU performance."
       }
     ],
     "output": "The pooled mean and covariance approach the stated target within the fixture tolerances. The two classical split R-hat values, one per parameter coordinate, remain near \\(1\\); acceptance is reported separately for each chain.",
@@ -78,7 +82,23 @@
         "prompt": "Construct four arrays with similar within-chain variation but means separated by four units. Verify that classical split R-hat flags disagreement.",
         "hint": "Use independent small noise around four different constants.",
         "solution": "# Catch chains trapped at different levels (Transfer / diagnosis)\n# Create or split explicit PRNG key(s) (`fake`) for reproducible randomness.\nfake=jax.random.normal(jax.random.key(4),(4,600))*.1+jnp.arange(4)[:,None]*4\nassert split_rhat(fake)>5",
-        "explanation": "Between-chain variation dominates within-chain variation, so pooling would conceal a serious exploration problem."
+        "explanation": "Between-chain variation dominates within-chain variation, so pooling would conceal a serious exploration problem.",
+        "learnerStarter": {
+          "inputs": [
+            "Four chains with similar within-chain variation and means separated by four units."
+          ],
+          "outputs": [
+            "The classical split R-hat and a check that it flags the separated chain means."
+          ],
+          "invariants": [
+            "Chain identity is retained through splitting; a classical split diagnostic is reported, not a rank-normalized modern diagnostic."
+          ],
+          "hints": [
+            "Split each chain into two halves before computing within- and between-chain variation.",
+            "Keep the chain offsets and within-chain noise on separate axes."
+          ],
+          "code": "import jax.numpy as jnp\n\ndef check_classical_split_rhat(chains, split_rhat):\n    # TODO: Construct the specified separated chains and evaluate the classical split diagnostic.\n    raise NotImplementedError\n"
+        }
       },
       {
         "title": "Verify a directional derivative",
@@ -86,7 +106,23 @@
         "prompt": "At a nonzero position compare the autodiff directional derivative with the analytic precision-matrix expression. Then compare to a central difference.",
         "hint": "Use the same direction and a moderate float32 finite-difference step.",
         "solution": "# Verify a directional derivative (Transfer / diagnosis)\nq=jnp.array([.4,.8])\nv=jnp.array([.7,-.2])\neps=.001\nanalytic=(precision@(q-target_mean))@v\nauto=force(q)@v\nfinite=(potential(q+eps*v)-potential(q-eps*v))/(2*eps)\nnp.testing.assert_allclose(auto,analytic,rtol=1e-6)\nnp.testing.assert_allclose(finite,analytic,rtol=.005,atol=.002)",
-        "explanation": "A sign error in potential or a transposed geometry can be isolated before tuning the sampler."
+        "explanation": "A sign error in potential or a transposed geometry can be isolated before tuning the sampler.",
+        "learnerStarter": {
+          "inputs": [
+            "The target mean and precision matrix, the log-density gradient, a nonzero position, a direction, and a finite-difference step."
+          ],
+          "outputs": [
+            "The analytic precision-matrix directional derivative, autodiff directional derivative, and central-difference estimate."
+          ],
+          "invariants": [
+            "All three derivatives use the same nonzero position and direction; the central difference perturbs only along that direction."
+          ],
+          "hints": [
+            "Form the analytic gradient action from the precision matrix and centered position.",
+            "Compare a symmetric log-density difference with the autodiff directional derivative."
+          ],
+          "code": "import jax\nimport jax.numpy as jnp\n\ndef compare_gaussian_directional_derivatives(log_density, mean, precision, point, direction, epsilon):\n    # TODO: Compare the analytic precision action, autodiff derivative, and central difference.\n    raise NotImplementedError\n"
+        }
       }
     ],
     "takeaways": [
@@ -112,8 +148,8 @@
       "title": "Four HMC traces around a known posterior mean",
       "kind": "executed",
       "prediction": "Can the chains cross the known mean while still showing successive correlated values?",
-      "reading": "The horizontal axis counts retained transitions after discarding the initial \\(400\\). The vertical axis is the first coordinate of the sampled parameter. Each colored line is one chain, plotted at every tenth retained transition to keep the figure readable. The target mean is \\(1\\); the chains move on both sides of it. Their paths differ because they use different keys and initial positions. Connecting thinned points helps visual inspection but does not make the underlying draws independent.",
-      "connection": "This trace is one piece of the evidence. The code also checks the two-dimensional covariance, which a single-coordinate trace cannot show, and prints classical split R-hat and acceptance. A smooth-looking trace or repeated crossings of the mean is distinct from exploration of modes absent from this single-Gaussian fixture.",
+      "reading": "The horizontal axis counts retained transitions after the fixed discard of 400; the vertical axis is the first parameter coordinate. Four colored chains are plotted every tenth transition, and the horizontal reference is the known mean 1. The plotted values move on both sides of 1, including chain 1's sampled values near 0.96 and 0.11 early in the shown segment. Lines join thinned states for display; they do not imply independence.",
+      "connection": "The first-coordinate trace cannot show the covariance between coordinates. The full retained sample gives mean \\([0.984,-1.019]\\), covariance about \\([[0.980,0.773],[0.773,0.986]]\\), and classical split R-hat near 1.0002, while the damaged large-step run has zero acceptance and huge energy error. Use the trace as one diagnostic alongside these numerical checks; it cannot rule out shared failure to explore a mode.",
       "code": "indices=np.arange(0,400,10)\n# Transfer the device result to the host for an independent NumPy comparison.\nvisual_data={\"kind\":\"line\",\"x\":indices.tolist(),\"xlabel\":\"retained transition (after fixed discard)\",\"ylabel\":\"first parameter coordinate\",\"series\":[{\"label\":\"chain \"+str(i+1),\"y\":np.asarray(samples[i,indices,0]).tolist()} for i in range(4)]}",
       "alt": "Four HMC traces around a known posterior mean. The horizontal axis counts retained transitions after discarding the initial \\(400\\). The vertical axis is the first coordinate of the sampled parameter. Each colored line is one chain, plotted at every tenth retained transition to keep the figure readable. The target mean is \\(1\\); the chains move on both sides of it. Their paths differ because they use different keys and initial positions. Connecting thinned points helps visual inspection but does not make the underlying draws independent."
     },
@@ -137,6 +173,30 @@
         "code": "# Step 3 — 3. Compare chains and an analytic oracle: The tolerances test this seeded Gaussian fixture only.\nstarts=jnp.array([[-4.,-4.],[-4.,4.],[4.,-4.],[4.,4.]])\n# Create or split explicit PRNG key(s) (`records`) for reproducible randomness.\nrecords=jax.vmap(lambda key,start:chain(key,start))(jax.random.split(jax.random.key(71),4),starts)\nsamples=records[0][:,400:,:]\ndef split_rhat(values):\n    # Classical split R-hat for one scalar coordinate; not rank-normalized.\n    half=values.shape[1]//2\n    split=jnp.concatenate([values[:,:half],values[:,-half:]],axis=0)\n    # Reduce along axis=1 to compute `within`.\n    within=jnp.var(split,axis=1,ddof=1).mean()\n    # Reduce along axis=1 to compute `between`.\n    between=half*jnp.var(split.mean(axis=1),ddof=1)\n    return jnp.sqrt(((half-1)*within/half+between/half)/within)\n# Vectorize across the batch dimension with `jax.vmap` (`rhats`).\nrhats=jax.vmap(split_rhat,in_axes=2)(samples)\npooled=samples.reshape(-1,2)\nassert jnp.max(jnp.abs(pooled.mean(0)-target_mean))<.15\nassert jnp.max(jnp.abs(jnp.cov(pooled.T)-target_cov))<.2\nassert jnp.all(rhats<1.05)\nprint('mean:',pooled.mean(0),'covariance:',jnp.cov(pooled.T))\nprint('classical split R-hat:',rhats,'acceptance:',records[1].mean(axis=1))",
         "explanation": "The tolerances test this seeded Gaussian fixture only. Agreement with a known posterior is stronger evidence here than a diagnostic threshold alone."
       }
-    ]
+    ],
+    "optionFeedback": [
+      "Chains trapped in the same mode can agree. Inspect traces, effective sample size and multiple initializations as well as R-hat.",
+      "R-hat near one does not remove serial correlation. Autocorrelation and effective sample size assess a different part of chain quality.",
+      "A diagnostic can reveal problems without proving their absence. Here we also compare to exact moments; an unknown target needs several diagnostics and model checks."
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "A target mean and covariance, chain starts, and a deliberately large leapfrog step size."
+      ],
+      "outputs": [
+        "Per-chain acceptance summaries, signed energy errors, and a saved position trace."
+      ],
+      "invariants": [
+        "A rejected transition retains the previous state.",
+        "A large positive energy error lowers acceptance probability.",
+        "The diagnostic report names its R-hat variant and does not infer convergence from acceptance alone."
+      ],
+      "hints": [
+        "Keep momentum and acceptance random keys independent.",
+        "Inspect energy error and trace movement together.",
+        "Compare with the exact Gaussian target before interpreting a sampler statistic."
+      ],
+      "code": "def summarize_unstable_trajectory(key, mean, covariance, starts, step_size):\n    \"\"\"Return transition summaries and the chain states for inspection.\"\"\"\n    # TODO: run the changed-step experiment and preserve per-chain evidence.\n    raise NotImplementedError"
+    }
   }
 }

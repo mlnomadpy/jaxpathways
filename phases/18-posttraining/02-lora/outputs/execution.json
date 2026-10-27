@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "posttraining-02",
-  "contentHash": "e7d104e494933051fe13e64e431849f5aa135b6df904d42819f8b3461e62154a",
-  "executedAt": "2026-10-20T22:26:55.630118+00:00",
+  "contentHash": "a65d2eca70cd24360177c44b6225e354095e6015814b00c27e1ff9cc272769cc",
+  "executedAt": "2026-10-27T16:12:08.346225+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -11,7 +11,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "LoRA initial/final: 0.043869297951459885 2.466217665642034e-07 ; trainable: 10 base: 24\nLoRA initial/final: 0.043869297951459885 2.466217665642034e-07 ; trainable: 10 base: 24\nBoth zero factors produce zero first gradients.\nBoth LoRA factor gradients match the matrix-calculus oracle at alpha/r = 1.5.\nAdapter round trip and merge checked.\nNew-input merge passes; accidental double merge changes outputs.\nNonunit scaling passes; best rank-one identity-input MSE is 0.25.\nPASS: posttraining-02\n",
+  "stdout": "LoRA initial/final: 0.043869297951459885 2.466217665642034e-07 ; trainable: 10 base: 24\nLoRA initial/final: 0.043869297951459885 2.466217665642034e-07 ; trainable: 10 base: 24\nBoth zero factors produce zero first gradients.\nBoth LoRA factor gradients match the matrix-calculus oracle at alpha/r = 1.5.\nNew-input merge passes; accidental double merge changes outputs.\nNonunit scaling passes; best rank-one identity-input MSE is 0.25.\nrank-two alpha/r=1.5 teaching-fit loss: 0.12098397314548492 1.915084067150019e-05\nFresh-process trained-factor round trip passed at alpha/r=1.5; wrong same-shape base and altered rank, alpha, target, and shape metadata were rejected.\nPASS: posttraining-02\n",
   "notebookCells": [
     {
       "sourceHash": "20d6b7cff812e0d71abc410176e8ff32aa7abc7bc10ad8ad962e016a78dcc365",
@@ -50,7 +50,7 @@
       "outputs": []
     },
     {
-      "sourceHash": "25df6d662f9d3f0c4e984c6a201f79fa0cfd7a2633dc4b0773dfba6c2dd4ee6c",
+      "sourceHash": "53dc08a479da44f2b1718bf964cd5c4d3e3305811c536df9d501b1833a6e3476",
       "outputs": [
         {
           "output_type": "display_data",
@@ -89,23 +89,15 @@
       ]
     },
     {
-      "sourceHash": "bbdbfc543c157d1515b0d60e094c054182e6cc2a7d8e18ea2b76a61f309ab269",
+      "sourceHash": "22d5d8896e54aecd8b70f9aafa0c68cf3475cdb9799648df8d1bbbd8b53d1ac8",
       "outputs": []
     },
     {
-      "sourceHash": "51dd61e473f10205093ab584de8e8eee1f9bf2f72fc9c38d7de0584795a01200",
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "Adapter round trip and merge checked.\n"
-          ]
-        }
-      ]
+      "sourceHash": "69d07b8a8b64f59e3351ad912c2055ba6dd6db49886fbf0fb4a6c808d7a99409",
+      "outputs": []
     },
     {
-      "sourceHash": "d4bc71d363a72938e3890bf60c6bafdcda81ecfbbc4a715730914a6811955ed9",
+      "sourceHash": "22d5d8896e54aecd8b70f9aafa0c68cf3475cdb9799648df8d1bbbd8b53d1ac8",
       "outputs": []
     },
     {
@@ -121,7 +113,7 @@
       ]
     },
     {
-      "sourceHash": "0caa7abf739a79cf550ec49cae2d301788a7b6f77bbda0d2e3dbbf63fb4db260",
+      "sourceHash": "22d5d8896e54aecd8b70f9aafa0c68cf3475cdb9799648df8d1bbbd8b53d1ac8",
       "outputs": []
     },
     {
@@ -132,6 +124,23 @@
           "name": "stdout",
           "text": [
             "Nonunit scaling passes; best rank-one identity-input MSE is 0.25.\n"
+          ]
+        }
+      ]
+    },
+    {
+      "sourceHash": "22d5d8896e54aecd8b70f9aafa0c68cf3475cdb9799648df8d1bbbd8b53d1ac8",
+      "outputs": []
+    },
+    {
+      "sourceHash": "c5d71319654a4f6f0dcbed13e378459d6142f251d1e5ed035398c485cea09e15",
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "rank-two alpha/r=1.5 teaching-fit loss: 0.12098397314548492 1.915084067150019e-05\n",
+            "Fresh-process trained-factor round trip passed at alpha/r=1.5; wrong same-shape base and altered rank, alpha, target, and shape metadata were rejected.\n"
           ]
         }
       ]

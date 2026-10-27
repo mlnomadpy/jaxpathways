@@ -1,0 +1,40 @@
+Traceback (most recent call last):
+  File "/private/tmp/jaxpathways-reader-review-fix/projects/embedding-model-300m/tests/check.py", line 1983, in <module>
+    main()
+    ~~~~^^
+  File "/private/tmp/jaxpathways-reader-review-fix/projects/embedding-model-300m/tests/check.py", line 1943, in main
+    model_checks = _check_model(candidate)
+  File "/private/tmp/jaxpathways-reader-review-fix/projects/embedding-model-300m/tests/check.py", line 649, in _check_model
+    mlm_checks = _check_mlm_oracle_and_gradients(
+        module, mlm_params, input_ids, labels, selected, config
+    )
+  File "/private/tmp/jaxpathways-reader-review-fix/projects/embedding-model-300m/tests/check.py", line 205, in _check_mlm_oracle_and_gradients
+    np.testing.assert_allclose(raw_logits, oracle_logits, rtol=3e-5, atol=3e-6)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/jaxpathways-embedding-c01-env/lib/python3.14/site-packages/numpy/testing/_private/utils.py", line 1768, in assert_allclose
+    assert_array_compare(compare, actual, desired, err_msg=str(err_msg),
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                         verbose=verbose, header=header, equal_nan=equal_nan,
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                         strict=strict)
+                         ^^^^^^^^^^^^^^
+  File "/private/tmp/jaxpathways-embedding-c01-env/lib/python3.14/site-packages/numpy/testing/_private/utils.py", line 983, in assert_array_compare
+    raise AssertionError(msg)
+AssertionError: 
+Not equal to tolerance rtol=3e-05, atol=3e-06
+
+Mismatched elements: 256 / 256 (100%)
+First 5 mismatches are at indices:
+ [0, 0, 0]: 0.0 (ACTUAL), -0.36889153188706814 (DESIRED)
+ [0, 0, 1]: 0.0 (ACTUAL), -0.10670894764089252 (DESIRED)
+ [0, 0, 2]: 0.0 (ACTUAL), -0.0715925219114463 (DESIRED)
+ [0, 0, 3]: 0.0 (ACTUAL), -0.129522314368188 (DESIRED)
+ [0, 0, 4]: 0.0 (ACTUAL), -0.08819493612091786 (DESIRED)
+Max absolute difference among violations: 0.40619926
+Max relative difference among violations: 1.
+ ACTUAL: array([[[0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
+         0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.],
+        [0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,...
+ DESIRED: array([[[-0.368892, -0.106709, -0.071593, -0.129522, -0.088195,
+         -0.164648, -0.170886, -0.200696, -0.203112, -0.134641,
+         -0.225422, -0.091687,  0.071416, -0.123633,  0.14365 ,...

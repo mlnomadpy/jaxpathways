@@ -17,3 +17,11 @@ For inference, a noise-free rate is not a compulsory result on noisy observation
 Review grid refinement at fixed physical observation times. Doubling internal steps changes the numerical method; changing measurement times changes the experiment. Interpolate or save exactly at observation times with a documented contract. Distinguish evaluating a fitted rate on a finer grid from optimizing a new rate on that grid.
 
 A single seed and one synthetic family do not establish calibrated uncertainty, real-world model adequacy, experimental identifiability under all conditions, or hardware scaling.
+
+## Discussion-case review notes
+
+The inverse solver recovers the planted parameter on one grid but its estimate shifts under refinement.
+
+Ask for fixed-horizon forward and sensitivity error tables and an independent continuous/discrete reference. Separate numerical error from optimization and identifiability; one planted-parameter success is insufficient.
+
+Record the learner’s original explanation, the requested evidence and the revised claim. This discussion is qualitative review; it adds no automatic score and is not an independent teaching-review receipt.

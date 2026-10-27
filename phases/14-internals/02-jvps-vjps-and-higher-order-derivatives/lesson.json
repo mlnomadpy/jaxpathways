@@ -14,7 +14,7 @@
       {
         "id": "guided-reasoning",
         "title": "Forward and reverse products answer complementary questions",
-        "body": "For a map from three inputs to two outputs, the Jacobian has shape \\((2,3)\\). A JVP consumes a three-component direction and returns two components. A VJP consumes a two-component cotangent and returns three.\n\nCheck the adjoint relation \\(u^T(Jv)=(J^Tu)^Tv\\) using independent dot products. It connects both directions without requiring the full Jacobian to be materialized.\n\nWhen reading product bars, name the vector's space before interpreting its coordinates. A square example can hide a transpose mistake because both vectors have the same length. Add an unequal-dimension case to expose that ambiguity.",
+        "body": "For a map from three inputs to two outputs, the Jacobian has shape \\((2,3)\\). A JVP consumes a three-component direction and returns two components. A VJP consumes a two-component cotangent and returns three.\n\nCheck the adjoint relation \\(u^T(Jv)=(J^Tu)^Tv\\) using independent dot products. It connects both directions without requiring the full Jacobian to be materialized.\n\nWhen reading product bars, name the vector's space before interpreting its coordinates. A square example can hide a transpose mistake because both vectors have the same length. Add an unequal-dimension case to expose that ambiguity.\n\nAt the recorded point \\(x=(0.4,-0.7)\\), the Jacobian is \\(J=[[-0.7,0.4],[0.92106,-1.4]]\\), with rows for outputs and columns for inputs. Thus the plotted JVP for \\(v=(1.2,-0.3)\\) is \\((-0.96,1.52527)\\), a vector in output space. Keep that row/column convention beside the shapes: it makes a transposition error easier to spot than a square-shaped label alone.",
         "check": {
           "prompt": "Does a VJP simply return the same vector as a JVP?",
           "answer": "No. They apply the derivative in different directions and can have different result dimensions. Their relationship is the adjoint identity, not equality of vectors."
@@ -73,7 +73,24 @@
         "prompt": "Check the JVP of \\(2v-w\\) against the same combination of separate JVPs. Then show why changing the base point is a different operation.",
         "hint": "A derivative is linear in its direction at a fixed base point.",
         "solution": "# Test linearity at a fixed point (Practice): Linearity in the tangent is a local property.\nw=jnp.array([-0.6,0.9])\nproduct=lambda direction:jax.jvp(mapping,(x,),(direction,))[1]\nnp.testing.assert_allclose(product(2*v-w),2*product(v)-product(w),rtol=1e-12)\nshifted=jax.jvp(mapping,(x+w,),(v,))[1]\nassert np.linalg.norm(np.asarray(shifted-product(v)))>0.1\nprint(\"Direction linearity holds; the Jacobian changes with the base point\")",
-        "explanation": "Linearity in the tangent is a local property. A nonlinear function need not use the same linear map at different points."
+        "explanation": "Linearity in the tangent is a local property. A nonlinear function need not use the same linear map at different points.",
+        "learnerStarter": {
+          "inputs": [
+            "A fixed base point, tangent directions v and w, and f(v,w)=2v-w."
+          ],
+          "outputs": [
+            "JVP for a combined direction and sum of separate JVPs."
+          ],
+          "invariants": [
+            "The base point remains fixed for the linearity comparison.",
+            "Changing the base point is not tangent linearity."
+          ],
+          "hints": [
+            "Use jax.jvp at one shared primal input.",
+            "Compare one combined seed with the linear combination of separate seeds."
+          ],
+          "code": "import jax\nimport jax.numpy as jnp\n\ndef check_jvp_linearity(function, base, v, w):\n    # TODO: compare combined and separate JVPs at the same base.\n    raise NotImplementedError(\"Test tangent linearity without changing the primal point\")"
+        }
       },
       {
         "title": "Check curvature symmetry without a full Hessian",
@@ -81,7 +98,24 @@
         "prompt": "For two directions \\(v,w\\), verify \\(w^\\mathsf{T}Hv=v^\\mathsf{T}Hw\\), then verify one product with finite differences.",
         "hint": "Compose jvp with grad and compare scalar products.",
         "solution": "# Check curvature symmetry without a full Hessian (Challenge): For this smooth scalar objective, mixed partials agree.\nw=jnp.array([0.2,0.9])\nhw=jax.jvp(jax.grad(objective),(x,),(w,))[1]\nnp.testing.assert_allclose(jnp.vdot(w,hvp),jnp.vdot(v,hw),rtol=1e-12)\neps=1e-4\nfdw=(jax.grad(objective)(x+eps*w)-jax.grad(objective)(x-eps*w))/(2*eps)\nnp.testing.assert_allclose(hw,fdw,rtol=1e-7,atol=1e-8)\nprint(\"Bilinear Hessian symmetry and finite-difference product verified\")",
-        "explanation": "For this smooth scalar objective, mixed partials agree. Symmetry is a useful invariant, but an independent derivative check is still necessary."
+        "explanation": "For this smooth scalar objective, mixed partials agree. Symmetry is a useful invariant, but an independent derivative check is still necessary.",
+        "learnerStarter": {
+          "inputs": [
+            "A scalar-valued twice-differentiable function, base point, and directions v,w."
+          ],
+          "outputs": [
+            "Both mixed Hessian directional products and a finite-difference check."
+          ],
+          "invariants": [
+            "Mixed products agree within a stated tolerance.",
+            "Finite differences independently check one Hessian-vector product."
+          ],
+          "hints": [
+            "Compute Hessian-vector products with forward-over-reverse or jvp(grad).",
+            "Perturb the gradient along one direction for the finite-difference comparison."
+          ],
+          "code": "import jax\nimport jax.numpy as jnp\n\ndef check_hessian_symmetry(function, point, v, w, epsilon):\n    # TODO: compare the two mixed products and finite-difference one product.\n    raise NotImplementedError(\"Verify curvature symmetry without materializing the Hessian\")"
+        }
       }
     ],
     "diagnosis": "If a product has the wrong shape, identify whether its seed lives in input or output space. If basis reconstruction is transposed, inspect which index vmap stacks first. If an HVP differs from J-transpose-J times the direction, calculate the residual-weighted second-derivative term before blaming autodiff.",
@@ -97,8 +131,8 @@
       "title": "Forward and reverse products live in different spaces",
       "kind": "executed",
       "prediction": "Should a JVP and VJP have equal coordinates just because this example has two inputs and two outputs?",
-      "reading": "The first panel compares the JVP with the explicit product \\(Jv\\), one bar per output coordinate. The matched values are about \\(-0.96\\) and \\(1.5253\\). These are predicted output changes for the selected input direction, not the function outputs themselves.\n\nThe second panel compares the VJP with \\(J^\\mathsf{T}u\\), one bar per input coordinate. Its matched values are about \\(1.4921\\) and \\(-2.6\\). Both plots happen to contain two coordinates, but their axes refer to different vector spaces.",
-      "connection": "The bars agree within each panel because the hand-derived Jacobian verifies the corresponding JAX product. The two panels should not agree with each other: their seed vectors and meanings differ. Multiplying by the opposite seed gives the common adjoint scalar, about \\(2.5705\\).\n\nAn adjoint equality checks compatibility between two linear maps. The independent Jacobian and changed-point exercises protect against a shared wrong map. The figure does not compare runtime or memory use.",
+      "reading": "The upper panel’s horizontal labels are output coordinates and its vertical unit is directional output change; JAX and analytic \\(Jv\\) overlap at \\((-0.96,1.52527)\\). The lower panel labels input coordinates and measures input cotangents; JAX and analytic \\(J^Tu\\) overlap at \\((1.49212,-2.6)\\). The two pairs agree within their own spaces, but their vectors are not interchangeable. Next check the scalar adjoint products, both about 2.57055.",
+      "connection": "The recorded Jacobian \\([[-0.7,0.4],[0.92106,-1.4]]\\) maps a two-coordinate input direction to two output coordinates here, so shape alone cannot expose a transpose mistake. The independent products do: \\(u^T Jv=(J^T u)^T v\\approx2.57055\\). Use an unequal input/output-size example when teaching the shape contract, then retain this fixture’s explicit Jacobian as the numerical check. These bars show derivative values, not execution cost.",
       "alt": "Paired bars show JVP matching J times v and VJP matching transpose J times u, with different coordinates in the two panels.",
       "code": "# Transfer the device result to the host for an independent NumPy comparison.\nvisual_data={'panels':[{'kind':'bar','labels':['output 0','output 1'],'ylabel':'directional output change','series':[{'label':'JAX JVP','y':np.asarray(jvp).tolist()},{'label':'analytic J v','y':(jacobian@np.asarray(v)).tolist()}]},{'kind':'bar','labels':['input 0','input 1'],'ylabel':'input cotangent','series':[{'label':'JAX VJP','y':np.asarray(vjp).tolist()},{'label':'analytic transpose J u','y':(jacobian.T@np.asarray(u)).tolist()}]}]}"
     },
@@ -152,7 +186,7 @@
     "diagram": {
       "title": "JVP and VJP use different vector spaces",
       "prediction": "Does a VJP simply return the same vector as a JVP?",
-      "reading": "The top row pushes a three-component direction into two output components. The bottom pulls a two-component sensitivity back to three inputs. Shapes disambiguate the two products even when a square worked example would not. The adjoint identity checks their relationship.",
+      "reading": "Read each row as a map between spaces: JVP takes \\(v\\in\\mathbb R^3\\) through \\(J\\in\\mathbb R^{2\\times3}\\) to \\(Jv\\in\\mathbb R^2\\); VJP takes \\(u\\in\\mathbb R^2\\) through \\(J^T\\) to \\(J^Tu\\in\\mathbb R^3\\). The diagram’s three-to-two shape example is a shape lesson, while the executed numerical fixture happens to be two-to-two. Preserve that distinction; a nonsquare check is what catches swapped spaces.",
       "alt": "The top row pushes a three-component direction into two output components. The bottom pulls a two-component sensitivity back to three inputs. Shapes disambiguate the two products even when a square worked example would not. The adjoint identity checks their relationship.",
       "scope": "Architecture and dataflow mechanism diagram.",
       "height": 3.5,
@@ -179,6 +213,29 @@
           ]
         ]
       }
+    },
+    "optionFeedback": [
+      "A VJP is a linear map on output sensitivity at a fixed input, not a finite perturbation of the forward function.",
+      "The pullback applies the transpose Jacobian to the output weighting. It maps an output cotangent into the input space at the stored base point.",
+      "A VJP uses first derivatives. A Hessian requires differentiating a gradient or composing appropriate derivative operations."
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "Vector function mapping R² to R².",
+        "Changed base point x=(-0.2, 0.8), tangent v=(-0.5, 1.3), and output cotangent u=(1.1, -0.4)."
+      ],
+      "outputs": [
+        "Jacobian, JVP, VJP, and adjoint inner products at the changed point."
+      ],
+      "invariants": [
+        "JVP belongs to output space and VJP belongs to input space.",
+        "The two adjoint inner products agree within numerical tolerance."
+      ],
+      "hints": [
+        "Use the changed primal and seeds for every transform.",
+        "Check each result shape before comparing scalar inner products."
+      ],
+      "code": "import jax\nimport jax.numpy as jnp\n\ndef inspect_changed_linearization(function, x, v, u):\n    # TODO: compute Jacobian, JVP, VJP, and both adjoint inner products.\n    raise NotImplementedError(\"Check primal, tangent, and cotangent spaces separately\")"
     }
   }
 }

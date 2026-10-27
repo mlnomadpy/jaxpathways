@@ -4,6 +4,8 @@ Phase 14: Autodiff & JAX internals · about 105 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Read your first jaxpr](https://www.tahabouhsine.com/jaxpathways/lesson-internals-01.html).
+
 ## What you will be able to do
 
 - Compute and interpret JVP and VJP products with correct domains and shapes.
@@ -26,6 +28,8 @@ Check the adjoint relation $u^T(Jv)=(J^Tu)^Tv$ using independent dot products. I
 
 When reading product bars, name the vector's space before interpreting its coordinates. A square example can hide a transpose mistake because both vectors have the same length. Add an unequal-dimension case to expose that ambiguity.
 
+At the recorded point $x=(0.4,-0.7)$, the Jacobian is $J=[[-0.7,0.4],[0.92106,-1.4]]$, with rows for outputs and columns for inputs. Thus the plotted JVP for $v=(1.2,-0.3)$ is $(-0.96,1.52527)$, a vector in output space. Keep that row/column convention beside the shapes: it makes a transposition error easier to spot than a square-shaped label alone.
+
 ### JVP and VJP use different vector spaces
 
 **Predict:** Does a VJP simply return the same vector as a JVP?
@@ -34,7 +38,7 @@ When reading product bars, name the vector's space before interpreting its coord
 
 *Architecture and dataflow mechanism diagram.*
 
-The top row pushes a three-component direction into two output components. The bottom pulls a two-component sensitivity back to three inputs. Shapes disambiguate the two products even when a square worked example would not. The adjoint identity checks their relationship.
+Read each row as a map between spaces: JVP takes $v\in\mathbb R^3$ through $J\in\mathbb R^{2\times3}$ to $Jv\in\mathbb R^2$; VJP takes $u\in\mathbb R^2$ through $J^T$ to $J^Tu\in\mathbb R^3$. The diagram’s three-to-two shape example is a shape lesson, while the executed numerical fixture happens to be two-to-two. Preserve that distinction; a nonsquare check is what catches swapped spaces.
 
 ### Pause and reason
 
@@ -214,15 +218,11 @@ Expected: JVP [-0.96, 1.52527319], VJP [1.49212199, -2.6], adjoint scalar approx
 
 ### Read the figure
 
-The first panel compares the JVP with the explicit product $Jv$, one bar per output coordinate. The matched values are about $-0.96$ and $1.5253$. These are predicted output changes for the selected input direction, not the function outputs themselves.
-
-The second panel compares the VJP with $J^\mathsf{T}u$, one bar per input coordinate. Its matched values are about $1.4921$ and $-2.6$. Both plots happen to contain two coordinates, but their axes refer to different vector spaces.
+The upper panel’s horizontal labels are output coordinates and its vertical unit is directional output change; JAX and analytic $Jv$ overlap at $(-0.96,1.52527)$. The lower panel labels input coordinates and measures input cotangents; JAX and analytic $J^Tu$ overlap at $(1.49212,-2.6)$. The two pairs agree within their own spaces, but their vectors are not interchangeable. Next check the scalar adjoint products, both about 2.57055.
 
 ### Connect it to the computation
 
-The bars agree within each panel because the hand-derived Jacobian verifies the corresponding JAX product. The two panels should not agree with each other: their seed vectors and meanings differ. Multiplying by the opposite seed gives the common adjoint scalar, about $2.5705$.
-
-An adjoint equality checks compatibility between two linear maps. The independent Jacobian and changed-point exercises protect against a shared wrong map. The figure does not compare runtime or memory use.
+The recorded Jacobian $[[-0.7,0.4],[0.92106,-1.4]]$ maps a two-coordinate input direction to two output coordinates here, so shape alone cannot expose a transpose mistake. The independent products do: $u^T Jv=(J^T u)^T v\approx2.57055$. Use an unequal input/output-size example when teaching the shape contract, then retain this fixture’s explicit Jacobian as the numerical check. These bars show derivative values, not execution cost.
 
 ```python
 # Transfer the device result to the host for an independent NumPy comparison.
@@ -231,7 +231,7 @@ visual_data={'panels':[{'kind':'bar','labels':['output 0','output 1'],'ylabel':'
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:24:09.478062+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:08:48.748449+00:00. JAX 0.9.2.
 
 ```text
 Jacobian: [[-0.7         0.4       ]
@@ -295,31 +295,30 @@ Repeat the Jacobian, JVP, VJP and adjoint checks at $x=(-0.2,0.8)$ with $v=(-0.5
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.jvp / jax.vjp / jax.jacfwd / jax.hessian` — Computes JVPs, VJPs, Jacobians or Hessians by differentiating the implemented operations. Results still have floating-point error.
+**Inputs:**
+- Vector function mapping R² to R².
+- Changed base point x=(-0.2, 0.8), tangent v=(-0.5, 1.3), and output cotangent u=(1.1, -0.4).
 
-**Step-by-step implementation plan:**
-1. Exercise solution
-2. Transfer the device result to the host for an independent NumPy comparison.
+**Outputs:**
+- Jacobian, JVP, VJP, and adjoint inner products at the changed point.
+
+**Invariants to check:**
+- JVP belongs to output space and VJP belongs to input space.
+- The two adjoint inner products agree within numerical tolerance.
+
+**Hints:**
+- Use the changed primal and seeds for every transform.
+- Check each result shape before comparing scalar inner products.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-changed_x = jnp.array(...)  # TODO: compute changed_x
-changed_v = jnp.array(...)  # TODO: compute changed_v
-changed_u = jnp.array(...)  # TODO: compute changed_u
-# Transfer the device result to the host for an independent NumPy comparison.
-a2,b2 = np.asarray(...)  # TODO: compute a2,b2
-j2 = np.array(...)  # TODO: compute j2
-fj = jax.jvp(...)  # TODO: compute fj
-rj = jax.vjp(...)  # TODO: compute rj
-np.testing.assert_allclose(fj,j2@changed_v,rtol=1e-12)
-np.testing.assert_allclose(rj,j2.T@changed_u,rtol=1e-12)
-np.testing.assert_allclose(jnp.vdot(changed_u,fj),jnp.vdot(rj,changed_v),rtol = ...  # TODO: compute np.testing.assert_allclose(jnp.vdot(changed_u,fj),jnp.vdot(rj,changed_v),rtol
-print("Changed-point adjoint verified")
+import jax
+import jax.numpy as jnp
+
+def inspect_changed_linearization(function, x, v, u):
+    # TODO: compute Jacobian, JVP, VJP, and both adjoint inner products.
+    raise NotImplementedError("Check primal, tangent, and cotangent spaces separately")
 ```
 
 <details><summary>Reference solution</summary>
@@ -356,25 +355,29 @@ A derivative is linear in its direction at a fixed base point.
 
 ### How to write: Test linearity at a fixed point — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.jvp / jax.vjp / jax.jacfwd / jax.hessian` — Computes JVPs, VJPs, Jacobians or Hessians by differentiating the implemented operations. Results still have floating-point error.
+**Inputs:**
+- A fixed base point, tangent directions v and w, and f(v,w)=2v-w.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- JVP for a combined direction and sum of separate JVPs.
+
+**Invariants to check:**
+- The base point remains fixed for the linearity comparison.
+- Changing the base point is not tangent linearity.
+
+**Hints:**
+- Use jax.jvp at one shared primal input.
+- Compare one combined seed with the linear combination of separate seeds.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Test linearity at a fixed point (Practice): Linearity in the tangent is a local property.
-w = jnp.array(...)  # TODO: compute w
-product = ...  # TODO: compute product
-np.testing.assert_allclose(product(2*v-w),2*product(v)-product(w),rtol=1e-12)
-shifted = jax.jvp(...)  # TODO: compute shifted
-assert np.linalg.norm(np.asarray(shifted-product(v)))  # TODO: complete assertion check
-print("Direction linearity holds; the Jacobian changes with the base point")
+import jax
+import jax.numpy as jnp
+
+def check_jvp_linearity(function, base, v, w):
+    # TODO: compare combined and separate JVPs at the same base.
+    raise NotImplementedError("Test tangent linearity without changing the primal point")
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -407,27 +410,29 @@ Compose jvp with grad and compare scalar products.
 
 ### How to write: Check curvature symmetry without a full Hessian — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
-- `jax.jvp / jax.vjp / jax.jacfwd / jax.hessian` — Computes JVPs, VJPs, Jacobians or Hessians by differentiating the implemented operations. Results still have floating-point error.
+**Inputs:**
+- A scalar-valued twice-differentiable function, base point, and directions v,w.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- Both mixed Hessian directional products and a finite-difference check.
+
+**Invariants to check:**
+- Mixed products agree within a stated tolerance.
+- Finite differences independently check one Hessian-vector product.
+
+**Hints:**
+- Compute Hessian-vector products with forward-over-reverse or jvp(grad).
+- Perturb the gradient along one direction for the finite-difference comparison.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Check curvature symmetry without a full Hessian (Challenge): For this smooth scalar objective, mixed partials agree.
-w = jnp.array(...)  # TODO: compute w
-hw = jax.jvp(...)  # TODO: compute hw
-np.testing.assert_allclose(jnp.vdot(w,hvp),jnp.vdot(v,hw),rtol = ...  # TODO: compute np.testing.assert_allclose(jnp.vdot(w,hvp),jnp.vdot(v,hw),rtol
-eps = ...  # TODO: compute eps
-fdw = ...  # TODO: compute fdw
-np.testing.assert_allclose(hw,fdw,rtol = ...  # TODO: compute np.testing.assert_allclose(hw,fdw,rtol
-print("Bilinear Hessian symmetry and finite-difference product verified")
+import jax
+import jax.numpy as jnp
+
+def check_hessian_symmetry(function, point, v, w, epsilon):
+    # TODO: compare the two mixed products and finite-difference one product.
+    raise NotImplementedError("Verify curvature symmetry without materializing the Hessian")
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -457,9 +462,17 @@ A VJP is seeded with an output weighting u. What does the returned input cotange
 
 <details><summary>Answer and explanation</summary>
 
-The gradient of the scalar weighted output u-transpose f(x), with u fixed.
+**1. The output at a displaced input x+u.**
+
+A VJP is a linear map on output sensitivity at a fixed input, not a finite perturbation of the forward function.
+
+**2. The gradient of the scalar weighted output u-transpose f(x), with u fixed. (correct)**
 
 The pullback applies the transpose Jacobian to the output weighting. It maps an output cotangent into the input space at the stored base point.
+
+**3. A complete Hessian for every possible loss.**
+
+A VJP uses first derivatives. A Hessian requires differentiating a gradient or composing appropriate derivative operations.
 
 </details>
 

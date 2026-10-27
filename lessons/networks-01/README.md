@@ -21,11 +21,11 @@ A multilayer perceptron combines learned linear maps with nonlinear activations.
 
 ## Why hidden layers need nonlinear operations
 
-XOR gives the same label to opposite corners of a square. One straight separating line cannot isolate both opposite corners from the other two. Hidden units can form intermediate regions that an output layer combines.
+The four training points alternate labels around the square: $(-1,1)$ and $(1,-1)$ are class one, while the other corners are class zero. A straight boundary puts each class on one side, so it cannot separate both diagonals. The trained field later shows two separated class-one regions, one around each triangle.
 
-Remove every nonlinear activation and the weight matrices simply multiply into one linear map. More matrices alone do not solve this geometry. Biases change offsets but do not remove the limitation.
+If you remove tanh, the two affine maps combine into one: $xW_1W_2+b_1W_2+b_2$. Increasing width then adds parameters but still leaves a straight decision boundary. Keep the activation when you want the hidden layer to build nonlinear features.
 
-Read the decision field both at and between the training points. The four observed labels constrain only a tiny part of the plane. A smooth-looking boundary is still an extrapolation. Connect each layer's actual width to the feature vector it produces before interpreting that extrapolation.
+The four corner labels are the only observed labels in the training set. The grid between them is the model's extension of that pattern, so use held-out points to check nearby behavior instead of treating every colored pixel as evidence.
 
 ### Pause and reason
 
@@ -39,7 +39,9 @@ No. It checks representation and optimization on this teaching fixture. A differ
 
 ## Trace the shapes from observations to logits
 
-Each row is one observation with two features. The first weight matrix has shape $(2, 8)$, so a batch $(B, 2)$ becomes $(B, 8)$. A bias vector $(8,)$ broadcasts across rows; it does not create eight observations. tanh changes values without changing shape. The second matrix $(8, 1)$ produces one logit per row. Squeeze only the final axis to produce $(B,)$, preserving the batch dimension even when $B$ is one. A logit is an unrestricted real score; a positive logit predicts class one when the decision threshold is probability $0.5$.
+Follow one batch row through the actual matrix shapes. The input has two features, so $(B,2)$ multiplied by $W_1$ of shape $2,8$ gives $(B,8)$. The bias $(8,)$ is added to each row, and tanh keeps the same shape. Multiplying by $W_2$ of shape $8,1)$ gives $(B,1)$; squeezing only the last axis yields one score per example, $(B,)$.
+
+For a single example, the result is still $(1,)$, not a scalar and not an eight-example batch. A positive score favors class one because sigmoid maps it above (0.5). Keep labels in the matching $(B,)$ shape so each score is paired with one target.
 
 ```text
 (B, 2) → affine → (B, 8) → tanh → (B, 8) → affine → (B, 1) → (B,)
@@ -47,19 +49,27 @@ Each row is one observation with two features. The first weight matrix has shape
 
 ## Explain why the hidden activation matters
 
-XOR assigns matching signs to class zero and opposite signs to class one. A single line cannot place both diagonal pairs on opposite sides. Two affine layers without an activation still collapse to one affine map: ($x$ W1 + b1) W2 + b2. More parameters alone therefore do not solve this obstacle. tanh introduces curved intermediate features that can support a nonlinear boundary. Eight hidden units are deliberately small enough to inspect. They are not a principled best width, and successful training at one seed does not guarantee every initialization will converge.
+The activation is the operation that stops the two affine layers from collapsing into one line. With tanh, each of the eight hidden coordinates can respond differently to an input; the output combines those responses to form the two separated XOR regions. The width-three NNX model in the next lesson changes the number of features, but not this role of a nonlinearity.
+
+This run used 33 trainable values and ended at training loss (0.0015879), with accuracy (1.0) on 32 nearby points from held-out seed 12. Those measurements show that this initialization fit this small task. They do not establish that width eight is optimal or that every random initialization will converge.
 
 ## Use stable binary cross-entropy
 
-Do not calculate $\log\sigma(z)$ by separately taking the sigmoid and logarithm. At large negative scores the probability may round to zero. The stable scalar loss is $\operatorname{logaddexp}(0,z)-yz$. Average these losses over the batch so duplicating every row does not double the objective. Labels are zero or one, logits and labels both have shape $(B,)$, and gradients are taken with respect to the parameter tree. The derivative with respect to each score is $\sigma(z)-y$, divided by batch size. We verify the implementation independently with NumPy and verify a zero-parameter example against $\log2$.
+For score $z_i$ and binary label $y_i$, the per-example loss is $\operatorname{logaddexp}(0,z_i)-y_i z_i$. At $z_i=0$, either label gives $\log 2$, which the zero-parameter check confirms. The script also computes the same mean with NumPy, independently of JAX autodiff and Optax.
+
+The score vector and label vector both have shape $B$, so the loss has one value per example before the mean. If labels instead have shape $(B,1)$, broadcasting against scores of shape $(B,)$ creates $(B,B)$: every score is paired with every label. Inspect the unreduced shape before averaging, because a plausible scalar can hide this changed objective. Repeating every row three times leaves the mean loss and gradient unchanged.
 
 ## Separate learning from held-out measurement
 
-The four XOR corners are the complete training set. Held-out points are perturbed versions of those corners, generated from a separate fixed seed. Their labels follow the original sign rule. They check nearby transfer rather than merely memorizing four exact inputs. They do not test arbitrary extrapolation across the plane; this small fixture is especially easy. Record initial and final loss, the seed, hidden width, learning rate, update count, and held-out accuracy. Keep evaluation outside the update loop and do not select a hyperparameter by repeatedly inspecting the held-out answers.
+The optimizer sees only the four exact corners for 200 updates. Afterward, the script creates 32 perturbed points with NumPy seed 12 and labels them from the original sign rule. The run reports final training loss (0.0015879) and held-out accuracy (1.0); the held-out points are near the corners, so this tests local transfer on the same simple rule.
+
+Keep the seed, width, rate, update count, and split together when recording the result. Use held-out data for a declared evaluation, not repeated tuning. Neither the four-point fit nor nearby accuracy tests arbitrary points across the plane or a real population.
 
 ## Read the classification loss one example at a time
 
-The logit $z$ is the model’s raw score; the label $y$ is either $0$ or $1$. A positive logit favors class $1$. When $z=0$, the sigmoid probability is one half, so either label gives a loss of $\log 2$. That is a useful sanity check. In code, logaddexp evaluates the softplus term stably instead of separately computing an exponential and logarithm.
+A score (z) is not a probability. For label (y=1), positive (z) reduces loss; for (y=0), it increases loss. At (z=0), sigmoid gives (0.5) and both labels have loss $\log 2$.
+
+`logaddexp(0, z)` computes the softplus term without first rounding a sigmoid to zero or one. That stable per-example value is then averaged across examples; it is the same quantity the NumPy reference checks.
 
 $$
 \ell(z,y)=\underbrace{\log(1+e^z)}_{\mathrm{softplus}(z)}-yz
@@ -203,15 +213,11 @@ Expected: Loss falls below $0.03$ and nearby held-out accuracy is at least $0.95
 
 ### Read the figure
 
-The axes are the two input features. Background color shows the model’s predicted probability of label $1$: dark purple is near $1$, and the pale regions are near $0$. The markers give observed labels independently of that background: triangles are label $1$, circles are label $0$.
-
-The triangles at $(-1,1)$ and $(1,-1)$ sit in dark regions. The circles at $(-1,-1)$ and $(1,1)$ sit in pale regions. Thus the learned pattern assigns label $1$ to opposite-sign corners and label $0$ to same-sign corners, matching XOR.
+The horizontal axis is feature 0 and the vertical axis is feature 1; color is predicted probability of class one, from pale near 0 to dark near 1. The four markers are the only training observations: triangles at opposite-sign corners are label 1, and circles at same-sign corners are label 0. In the retained run the corresponding class-one corners sit in dark regions and class-zero corners in pale regions.
 
 ### Connect it to the computation
 
-A single straight boundary cannot separate these alternating corners. The hidden nonlinear layer allows the model to bend the boundary and create separated regions for the same class. The transition band between light and dark marks inputs where the predicted probability changes rapidly.
-
-Most colored locations are grid queries, not additional labeled observations. Their colors show how this trained model extends its predictions between and beyond the examples. A dark region alone is separate from calibrated confidence or accuracy there; those claims need appropriate held-out data.
+The alternating corners cannot be divided by one straight line, while this learned field bends into two class-one regions. Use the (0.5) color transition to inspect where the model changes its decision, then compare predictions at the separately generated nearby points. Grid colors are model queries, not new labeled examples or a calibration measurement.
 
 ```python
 axis = jnp.linspace(-1.6, 1.6, 61)
@@ -224,7 +230,7 @@ visual_data = {'kind': 'field', 'values': prob.tolist(), 'extent': [-1.6, 1.6, -
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:21:01.475954+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:04:17.932100+00:00. JAX 0.9.2.
 
 ```text
 Training loss: 0.7047799825668335 -> 0.0015878621488809586 held-out accuracy: 1.0
@@ -275,23 +281,28 @@ Swap class zero and one. Transform only the trained output layer to preserve the
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- An MLP parameter pytree and a permutation of its output classes.
 
-**Step-by-step implementation plan:**
-1. Transfer the device result to the host for an independent NumPy comparison.
+**Outputs:**
+- Transformed output-layer parameters and logits on held-out coordinates.
+
+**Invariants to check:**
+- The transformed model preserves or intentionally permutes class scores as specified; hidden-unit changes must be paired.
+
+**Hints:**
+- Inspect which parameter axis represents classes.
+- Test a new coordinate batch, not only the training points.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Swap class zero and one.
-complemented = dict(...)  # TODO: compute complemented
-changed_x = jnp.array(...)  # TODO: compute changed_x
-np.testing.assert_allclose(logits(complemented,changed_x),-logits(params,changed_x),atol=1e-6)
-# Transfer the device result to the host for an independent NumPy comparison.
-expected_labels = ...  # TODO: compute expected_labels
-assert np.array_equal(np.asarray(logits(complemented,changed_x)  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def permute_output_classes(params, class_permutation):
+    """Transformed output-layer parameters and logits on held-out coordinates."""
+    # TODO: Transform the output-layer class axis and verify logits on new input coordinates.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -322,25 +333,27 @@ Columns of the first kernel and rows of the second kernel describe the same hidd
 
 ### How to write: Reorder hidden units without changing predictions — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- Permute the hidden units and make the matching change to the output layer. Predict whether the logits change. Test the result on new coordinates, then show why permuting only one side breaks the contract.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- Logit parity on new inputs plus a one-sided-permutation counterexample.
+
+**Invariants to check:**
+- Incoming and outgoing parameter axes use the same hidden-unit permutation.
+
+**Hints:**
+- Columns of the first kernel and rows of the second kernel describe the same hidden units.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Reorder hidden units without changing predictions (Transfer): A hidden unit has no intrinsic index.
-order = jnp.array(...)  # TODO: compute order
-probe = jnp.array(...)  # TODO: compute probe
-permuted = dict(...)  # TODO: compute permuted
-np.testing.assert_allclose(logits(permuted,probe),logits(params,probe),rtol = ...  # TODO: compute np.testing.assert_allclose(logits(permuted,probe),logits(params,probe),rtol
-broken = dict(...)  # TODO: compute broken
-assert not np.allclose(logits(broken,probe),logits(params,probe),atol=1e-5)  # TODO: complete assertion check
-print('Consistent hidden permutation preserves logits; one-sided permutation changes them.')
+import jax.numpy as jnp
+
+def practice_reorder_hidden_units_without_changing_predictions(hidden_permutation, hidden_weights, output_weights):
+    """Implement the reorder hidden units without changing predictions check."""
+    # TODO: Permute the hidden-unit axis and apply the matching inverse permutation to outgoing weights and biases.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -374,27 +387,27 @@ Inspect the unreduced loss shape; a scalar mean can hide the error.
 
 ### How to write: Diagnose accidental pairwise broadcasting — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `optax.adam(lr) / optax.apply_updates(params, updates)` — Optax gradient transformations and numerically stable loss functions over parameter PyTrees.
+**Inputs:**
+- Demonstrate how labels shaped $(B, 1)$ and scores shaped $(B,)$ create a $(B, B)$ loss. Repair the contract before averaging.
 
-**Step-by-step implementation plan:**
-1. Diagnose accidental pairwise broadcasting (Intermediate)
-2. Check tensor shape invariant: `bad.shape==(4,4)`
-3. Check tensor shape invariant: `good.shape==(4,)`
+**Outputs:**
+- Rejected mismatched shape and a per-example loss after alignment.
+
+**Invariants to check:**
+- One score is paired with one label; the reduction is over examples only.
+
+**Hints:**
+- Inspect the unreduced loss shape; a scalar mean can hide the error.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Diagnose accidental pairwise broadcasting (Intermediate)
-bad = optax.sigmoid_binary_cross_entropy(...)  # TODO: compute bad
-# Check tensor shape invariant: `bad.shape==(4,4)`
-assert bad.shape  # TODO: complete assertion check
-good = optax.sigmoid_binary_cross_entropy(...)  # TODO: compute good
-# Check tensor shape invariant: `good.shape==(4,)`
-assert good.shape  # TODO: complete assertion check
-np.testing.assert_allclose(jnp.mean(good),loss(params,x,y),rtol = ...  # TODO: compute np.testing.assert_allclose(jnp.mean(good),loss(params,x,y),rtol
+import jax.numpy as jnp
+
+def practice_diagnose_accidental_pairwise_broadcasting(scores, labels):
+    """Implement the diagnose accidental pairwise broadcasting check."""
+    # TODO: Assert score and label shapes match before subtraction, then show the (B,1) by (B,) broadcast shape and repair it.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -424,9 +437,17 @@ Why does the two-layer XOR model need a nonlinear activation?
 
 <details><summary>Answer and explanation</summary>
 
-Without it the composition is still affine
+**1. Without it the composition is still affine (correct)**
 
 The optimizer can change coefficients but cannot enlarge the affine function class. The activation supplies nonlinear intermediate features.
+
+**2. Two affine layers always separate XOR**
+
+Two affine layers compose into another affine map. Write their combined matrix and bias to see why another layer alone is insufficient.
+
+**3. Cross-entropy itself changes the prediction boundary**
+
+The loss changes how parameters are fitted, not which functions the architecture can represent. Inspect the forward map for a nonlinearity.
 
 </details>
 

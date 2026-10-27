@@ -134,6 +134,24 @@ These commands are linked qualification exercises, not claims that this text har
 
 Complete the [TPU training-system synthesis](../../assessments/tpu.md). CPU model/system evidence and target-device qualification are reviewed separately.
 
+## Continue with natural text
+
+The [decoder foundations workflow](foundations/README.md) extends this small
+baseline with a configurable multi-layer decoder, a train-only BPE tokenizer,
+chapter-level data splits, full training-state recovery and a local inference
+package. Its retained six-update CPU pilot includes raw metrics and an explained
+figure. Install its separate pinned environment before running it. The larger
+target configuration is a parameter-count exercise; target-scale training and
+language-quality evaluation remain open.
+
 ## API references
 
 The reference uses installed JAX 0.9.2 and verifies the actual serialized calls locally. The [JAX export guide](https://docs.jax.dev/en/latest/export/export.html) describes staged computation serialization; exported artifacts still require a compatible runtime. The [JAX profiling guide](https://docs.jax.dev/en/latest/profiling.html) explains trace recording and waiting for computation completion. The measured source-bound report takes precedence over assumptions about a different runtime or device.
+
+## Review handoff: explain a changed condition
+
+Change padding or prompt length while keeping the intended response tokens fixed. Which shifted targets, attention edges and cached positions should change?
+
+**Keep for review:** A small token-position table, loss-eligible target mask, cache-position trace and full-versus-cached logits. Keep tokenizer and model identities with the exported artifact.
+
+Write your prediction before opening the reference implementation. Distinguish what the existing checker verifies from your proposed extension; record any extension command, actual output and limitation separately. A reviewer should be able to locate the first failed contract from your saved evidence.

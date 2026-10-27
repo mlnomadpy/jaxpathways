@@ -4,6 +4,8 @@ Phase 02: JAX transformations · about 55 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Your first gradient](https://www.tahabouhsine.com/jaxpathways/lesson-first-gradient.html).
+
 ## What you will be able to do
 
 - Derive a batch mean-squared-error gradient for one weight.
@@ -21,11 +23,9 @@ A loss value tells us how the current prediction is scored. Its derivative tells
 
 ## Read the value and derivative at the same point
 
-Take $L(w)=(w-2)^2+1$ as a new hand-worked objective. At $w=0$, the loss is $5$ and the derivative is $-4$. A small positive change in the weight should decrease the loss. At $w=2$, the derivative is zero but the loss remains $1$.
+We need both the score and its direction because they answer different questions: the loss says how this parameter setting performs, while the derivative predicts how a small adjustment changes that score. For the separate objective $L(w)=(w-2)^2+1$, at $w=0$ the loss is $5$ and the slope is $-4$, so increasing $w$ slightly should lower the loss. At $w=2$, the slope is zero but the loss is still $1$.
 
-The added constant changes every loss value but leaves the derivative unchanged. This is a useful diagnostic: if a derivative implementation changes when you add a parameter-independent constant, investigate the implementation. Equally, a nonzero minimum loss need not mean optimization failed.
-
-When reading a plot of value and slope, compare them at the same horizontal coordinate and respect their different vertical units. The loss is not a gradient norm, and a small loss is separate from that all parameters are close to their intended values.
+The plot has weight on both horizontal axes, loss in the upper panel and loss-per-weight in the lower. For the lesson’s unshifted data, $w=1$ gives $(L,L')=(14/3,-28/3)$, and $w=2$ gives $(0,0)$. A zero derivative is a stationary point; it does not generally mean zero loss. Adding a constant shifts loss values without moving the derivative’s zero.
 
 ### Pause and reason
 
@@ -39,9 +39,9 @@ It is multiplied by $10$ as well. Unlike adding a constant, scaling the objectiv
 
 ## From three residuals to one decision
 
-Read the formula from the inside out. For example $i$, the model predicts $wx_i$. Subtract the observed target $y_i$ to get the residual, square it, and then average over all $N$ examples. The symbol $\sum$ just tells us to add the individual terms.
+A batch needs one scalar score before `grad` can return a single objective gradient. For each row, compute prediction, subtract its target, square the residual, then average the squared errors. This order makes the reduction and its scale visible.
 
-For inputs $[1, 2, 3]$, targets $[2, 4, 6]$ and weight $1$, the predictions are $[1, 2, 3]$. The residuals are $[-1, -2, -3]$. Their squares add to $14$, so the mean loss is $14/3$. At weight $2$, every residual is zero. These two settings give us independent checks before we use gradients.
+With inputs $[1,2,3]$, targets $[2,4,6]$, and $w=1$, predictions are $[1,2,3]$, residuals are $[-1,-2,-3]$, and squared errors sum to $14$. The mean loss is $14/3$. At $w=2$, predictions match all targets and the loss is zero. These hand values check both the model and the averaging before differentiating.
 
 $$
 L(w)=\frac{1}{N}\sum_{i=1}^{N}(wx_i-y_i)^2
@@ -49,9 +49,9 @@ $$
 
 ## Derive the gradient independently
 
-Each squared residual contributes two factors when we differentiate: twice the residual, and the input $x_i$ from differentiating $wx_i$. We average those contributions just as we averaged the losses.
+Differentiating the mean loss preserves one contribution from every example, then averages them. Each squared residual contributes twice the residual, and differentiating the prediction $wx_i$ contributes the input $x_i$.
 
-For this dataset, the loss simplifies to $(14/3)(w-2)^2$. At $w=1$, its derivative is $-28/3$. The negative sign tells us that a small increase in the weight reduces the loss. That sign is useful: subtracting a negative gradient should move the weight upward, toward $2$.
+For this dataset, each residual is $x_i(w-2)$, so the loss is $(14/3)(w-2)^2$. At $w=1$, its slope is $-28/3$. The negative sign predicts that raising the weight lowers the loss. Since gradient descent subtracts the gradient, the update should move upward; this direction check can reveal a missing minus sign before running code.
 
 $$
 \begin{aligned}\frac{dL}{dw}&=\frac{2}{N}\sum_{i=1}^{N}(wx_i-y_i)x_i\\L(w)&=\frac{14}{3}(w-2)^2\quad\text{for our three examples}\end{aligned}
@@ -59,15 +59,15 @@ $$
 
 ## Read value_and_grad as an interface
 
-The transformation returns a callable whose result is a pair: (value, gradient). In this lesson the value has shape $()$ and the gradient also has shape $()$ because the parameter is scalar. For a vector parameter, the gradient would have the vector parameter shape, not the batch shape. For a structured parameter tree, the gradient mirrors the tree.
+`value_and_grad` returns the objective value and its derivative together, which keeps evaluation and update tied to the same parameter value. In the scalar example both outputs have shape $()$. With a vector parameter the gradient has the parameter’s shape, and with a parameter pytree it has matching structure; it does not acquire the batch shape just because the loss used a batch.
 
-Only the first positional argument is differentiated by default. Data can be explicit additional inputs without becoming parameters. Making that boundary explicit will matter when we compile training steps and reuse them across batches. value_and_grad bundles value and derivative computation in one transformed call; it does not guarantee a specific speedup for every workload.
+By default, the first positional argument is differentiated. Passing data as later arguments makes the boundary explicit: differentiate parameters while treating this batch as input. The returned pair is an interface contract, not a promise of speed. Inspect both value and gradient shapes when moving from this scalar example to a model.
 
 ## Predict whether a step improves the objective
 
-A gradient descent step uses $w_{\mathrm{new}}=w-\alpha g$. With $\alpha=0.1$ and $g=-28/3$, w_new is about $1.9333$, much closer to $2$ than the initial $1$. The loss therefore falls to about $0.02074$.
+An update is useful only if its sign and size move the objective in the intended direction. Starting at $w=1$, with gradient $-28/3$ and step size $\alpha=0.1$, gradient descent gives $w_{new}=1.9333$, closer to the zero-loss weight $2$; the loss falls to about $0.02074$.
 
-For this quadratic, the error $e=w-2$ evolves as $e_{\mathrm{new}}=(1-28\alpha/3)e$. The loss decreases for a nonzero error when the absolute value of that multiplier is below one, giving $0<\alpha<\frac{3}{14}$. At $\alpha=0.3$, the multiplier is $-1.8$: the update crosses the optimum and increases the magnitude of the error. This threshold belongs to this dataset and objective, not to all training problems. Here $\alpha$ is the step size, $g$ is the gradient, and $e$ measures how far the current weight is from $2$. Try reading the error multiplier before running each step-size experiment.
+For this quadratic the error is multiplied by $1-28\alpha/3$ each step. At $\alpha=0.3$, that multiplier is $-1.8$: the update crosses the solution and leaves a larger error, so loss rises. Read this as a property of this quadratic and dataset, not a universal learning-rate rule. The plotted slope tells direction; this calculation tells whether the chosen step overshoots.
 
 $$
 \begin{aligned}w_{\mathrm{new}}&=w-\alpha g\\e_{\mathrm{new}}&=\left(1-\frac{28\alpha}{3}\right)e,\qquad e=w-2\end{aligned}
@@ -75,9 +75,9 @@ $$
 
 ## Separate objective value from useful metrics
 
-A single mean can hide an important individual error. Keep residuals or another diagnostic metric alongside the scalar loss. With `has_aux=True`, the function returns `(scalar_loss, auxiliary_data)`, and value_and_grad returns `((loss, auxiliary_data), gradient)`. The differentiation objective is still the scalar loss; the auxiliary return does not create an additional objective.
+A mean loss compresses a batch to one number, so it can hide which example is still wrong. Keep residuals or another diagnostic as auxiliary output when they help explain behavior. With `has_aux=True`, `value_and_grad` differentiates only the scalar loss and carries auxiliary data alongside its value.
 
-In a larger model, auxiliary data might contain predictions or accuracy. This interface avoids confusing model outputs, logging information, and the objective. It also makes it easier to test what the step actually optimizes.
+For example, predictions can be useful to inspect while optimizing their mean squared error. They are not a second objective merely because the function returns them. Read the result nesting carefully: objective plus auxiliary data is paired with the gradient. This distinction prevents logging outputs from being mistaken for quantities that receive gradients.
 
 ## Import JAX differentiation and array operations
 
@@ -133,34 +133,35 @@ assert jnp.allclose(gradient, -28./3.)
 
 Expected: Loss ≈ $4.666667$; gradient ≈ $-9.333334$. Small floating-point differences are normal.
 
-## Loss and slope answer different questions
+## Loss and derivative use separate vertical scales
 
-**Predict:** Where is the loss smallest, and where does its slope change sign?
+**Predict:** At which weight is the derivative zero, and what is the loss at that same weight?
 
-![Loss and slope answer different questions](../outputs/figure.svg)
+![Loss and derivative use separate vertical scales](../outputs/figure.svg)
 
 **Recorded CPU computation**
 
 ### Read the figure
 
-The solid bowl is mean squared loss and the dashed line is its derivative with respect to the weight. The horizontal axis varies the weight. The two vertical quantities have different meanings even though they share one axis.
-
-Both reach zero at $w=2$. At $w=1$, the loss is about $4.67$, while the derivative is about $-9.33$. Left of the minimum, the derivative is negative; right of it, the derivative is positive.
+Both panels use the same horizontal weight coordinate. The upper vertical axis is mean squared loss; the lower is derivative per weight unit. At $w=1$, read loss $14/3$ and slope $-28/3$; at $w=2$, both are zero for this dataset. Follow the lower curve to its zero, then read the upper curve at that same weight. The panels have separate units and scales.
 
 ### Connect it to the computation
 
-The loss tells us how wrong the predictions are. The derivative tells us how that loss changes when the weight increases slightly. A negative derivative means moving right initially lowers the loss, which is why subtracting the gradient moves the weight toward $2$.
-
-The dashed line below zero is a negative slope, not a negative squared loss. Likewise, an intersection of the two curves away from the minimum has no special optimization meaning. `value_and_grad` returns these two different pieces of information together.
+The lower curve crosses zero at the minimum of this convex quadratic, while the upper curve gives the objective value there. A stationary point need not have zero loss: adding a constant would lift only the upper curve and leave the lower zero crossing fixed. Use the two panels together to distinguish objective height from local direction.
 
 ```python
 grid = jnp.linspace(0.0, 4.0, 81)
-visual_data = {'kind': 'line', 'x': grid.tolist(), 'xlabel': 'weight', 'ylabel': 'loss or derivative (different quantities)', 'series': [{'label': 'mean squared loss', 'y': jax.vmap(loss)(grid).tolist()}, {'label': 'derivative', 'y': jax.vmap(jax.grad(loss))(grid).tolist()}]}
+loss_values = jax.vmap(loss)(grid)
+gradient_values = jax.vmap(jax.grad(loss))(grid)
+assert jnp.allclose(loss(1.0), 14. / 3.)
+assert jnp.allclose(jax.grad(loss)(1.0), -28. / 3.)
+assert jnp.allclose(jax.grad(loss)(2.0), 0.)
+visual_data = {'panels': [{'kind': 'line', 'x': grid.tolist(), 'xlabel': 'weight w', 'ylabel': 'mean squared loss (squared target units)', 'series': [{'label': 'L(w)', 'y': loss_values.tolist()}]}, {'kind': 'line', 'x': grid.tolist(), 'xlabel': 'weight w (same coordinates)', 'ylabel': 'dL/dw (loss units per weight unit)', 'series': [{'label': 'gradient', 'y': gradient_values.tolist()}, {'label': 'zero derivative', 'y': [0.0] * len(grid)}]}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:20:06.959574+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:02:51.126054+00:00. JAX 0.9.2.
 
 ```text
 Loss: 4.6666669845581055 gradient: -9.333333969116211
@@ -216,22 +217,31 @@ Foundation · Starting from $w=1$, calculate the next weight and loss for $\alph
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- The lesson model inputs and targets.
+- Starting weight 1 and learning rates 0.1 and 0.3.
 
-**Step-by-step implementation plan:**
-1. Exercise solution
+**Outputs:**
+- Each candidate weight and its post-update loss.
+
+**Invariants to check:**
+- Both updates use a gradient evaluated at the same starting weight.
+- Loss is recomputed at each candidate.
+- Overshoot is explained through the objective, not an autodiff failure.
+
+**Hints:**
+- Keep the initial gradient separate from the candidate evaluations.
+- Compare each rate independently.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-small_step = ...  # TODO: compute small_step
-large_step = ...  # TODO: compute large_step
-assert jnp.allclose(small_step, 29. / 15.)  # TODO: complete assertion check
-assert loss(small_step)  # TODO: complete assertion check
-assert loss(large_step)  # TODO: complete assertion check
-assert jnp.allclose(loss(2.), 0.)  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+
+def compare_updates(loss, initial_weight, rates):
+    # TODO: compute the initial gradient and evaluate each candidate
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -262,23 +272,35 @@ Default differentiation is with respect to the first argument, not every floatin
 
 ### How to write: Make the data boundary explicit — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.value_and_grad(loss_fn)(params, ...)` — Evaluates both the scalar loss and its gradient PyTree `(loss_val, grads)` in a single forward+backward pass.
+**Inputs:**
+- A scalar weight and input/target arrays passed as arguments.
+- Starting weight 1.
 
-**Step-by-step implementation plan:**
-1. Make the data boundary explicit (Practice)
+**Outputs:**
+- Loss and weight gradient from `value_and_grad`.
+
+**Invariants to check:**
+- Data are explicit function inputs.
+- Differentiation is with respect to the weight.
+- Compare with an independent hand result.
+
+**Hints:**
+- Place the parameter as the first argument.
+- Use the same fixed data in both checks.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Make the data boundary explicit (Practice)
+import jax
+import jax.numpy as jnp
+
 def explicit_loss(weight, inputs, targets):
-    return ...  # TODO: return computed result
-v_explicit, g_explicit = jax.value_and_grad(...)  # TODO: compute v_explicit, g_explicit
-assert jnp.allclose(v_explicit, 14. / 3.)  # TODO: complete assertion check
-assert jnp.allclose(g_explicit, -28. / 3.)  # TODO: complete assertion check
+    # TODO: return the scalar batch objective
+    raise NotImplementedError
+
+def check_value_and_gradient(inputs, targets):
+    # TODO: evaluate value_and_grad at the requested weight
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -310,27 +332,31 @@ Duplicate data are not new information. Track the factor $N$ in the mathematical
 
 ### How to write: Audit reduction and batch replication — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
+**Inputs:**
+- Inputs and targets for one batch.
+- A repeated copy of that batch.
 
-**Step-by-step implementation plan:**
-1. Audit reduction and batch replication (Challenge)
+**Outputs:**
+- Mean-loss and sum-loss gradients before and after repetition.
+
+**Invariants to check:**
+- Repeating the batch preserves a mean gradient.
+- A sum gradient scales with repeated example count.
+- State the learning-rate adjustment that matches the update.
+
+**Hints:**
+- Keep mean and sum in separate functions.
+- Track the batch duplication factor.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Audit reduction and batch replication (Challenge)
-def summed_loss(weight, inputs, targets):
-    return ...  # TODO: return computed result
-g_mean = jax.grad(...)  # TODO: compute g_mean
-g_sum = jax.grad(...)  # TODO: compute g_sum
-x_twice, y_twice = jnp.tile(...)  # TODO: compute x_twice, y_twice
-assert jnp.allclose(g_sum, len(x) * g_mean)  # TODO: complete assertion check
-assert jnp.allclose(jax.grad(explicit_loss)(1., x_twice, y_twice), g_mean)  # TODO: complete assertion check
-assert jnp.allclose(jax.grad(summed_loss)(1., x_twice, y_twice), 2. * g_sum)  # TODO: complete assertion check
-assert jnp.allclose(1. - 0.1 * g_mean, 1. - (0.1 / len(x)) * g_sum)  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+
+def compare_reductions_and_repeats(inputs, targets, weight):
+    # TODO: compute both reductions before and after repeating data
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -362,9 +388,17 @@ You duplicate every example and keep the same learning rate. What happens to a s
 
 <details><summary>Answer and explanation</summary>
 
-Its gradient and update magnitude double.
+**1. Its gradient and update magnitude double. (correct)**
 
 A sum counts each replicated contribution again. A mean divides by the new batch size and would preserve the gradient in this example.
+
+**2. It stays unchanged because the data values are unchanged.**
+
+A sum counts both copies, so its gradient doubles. A mean would cancel the duplication through its denominator.
+
+**3. value_and_grad silently converts the sum to a mean.**
+
+value_and_grad preserves the objective you supply. Compare sum and mean explicitly; the transform does not normalize a loss for you.
 
 </details>
 

@@ -1,0 +1,38 @@
+{
+  "all_12_arm_logits_equal_private_raw": true,
+  "all_7_condition_logits_equal_private_raw": true,
+  "brightness_drop": 0.02490262683114214,
+  "calibrated_nll": 1.5087931145497713,
+  "color_balanced_accuracy": 0.3638358559328016,
+  "dev_selected": "baseline-vit",
+  "final_balanced_accuracy": 0.3185224830158059,
+  "pretraining_exposure": {
+    "mae-pretrain": {
+      "source_images": 128,
+      "targets": 786432,
+      "updates": 16,
+      "views": 128
+    },
+    "simclr-pretrain": {
+      "source_images": 128,
+      "targets": 0,
+      "updates": 16,
+      "views": 256
+    }
+  },
+  "public_file_count": 29,
+  "public_rankings_equal_private_feature_rankings": true,
+  "raw_nll": 1.508965291041416,
+  "retrieval_AP_count": 2188,
+  "retrieval_map": {
+    "baseline-vit": 0.23465095738800937,
+    "finetune-mae": 0.22972499337957383,
+    "finetune-simclr": 0.23556515597311875,
+    "partial-selected": 0.23564773235413858
+  },
+  "selected_T1_correct_probabilities_equal_private_raw": true,
+  "stage_count": 11,
+  "status": "PASS",
+  "temperature": 1.0201723141714116,
+  "updates": 384
+}

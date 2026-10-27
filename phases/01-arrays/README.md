@@ -12,7 +12,9 @@ Draw the input and output shapes before running each change.
 
 ## Study guide: Can you spot a wrong axis even when the program runs?
 
-Array bugs often return plausible numbers. Use unequal dimensions and hand-computed rows so that a successful operation cannot hide a mistaken meaning. Carry that habit into preprocessing and model inputs.
+An array carries a meaning as well as a shape. If rows are observations and columns are features, a mean over rows answers a different question from a mean over columns. Broadcasting can complete successfully while adding an observation bias where a feature bias was intended.
+
+Use unequal dimensions and one hand-computed row throughout this chapter. Follow training statistics into a new batch, keep the caller's inputs intact, and distinguish replacing an indexed value from accumulating repeated contributions. These habits become the input contract for every later model.
 
 ### Check your starting point
 
@@ -38,11 +40,11 @@ Review: [From NumPy to jax.numpy](01-from-numpy-to-jax-numpy/docs/en.md).
 
 ### Try a changed condition
 
-Normalize a matrix with a constant feature and one masked observation. What should the constant feature and the mean denominator do?
+Use rows \((1,3)\), \((5,7)\), \((100,200)\), with the last row masked. Predict feature means and population variances. Then select only the first row.
 
 <details><summary>Compare an approach</summary>
 
-Define the constant-feature policy before division, for example a unit fallback scale. Compute statistics only from valid observations; masking the final output alone leaves the fitted statistics contaminated. Reject a feature with no valid observations or declare an explicit policy.
+With two valid rows the means are \((3,5)\), variances \((4,4)\), and count 2. Selecting only the first row gives means \((1,3)\), variances \((0,0)\), count 1. Dividing by all three rows is a denominator bug. A zero valid count needs rejection or an explicitly declared policy before division.
 
 </details>
 

@@ -11,7 +11,12 @@
         "Only when the vectors are perpendicular"
       ],
       "correct": 1,
-      "explanation": "The line is unchanged, so its closest point is unchanged. The coefficient absorbs the rescaling."
+      "explanation": "The line is unchanged, so its closest point is unchanged. The coefficient absorbs the rescaling.",
+      "optionFeedback": [
+        "Doubling the direction also quadruples its squared norm. Work out the coefficient and the reconstructed vector separately.",
+        "The line is unchanged, so its closest point is unchanged. The coefficient absorbs the rescaling.",
+        "Orthogonality is not required. Substitute a general nonzero direction into the projection formula and cancel the scale factor."
+      ]
     }
   ]
 }

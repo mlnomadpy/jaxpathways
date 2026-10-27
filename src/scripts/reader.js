@@ -199,10 +199,13 @@ function showLesson(phase, lesson, options = {}) {
     const checkpointForm = /** @type {HTMLFormElement} */ (requireElement('#lesson-checkpoint'));
     checkpointForm.onsubmit = (e) => {
       e.preventDefault();
-      const selected = Number(new FormData(checkpointForm).get('answer'));
+      const answer = new FormData(checkpointForm).get('answer');
+      if (typeof answer !== 'string' || !/^(0|[1-9]\d*)$/.test(answer)) return;
+      const selected = Number(answer);
+      if (!Number.isInteger(selected) || selected < 0 || selected >= content.options.length) return;
       const passed = selected === content.answer;
       requireElement('#checkpoint-result').innerHTML = inlineMath(
-        (passed ? 'You’ve got it. ' : 'Let’s work through it. ') + content.explanation,
+        (passed ? 'You’ve got it. ' : 'Let’s work through it. ') + content.optionFeedback[selected],
       );
       if (passed) {
         entry.checkpointPassed = true;
@@ -331,7 +334,6 @@ function renderReaderNavigation(phase, lesson) {
   if (outline) outline.open = matchMedia('(min-width: 1101px)').matches;
   requireElement('#reader-sidebar').classList.remove('is-open');
   requireElement('#reader-menu').setAttribute('aria-expanded', 'false');
-  $('#activity-bar')?.remove();
   const headings = Array.from(requireElement('#lesson-body').querySelectorAll('h2'));
   /** @type {Record<ActivityGroup, string[]>} */
   const groups = { Understand: [], Build: [], Experiment: [], Practice: [], Evidence: [] };
@@ -375,14 +377,6 @@ function renderReaderNavigation(phase, lesson) {
         pill.hidden = true;
       }
     });
-  if (headings.length) {
-    const bar = document.createElement('nav');
-    bar.id = 'activity-bar';
-    bar.setAttribute('aria-label', 'Lesson activities');
-    bar.innerHTML =
-      '<a class="button" id="previous-activity">Previous activity</a><span id="activity-position"></span><a class="button primary" id="next-activity">Next activity</a>';
-    requireElement('#lesson-page').after(bar);
-  }
   requireElement('#reader-toc').innerHTML = Object.entries(groups)
     .filter(([, links]) => links.length)
     .map(([name, links]) => `<div class="toc-group"><p>${name}</p>${links.join('')}</div>`)
@@ -489,14 +483,12 @@ function updateReadingPosition() {
     else stageEl.removeAttribute('data-stage-active');
   });
   if (previous && next) {
-    $('#activity-bar')?.setAttribute('data-active-stage', group);
     previous.hidden = index === 0;
     previous.textContent = index ? 'Previous: ' + steps[index - 1] : 'Previous';
     const previousHeading = headings.find(
       (h) => h.getAttribute('data-activity-group') === steps[index - 1],
     );
     previous.href = index && previousHeading ? '#' + previousHeading.id : '#lesson-title';
-    requireElement('#activity-position').textContent = stageLabel;
     const nextLesson = $('#next');
     next.textContent =
       index < steps.length - 1

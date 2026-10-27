@@ -55,6 +55,129 @@ print("Initial loss:",float(before))
 print("Gradient:",np.asarray(gradient),"updated weights:",np.asarray(new_w))
 print("Updated loss:",float(loss(new_w,x,y)))
 
+# Run the 2D parameter-sharded update
+# Step 4 — Run an actual 2D parameter-sharded training update
+# This independent task uses 8 padded rows, 4 input features, and 4 output columns.
+# It runs on a 2x2 logical CPU mesh and compares against an unsharded NumPy oracle.
+import jax
+import jax.numpy as jnp
+import numpy as np
+from jax.sharding import Mesh, NamedSharding, PartitionSpec as P
+
+mesh2d = Mesh(np.asarray(jax.devices("cpu")).reshape(2, 2), ("data", "model"))
+x_shard = NamedSharding(mesh2d, P("data", None))
+weight_shard = NamedSharding(mesh2d, P(None, "model"))
+target_shard = NamedSharding(mesh2d, P("data", "model"))
+mask_shard = NamedSharding(mesh2d, P("data"))
+replicated_scalar = NamedSharding(mesh2d, P())
+
+x_host = (np.arange(32, dtype=np.float32).reshape(8, 4) - 7) / 10
+weight_host = (np.arange(16, dtype=np.float32).reshape(4, 4) - 5) / 20
+truth_host = np.full((4, 4), 0.2, dtype=np.float32)
+target_host = x_host @ truth_host
+momentum_host = np.full((4, 4), 0.1, dtype=np.float32)
+x_2d = jax.device_put(x_host, x_shard)
+target_2d = jax.device_put(target_host, target_shard)
+weight_2d = jax.device_put(weight_host, weight_shard)
+momentum_2d = jax.device_put(momentum_host, weight_shard)
+
+# The global masked mean is numerator / (valid examples * output columns).
+def masked_loss_2d(weight, features, targets, valid):
+    residual = features @ weight - targets
+    numerator = jnp.sum(jnp.square(residual) * valid[:, None])
+    denominator = jnp.sum(valid) * targets.shape[1]
+    return numerator / denominator
+
+@jax.jit(
+    in_shardings=(weight_shard, x_shard, target_shard, mask_shard),
+    out_shardings=(replicated_scalar, weight_shard),
+)
+def value_and_grad_2d(weight, features, targets, valid):
+    return jax.value_and_grad(masked_loss_2d)(weight, features, targets, valid)
+
+learning_rate_2d = 0.05
+momentum_rate_2d = 0.8
+@jax.jit(
+    in_shardings=(weight_shard, weight_shard, weight_shard),
+    out_shardings=(weight_shard, weight_shard),
+)
+def momentum_update_2d(weight, momentum, gradient):
+    next_momentum = momentum_rate_2d * momentum + gradient
+    next_weight = weight - learning_rate_2d * next_momentum
+    return next_weight, next_momentum
+
+# Five valid rows create unequal local counts (4 and 1); three create an empty shard (3 and 0).
+for valid_count_2d in (5, 3):
+    valid_host_2d = np.r_[np.ones(valid_count_2d, np.float32),
+                          np.zeros(8 - valid_count_2d, np.float32)]
+    valid_2d = jax.device_put(valid_host_2d, mask_shard)
+    loss_2d, gradient_2d = value_and_grad_2d(
+        weight_2d, x_2d, target_2d, valid_2d
+    )
+    next_weight_2d, next_momentum_2d = momentum_update_2d(
+        weight_2d, momentum_2d, gradient_2d
+    )
+    loss_2d.block_until_ready()
+
+    # Independent unsharded oracle: no JAX sharding or autodiff is used here.
+    residual_host_2d = x_host @ weight_host - target_host
+    oracle_loss_2d = np.sum(residual_host_2d ** 2 * valid_host_2d[:, None]) / (valid_count_2d * 4)
+    oracle_gradient_2d = (
+        2 * x_host.T @ (residual_host_2d * valid_host_2d[:, None])
+        / (valid_count_2d * 4)
+    )
+    oracle_momentum_2d = momentum_rate_2d * momentum_host + oracle_gradient_2d
+    oracle_weight_2d = weight_host - learning_rate_2d * oracle_momentum_2d
+    np.testing.assert_allclose(np.asarray(loss_2d), oracle_loss_2d, rtol=2e-5, atol=2e-6)
+    np.testing.assert_allclose(np.asarray(gradient_2d), oracle_gradient_2d, rtol=2e-5, atol=2e-6)
+    np.testing.assert_allclose(np.asarray(next_weight_2d), oracle_weight_2d, rtol=2e-5, atol=2e-6)
+    np.testing.assert_allclose(np.asarray(next_momentum_2d), oracle_momentum_2d, rtol=2e-5, atol=2e-6)
+    local_valid_counts_2d = [
+        int(np.asarray(shard.data).sum())
+        for shard in valid_2d.addressable_shards
+    ]
+    expected_counts_2d = [4, 4, 1, 1] if valid_count_2d == 5 else [3, 3, 0, 0]
+    assert sorted(local_valid_counts_2d) == sorted(expected_counts_2d)
+    local_means_2d = []
+    for row_start_2d in (0, 4):
+        row_stop_2d = row_start_2d + 4
+        shard_count_2d = valid_host_2d[row_start_2d:row_stop_2d].sum()
+        shard_numerator_2d = np.sum(
+            residual_host_2d[row_start_2d:row_stop_2d] ** 2
+            * valid_host_2d[row_start_2d:row_stop_2d, None]
+        )
+        if shard_count_2d:
+            local_means_2d.append(shard_numerator_2d / (shard_count_2d * 4))
+        else:
+            assert shard_numerator_2d == 0
+    if valid_count_2d == 5:
+        # Negative control: equal averaging of 4-example and 1-example means is wrong.
+        naive_local_mean_2d = float(np.mean(local_means_2d))
+        assert not np.isclose(naive_local_mean_2d, oracle_loss_2d)
+        print(f"valid=5; naive equal mean of nonempty shard means={naive_local_mean_2d:.6f} (wrong); weighted global loss={oracle_loss_2d:.6f}")
+    else:
+        print("valid=3; empty data shard contributes zero sum and zero count")
+    print(f"valid={valid_count_2d}; device valid counts={local_valid_counts_2d}; loss={float(loss_2d):.6f}")
+
+# Report per-device ownership from the actual addressable shards. All are float32.
+def shard_report_2d(name, array):
+    rows = []
+    for shard in array.addressable_shards:
+        rows.append((shard.device.id, shard.data.shape, int(shard.data.size * shard.data.dtype.itemsize)))
+    print(f"{name} per device (device id, local shape, bytes): {rows}")
+
+for name_2d, value_2d in [
+    ("batch features", x_2d),
+    ("targets", target_2d),
+    ("parameters", weight_2d),
+    ("momentum state", momentum_2d),
+    ("parameter gradient", gradient_2d),
+    ("updated parameters", next_weight_2d),
+    ("updated momentum", next_momentum_2d),
+]:
+    shard_report_2d(name_2d, value_2d)
+print("2D parameter-sharded forward/backward/update matches the unsharded NumPy oracle")
+
 # Step 1 — Start a fresh CPU runtime
 import jax
 jax.config.update("jax_platforms", "cpu")
@@ -107,9 +230,147 @@ print("Initial loss:",float(before))
 print("Gradient:",np.asarray(gradient),"updated weights:",np.asarray(new_w))
 print("Updated loss:",float(loss(new_w,x,y)))
 
+# Step 4 — Run an actual 2D parameter-sharded training update
+# This independent task uses 8 padded rows, 4 input features, and 4 output columns.
+# It runs on a 2x2 logical CPU mesh and compares against an unsharded NumPy oracle.
+import jax
+import jax.numpy as jnp
+import numpy as np
+from jax.sharding import Mesh, NamedSharding, PartitionSpec as P
+
+mesh2d = Mesh(np.asarray(jax.devices("cpu")).reshape(2, 2), ("data", "model"))
+x_shard = NamedSharding(mesh2d, P("data", None))
+weight_shard = NamedSharding(mesh2d, P(None, "model"))
+target_shard = NamedSharding(mesh2d, P("data", "model"))
+mask_shard = NamedSharding(mesh2d, P("data"))
+replicated_scalar = NamedSharding(mesh2d, P())
+
+x_host = (np.arange(32, dtype=np.float32).reshape(8, 4) - 7) / 10
+weight_host = (np.arange(16, dtype=np.float32).reshape(4, 4) - 5) / 20
+truth_host = np.full((4, 4), 0.2, dtype=np.float32)
+target_host = x_host @ truth_host
+momentum_host = np.full((4, 4), 0.1, dtype=np.float32)
+x_2d = jax.device_put(x_host, x_shard)
+target_2d = jax.device_put(target_host, target_shard)
+weight_2d = jax.device_put(weight_host, weight_shard)
+momentum_2d = jax.device_put(momentum_host, weight_shard)
+
+# The global masked mean is numerator / (valid examples * output columns).
+def masked_loss_2d(weight, features, targets, valid):
+    residual = features @ weight - targets
+    numerator = jnp.sum(jnp.square(residual) * valid[:, None])
+    denominator = jnp.sum(valid) * targets.shape[1]
+    return numerator / denominator
+
+@jax.jit(
+    in_shardings=(weight_shard, x_shard, target_shard, mask_shard),
+    out_shardings=(replicated_scalar, weight_shard),
+)
+def value_and_grad_2d(weight, features, targets, valid):
+    return jax.value_and_grad(masked_loss_2d)(weight, features, targets, valid)
+
+learning_rate_2d = 0.05
+momentum_rate_2d = 0.8
+@jax.jit(
+    in_shardings=(weight_shard, weight_shard, weight_shard),
+    out_shardings=(weight_shard, weight_shard),
+)
+def momentum_update_2d(weight, momentum, gradient):
+    next_momentum = momentum_rate_2d * momentum + gradient
+    next_weight = weight - learning_rate_2d * next_momentum
+    return next_weight, next_momentum
+
+# Five valid rows create unequal local counts (4 and 1); three create an empty shard (3 and 0).
+for valid_count_2d in (5, 3):
+    valid_host_2d = np.r_[np.ones(valid_count_2d, np.float32),
+                          np.zeros(8 - valid_count_2d, np.float32)]
+    valid_2d = jax.device_put(valid_host_2d, mask_shard)
+    loss_2d, gradient_2d = value_and_grad_2d(
+        weight_2d, x_2d, target_2d, valid_2d
+    )
+    next_weight_2d, next_momentum_2d = momentum_update_2d(
+        weight_2d, momentum_2d, gradient_2d
+    )
+    loss_2d.block_until_ready()
+
+    # Independent unsharded oracle: no JAX sharding or autodiff is used here.
+    residual_host_2d = x_host @ weight_host - target_host
+    oracle_loss_2d = np.sum(residual_host_2d ** 2 * valid_host_2d[:, None]) / (valid_count_2d * 4)
+    oracle_gradient_2d = (
+        2 * x_host.T @ (residual_host_2d * valid_host_2d[:, None])
+        / (valid_count_2d * 4)
+    )
+    oracle_momentum_2d = momentum_rate_2d * momentum_host + oracle_gradient_2d
+    oracle_weight_2d = weight_host - learning_rate_2d * oracle_momentum_2d
+    np.testing.assert_allclose(np.asarray(loss_2d), oracle_loss_2d, rtol=2e-5, atol=2e-6)
+    np.testing.assert_allclose(np.asarray(gradient_2d), oracle_gradient_2d, rtol=2e-5, atol=2e-6)
+    np.testing.assert_allclose(np.asarray(next_weight_2d), oracle_weight_2d, rtol=2e-5, atol=2e-6)
+    np.testing.assert_allclose(np.asarray(next_momentum_2d), oracle_momentum_2d, rtol=2e-5, atol=2e-6)
+    local_valid_counts_2d = [
+        int(np.asarray(shard.data).sum())
+        for shard in valid_2d.addressable_shards
+    ]
+    expected_counts_2d = [4, 4, 1, 1] if valid_count_2d == 5 else [3, 3, 0, 0]
+    assert sorted(local_valid_counts_2d) == sorted(expected_counts_2d)
+    local_means_2d = []
+    for row_start_2d in (0, 4):
+        row_stop_2d = row_start_2d + 4
+        shard_count_2d = valid_host_2d[row_start_2d:row_stop_2d].sum()
+        shard_numerator_2d = np.sum(
+            residual_host_2d[row_start_2d:row_stop_2d] ** 2
+            * valid_host_2d[row_start_2d:row_stop_2d, None]
+        )
+        if shard_count_2d:
+            local_means_2d.append(shard_numerator_2d / (shard_count_2d * 4))
+        else:
+            assert shard_numerator_2d == 0
+    if valid_count_2d == 5:
+        # Negative control: equal averaging of 4-example and 1-example means is wrong.
+        naive_local_mean_2d = float(np.mean(local_means_2d))
+        assert not np.isclose(naive_local_mean_2d, oracle_loss_2d)
+        print(f"valid=5; naive equal mean of nonempty shard means={naive_local_mean_2d:.6f} (wrong); weighted global loss={oracle_loss_2d:.6f}")
+    else:
+        print("valid=3; empty data shard contributes zero sum and zero count")
+    print(f"valid={valid_count_2d}; device valid counts={local_valid_counts_2d}; loss={float(loss_2d):.6f}")
+
+# Report per-device ownership from the actual addressable shards. All are float32.
+def shard_report_2d(name, array):
+    rows = []
+    for shard in array.addressable_shards:
+        rows.append((shard.device.id, shard.data.shape, int(shard.data.size * shard.data.dtype.itemsize)))
+    print(f"{name} per device (device id, local shape, bytes): {rows}")
+
+for name_2d, value_2d in [
+    ("batch features", x_2d),
+    ("targets", target_2d),
+    ("parameters", weight_2d),
+    ("momentum state", momentum_2d),
+    ("parameter gradient", gradient_2d),
+    ("updated parameters", next_weight_2d),
+    ("updated momentum", next_momentum_2d),
+]:
+    shard_report_2d(name_2d, value_2d)
+print("2D parameter-sharded forward/backward/update matches the unsharded NumPy oracle")
+
 # Figure data experiment
-# Transfer the device result to the host for an independent NumPy comparison.
-visual_data = {'kind': 'bar', 'labels': ['weight 0', 'weight 1'], 'ylabel': 'gradient coordinate', 'series': [{'label': 'sharded JAX', 'y': np.asarray(gradient).tolist()}, {'label': 'NumPy reference', 'y': expected_gradient.tolist()}]}
+# Derive the table from actual local shards rather than hardcoded byte labels.
+table_rows = []
+for label, array, spec_label in [
+    ('batch X', x_2d, 'P(data,None)'),
+    ('target Y', target_2d, 'P(data,model)'),
+    ('weights W', weight_2d, 'P(None,model)'),
+    ('momentum', momentum_2d, 'P(None,model)'),
+    ('gradient dW', gradient_2d, 'P(None,model)'),
+]:
+    shards = array.addressable_shards
+    shapes = {tuple(s.data.shape) for s in shards}
+    sizes = {int(s.data.size * s.data.dtype.itemsize) for s in shards}
+    assert len(shapes) == len(sizes) == 1
+    table_rows.append([label, str(tuple(array.shape)) + '\n' + spec_label,
+                       str(next(iter(shapes))), next(iter(sizes))])
+visual_data = {'kind': 'table', 'headers': ['Array','Global shape/spec','Each device','Bytes/device'],
+               'rows': table_rows, 'widths': [.17,.40,.23,.20]}
+
 
 # Experiment: Permutation across shards
 # Experiment — Permutation across shards: The global mean is invariant to row order.
@@ -135,6 +396,128 @@ for step_index in range(10):
     # Transfer the device result to the host for an independent NumPy comparison.
     np.testing.assert_allclose(np.asarray(cpu_weights),reference_weights,rtol=1e-5,atol=1e-6)
 print("Ten-step weights:",np.asarray(cpu_weights))
+
+# Experiment: Parameter-sharded update with unequal and empty valid counts
+# This independent task uses 8 padded rows, 4 input features, and 4 output columns.
+# It runs on a 2x2 logical CPU mesh and compares against an unsharded NumPy oracle.
+import jax
+import jax.numpy as jnp
+import numpy as np
+from jax.sharding import Mesh, NamedSharding, PartitionSpec as P
+
+mesh2d = Mesh(np.asarray(jax.devices("cpu")).reshape(2, 2), ("data", "model"))
+x_shard = NamedSharding(mesh2d, P("data", None))
+weight_shard = NamedSharding(mesh2d, P(None, "model"))
+target_shard = NamedSharding(mesh2d, P("data", "model"))
+mask_shard = NamedSharding(mesh2d, P("data"))
+replicated_scalar = NamedSharding(mesh2d, P())
+
+x_host = (np.arange(32, dtype=np.float32).reshape(8, 4) - 7) / 10
+weight_host = (np.arange(16, dtype=np.float32).reshape(4, 4) - 5) / 20
+truth_host = np.full((4, 4), 0.2, dtype=np.float32)
+target_host = x_host @ truth_host
+momentum_host = np.full((4, 4), 0.1, dtype=np.float32)
+x_2d = jax.device_put(x_host, x_shard)
+target_2d = jax.device_put(target_host, target_shard)
+weight_2d = jax.device_put(weight_host, weight_shard)
+momentum_2d = jax.device_put(momentum_host, weight_shard)
+
+# The global masked mean is numerator / (valid examples * output columns).
+def masked_loss_2d(weight, features, targets, valid):
+    residual = features @ weight - targets
+    numerator = jnp.sum(jnp.square(residual) * valid[:, None])
+    denominator = jnp.sum(valid) * targets.shape[1]
+    return numerator / denominator
+
+@jax.jit(
+    in_shardings=(weight_shard, x_shard, target_shard, mask_shard),
+    out_shardings=(replicated_scalar, weight_shard),
+)
+def value_and_grad_2d(weight, features, targets, valid):
+    return jax.value_and_grad(masked_loss_2d)(weight, features, targets, valid)
+
+learning_rate_2d = 0.05
+momentum_rate_2d = 0.8
+@jax.jit(
+    in_shardings=(weight_shard, weight_shard, weight_shard),
+    out_shardings=(weight_shard, weight_shard),
+)
+def momentum_update_2d(weight, momentum, gradient):
+    next_momentum = momentum_rate_2d * momentum + gradient
+    next_weight = weight - learning_rate_2d * next_momentum
+    return next_weight, next_momentum
+
+# Five valid rows create unequal local counts (4 and 1); three create an empty shard (3 and 0).
+for valid_count_2d in (5, 3):
+    valid_host_2d = np.r_[np.ones(valid_count_2d, np.float32),
+                          np.zeros(8 - valid_count_2d, np.float32)]
+    valid_2d = jax.device_put(valid_host_2d, mask_shard)
+    loss_2d, gradient_2d = value_and_grad_2d(
+        weight_2d, x_2d, target_2d, valid_2d
+    )
+    next_weight_2d, next_momentum_2d = momentum_update_2d(
+        weight_2d, momentum_2d, gradient_2d
+    )
+    loss_2d.block_until_ready()
+
+    # Independent unsharded oracle: no JAX sharding or autodiff is used here.
+    residual_host_2d = x_host @ weight_host - target_host
+    oracle_loss_2d = np.sum(residual_host_2d ** 2 * valid_host_2d[:, None]) / (valid_count_2d * 4)
+    oracle_gradient_2d = (
+        2 * x_host.T @ (residual_host_2d * valid_host_2d[:, None])
+        / (valid_count_2d * 4)
+    )
+    oracle_momentum_2d = momentum_rate_2d * momentum_host + oracle_gradient_2d
+    oracle_weight_2d = weight_host - learning_rate_2d * oracle_momentum_2d
+    np.testing.assert_allclose(np.asarray(loss_2d), oracle_loss_2d, rtol=2e-5, atol=2e-6)
+    np.testing.assert_allclose(np.asarray(gradient_2d), oracle_gradient_2d, rtol=2e-5, atol=2e-6)
+    np.testing.assert_allclose(np.asarray(next_weight_2d), oracle_weight_2d, rtol=2e-5, atol=2e-6)
+    np.testing.assert_allclose(np.asarray(next_momentum_2d), oracle_momentum_2d, rtol=2e-5, atol=2e-6)
+    local_valid_counts_2d = [
+        int(np.asarray(shard.data).sum())
+        for shard in valid_2d.addressable_shards
+    ]
+    expected_counts_2d = [4, 4, 1, 1] if valid_count_2d == 5 else [3, 3, 0, 0]
+    assert sorted(local_valid_counts_2d) == sorted(expected_counts_2d)
+    local_means_2d = []
+    for row_start_2d in (0, 4):
+        row_stop_2d = row_start_2d + 4
+        shard_count_2d = valid_host_2d[row_start_2d:row_stop_2d].sum()
+        shard_numerator_2d = np.sum(
+            residual_host_2d[row_start_2d:row_stop_2d] ** 2
+            * valid_host_2d[row_start_2d:row_stop_2d, None]
+        )
+        if shard_count_2d:
+            local_means_2d.append(shard_numerator_2d / (shard_count_2d * 4))
+        else:
+            assert shard_numerator_2d == 0
+    if valid_count_2d == 5:
+        # Negative control: equal averaging of 4-example and 1-example means is wrong.
+        naive_local_mean_2d = float(np.mean(local_means_2d))
+        assert not np.isclose(naive_local_mean_2d, oracle_loss_2d)
+        print(f"valid=5; naive equal mean of nonempty shard means={naive_local_mean_2d:.6f} (wrong); weighted global loss={oracle_loss_2d:.6f}")
+    else:
+        print("valid=3; empty data shard contributes zero sum and zero count")
+    print(f"valid={valid_count_2d}; device valid counts={local_valid_counts_2d}; loss={float(loss_2d):.6f}")
+
+# Report per-device ownership from the actual addressable shards. All are float32.
+def shard_report_2d(name, array):
+    rows = []
+    for shard in array.addressable_shards:
+        rows.append((shard.device.id, shard.data.shape, int(shard.data.size * shard.data.dtype.itemsize)))
+    print(f"{name} per device (device id, local shape, bytes): {rows}")
+
+for name_2d, value_2d in [
+    ("batch features", x_2d),
+    ("targets", target_2d),
+    ("parameters", weight_2d),
+    ("momentum state", momentum_2d),
+    ("parameter gradient", gradient_2d),
+    ("updated parameters", next_weight_2d),
+    ("updated momentum", next_momentum_2d),
+]:
+    shard_report_2d(name_2d, value_2d)
+print("2D parameter-sharded forward/backward/update matches the unsharded NumPy oracle")
 
 # Reference solution. Try the exercise before reading this.
 # Exercise solution
@@ -195,4 +578,33 @@ parts = [(host_x[:3],host_y[:3]),(host_x[3:],host_y[3:])]
 weighted = sum(len(b)*(2*a.T @ (-b)/len(b)) for a,b in parts)/len(host_y)
 np.testing.assert_allclose(weighted,expected_gradient,rtol=1e-6)
 print("Summed local means are four times too large; weighted aggregation repaired")
+
+# Reference practice: Change the mesh-sized regression fixture
+# Transfer the fixture to twelve padded rows with seven valid examples.
+x12_host = (np.arange(48, dtype=np.float32).reshape(12, 4) - 11) / 12
+truth12_host = np.full((4, 4), 0.15, dtype=np.float32)
+target12_host = x12_host @ truth12_host
+valid12_host = np.r_[np.ones(7, np.float32), np.zeros(5, np.float32)]
+x12_2d = jax.device_put(x12_host, x_shard)
+target12_2d = jax.device_put(target12_host, target_shard)
+valid12_2d = jax.device_put(valid12_host, mask_shard)
+loss12_2d, gradient12_2d = value_and_grad_2d(
+    weight_2d, x12_2d, target12_2d, valid12_2d
+)
+next_weight12_2d, next_momentum12_2d = momentum_update_2d(
+    weight_2d, momentum_2d, gradient12_2d
+)
+residual12_host = x12_host @ weight_host - target12_host
+oracle_loss12 = np.sum(residual12_host[:7] ** 2) / (7 * 4)
+oracle_gradient12 = 2 * x12_host[:7].T @ residual12_host[:7] / (7 * 4)
+oracle_momentum12 = momentum_rate_2d * momentum_host + oracle_gradient12
+oracle_weight12 = weight_host - learning_rate_2d * oracle_momentum12
+np.testing.assert_allclose(np.asarray(loss12_2d), oracle_loss12, rtol=2e-5, atol=2e-6)
+np.testing.assert_allclose(np.asarray(gradient12_2d), oracle_gradient12, rtol=2e-5, atol=2e-6)
+np.testing.assert_allclose(np.asarray(next_weight12_2d), oracle_weight12, rtol=2e-5, atol=2e-6)
+np.testing.assert_allclose(np.asarray(next_momentum12_2d), oracle_momentum12, rtol=2e-5, atol=2e-6)
+counts12 = [int(np.asarray(s.data).sum()) for s in valid12_2d.addressable_shards]
+assert sorted(counts12) == [1, 1, 6, 6]
+assert all(s.data.shape == (4, 2) and s.data.nbytes == 32 for s in next_weight12_2d.addressable_shards)
+print(f"12-row transfer: valid counts={counts12}; loss={float(loss12_2d):.6f}; parameter shards=(4,2), 32 bytes/device")
 print("PASS: distributed-02")

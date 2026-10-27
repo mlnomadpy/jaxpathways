@@ -30,3 +30,11 @@ Stage 2 changes the input to \(X+I\). Predict the result before running: \([[2,2
 Stage 3 writes a JSON receipt with the input, Gram matrix, checksum, backend and device inventory. Without `--evidence-dir`, the receipt stays in a temporary directory. Stage 4 reruns all checks together. Each stage prints `PASS welcome-audit stage N` when it succeeds.
 
 The receipt supports reproducibility of this CPU calculation. It does not establish TPU compatibility or observed accelerator execution. The reference command is `python3 projects/welcome-audit/tests/check.py --implementation solution --stage 4`.
+
+## Review handoff: explain a changed condition
+
+Ask another person to reconstruct the experiment using only your evidence folder. Which environment and execution facts are actually recoverable?
+
+**Keep for review:** Interpreter/package/device records, exact command, input and output. Mark unavailable facts as unknown; a successful screenshot is not a runnable handoff.
+
+Write your prediction before opening the reference implementation. Distinguish what the existing checker verifies from your proposed extension; record any extension command, actual output and limitation separately. A reviewer should be able to locate the first failed contract from your saved evidence.

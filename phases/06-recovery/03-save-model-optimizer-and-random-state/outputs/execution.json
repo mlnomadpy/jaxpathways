@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "recovery-03",
-  "contentHash": "533dd935b0e441a387312fd3ad92ecb77b962d20f41bdb9ae096d24155a7eea0",
-  "executedAt": "2026-10-21T10:05:22.060810+00:00",
+  "contentHash": "55ab3a10dffb0ea454de16e472825af3ae55818ebf07862209b5f077b43cfe92",
+  "executedAt": "2026-10-27T17:04:56.867929+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -11,26 +11,16 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Restored step: 3\nOptimizer count: 3\nNext update and loss agree; checkpoint exists: True\nRestored step: 3\nOptimizer count: 3\nNext update and loss agree; checkpoint exists: True\nModel-only checkpoint produces a different Adam update\nReset key changes the noisy objective and continuation stream\nFull restore Adam count: 4; reset memory count: 1; next parameters differ.\nExpected changed configuration rejection\nExpected exact key-data mismatch\nPASS: recovery-03\n",
+  "stdout": "Learner transition step: 1 Adam count: 1\nRestored step: 3\nOptimizer count: 3\nNext update and loss agree; checkpoint exists: True\nModel-only checkpoint produces a different Adam update\nReset key changes the noisy objective and continuation stream\nFull restore Adam count: 4; reset memory count: 1; next parameters differ.\nExpected changed configuration rejection\nExpected exact key-data mismatch\nPASS: recovery-03\n",
   "notebookCells": [
     {
-      "sourceHash": "53e0b799653dc93e7c1dec1523d3c18ceb729f7078d9436cb7e82e73c32245ed",
-      "outputs": []
-    },
-    {
-      "sourceHash": "bbeb0540e5ed8412a07c25397124bdbbdb058cdfa206dbfa2f41d4d7544fd083",
-      "outputs": []
-    },
-    {
-      "sourceHash": "d7e7bda09f1986da5e0ccfe70f648abb5efdb0d0db26f75967a51ef0fe18b766",
+      "sourceHash": "b2a8b25ad801114ad6d7ce47e4ed2953e9cbb4ebe6b7b9667a5e54950aebe70f",
       "outputs": [
         {
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "Restored step: 3\n",
-            "Optimizer count: 3\n",
-            "Next update and loss agree; checkpoint exists: True\n"
+            "Learner transition step: 1 Adam count: 1\n"
           ]
         }
       ]
@@ -54,7 +44,7 @@
       "outputs": []
     },
     {
-      "sourceHash": "25df6d662f9d3f0c4e984c6a201f79fa0cfd7a2633dc4b0773dfba6c2dd4ee6c",
+      "sourceHash": "53dc08a479da44f2b1718bf964cd5c4d3e3305811c536df9d501b1833a6e3476",
       "outputs": [
         {
           "output_type": "display_data",
@@ -93,7 +83,7 @@
       ]
     },
     {
-      "sourceHash": "d222bdc69df2e7160a88cde1b6a1508f216c68df057e9b7c74edf04e9c903ece",
+      "sourceHash": "22d5d8896e54aecd8b70f9aafa0c68cf3475cdb9799648df8d1bbbd8b53d1ac8",
       "outputs": []
     },
     {
@@ -101,7 +91,7 @@
       "outputs": []
     },
     {
-      "sourceHash": "246f28af5f768d2946eab0612704ab2b2f2bc8b03c9cf22efc0e7432563b233e",
+      "sourceHash": "22d5d8896e54aecd8b70f9aafa0c68cf3475cdb9799648df8d1bbbd8b53d1ac8",
       "outputs": []
     },
     {
@@ -117,7 +107,7 @@
       ]
     },
     {
-      "sourceHash": "b68b9710e687ca817575c512d33d2670b1dc333a5f645a78443cb7f1bcc0f924",
+      "sourceHash": "22d5d8896e54aecd8b70f9aafa0c68cf3475cdb9799648df8d1bbbd8b53d1ac8",
       "outputs": []
     },
     {

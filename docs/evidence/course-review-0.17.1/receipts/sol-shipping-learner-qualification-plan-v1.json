@@ -1,0 +1,99 @@
+{
+  "aggregateUpperBoundAcrossExactlyFive": {
+    "actorOptimizerSteps": 10,
+    "criticOptimizerSteps": 10,
+    "heldoutQualityScores": 0,
+    "outerUpdateExecutions": 5,
+    "rewardHeadOptimizerSteps": 20
+  },
+  "approval": {
+    "mechanicsPath": "/private/tmp/sol-transformer-lineage-learner-mechanics-approval-v2.json",
+    "mechanicsSha256": "72ecd919095e2fcc4bc095afee6f27a74571ba61aa1a56ae7c9ca442399c3c48",
+    "portableNonRunPath": "/private/tmp/sol-transformer-lineage-portable-nonrun-approval-v2.json",
+    "portableNonRunSha256": "28f625fa4a1e8f705ce6b0e4a4ae56e241ce33d7ec5f3ec091e8428df738838b",
+    "runAuthorized": false
+  },
+  "candidateFreezePending": true,
+  "candidatePreparationRule": "Before any import/output, create a separate immutable candidate-freeze manifest with exact five candidate paths/SHA-256, AST comparison to repaired completed-six/reference, one-defect deltas for each negative, and generated ZIP/extracted-root SHA/member inventory. Confirm all candidate hashes again immediately before each invocation.",
+  "historicalAsRunStarterSha256": "b7fc9060123b474de92ac04a5480ef818ab296bc216351ed2f7701474741b03d",
+  "historicalCampaignExposureSeparate": {
+    "v1PlusV5OuterUpdates": 24,
+    "v1PlusV5RewardFitSteps": 240,
+    "v5QualityGate": "failed"
+  },
+  "invocations": [
+    {
+      "candidateConstruction": "Fill exactly six TODO bodies in repaired shipping starter; 20 helper ASTs unchanged; entire module AST equals reference.",
+      "expected": "pass",
+      "id": "completed-six-positive"
+    },
+    {
+      "candidateConstruction": "Same valid math and provided helpers with independently spelled GAE and clipping; AST may differ only in intended learner functions; semantic no-update positive first.",
+      "expected": "pass",
+      "id": "alternate-spelling-positive"
+    },
+    {
+      "candidateConstruction": "Completed-six baseline with only train TODO body mutated to leave actor/critic/update clock unchanged.",
+      "expected": "reject",
+      "id": "unchanged-train-negative"
+    },
+    {
+      "candidateConstruction": "Completed-six baseline with only reward-fit TODO body mutated to change the declared reward-head Adam learning rate.",
+      "expected": "reject",
+      "id": "wrong-reward-rate-negative"
+    },
+    {
+      "candidateConstruction": "Completed-six baseline with only train TODO body mutated to apply an incorrect actor update while maintaining apparent clocks.",
+      "expected": "reject",
+      "id": "wrong-actor-update-negative"
+    }
+  ],
+  "kind": "sol-transformer-lineage-shipping-learner-check-qualification-plan",
+  "locationRule": "Only generated posttraining-audit project ZIP extracted into a fresh root after ZIP member/source fidelity check; no duplicate optimization execution in source checkout.",
+  "perInvocationUpperBound": {
+    "actorOptimizerSteps": 2,
+    "criticOptimizerSteps": 2,
+    "heldoutQualityScores": 0,
+    "outerUpdateExecutions": 1,
+    "rewardHeadFits": 1,
+    "rewardHeadOptimizerSteps": 4
+  },
+  "qualificationNotYetExecuted": true,
+  "requiredObservations": [
+    "both positives pass independent initial+four-step reward Adam oracle, rollout/GAE/PPO/value math and two-epoch actor/critic optimizer replay",
+    "unchanged train fails clock/parameter-change oracle",
+    "wrong reward rate fails four-step reward Adam oracle",
+    "wrong actor update fails post-update decoder selected-logprob/optimizer oracle",
+    "no heldout quality result or new 8+4+4 campaign output"
+  ],
+  "requiredRuntimeGuards": [
+    "--stage learner-check only",
+    "exact caller-supplied candidate SHA before import",
+    "same exact mechanics approval hash for all five",
+    "fresh external temp output per invocation",
+    "CPU/pinned versions only",
+    "candidate source and ZIP/extracted source hashes checked before invocation",
+    "record actual optimizer exposure for every early-reject candidate"
+  ],
+  "schemaVersion": 1,
+  "scope": "One clean-extracted-project local CPU learner mechanics qualification, separate from exhausted v4/v5 quality campaigns; no training selection, heldout scoring, corpus/cloud/hardware, source retune or child-weight release.",
+  "shippingSourceFilesSha256": {
+    "projects/posttraining-audit/transformer_lineage/README.md": "2d0f9db1a2ec5c3eec8845c7b8267e6cd3044a97d66ecfc37c7eef97d9ec7c98",
+    "projects/posttraining-audit/transformer_lineage/check.py": "12f6709ef0683067ee10d871891bb4d67736c6d5039d5a2809d2dfa92115a0e3",
+    "projects/posttraining-audit/transformer_lineage/evidence-schema.json": "59f5ba83b7129b531fb790c0ac62bae22b70a297b3f35caacd3f4e314418e798",
+    "projects/posttraining-audit/transformer_lineage/fixture.json": "6a47dbe54012ed3013753ca8089fbcd51e57b3d0cbd61ffdb50a6877e0a534ff",
+    "projects/posttraining-audit/transformer_lineage/recipe.json": "8411afc4412c59973d56b2cceae530dd642a5aa1c9e6f57a5dbb7f6ba110bc57",
+    "projects/posttraining-audit/transformer_lineage/requirements.txt": "14c6bdedf000ba836f74beedc4c7aa50bc818939d30b75030a2c47a0cf6df537",
+    "projects/posttraining-audit/transformer_lineage/solution.py": "df56c036a57e8ad1c7be61341290422e7dfa47ea3326b3c82e5cecad5806b569",
+    "projects/posttraining-audit/transformer_lineage/starter.py": "8196af0f989c382ab5c4833102f11a2d1fe2263614e35e8ac1be8ab1ce501d32",
+    "projects/text-harness/foundations/config.py": "5c05801a7ec1a15b3978c87c77ac4e64d1b056c60487cbcff3cdf72475c8bb64",
+    "projects/text-harness/foundations/data.py": "ff8ff698090866d46bc1f2b3540393b9a16db2121ad824110bd2ba53db645bd8",
+    "projects/text-harness/foundations/model.py": "94a88ae7fd6a251b5b190b4631496e04bb71a31c1bfe418511fdd37ffef034c9",
+    "projects/text-harness/foundations/reference/run/inference-package/package.json": "02b92a9f56325e5a38be2c40bf263d2ca91db6122ba84dd4df266339457bf278",
+    "projects/text-harness/foundations/reference/run/inference-package/params.npz": "271cb6457de5da3f727c343c64b7bd350c00e503ea7ac847eecf51fbd5558802",
+    "projects/text-harness/foundations/reference/run/inference-package/tokenizer.json": "c92b534443cc6a1eacd5e78406b2c42e59553df704a07102a03c639d3694f586",
+    "projects/text-harness/foundations/train.py": "ee9f3bc73505ce8e00fe9680589d97805593e5c8c035cba4709b5f334eb27a2b"
+  },
+  "shippingStarterSha256": "8196af0f989c382ab5c4833102f11a2d1fe2263614e35e8ac1be8ab1ce501d32",
+  "zipAndExtractedRootPending": true
+}

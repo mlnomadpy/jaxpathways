@@ -1,0 +1,15 @@
+{
+  "bos_id": 2,
+  "dropout": 0.1,
+  "eos_id": 3,
+  "heads": 4,
+  "layers": 2,
+  "mask_id": 4,
+  "max_length": 64,
+  "mlp_width": 64,
+  "pad_id": 0,
+  "tied_mlm_head": true,
+  "unk_id": 1,
+  "vocab_size": 512,
+  "width": 32
+}

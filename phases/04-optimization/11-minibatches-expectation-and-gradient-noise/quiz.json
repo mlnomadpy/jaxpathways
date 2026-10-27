@@ -11,7 +11,12 @@
         "Only with Adam"
       ],
       "correct": 1,
-      "explanation": "The dataset mean weights examples equally. Unequal batches need count weighting."
+      "explanation": "The dataset mean weights examples equally. Unequal batches need count weighting.",
+      "optionFeedback": [
+        "A small batch and a large batch should not receive equal weight. Compare batches of sizes one and three with different means.",
+        "The dataset mean weights examples equally. Unequal batches need count weighting.",
+        "The aggregation identity does not depend on Adam. Weight each batch mean by its observation count and divide by the total count."
+      ]
     }
   ]
 }

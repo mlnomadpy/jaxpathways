@@ -12,7 +12,9 @@ After completing this third TPU mini-course, you can plan a candidate accelerato
 
 ## Study guide: How do you size TPU HBM capacity, bound BF16/INT8 precision error, and capture a clean XProf trace?
 
-Provisioning a TPU slice without budgeting HBM wastes time on out-of-memory crashes, and profiling without warming up measures compiler overhead instead of MXU execution.
+Hardware specifications become useful only after you connect them to the workload. Training-state memory, inference KV-cache growth, arithmetic intensity and numerical precision place different demands on a device. Calculate those demands under explicit storage and placement assumptions before comparing theoretical ceilings.
+
+Then separate three observations: how many bytes are represented, how the numerical result changes and where execution time is spent. The memory ledger, precision chart and XProf trace each answer one of these questions. Read them together to form a target-specific hypothesis, and retain the actual target evidence when testing it.
 
 ### Check your starting point
 
@@ -20,7 +22,7 @@ A matrix multiplication has arithmetic intensity 170 FLOP/byte on TPU v5e (ridge
 
 <details><summary>Compare your reasoning</summary>
 
-HBM bandwidth-bound, because its arithmetic intensity (170 FLOP/byte) is below the TPU v5e ridge point (240.5 FLOP/byte). Increasing batch size or sequence length raises operational intensity toward the MXU ceiling.
+Under this ideal roofline model, 170 FLOP/byte is below the TPU v5e ridge of 240.5 FLOP/byte, so the HBM bandwidth ceiling is lower. Changing batch or sequence length can change data reuse and operational intensity; recompute the traffic assumptions and measure the actual workload before claiming a bottleneck or speedup.
 
 </details>
 
@@ -28,27 +30,27 @@ Review: [TPU generations and HBM memory budgeting](01-tpu-generations-and-hbm-me
 
 ### Build in stages
 
-1. **Compare TPU generations and budget HBM capacity.** Compute TPU v5e, v5p, and v6e ridge points, calculate FP32 vs mixed-BF16 training state and KV-cache GiB, and determine the minimum chip count at an 80% HBM budget.
+1. **Compare TPU generations and budget HBM capacity.** Compute the v5e/v5p/v6e ideal ridge points and separate training-state from inference KV-cache bytes. Compare replicated and explicitly sharded per-device ledgers under headroom and temporary/activation assumptions before deriving any conditional minimum chip count.
 
    Lessons: [TPU generations and HBM memory budgeting](01-tpu-generations-and-hbm-memory-budgeting/docs/en.md).
 
-2. **Audit BF16/INT8 precision and capture a warmed XProf trace.** Compare BF16 and symmetric INT8 matmul errors against FP32, verify FP32 accumulation inside jax.lax.dot_general, and capture a warmed *.xplane.pb trace.
+2. **Audit BF16/INT8 precision and capture a warmed XProf trace.** Compare BF16 operand/requested-result policies and an INT8 weight-dequantization reference against FP32, inspect returned dtypes and retained CPU compiler IR, and capture a warmed *.xplane.pb trace with its backend recorded.
 
    Lessons: [bfloat16, int8 precision, and XProf profiling on TPU](02-bfloat16-int8-precision-and-xprof-profiling/docs/en.md).
 
 ### Try a changed condition
 
-An XProf trace on your TPU VM shows a 12-second host compile block followed by five 9-millisecond step blocks. How do you get a clean steady-state profile?
+At the stated ideal byte count, a BF16 1024-square matmul has about 341.3 FLOP/byte. Compare v5e’s 240.5 ridge with v6e’s 560.4 ridge.
 
 <details><summary>Compare an approach</summary>
 
-Run at least one warmup call and call jax.block_until_ready() before entering with jax.profiler.trace(trace_dir): so only steady-state execution is recorded.
+The operation is above v5e’s ideal intersection and below v6e’s. That selects the lower of theoretical ceilings, not measured bottlenecks or a device ranking. Record actual precision, output bytes and traffic assumptions; validate the hypothesis with target timing and a trace before claiming a speedup.
 
 </details>
 
-**Symptom:** Accumulating a long bfloat16 dot product directly in bfloat16 produces much larger drift than expected.
+**Symptom:** A BF16 result differs from a requested FP32 result even when both dots receive the same BF16-rounded operands.
 
-**Check next:** Pass preferred_element_type=jnp.float32 to jax.lax.dot_general so the TPU MXU accumulates products in FP32 before any output cast.
+**Check next:** Compare actual returned dtypes and an explicit FP32-result-to-BF16 cast, then inspect compiler evidence on the named backend. A result dtype or larger output error does not prove that every partial sum used that dtype.
 
 ### Decide what is ready
 
@@ -66,11 +68,11 @@ Use the reviewed execution matrix before staging code on a TPU. CPU-only lesson 
 
 Status: authored lesson with CPU exercise.
 
-**Intended outcome:** Compare TPU v5e, v5p, and v6e specifications and roofline ridge points, budget FP32 vs mixed-BF16 training state and KV-cache HBM, and size the minimum chip count for a model.
+**Intended outcome:** Compare TPU generation tradeoffs, prove per-device replicated versus sharded memory fit, and budget training state separately from inference KV cache.
 
-**Evidence:** Keep the TPU ridge-point table, 7B and 1.5B training/KV-cache HBM budgets, and minimum chip count calculation at an 80% HBM ceiling.
+**Evidence:** Keep aggregate and per-device state ledgers, replication/sharding/headroom assumptions, invalid aggregate-fit counterexamples and separate training-versus-inference capacity decisions.
 
-**Checkpoint:** Why does mixed-precision Adam training still require ~12 bytes per parameter in HBM even when forward and backward matmuls use 2-byte bfloat16?
+**Checkpoint:** Under this lesson's ledger, why does mixed-BF16 Adam training require 18 bytes per parameter before activations and temporary buffers are counted?
 
 ### 21.02 bfloat16, int8 precision, and XProf profiling on TPU
 
@@ -78,9 +80,9 @@ Status: authored lesson with CPU exercise.
 
 Status: authored lesson with CPU exercise.
 
-**Intended outcome:** Measure bfloat16 and symmetric int8 matrix multiplication error against float32, verify float32 accumulator precision, and capture a warmed XProf (*.xplane.pb) trace.
+**Intended outcome:** Measure BF16 operand and requested result-dtype error against a finite-precision FP32 JAX reference, inspect CPU dtype and compiler evidence, and retain a warmed XProf trace with its observed backend.
 
-**Evidence:** Keep the BF16 vs INT8 error summary, FP32-vs-BF16 accumulator drift comparison, and captured *.xplane.pb trace receipt.
+**Evidence:** Keep the returned-dtype/error table, seeded cast comparisons, source-bound CPU compiler IR and captured *.xplane.pb trace receipt. State the observed backend and the limits of each artifact.
 
 **Checkpoint:** Why should you run and synchronize at least one warmup step before entering with jax.profiler.trace(trace_dir): on a TPU VM?
 
@@ -88,7 +90,7 @@ Status: authored lesson with CPU exercise.
 
 Estimate optimizer-state bytes and calculate supplied-rate scaling efficiency.
 
-**Demonstrate:** Compare TPU v5e, v5p, and v6e ridge points, budget training and KV-cache HBM, measure BF16/INT8 matmul error with FP32 accumulation, and capture a warmed XProf trace.
+**Demonstrate:** Compare published TPU roofline estimates, budget training and KV-cache HBM, compare BF16 result-dtype policies and an INT8 weight-dequantization reference, and retain a warmed profiler trace with its observed backend.
 
 Project status: implemented staged practice · [Open source](../../projects/tpu-systems-audit/README.md). Use stages 1, 2, 3, 4 for this phase. Work in projects/tpu-systems-audit/starter/model.py. Complete stages 1 and 2 for independent calculations and changed-condition diagnosis, then retain the stage 3 evidence with --evidence-dir runs/tpu-systems-audit. Stage 4 integrates the checks. Learner commands explicitly select the starter; --implementation solution is instructor reference execution. This bounded practice does not certify the entire phase or target hardware.
 

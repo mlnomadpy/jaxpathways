@@ -1,5 +1,13 @@
 import katex from 'katex';
 import { escapeHtml } from './html.js';
+import { normalizeEpubMathML } from './mathml-export.js';
+
+/** @param {string} rendered @returns {string} */
+function normalizeMathMLFragments(rendered) {
+  return rendered.replace(/<math\b[^>]*>[\s\S]*?<\/math>/g, (mathml) =>
+    normalizeEpubMathML(mathml),
+  );
+}
 
 /**
  * Explicit delimiters avoid treating currency and shell dollar signs as math.
@@ -18,9 +26,10 @@ export function renderMath(tex, displayMode = false, output = 'htmlAndMathml') {
     maxSize: 20,
     macros: {},
   });
+  const normalized = output === 'html' ? rendered : normalizeMathMLFragments(rendered);
   return displayMode
-    ? `<span class="math-display" tabindex="0" role="group" aria-label="Equation">${rendered}</span>`
-    : rendered;
+    ? `<span class="math-display" tabindex="0" role="group" aria-label="Equation">${normalized}</span>`
+    : normalized;
 }
 
 const SAFE_HREF =

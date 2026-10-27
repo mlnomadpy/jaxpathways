@@ -4,7 +4,7 @@ Copy this template into your own portfolio and fill it after running your modifi
 
 ## Evidence required
 
-Keep the analytic error recurrence, per-step weight/loss/gradient norm for rates 0.1 and 0.3, observed 3.24 loss multiplier, changed-scale comparison, clipping bound, and one repaired nonfinite-input case.
+Keep the NaN input diagnosis, saturation and excessive-rate controls, per-layer gradient/activation evidence and held-out comparisons for each one-factor repair.
 
 - Command: `python3 phases/05-networks/05-debug-unstable-learning/code/main.py`
 - Working directory: Repository root

@@ -177,3 +177,11 @@ Keep your implementation path, package versions, exact commands and the independ
 `outputs/evidence.json` records the actual reference trajectories, metric conventions, checker output and hashes of the executed source, checker and figure generator. It contains instructor reference evidence; your own submission should name your implementation and changed conditions. No natural dataset, accelerator, production convergence or independent learner review is claimed.
 
 Primary references: [JAX automatic differentiation](https://docs.jax.dev/en/latest/automatic-differentiation.html), [Optax optimizer definitions](https://optax.readthedocs.io/en/latest/api/optimizers.html), and [Optax transformations and clipping](https://optax.readthedocs.io/en/latest/api/transformations.html). The project’s transparent recurrences are checked against independent derivations; the earlier Optax lessons provide the library integration.
+
+## Review handoff: explain a changed condition
+
+Clip gradient (3, 4) to norm one, then compare a first SGD step with a first bias-corrected Adam step using learning rate 0.1.
+
+**Keep for review:** The clipped gradient (0.6, 0.8), SGD delta (-0.06, -0.08), and Adam delta approximately (-0.1, -0.1), with epsilon stated. Explain why clipping the input gradient does not bound Adam’s final delta to the SGD norm.
+
+Write your prediction before opening the reference implementation. Distinguish what the existing checker verifies from your proposed extension; record any extension command, actual output and limitation separately. A reviewer should be able to locate the first failed contract from your saved evidence.

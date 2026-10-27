@@ -1,0 +1,26 @@
+{
+  "approvalSha256": "6f1dab24fff6b759479905a9c4767d7f448f17d1cfebc5529656b3d15dc72b18",
+  "durableSplitClock": {
+    "innerEpoch": 8,
+    "promptCursor": 0,
+    "rewardHeadSha256": "16032ed9d6610fc4c85bc005a5eba35e30f370ca20b674faf6b49464bd7e26c2",
+    "update": 4
+  },
+  "failure": "solution.evaluate passed reference model params as critic_params to baseline rollout, causing KeyError: weight in _critic_value",
+  "kind": "sol-transformer-lineage-campaign-v1-incident-audit",
+  "limits": [
+    "only four-update split state is durably saved",
+    "in-memory eight-update state and first dev child rollout were not persisted",
+    "no source mutation, resume or second campaign is included in this receipt",
+    "a new source-bound approval is required before any new optimization"
+  ],
+  "logAndDurableFilesSha256": {
+    "/private/tmp/transformer-lineage-campaign-v1.log": "4cb1ae7ee606d33d9fc84f9718cc150e1cc03f69ad1e12a19e09d8151bc952b6",
+    "/private/tmp/transformer-lineage-campaign-v1/primary-split-state/state.json": "ccd65f56361b5b7a1683629c3830d06f973ee3417f9d49a2ad9c98378a117c67",
+    "/private/tmp/transformer-lineage-campaign-v1/primary-split-state/state.npz": "5ade2995195a1fa37cd88b5205e6fe827424892f022b6e756c81dca7452f4c67"
+  },
+  "observedExecution": "one reward-head fit, eight primary update executions in process, first dev child rollout in memory, then frozen-parent baseline rollout failed at critic weight lookup; no matched dev pair, no heldout rollout, no quality result, no replay lane, no final primary checkpoint",
+  "recipeSha256": "8411afc4412c59973d56b2cceae530dd642a5aa1c9e6f57a5dbb7f6ba110bc57",
+  "solutionSha256": "ddb8d67c4bca23958f55b7c0f710d99a0094e3ff8685434220b0b3929f03c93d",
+  "status": "failed-development-at-evaluation-before-quality"
+}

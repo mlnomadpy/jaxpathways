@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "operations-06",
-  "contentHash": "0121871c1f1374ac99950577151e0383ae776e976d3b81b5b7b8a42730b0ce0c",
-  "rendererHash": "a1bd5b648f4731ae5d5f0a24811c2540d1a0a132149ce589d17c4113509cbedf",
+  "contentHash": "7ec8f2cfa03e46cfd98da43caea64bed7e3657e14ca88bc133d201c56f8e92fa",
+  "rendererHash": "17e3bbad72ee4c43425845aaee76b86b85e84750551278be03d8c16842f4dc63",
   "kind": "executed",
-  "generatedAt": "2026-10-20T22:29:44.012071+00:00",
+  "generatedAt": "2026-10-27T16:10:56.026888+00:00",
   "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",
@@ -13,7 +13,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Overall MSE: 0.409 high-slice MSE: 4.0 release: False\nTwo-bin input total variation: 0.4 (requires investigation; not an automatic retraining order)\n",
+  "stdout": "manifest: 4f1493ec073741382bbce1bbf62ee5b7d923de301d12df31743a048e6575770c\nartifact fingerprint: ac13dc98a0997fec89546bd1171454f6ddd3d1b90b497a17a2979ef6b89cbad4\nper-example prediction sample: {'id': 'low-0', 'slice': 'low', 'target': 1.1, 'prediction': 1.0, 'squared_error': 0.010000000000000018}\nbaseline metrics: {'low': {'count': 9, 'mse': 0.009999999999999988}, 'high': {'count': 1, 'mse': 4.0}, 'overall': {'count': 10, 'mse': 0.409}, 'passed': False}\ncandidate B fingerprint: 5a2066123c8cc83b54669ef794d3bb91ceff53ce2b7bac6cd50815c53a5f1c06\npaired candidate B metrics (same ten IDs, targets, splits, slices and policy): {'low': {'count': 9, 'mse': 0.009999999999999988}, 'high': {'count': 1, 'mse': 0.010000000000000285}, 'overall': {'count': 10, 'mse': 0.010000000000000018}, 'passed': True}\nlabel-correction sensitivity with artifact A held fixed: {'low': {'count': 9, 'mse': 0.009999999999999988}, 'high': {'count': 1, 'mse': 0.010000000000000285}, 'overall': {'count': 10, 'mse': 0.010000000000000018}, 'passed': True}\nmissing required slice: {'count': 0, 'mse': None} release: False\n",
   "data": {
     "kind": "bar",
     "labels": [
@@ -21,15 +21,23 @@
       "low (9)",
       "high (1)"
     ],
-    "xlabel": "evaluation group (count)",
+    "xlabel": "evaluation group (same fixed cases)",
     "ylabel": "mean squared error",
     "series": [
       {
-        "label": "observed MSE",
+        "label": "candidate A",
         "y": [
           0.409,
-          0.01,
+          0.009999999999999988,
           4.0
+        ]
+      },
+      {
+        "label": "candidate B",
+        "y": [
+          0.010000000000000018,
+          0.009999999999999988,
+          0.010000000000000285
         ]
       },
       {

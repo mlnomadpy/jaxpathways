@@ -4,6 +4,8 @@ Phase 15: Deployment, interoperability & edge AI · about 110 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Inference capacity, batching, and autoscaling](https://www.tahabouhsine.com/jaxpathways/lesson-deployment-04.html).
+
 ## What you will be able to do
 
 - Trace source model through conversion, runtime and device execution.
@@ -74,6 +76,8 @@ Our sample uses three sensor features in the range $0$ to $255$ and divides by $
 ## Budget more than weights
 
 Peak memory includes activations, tensors held by the runtime, workspace, preprocessing buffers and, for autoregressive models, KV cache. A compressed file may expand on load. Batch one often minimizes interaction latency but may reduce throughput. Include cold process startup, model load and runtime initialization in a separate device cold-start measurement; our first-request timing starts after imports and model setup, so it does not cover them. Measure power or energy with an actual target-device tool and record thermal state.
+
+The local proxy records thirty warm requests and reports their sample p50 and p95. Its request timer includes JSON decode, normalization, transfer, inference, waiting and response encoding, but starts after imports and model setup. Read the exact values from that capture's trace; the numerical ordering can change when the script is rerun. The metadata explicitly marks `edge_device_validated=false`, so these durations describe the desktop request boundary rather than phone latency.
 
 ## Measure the request the user experiences
 
@@ -256,15 +260,15 @@ Expected: A JSON report with $30$ measured warm requests, first-request time, p5
 
 ### Read the figure
 
-The horizontal axis counts warm requests, and the vertical axis measures end-to-end latency in milliseconds. The solid line joins the measured request times. The dashed horizontal line is the empirical $95$th percentile of those same $30$ samples; it is a summary threshold, not a second implementation.
+The horizontal axis counts thirty warm requests; the vertical axis is complete request time in milliseconds. Follow the solid local-CPU trace and compare each point with the dashed empirical p95 from those same thirty samples. A point above p95 is a slow member of this sample, not an automatic breach of a separately defined service objective.
 
-Read a solid point above the dashed line as a request slower than that percentile threshold. The line is not the maximum, so a few points can lie above it. The first cold request is reported separately and is not the first point of this warm-only plot.
+Inspect the early requests and the later cluster. A warmed model can still show request-wrapper and scheduling variation. The timer begins after imports and model setup, so the early points do not include a true cold process start. The p95 line is a descriptive sample threshold and can move when the experiment is rerun.
 
 ### Connect it to the computation
 
-Each duration includes JSON decoding, normalization, transfer, inference, waiting for completion, and encoding the response. That boundary explains why the chart should not be read as pure model execution time. An early high warm point or later spike shows variation in the whole request; this plot alone cannot identify its cause.
+Each dot includes JSON decode, normalization, transfer, inference completion and response encoding. It therefore answers a different question from an isolated kernel timer. Use the same raw golden request when moving to a target device, then compare both its prediction and its actual runtime placement before interpreting a latency difference.
 
-The percentile is computed from a small sample, with interpolation between ordered values. It does not guarantee that future requests will meet the threshold. Compare the sample distribution, median, and tail across repeated runs on the target device. These are local CPU proxy measurements, not evidence of mobile or edge-device latency.
+Ask which unmeasured costs a user would still see: process startup, model load, device-runtime initialization or sustained thermal effects. The receipt says `edge_device_validated=false`; those device questions remain for a named-hardware run. Thirty desktop samples explain the protocol, not a production tail guarantee.
 
 ```python
 visual_data = {'kind': 'line', 'x': list(range(1, len(samples) + 1)), 'xlabel': 'warm request number', 'ylabel': 'end-to-end milliseconds', 'series': [{'label': 'local CPU request', 'y': samples}, {'label': 'recorded p95', 'y': [report['p95_ms']] * len(samples)}]}
@@ -272,88 +276,88 @@ visual_data = {'kind': 'line', 'x': list(range(1, len(samples) + 1)), 'xlabel': 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:24:52.215348+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:15:12.407255+00:00. JAX 0.9.2.
 
 ```text
 {
   "runtime": "JAX CPU instructional proxy",
   "jax": "0.9.2",
-  "first_request_ms": 20.69954201579094,
+  "first_request_ms": 20.254916977137327,
   "warm_samples_ms": [
-    0.24737464264035225,
-    0.10249996557831764,
-    0.0727078877389431,
-    0.0627920962870121,
-    0.060750171542167664,
-    0.05566701292991638,
-    0.05533406510949135,
-    0.05333311855792999,
-    0.05141599103808403,
-    0.05195802077651024,
-    0.05116686224937439,
-    0.05145790055394173,
-    0.0500422902405262,
-    0.04929210990667343,
-    0.04766695201396942,
-    0.05366699770092964,
-    0.04920829087495804,
-    0.05041668191552162,
-    0.050541944801807404,
-    0.04804227501153946,
-    0.04700012505054474,
-    0.04691723734140396,
-    0.04691723734140396,
+    0.22416701540350914,
+    0.10362500324845314,
+    0.07787486538290977,
+    0.06537465378642082,
+    0.05979090929031372,
+    0.055833254009485245,
+    0.05574990063905716,
+    0.061125028878450394,
+    0.055791810154914856,
+    0.057833269238471985,
+    0.05795806646347046,
+    0.05354173481464386,
+    0.05050003528594971,
+    0.052333809435367584,
+    0.05100015550851822,
+    0.06533274427056313,
+    0.05337502807378769,
+    0.05487492308020592,
+    0.05137501284480095,
+    0.049083027988672256,
+    0.0488748773932457,
+    0.04900014027953148,
+    0.05429191514849663,
+    0.04866672679781914,
     0.047625042498111725,
-    0.048166606575250626,
-    0.06870832294225693,
-    0.04687486216425896,
-    0.04591699689626694,
-    0.04575029015541077,
-    0.046416185796260834
+    0.05141599103808403,
+    0.04583410918712616,
+    0.04970794543623924,
+    0.7312917150557041,
+    0.1598750241100788
   ],
-  "p50_ms": 0.05047931335866451,
-  "p95_ms": 0.08909353055059901,
+  "p50_ms": 0.05458341911435127,
+  "p95_ms": 0.1952356193214653,
   "boundary": "JSON decode + normalize + transfer + infer + wait + encode",
   "edge_device_validated": false
 }
 {
   "runtime": "JAX CPU instructional proxy",
   "jax": "0.9.2",
-  "first_request_ms": 17.36054103821516,
+  "first_request_ms": 17.005333211272955,
   "warm_samples_ms": [
-    0.22612465545535088,
-    0.2076667733490467,
-    0.24958280846476555,
-    0.11129211634397507,
-    0.08287513628602028,
-    0.0716252252459526,
-    0.06020767614245415,
-    0.059999991208314896,
-    0.05812523886561394,
-    0.057874713093042374,
-    0.05699973553419113,
-    0.05516689270734787,
-    0.054374802857637405,
-    0.05875015631318092,
-    0.05499972030520439,
-    0.055208802223205566,
-    0.05620857700705528,
-    0.05349982529878616,
-    0.05304161459207535,
-    0.050791073590517044,
-    0.05229096859693527,
-    0.05062483251094818,
-    0.050749629735946655,
-    0.049458350986242294,
-    0.05149981006979942,
-    0.05408283323049545,
-    0.04941597580909729,
-    0.050292350351810455,
-    0.04974985495209694,
-    0.05012517794966698
+    0.2099159173667431,
+    0.09224982932209969,
+    0.07258262485265732,
+    0.0665830448269844,
+    0.05654105916619301,
+    0.05299970507621765,
+    0.04983274266123772,
+    0.05370797589421272,
+    0.04862481728196144,
+    0.04845811054110527,
+    0.048667192459106445,
+    0.04737498238682747,
+    0.04758266732096672,
+    0.046374741941690445,
+    0.046374741941690445,
+    0.09116716682910919,
+    0.21291710436344147,
+    0.10416703298687935,
+    0.331041868776083,
+    0.260333064943552,
+    0.15554111450910568,
+    0.09787501767277718,
+    0.07191719487309456,
+    0.06129080429673195,
+    0.14287512749433517,
+    0.1932918094098568,
+    0.08024973794817924,
+    0.06174994632601738,
+    0.054833944886922836,
+    0.05174987018108368
   ],
-  "p50_ms": 0.05508330650627613,
-  "p95_ms": 0.21781860850751394,
+  "p50_ms": 0.06416649557650089,
+  "p95_ms": 0.23899588268250213,
   "boundary": "JSON decode + normalize + transfer + infer + wait + encode",
   "edge_device_validated": false
 }
@@ -414,23 +418,27 @@ Send a second raw input $[0, 255, 128]$ through the full request, and verify its
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- The edge request pipeline and the second raw input [0, 255, 128].
 
-**Step-by-step implementation plan:**
-1. Exercise solution
-2. Transfer the device result to the host for an independent NumPy comparison.
+**Outputs:**
+- The normalized request, pipeline result, and an independent NumPy result for that raw input.
+
+**Invariants to check:**
+- Normalization follows the request contract and the pipeline output matches the independent normalized calculation.
+
+**Hints:**
+- Apply the same normalization used by the request path before calculating the host reference.
+- Keep target-device readiness evidence separate from this numerical request check.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-changed_raw = np.array(...)  # TODO: compute changed_raw
-changed_response = json.loads(...)  # TODO: compute changed_response
-# Transfer the device result to the host for an independent NumPy comparison.
-expected_changed = ...  # TODO: compute expected_changed
-np.testing.assert_allclose(changed_response["scores"], expected_changed, atol = ...  # TODO: compute np.testing.assert_allclose(changed_response["scores"], expected_changed, atol
-print("Changed end-to-end request verified")
+import numpy as np
+
+def check_second_edge_request(request_pipeline, raw_input):
+    # TODO: Send the second raw vector through the full request and compare with independent normalized arithmetic.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -461,20 +469,32 @@ List the hardware, runtime, delegate and measurement fields before testing compl
 
 ### How to write: Make incomplete deployment evidence explicit — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Inputs:**
+- Create a device report template with required hardware and measurement fields. Reject it as ready while those fields are missing.
+
+**Outputs:**
+- A report-validation result with missing target fields listed.
+
+**Invariants to check:**
+- Absent device measurements remain pending rather than receiving synthetic pass values.
+
+**Hints:**
+- List the hardware, runtime, delegate and measurement fields before testing completeness. A missing value is different from a measured zero or an explicitly unsupported capability.
+- Validate required fields before considering readiness.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Make incomplete deployment evidence explicit (Transfer): Empty evidence stays empty.
-device_report = ...  # TODO: compute device_report
-                 "quality_metric": None, "p95_ms": None, "peak_memory_bytes": None,
-                 "cold_start_ms": None, "fallback_operators": None}
-missing = ...  # TODO: compute missing
-assert missing  # TODO: complete assertion check
-print("Not device-validated; missing:", ", ".join(missing))
+import json
+import time
+import numpy as np
+import jax
+import jax.numpy as jnp
+
+def practice_make_incomplete_deployment_evidence_explicit(report, required_fields):
+    """Complete the make incomplete deployment evidence explicit check."""
+    # TODO: ('Validate that required target model/runtime/device/measurement fields are present and keep the report pending if any are absent.', 'A report schema and explicit not-ready result for missing device fields.', 'Missing target-device evidence never becomes a measured pass through default values.')
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -507,25 +527,32 @@ Keep the fixed work unchanged. Compare the total request with the deadline, not 
 
 ### How to write: Decide whether a model speedup meets the request budget — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- Use the illustrative serial times above. A $19$-millisecond deadline is declared before optimization. Does halving model time meet it? What is the best possible total if model time tends to zero?
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- A deadline decision and fixed-overhead lower bound.
+
+**Invariants to check:**
+- Only the model component changes while fixed overhead remains constant.
+
+**Hints:**
+- Keep the fixed work unchanged. Compare the total request with the deadline, not the model-only duration.
+- Take the model-time-to-zero limit to find the best possible total.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Decide whether a model speedup meets the request budget (Transfer / diagnosis)
-fixed_ms = ...  # TODO: compute fixed_ms
-model_ms = ...  # TODO: compute model_ms
-deadline_ms = ...  # TODO: compute deadline_ms
-before_ms = ...  # TODO: compute before_ms
-after_ms = ...  # TODO: compute after_ms
-np.testing.assert_allclose([before_ms,after_ms,before_ms/after_ms],[24.,20.,1.2])
-assert after_ms  # TODO: complete assertion check
-print('Illustrative request before/after/lower-bound (ms):',before_ms,after_ms,fixed_ms)
+import json
+import time
+import numpy as np
+import jax
+import jax.numpy as jnp
+
+def practice_decide_whether_a_model_speedup_meets_the_request_budget(fixed_overhead_ms, model_ms, deadline_ms):
+    """Complete the decide whether a model speedup meets the request budget check."""
+    # TODO: ('Compute fixed overhead plus halved model time against the predeclared 19 ms deadline, then take the zero-model-time lower bound.', 'Deadline decision and irreducible total-latency floor.', 'Only model time changes; other serial costs remain fixed.')
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -556,9 +583,17 @@ A LiteRT file converts successfully. What must happen before claiming NPU latenc
 
 <details><summary>Answer and explanation</summary>
 
-Run it on the named device, verify execution placement and measure the stated request boundary.
+**1. Run it on the named device, verify execution placement and measure the stated request boundary. (correct)**
 
 Conversion proves a converter accepted the graph. Device execution, fallback behavior and end-to-end latency require direct measurement.
+
+**2. Divide CPU latency by the weight compression ratio.**
+
+CPU timing and compression ratio cannot establish NPU placement or latency. Inspect delegated operations on the actual device.
+
+**3. Assume every operator uses the NPU.**
+
+Conversion can leave unsupported operations on CPU. Confirm partitioning and measure the whole prediction boundary.
 
 </details>
 

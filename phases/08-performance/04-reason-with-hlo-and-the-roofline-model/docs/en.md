@@ -4,6 +4,8 @@ Phase 08: Performance diagnosis · about 95 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Read an XProf trace](https://www.tahabouhsine.com/jaxpathways/lesson-performance-03.html).
+
 ## What you will be able to do
 
 - Locate matrix multiplication and activation in StableHLO.
@@ -21,11 +23,9 @@ A roofline compares arithmetic work with data movement under stated compute and 
 
 ## Read a roofline as a conditional bound
 
-As a separate analytic example, assume $100$ GB/s bandwidth and $1000$ GFLOP/s compute capacity. The ridge is at $10$ FLOP/byte. At intensity $2$ FLOP/byte, the bandwidth-based bound is $200$ GFLOP/s.
+A roofline turns two assumed budgets into a conditional ceiling. With 100 GB/s bandwidth and 1000 GFLOP/s compute, the curves meet at 10 FLOP/byte. At intensity 2 FLOP/byte, the bandwidth line gives 200 GFLOP/s, so the lower of the two budgets is the bound for this model.
 
-The implementation need not reach that bound. Traffic estimates may omit intermediates, padding or cache effects; the assumed peaks may not apply to the actual dtype and device.
-
-Use the lesson's hypothetical curve to propose a change, such as reducing data movement. Then inspect the resulting computation and measure the same workload. Moving a modeled point rightward is separate from that the implementation became faster.
+This is a hypothetical calculation, not a performance result. Use it to predict whether more reuse could raise the modeled bound; verify any implementation change with compiler output and a synchronized measurement of the same workload.
 
 ### Pause and reason
 
@@ -39,15 +39,13 @@ No. It identifies the tighter bound in this model. Other bottlenecks and ineffic
 
 ## Read the contract before the compiler text
 
-Our left matrix has shape $(32,16)$, the right matrix $(16,8)$, and the result $(32,8)$. Their shared dimension is contracted; tanh is then applied elementwise. Lowering with these arrays specializes the computation to compatible input shapes and dtypes.
-
-The lesson prints compiler cost estimates and checks for the corresponding dot and tanh operations in StableHLO. Compiler text and cost fields can change by backend and version. Read operation meaning and tensor types rather than depending on generated variable names or assuming every operation remains a separate kernel.
+The measured example multiplies $(32,16)$ by $(16,8)$, yielding $(32,8)$, then applies tanh. Lowering this specific input contract produces StableHLO containing `dot_general` and `tanh` in the recorded run. Read these operation meanings and tensor types before interpreting compiler cost fields; names and lowering details can vary by version and backend.
 
 ## Count work with a stated convention
 
-For matrix dimensions $m,k,n$, we count one multiply and one addition for every inner-product term. This conventional estimate is $2mkn$ floating-point operations. It omits the tanh activation and treats the initial addition the same as later additions. State that convention beside a throughput calculation.
+For dimensions $m,k,n$, count one multiply and one addition per inner-product term: $2mkn$ floating-point operations. For the declared matrix shapes, that gives 8192 matmul operations. The count omits tanh and uses a conventional two-operations-per-term accounting, so label its scope if you turn it into a throughput estimate.
 
-For the declared workload it gives $8192$ matrix operations. Counting a whole model using only that number would undercount the activation and other work. Compiler estimates are another model of work, not a substitute for a measured operation trace.
+Compiler estimates report a separate backend-specific view of work. Neither one is a measured device trace.
 
 $$
 F=2mkn
@@ -55,9 +53,9 @@ $$
 
 ## Minimum traffic is an assumption you can challenge
 
-Assume each input matrix is read once and the output is written once. With float32 elements, the minimum traffic is four times the sum of their element counts. Our shapes give $3584$ bytes and arithmetic intensity $16/7$ operations per byte.
+Assume each float32 input is read once and the output is written once. The matrix shapes then imply $4(32\cdot16+16\cdot8+32\cdot8)=3584$ bytes and intensity $8192/3584=16/7\approx2.29$ operations per byte for matmul-only work.
 
-This ignores cache misses, repeated transfers, temporary arrays, layout changes and activation traffic. Fusion might avoid materializing some intermediates; a poor access pattern might read data more often. A roofline based on minimum traffic is an optimistic accounting model, not a statement that the device actually transferred exactly those bytes.
+This minimum omits tanh, intermediates, repeated reads, cache effects and layout changes. It is an accounting assumption that you can challenge with compiler estimates or traffic evidence, not a claim that exactly 3584 bytes moved.
 
 $$
 B=4(mk+kn+mn),\qquad I=F/B
@@ -65,9 +63,9 @@ $$
 
 ## Find the corner in a hypothetical roofline
 
-Use a hypothetical compute ceiling of $100$ billion operations per second and bandwidth of $20$ billion bytes per second. These are teaching assumptions, not specifications for the current CPU. The transition intensity is $5$ operations per byte. Below it, increasing reuse can raise the modeled ceiling; above it, this simple model hits the compute limit.
+The plotted roofline assumes 100 billion operations/s and 20 billion bytes/s, so the transition is at 5 operations/byte. Below that ridge, the bandwidth ceiling rises with intensity; above it, the combined ceiling stays at the compute cap. For the square-size cases, the first two plotted bounds are about 26.67 and 53.33 GFLOP/s; at intensity 5 the model reaches 100 GFLOP/s.
 
-For square matrices, the minimum-traffic intensity simplifies to $n/6$. Our sizes cross the transition between the second and third cases. The calculation makes the mechanism visible without claiming that small matrices achieve these ceilings.
+Use that slope change to predict the effect of doubling reuse in a bandwidth-limited case. It raises the modeled bound only until the compute ceiling; it does not guarantee a faster measured program.
 
 $$
 P_{\mathrm{ceiling}}=\min(P_{\mathrm{compute}},\,\beta I)
@@ -75,9 +73,9 @@ $$
 
 ## Compare measurements only after checking equivalence
 
-The executable is checked against an independent NumPy matrix product and activation, warmed, and timed with output synchronization. Small CPU calls can be dominated by dispatch overhead and poor parallel utilization, so a low fraction of the hypothetical ceiling is not evidence of a broken compiler.
+The executable is compared with an independent NumPy product and tanh, then warmed and timed with output synchronization. The recorded CPU samples vary substantially, which is expected to matter for this tiny workload; the calculation's hypothetical GFLOP/s ceilings are not measured CPU throughput.
 
-To use a roofline for a real accelerator, replace the hypothetical budgets with applicable device/precision specifications or measured sustainable limits. Record the memory level being modeled and profile actual traffic where possible. Compare equivalent dtypes and workloads; do not mix sparse-operation marketing counts with dense measured work.
+For a real roofline, select budgets for the actual device and precision, name the memory level, and gather traffic evidence. Keep dtype, shape and operation equivalent when comparing measured results.
 
 ## Inspect a specialized lowered computation
 
@@ -233,15 +231,11 @@ Expected: StableHLO contains the declared dot and activation. The matmul account
 
 ### Read the figure
 
-The horizontal axis is the minimum-traffic arithmetic intensity, in operations per byte. The vertical axis is a hypothetical throughput ceiling in billions of operations per second. The rising bandwidth line multiplies intensity by the assumed bandwidth; the horizontal compute line is the assumed compute budget. Neither line is a device measurement.
-
-The combined ceiling follows the lower of these two lines. The first two cases are about $26.67$ and $53.33$ GFLOP/s; from the third matrix-size case onward the ceiling is $100$. The change of slope occurs where the budgets meet, at intensity $5$, which is included explicitly as an extra point between the second and third matrix-size cases.
+The x-axis is minimum-traffic arithmetic intensity in operations per byte; the y-axis is a hypothetical ceiling in GFLOP/s. The bandwidth series rises as intensity times the assumed 20 GB/s, the compute series stays at 100 GFLOP/s, and the combined curve follows the lower series. These lines are model budgets, not device measurements. The first two cases give about 26.67 and 53.33 GFLOP/s; at the ridge of 5 operations/byte, the ceiling reaches 100.
 
 ### Connect it to the computation
 
-Each intensity comes from counting the elements in square input/output matrices and assuming one read or write per element. Increasing matrix size increases modeled reuse, so the bandwidth ceiling rises. After the compute cap is reached, further reuse cannot raise this simplified ceiling.
-
-Actual small CPU measurements are recorded separately and include dispatch and completion waiting. Do not plot them against these invented hardware budgets as a measured efficiency claim. A real roofline study needs appropriate hardware limits and traffic evidence.
+The plotted square cases use a simple one-read/one-write traffic estimate: larger matrices have higher modeled reuse, so their bandwidth ceiling rises until it meets the compute cap. The lesson's rectangular matmul separately has modeled intensity $16/7\approx2.29$ operations/byte under the same minimum-traffic convention; compare that location with the curve only as an estimate. Next predict whether doubling the modeled intensity would remain below the ridge, then measure an equivalent implementation before claiming improvement.
 
 ```python
 plot_intensity=np.sort(np.append(intensity,peak/bandwidth))
@@ -250,17 +244,17 @@ visual_data={'kind':'line','x':plot_intensity.tolist(),'xlabel':'minimum-traffic
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:22:15.822023+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:05:57.803684+00:00. JAX 0.9.2.
 
 ```text
 StableHLO operations present: dot_general and tanh
-Compiler estimates (backend-specific): {'transcendentals': 256.0, 'utilization1{}': 1.0, 'flops': 8192.0, 'bytes accessed1{}': 512.0, 'bytes accessed0{}': 3072.0, 'bytes accessed': 5632.0, 'bytes accessedout{}': 2048.0, 'utilization0{}': 2.0}
-Local CPU samples seconds: [3.929203376173973e-05, 5.700020119547844e-05, 1.5208963304758072e-05, 1.0291580110788345e-05, 8.707866072654724e-06]
+Compiler estimates (backend-specific): {'bytes accessed1{}': 512.0, 'bytes accessed': 5632.0, 'utilization0{}': 2.0, 'flops': 8192.0, 'bytes accessedout{}': 2048.0, 'utilization1{}': 1.0, 'transcendentals': 256.0, 'bytes accessed0{}': 3072.0}
+Local CPU samples seconds: [5.924981087446213e-05, 5.21661713719368e-05, 5.2374787628650665e-05, 5.312496796250343e-05, 5.566701292991638e-05]
 Matmul-only accounting: {'flops': 8192, 'minimum_bytes': 3584, 'flops_per_byte': 2.2857142857142856}
 Hypothetical ceilings GFLOP/s: [26.666666666666664, 53.33333333333333, 100.0, 100.0, 100.0]
 StableHLO operations present: dot_general and tanh
-Compiler estimates (backend-specific): {'bytes accessed': 5632.0, 'bytes accessedout{}': 2048.0, 'utilization1{}': 1.0, 'flops': 8192.0, 'transcendentals': 256.0, 'utilization0{}': 2.0, 'bytes accessed1{}': 512.0, 'bytes accessed0{}': 3072.0}
-Local CPU samples seconds: [1.4874618500471115e-05, 1.254212111234665e-05, 9.542331099510193e-06, 7.832888513803482e-06, 7.916707545518875e-06]
+Compiler estimates (backend-specific): {'bytes accessed': 5632.0, 'bytes accessed0{}': 3072.0, 'flops': 8192.0, 'bytes accessed1{}': 512.0, 'utilization1{}': 1.0, 'utilization0{}': 2.0, 'bytes accessedout{}': 2048.0, 'transcendentals': 256.0}
+Local CPU samples seconds: [5.029095336794853e-05, 8.283276110887527e-05, 4.158308729529381e-05, 3.808317705988884e-05, 7.008295506238937e-05]
 Matmul-only accounting: {'flops': 8192, 'minimum_bytes': 3584, 'flops_per_byte': 2.2857142857142856}
 Hypothetical ceilings GFLOP/s: [26.666666666666664, 53.33333333333333, 100.0, 100.0, 100.0]
 Ceilings with twice minimum traffic GFLOP/s: [13.333333333333332, 26.666666666666664, 53.33333333333333, 100.0, 100.0]
@@ -293,22 +287,28 @@ Derive the work and minimum traffic for shapes $(48,24)$ and $(24,12)$. Compare 
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- Matrix dimensions, element storage size, and a declared hardware budget.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- FLOP count, minimum-byte estimate, arithmetic intensity, and hypothetical roofline ceiling.
+
+**Invariants to check:**
+- State the storage and traffic assumptions; a bound is not observed throughput.
+
+**Hints:**
+- Count multiply-add work and both input/output bytes independently.
+- Change only itemsize to isolate its effect on the estimate.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Derive the work and minimum traffic for shapes (48,24) and (24,12).
-work,traffic,ratio = contract(...)  # TODO: compute work,traffic,ratio
-assert work  # TODO: complete assertion check
-np.testing.assert_allclose(ratio,24/7)
-assert bandwidth*ratio  # TODO: complete assertion check
-print('Changed contract:',work,traffic,ratio,'bandwidth-limited in the hypothetical model')
+import numpy as np
+
+def roofline_contract(m, k, n, itemsize):
+    """FLOP count, minimum-byte estimate, arithmetic intensity, and hypothetical roofline ceiling."""
+    # TODO: Count matrix FLOPs and minimum bytes from the declared dimensions and element size.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -338,22 +338,27 @@ The model assumes both inputs and output use that element size; real accumulatio
 
 ### How to write: Keep the same shapes but change storage precision — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- Change only the assumed element size from four bytes to two bytes. Calculate the resulting traffic and intensity, and explain why this is insufficient to predict an actual speedup.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- Changed byte estimate and intensity under the explicit storage assumption.
+
+**Invariants to check:**
+- Only the bytes per element change; the operation count and shapes stay fixed.
+
+**Hints:**
+- The model assumes both inputs and output use that element size; real accumulation and conversion may differ.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Keep the same shapes but change storage precision (Transfer)
-f32,b32,i32 = contract(...)  # TODO: compute f32,b32,i32
-f16,b16,i16 = contract(...)  # TODO: compute f16,b16,i16
-assert f32  # TODO: complete assertion check
-np.testing.assert_allclose(i16,2*i32)
-print('Arithmetic unchanged; modeled traffic halved and intensity doubled.')
+import numpy as np
+
+def practice_keep_the_same_shapes_but_change_storage_precision(m, k, n, itemsize):
+    """Implement the keep the same shapes but change storage precision check."""
+    # TODO: Recompute minimum traffic and arithmetic intensity with two-byte elements while holding dimensions fixed.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -381,9 +386,17 @@ The lowered program contains a dot operation and a roofline model predicts a hig
 
 <details><summary>Answer and explanation</summary>
 
-A matching measured workload on the actual device, with justified traffic and precision assumptions.
+**1. Nothing; lowered operations establish throughput.**
+
+An HLO operation and a theoretical ceiling do not measure achieved throughput. Run the target workload with a defined synchronized boundary.
+
+**2. A matching measured workload on the actual device, with justified traffic and precision assumptions. (correct)**
 
 A typed intermediate representation and an optimistic ceiling do not measure execution. Workload equivalence, synchronization, device evidence and appropriate model assumptions are still required.
+
+**3. Only the number of Python source lines.**
+
+Source line counts do not describe data traffic or hardware utilization. Inspect operation shapes, precision and measured execution.
 
 </details>
 

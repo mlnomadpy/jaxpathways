@@ -1,0 +1,12 @@
+{
+  "audio-snapshot.py": "7627823e827271d444b9358ff8da4fcba82f1dff6af9b3cd196f632f9924a165",
+  "check-encoder.py": "881bf00f4e660d501495fba7a056181044daa2380fd378ef946339d2cbe15036",
+  "check-frontend.py": "81a6ba605300a97bf1f2a72aa5559dbc4e0700ab8b11b25409bb9c6347450d37",
+  "check-inventory.py": "7307cb585c6f01a058c60f99c64f434483bb77a0596cb6ddc47725e44ea845b0",
+  "config-snapshot.py": "116c79bdfab004da7e2fd00cd9e87c8d24b876d6c3e925da19d910ec933b6b61",
+  "corrected-handoff-lock.json": "88e0777f92a0d53d9acacb44f8b6d62d787b209bbad9fdc9bbc1a2b566f18c76",
+  "encoder-forward.json": "6a37f751cb02203e91e6d24ecf27c5f786d9bf05f303b68631f94925f144f026",
+  "frontend-forward.json": "58843931ea10a5fb90aa021a9aef89e443260c1f73cdc9aa8d427f601a130840",
+  "inventory-reconstruction.json": "6f682c08d9c45276e985767a25a631cfd722d945c94fed5a2868496700680fff",
+  "model-snapshot.py": "62591c9762a1249639550ce186fccd0fadc7fece92b5c523f00c71c1d808d260"
+}

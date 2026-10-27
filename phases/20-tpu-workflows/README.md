@@ -12,7 +12,9 @@ Do not run arbitrary lesson scripts on TPU. `distributed-02` is CPU-only; inspec
 
 ## Study guide: Can you launch a JAX job over SSH, separate XLA warmup from steady-state timing, and resume cleanly after interruption?
 
-Cloud TPU VMs can be preempted and multi-host Pod slices require lockstep execution across all workers. A reliable workflow saves atomic checkpoints, logs JSONL events, and copies artifacts back before teardown.
+A cloud training job needs a repeatable path from local source to running process to retained result. Follow which files and dependencies reach each worker, when warmup ends, which state is checkpointed and where the resulting evidence is copied before teardown.
+
+The single-host exercise establishes a bounded continuation. Multi-host work additionally requires agreement across participants about topology, global steps and accepted checkpoint boundaries. A topology-discovery command and a collective training receipt answer different questions; use the observed state to decide what the next experiment can safely assume.
 
 ### Check your starting point
 
@@ -38,11 +40,11 @@ Review: [Stage and launch checkpointed TPU jobs](01-stage-and-launch-checkpointe
 
 ### Try a changed condition
 
-You move a script from a single-host v5litepod-4 VM to a 4-host v5litepod-16 Pod slice, and it hangs at startup. What is the first thing to check?
+A four-process job saves global step 20 but only three workers report it. Can it become the accepted recovery checkpoint?
 
 <details><summary>Compare an approach</summary>
 
-For topology discovery, launch all hosts with `--worker=all` and initialize JAX before querying devices. This proves process/device discovery only. A training claim also needs explicit per-process inputs, a checked global update, synchronized outputs, and all worker receipts.
+A step label does not establish a globally committed snapshot. Require all participating workers, a completed compatible checkpoint and the declared restore protocol. Keep the previous accepted checkpoint on failure. The existing multi-host receipt tests a bounded same-process restore; fresh-process worker-loss recovery remains a separate qualification.
 
 </details>
 

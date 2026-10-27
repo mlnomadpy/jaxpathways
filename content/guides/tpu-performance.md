@@ -261,3 +261,15 @@ Your report should contain:
 **Reference diagnosis:** INT8 lowers stored bytes in the synthetic dot but introduces more error in the outlier case. That supports investigating finer scaling or a floating policy for sensitive activations. It does not establish that a quantized embedding model retains retrieval quality or that INT8 is faster on your TPU. Those need the real model, held-out data and target profile.
 
 For training, continue with the [state and recovery phase](course.html?phase=recovery), precision monitoring and the [pretraining methods](course.html?phase=pretraining). For serving, connect the report to [deployment precision checks](course.html?phase=deployment) and the modality harness's inference endpoints. Use MaxText as a reference for a complete training system after these small checks, recording the exact recipe revision. A successful microbenchmark is the start of a model qualification report, not its conclusion.
+
+## Review a roofline claim with units before choosing hardware
+
+Use the exact published rates and state whether bandwidth is decimal bytes per second. With the current v6e figures, the ideal BF16 intersection is:
+
+\[
+I_\star = \frac{918\times10^{12}\ \mathrm{FLOP/s}}{1638\times10^9\ \mathrm{byte/s}} \approx 560.4\ \mathrm{FLOP/byte}.
+\]
+
+A hypothetical BF16 square matmul with two input reads and one BF16 output write has intensity approximately one third of its side length. At side length 1024 that is about 341.3 FLOP/byte, below this ideal ridge. This does not establish measured bandwidth saturation: actual output dtype, padding, reuse, transfers, vector operations and communication can change the relevant work and traffic. Use the calculation to propose a bottleneck hypothesis, then inspect the target trace and unprofiled synchronized timings.
+
+The [published TPU7x comparison](https://docs.cloud.google.com/tpu/docs/tpu7x) lists v6e at 1638 GB/s and TPU7x at 192 GiB and 7380 GB/s per chip. It also documents two JAX devices per TPU7x chip. Keep device counts, chip counts and host counts separate in benchmark reports. These specifications were checked on 2026-10-21; the course has no new TPU7x execution receipt.

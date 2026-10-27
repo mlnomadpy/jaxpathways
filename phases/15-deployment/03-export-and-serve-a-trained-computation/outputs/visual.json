@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "deployment-03",
-  "contentHash": "e80088adb3ad789a58d8eacd0ba291d56c5125f262831c9b806b27d93edd19b4",
-  "rendererHash": "a1bd5b648f4731ae5d5f0a24811c2540d1a0a132149ce589d17c4113509cbedf",
+  "contentHash": "6bb75e8e9fd5aa37040e40e6514c54146bc1bd33d2d9f6b5f7e574a0277d02b7",
+  "rendererHash": "17e3bbad72ee4c43425845aaee76b86b85e84750551278be03d8c16842f4dc63",
   "kind": "executed",
-  "generatedAt": "2026-10-20T22:29:23.217156+00:00",
+  "generatedAt": "2026-10-27T17:01:37.325880+00:00",
   "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",
@@ -41,7 +41,7 @@
   "diagram": {
     "title": "Four different deployment boundaries",
     "prediction": "Which row is tested by the exported object alone?",
-    "reading": "Read top to bottom from the raw request to the response. Each row has a distinct contract and a distinct failure. The exported computation handles the numeric call; request fields, artifact identity and response meaning require surrounding checks. The fresh-process experiment exercises loading and calling under the installed CPU runtime.",
+    "reading": "Follow the flow from validated raw request through preprocessing and artifact loading to the numeric call and encoded response. The exported object proves only its graph/signature boundary; the wrapper owns request validation and response meaning. The recorded fresh process reloads the bytes and reproduces \\( (3.1,-0.45)\\), while the \\( (2,3)\\) shape is rejected. To extend the claim, retain evidence for every new runtime boundary.",
     "alt": "Read top to bottom from the raw request to the response. Each row has a distinct contract and a distinct failure. The exported computation handles the numeric call; request fields, artifact identity and response meaning require surrounding checks. The fresh-process experiment exercises loading and calling under the installed CPU runtime.",
     "scope": "Architecture and dataflow mechanism diagram.",
     "height": 4.2,

@@ -96,3 +96,13 @@ Before this plan can change from **planned** to **authored**, provide independen
 - [BEIR evaluation toolkit](https://github.com/beir-cellar/beir): retrieval evaluation protocols and baseline integrations.
 - [Faiss index selection guide](https://github.com/facebookresearch/faiss/wiki/Guidelines-to-choose-an-index): index tradeoffs; qualify the selected implementation on the target workload.
 - [MTEB](https://github.com/embeddings-benchmark/mteb): select and pin relevant text-embedding retrieval tasks; do not substitute its aggregate for the service audit.
+
+## Recipe decision rehearsal before target-scale training
+
+An approximate index meets latency but the reranked system misses a required query slice.
+
+**Decide:** First compare approximate candidates with exact search under the same frozen embeddings and filters. Separate candidate recall, relevance ranking and serving latency. Then compare reranking within the same candidate budget, including versioned judgments and queries with no relevant item.
+
+**Review packet:** Exact/approximate overlap, candidate recall, judged ranking metrics, per-slice failures and a shadow migration/rollback record. Reject promotion when index/model/processor identities do not match.
+
+This is a design exercise for a planned implementation. Record a hypothesis, a controlled pilot, a stopping criterion and the evidence needed to reject the recipe before requesting target-scale compute. Do not mark the capstone implemented or publish a model card with invented metrics.

@@ -4,6 +4,8 @@ Phase 00: Setup & first steps · about 45 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Set up your learning workspace](https://www.tahabouhsine.com/jaxpathways/lesson-welcome-01.html).
+
 ## What you will be able to do
 
 - Read the table before using an API
@@ -21,14 +23,14 @@ An array is a collection of values with a shape, a dtype and a device. Shape tel
 
 ## Read one array two ways
 
-Take the two rows $[1,2,3]$ and $[4,5,6]$. Summing across each row gives $[6,15]$: one answer per observation. Summing down the rows gives $[5,7,9]$: one answer per feature. The values are the same; the question determines the axis.
+Take the two rows $[0,1,2]$ and $[3,4,5]$ from the program below. Summing across each row gives $[3,12]$: one answer per observation. Summing down the rows gives $[3,5,7]$: one answer per feature. The values stay fixed; the question determines the axis.
 
-In Python, the row sums use `axis=1`, because the feature axis is reduced. The feature sums use `axis=0`, because the observation axis is reduced. The axis you name is the one you consume, not the one you keep.
+The row sums use `axis=1`, because the feature axis is reduced. The feature sums use `axis=0`, because the observation axis is reduced. The axis you name is the one you consume, not the one you keep. Check this in the heatmap by pointing to the cells that contribute to one output.
 
-Read the heatmap by locating one row and one column before looking at its color. Color helps compare values, but labels establish which observation and feature you are comparing. A device label is a separate property; moving the same values to another device does not change what a row means.
+Now predict a changed input. If every entry increases by $1$, each three-feature row sum increases by $3$, while each two-observation column sum increases by $2$. The new outputs are $[6,15]$ and $[5,7,9]$. Use the different increments to explain the reduction instead of memorizing axis numbers.
 
 $$
-Y_{i,j} = \alpha X_{i,j} + \beta, \qquad X \in \mathbb{R}^{M \times N}
+r_i=\sum_{j=0}^{2}X_{ij},\qquad c_j=\sum_{i=0}^{1}X_{ij},\qquad X=\begin{bmatrix}0&1&2\\3&4&5\end{bmatrix}
 $$
 
 ### Pause and reason
@@ -55,9 +57,9 @@ axis 1: measurements (3)
 
 ## Derive a reduction and its output shape
 
-Summing along axis $1$ removes the measurement axis and leaves one number per observation. The first row sums to $3$, the second to $12$, so the result has shape $(2,)$. Summing along axis $0$ instead combines observations and leaves three measurement totals: $[3, 5, 7]$.
+Summing along axis $1$ consumes the feature axis and leaves one total per observation. From the displayed rows $[0,1,2]$ and $[3,4,5]$, calculate $0+1+2=3$ and $3+4+5=12$; the result $[3,12]$ has shape $(2,)$. Summing along axis $0$ consumes the observation axis instead, leaving one total per feature: $[3,5,7]$, shape $(3,)$.
 
-A reduction can also keep the reduced axis with `keepdims=True.` Column means then have shape $(1, 3)$, which states explicitly that the same three means are subtracted from every row. Derive the numbers and shape before using sum or mean.
+With `keepdims=True`, the column means retain a leading singleton dimension, shape $(1,3)$. That shape makes the intended reuse across both rows visible when centering. Before running your exercise, write the output shape next to the axis you plan to reduce; if you need one value per observation, the answer should have two entries.
 
 ```text
 (2,3) --sum(axis=1)--> (2,) : [3,12]
@@ -162,7 +164,7 @@ visual_data = {'kind': 'heatmap', 'values': x.tolist(), 'rows': ['row 0', 'row 1
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:19:53.950321+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:02:29.749911+00:00. JAX 0.9.2.
 
 ```text
 Shape: (2, 3)
@@ -227,24 +229,31 @@ Compute column sums instead. State the resulting shape before running the code.
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- A two-row, three-feature JAX array named `x`.
+- The lesson has checked its dtype and device.
 
-**Step-by-step implementation plan:**
-1. Reduce along axis=0 to compute `column_sums`.
-2. Check tensor shape invariant: `column_sums.shape == (3,)`
+**Outputs:**
+- Column totals and an explicit output-shape check.
+
+**Invariants to check:**
+- Reduce the observation axis and preserve the feature axis.
+- Check shape separately from numeric values.
+
+**Hints:**
+- Read the dimensions before choosing a reduction axis.
+- The result retains the feature dimension.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Compute column sums instead.
-# Reduce along axis=0 to compute `column_sums`.
-column_sums = x.sum(...)  # TODO: compute column_sums
-# Check tensor shape invariant: `column_sums.shape == (3,)`
-assert column_sums.shape  # TODO: complete assertion check
-assert jnp.allclose(column_sums, jnp.array([3., 5., 7.]))  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def column_summary(x):
+    # TODO: reduce observations and return feature-wise values and shape
+    values = ...
+    shape = ...
+    return values, shape
 ```
 
 <details><summary>Reference solution</summary>
@@ -274,22 +283,31 @@ Keep observation rows and measurement columns.
 
 ### How to write: Add a new observation — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.arange(n, dtype=...)` — Creates a 1-D JAX array of evenly spaced values `[0, 1, ..., n-1]` on the target device.
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `array.reshape(new_shape)` — Reorganizes tensor axes without changing the total element count (`array.size`).
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
+**Inputs:**
+- The original two-row table and the new observation `[6, 7, 8]`.
 
-**Step-by-step implementation plan:**
-1. Add a new observation (Practice)
+**Outputs:**
+- The extended table, row totals, and feature means.
+
+**Invariants to check:**
+- Appending adds an observation without changing feature count.
+- Row and feature reductions preserve opposite axes.
+
+**Hints:**
+- Concatenate along the observation axis.
+- Write down the table shape before reducing.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Add a new observation (Practice)
-table = jnp.arange(...)  # TODO: compute table
-assert jnp.allclose(table.sum(axis=1),jnp.array([3.,12.,21.]))  # TODO: complete assertion check
-assert jnp.allclose(table.mean(axis=0),jnp.array([3.,4.,5.]))  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def extend_and_summarize(table, new_row):
+    # TODO: append one observation and compute both summaries
+    extended = ...
+    row_totals = ...
+    feature_means = ...
+    return extended, row_totals, feature_means
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -319,24 +337,31 @@ Count required elements before changing the code.
 
 ### How to write: Diagnose an impossible reshape — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `array.reshape(new_shape)` — Reorganizes tensor axes without changing the total element count (`array.size`).
+**Inputs:**
+- A six-value array and target shape `(2, 4)`.
+- The intended table has three measurements per row.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- A captured incompatible reshape and a repaired three-feature layout.
+
+**Invariants to check:**
+- Reshape preserves the number of elements.
+- The repaired table retains every value.
+
+**Hints:**
+- Count required elements before reshaping.
+- Catch the shape error without discarding data.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Diagnose an impossible reshape (Challenge): An incompatible reshape is an element-count error.
-try:
-    x.reshape(2,4)
-except TypeError:
-    print("Expected element-count mismatch")
-else:
-    raise AssertionError("Expected reshape to fail")
-assert x.reshape(2,3).size  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def diagnose_reshape(values):
+    # TODO: attempt the requested shape and capture its incompatibility
+    attempted = ...
+    repaired = ...
+    return attempted, repaired
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -366,9 +391,17 @@ For an array of shape $(2, 3)$, what shape results from `sum(axis=0)`?
 
 <details><summary>Answer and explanation</summary>
 
-$(3,)$
+**1. $(2,)$**
+
+This would describe reducing the columns within each row. Axis zero runs down the observations; write the two row vectors and add them element by element.
+
+**2. $(3,)$ (correct)**
 
 Axis $0$ is reduced. The three columns remain, so the result has shape $(3,)$.
+
+**3. $(2, 3)$**
+
+A reduction removes the selected axis unless keepdims is requested. Count the three column sums left after combining the two rows.
 
 </details>
 

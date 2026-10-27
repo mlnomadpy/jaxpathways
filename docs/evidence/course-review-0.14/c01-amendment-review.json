@@ -1,0 +1,10 @@
+{
+  "helper_sha256": "f7f0f59375a54959b1a3b8f96b99fb804ae5aa6d4f50530271380ec5a3c21b0c",
+  "regenerated_index_equals_retained": true,
+  "public_files": 51,
+  "sources": 19,
+  "mutation_controls": {
+    "wrong_previous_checker": "rejected",
+    "wrong_full_receipt_hash": "rejected"
+  }
+}

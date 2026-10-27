@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "candidateVersion": "0.11.1",
+  "verifiedAt": "2026-10-21T17:24:49.416826+00:00",
+  "baseCommit": "d7bc44afbd723ab698932e566d622b6e640c8551",
+  "sourceSnapshotHash": "22b42bf35415155411a70a07336c87625d04e2560bdfe25a38a0b20d6aff2c85",
+  "scope": "Internal source/DOM/browser and selected print QA. Not native EPUB, assistive-technology, human teaching acceptance or full-book pagination qualification.",
+  "checks": {
+    "npmRunCheck": {
+      "status": "passed",
+      "tests": 149,
+      "log": "check.log"
+    },
+    "deployment": {
+      "status": "passed",
+      "bases": [
+        "/",
+        "/jaxpathways/"
+      ],
+      "log": "deployment.log"
+    },
+    "browser": {
+      "status": "passed",
+      "tests": 28,
+      "log": "browser.log"
+    },
+    "epubcheck": {
+      "status": "passed",
+      "version": "5.4.0",
+      "errors": 0,
+      "warnings": 0,
+      "report": "epubcheck-report.json"
+    }
+  },
+  "book": {
+    "chapters": 104,
+    "learnerContracts": 303,
+    "printAppendices": 104,
+    "canonicalLessonHashesUnchangedFromBase": 104,
+    "printSamples": {
+      "A4": 72,
+      "Letter": 79
+    },
+    "printReading": "All 151 sample pages reviewed in raster contact sheets for layout; focused full-resolution code/math/figure and repaired page-boundary views inspected. The final ink-only change preserved all glyph positions/text; final high-resolution rasters and browser computed-color checks confirm starter readability.",
+    "limits": "Four selected chapters retain their original ancestor contexts; unselected sibling material is removed. Full-book page numbering and other browser engines are unqualified."
+  },
+  "sourceFilesSha256": {
+    "src/components/shared/ReaderChapter.astro": "0d0dcdc94ce39eb27d1acd6c4c4b6e8eb412eed194f31846e10b78e30f7f6f7b",
+    "src/lib/code-teaching.js": "af35fc7808332945e605bafbf86344d454481fdbb9c7818cffcaf5059ade9b47",
+    "src/pages/downloads/jax-foundations.astro": "3d2ef7676d2f168ed076e7a6dda922f243321687260bdede3e156c22295e8a13",
+    "src/styles/print.css": "ae7987720e983b0704018465707959393c7da91954f3d7b6c86a2119567289a6",
+    "tests/course-reader.test.mjs": "2050e53c17a563f4de90ba22bd03821e40d9b44696b133dca39315c41a57f6a2",
+    "browser-tests/reader-print.spec.ts": "ab561029683ac0cfd5e01e3b30cdc3865f925cde921ef457977502c861faa9f5",
+    "scripts/qualify-book-print.mjs": "8e1fa54cfc70e60118bfd8641995fd304852715c57244409fdf408cd656f6c71"
+  },
+  "artifactSha256": {
+    "jax-foundations.epub": "3846fb1237c6b3782846644743faa7f42bd43d08b0c9e615afbab7f17767648b"
+  },
+  "localPdfArtifacts": {
+    "path": "output/pdf/book-print-0.11.1 relative to the original task workspace",
+    "receipt": "print-receipt.json",
+    "geometry": "geometry-check.json",
+    "reproduce": "PLAYWRIGHT_BROWSERS_PATH=<isolated-browser-install> node scripts/qualify-book-print.mjs --url <local-preview>/downloads/jax-foundations.html --output output/pdf/book-print-0.11.1"
+  },
+  "pending": [
+    "Hosted CI on this patch commit",
+    "Native Apple Books and a second EPUB engine",
+    "Actual screen-reader speech and independent human review",
+    "Full-book pagination and other print engines"
+  ],
+  "retainedFilesSha256": {
+    "final-starter-a4-26.png": "310b390de77f86ab865ea7c20ab26a89e05ae27e33d47c5d75e6a7a3e0efb765",
+    "browser.log": "459fe4b2c139b2f1c15ecfc8d2a43f5ff0e35ec2ff0073645efb9257dac2a2c0",
+    "final-math-a4-20.png": "a4e453f33d826ae5b0f8a7a0a2ce001c02d043a1a218d5f3a713d31de3943ffc",
+    "deployment.log": "f95d8e1ee21ef56a9b052bd214f25e4deef8a1a1cc4f702d63e8d866a80ba79e",
+    "final-figure-letter-63.png": "65c8d652ff0a47f552357c86f228fb9ee8627fe30d4fd7f3c2047c75956e8968",
+    "epubcheck.log": "7762882cc0e77ad791a4d3cbda6ae124ed8682e19906d72b6983987e55585d12",
+    "check.log": "1cc98840d5061a300f28df46ae0bfa58399bc34cb018e85b20dcb847c0d4354e",
+    "print-receipt.json": "bf632ff2b96b0b7e8f3a722d78892c7d8ab536f12064d7a42406e9a2fdabda3f",
+    "epubcheck-report.json": "1772739a923c354ab3a1147b584abbca0c04d3f78008069f5772fe0728836909",
+    "geometry-check.json": "4c63254e8f00018d6296231d23431b4a40d8dc4f55e49fec43c5dd3301005cfd"
+  }
+}

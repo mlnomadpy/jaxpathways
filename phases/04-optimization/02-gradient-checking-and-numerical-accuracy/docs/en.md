@@ -4,6 +4,8 @@ Phase 04: Math & optimization · about 80 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [The chain rule, Jacobians, and directions](https://www.tahabouhsine.com/jaxpathways/lesson-optimization-07.html).
+
 ## What you will be able to do
 
 - Build an independent derivative estimate
@@ -44,6 +46,8 @@ Our objective is $(w_0-2)^2+(w_1+1)^2$. At $[0.5, 0.25]$, the derivative is $[-3
 
 Central differences probe each coordinate along a basis vector: hold all other coordinates fixed, evaluate at $w+h e_i$ and $w-h e_i$, then divide the difference by $2h$. vmap batches these independent probes; it does not make the approximation exact. In the formula, $e_i$ is a vector with a $1$ in position $i$ and zeros elsewhere. It lets us move just one weight while keeping the others fixed. The symbol $\approx$ reminds us that this is an estimate.
 
+For this objective, differentiating each square gives 2(w0-2) and 2(w1+1). Substituting $(0.5, 0.25)$ gives $2(-1.5)=-3$ and $2(1.25)=2.5$. A positive second component means moving w1 upward locally increases the objective, while the negative first component means moving w0 upward decreases it. The centered probe should reproduce these signed components, not merely a similar gradient norm.
+
 $$
 \frac{\partial L}{\partial w_i}\approx\frac{L(w+h e_i)-L(w-h e_i)}{2h}
 $$
@@ -59,6 +63,8 @@ Float32 cannot represent every nearby number. With an extremely small step, the 
 A directional derivative compares $\nabla L(w)^\mathsf{T}v$ with a finite difference along the direction vector $v$. This is useful for large parameter trees because a few directions cost fewer evaluations than probing every scalar. It can miss an error orthogonal to all tested directions, so combine it with several points and known structural cases.
 
 An allclose check permits absolute error near zero and relative error for larger values. Record the actual difference and dtype alongside a pass/fail result. Relaxing a tolerance until a broken calculation passes removes the value of the check.
+
+For example, along $v=(1,-1)$, the predicted slope is $(-3)(1)+(2.5)(-1)=-5.5$. A small positive step should therefore lower the loss by about $5.5h$ to first order. Checking this scalar projection tests a direction and its sign; testing only the norm would lose that information.
 
 ## Recognize what a gradient check cannot prove
 
@@ -160,6 +166,8 @@ At very small steps, float32 rounding makes the two nearby function evaluations 
 
 This particular objective is quadratic, so a central difference has no truncation error in exact arithmetic. Do not expect a pronounced U-shaped error curve on the right of this example. For a general nonlinear objective, overly large steps can introduce truncation error too. Check several step sizes and look for agreement across a useful range, rather than choosing the smallest available step.
 
+Before checking a new objective, predict whether its central-difference error should first fall with h and where rounding may dominate; then inspect dtype and scale.
+
 ```python
 steps = jnp.logspace(-8.0, -1.0, 22)
 errors = []
@@ -173,7 +181,7 @@ visual_data['yscale'] = 'log'
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:20:29.990002+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:26:26.072369+00:00. JAX 0.9.2.
 
 ```text
 Finite difference: [-2.9999971  2.4999976]
@@ -249,23 +257,29 @@ Check the gradient again at $w=[2., -1.]$. Explain why this checks a minimum but
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.zeros / jnp.ones(shape, dtype=...)` — Allocates a tensor of the given `shape` initialized with constants.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
+**Inputs:**
+- A differentiable scalar objective and a vector of evaluation points.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- A report comparing autodiff with central finite differences at multiple step sizes.
+
+**Invariants to check:**
+- Compare the same scalar objective and coordinate at every step size; finite differences are estimates, not a proof for all inputs.
+
+**Hints:**
+- Check a smooth point, and compare several perturbation scales.
+- Keep the analytic derivative independent from the finite-difference implementation.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Check the gradient again at w=[2., -1.].
-minimum = jnp.array(...)  # TODO: compute minimum
-assert jnp.allclose(jax.grad(objective)(minimum), jnp.zeros(2))  # TODO: complete assertion check
-assert jnp.allclose(objective(minimum), 0.)  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+
+def gradient_check_report(point, epsilons):
+    """A report comparing autodiff with central finite differences at multiple step sizes."""
+    # TODO: Evaluate autodiff and central-difference gradients at the supplied point across the requested perturbations.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -293,26 +307,28 @@ Use cosine as the analytic reference; here truncation error also matters.
 
 ### How to write: Move to a different smooth objective — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.zeros / jnp.ones(shape, dtype=...)` — Allocates a tensor of the given `shape` initialized with constants.
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- Check the derivative of `sum(sin(z))` at $[0.2, -0.7]$ using cosine and central differences.
 
-**Step-by-step implementation plan:**
-1. Vectorize across the batch dimension with `jax.vmap` (`fd`).
+**Outputs:**
+- Autodiff, analytic derivative, and finite-difference values for both coordinates.
+
+**Invariants to check:**
+- All methods evaluate the same scalar objective at the requested point.
+
+**Hints:**
+- Use cosine as the analytic reference; here truncation error also matters.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Move to a different smooth objective (Transfer / diagnosis)
-z = jnp.array(...)  # TODO: compute z
-def trig_loss(z):
-    return ...  # TODO: return computed result
-# Vectorize across the batch dimension with `jax.vmap` (`fd`).
-fd = jax.vmap(...)  # TODO: compute fd
-assert jnp.allclose(jax.grad(trig_loss)(z), jnp.cos(z))  # TODO: complete assertion check
-assert jnp.allclose(fd, jnp.cos(z), atol=5e-5, rtol=5e-5)  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+
+def practice_move_to_a_different_smooth_objective(point):
+    """Implement the move to a different smooth objective check."""
+    # TODO: Differentiate the sine-sum objective at both supplied coordinates and compare each result with cosine and central differences.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -346,25 +362,28 @@ Differentiate $(z_0-2)^2$ and compare both coordinates.
 
 ### How to write: Catch the wrong objective despite correct gradients — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
+**Inputs:**
+- A model is meant to use both coordinates. Show that an objective omitting the second coordinate has a correct derivative for itself but fails the intended analytic reference. Repair it.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- A counterexample for the incomplete objective and a passing repaired comparison.
+
+**Invariants to check:**
+- The derivative is checked against the intended function, not only the function that produced it.
+
+**Hints:**
+- Differentiate $(z_0-2)^2$ and compare both coordinates.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Catch the wrong objective despite correct gradients (Transfer / diagnosis)
-def incomplete(z):
-    return ...  # TODO: return computed result
-bad = jax.grad(...)  # TODO: compute bad
-assert jnp.allclose(bad, jnp.array([-3., 0.]))  # TODO: complete assertion check
-assert not jnp.allclose(bad, analytic)  # TODO: complete assertion check
-assert jnp.allclose(jax.grad(objective)(w), analytic)  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+
+def practice_catch_the_wrong_objective_despite_correct_gradients(point):
+    """Implement the catch the wrong objective despite correct gradients check."""
+    # TODO: Construct the objective that drops the second coordinate, compare its gradient to the intended two-coordinate reference, then restore the missing dependence.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -393,9 +412,17 @@ Does passing one gradient check prove a loss implementation is correct for all i
 
 <details><summary>Answer and explanation</summary>
 
-No; it is evidence at tested inputs and must be combined with shape and objective checks
+**1. Yes, autodiff is an oracle**
+
+An independent derivative or finite difference helps test AD. Reusing AD as its own expected answer cannot detect a shared objective error.
+
+**2. No; it is evidence at tested inputs and must be combined with shape and objective checks (correct)**
 
 Independent gradient calculations help expose errors, but finite test cases do not prove all behavior.
+
+**3. Only on TPU**
+
+Gradient checks are useful on CPU too. Their limits concern tested inputs, tolerances and objective correctness, not a requirement for TPUs.
 
 </details>
 

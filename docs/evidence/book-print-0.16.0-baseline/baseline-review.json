@@ -1,0 +1,58 @@
+{
+  "recordedAt": "2026-10-22T01:25:03.402Z",
+  "edition": "0.16.0",
+  "sourceUrl": "http://127.0.0.1:4200/downloads/jax-foundations.html",
+  "sourceHtmlSha256": "06f851086a28ac27aff6611543efa048d6deda7ee03db7f8e24cbdd18735c96a",
+  "browser": "156.0.8078.4",
+  "printState": {
+    "articles": 104,
+    "phaseSections": 24,
+    "images": 135,
+    "math": 3332,
+    "allImagesLoaded": true,
+    "inlineSolutionsHidden": true,
+    "appendicesVisible": true
+  },
+  "settings": {
+    "renderer": "Playwright headless Chromium page.pdf",
+    "scale": 1,
+    "margins": "Frozen book CSS @page 18mm",
+    "printBackground": true,
+    "headerFooter": false,
+    "tagged": true,
+    "outline": true
+  },
+  "artifacts": [
+    {
+      "format": "A4",
+      "filename": "jax-pathways-0.16.0-full-a4.pdf",
+      "bytes": 28989361,
+      "sha256": "4c92d69b99dcc9a780e2f053cf67b95a69ff265650693c0625315600f1377b0f"
+    },
+    {
+      "format": "Letter",
+      "filename": "jax-pathways-0.16.0-full-letter.pdf",
+      "bytes": 29131702,
+      "sha256": "c4868a66809d0d50d06e4119a3fa8d12ecf7741254f13ca0ced98907e082f0ae"
+    }
+  ],
+  "scope": "Entire frozen HTML book, unpruned. Native reader and assistive-technology acceptance remain separate.",
+  "visualReview": {
+    "status": "Changes requested",
+    "contactSheetPages": 34,
+    "focusedPages": [
+      "Letter 223 and 224"
+    ],
+    "observations": [
+      "No text glyph lies beyond any media box across 1254 A4 and 1368 Letter pages. This geometric check does not prove absence of visual clipping inside the page.",
+      "Sampled math/code/diagrams/solution appendices are readable in the contact sheets.",
+      "Letter page 223 separates the least-squares figure title and prediction from its chart on page 224.",
+      "The long print export has no page-number footer."
+    ],
+    "pending": [
+      "Pagination repair and retest on new candidate",
+      "Full-book visual inspection beyond 34 sampled pages",
+      "Native EPUB engines and assistive technology remain separate open gates"
+    ]
+  }
+}

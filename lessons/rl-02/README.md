@@ -4,6 +4,8 @@ Phase 12: Reinforcement learning · about 85 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Write a functional environment](https://www.tahabouhsine.com/jaxpathways/lesson-rl-01.html).
+
 ## What you will be able to do
 
 - Build a scan over vmapped transitions with explicit key ownership.
@@ -20,11 +22,7 @@ Batched rollouts put independent environments on one axis and time on another. S
 
 ## Keep the array shape fixed while activity changes
 
-Draw one environment per row and time across columns. Mark the transition that terminates an episode, then mark later padding separately. The terminal transition can still earn reward; masking it out too early loses part of the episode.
-
-Carry the next state and activity information explicitly. If the implementation resets finished environments, distinguish that contract from absorbing padding instead of mixing them in one explanation.
-
-The active-count curve decreases while the tensor shape stays fixed. It measures active environments, not shrinking allocation. Verify one environment independently, then permute the batch to check that unrelated trajectories stay independent.
+A compiled rollout needs a fixed $(T,B)$ array even when episodes finish at different times. In this collector, `active` is read before `step`, so an action that reaches the goal still contributes its reward; later rows remain as padding. For one row, read `active → terminal + reward → padding`; compare it with an episode that stays active through all columns. This implementation does not auto-reset inside the scan.
 
 ### A terminal transition still counts
 
@@ -34,7 +32,7 @@ The active-count curve decreases while the tensor shape stays fixed. It measures
 
 *Architecture and dataflow mechanism diagram.*
 
-Each row is one environment. A terminating transition can still earn reward; later cells are padding under this absorbing-state contract. Tensor length stays fixed while activity changes. This is a conceptual rollout example, not an auto-reset implementation.
+Read each table row as an environment and each column as a transition in time. `active → terminal + reward → padding` shows that the ending transition is still data; later cells are fixed-shape padding. Row C stays active through the displayed window. Predict what would be lost if masking used the next state's `done` flag: the transition carrying the goal reward would disappear. This is absorbing padding, not an auto-reset stream.
 
 ### Pause and reason
 
@@ -48,15 +46,15 @@ No. The terminating transition can contain valid reward and learning information
 
 ## Give each axis one meaning
 
-For $T=8$ and $B=64$, the reward array has shape $(8,64)$. Summing axis zero gives one return per episode. Summing axis one gives total reward at each time index across the batch, a different statistic. vmap maps reset and step over environments; scan threads the complete batch of states through time. The carry has the same structure, shapes and dtypes at every iteration.
+The rollout stores rewards with shape $(T,B)=(8,64)$: time is axis 0 and environment is axis 1. Summing axis 0 gives 64 episode returns; summing axis 1 gives eight batch totals by time, which answers a different question. `scan` advances the batch state through time while `vmap` handles environments. Check an entry's indices before reducing so time and episode are not accidentally swapped.
 
 ## Split randomness where ownership changes
 
-First split a reset key from an action key. Split reset keys across the $B$ environments. Split action keys across the $T$ time steps, then across environments. A scalar reset key broadcast to all environments would create correlated starts. An action key reused at every step would replay draws. Deterministic transitions do not need an extra key, so their signature stays simple.
+Give independent random draws an owner. The collector splits reset and action keys; reset keys are split across 64 environments, and action keys across time and environments. Reusing one reset key would give identical starts, while reusing an action key at each step would repeat the same draw. The transition itself is deterministic, so it needs no key.
 
 ## Store the behavior policy before changing it
 
-Each position has a policy logit $\theta_s$. Applying the sigmoid gives the probability of moving right; the left probability is its complement. A sampled action is discrete, so we will not differentiate through action sampling. Instead, we store its log probability under the behavior policy. Stable log-sigmoid avoids taking a logarithm of a probability rounded to zero.
+At each position, $\theta_s$ is a logit and $\operatorname{sigmoid}(\theta_s)$ is the probability of moving right. The collector stores the sampled action's log probability before training changes `theta`; later policy-gradient code compares against that behavior-policy record. Because the action is discrete, the estimator differentiates log probability times a credit signal rather than differentiating through the random draw. `log_sigmoid` keeps this calculation stable.
 
 $$
 \pi_\theta(1\mid s)=\sigma(\theta_s),\qquad \log\pi_\theta(a\mid s)=a\log\sigma(\theta_s)+(1-a)\log\sigma(-\theta_s)
@@ -64,11 +62,11 @@ $$
 
 ## A final transition is still a learning example
 
-The active mask is computed from the state before step. Therefore the action that reaches the goal is active and retains its reward. Only subsequent rows are padding. Masking with the next state would delete the successful action itself. We store the final observation in the returned state and do not replace it with a fresh start. This collector handles one finite episode per environment, not an endless auto-reset stream.
+Suppose the state before a step is active and action 1 reaches the goal. That row's mask is true, so its reward 1 stays in the batch; only the next row is padding. Masking from the returned `done` state would erase the successful transition. The stored `next_observation` is the true final position, not a fresh reset state.
 
 ## Credit each action with rewards that follow it
 
-Reward-to-go sums rewards from the current time onward. For rewards $(-0.01,-0.01,1,0)$, targets are $(0.98,0.99,1,0)$. The first action can influence all later rewards; the last successful action is credited with the goal reward only. We reverse the time axis, take a cumulative sum, and reverse it back. There is no value bootstrap here because these are complete finite-horizon episodes.
+Reward-to-go is the sum of current and later rewards. For `(-0.01,-0.01,1,0)`, the stored targets are `(0.98,0.99,1,0)`: the first action is associated with all later reward, and the goal-reaching action gets 1. These complete episodes use no value bootstrap. Returns from sampled episodes vary, so the estimate of an action's expected outcome is noisy; a learned baseline can reduce policy-gradient variance, which the later value/GAE lesson studies.
 
 $$
 G_{t,b}=\sum_{u=t}^{T-1}r_{u,b}
@@ -147,7 +145,8 @@ def rollout(theta, key, batch_size=256, horizon=8):
         # Vectorize across the batch dimension without a Python loop (`(next_states, rewards, terminated, truncated)`).
         next_states, rewards, terminated, truncated = jax.vmap(
             lambda s, a: step(s, a, horizon))(states, actions)
-        record = dict(observation=observations, action=actions, reward=rewards,
+        record = dict(observation=observations, next_observation=next_states.position,
+                      next_elapsed=next_states.elapsed, action=actions, reward=rewards,
                       active=~states.done, terminated=terminated, truncated=truncated,
                       old_logp=log_probability(theta, observations, actions))
         return next_states, record
@@ -247,7 +246,8 @@ def rollout(theta, key, batch_size=256, horizon=8):
         # Vectorize across the batch dimension without a Python loop (`(next_states, rewards, terminated, truncated)`).
         next_states, rewards, terminated, truncated = jax.vmap(
             lambda s, a: step(s, a, horizon))(states, actions)
-        record = dict(observation=observations, action=actions, reward=rewards,
+        record = dict(observation=observations, next_observation=next_states.position,
+                      next_elapsed=next_states.elapsed, action=actions, reward=rewards,
                       active=~states.done, terminated=terminated, truncated=truncated,
                       old_logp=log_probability(theta, observations, actions))
         return next_states, record
@@ -286,11 +286,11 @@ Expected: The trajectory has the stated time and environment axes, exactly one e
 
 ### Read the figure
 
-The horizontal axis is the transition index; the vertical axis counts environments active before that transition. The first value is $64$. The count never rises because we do not reset inside a rollout. Decreases show episodes reaching the goal; episodes still active on the final row will either finish or time out on that row. In the recorded seed, the first two counts are both $64$: even the nearer starting position needs two actions to reach the goal. The third count is $58$, and the last is $29$. The unchanged first pair is therefore expected, not a stalled loop.
+The x-axis is transition index (1–8); the y-axis counts active environments before that transition. The single uniform-random-policy series reads `[64,64,58,53,47,44,39,29]`: it begins with all 64 active, then fewer remain after goal-reaching transitions. The first two equal counts are expected because even a start at position 1 needs two right moves. Predict the next count's direction: without auto-reset, it can stay level or fall, never rise.
 
 ### Connect it to the computation
 
-This curve is not reward or policy quality: a fast-ending policy could succeed, fail or exploit a termination bug in a different task. Here the transition tests establish that early endings are goals. The fixed $(8,64)$ reward array retains later rows, but their active flags are false. Changing the seed can move individual counts while preserving these invariants.
+The plotted values exactly match `active environments by transition` in the CPU execution. The $(8,64)$ rollout allocation stays fixed while the live count falls from 64 to 29; those are different quantities. A falling count only says episodes ended, not whether a policy is good. Check the terminal-transition mask and reward before treating the curve as evidence of successful behavior.
 
 ```python
 visual_data = {'kind':'line','x':list(range(1,9)),'xlabel':'transition index','ylabel':'active environments before transition','series':[{'label':'uniform random policy','y':records['active'].sum(1).tolist()}]}
@@ -298,7 +298,7 @@ visual_data = {'kind':'line','x':list(range(1,9)),'xlabel':'transition index','y
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:23:22.540523+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:14:07.973048+00:00. JAX 0.9.2.
 
 ```text
 return mean: 0.5848437547683716
@@ -351,26 +351,35 @@ Change the batch to $7$ environments and the horizon to $5$. Verify array shapes
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.zeros / jnp.ones(shape, dtype=...)` — Allocates a tensor of the given `shape` initialized with constants.
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jax.random.PRNGKey(seed) & jax.random.split(key)` — Uses explicit PRNG keys. Split a key when you need independent random draws; reusing a key repeats its random stream.
+**Inputs:**
+- A policy parameter vector `theta` and explicit JAX key.
+- Changed batch size 7 and horizon 5.
+- The lesson’s `rollout` collector and its time-major records.
 
-**Step-by-step implementation plan:**
-1. Create or split explicit PRNG key(s) (`(final7, r7)`) for reproducible randomness.
-2. Check tensor shape invariant: `r7['reward'].shape == (5`
+**Outputs:**
+- Final state for each environment and the retained rollout record.
+- A small set of assertions about shapes, activity, and ending events.
+
+**Invariants to check:**
+- Reward and event arrays have shape `(5, 7)`.
+- Every episode has one ending event.
+- Rows after finishing are padding and carry no reward.
+
+**Hints:**
+- The first axis is time and the second is environment.
+- The active flag describes the state before the action.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Change the batch to 7 environments and the horizon to 5.
-# Create or split explicit PRNG key(s) (`(final7, r7)`) for reproducible randomness.
-final7, r7 = rollout(...)  # TODO: compute final7, r7
-# Check tensor shape invariant: `r7['reward'].shape == (5`
-assert r7['reward'].shape  # TODO: complete assertion check
-assert bool(final7.done.all())  # TODO: complete assertion check
-assert jnp.array_equal((r7['terminated'] | r7['truncated']).sum(0), jnp.ones(7))  # TODO: complete assertion check
-assert bool(jnp.all(jnp.where(r7['active'],0.,r7['reward'])  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+
+def inspect_changed_rollout(theta, key):
+    # TODO: collect with seven environments and a five-step horizon
+    final_state, records = ...
+    # TODO: check time/environment axes and episode endings
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -402,25 +411,31 @@ Record the mask before calling step; the successful transition still belongs to 
 
 ### How to write: Catch a shifted mask — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Accumulate the next contribution into `correct`.
-2. Accumulate the next contribution into `broken`.
+**Inputs:**
+- State at position 1, unfinished.
+- Two right actions and the lesson transition.
+
+**Outputs:**
+- The accumulated transition reward with the correct pre-action mask.
+- A second total showing the effect of a shifted post-action mask.
+
+**Invariants to check:**
+- The successful transition remains active.
+- The two totals differ because only one uses the pre-transition done flag.
+
+**Hints:**
+- Capture activity before calling `step`.
+- Do not discard the transition that reaches the goal.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Catch a shifted mask (Transfer / diagnosis)
-s = State(...)  # TODO: compute s
-correct, broken = ...  # TODO: compute correct, broken
-for a in [1,1]:
-    active = ...  # TODO: compute active
-    s, reward, _, _ = step(...)  # TODO: compute s, reward, _, _
-    # Accumulate the next contribution into `correct`.
-    correct += float(reward*active)
-    # Accumulate the next contribution into `broken`.
-    broken += float(reward*(~s.done))
-assert abs(correct-.99)  # TODO: complete assertion check
-assert abs(broken+.01)  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def compare_activity_masks(step, State):
+    state = State(jnp.int32(1), jnp.int32(0), jnp.bool_(False))
+    # TODO: evaluate both actions using pre-step and post-step masks
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -458,24 +473,35 @@ The two start states need different numbers of actions. Compare each return agai
 
 ### How to write: Check a deterministic policy limit — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.zeros / jnp.ones(shape, dtype=...)` — Allocates a tensor of the given `shape` initialized with constants.
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.random.PRNGKey(seed) & jax.random.split(key)` — Uses explicit PRNG keys. Split a key when you need independent random draws; reusing a key repeats its random stream.
+**Inputs:**
+- A policy with strongly positive action logits.
+- A batch of 23 environments, a fixed key, and an eight-step horizon.
 
-**Step-by-step implementation plan:**
-1. Create or split explicit PRNG key(s) (`(_, easy)`) for reproducible randomness.
+**Outputs:**
+- Collected trajectories and a summary of their action and ending behavior.
+
+**Invariants to check:**
+- Repeated calls with the same key replay.
+- The sampled rollouts obey the same environment and horizon contract.
+
+**Hints:**
+- Use a fresh key to test reproducibility separately.
+- A deterministic limit is a behavioral check, not a return benchmark.
+
+**Key functions & syntax to use:**
+- `jnp.full(shape, fill_value, dtype=...)` — Creates an array of the requested shape with every element set to `fill_value`.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Check a deterministic policy limit (Transfer / diagnosis)
-# Create or split explicit PRNG key(s) (`(_, easy)`) for reproducible randomness.
-_, easy = rollout(...)  # TODO: compute _, easy
-expected = jnp.where(...)  # TODO: compute expected
-assert jnp.allclose(easy['reward'].sum(0),expected,atol=1e-6)  # TODO: complete assertion check
-assert jnp.array_equal(easy['active'].sum(0),3-easy['observation'][0])  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+
+def inspect_right_biased_policy(rollout, key):
+    theta = jnp.full((3,), 100.)
+    # TODO: collect with the requested batch and horizon
+    final_state, records = ...
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -503,9 +529,17 @@ Which axis should be summed to obtain one return per environment from a time-maj
 
 <details><summary>Answer and explanation</summary>
 
-The time axis
+**1. The time axis (correct)**
 
 Summing over time leaves one scalar for each episode. Averaging these episode returns gives the finite-episode performance objective.
+
+**2. The environment axis**
+
+Summing over environments merges different episodes. Keep one return per environment by reducing the time axis.
+
+**3. Both axes before averaging by live transitions**
+
+Reducing both axes gives one aggregate instead of per-environment returns. Inspect the intended output shape before computing a summary.
 
 </details>
 

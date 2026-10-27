@@ -4,6 +4,8 @@ Phase 15: Deployment, interoperability & edge AI · about 110 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Export a computation and verify its serving contract](https://www.tahabouhsine.com/jaxpathways/lesson-deployment-03.html).
+
 ## What you will be able to do
 
 - Compare FP32, FP16 and BF16 rounding without confusing storage with accumulation.
@@ -27,6 +29,8 @@ In a dot product, centered integer products accumulate in an appropriately wide 
 
 The error plots compare specific representation policies. Read weight, activation and accumulation choices separately. Per-channel scales also require a declared axis. Numerical error, downstream quality and target-runtime speed need separate evidence.
 
+The recorded max absolute output errors are 0 for FP32, 0.00105 for FP16-rounded operands, 0.00617 for BF16, 0.00803 for simulated W8A32, and 0.14571 for simulated W4A32. In this fixture the four-bit weight approximation errs about 18 times more than eight-bit. That comparison is about this output’s units, not task quality or latency; inspect the downstream metric before selecting a policy.
+
 ### Integer values need scales and zero-points
 
 **Predict:** What happens if you ignore a nonzero zero-point when interpreting quantized values?
@@ -35,7 +39,7 @@ The error plots compare specific representation policies. Read weight, activatio
 
 *Architecture and dataflow mechanism diagram.*
 
-Follow affine integer codes into centered products, wide accumulation and compatible bias units, then output rescaling. Exact accumulator dtype and per-channel scale axes belong to the declared runtime policy. These arrows describe arithmetic dependencies, not a specific hardware kernel.
+The nodes follow real values to rounded codes, then zero-point-centered products, wide accumulation with bias in matching units, and finally output rescaling. In the example, omitting the input zero point changes outputs from $ (0.625,0.9375)$ to $ (-0.125,0.5625)$; a narrow output grid clips both to 0.52734. When values disagree, inspect the first boundary where the numeric units stop matching. The arrows describe arithmetic, not a particular hardware kernel.
 
 ### Pause and reason
 
@@ -236,19 +240,11 @@ Expected: FP32, FP16 and BF16 comparisons are finite with error below $0.05$ for
 
 ### Read the figure
 
-The horizontal categories are precision policies; the vertical axis is maximum absolute output error against the FP32 reference on the same small input. Lower bars mean closer numerical agreement, not faster execution. The FP32 baseline is zero by construction.
-
-The errors are approximately $0.00105$ for FP16 rounding, $0.00617$ for BF16 rounding, $0.00803$ for W8 A32, and $0.146$ for W4 A32. The four-bit weight simulation has about eighteen times the output error of the eight-bit simulation in this example. These are output units, not percentages or classification error rates.
-
-The lower panel uses a separate exactly representable affine fixture, with output channel on the horizontal axis and real output value on the vertical axis. Correct values are $0.625$ and $0.9375$. Omitting the input zero point lowers them to $-0.125$ and $0.5625$; this is systematic offset error, not random rounding. The narrow output grid makes both bars equal $0.52734375$, the largest representable output under that policy. Equal bars here reveal saturation, not equal underlying predictions.
+In the upper panel, x is precision policy and y is maximum absolute output error against the FP32 reference. Values are 0, 0.00105, 0.00617, 0.00803 and 0.14571 for FP32, FP16, BF16, W8A32 and W4A32. Here W4A32’s error is about 18 times W8A32’s. In the lower panel, x is output channel and y is real output value: correct values 0.625/0.9375 contrast with missing-zero-point values -0.125/0.5625 and clipped values 0.52734/0.52734. Inspect centering for the offset and output range for clipping.
 
 ### Connect it to the computation
 
-For the floating-point policies, both inputs and weights are rounded, then converted to FP32 for accumulation. FP16 has finer precision than BF16 around these particular values; BF16’s wider exponent range is not being tested here. The weight-only policies keep activations in FP32 and reconstruct quantized weights before multiplication.
-
-Four-bit quantization uses fewer representable weight levels, so its larger rounding steps can create larger output discrepancies. The code uses per-output-column scales and checks an independent error bound. This is simulated quantization using ordinary CPU arrays, not a measurement of packed four-bit storage or native low-bit kernels. Accuracy, memory, and latency must each be evaluated on the intended workload and runtime.
-
-Use the lower panel to decide what to inspect: zero-point subtraction and bias units for an offset mismatch; output range and clipping counts for saturation. The upper panel compares precision policies on the original fixture, while the lower panel isolates operator bookkeeping on a different fixture. Neither measures latency.
+FP16 has smaller error than BF16 on these values, though BF16 has wider exponent range; this plot does not exercise overflow range. W4A32 is simulated with ordinary CPU arrays, not packed codes or native low-bit kernels. The lower fixture isolates different arithmetic bugs: omitting input zero point shifts both outputs, while a narrow output grid saturates both to 0.52734. Keep accuracy, storage and latency as separate measurements.
 
 ```python
 names = []
@@ -313,7 +309,7 @@ visual_data = {'panels': [first_panel, {'kind': 'bar', 'labels': ['output 0', 'o
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:24:44.714005+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:09:41.626297+00:00. JAX 0.9.2.
 
 ```text
 <class 'jax.numpy.float32'> max absolute error 0.0
@@ -436,22 +432,27 @@ Add a zero-valued output channel and verify that its quantization scale is finit
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.isfinite(x)` — Returns a boolean mask verifying that no element is `NaN` or `Inf`.
+**Inputs:**
+- The output weight matrix with one added all-zero output channel and the channel-wise quantizer.
 
-**Step-by-step implementation plan:**
-1. Exercise solution
+**Outputs:**
+- The zero channel’s quantization scale and reconstructed values.
+
+**Invariants to check:**
+- The scale is finite and every reconstructed value for the all-zero channel is exactly zero.
+
+**Hints:**
+- Handle a zero channel maximum explicitly when forming its scale.
+- Inspect the reconstructed channel after quantization, not only its integer codes.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-with_zero = np.column_stack(...)  # TODO: compute with_zero
-q, scale = quantize_weights(...)  # TODO: compute q, scale
-assert np.isfinite(scale).all()  # TODO: complete assertion check
-np.testing.assert_array_equal(q[:, -1], 0)
-np.testing.assert_array_equal((q * scale)[:, -1], 0)
-print("Zero channel handled")
+import jax.numpy as jnp
+
+def check_zero_output_channel(weights, quantize_weights):
+    # TODO: Add an all-zero output channel, run channel-wise quantization, and inspect its scale and reconstruction.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -482,24 +483,29 @@ Cast both integer-code arrays before multiplication. The real accumulator unit i
 
 ### How to write: Compute W8A8 with a wide accumulator — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- Use calibrated symmetric scales for $x$ and per-channel scales for $w$. Multiply integer codes with INT32 accumulation, rescale, and compare to the float baseline. Do not multiply int8 arrays directly.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- An integer-coded output, float baseline, and error comparison.
+
+**Invariants to check:**
+- Integer dot products widen to int32 before summation.
+
+**Hints:**
+- Cast both integer-code arrays before multiplication. The real accumulator unit is the activation scale multiplied by each output channel’s weight scale; compare with the unchanged floating-point reference.
+- Apply activation and per-output-channel weight scales after accumulation.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-sx = float(...)  # TODO: compute sx
-qx = np.clip(...)  # TODO: compute qx
-qw, sw = quantize_weights(...)  # TODO: compute qw, sw
-accumulator = qx.astype(...)  # TODO: compute accumulator
-y_integer = accumulator.astype(...)  # TODO: compute y_integer
-assert accumulator.dtype  # TODO: complete assertion check
-np.testing.assert_allclose(y_integer, reference, atol = ...  # TODO: compute np.testing.assert_allclose(y_integer, reference, atol
-print("W8A8 fixture error", float(np.max(np.abs(y_integer-reference))))
+import numpy as np
+import jax.numpy as jnp
+
+def practice_compute_w8a8_with_a_wide_accumulator(activation, weights, activation_scale, weight_scales):
+    """Complete the compute w8a8 with a wide accumulator check."""
+    # TODO: ('Quantize activation and per-channel weight values, multiply integer codes with an int32 accumulator, rescale, and compare with float output.', 'Integer-path output, float reference, and per-output error.', 'Integer products are widened before accumulation; calibration scales are retained per channel.')
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -533,31 +539,29 @@ Shift the zero point and codes by the same amount before subtracting; verify rep
 
 ### How to write: Change the code origin without changing the values — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Inputs:**
+- Change the activation zero point from $-3$ to $17$, shift the input codes accordingly, and prove that predictions stay unchanged. Then feed codes representing real zero and identify the expected bias-only result.
+
+**Outputs:**
+- Equivalent dequantized activations and output for both code origins.
+
+**Invariants to check:**
+- Real activation values remain fixed after code and zero-point shift together.
+
+**Hints:**
+- Shift the zero point and codes by the same amount before subtracting; verify representability before casting back to INT8.
+- Use the declared zero point to identify which codes represent real zero.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Change the code origin without changing the values (Transfer): Integer codes are coordinates on a grid.
-shifted_zx = ...  # TODO: compute shifted_zx
-shifted_codes_wide = a_qx.astype(...)  # TODO: compute shifted_codes_wide
-assert np.all((-128  # TODO: complete assertion check
-shifted_codes = shifted_codes_wide.astype(...)  # TODO: compute shifted_codes
-shifted_acc = ...  # TODO: compute shifted_acc
-np.testing.assert_array_equal(shifted_acc, a_acc)
-zero_codes = np.full(...)  # TODO: compute zero_codes
-zero_result = ...  # TODO: compute zero_result
-np.testing.assert_array_equal(zero_result, a_bias[None, :])
-for bad_scale in (0., -1., float('nan')):
-    try:
-        output_grid(a_real, bad_scale, -8)
-    except ValueError:
-        pass
-    else:
-        raise AssertionError('invalid scale accepted')
-print('Code-origin invariance and bias-only zero input verified.')
+import numpy as np
+import jax.numpy as jnp
+
+def practice_change_the_code_origin_without_changing_the_values(codes, old_zero_point, new_zero_point):
+    """Complete the change the code origin without changing the values check."""
+    # TODO: ('Recenter activation codes from zero point -3 to 17, adjust codes consistently, and test the real-zero input response.', 'Matching predictions before/after recoding plus the expected bias-only result for real zero.', 'Dequantized real activation values are invariant under the zero-point change.')
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -601,20 +605,29 @@ Use nbytes for actual arrays. Packing two signed four-bit codes into one byte is
 
 ### How to write: Account for actual low-bit storage — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Inputs:**
+- Calculate FP32 storage, ideal packed four-bit storage, and the actual int8-backed four-bit simulation for the fixture. Include per-output-channel FP32 scales; keep biases and runtime workspace explicitly outside this subtotal.
+
+**Outputs:**
+- Separate ideal packed and actual simulated storage totals.
+
+**Invariants to check:**
+- Per-channel scales count as FP32 metadata and biases/workspace stay outside the subtotal.
+
+**Hints:**
+- Use nbytes for actual arrays. Packing two signed four-bit codes into one byte is not implemented by astype(int8).
+- Report the actual backing dtype separately from nominal bit width.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Account for actual low-bit storage (Transfer / diagnosis)
-q4, s4 = quantize_weights(...)  # TODO: compute q4, s4
-float_weight_bytes = ...  # TODO: compute float_weight_bytes
-simulated_weight_and_scale_bytes = ...  # TODO: compute simulated_weight_and_scale_bytes
-ideal_packed_weight_and_scale_bytes = ...  # TODO: compute ideal_packed_weight_and_scale_bytes
-assert (float_weight_bytes, simulated_weight_and_scale_bytes, ideal_packed_weight_and_scale_bytes)  # TODO: complete assertion check
-print('Weight-plus-scale subtotals:', float_weight_bytes, simulated_weight_and_scale_bytes, ideal_packed_weight_and_scale_bytes)
+import numpy as np
+import jax.numpy as jnp
+
+def practice_account_for_actual_low_bit_storage(parameter_count, output_channels, bits):
+    """Complete the account for actual low-bit storage check."""
+    # TODO: ('Compute FP32, ideal packed four-bit, and int8-backed four-bit payload bytes including per-channel scales.', 'Three storage totals with biases/workspace explicitly excluded.', 'The simulated format is counted using its actual int8 backing storage, not ideal bit packing.')
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -643,9 +656,17 @@ What must a deployment policy specify beyond “INT8 weights”?
 
 <details><summary>Answer and explanation</summary>
 
-Activation, accumulator and output formats, scales, calibration and supported kernels.
+**1. Activation, accumulator and output formats, scales, calibration and supported kernels. (correct)**
 
 Bit width alone is incomplete. Arithmetic, scale metadata, calibration and runtime support determine both behavior and practical benefit.
+
+**2. Only the filename extension.**
+
+A filename or container format does not define tensor scales, calibration or accumulation. Write the numerical contract explicitly.
+
+**3. Nothing; INT8 guarantees acceleration.**
+
+Smaller storage does not guarantee faster execution. Check native operator support, data movement and measured target latency.
 
 </details>
 

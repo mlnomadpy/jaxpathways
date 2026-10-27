@@ -1,0 +1,11 @@
+{
+  "checker_sha256": "ccf9c6205827af3dd54631ce750e36abc146f0ffbe8374879ffc24fad9875f37",
+  "reference_sha256": "b5bdbc988cafcfe789e4703db7acde33eb13f81a1da762f22dcce3ff976347ff",
+  "unchanged_mutants_rejected_selftest": "ignored_momentum mutation was not detected",
+  "wrong_velocity_shape_rejected": "checkpoint optimizer shape differs from caller config",
+  "unreached_failpoint_rejected": {
+    "exit": 1,
+    "stderr_tail": "sts/check.py\", line 684, in run\n    stages[key] = stage6(m, candidate_path, scratch)\n                  ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/tahabsn/Documents/ChatGPT/jaxpathways/projects/recovery-audit/tests/check.py\", line 482, in stage6\n    assert worker_record == {\"pid\": worker_record[\"pid\"], \"status\": expected_status, \"failpoint\": failpoint}, worker_record\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: {'failpoint': 'during_temp_write', 'pid': 26103, 'status': 'ValueError:unrelated preflight error'}\n"
+  },
+  "equivalent_pass": true
+}

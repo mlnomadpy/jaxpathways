@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="576pt" height="273.6pt" viewBox="0 0 576 273.6" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:description>Actual Perfetto CPU event timeline in microseconds: learner_step starts at 122 and ends at 2787, containing input_wait from 125 to 2645 and model_and_wait from 2668 to 2787.</dc:description>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.10.8, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 273.6
+L 576 273.6
+L 576 0
+L 0 0
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="table_1">
+    <g id="patch_2">
+     <path d="M 3.00024 95.644913
+L 117.000144 95.644913
+L 117.000144 54.489826
+L 3.00024 54.489826
+z
+" style="fill: #e9e4f5; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_1">
+     <text style="font-weight: 700; font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="60.000192" y="78.37862" transform="rotate(-0 60.000192 78.37862)">condition</text>
+    </g>
+    <g id="patch_3">
+     <path d="M 117.000144 95.644913
+L 231.000048 95.644913
+L 231.000048 54.489826
+L 117.000144 54.489826
+z
+" style="fill: #e9e4f5; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_2">
+     <text style="font-weight: 700; font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="174.000096" y="78.37862" transform="rotate(-0 174.000096 78.37862)">event</text>
+    </g>
+    <g id="patch_4">
+     <path d="M 231.000048 95.644913
+L 344.999952 95.644913
+L 344.999952 54.489826
+L 231.000048 54.489826
+z
+" style="fill: #e9e4f5; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_3">
+     <text style="font-weight: 700; font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="288" y="78.37862" transform="rotate(-0 288 78.37862)">start (us)</text>
+    </g>
+    <g id="patch_5">
+     <path d="M 344.999952 95.644913
+L 458.999856 95.644913
+L 458.999856 54.489826
+L 344.999952 54.489826
+z
+" style="fill: #e9e4f5; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_4">
+     <text style="font-weight: 700; font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="401.999904" y="78.37862" transform="rotate(-0 401.999904 78.37862)">duration (us)</text>
+    </g>
+    <g id="patch_6">
+     <path d="M 458.999856 95.644913
+L 572.99976 95.644913
+L 572.99976 54.489826
+L 458.999856 54.489826
+z
+" style="fill: #e9e4f5; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_5">
+     <text style="font-weight: 700; font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="515.999808" y="78.37862" transform="rotate(-0 515.999808 78.37862)">end (us)</text>
+    </g>
+    <g id="patch_7">
+     <path d="M 3.00024 136.8
+L 117.000144 136.8
+L 117.000144 95.644913
+L 3.00024 95.644913
+z
+" style="fill: #f4f7fb; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_6">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="60.000192" y="119.533707" transform="rotate(-0 60.000192 119.533707)">2 ms injected wait</text>
+    </g>
+    <g id="patch_8">
+     <path d="M 117.000144 136.8
+L 231.000048 136.8
+L 231.000048 95.644913
+L 117.000144 95.644913
+z
+" style="fill: #f4f7fb; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_7">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="174.000096" y="119.366832" transform="rotate(-0 174.000096 119.366832)">learner_step</text>
+    </g>
+    <g id="patch_9">
+     <path d="M 231.000048 136.8
+L 344.999952 136.8
+L 344.999952 95.644913
+L 231.000048 95.644913
+z
+" style="fill: #f4f7fb; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_8">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="288" y="119.533707" transform="rotate(-0 288 119.533707)">122</text>
+    </g>
+    <g id="patch_10">
+     <path d="M 344.999952 136.8
+L 458.999856 136.8
+L 458.999856 95.644913
+L 344.999952 95.644913
+z
+" style="fill: #f4f7fb; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_9">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="401.999904" y="119.533707" transform="rotate(-0 401.999904 119.533707)">2665</text>
+    </g>
+    <g id="patch_11">
+     <path d="M 458.999856 136.8
+L 572.99976 136.8
+L 572.99976 95.644913
+L 458.999856 95.644913
+z
+" style="fill: #f4f7fb; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_10">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="515.999808" y="119.533707" transform="rotate(-0 515.999808 119.533707)">2787</text>
+    </g>
+    <g id="patch_12">
+     <path d="M 3.00024 177.955087
+L 117.000144 177.955087
+L 117.000144 136.8
+L 3.00024 136.8
+z
+" style="fill: #ffffff; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_11">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="60.000192" y="160.688793" transform="rotate(-0 60.000192 160.688793)">2 ms injected wait</text>
+    </g>
+    <g id="patch_13">
+     <path d="M 117.000144 177.955087
+L 231.000048 177.955087
+L 231.000048 136.8
+L 117.000144 136.8
+z
+" style="fill: #ffffff; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_12">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="174.000096" y="160.521918" transform="rotate(-0 174.000096 160.521918)">input_wait</text>
+    </g>
+    <g id="patch_14">
+     <path d="M 231.000048 177.955087
+L 344.999952 177.955087
+L 344.999952 136.8
+L 231.000048 136.8
+z
+" style="fill: #ffffff; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_13">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="288" y="160.688793" transform="rotate(-0 288 160.688793)">125</text>
+    </g>
+    <g id="patch_15">
+     <path d="M 344.999952 177.955087
+L 458.999856 177.955087
+L 458.999856 136.8
+L 344.999952 136.8
+z
+" style="fill: #ffffff; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_14">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="401.999904" y="160.688793" transform="rotate(-0 401.999904 160.688793)">2520</text>
+    </g>
+    <g id="patch_16">
+     <path d="M 458.999856 177.955087
+L 572.99976 177.955087
+L 572.99976 136.8
+L 458.999856 136.8
+z
+" style="fill: #ffffff; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_15">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="515.999808" y="160.688793" transform="rotate(-0 515.999808 160.688793)">2645</text>
+    </g>
+    <g id="patch_17">
+     <path d="M 3.00024 219.110174
+L 117.000144 219.110174
+L 117.000144 177.955087
+L 3.00024 177.955087
+z
+" style="fill: #f4f7fb; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_16">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="60.000192" y="201.84388" transform="rotate(-0 60.000192 201.84388)">2 ms injected wait</text>
+    </g>
+    <g id="patch_18">
+     <path d="M 117.000144 219.110174
+L 231.000048 219.110174
+L 231.000048 177.955087
+L 117.000144 177.955087
+z
+" style="fill: #f4f7fb; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_17">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="174.000096" y="201.677005" transform="rotate(-0 174.000096 201.677005)">model_and_wait</text>
+    </g>
+    <g id="patch_19">
+     <path d="M 231.000048 219.110174
+L 344.999952 219.110174
+L 344.999952 177.955087
+L 231.000048 177.955087
+z
+" style="fill: #f4f7fb; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_18">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="288" y="201.84388" transform="rotate(-0 288 201.84388)">2668</text>
+    </g>
+    <g id="patch_20">
+     <path d="M 344.999952 219.110174
+L 458.999856 219.110174
+L 458.999856 177.955087
+L 344.999952 177.955087
+z
+" style="fill: #f4f7fb; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_19">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="401.999904" y="201.84388" transform="rotate(-0 401.999904 201.84388)">119</text>
+    </g>
+    <g id="patch_21">
+     <path d="M 458.999856 219.110174
+L 572.99976 219.110174
+L 572.99976 177.955087
+L 458.999856 177.955087
+z
+" style="fill: #f4f7fb; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_20">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="515.999808" y="201.84388" transform="rotate(-0 515.999808 201.84388)">2787</text>
+    </g>
+   </g>
+  </g>
+ </g>
+</svg>

@@ -18,7 +18,7 @@
       {
         "id": "guided-reasoning",
         "title": "Calculate one weighted value mixture",
-        "body": "Suppose one query gives weights \\(0.25\\) and \\(0.75\\) to values \\([2,0]\\) and \\([0,4]\\). The mixture is \\([0.5,3]\\). The weights sum to one, but output coordinates need not sum to one or lie between zero and one.\n\nRead one heatmap row as a query's distribution over eligible keys, after confirming the axes. Scaling affects concentration, and a mask determines which keys can participate.\n\nHold the weights fixed and change a value vector: the output changes while the heatmap does not. Conversely, redundant values can make different weight patterns produce the same mixture. Use a hand-computed row to connect the heatmap to the actual value multiplication.",
+        "body": "Attention answers two linked questions: which keys should this query use, and what content do their values contribute? Start with weights we can inspect directly: \\(0.25(2,0)+0.75(0,4)=(0.5,3)\\). The weights sum to one, but the output coordinates need not.\n\nOn a heatmap, follow one query row across the eligible keys, then apply those weights to the corresponding value rows. If you change a value while holding weights fixed, the mixture changes but the heatmap does not. Predict the mixture before reading the computed output.",
         "check": {
           "prompt": "Can an attention-weight heatmap alone reconstruct the output?",
           "answer": "No. You also need the value vectors and any output projection. Weights explain the mixing coefficients, not the content being mixed."
@@ -26,25 +26,29 @@
       },
       {
         "title": "Track query, key and value axes",
-        "body": "\\(Q\\) has two query rows with two features each; \\(K\\) has three key rows with the same feature dimension. \\(QK^\\mathsf{T}\\) produces a \\((2, 3)\\) score matrix: one row per query and one column per key. \\(V\\) has three value rows, so the weighted sum returns two output rows. Its value-feature dimension need not equal the key-feature dimension.\n\nSoftmax acts along the last axis because a query chooses among keys. A softmax over queries instead would normalize a different problem. Check a rectangular example first: equal query and key counts can hide transposed-axis errors.",
+        "body": "The shapes explain that recipe. With \\(Q\\in\\mathbb{R}^{2\\times2}\\) and \\(K\\in\\mathbb{R}^{3\\times2}\\), \\(QK^\\mathsf{T}\\) has shape \\((2,3)\\): one row per query and one column per key. Softmax over the last axis gives each query its own distribution across keys. Multiplying by three value rows produces two output rows; the value width \\(D_v\\) can differ from key width \\(D_k\\).\n\nA rectangular example exposes a transposed-axis mistake that square shapes can hide. In the code, check each intermediate shape and ask: is this reduction choosing among keys for each query?",
         "formula": "Q (Tq, Dk) @ Kᵀ (Dk, Tk) → scores (Tq, Tk)\nsoftmax over Tk → weights (Tq, Tk)\nweights @ V (Tk, Dv) → output (Tq, Dv)"
       },
       {
         "title": "Derive the uniform-query result",
-        "body": "Every dot product with a zero query is zero. Softmax of \\([0, 0, 0]\\) is \\([1/3, 1/3, 1/3]\\), so each output is the mean of the three value rows. Our values sum to \\([6, 6]\\); both queries therefore produce \\([2, 2]\\). This known answer checks score normalization and value mixing without using another attention implementation.\n\nThe output is a weighted average, not a selected row. With finite unmasked scores, multiple keys can contribute. More concentrated weights can approximate retrieval but do not create a discrete index operation."
+        "body": "A zero query has dot product zero with every key, so softmax receives \\((0,0,0)\\) and returns \\((1/3,1/3,1/3)\\). The three values sum to \\((6,6)\\), so their mean is \\((2,2)\\); the recorded run prints that output for both queries. This gives a known answer for checking both normalization and value mixing.\n\nKeep this special case separate from the nonuniform permutation exercise: uniform weights make every value-only permutation preserve the mean. The exercise declares a nonzero query and a fixture where changing value order changes its output. A heatmap row is a weighted average, not an index selecting one value."
       },
       {
         "title": "Scale scores and keep softmax stable",
-        "body": "Dividing by `sqrt(Dk)` moderates dot-product scale as the feature dimension grows under common initialization assumptions. It is a design convention, not a proof that arbitrary query/key values cannot saturate. The independent NumPy reference below subtracts each row maximum before exponentiating to avoid overflow.\n\nJAX softmax performs a stable normalization. Adding the same finite constant to every score in a row leaves its weights unchanged. Extremely large or infinite inputs can still require diagnosis; a stable formula does not make invalid inputs meaningful."
+        "body": "As feature width grows, dot products can grow in scale under common initialization assumptions. Dividing by \\(\\sqrt{D_k}\\) moderates that scale; it does not prevent every possible input from producing saturated weights. The independent NumPy reference subtracts each row maximum before exponentiating, while JAX softmax uses a stable normalization.\n\nAdding the same finite constant to every score in one row leaves its softmax unchanged. Use that invariance as a check, then inspect unusually concentrated weights in context rather than treating scaling as a guarantee."
       },
       {
         "title": "Test relationships that should survive a change",
-        "body": "Adding a constant value vector c to every value row shifts every output by c because each weight row sums to one. Permuting keys and their corresponding values together leaves the result unchanged. Permuting only values changes what each score retrieves.\n\nThese tests examine the mechanism under changed conditions rather than merely duplicating the implementation. The unmasked head allows every key to contribute; interpreting it as a next-token model would leak future information. That boundary belongs in the next lesson."
+        "body": "Use invariants to check that the computation still means the same thing after a controlled edit. Adding a shared vector \\(c\\) to every value should add \\(c\\) to each output because each weight row sums to one. Permuting keys with their paired values preserves the same weighted terms; permuting values alone usually changes which content each score selects.\n\nThe recorded nonuniform fixture prints original and paired outputs as \\((2.67485,1.32515)\\), while the value-only result is \\((2,2.67485)\\). The separate zero-query example still stays at its mean under any value permutation. Use the exercise's explicit fixture to distinguish the general behavior from that uniform exception. Since this head is unmasked, it can read future positions and is not yet a next-token model."
       },
       {
         "title": "Read attention as matching, then mixing",
-        "body": "Let’s give each symbol a job. \\(Q\\) contains queries, \\(K\\) contains keys, and \\(V\\) contains the values we want to mix. The feature count \\(d_k\\) sets the score scale. Each row of \\(A\\) contains nonnegative weights that sum to one. For a zero query, all scores match, so three values each receive weight \\(1/3\\). Their average is the output. You can check that case before thinking about learned projections.",
+        "body": "The compact equation assigns a job to each stage: \\(Q\\) and \\(K\\) form compatibility scores, row-wise softmax turns them into weights \\(A\\), and \\(AV\\) mixes the content. The score divisor uses key width \\(d_k\\); each row of \\(A\\) is nonnegative and sums to one.\n\nFor the zero-query example, all three scores tie, so the value mixture is their mean, \\((2,2)\\). Check this by hand before moving from the single head to learned projections.",
         "math": "\\begin{aligned}S&=\\frac{QK^\\mathsf{T}}{\\sqrt{d_k}}\\\\A_{ij}&=\\frac{\\exp(S_{ij}-m_i)}{\\sum_t\\exp(S_{it}-m_i)},\\quad m_i=\\max_t S_{it}\\\\O&=AV\\end{aligned}"
+      },
+      {
+        "title": "From the attention head to a decoder stack",
+        "body": "The small Q/K/V exercise isolates one weighted mixture. A decoder adds learned projections, multiple heads, normalization, residual paths, token embeddings and causal blocks. In the optional text foundations, compare the independent NumPy attention row with the model output before interpreting a generated token. Its small CPU pilot is documented in `projects/text-harness/foundations/README.md`; it is a separate workflow from the original four-stage one-block harness."
       }
     ],
     "code": "# Step 1 — 1. Prepare the experiment\nimport jax\nimport jax.numpy as jnp\nimport numpy as np\n\n# Step 2 — 2. Implement the mechanism\ndef attend(q, k, v):\n    scores = q @ k.T / jnp.sqrt(q.shape[-1])\n    weights = jax.nn.softmax(scores, axis=-1)\n    return weights @ v, weights\n\n# Step 3 — 3. Run and check: Uniform weights 1/3; both output rows [2, 2].\nq = jnp.zeros((2, 2))\nk = jnp.array([[1., 0.], [0., 1.], [1., 1.]])\nv = jnp.array([[2., 0.], [0., 4.], [4., 2.]])\noutput, weights = attend(q, k, v)\nprint(\"Weights / output:\", weights, output)\nassert jnp.allclose(weights, jnp.full((2, 3), 1/3))\nassert jnp.allclose(output, jnp.array([[2., 2.], [2., 2.]]))\nassert jnp.allclose(jnp.sum(weights, axis=-1), 1.)",
@@ -65,8 +69,8 @@
         "explanation": "Row-normalized attention preserves a shared value translation."
       }
     ],
-    "exercise": "Permute the three key/value pairs together, then permute only values. Verify invariance for the paired permutation and a changed result for the mismatched pairing.",
-    "solution": "# Exercise solution: Permute the three key/value pairs together, then permute only values.\norder = jnp.array([2, 0, 1])\npaired, _ = attend(q_new, k[order], v[order])\nmismatched, _ = attend(q_new, k, v[order])\nassert jnp.allclose(paired, actual)\nassert not jnp.allclose(mismatched, actual)",
+    "exercise": "Start from the explicit independent fixture below: q_ex = [[2, 0]], k_ex = [[1, 0], [0, 1], [1, 1]], and v_ex = [[2, 0], [0, 4], [4, 2]]. Implement `attend` using the declared starter. Show algebraically why permuting keys and their paired values together preserves the weighted sum. Then test order [2, 0, 1] for both the paired permutation and a value-only permutation. Compare each result to the original output with NumPy. State why the separate zero-query worked example cannot show a value-only change.",
+    "solution": "# Exercise solution: all inputs are declared here, independent of prior experiments.\nimport jax\nimport jax.numpy as jnp\nimport numpy as np\n\ndef attend(q, k, v):\n    scores = q @ k.T / jnp.sqrt(q.shape[-1])\n    weights = jax.nn.softmax(scores, axis=-1)\n    return weights @ v, weights\n\nq_ex = jnp.array([[2., 0.]])\nk_ex = jnp.array([[1., 0.], [0., 1.], [1., 1.]])\nv_ex = jnp.array([[2., 0.], [0., 4.], [4., 2.]])\norder = jnp.array([2, 0, 1])\noriginal, weights = attend(q_ex, k_ex, v_ex)\npaired, paired_weights = attend(q_ex, k_ex[order], v_ex[order])\nvalue_only, _ = attend(q_ex, k_ex, v_ex[order])\nassert jnp.allclose(paired, original)\nassert not jnp.allclose(value_only, original)\n\n# Independent NumPy reference for the original and both permutations.\ndef numpy_attend(q, k, v):\n    scores = q @ k.T / np.sqrt(q.shape[-1])\n    exp_scores = np.exp(scores - scores.max(axis=-1, keepdims=True))\n    w = exp_scores / exp_scores.sum(axis=-1, keepdims=True)\n    return w @ v\nnp.testing.assert_allclose(original, numpy_attend(np.asarray(q_ex), np.asarray(k_ex), np.asarray(v_ex)), rtol=1e-6, atol=1e-6)\nnp.testing.assert_allclose(paired, numpy_attend(np.asarray(q_ex), np.asarray(k_ex[order]), np.asarray(v_ex[order])), rtol=1e-6, atol=1e-6)\nnp.testing.assert_allclose(value_only, numpy_attend(np.asarray(q_ex), np.asarray(k_ex), np.asarray(v_ex[order])), rtol=1e-6, atol=1e-6)\n\n# For any permutation p, sum_i w_i V_{p(i)} generally changes when w is nonuniform.\n# With q=0, all w_i=1/3 and the output is mean(V), invariant under every permutation.\nzero_query, _ = attend(jnp.zeros((1, 2)), k_ex, v_ex)\nassert jnp.allclose(zero_query, v_ex.mean(axis=0, keepdims=True))\nprint(\"original / paired / value-only:\", original, paired, value_only)\nprint(\"zero-query mean:\", zero_query)",
     "practice": [
       {
         "title": "Use a different value dimension",
@@ -74,7 +78,22 @@
         "prompt": "Make each value a single scalar \\([3, 6, 9]\\). Check the output shape and zero-query mean.",
         "hint": "The score matrix does not depend on Dv.",
         "solution": "# Use a different value dimension (Transfer / diagnosis)\nscalar_v = jnp.array([[3.], [6.], [9.]])\nscalar_out, _ = attend(q, k, scalar_v)\n# Check tensor shape invariant: `scalar_out.shape == (2, 1)`\nassert scalar_out.shape == (2, 1)\nassert jnp.allclose(scalar_out, 6.)",
-        "explanation": "Queries and keys share \\(Dk\\); values may have an independent feature dimension."
+        "explanation": "Queries and keys share \\(Dk\\); values may have an independent feature dimension.",
+        "learnerStarter": {
+          "inputs": [
+            "Make each value a single scalar \\([3, 6, 9]\\). Check the output shape and zero-query mean."
+          ],
+          "outputs": [
+            "One scalar attention output per query and a zero-query mean check."
+          ],
+          "invariants": [
+            "The key/value row pairing remains aligned and the query axis is preserved."
+          ],
+          "hints": [
+            "The score matrix does not depend on Dv."
+          ],
+          "code": "import jax.numpy as jnp\n\ndef practice_use_a_different_value_dimension(values):\n    \"\"\"Implement the use a different value dimension check.\"\"\"\n    # TODO: Construct scalar values with shape (3,1), attend with a zero query, and assert the output shape and arithmetic mean.\n    raise NotImplementedError\n"
+        }
       },
       {
         "title": "Expose a wrong softmax axis",
@@ -82,7 +101,22 @@
         "prompt": "Normalize zero scores along axis \\(0\\) and compare row sums with the intended contract. Repair the axis.",
         "hint": "Two queries and three keys make the incorrect result visible.",
         "solution": "# Expose a wrong softmax axis (Transfer / diagnosis): A legal operation can normalize the wrong axis.\nwrong_w = jax.nn.softmax(jnp.zeros((2, 3)), axis=0)\nassert jnp.allclose(wrong_w.sum(axis=-1), 1.5)\nright_w = jax.nn.softmax(jnp.zeros((2, 3)), axis=-1)\nassert jnp.allclose(right_w.sum(axis=-1), 1.)",
-        "explanation": "A legal operation can normalize the wrong axis. Rectangular shapes expose the mismatch."
+        "explanation": "A legal operation can normalize the wrong axis. Rectangular shapes expose the mismatch.",
+        "learnerStarter": {
+          "inputs": [
+            "Normalize zero scores along axis \\(0\\) and compare row sums with the intended contract. Repair the axis."
+          ],
+          "outputs": [
+            "Both row-sum diagnostics and a corrected attention-weight matrix."
+          ],
+          "invariants": [
+            "For each query, probabilities sum across key positions."
+          ],
+          "hints": [
+            "Two queries and three keys make the incorrect result visible."
+          ],
+          "code": "import jax.numpy as jnp\n\ndef practice_expose_a_wrong_softmax_axis(scores):\n    \"\"\"Implement the expose a wrong softmax axis check.\"\"\"\n    # TODO: Normalize a zero score matrix across axis zero, inspect column sums, and implement the key-axis normalization.\n    raise NotImplementedError\n"
+        }
       }
     ],
     "question": "Which dimension should softmax normalize for one query to combine all key/value pairs?",
@@ -129,17 +163,41 @@
         "title": "3. Run and check",
         "instruction": "Append this block and run python main.py. Compare its output with your prediction. An assertion failure means a stated contract needs investigation.",
         "code": "# Step 3 — 3. Run and check: Uniform weights 1/3; both output rows [2, 2].\nq = jnp.zeros((2, 2))\nk = jnp.array([[1., 0.], [0., 1.], [1., 1.]])\nv = jnp.array([[2., 0.], [0., 4.], [4., 2.]])\noutput, weights = attend(q, k, v)\nprint(\"Weights / output:\", weights, output)\nassert jnp.allclose(weights, jnp.full((2, 3), 1/3))\nassert jnp.allclose(output, jnp.array([[2., 2.], [2., 2.]]))\nassert jnp.allclose(jnp.sum(weights, axis=-1), 1.)",
-        "explanation": "Uniform weights \\(1/3\\); both output rows \\([2, 2]\\)."
+        "explanation": "Uniform weights \\(1/3\\); both output rows \\([2, 2]\\). The separate permutation exercise declares its own nonuniform Q/K/V fixture and does not depend on the later `q_new` experiment."
       }
     ],
     "visual": {
       "title": "Each query distributes one unit of attention",
       "kind": "executed",
       "prediction": "Why do the initial rows have equal weights?",
-      "reading": "Rows are queries and columns are keys. Each cell gives the attention weight assigned to that key by that query. Both panels use the same color range from \\(0\\) to \\(1\\), so their shades are directly comparable. Read across one row at a time; its weights sum to \\(1\\).\n\nWith zero queries, all scores are equal and every key receives weight \\(1/3\\). With changed queries, the first row becomes approximately \\((0.472,0.0565,0.472)\\), while the second becomes \\((0.0565,0.472,0.472)\\). Each row favors two tied keys, not a single winning key.",
-      "connection": "The changed queries are \\((3,0)\\) and \\((0,3)\\); the keys are \\((1,0)\\), \\((0,1)\\), and \\((1,1)\\). The third key matches the active coordinate of either query, explaining why it ties for the highest weight in both rows. Softmax converts these relative scores into normalized, positive weights.\n\nThe weights mix the value vectors; they are not the output vectors themselves. In the uniform panel, averaging the values \\((2,0)\\), \\((0,4)\\), and \\((4,2)\\) produces \\((2,2)\\) for each query. To understand a changed output, first read its row of weights, then form that weighted sum.",
+      "reading": "Rows are queries, columns are keys, and each cell is the attention weight assigned to that key; the shared color scale runs from \\(0\\) to \\(1\\). Read horizontally because each query's weights normalize across keys. In the zero-query panel every cell is about \\(0.3333\\). In the changed-query panel, query 0 assigns about \\((0.472,0.0565,0.472)\\), and query 1 assigns \\((0.0565,0.472,0.472)\\).",
+      "connection": "The changed queries \\((3,0)\\) and \\((0,3)\\) score keys \\((1,0),(0,1),(1,1)\\); key 2 ties with the matching coordinate, so each row has two largest weights. The code applies softmax to these scores, then multiplies the resulting row by the value matrix. In the uniform panel that weighted sum is \\((2,2)\\); the changed panel's weights alone do not tell you its output until you combine them with values. Next, predict how changing one value row affects output without changing these weights.",
       "alt": "Each query distributes one unit of attention. Rows are queries and columns are keys. Each cell gives the attention weight assigned to that key by that query. Both panels use the same color range from \\(0\\) to \\(1\\), so their shades are directly comparable. Read across one row at a time; its weights sum to \\(1\\). With zero queries, all scores are equal and every key receives weight \\(1/3\\). With changed queries, the first row becomes approximately \\((0.472,0.0565,0.472)\\), while the second becomes \\((0.0565,0.472,0.472)\\). Each row favors two tied keys, not a single winning key.",
       "code": "changed_q = jnp.array([[3.0, 0.0], [0.0, 3.0]])\n_, focused = attend(changed_q, k, v)\nvisual_data = {'kind': 'panels', 'panels': [{'kind': 'heatmap', 'title': 'Zero queries', 'values': weights.tolist(), 'rows': ['query 0', 'query 1'], 'columns': ['key 0', 'key 1', 'key 2'], 'unit': 'attention weight'}, {'kind': 'heatmap', 'title': 'Changed queries', 'values': focused.tolist(), 'rows': ['query 0', 'query 1'], 'columns': ['key 0', 'key 1', 'key 2'], 'unit': 'attention weight'}]}"
+    },
+    "optionFeedback": [
+      "Normalizing over queries changes which probabilities sum to one. For each query, sum its weights over the available keys.",
+      "One query needs a probability distribution across keys; each row must sum to one.",
+      "The value-feature axis belongs to the weighted output representation. Attention probabilities normalize over candidate key positions."
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "Independent nonuniform fixture: q_ex=[[2,0]], k_ex=[[1,0],[0,1],[1,1]], v_ex=[[2,0],[0,4],[4,2]], and permutation order [2,0,1]."
+      ],
+      "outputs": [
+        "Original attention output, paired-permutation output, and value-only-permutation output compared with an independent NumPy reference."
+      ],
+      "invariants": [
+        "Permuting keys and their paired values together preserves the weighted sum.",
+        "A value-only permutation can change the result for this nonuniform fixture; this is not guaranteed for every query/value set.",
+        "Zero queries produce a uniform-weight mean that is invariant under value permutations."
+      ],
+      "hints": [
+        "Implement scaled scores, softmax over keys, then weights @ values.",
+        "Write the paired permutation as a reindexing of the same sum.",
+        "Run the full solution using only the fixture declared in this starter."
+      ],
+      "code": "import jax\nimport jax.numpy as jnp\n\ndef attend(q, k, v):\n    \"\"\"Return attention outputs and normalized key weights.\"\"\"\n    # TODO: compute scaled query-key scores, normalize over keys, and mix values.\n    raise NotImplementedError\n\nq_ex = jnp.array([[2., 0.]])\nk_ex = jnp.array([[1., 0.], [0., 1.], [1., 1.]])\nv_ex = jnp.array([[2., 0.], [0., 4.], [4., 2.]])\norder = jnp.array([2, 0, 1])"
     }
   }
 }

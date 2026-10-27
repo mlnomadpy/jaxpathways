@@ -16,7 +16,7 @@ Train and deploy two encoders that retrieve matching synthetic images and litera
 
 ## Figures to explain
 
-Read the actual training curve, paired image and clean similarity matrix, then inspect shifted-image confusion counts. Clean retrieval is 20/20 while one-pixel shifted retrieval is 5/20; explain the fixed pixel coordinates behind that failure.
+Show the query-to-candidate similarity matrix with pair/group IDs and explicitly mark all valid positives. Plot query-to-item and item-to-query rank metrics separately. Inspect failed queries and duplicate positives, and compare random/untrained/exact-search baselines under the same candidate pool. A diagonal heatmap on training pairs does not establish held-out retrieval.
 
 ## 1. Define the data contract
 

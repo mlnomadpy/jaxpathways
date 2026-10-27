@@ -72,3 +72,9 @@ Review each task separately as **accept**, **revise**, or **not demonstrated**. 
 - Figures: axes, units or scales and plotted quantities are named; the explanation cites actual values and a limitation.
 
 Keep unresolved differences and the next diagnostic question in your report. After your attempt, [read the reviewer notes](math-reviewer.md). These public notes help review the reasoning; they do not supply independent evidence of a learner’s work.
+
+## Reviewer discussion: distinguish evidence from a plausible claim
+
+Two coefficient vectors differ substantially but make almost identical predictions on a collinear design.
+
+Before opening the reviewer notes, name the first unsupported claim and the smallest additional artifact that would resolve it. Keep correct partial reasoning even when the overall submission needs repair.

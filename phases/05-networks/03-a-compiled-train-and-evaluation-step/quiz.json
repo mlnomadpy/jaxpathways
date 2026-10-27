@@ -11,7 +11,12 @@
         "A separate held-out model"
       ],
       "correct": 0,
-      "explanation": "The order of statements matters: value_and_grad runs before applying the update. Use a fresh evaluation call to measure final parameters."
+      "explanation": "The order of statements matters: value_and_grad runs before applying the update. Use a fresh evaluation call to measure final parameters.",
+      "optionFeedback": [
+        "The order of statements matters: value_and_grad runs before applying the update. Use a fresh evaluation call to measure final parameters.",
+        "The computed loss belongs to the parameters used before that update. Recompute after updating if you want a post-update loss.",
+        "The data used in the loss determines whether it is held out. Calling optimizer.update does not create a validation split."
+      ]
     }
   ]
 }

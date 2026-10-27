@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "tpu-04",
-  "contentHash": "bea6fb9f5f8fad4951d860c7459a0ef56ac245d3dee084a497ce816cacd5cfce",
-  "rendererHash": "a1bd5b648f4731ae5d5f0a24811c2540d1a0a132149ce589d17c4113509cbedf",
+  "contentHash": "f805adaf1a7b07b11fc4b8c9410f43ba4081fa0bd68d0c7a8113b49efd35e041",
+  "rendererHash": "17e3bbad72ee4c43425845aaee76b86b85e84750551278be03d8c16842f4dc63",
   "kind": "analytic",
-  "generatedAt": "2026-10-20T22:30:05.431275+00:00",
+  "generatedAt": "2026-10-27T17:19:34.497264+00:00",
   "provenance": "analytic_calculation_not_device_execution",
   "environment": {
     "backend": "cpu",
@@ -13,7 +13,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Runtime receipt: {\"backend\": \"cpu\", \"expected_total\": 140.0, \"jax\": \"0.9.2\", \"local_device_count\": 1, \"observed_total\": 140.0, \"per_device_sums\": [140.0], \"python\": \"3.14.3\", \"receipt_sha256\": \"8c6bd0cbe29edc78\", \"verified\": true}\nExpected pmap sums by slice: {'1-device (CPU / v5e-1)': 140.0, '4-device (v5litepod-4 / v6e-4)': 10416.0, '8-device (v5litepod-8 / v6e-8)': 85344.0}\n",
+  "stdout": "Runtime receipt: {\"arithmetic_ok\": true, \"device_count\": 1, \"environment_lock\": \"projects/reproducible-experiments/requirements.txt; jax[tpu]==0.9.2\", \"expected_backend\": \"tpu\", \"expected_backend_ok\": false, \"expected_device_count\": 4, \"expected_topology_ok\": false, \"expected_total\": 140.0, \"jax\": \"0.9.2\", \"local_device_count\": 1, \"observed_backend\": \"cpu\", \"observed_total\": 140.0, \"per_device_sums\": [140.0], \"process_count\": 1, \"python\": \"3.14.3\", \"receipt_sha256\": \"64561213664a634b\", \"requested_target_ready\": false, \"source_identity\": \"unavailable: interactive execution has no readable __file__\", \"source_sha256\": null}\nExpected pmap sums by slice: {'1-device (CPU / v5e-1)': 140.0, '4-device (v5litepod-4 / v6e-4)': 10416.0, '8-device (v5litepod-8 / v6e-8)': 85344.0}\n",
   "data": {
     "kind": "bar",
     "labels": [

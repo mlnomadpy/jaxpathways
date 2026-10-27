@@ -1,0 +1,37 @@
+{
+  "output": "/private/tmp/jaxpathways-c02-root-loader-retest-lt5ynom9",
+  "validControl": "pass",
+  "sourceSha256": {
+    "training.py": "87cd3754268552ed5ce4f3d95774591c57c3546afc352768324e459a86e5caf7",
+    "model.py": "efec0774f84e19f870368f7965e3e779641935f4670140065226ec8a27e71932",
+    "run_pilot.py": "ff570c4431c9fd326d0ee163b01d35d3354a2c8ec45b58ff280b73f3e9812303",
+    "test_training_recovery.py": "d8748e8bab325b057f5cda9b251b45e516f950beee0a278093e823e25ce1789e"
+  },
+  "findings": [
+    {
+      "mutation": "integer-first-moment",
+      "accepted": false,
+      "error": "checkpoint first moment leaf 0 has wrong shape or dtype"
+    },
+    {
+      "mutation": "negative-second-moment",
+      "accepted": false,
+      "error": "checkpoint second moment leaf 0 must be nonnegative"
+    },
+    {
+      "mutation": "negative-epoch",
+      "accepted": false,
+      "error": "checkpoint epoch is outside the fixed stage schedule"
+    },
+    {
+      "mutation": "past-horizon-step",
+      "accepted": false,
+      "error": "checkpoint optimizer clock exceeds frozen schedule horizon"
+    },
+    {
+      "mutation": "wrong-cursor-at-current-step",
+      "accepted": false,
+      "error": "checkpoint cursor does not match the declared optimizer update boundary"
+    }
+  ]
+}

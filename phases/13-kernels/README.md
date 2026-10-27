@@ -12,7 +12,9 @@ Begin with a profiled operation and independent oracle. Complete CPU semantics f
 
 ## Study guide: Does a custom kernel earn its complexity?
 
-A lower-level implementation first owes you the same numerical contract. Use hostile shapes, independent references and explicit target limits before attempting a speed claim.
+A lower-level kernel replaces an operation the learner already understands. Its first responsibility is to compute the same result for every supported element, including the last partial tile. Draw the relationship among a program coordinate, its operand slices and its output before changing block sizes.
+
+The chapter moves from indexing to contraction and buffer lifetimes, then to a measured decision about whether an optimization is worthwhile. Treat boundary cases and independent numerical references as explanations of the contract. CPU interpretation illustrates semantics; target execution is needed to judge a performance tradeoff.
 
 ### Check your starting point
 
@@ -38,11 +40,11 @@ Review: [Pallas grids and BlockSpecs](01-pallas-grids-and-blockspecs/docs/en.md)
 
 ### Try a changed condition
 
-Interpret mode passes all numerical tests. Can you use its timings to choose the fastest TPU tile?
+For an output of length 10 and block width 4, which lanes of the final block are valid? Does a CPU interpretation prove the chosen block is fast?
 
 <details><summary>Compare an approach</summary>
 
-No. Interpretation supports bounded semantic checks. Compile and measure supported candidates on the named TPU with equivalent work and synchronization, including numerical verification there.
+The third block starts at 8; lanes for indices 8 and 9 are valid while 10 and 11 must not perform invalid loads/stores. Verify boundary handling and sentinel values with the API supported by the kernel. Interpretation can test semantics, but only supported target lowering and synchronized target measurements can rank block performance.
 
 </details>
 

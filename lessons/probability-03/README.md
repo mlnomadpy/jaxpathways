@@ -4,6 +4,8 @@ Phase 11: Probabilistic modeling · about 140 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Build a Bayesian regression](https://www.tahabouhsine.com/jaxpathways/lesson-probability-02.html).
+
 ## What you will be able to do
 
 - Implement leapfrog with the correct half-step boundaries
@@ -21,11 +23,9 @@ Hamiltonian Monte Carlo introduces momentum to propose distant states while acco
 
 ## A moving chain is not automatically a well-mixed chain
 
-Follow position and momentum through a leapfrog trajectory. A proposal can travel far without behaving like an independent posterior draw. Integration error and acceptance behavior provide one diagnostic, while between-chain agreement and autocorrelation provide others.
+The trace figure follows the first parameter coordinate for four chains after a fixed discard of 400 transitions. The lines cross the known mean of 1, and the executed sample mean is about 0.984; this is evidence about the marginal average, not proof that successive draws are independent or that every possible mode was found.
 
-Start multiple chains from meaningfully different positions where appropriate. Inspect the same retained sampling region across chains, and separate adaptation from retained draws. A trace that looks active may still stay in one region or be strongly correlated.
-
-The lesson's trace plot uses a known posterior mean as a reference. Matching that mean is not sufficient: spread and dependence matter too. Compute diagnostics from the retained samples with their conventions recorded; plotting a thinned subset should not silently redefine the diagnostic sample.
+The sampler retains rejected states as repeated values because each transition still contributes to the Markov chain's target distribution. The recorded acceptance rates are high, about 0.977 to 0.986, but high acceptance alone can accompany slow movement when the step is tiny. Compare trace behavior, covariance and chain diagnostics together; a thinned plot is for readability and does not change the samples used by the diagnostics.
 
 ### Pause and reason
 
@@ -59,7 +59,13 @@ We start four chains from dispersed points and discard the first $400$ transitio
 
 ## Use the reference model to expose failure
 
-Here the exact mean, variance and covariance are known. Check all of them: getting both marginal means right can still hide missing correlation. Acceptance alone is insufficient; a tiny step can accept almost everything while exploring slowly. Effective sample size concerns the information in correlated draws, not the number of rows stored. Before using a library such as NumPyro on an unknown posterior, repeat an exact-model validation and inspect its documented diagnostics. This CPU fixture establishes neither multimodal exploration nor accelerator performance.
+For this known correlated Gaussian, the retained sample mean is approximately $[0.984,-1.019]$, and the sampled covariance is about $[[0.980,0.773],[0.773,0.986]]$, close to the target's mean $[1,-1]$ and covariance with off-diagonal 0.8. Classical split R-hat is about 1.0002 for both coordinates. Those checks support this fixture's exploration but do not certify a different posterior, especially a multimodal one.
+
+The deliberately damaged step size changes the situation: the recorded bad-run acceptance is zero and its maximum energy error is roughly $5.02\times10^{10}$. That is a numerical integration failure, distinct from ordinary Monte Carlo variation. If the step were reduced, acceptance would likely recover for this target, but movement per transition could become smaller; inspect effective information as well as acceptance.
+
+## Optional NumPyro check against a conjugate posterior
+
+The project extension at `projects/bayesian-regression/` adds a real NumPyro NUTS run in its own pinned optional CPU environment. It runs four chains, compares sampled means and covariance to a separate host NumPy precision solve using estimated Monte Carlo standard errors, and repeats after changing the random seed, number of observations and parameter dimension. Its diagnostics use rank-normalized split R-hat, bulk ESS, tail ESS and the sampler divergence count. These answer different questions: R-hat compares chains, ESS estimates information after serial correlation, and divergences flag problematic Hamiltonian transitions. None establishes that every mode was explored. The saved diagnostic plot and the exact values used to draw it are under `projects/bayesian-regression/reference/numpyro/`. The optional workflow does not replace the transparent sampler built in this lesson or validate TPU performance.
 
 ## 1. Write a known target and its gradient
 
@@ -225,11 +231,11 @@ Expected: The pooled mean and covariance approach the stated target within the f
 
 ### Read the figure
 
-The horizontal axis counts retained transitions after discarding the initial $400$. The vertical axis is the first coordinate of the sampled parameter. Each colored line is one chain, plotted at every tenth retained transition to keep the figure readable. The target mean is $1$; the chains move on both sides of it. Their paths differ because they use different keys and initial positions. Connecting thinned points helps visual inspection but does not make the underlying draws independent.
+The horizontal axis counts retained transitions after the fixed discard of 400; the vertical axis is the first parameter coordinate. Four colored chains are plotted every tenth transition, and the horizontal reference is the known mean 1. The plotted values move on both sides of 1, including chain 1's sampled values near 0.96 and 0.11 early in the shown segment. Lines join thinned states for display; they do not imply independence.
 
 ### Connect it to the computation
 
-This trace is one piece of the evidence. The code also checks the two-dimensional covariance, which a single-coordinate trace cannot show, and prints classical split R-hat and acceptance. A smooth-looking trace or repeated crossings of the mean is distinct from exploration of modes absent from this single-Gaussian fixture.
+The first-coordinate trace cannot show the covariance between coordinates. The full retained sample gives mean $[0.984,-1.019]$, covariance about $[[0.980,0.773],[0.773,0.986]]$, and classical split R-hat near 1.0002, while the damaged large-step run has zero acceptance and huge energy error. Use the trace as one diagnostic alongside these numerical checks; it cannot rule out shared failure to explore a mode.
 
 ```python
 indices=np.arange(0,400,10)
@@ -239,7 +245,7 @@ visual_data={"kind":"line","x":indices.tolist(),"xlabel":"retained transition (a
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:23:11.359092+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:07:12.438740+00:00. JAX 0.9.2.
 
 ```text
 mean: [ 0.98358583 -1.0185838 ] covariance: [[0.98042357 0.7727629 ]
@@ -297,22 +303,29 @@ Increase the step size to 1.2 with the same leapfrog count. Record acceptance an
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jax.random.PRNGKey(seed) & jax.random.split(key)` — Uses explicit PRNG keys. Split a key when you need independent random draws; reusing a key repeats its random stream.
+**Inputs:**
+- A target mean and covariance, chain starts, and a deliberately large leapfrog step size.
 
-**Step-by-step implementation plan:**
-1. Create or split explicit PRNG key(s) (`bad`) for reproducible randomness.
+**Outputs:**
+- Per-chain acceptance summaries, signed energy errors, and a saved position trace.
+
+**Invariants to check:**
+- A rejected transition retains the previous state.
+- A large positive energy error lowers acceptance probability.
+- The diagnostic report names its R-hat variant and does not infer convergence from acceptance alone.
+
+**Hints:**
+- Keep momentum and acceptance random keys independent.
+- Inspect energy error and trace movement together.
+- Compare with the exact Gaussian target before interpreting a sampler statistic.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Increase the step size to 1.2 with the same leapfrog count.
-# Create or split explicit PRNG key(s) (`bad`) for reproducible randomness.
-bad = chain(...)  # TODO: compute bad
-assert bad[1].mean()  # TODO: complete assertion check
-assert jnp.max(bad[2])  # TODO: complete assertion check
-print("bad acceptance:",float(bad[1].mean()),"maximum energy error:",float(jnp.max(bad[2])))
+def summarize_unstable_trajectory(key, mean, covariance, starts, step_size):
+    """Return transition summaries and the chain states for inspection."""
+    # TODO: run the changed-step experiment and preserve per-chain evidence.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -342,20 +355,27 @@ Use independent small noise around four different constants.
 
 ### How to write: Catch chains trapped at different levels — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.arange(n, dtype=...)` — Creates a 1-D JAX array of evenly spaced values `[0, 1, ..., n-1]` on the target device.
-- `jax.random.PRNGKey(seed) & jax.random.split(key)` — Uses explicit PRNG keys. Split a key when you need independent random draws; reusing a key repeats its random stream.
+**Inputs:**
+- Four chains with similar within-chain variation and means separated by four units.
 
-**Step-by-step implementation plan:**
-1. Create or split explicit PRNG key(s) (`fake`) for reproducible randomness.
+**Outputs:**
+- The classical split R-hat and a check that it flags the separated chain means.
+
+**Invariants to check:**
+- Chain identity is retained through splitting; a classical split diagnostic is reported, not a rank-normalized modern diagnostic.
+
+**Hints:**
+- Split each chain into two halves before computing within- and between-chain variation.
+- Keep the chain offsets and within-chain noise on separate axes.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Catch chains trapped at different levels (Transfer / diagnosis)
-# Create or split explicit PRNG key(s) (`fake`) for reproducible randomness.
-fake = jax.random.normal(...)  # TODO: compute fake
-assert split_rhat(fake)  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def check_classical_split_rhat(chains, split_rhat):
+    # TODO: Construct the specified separated chains and evaluate the classical split diagnostic.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -385,26 +405,28 @@ Use the same direction and a moderate float32 finite-difference step.
 
 ### How to write: Verify a directional derivative — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- The target mean and precision matrix, the log-density gradient, a nonzero position, a direction, and a finite-difference step.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- The analytic precision-matrix directional derivative, autodiff directional derivative, and central-difference estimate.
+
+**Invariants to check:**
+- All three derivatives use the same nonzero position and direction; the central difference perturbs only along that direction.
+
+**Hints:**
+- Form the analytic gradient action from the precision matrix and centered position.
+- Compare a symmetric log-density difference with the autodiff directional derivative.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Verify a directional derivative (Transfer / diagnosis)
-q = jnp.array(...)  # TODO: compute q
-v = jnp.array(...)  # TODO: compute v
-eps = ...  # TODO: compute eps
-analytic = ...  # TODO: compute analytic
-auto = force(...)  # TODO: compute auto
-finite = ...  # TODO: compute finite
-np.testing.assert_allclose(auto,analytic,rtol = ...  # TODO: compute np.testing.assert_allclose(auto,analytic,rtol
-np.testing.assert_allclose(finite,analytic,rtol = ...  # TODO: compute np.testing.assert_allclose(finite,analytic,rtol
+import jax
+import jax.numpy as jnp
+
+def compare_gaussian_directional_derivatives(log_density, mean, precision, point, direction, epsilon):
+    # TODO: Compare the analytic precision action, autodiff derivative, and central difference.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -435,7 +457,15 @@ Four chains have classical split R-hat close to one. What can we conclude?
 
 <details><summary>Answer and explanation</summary>
 
-Their within-chain and between-chain variance estimates agree, but additional checks are still necessary
+**1. They have certainly explored every posterior mode**
+
+Chains trapped in the same mode can agree. Inspect traces, effective sample size and multiple initializations as well as R-hat.
+
+**2. Their retained draws are independent**
+
+R-hat near one does not remove serial correlation. Autocorrelation and effective sample size assess a different part of chain quality.
+
+**3. Their within-chain and between-chain variance estimates agree, but additional checks are still necessary (correct)**
 
 A diagnostic can reveal problems without proving their absence. Here we also compare to exact moments; an unknown target needs several diagnostics and model checks.
 

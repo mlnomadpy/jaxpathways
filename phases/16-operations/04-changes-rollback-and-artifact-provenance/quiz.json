@@ -11,7 +11,12 @@
         "The publisher is authenticated and authorized"
       ],
       "correct": 0,
-      "explanation": "A digest is an integrity/identity mechanism. Quality evaluation and authenticated authority require separate evidence and controls."
+      "explanation": "A digest is an integrity/identity mechanism. Quality evaluation and authenticated authority require separate evidence and controls.",
+      "optionFeedback": [
+        "A digest is an integrity/identity mechanism. Quality evaluation and authenticated authority require separate evidence and controls.",
+        "A digest binds bytes, not future behavior. Evaluate quality under a defined data and runtime contract.",
+        "Anyone can hash an artifact. Publisher authentication requires a separate trusted identity or signing mechanism."
+      ]
     }
   ]
 }

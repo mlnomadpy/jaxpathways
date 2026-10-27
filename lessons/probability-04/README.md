@@ -4,6 +4,8 @@ Phase 11: Probabilistic modeling · about 125 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Hamiltonian Monte Carlo and sampler diagnostics](https://www.tahabouhsine.com/jaxpathways/lesson-probability-03.html).
+
 ## What you will be able to do
 
 - Derive the diagonal Gaussian variational optimum for a correlated target
@@ -35,7 +37,7 @@ The lesson's variance comparison asks which downstream quantities are sensitive 
 
 *Architecture and dataflow mechanism diagram.*
 
-Both analytic matrices have unit marginal variances. Purple adds covariance $0.8$, stretching along the shared diagonal; green has zero covariance. These are unit Mahalanobis-distance contours, not 95% regions or fitted samples. Sum variances are $3.6$ and $2$, respectively.
+The horizontal and vertical axes are the two parameter coordinates; both ellipses are unit Mahalanobis-distance contours from analytic covariance matrices, not 95% regions or sampled points. The purple ellipse has unit marginal variances and correlation 0.8, so its long axis follows the shared diagonal; the green ellipse has the same marginals but zero covariance and is circular. Projecting onto the sum direction gives variances 3.6 and 2, respectively. Matching coordinate means or marginal variances therefore does not determine uncertainty in their sum.
 
 ### Pause and reason
 
@@ -69,11 +71,15 @@ $$
 
 ## Inspect what the model predicts, not only its optimizer
 
-A posterior predictive check draws plausible replicated observations and compares meaningful features with the observed data. Choose a discrepancy such as residual curvature, outlier count or group-specific spread; a single global mean can conceal a failure. Our stress fixture uses a zero linear mean and noise standard deviation $0.25$, then supplies targets $x^2-1$. Positive residuals at both ends and negative residuals near the center reveal curvature missing from the mean model. Narrower intervals cannot repair that pattern.
+The observed synthetic targets are $x^2-1$ at the nine inputs, while the assumed linear model predicts a zero mean with noise standard deviation 0.25. The standardized residuals are $[12,5,0,-3,-4,-3,0,5,12]$: positive at both ends and negative through the middle. That curved pattern is structured model mismatch, not a noisy estimate of a correctly specified line.
+
+Only two of nine targets fall inside the nominal 95% intervals in this tiny fixture, giving recorded coverage about 0.222. The pattern and residual signs explain why: narrower intervals cannot repair the missing quadratic mean. A posterior predictive check flags tension with the assumed model; it does not alone prove which alternative model is true.
 
 ## Keep inference and model errors separate
 
-The first experiment has a correct known target but an inadequate variational family. The second deliberately changes the data-generating mean while retaining an inadequate likelihood. Posterior predictive checks can reveal tension but are verified separately from model truth. For a real workflow, choose checks before inspecting a final held-out split, keep group sizes and uncertainty in reported coverage, and refit only on permitted data. **TODO (NumPyro Extension):** Compare this hand-written ELBO loop against `numpyro.infer.SVI` and `numpyro.infer.NUTS` on the same target density.
+The Gaussian VI experiment uses a correct known target but a diagonal family that cannot represent correlation; its optimized marginal variances are about 0.36 and its remaining KL is about 0.5108. The predictive stress test instead keeps a linear mean model while generating curved targets, producing coverage 2/9 and the residual pattern above. These are distinct failures: approximation-family restriction versus data/model mismatch.
+
+If the variational family were full covariance, it could represent the first Gaussian target; that change would not fix the second experiment's curved mean. Conversely, adding a quadratic mean could address the residual pattern but would not restore covariance the diagonal family cannot express. Evaluate approximation and model assumptions separately, using a check matched to each source of error.
 
 ## 1. Specify a correlated target and a simpler approximation
 
@@ -193,11 +199,11 @@ Expected: The optimized variances are $(0.36,0.36)$, compared with target margin
 
 ### Read the figure
 
-The horizontal categories identify three quantities: variance of the first weight, variance of the second weight and variance of their sum. The vertical axis is variance in squared parameter units. The target bars are $1,1,3.6$. The optimized diagonal approximation gives $0.36,0.36,0.72$. The especially large gap for the sum comes from both smaller marginal variances and missing positive covariance.
+The horizontal categories are the first weight, second weight and their sum; the vertical axis is variance in squared parameter units. The exact target bars are 1, 1 and 3.6. The optimized diagonal approximation gives about 0.36, 0.36 and 0.72. The sum gap combines narrower marginals with omitted positive covariance 0.8; it is not explained by a mean error, since the fitted means match the target.
 
 ### Connect it to the computation
 
-The code checks that the optimizer reaches the analytic variational optimum. The remaining gap therefore comes from the chosen diagonal family and KL direction on this particular Gaussian target. It is not evidence that every variational approximation has the same bias; a full-covariance Gaussian can represent this target.
+The exact objective's optimizer reaches this diagonal-family optimum, with remaining KL about 0.5108, so additional iterations cannot add the missing covariance. A full-covariance family could represent this Gaussian target. That change would not solve the separate curved-residual fixture; model checks and inference-family checks address different causes of poor uncertainty.
 
 ```python
 visual_data={"kind":"bar","x":[0,1,2],"labels":["weight 1","weight 2","sum of weights"],"xlabel":"quantity","ylabel":"variance (squared parameter units)","series":[{"label":"exact target","y":[1.,1.,3.6]},{"label":"optimized diagonal q","y":[float(variance[0]),float(variance[1]),float(variance.sum())]}]}
@@ -205,7 +211,7 @@ visual_data={"kind":"bar","x":[0,1,2],"labels":["weight 1","weight 2","sum of we
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:23:15.474979+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:07:18.472190+00:00. JAX 0.9.2.
 
 ```text
 VI mean: [ 0.99999994 -0.99999994] variances: [0.36000016 0.36000016] remaining KL: 0.5108256340026855
@@ -265,21 +271,27 @@ Replace the target correlation by zero and rederive the optimal diagonal varianc
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.zeros / jnp.ones(shape, dtype=...)` — Allocates a tensor of the given `shape` initialized with constants.
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- The target mean and covariance after setting the target correlation to zero.
 
-**Step-by-step implementation plan:**
-1. Exercise solution
+**Outputs:**
+- The optimized diagonal-family variances, the minimum KL value, and whether the family represents this target exactly.
+
+**Invariants to check:**
+- The result uses the exercise’s KL direction; when the target covariance is diagonal, the optimized diagonal family can match its covariance exactly.
+
+**Hints:**
+- Recompute the target precision after setting the correlation to zero.
+- Evaluate the KL at the optimized diagonal covariance and compare the two covariance matrices.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-def independent_kl(location,log_scale):
-    return ...  # TODO: return computed result
-assert jnp.allclose(independent_kl(mu,jnp.zeros(2)),0.)  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def check_diagonal_family_at_zero_correlation(mean, target_covariance):
+    # TODO: Set the target correlation to zero and evaluate the optimal diagonal approximation and minimum KL.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -307,24 +319,25 @@ Retain the off-diagonal covariance terms in the target calculation.
 
 ### How to write: A correct diagonal is not a correct covariance — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.zeros / jnp.ones(shape, dtype=...)` — Allocates a tensor of the given `shape` initialized with constants.
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- A full target covariance and a projection direction.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- Projected variance under the full target and a diagonal approximation.
+
+**Invariants to check:**
+- The full covariance projection includes off-diagonal contributions.
+
+**Hints:**
+- Evaluate v.T @ covariance @ v for each covariance choice.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# A correct diagonal is not a correct covariance (Transfer / diagnosis)
-direction = jnp.ones(...)  # TODO: compute direction
-true_sum_var = ...  # TODO: compute true_sum_var
-approx_sum_var = jnp.sum(...)  # TODO: compute approx_sum_var
-assert jnp.allclose(true_sum_var,3.6)  # TODO: complete assertion check
-assert jnp.allclose(approx_sum_var,.72,atol=1e-5)  # TODO: complete assertion check
+def compare_projected_uncertainty(covariance, direction, diagonal_variance):
+    """Return the projected variances under full and diagonal covariance."""
+    # TODO: compute both quadratic forms from the supplied values.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -356,24 +369,25 @@ The fixture supplies the true curvature; real data would require fitting and hel
 
 ### How to write: Repair the changed mean without hiding noise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.linspace(start, stop, num)` — Creates `num` evenly spaced float points across the closed interval `[start, stop]`.
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jax.random.PRNGKey(seed) & jax.random.split(key)` — Uses explicit PRNG keys. Split a key when you need independent random draws; reusing a key repeats its random stream.
+**Inputs:**
+- Inputs, observed targets, a known curved mean, a noise scale, and a random key.
 
-**Step-by-step implementation plan:**
-1. Create or split explicit PRNG key(s) (`fresh`) for reproducible randomness.
+**Outputs:**
+- Observed and replicated discrepancy summaries before/after the mean repair.
+
+**Invariants to check:**
+- Use the same discrepancy on observed and replicated data.
+
+**Hints:**
+- Keep the noise scale fixed when adding the missing mean term.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Repair the changed mean without hiding noise (Transfer / diagnosis)
-truth = jnp.linspace(...)  # TODO: compute truth
-# Create or split explicit PRNG key(s) (`fresh`) for reproducible randomness.
-fresh = ...  # TODO: compute fresh
-residual = ...  # TODO: compute residual
-assert abs(float(residual.std())-.25)  # TODO: complete assertion check
-assert abs(float(residual.mean()))  # TODO: complete assertion check
+def compare_curved_mean_repair(X, y, corrected_mean, noise_scale, key):
+    """Return paired posterior predictive discrepancy summaries."""
+    # TODO: evaluate the same residual statistic under both mean models.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -402,9 +416,17 @@ The variational mean is correct and the optimization gradient is tiny. Why can p
 
 <details><summary>Answer and explanation</summary>
 
-The diagonal family cannot represent the correlated target, even at its optimum
+**1. The diagonal family cannot represent the correlated target, even at its optimum (correct)**
 
 For this KL direction and correlated target, the optimal diagonal variances are 0.36 rather than the target marginal variances of one. This is approximation error, not an unfinished optimizer.
+
+**2. Any Gaussian model necessarily produces wrong uncertainty**
+
+A Gaussian target can still have correlated coordinates that a diagonal variational family cannot represent.
+
+**3. The number of optimizer iterations defines posterior variance**
+
+More iterations can optimize the chosen family but cannot add missing covariance structure. Compare its uncertainty with the exact posterior.
 
 </details>
 

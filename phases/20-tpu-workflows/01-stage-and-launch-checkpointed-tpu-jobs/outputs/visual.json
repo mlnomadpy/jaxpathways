@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "tpu-02",
-  "contentHash": "faba90e250eac21e49d496fa2c46348cb1b4270e3d576469881b319d0b0220d0",
-  "rendererHash": "a1bd5b648f4731ae5d5f0a24811c2540d1a0a132149ce589d17c4113509cbedf",
+  "contentHash": "fc9afc30bc587e4773a9ef29e2b70db07ec4462f2935d6d57d5c7d3e7d995a63",
+  "rendererHash": "17e3bbad72ee4c43425845aaee76b86b85e84750551278be03d8c16842f4dc63",
   "kind": "executed",
-  "generatedAt": "2026-10-20T22:30:06.923738+00:00",
+  "generatedAt": "2026-10-27T17:16:50.851147+00:00",
   "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",
@@ -57,7 +57,7 @@
   "diagram": {
     "title": "Checkpointed TPU job launcher lifecycle from warmup to zero-drift resume",
     "prediction": "Why must the warmup compilation step run before the timed step loop without overwriting the restored checkpoint state?",
-    "reading": "Read top to bottom: the launcher loads either the initial state or `checkpoint-latest.json`, runs one synchronized `@jax.jit` warmup call to compile XLA HLO without mutating state, executes timed steady-state steps while appending to `events.jsonl`, and writes `checkpoint-latest.json` atomically via `.tmp` + `fsync` + `os.replace`.",
+    "reading": "Read the arrows as a job lifecycle: load initial or validated checkpoint state, compile one synchronized warmup without changing that state, run synchronized updates while appending `step` events, then publish a checkpoint through `.tmp` and atomic replacement. After interruption, validate the published file's schema, state hash and run identity before resume; discard a leftover `.tmp`. The measured CPU example separates about 196.9 ms warmup from a 1.018 ms median step. The next decision is whether the named checkpoint is valid; an invalid or missing destination needs a separately saved backup or a restart, not a guess.",
     "alt": "Read top to bottom: initialize or restore checkpoint state, run synchronized warmup compilation without mutating state, execute timed steps logging events.jsonl, and atomically replace checkpoint-latest.json.",
     "scope": "Architecture and dataflow mechanism diagram.",
     "height": 6,

@@ -30,7 +30,7 @@
       },
       {
         "title": "Distinguish gradients, updates, and parameters",
-        "body": "A gradient describes local sensitivity; an update is the change the optimizer wants to add to parameters. Optax SGD transforms \\(g\\) into \\(-\\eta g\\). apply_updates adds that update, so subtracting it again would reverse the intended direction. The tree structure of gradients and updates follows the parameter tree.\n\nFor our evenly spaced \\(x\\) values, \\(\\operatorname{mean}(x)=0\\) and \\(\\operatorname{mean}(x^2)=\\frac{11}{30}\\). At zero parameters, the weight derivative is \\(-4\\cdot\\frac{11}{30}=-\\frac{22}{15}\\) and the bias derivative is \\(-2\\). With rate \\(0.2\\), the first weight becomes \\(22/75\\) and bias \\(0.4\\). Compute these values before trusting a long run.",
+        "body": "A gradient describes local sensitivity; an update is the change the optimizer wants to add to parameters. Optax SGD transforms \\(g\\) into \\(-\\eta g\\). apply_updates adds that update, so subtracting it again would reverse the intended direction. The tree structure of gradients and updates follows the parameter tree.\n\nFor our evenly spaced \\(x\\) values, \\(\\operatorname{mean}(x)=0\\) and \\(\\operatorname{mean}(x^2)=\\frac{11}{30}\\). At zero parameters, the weight derivative is \\(-4\\cdot\\frac{11}{30}=-\\frac{22}{15}\\) and the bias derivative is \\(-2\\). With rate \\(0.2\\), the first weight becomes \\(22/75\\) and bias \\(0.4\\). Compute these values before trusting a long run.\n\nFor the first update, the initial residual is -y. The slope derivative is therefore -2 mean(xy). In this fixture \\(\\operatorname{mean}(x)=0\\) and \\(\\operatorname{mean}(x^2)=11/30\\); because \\(y=2x+1\\), \\(\\operatorname{mean}(xy)=2(11/30)+\\operatorname{mean}(x)=11/15\\), so the gradient is \\(-22/15\\). The bias gradient is -2. SGD multiplies the negative gradient by rate 0.2, giving parameter changes \\(+22/75\\) and +0.4.",
         "formula": "params → loss → grads\ngrads + old optimizer state → updates + new optimizer state\nparams + updates → next params"
       },
       {
@@ -47,7 +47,7 @@
       },
       {
         "title": "Preserve state when a gradient happens to be zero",
-        "body": "Momentum remembers earlier gradients. Under the convention \\(m_t=\\beta m_{t-1}+g_t\\), a zero current gradient can still produce a nonzero update. With \\(\\beta=0.9\\), a previous trace of \\(2\\) becomes \\(1.8\\) when the new gradient is zero. This is why an optimizer’s behavior cannot be reconstructed from the current gradient and weights alone. The next lesson builds on this state model to explain Adam and learning-rate schedules.",
+        "body": "Momentum remembers earlier gradients. Under the convention \\(m_t=\\beta m_{t-1}+g_t\\), a zero current gradient can still produce a nonzero update. With \\(\\beta=0.9\\), a previous trace of \\(2\\) becomes \\(1.8\\) when the new gradient is zero. This is why an optimizer’s behavior cannot be reconstructed from the current gradient and weights alone. The next lesson builds on this state model to explain Adam and learning-rate schedules.\n\nA zero current gradient is not the same thing as zero optimizer state. With momentum trace \\(m_t=0.9m_{t-1}+g_t\\), setting the current gradient to zero after a trace of 2 leaves \\(m_t=1.8\\). At rate 0.1, the next parameter update is still \\(-0.18\\). The gradient describes the present objective at this point; the momentum trace summarizes recent history.",
         "math": "m_t=\\beta m_{t-1}+g_t,\\qquad \\Delta w_t=-\\eta m_t"
       }
     ],
@@ -81,7 +81,22 @@
         "prompt": "Save the state after the first update; run the next update twice from that state and compare every state leaf.",
         "hint": "Optimizer transformations return new state; reuse the saved value for the replay.",
         "solution": "# Replay a momentum continuation (Transfer / diagnosis): This verifies an in-memory optimizer transition.\nreplay_u, replay_state = momentum.update(jnp.array(1.), m1)\nassert jnp.allclose(replay_u, u2)\nassert all(jnp.allclose(a,b) for a,b in zip(jax.tree.leaves(replay_state), jax.tree.leaves(m2)))",
-        "explanation": "This verifies an in-memory optimizer transition. It does not test serialization or a data-loader resume."
+        "explanation": "This verifies an in-memory optimizer transition. It does not test serialization or a data-loader resume.",
+        "learnerStarter": {
+          "inputs": [
+            "Save the state after the first update; run the next update twice from that state and compare every state leaf."
+          ],
+          "outputs": [
+            "Equal next parameters and state leaves from replayed continuations."
+          ],
+          "invariants": [
+            "Both continuations start from the same parameters, gradients, and saved optimizer state."
+          ],
+          "hints": [
+            "Optimizer transformations return new state; reuse the saved value for the replay."
+          ],
+          "code": "import jax.numpy as jnp\nimport optax\n\ndef practice_replay_a_momentum_continuation(params, opt_state, grads):\n    \"\"\"Implement the replay a momentum continuation check.\"\"\"\n    # TODO: Advance momentum once, snapshot every optimizer-state leaf, and compare two next updates restored from that snapshot.\n    raise NotImplementedError\n"
+        }
       },
       {
         "title": "Catch double subtraction",
@@ -89,7 +104,22 @@
         "prompt": "At zero parameters, subtract SGD updates by mistake. Show the loss increases; repair using apply_updates.",
         "hint": "SGD updates already contain the minus sign.",
         "solution": "# Catch double subtraction (Transfer / diagnosis)\nwrong = jax.tree.map(lambda p,u: p-u, p0,u0)\nright = optax.apply_updates(p0,u0)\nassert loss(wrong) > loss(p0)\nassert loss(right) < loss(p0)",
-        "explanation": "Comparing identical gradients exposes an update-sign error rather than a hyperparameter difference."
+        "explanation": "Comparing identical gradients exposes an update-sign error rather than a hyperparameter difference.",
+        "learnerStarter": {
+          "inputs": [
+            "At zero parameters, subtract SGD updates by mistake. Show the loss increases; repair using apply_updates."
+          ],
+          "outputs": [
+            "Correct and double-subtracted parameter trees with a loss comparison."
+          ],
+          "invariants": [
+            "Each update is applied with its documented sign exactly once."
+          ],
+          "hints": [
+            "SGD updates already contain the minus sign."
+          ],
+          "code": "import jax.numpy as jnp\nimport optax\n\ndef practice_catch_double_subtraction(params, opt_state, grads):\n    \"\"\"Implement the catch double subtraction check.\"\"\"\n    # TODO: Apply the Optax update with apply_updates, then deliberately subtract the update once more and compare losses.\n    raise NotImplementedError\n"
+        }
       }
     ],
     "references": [
@@ -138,9 +168,30 @@
       "kind": "executed",
       "prediction": "What does each learned parameter change in the predictions?",
       "reading": "The horizontal axis gives input values and the vertical axis gives predictions. The dashed initial model is flat at zero. The target and trained-model lines rise together from approximately \\((-1,-1)\\) through \\((0,1)\\) to \\((1,3)\\).\n\nThe trained line lies almost exactly on top of the target, so one can hide the other. This overlap is the intended result, not a missing legend entry. It means the predictions agree to the numerical tolerance used in the example.",
-      "connection": "Read the learned parameters from the geometry: the intercept is \\(1\\), and increasing the input by \\(1\\) raises the prediction by \\(2\\). Training has therefore recovered the target relationship \\(y=2x+1\\), whereas the initial model used zero slope and zero intercept.\n\nThis picture shows the final fit across the displayed inputs, not the optimizer’s path or its runtime. Agreement on an exact synthetic linear target is a useful correctness check. It is separate from performance on noisy data or on a different relationship.",
+      "connection": "Read the learned parameters from the geometry: the intercept is \\(1\\), and increasing the input by \\(1\\) raises the prediction by \\(2\\). Training has therefore recovered the target relationship \\(y=2x+1\\), whereas the initial model used zero slope and zero intercept.\n\nThis picture shows the final fit across the displayed inputs, not the optimizer’s path or its runtime. Agreement on an exact synthetic linear target is a useful correctness check. It is separate from performance on noisy data or on a different relationship.\n\nBefore resuming from a checkpoint, predict the next update from both saved parameters and optimizer state; compare it with an uninterrupted transition.",
       "alt": "The fitted line recovers slope and bias. The horizontal axis gives input values and the vertical axis gives predictions. The dashed initial model is flat at zero. The target and trained-model lines rise together from approximately \\((-1,-1)\\) through \\((0,1)\\) to \\((1,3)\\). The trained line lies almost exactly on top of the target, so one can hide the other. This overlap is the intended result, not a missing legend entry. It means the predictions agree to the numerical tolerance used in the example.",
       "code": "visual_data = {'kind': 'line', 'x': x.tolist(), 'xlabel': 'input', 'ylabel': 'prediction', 'series': [{'label': 'target', 'y': y.tolist()}, {'label': 'initial model', 'y': jnp.zeros_like(x).tolist()}, {'label': 'trained model', 'y': (params['weight'] * x + params['bias']).tolist()}]}"
+    },
+    "optionFeedback": [
+      "The scalar loss does not contain the optimizer moments or update count. Keep the returned optimizer state with the parameters.",
+      "State carries momentum or adaptive statistics between steps. Reinitializing it discards that history.",
+      "Reinitialization discards history and changes later updates. Compare two steps with retained state against two first-step updates."
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "A parameter pytree, an Optax transformation and its state, and a scalar loss."
+      ],
+      "outputs": [
+        "The updated parameter pytree and next optimizer state."
+      ],
+      "invariants": [
+        "Update leaves match parameter leaves; Optax updates are applied once and state is carried forward."
+      ],
+      "hints": [
+        "Use value_and_grad to get the gradient tree.",
+        "Keep optimizer state as a separate returned value so it can be replayed."
+      ],
+      "code": "import jax\nimport jax.numpy as jnp\nimport optax\n\ndef sgd_update(params, optimizer, opt_state, loss_fn):\n    \"\"\"The updated parameter pytree and next optimizer state.\"\"\"\n    # TODO: Initialize the Optax state, compute one gradient tree, request updates, and apply them once to the parameters.\n    raise NotImplementedError\n"
     }
   }
 }

@@ -1,0 +1,1638 @@
+
+> jaxpathways@0.17.1 check
+> npm run content:build && npm run check:astro && npm run check:types && npm run lint && npm run format:check && node scripts/validate-curriculum.mjs && npm run build && npm test && npm run check:epub-identity && python3 scripts/check-distribution.py && npm run check:site
+
+
+> jaxpathways@0.17.1 content:build
+> node scripts/render-curriculum.mjs && python3 scripts/audit-learning-material.py && python3 scripts/build-distribution.py && python3 scripts/build-assessments.py && python3 scripts/build-project-workspace.py && python3 scripts/build-tpu-workspace.py && python3 scripts/build-experiment-workshop.py
+
+{
+  "byKind": {
+    "lessons": 104,
+    "phases": 22,
+    "projects": 31,
+    "plans": 10,
+    "assessments": 11,
+    "pathways": 10,
+    "careers": 7,
+    "tracks": 4,
+    "guides": 3,
+    "book": 1
+  },
+  "phaseLevels": {
+    "available-draft": 9,
+    "in-development": 13
+  },
+  "itemLevels": {
+    "available-draft": 162,
+    "in-development": 31,
+    "planned": 10
+  },
+  "tasks": 540,
+  "lessonTasks": 409,
+  "projectStages": 131,
+  "currentCpuLessons": 104,
+  "currentProjectReferences": 28,
+  "expertReviewedLessons": 0,
+  "novicePilotedLessons": 0,
+  "choiceSpecificFeedbackLessons": 104,
+  "boundedHardwareQualifications": 4,
+  "fullCapstonesPlanned": 10,
+  "optionalPilots": 3,
+  "verifiedOptionalPilots": 3
+}
+Built offline HTML/EPUB (104 lessons), staged project, and tutor bundles.
+Built course workspace with canonical lessons, projects and tutor skills.
+Exported 11 synthesis assessment drafts for Astro and download.
+Built project workflow guide and portable CLI practice workspace.
+Built TPU/GCP guides, precision figures and practice bundle; no cloud resources created.
+Verified workshop: six recorded CPU runs, frozen source/config/data, metrics, artifacts and figure provenance; optional adapters checked separately.
+
+> jaxpathways@0.17.1 check:astro
+> astro check
+
+06:23:56 [types] Generated 82ms
+06:23:56 [check] Getting diagnostics for Astro files in /private/tmp/jaxpathways-transformer-bridge-review...
+Result (148 files): 
+- 0 errors
+- 0 warnings
+- 0 hints
+
+
+> jaxpathways@0.17.1 check:types
+> tsc -p tsconfig.domain.json && tsc -p tsconfig.browser-tests.json
+
+
+> jaxpathways@0.17.1 lint
+> eslint src scripts/*.mjs astro.config.mjs
+
+
+> jaxpathways@0.17.1 format:check
+> prettier --check src astro.config.mjs eslint.config.js
+
+Checking formatting...
+All matched files use Prettier code style!
+OK: 22 phases, 104 canonical lesson briefs, 10 routes; prerequisites acyclic and ordered.
+Content status: 104 authored lessons with script/notebook companions; 0 planned. 31 staged integration projects and synthesis assessments are linked across all routes.
+OK: 4 core domains, 7 career routes; every specialization and role has a home.
+OK: career milestones and starting-point checks reference their required route phases.
+
+> jaxpathways@0.17.1 build
+> npm run release:check && npm run content:build && astro build
+
+
+> jaxpathways@0.17.1 release:check
+> node scripts/release.mjs
+
+Release 0.17.1: 104 lessons and 22 phases match the recorded source snapshot.
+
+> jaxpathways@0.17.1 content:build
+> node scripts/render-curriculum.mjs && python3 scripts/audit-learning-material.py && python3 scripts/build-distribution.py && python3 scripts/build-assessments.py && python3 scripts/build-project-workspace.py && python3 scripts/build-tpu-workspace.py && python3 scripts/build-experiment-workshop.py
+
+{
+  "byKind": {
+    "lessons": 104,
+    "phases": 22,
+    "projects": 31,
+    "plans": 10,
+    "assessments": 11,
+    "pathways": 10,
+    "careers": 7,
+    "tracks": 4,
+    "guides": 3,
+    "book": 1
+  },
+  "phaseLevels": {
+    "available-draft": 9,
+    "in-development": 13
+  },
+  "itemLevels": {
+    "available-draft": 162,
+    "in-development": 31,
+    "planned": 10
+  },
+  "tasks": 540,
+  "lessonTasks": 409,
+  "projectStages": 131,
+  "currentCpuLessons": 104,
+  "currentProjectReferences": 28,
+  "expertReviewedLessons": 0,
+  "novicePilotedLessons": 0,
+  "choiceSpecificFeedbackLessons": 104,
+  "boundedHardwareQualifications": 4,
+  "fullCapstonesPlanned": 10,
+  "optionalPilots": 3,
+  "verifiedOptionalPilots": 3
+}
+Built offline HTML/EPUB (104 lessons), staged project, and tutor bundles.
+Built course workspace with canonical lessons, projects and tutor skills.
+Exported 11 synthesis assessment drafts for Astro and download.
+Built project workflow guide and portable CLI practice workspace.
+Built TPU/GCP guides, precision figures and practice bundle; no cloud resources created.
+Verified workshop: six recorded CPU runs, frozen source/config/data, metrics, artifacts and figure provenance; optional adapters checked separately.
+06:24:18 [types] Generated 35ms
+06:24:18 [build] output: "static"
+06:24:18 [build] mode: "static"
+06:24:18 [build] directory: /private/tmp/jaxpathways-transformer-bridge-review/dist/
+06:24:18 [build] Collecting build info...
+06:24:18 [build] ✓ Completed in 64ms.
+06:24:18 [build] Building static entrypoints...
+06:24:19 [vite] ✓ built in 409ms
+06:24:20 [vite] ✓ built in 833ms
+06:24:20 [build] Rearranging server assets...
+
+ generating static routes 
+06:24:20   ├─ /assessments/foundations.html (+33ms) 
+06:24:20   ├─ /assessments/models.html (+9ms) 
+06:24:20   ├─ /assessments/math.html (+8ms) 
+06:24:20   ├─ /assessments/science.html (+8ms) 
+06:24:20   ├─ /assessments/rl.html (+5ms) 
+06:24:20   ├─ /assessments/probability.html (+5ms) 
+06:24:20   ├─ /assessments/internals.html (+8ms) 
+06:24:20   ├─ /assessments/ship.html (+3ms) 
+06:24:20   ├─ /assessments/ops.html (+5ms) 
+06:24:20   ├─ /assessments/scale.html (+4ms) 
+06:24:20   ├─ /assessments/tpu.html (+2ms) 
+06:24:20   ├─ /book.html (+3ms) 
+06:24:20   ├─ /career-guides/training-engineer.html (+2ms) 
+06:24:20   ├─ /career-guides/research-engineer.html (+1ms) 
+06:24:20   ├─ /career-guides/scientific-ml.html (+1ms) 
+06:24:20   ├─ /career-guides/rl-engineer.html (+1ms) 
+06:24:20   ├─ /career-guides/performance-engineer.html (+1ms) 
+06:24:20   ├─ /career-guides/inference-engineer.html (+1ms) 
+06:24:20   ├─ /career-guides/operations-engineer.html (+1ms) 
+06:24:20   ├─ /careers.html (+5ms) 
+06:24:20   ├─ /content-status.html (+16ms) 
+06:24:20   ├─ /course.html (+12ms) 
+06:24:20   ├─ /developer.html (+4ms) 
+06:24:20   ├─ /downloads/jax-foundations.html (+463ms) 
+06:24:20   ├─ /learning-paths/foundations.html (+2ms) 
+06:24:20   ├─ /learning-paths/models.html (+1ms) 
+06:24:20   ├─ /learning-paths/science.html (+2ms) 
+06:24:20   ├─ /learning-paths/probability.html (+2ms) 
+06:24:20   ├─ /learning-paths/rl.html (+1ms) 
+06:24:20   ├─ /learning-paths/scale.html (+1ms) 
+06:24:20   ├─ /learning-paths/internals.html (+1ms) 
+06:24:20   ├─ /learning-paths/tpu.html (+1ms) 
+06:24:20   ├─ /learning-paths/ship.html (+1ms) 
+06:24:20   ├─ /learning-paths/ops.html (+1ms) 
+06:24:20   ├─ /lesson.html (+3ms) 
+06:24:20   ├─ /notebook.html (+3ms) 
+06:24:20   ├─ /organizer.html (+3ms) 
+06:24:20   ├─ /pathways.html (+5ms) 
+06:24:20   ├─ /phase-guides/welcome.html (+2ms) 
+06:24:20   ├─ /phase-guides/arrays.html (+2ms) 
+06:24:20   ├─ /phase-guides/transforms.html (+1ms) 
+06:24:20   ├─ /phase-guides/state.html (+1ms) 
+06:24:20   ├─ /phase-guides/optimization.html (+2ms) 
+06:24:20   ├─ /phase-guides/networks.html (+1ms) 
+06:24:20   ├─ /phase-guides/recovery.html (+2ms) 
+06:24:20   ├─ /phase-guides/transformers.html (+1ms) 
+06:24:20   ├─ /phase-guides/performance.html (+2ms) 
+06:24:20   ├─ /phase-guides/distributed.html (+2ms) 
+06:24:20   ├─ /phase-guides/science.html (+1ms) 
+06:24:20   ├─ /phase-guides/probability.html (+1ms) 
+06:24:20   ├─ /phase-guides/rl.html (+1ms) 
+06:24:20   ├─ /phase-guides/kernels.html (+1ms) 
+06:24:20   ├─ /phase-guides/internals.html (+1ms) 
+06:24:20   ├─ /phase-guides/deployment.html (+1ms) 
+06:24:20   ├─ /phase-guides/operations.html (+1ms) 
+06:24:20   ├─ /phase-guides/pretraining.html (+1ms) 
+06:24:20   ├─ /phase-guides/posttraining.html (+1ms) 
+06:24:20   ├─ /phase-guides/tpu.html (+1ms) 
+06:24:20   ├─ /phase-guides/tpu-workflows.html (+1ms) 
+06:24:20   ├─ /phase-guides/tpu-systems.html (+1ms) 
+06:24:20   ├─ /project.html (+3ms) 
+06:24:20   ├─ /project-guides/image-model-300m-pilot.html (+4ms) 
+06:24:20   ├─ /project-guides/posttraining-transformer-lineage.html (+7ms) 
+06:24:20   ├─ /project-guides/sharded-training-multiprocess.html (+3ms) 
+06:24:20   ├─ /project-guides/text-harness-foundations.html (+4ms) 
+06:24:20   ├─ /project-guides/regression-audit.html (+2ms) 
+06:24:20   ├─ /project-guides/mlp-classifier.html (+2ms) 
+06:24:20   ├─ /project-guides/scientific-inverse.html (+5ms) 
+06:24:20   ├─ /project-guides/policy-evaluation.html (+2ms) 
+06:24:20   ├─ /project-guides/bayesian-regression.html (+2ms) 
+06:24:20   ├─ /project-guides/derivative-audit.html (+2ms) 
+06:24:20   ├─ /project-guides/deployment-audit.html (+2ms) 
+06:24:20   ├─ /project-guides/workload-operations.html (+2ms) 
+06:24:20   ├─ /project-guides/audio-harness.html (+4ms) 
+06:24:20   ├─ /project-guides/cross-modal-harness.html (+2ms) 
+06:24:20   ├─ /project-guides/kernel-audit.html (+2ms) 
+06:24:20   ├─ /project-guides/image-harness.html (+2ms) 
+06:24:20   ├─ /project-guides/foundation-toolkit.html (+2ms) 
+06:24:20   ├─ /project-guides/sharded-training.html (+3ms) 
+06:24:20   ├─ /project-guides/text-harness.html (+3ms) 
+06:24:20   ├─ /project-guides/optimizer-audit.html (+9ms) 
+06:24:20   ├─ /project-guides/engineering-release.html (+3ms) 
+06:24:20   ├─ /project-guides/training-methods.html (+2ms) 
+06:24:20   ├─ /project-guides/weight-conversion.html (+2ms) 
+06:24:20   ├─ /project-guides/welcome-audit.html (+2ms) 
+06:24:20   ├─ /project-guides/arrays-audit.html (+1ms) 
+06:24:20   ├─ /project-guides/transforms-audit.html (+2ms) 
+06:24:20   ├─ /project-guides/recovery-audit.html (+2ms) 
+06:24:20   ├─ /project-guides/performance-audit.html (+1ms) 
+06:24:20   ├─ /project-guides/posttraining-audit.html (+7ms) 
+06:24:20   ├─ /project-guides/tpu-runtime-audit.html (+4ms) 
+06:24:20   ├─ /project-guides/tpu-workflow-audit.html (+1ms) 
+06:24:20   ├─ /project-guides/tpu-systems-audit.html (+1ms) 
+06:24:20   ├─ /project-guides/reproducible-experiments.html (+4ms) 
+06:24:20   ├─ /project-guides/embedding-lineage.html (+2ms) 
+06:24:20   ├─ /project-guides/causal-lineage.html (+3ms) 
+06:24:20   ├─ /project-plans/clip-model.html (+3ms) 
+06:24:20   ├─ /project-plans/siglip-model.html (+3ms) 
+06:24:20   ├─ /project-plans/retrieval-system.html (+3ms) 
+06:24:20   ├─ /project-plans/embedding-model-300m.html (+3ms) 
+06:24:20   ├─ /project-plans/causal-model-300m.html (+3ms) 
+06:24:20   ├─ /project-plans/image-model-300m.html (+2ms) 
+06:24:20   ├─ /project-plans/image-generation-model.html (+2ms) 
+06:24:20   ├─ /project-plans/audio-model-300m.html (+1ms) 
+06:24:20   ├─ /project-plans/audio-generation-model.html (+2ms) 
+06:24:20   ├─ /project-plans/multimodal-model.html (+1ms) 
+06:24:20   ├─ /project-workflow.html (+5ms) 
+06:24:20   ├─ /projects.html (+5ms) 
+06:24:20   ├─ /robots.txt (+2ms) 
+06:24:20   ├─ /sitemap.xml (+2ms) 
+06:24:20   ├─ /tpu-gcp.html (+3ms) 
+06:24:20   ├─ /tpu-performance.html (+8ms) 
+06:24:20   ├─ /tracks/image.html (+2ms) 
+06:24:20   ├─ /tracks/text.html (+1ms) 
+06:24:20   ├─ /tracks/audio.html (+1ms) 
+06:24:20   ├─ /tracks/cross-modal.html (+1ms) 
+06:24:20   ├─ /updates.html (+3ms) 
+06:24:20   ├─ /lesson-welcome-01.html (+5ms) 
+06:24:20   ├─ /lesson-welcome-02.html (+3ms) 
+06:24:20   ├─ /lesson-welcome-cpu.html (+4ms) 
+06:24:20   ├─ /lesson-welcome-03.html (+4ms) 
+06:24:20   ├─ /lesson-arrays-01.html (+6ms) 
+06:24:20   ├─ /lesson-arrays-02.html (+4ms) 
+06:24:20   ├─ /lesson-arrays-03.html (+3ms) 
+06:24:20   ├─ /lesson-arrays-04.html (+5ms) 
+06:24:20   ├─ /lesson-first-gradient.html (+6ms) 
+06:24:20   ├─ /lesson-transforms-02.html (+5ms) 
+06:24:20   ├─ /lesson-transforms-03.html (+4ms) 
+06:24:20   ├─ /lesson-transforms-04.html (+4ms) 
+06:24:20   ├─ /lesson-transforms-05.html (+4ms) 
+06:24:20   ├─ /lesson-state-01.html (+3ms) 
+06:24:20   ├─ /lesson-state-02.html (+5ms) 
+06:24:20   ├─ /lesson-state-03.html (+5ms) 
+06:24:20   ├─ /lesson-state-04.html (+3ms) 
+06:24:20   ├─ /lesson-optimization-05.html (+5ms) 
+06:24:20   ├─ /lesson-optimization-01.html (+6ms) 
+06:24:21   ├─ /lesson-optimization-06.html (+4ms) 
+06:24:21   ├─ /lesson-optimization-07.html (+6ms) 
+06:24:21   ├─ /lesson-optimization-02.html (+4ms) 
+06:24:21   ├─ /lesson-optimization-08.html (+6ms) 
+06:24:21   ├─ /lesson-optimization-03.html (+6ms) 
+06:24:21   ├─ /lesson-optimization-09.html (+4ms) 
+06:24:21   ├─ /lesson-optimization-10.html (+4ms) 
+06:24:21   ├─ /lesson-optimization-11.html (+5ms) 
+06:24:21   ├─ /lesson-optimization-04.html (+4ms) 
+06:24:21   ├─ /lesson-optimization-12.html (+6ms) 
+06:24:21   ├─ /lesson-networks-01.html (+5ms) 
+06:24:21   ├─ /lesson-networks-02.html (+3ms) 
+06:24:21   ├─ /lesson-networks-03.html (+3ms) 
+06:24:21   ├─ /lesson-networks-04.html (+4ms) 
+06:24:21   ├─ /lesson-networks-05.html (+5ms) 
+06:24:21   ├─ /lesson-recovery-01.html (+4ms) 
+06:24:21   ├─ /lesson-recovery-02.html (+3ms) 
+06:24:21   ├─ /lesson-recovery-03.html (+5ms) 
+06:24:21   ├─ /lesson-recovery-04.html (+6ms) 
+06:24:21   ├─ /lesson-recovery-05.html (+3ms) 
+06:24:21   ├─ /lesson-recovery-06.html (+3ms) 
+06:24:21   ├─ /lesson-transformers-01.html (+6ms) 
+06:24:21   ├─ /lesson-transformers-02.html (+4ms) 
+06:24:21   ├─ /lesson-transformers-03.html (+4ms) 
+06:24:21   ├─ /lesson-transformers-04.html (+6ms) 
+06:24:21   ├─ /lesson-performance-01.html (+3ms) 
+06:24:21   ├─ /lesson-performance-02.html (+4ms) 
+06:24:21   ├─ /lesson-performance-03.html (+3ms) 
+06:24:21   ├─ /lesson-performance-04.html (+3ms) 
+06:24:21   ├─ /lesson-performance-05.html (+3ms) 
+06:24:21   ├─ /lesson-distributed-01.html (+5ms) 
+06:24:21   ├─ /lesson-distributed-02.html (+5ms) 
+06:24:21   ├─ /lesson-distributed-03.html (+5ms) 
+06:24:21   ├─ /lesson-distributed-04.html (+5ms) 
+06:24:21   ├─ /lesson-science-01.html (+4ms) 
+06:24:21   ├─ /lesson-science-02.html (+3ms) 
+06:24:21   ├─ /lesson-science-03.html (+5ms) 
+06:24:21   ├─ /lesson-science-04.html (+5ms) 
+06:24:21   ├─ /lesson-probability-01.html (+4ms) 
+06:24:21   ├─ /lesson-probability-02.html (+4ms) 
+06:24:21   ├─ /lesson-probability-03.html (+4ms) 
+06:24:21   ├─ /lesson-probability-04.html (+4ms) 
+06:24:21   ├─ /lesson-rl-01.html (+3ms) 
+06:24:21   ├─ /lesson-rl-02.html (+5ms) 
+06:24:21   ├─ /lesson-rl-03.html (+7ms) 
+06:24:21   ├─ /lesson-rl-04.html (+6ms) 
+06:24:21   ├─ /lesson-rl-05.html (+6ms) 
+06:24:21   ├─ /lesson-kernels-01.html (+3ms) 
+06:24:21   ├─ /lesson-kernels-02.html (+4ms) 
+06:24:21   ├─ /lesson-kernels-03.html (+4ms) 
+06:24:21   ├─ /lesson-kernels-04.html (+6ms) 
+06:24:21   ├─ /lesson-internals-01.html (+6ms) 
+06:24:21   ├─ /lesson-internals-02.html (+5ms) 
+06:24:21   ├─ /lesson-internals-03.html (+3ms) 
+06:24:21   ├─ /lesson-internals-04.html (+6ms) 
+06:24:21   ├─ /lesson-deployment-02.html (+5ms) 
+06:24:21   ├─ /lesson-deployment-01.html (+5ms) 
+06:24:21   ├─ /lesson-deployment-08.html (+7ms) 
+06:24:21   ├─ /lesson-deployment-03.html (+4ms) 
+06:24:21   ├─ /lesson-deployment-05.html (+8ms) 
+06:24:21   ├─ /lesson-deployment-07.html (+4ms) 
+06:24:21   ├─ /lesson-deployment-04.html (+5ms) 
+06:24:21   ├─ /lesson-deployment-06.html (+4ms) 
+06:24:21   ├─ /lesson-operations-01.html (+4ms) 
+06:24:21   ├─ /lesson-operations-02.html (+5ms) 
+06:24:21   ├─ /lesson-operations-03.html (+4ms) 
+06:24:21   ├─ /lesson-operations-04.html (+5ms) 
+06:24:21   ├─ /lesson-operations-05.html (+5ms) 
+06:24:21   ├─ /lesson-operations-06.html (+4ms) 
+06:24:21   ├─ /lesson-operations-07.html (+3ms) 
+06:24:21   ├─ /lesson-operations-08.html (+3ms) 
+06:24:21   ├─ /lesson-pretraining-01.html (+5ms) 
+06:24:21   ├─ /lesson-pretraining-02.html (+4ms) 
+06:24:21   ├─ /lesson-pretraining-03.html (+5ms) 
+06:24:21   ├─ /lesson-posttraining-01.html (+4ms) 
+06:24:21   ├─ /lesson-posttraining-02.html (+4ms) 
+06:24:21   ├─ /lesson-posttraining-03.html (+4ms) 
+06:24:21   ├─ /lesson-posttraining-04.html (+7ms) 
+06:24:21   ├─ /lesson-posttraining-05.html (+5ms) 
+06:24:21   ├─ /lesson-tpu-01.html (+3ms) 
+06:24:21   ├─ /lesson-tpu-04.html (+3ms) 
+06:24:21   ├─ /lesson-tpu-02.html (+7ms) 
+06:24:21   ├─ /lesson-tpu-05.html (+4ms) 
+06:24:21   ├─ /lesson-tpu-03.html (+4ms) 
+06:24:21   ├─ /lesson-tpu-06.html (+5ms) 
+06:24:21   ├─ /index.html (+3ms) 
+06:24:21 ✓ Completed in 1.38s.
+
+06:24:21 [build] ✓ Completed in 2.66s.
+06:24:21 [build] 220 page(s) built in 3.27s
+06:24:21 [build] Complete!
+
+> jaxpathways@0.17.1 test
+> node --test scripts/*.test.cjs tests/*.test.mjs
+
+TAP version 13
+# Subtest: an unknown foundation is recommended before a claimed advanced capability
+ok 1 - an unknown foundation is recommended before a claimed advanced capability
+  ---
+  duration_ms: 0.481041
+  type: 'test'
+  ...
+# Subtest: a learner who knows the foundations starts with the first required applied phase
+ok 2 - a learner who knows the foundations starts with the first required applied phase
+  ---
+  duration_ms: 0.082292
+  type: 'test'
+  ...
+# Subtest: new learners start at setup regardless of their career choice
+ok 3 - new learners start at setup regardless of their career choice
+  ---
+  duration_ms: 0.113375
+  type: 'test'
+  ...
+# Subtest: the exported plan retains the full prerequisite route and verification criteria
+ok 4 - the exported plan retains the full prerequisite route and verification criteria
+  ---
+  duration_ms: 0.589292
+  type: 'test'
+  ...
+# Subtest: career counts distinguish available foundations from missing specialist material
+ok 5 - career counts distinguish available foundations from missing specialist material
+  ---
+  duration_ms: 0.479333
+  type: 'test'
+  ...
+# Subtest: Python coloring preserves multiline source and escapes embedded HTML
+ok 6 - Python coloring preserves multiline source and escapes embedded HTML
+  ---
+  duration_ms: 2.909417
+  type: 'test'
+  ...
+# Subtest: PowerShell commands preserve paths and separate flags, strings and comments
+ok 7 - PowerShell commands preserve paths and separate flags, strings and comments
+  ---
+  duration_ms: 0.323083
+  type: 'test'
+  ...
+# Subtest: Text outputs remain uncolored and literal
+ok 8 - Text outputs remain uncolored and literal
+  ---
+  duration_ms: 0.078209
+  type: 'test'
+  ...
+# Subtest: numeric separators and unrecognized token characters are never dropped
+ok 9 - numeric separators and unrecognized token characters are never dropped
+  ---
+  duration_ms: 4.043167
+  type: 'test'
+  ...
+# Subtest: catalog and lesson resources preserve authored versus planned status
+ok 10 - catalog and lesson resources preserve authored versus planned status
+  ---
+  duration_ms: 221.598042
+  type: 'test'
+  ...
+# Subtest: public pathway and role resources use the same course manifests
+ok 11 - public pathway and role resources use the same course manifests
+  ---
+  duration_ms: 1.10375
+  type: 'test'
+  ...
+# Subtest: CLI rejects unknown IDs and planned execution without running a program
+ok 12 - CLI rejects unknown IDs and planned execution without running a program
+  ---
+  duration_ms: 200.411459
+  type: 'test'
+  ...
+# Subtest: CLI role plan retains prerequisites and labels planned lessons
+ok 13 - CLI role plan retains prerequisites and labels planned lessons
+  ---
+  duration_ms: 116.470334
+  type: 'test'
+  ...
+# Subtest: packet preserves associations and includes unchecked substantive contracts despite recorded completion ticks
+ok 14 - packet preserves associations and includes unchecked substantive contracts despite recorded completion ticks
+  ---
+  duration_ms: 1.665292
+  type: 'test'
+  ...
+# Subtest: learner notes remain literal even when they contain Markdown checkboxes and fence delimiters
+ok 15 - learner notes remain literal even when they contain Markdown checkboxes and fence delimiters
+  ---
+  duration_ms: 0.38175
+  type: 'test'
+  ...
+# Subtest: missing project or stage contracts are called out rather than silently certifying them
+ok 16 - missing project or stage contracts are called out rather than silently certifying them
+  ---
+  duration_ms: 0.407917
+  type: 'test'
+  ...
+# Subtest: legacy version-1 backup merges checkpoints without erasing unrelated project, career or reading state
+ok 17 - legacy version-1 backup merges checkpoints without erasing unrelated project, career or reading state
+  ---
+  duration_ms: 2.133792
+  type: 'test'
+  ...
+# Subtest: version-2 roundtrip preserves project stages, evidence associations, edited records and latest reading position
+ok 18 - version-2 roundtrip preserves project stages, evidence associations, edited records and latest reading position
+  ---
+  duration_ms: 0.483542
+  type: 'test'
+  ...
+# Subtest: invalid state is rejected before persistence rather than writing arbitrary keys
+ok 19 - invalid state is rejected before persistence rather than writing arbitrary keys
+  ---
+  duration_ms: 0.333583
+  type: 'test'
+  ...
+# Subtest: failed multi-key persistence reports failure and restores earlier values where storage permits
+ok 20 - failed multi-key persistence reports failure and restores earlier values where storage permits
+  ---
+  duration_ms: 1.312667
+  type: 'test'
+  ...
+# Subtest: checkpoint success never implies exercise evidence
+ok 21 - checkpoint success never implies exercise evidence
+  ---
+  duration_ms: 0.565916
+  type: 'test'
+  ...
+# Subtest: import preserves existing evidence while adding checkpoints
+ok 22 - import preserves existing evidence while adding checkpoints
+  ---
+  duration_ms: 0.468917
+  type: 'test'
+  ...
+# Subtest: malformed and unknown lesson progress is rejected before merging
+ok 23 - malformed and unknown lesson progress is rejected before merging
+  ---
+  duration_ms: 0.262416
+  type: 'test'
+  ...
+# Subtest: organizer budgets real lesson minutes rather than dividing phase counts
+ok 24 - organizer budgets real lesson minutes rather than dividing phase counts
+  ---
+  duration_ms: 0.878625
+  type: 'test'
+  ...
+# Subtest: a lesson that cannot fit blocks later lessons rather than skipping a prerequisite
+ok 25 - a lesson that cannot fit blocks later lessons rather than skipping a prerequisite
+  ---
+  duration_ms: 0.317833
+  type: 'test'
+  ...
+# Subtest: summary separates unused capacity, blocked available work and unwritten topics
+ok 26 - summary separates unused capacity, blocked available work and unwritten topics
+  ---
+  duration_ms: 0.231875
+  type: 'test'
+  ...
+# Subtest: failed artifact save retains inputs and retry edits the same in-memory record
+ok 27 - failed artifact save retains inputs and retry edits the same in-memory record
+  ---
+  duration_ms: 7.361917
+  type: 'test'
+  ...
+# Subtest: successful artifact save persists once, clears inputs and leaves learning milestones untouched
+ok 28 - successful artifact save persists once, clears inputs and leaves learning milestones untouched
+  ---
+  duration_ms: 0.436042
+  type: 'test'
+  ...
+# Subtest: backup preview and cancellation leave stored records untouched
+ok 29 - backup preview and cancellation leave stored records untouched
+  ---
+  duration_ms: 0.680041
+  type: 'test'
+  ...
+# Subtest: confirmed backup merge updates the notebook and rejects malformed follow-up files
+ok 30 - confirmed backup merge updates the notebook and rejects malformed follow-up files
+  ---
+  duration_ms: 0.602833
+  type: 'test'
+  ...
+# Subtest: browser modules have an acyclic dependency graph and domain libraries do not import controllers
+ok 31 - browser modules have an acyclic dependency graph and domain libraries do not import controllers
+  ---
+  duration_ms: 24.144042
+  type: 'test'
+  ...
+# Subtest: browser entry points cannot reach server-only renderers or Node built-ins
+ok 32 - browser entry points cannot reach server-only renderers or Node built-ins
+  ---
+  duration_ms: 3.0835
+  type: 'test'
+  ...
+# Subtest: Markdown figures open their resolved full-size asset with accessible escaped names
+ok 33 - Markdown figures open their resolved full-size asset with accessible escaped names
+  ---
+  duration_ms: 13.029666
+  type: 'test'
+  ...
+# Subtest: embedded Markdown figures stay bare and preserve their escaped alt text
+ok 34 - embedded Markdown figures stay bare and preserve their escaped alt text
+  ---
+  duration_ms: 6.788917
+  type: 'test'
+  ...
+# Subtest: local PNG and SVG figures reserve their intrinsic aspect ratio before loading
+ok 35 - local PNG and SVG figures reserve their intrinsic aspect ratio before loading
+  ---
+  duration_ms: 7.436375
+  type: 'test'
+  ...
+# Subtest: print qualification defaults to four chapters and supports full-book format options
+ok 36 - print qualification defaults to four chapters and supports full-book format options
+  ---
+  duration_ms: 14.619542
+  type: 'test'
+  ...
+# Subtest: EPUB distribution checker requires the exact final grouped appendix SVG
+ok 37 - EPUB distribution checker requires the exact final grouped appendix SVG
+  ---
+  duration_ms: 2.7895
+  type: 'test'
+  ...
+# Subtest: print stylesheet reserves a footer and keeps complete visual intros together
+ok 38 - print stylesheet reserves a footer and keeps complete visual intros together
+  ---
+  duration_ms: 41.491792
+  type: 'test'
+  ...
+# Subtest: print CSS groups tall visuals and mechanism prompts and numbers every PDF page
+ok 39 - print CSS groups tall visuals and mechanism prompts and numbers every PDF page
+  ---
+  duration_ms: 6983.416541
+  type: 'test'
+  ...
+# Subtest: saved-decoder appendix figure is embedded, grouped, and rejected when its group breaks
+ok 40 - saved-decoder appendix figure is embedded, grouped, and rejected when its group breaks
+  ---
+  duration_ms: 567.105875
+  type: 'test'
+  ...
+# Subtest: the classifier outcome is reachable without cloud provisioning or RL enrollment
+ok 41 - the classifier outcome is reachable without cloud provisioning or RL enrollment
+  ---
+  duration_ms: 0.814166
+  type: 'test'
+  ...
+# Subtest: optional engineering work exposes its preparation without changing the selected route
+ok 42 - optional engineering work exposes its preparation without changing the selected route
+  ---
+  duration_ms: 1.535208
+  type: 'test'
+  ...
+# Subtest: every advertised career skill has named lesson, project and review evidence
+ok 43 - every advertised career skill has named lesson, project and review evidence
+  ---
+  duration_ms: 0.889334
+  type: 'test'
+  ...
+# Subtest: all ten lifecycle briefs are discoverable and retain planned status
+ok 44 - all ten lifecycle briefs are discoverable and retain planned status
+  ---
+  duration_ms: 1.519958
+  type: 'test'
+  ...
+# Subtest: project sharding refuses to overwrite the complete receipt
+ok 45 - project sharding refuses to overwrite the complete receipt
+  ---
+  duration_ms: 157.473917
+  type: 'test'
+  ...
+# Subtest: optional stored JSON handles missing, corrupt and unavailable records
+ok 46 - optional stored JSON handles missing, corrupt and unavailable records
+  ---
+  duration_ms: 1.101
+  type: 'test'
+  ...
+# Subtest: clipboard binding is repeatable, preserves literal text and reports failure
+ok 47 - clipboard binding is repeatable, preserves literal text and reports failure
+  ---
+  duration_ms: 50.055875
+  type: 'test'
+  ...
+# Subtest: select population treats labels as text and replaces previous options
+ok 48 - select population treats labels as text and replaces previous options
+  ---
+  duration_ms: 9.199875
+  type: 'test'
+  ...
+# Subtest: course loading rejects malformed reading records and clears stale in-memory progress
+ok 49 - course loading rejects malformed reading records and clears stale in-memory progress
+  ---
+  duration_ms: 24.354625
+  type: 'test'
+  ...
+# Subtest: home retains saved reading position, copies exact tutor text and controls keyboard navigation
+ok 50 - home retains saved reading position, copies exact tutor text and controls keyboard navigation
+  ---
+  duration_ms: 192.376875
+  type: 'test'
+  ...
+# Subtest: catalog retains route, roadmap and browser-history filtering under a project base
+ok 51 - catalog retains route, roadmap and browser-history filtering under a project base
+  ---
+  duration_ms: 499.959291
+  type: 'test'
+  ...
+# Subtest: every authored lesson renders, and checkpoint progress stays separate from exercise evidence
+ok 52 - every authored lesson renders, and checkpoint progress stays separate from exercise evidence
+  ---
+  duration_ms: 11050.55025
+  type: 'test'
+  ...
+# Subtest: all career routes render and a selected route saves the existing plan schema
+ok 53 - all career routes render and a selected route saves the existing plan schema
+  ---
+  duration_ms: 34.560875
+  type: 'test'
+  ...
+# Subtest: all learning paths open with their actual lesson availability
+ok 54 - all learning paths open with their actual lesson availability
+  ---
+  duration_ms: 31.200417
+  type: 'test'
+  ...
+# Subtest: both project workspaces render and stage ticks preserve their storage keys
+ok 55 - both project workspaces render and stage ticks preserve their storage keys
+  ---
+  duration_ms: 55.216125
+  type: 'test'
+  ...
+# Subtest: notebook saves evidence through the real form and planner uses canonical durations
+ok 56 - notebook saves evidence through the real form and planner uses canonical durations
+  ---
+  duration_ms: 64.457958
+  type: 'test'
+  ...
+# Subtest: permanent lesson pages retain pathway, section and existing learner evidence when enhanced
+ok 57 - permanent lesson pages retain pathway, section and existing learner evidence when enhanced
+  ---
+  duration_ms: 39.701167
+  type: 'test'
+  ...
+# Subtest: legacy reader boots from navigation data and redirects authored lessons with context
+ok 58 - legacy reader boots from navigation data and redirects authored lessons with context
+  ---
+  duration_ms: 8.614667
+  type: 'test'
+  ...
+# Subtest: legacy reader handles unknown lesson IDs without fetching the full curriculum
+ok 59 - legacy reader handles unknown lesson IDs without fetching the full curriculum
+  ---
+  duration_ms: 7.755125
+  type: 'test'
+  ...
+# Subtest: C01, C02 and C03 are scoped pilots while all ten full capstones stay planned
+ok 60 - C01, C02 and C03 are scoped pilots while all ten full capstones stay planned
+  ---
+  duration_ms: 5.6915
+  type: 'test'
+  ...
+# Subtest: audit reports optional pilot evidence separately from full-capstone status
+ok 61 - audit reports optional pilot evidence separately from full-capstone status
+  ---
+  duration_ms: 459.484583
+  type: 'test'
+  ...
+# Subtest: built C01 route and source archive expose only hash-verified public evidence
+ok 62 - built C01 route and source archive expose only hash-verified public evidence
+  ---
+  duration_ms: 320.9305
+  type: 'test'
+  ...
+# Subtest: C02 source and public evidence retain their exact identities
+ok 63 - C02 source and public evidence retain their exact identities
+  ---
+  duration_ms: 5.722
+  type: 'test'
+  ...
+# Subtest: C02 archive is complete and excludes fitted model and tokenizer payloads
+ok 64 - C02 archive is complete and excludes fitted model and tokenizer payloads
+  ---
+  duration_ms: 157.496917
+  type: 'test'
+  ...
+# Subtest: QA projections preserve all branches and scores without corpus inputs
+ok 65 - QA projections preserve all branches and scores without corpus inputs
+  ---
+  duration_ms: 4.947291
+  type: 'test'
+  ...
+# Subtest: C02 route explains its own task and failures and keeps full capstone planned
+ok 66 - C02 route explains its own task and failures and keeps full capstone planned
+  ---
+  duration_ms: 0.66675
+  type: 'test'
+  ...
+# Subtest: canonical C03 pilot metadata drives the parent route and machine discovery
+ok 67 - canonical C03 pilot metadata drives the parent route and machine discovery
+  ---
+  duration_ms: 223.30575
+  type: 'test'
+  ...
+# Subtest: C03 loose project assets contain exactly the approved 26 safe public files
+ok 68 - C03 loose project assets contain exactly the approved 26 safe public files
+  ---
+  duration_ms: 48.60875
+  type: 'test'
+  ...
+# Subtest: every option keeps its own reasoning in quizzes, Markdown and notebook reveals
+ok 69 - every option keeps its own reasoning in quizzes, Markdown and notebook reveals
+  ---
+  duration_ms: 140.0845
+  type: 'test'
+  ...
+# Subtest: standalone book keeps wrong-choice explanations inside a deliberate reveal
+ok 70 - standalone book keeps wrong-choice explanations inside a deliberate reveal
+  ---
+  duration_ms: 5782.046916
+  type: 'test'
+  ...
+# Subtest: choice enhancement is opt-in, repeatable and keeps native select properties
+ok 71 - choice enhancement is opt-in, repeatable and keeps native select properties
+  ---
+  duration_ms: 82.403917
+  type: 'test'
+  ...
+# Subtest: disclosure choices refresh after a form reset without changing stored records
+ok 72 - disclosure choices refresh after a form reset without changing stored records
+  ---
+  duration_ms: 12.476208
+  type: 'test'
+  ...
+# Subtest: teaches Flax NNX gradients and JAX gradients with their own APIs
+ok 73 - teaches Flax NNX gradients and JAX gradients with their own APIs
+  ---
+  duration_ms: 1.689125
+  type: 'test'
+  ...
+# Subtest: distinguishes JAX boolean comparisons from NumPy assertions
+ok 74 - distinguishes JAX boolean comparisons from NumPy assertions
+  ---
+  duration_ms: 0.91975
+  type: 'test'
+  ...
+# Subtest: gives array constructors, device placement, and mapping distinct descriptions
+ok 75 - gives array constructors, device placement, and mapping distinct descriptions
+  ---
+  duration_ms: 0.124583
+  type: 'test'
+  ...
+# Subtest: keeps Optax loss calls separate and explains their output contracts
+ok 76 - keeps Optax loss calls separate and explains their output contracts
+  ---
+  duration_ms: 0.161542
+  type: 'test'
+  ...
+# Subtest: explains least squares solution, residual, and matrix shapes
+ok 77 - explains least squares solution, residual, and matrix shapes
+  ---
+  duration_ms: 0.15275
+  type: 'test'
+  ...
+# Subtest: does not confuse namespace reductions with array methods
+ok 78 - does not confuse namespace reductions with array methods
+  ---
+  duration_ms: 0.43075
+  type: 'test'
+  ...
+# Subtest: distinguishes namespace reshape functions from the array method
+ok 79 - distinguishes namespace reshape functions from the array method
+  ---
+  duration_ms: 0.162334
+  type: 'test'
+  ...
+# Subtest: labels JAX and array synchronization methods accurately
+ok 80 - labels JAX and array synchronization methods accurately
+  ---
+  duration_ms: 0.12875
+  type: 'test'
+  ...
+# Subtest: ignores call-like text in comments and quoted or triple-quoted strings
+ok 81 - ignores call-like text in comments and quoted or triple-quoted strings
+  ---
+  duration_ms: 0.370333
+  type: 'test'
+  ...
+# Subtest: returns recognized calls in source order, capped at four, and ignores unknown calls
+ok 82 - returns recognized calls in source order, capped at four, and ignores unknown calls
+  ---
+  duration_ms: 0.396875
+  type: 'test'
+  ...
+# Subtest: does not infer an API from a bare symbol or an unqualified call
+ok 83 - does not infer an API from a bare symbol or an unqualified call
+  ---
+  duration_ms: 6.045292
+  type: 'test'
+  ...
+# Subtest: learner contract rendering escapes literal HTML once and preserves authored inline math
+ok 84 - learner contract rendering escapes literal HTML once and preserves authored inline math
+  ---
+  duration_ms: 126.626625
+  type: 'test'
+  ...
+# Subtest: downloaded reader renders every learner contract and provides a complete print solutions appendix
+ok 85 - downloaded reader renders every learner contract and provides a complete print solutions appendix
+  ---
+  duration_ms: 8778.43225
+  type: 'test'
+  ...
+# Subtest: reader copy preserves code literally and offers selection when clipboard access fails
+ok 86 - reader copy preserves code literally and offers selection when clipboard access fails
+  ---
+  duration_ms: 34.073416
+  type: 'test'
+  ...
+# Subtest: reading tools leave project catalog stage summaries alone and name workspace stage links
+ok 87 - reading tools leave project catalog stage summaries alone and name workspace stage links
+  ---
+  duration_ms: 20.598
+  type: 'test'
+  ...
+# Subtest: project stage chips filter all registered project cards and preserve a shareable URL
+ok 88 - project stage chips filter all registered project cards and preserve a shareable URL
+  ---
+  duration_ms: 83.546917
+  type: 'test'
+  ...
+# Subtest: career milestones cover each default route and README counts match current registries
+ok 89 - career milestones cover each default route and README counts match current registries
+  ---
+  duration_ms: 4.72875
+  type: 'test'
+  ...
+# Subtest: optional lesson search opens on demand, applies URL queries and restores direct links
+ok 90 - optional lesson search opens on demand, applies URL queries and restores direct links
+  ---
+  duration_ms: 19.090292
+  type: 'test'
+  ...
+# Subtest: posttraining project ZIP binds exactly the seven frozen parent dependencies
+ok 91 - posttraining project ZIP binds exactly the seven frozen parent dependencies
+  ---
+  duration_ms: 205.158042
+  type: 'test'
+  ...
+# Subtest: workshop joins existing lessons, projects, pathway guides and typeset teaching
+ok 92 - workshop joins existing lessons, projects, pathway guides and typeset teaching
+  ---
+  duration_ms: 94.275417
+  type: 'test'
+  ...
+# Subtest: portable workshop keeps recorded evidence, starter, numerical source and CLI help intact
+ok 93 - portable workshop keeps recorded evidence, starter, numerical source and CLI help intact
+  ---
+  duration_ms: 361.619917
+  type: 'test'
+  ...
+# Subtest: worked reasoning and concealed answers survive every lesson companion
+ok 94 - worked reasoning and concealed answers survive every lesson companion
+  ---
+  duration_ms: 2883.929708
+  type: 'test'
+  ...
+# Subtest: mechanism diagrams are current, accessible and embedded for offline notebooks
+ok 95 - mechanism diagrams are current, accessible and embedded for offline notebooks
+  ---
+  duration_ms: 115.403834
+  type: 'test'
+  ...
+# Subtest: hand-worked numeric examples agree with independent calculations
+ok 96 - hand-worked numeric examples agree with independent calculations
+  ---
+  duration_ms: 349.732292
+  type: 'test'
+  ...
+# Subtest: current hardware claims retain exact program identities and actual target receipts
+ok 97 - current hardware claims retain exact program identities and actual target receipts
+  ---
+  duration_ms: 17.51175
+  type: 'test'
+  ...
+# Subtest: multi-host proof retains all ranks, one checkpoint identity and a portable checkpoint
+ok 98 - multi-host proof retains all ranks, one checkpoint identity and a portable checkpoint
+  ---
+  duration_ms: 8.389792
+  type: 'test'
+  ...
+# Subtest: precision evidence includes actual integer checks and a retained TPU device trace
+ok 99 - precision evidence includes actual integer checks and a retained TPU device trace
+  ---
+  duration_ms: 2.9825
+  type: 'test'
+  ...
+# Subtest: JSON requests reject HTTP errors and malformed bodies
+ok 100 - JSON requests reject HTTP errors and malformed bodies
+  ---
+  duration_ms: 1.101916
+  type: 'test'
+  ...
+# Subtest: timeouts bound response-body reads and abort the request
+ok 101 - timeouts bound response-body reads and abort the request
+  ---
+  duration_ms: 5.63925
+  type: 'test'
+  ...
+# Subtest: resource cache shares concurrent requests, retries failures and isolates clients
+ok 102 - resource cache shares concurrent requests, retries failures and isolates clients
+  ---
+  duration_ms: 0.808959
+  type: 'test'
+  ...
+# Subtest: invalid manifest responses are rejected before rendering and do not poison the cache
+ok 103 - invalid manifest responses are rejected before rendering and do not poison the cache
+  ---
+  duration_ms: 4.535959
+  type: 'test'
+  ...
+# Subtest: the accepted image pilot source and public packet retain their exact inventories
+ok 104 - the accepted image pilot source and public packet retain their exact inventories
+  ---
+  duration_ms: 15.840459
+  type: 'test'
+  ...
+# Subtest: the built guide exposes all seven public figures and the full planned capstone
+ok 105 - the built guide exposes all seven public figures and the full planned capstone
+  ---
+  duration_ms: 150.060084
+  type: 'test'
+  ...
+# Subtest: the C03 pilot archive and course workspace contain the exact reviewed source and public packet
+ok 106 - the C03 pilot archive and course workspace contain the exact reviewed source and public packet
+  ---
+  duration_ms: 416.038292
+  type: 'test'
+  ...
+# Subtest: explicit contract renders independent inputs, outputs, invariants, hints, and TODO code
+ok 107 - explicit contract renders independent inputs, outputs, invariants, hints, and TODO code
+  ---
+  duration_ms: 1.92325
+  type: 'test'
+  ...
+# Subtest: browser writing guide requires the learner contract and never derives a scaffold from the solution
+ok 108 - browser writing guide requires the learner contract and never derives a scaffold from the solution
+  ---
+  duration_ms: 1.037459
+  type: 'test'
+  ...
+# Subtest: held-out learner downloads ignore reference mutations and omit worked answers and expected outputs
+ok 109 - held-out learner downloads ignore reference mutations and omit worked answers and expected outputs
+  ---
+  duration_ms: 1.082125
+  type: 'test'
+  ...
+# Subtest: learner notebook code cells contain editable authored TODO code and task-level pending status
+ok 110 - learner notebook code cells contain editable authored TODO code and task-level pending status
+  ---
+  duration_ms: 0.337417
+  type: 'test'
+  ...
+# Subtest: download labels report accurate full and partial learner-contract coverage
+ok 111 - download labels report accurate full and partial learner-contract coverage
+  ---
+  duration_ms: 0.203583
+  type: 'test'
+  ...
+# Subtest: canonical starter inventory reports each complete and missing exercise or practice contract
+ok 112 - canonical starter inventory reports each complete and missing exercise or practice contract
+  ---
+  duration_ms: 0.27875
+  type: 'test'
+  ...
+# Subtest: distributed, science, kernels, and internals have complete authored learner-only contracts
+ok 113 - distributed, science, kernels, and internals have complete authored learner-only contracts
+  ---
+  duration_ms: 1756.8625
+  type: 'test'
+  ...
+# Subtest: learner download URL and source paths derive from the lesson registry identity
+ok 114 - learner download URL and source paths derive from the lesson registry identity
+  ---
+  duration_ms: 0.378167
+  type: 'test'
+  ...
+# Subtest: held-out shape, mask layout, and PRNG seed flow from the contract rather than a fixed reference fixture
+ok 115 - held-out shape, mask layout, and PRNG seed flow from the contract rather than a fixed reference fixture
+  ---
+  duration_ms: 0.677542
+  type: 'test'
+  ...
+# Subtest: reference artifacts keep their deliberate solution reveal and execution content
+ok 116 - reference artifacts keep their deliberate solution reveal and execution content
+  ---
+  duration_ms: 2.987333
+  type: 'test'
+  ...
+# Subtest: missing contracts are labeled pending instead of copying reference answers
+ok 117 - missing contracts are labeled pending instead of copying reference answers
+  ---
+  duration_ms: 0.324834
+  type: 'test'
+  ...
+# Subtest: every authored lesson has current figure data, explanation, and executed notebook outputs
+ok 118 - every authored lesson has current figure data, explanation, and executed notebook outputs
+  ---
+  duration_ms: 377.239125
+  type: 'test'
+  ...
+# Subtest: figures have captions, explanations, keyboard access and downloadable evidence
+ok 119 - figures have captions, explanations, keyboard access and downloadable evidence
+  ---
+  duration_ms: 1607.726667
+  type: 'test'
+  ...
+# Subtest: stale artifacts are suppressed and output is escaped
+ok 120 - stale artifacts are suppressed and output is escaped
+  ---
+  duration_ms: 0.377583
+  type: 'test'
+  ...
+# Subtest: audit rejects stale execution, failed stages and unaccepted human reviews
+ok 121 - audit rejects stale execution, failed stages and unaccepted human reviews
+  ---
+  duration_ms: 2829.989791
+  type: 'test'
+  ...
+# Subtest: learner notices describe scope without awarding progress or review
+ok 122 - learner notices describe scope without awarding progress or review
+  ---
+  duration_ms: 18.814417
+  type: 'test'
+  ...
+# Subtest: every contribution link preserves the exact material and suggested work
+ok 123 - every contribution link preserves the exact material and suggested work
+  ---
+  duration_ms: 23.860875
+  type: 'test'
+  ...
+# Subtest: inline and display math include accessible MathML without interpreting currency or code
+ok 124 - inline and display math include accessible MathML without interpreting currency or code
+  ---
+  duration_ms: 134.693083
+  type: 'test'
+  ...
+# Subtest: math prose escapes raw HTML, rejects malformed TeX and does not trust URL commands
+ok 125 - math prose escapes raw HTML, rejects malformed TeX and does not trust URL commands
+  ---
+  duration_ms: 4.294208
+  type: 'test'
+  ...
+# Subtest: renderMath normalizes MathML script arity and operator tokens without changing visible HTML
+ok 126 - renderMath normalizes MathML script arity and operator tokens without changing visible HTML
+  ---
+  duration_ms: 23.26625
+  type: 'test'
+  ...
+# Subtest: equations and shape sketches stay distinct, and code panels never typeset source
+ok 127 - equations and shape sketches stay distinct, and code panels never typeset source
+  ---
+  duration_ms: 2.209666
+  type: 'test'
+  ...
+# Subtest: Markdown math conversion preserves Python and inline code exactly
+ok 128 - Markdown math conversion preserves Python and inline code exactly
+  ---
+  duration_ms: 5.397875
+  type: 'test'
+  ...
+# Subtest: regression explanation typesets inline dimensions and loss while preserving the Python expression
+ok 129 - regression explanation typesets inline dimensions and loss while preserving the Python expression
+  ---
+  duration_ms: 10.858584
+  type: 'test'
+  ...
+# Subtest: authored lesson prose does not leave mathematical shapes or operators as plain text
+ok 130 - authored lesson prose does not leave mathematical shapes or operators as plain text
+  ---
+  duration_ms: 104.154666
+  type: 'test'
+  ...
+# Subtest: inlineMath and mathProse render Markdown bold, italic, links, lists, and code in headings
+ok 131 - inlineMath and mathProse render Markdown bold, italic, links, lists, and code in headings
+  ---
+  duration_ms: 4.632791
+  type: 'test'
+  ...
+# Subtest: normalizes KaTeX max/min subscripts and preserves msup tokens under the two-child contract
+ok 132 - normalizes KaTeX max/min subscripts and preserves msup tokens under the two-child contract
+  ---
+  duration_ms: 1.733875
+  type: 'test'
+  ...
+# Subtest: groups additional script and fraction operands without discarding their token sequence
+ok 133 - groups additional script and fraction operands without discarding their token sequence
+  ---
+  duration_ms: 0.310583
+  type: 'test'
+  ...
+# Subtest: flattens a nested operator token while preserving its operator text and attributes
+ok 134 - flattens a nested operator token while preserving its operator text and attributes
+  ---
+  duration_ms: 0.151542
+  type: 'test'
+  ...
+# Subtest: normalizes rendered KaTeX while retaining its original TeX annotation
+ok 135 - normalizes rendered KaTeX while retaining its original TeX annotation
+  ---
+  duration_ms: 12.55525
+  type: 'test'
+  ...
+# Subtest: normalization leaves already valid MathML and allowed glyph children unchanged
+ok 136 - normalization leaves already valid MathML and allowed glyph children unchanged
+  ---
+  duration_ms: 0.4345
+  type: 'test'
+  ...
+# Subtest: offline book chapters render authored learner contracts before the separate solutions appendix
+ok 137 - offline book chapters render authored learner contracts before the separate solutions appendix
+  ---
+  duration_ms: 84.816042
+  type: 'test'
+  ...
+# Subtest: malformed portfolio JSON and null evidence records are rejected without changing optional null records
+ok 138 - malformed portfolio JSON and null evidence records are rejected without changing optional null records
+  ---
+  duration_ms: 0.753875
+  type: 'test'
+  ...
+# Subtest: backup normalization refuses null portfolio records before import can mutate storage
+ok 139 - backup normalization refuses null portfolio records before import can mutate storage
+  ---
+  duration_ms: 0.600417
+  type: 'test'
+  ...
+# Subtest: Diffrax reference figures retain their executed source and raw-data identities
+ok 140 - Diffrax reference figures retain their executed source and raw-data identities
+  ---
+  duration_ms: 3.279292
+  type: 'test'
+  ...
+# Subtest: decoder pilot evidence preserves the original receipt and all mapped source/package bytes
+ok 141 - decoder pilot evidence preserves the original receipt and all mapped source/package bytes
+  ---
+  duration_ms: 2.398166
+  type: 'test'
+  ...
+# Subtest: the rendered decoder workflow is discoverable and retains readable evidence links
+ok 142 - the rendered decoder workflow is discoverable and retains readable evidence links
+  ---
+  duration_ms: 139.193958
+  type: 'test'
+  ...
+# Subtest: two-controller recovery keeps its figure, local scope and optional entry discoverable
+ok 143 - two-controller recovery keeps its figure, local scope and optional entry discoverable
+  ---
+  duration_ms: 77.168209
+  type: 'test'
+  ...
+# Subtest: C03 pilot status stays distinct from its image-harness preparation project and planned capstone
+ok 144 - C03 pilot status stays distinct from its image-harness preparation project and planned capstone
+  ---
+  duration_ms: 81.216291
+  type: 'test'
+  ...
+# Subtest: the local recovery extension status is separate from its sharded-training preparation status
+ok 145 - the local recovery extension status is separate from its sharded-training preparation status
+  ---
+  duration_ms: 54.810083
+  type: 'test'
+  ...
+# Subtest: shared preparation cannot inflate specialist availability
+ok 146 - shared preparation cannot inflate specialist availability
+  ---
+  duration_ms: 1.641167
+  type: 'test'
+  ...
+# Subtest: career downloads retain work scenarios and distinguish focus from preparation
+ok 147 - career downloads retain work scenarios and distinguish focus from preparation
+  ---
+  duration_ms: 2.837042
+  type: 'test'
+  ...
+# Subtest: math assessment renders explicit formulas as KaTeX and preserves code literals
+ok 148 - math assessment renders explicit formulas as KaTeX and preserves code literals
+  ---
+  duration_ms: 102.147583
+  type: 'test'
+  ...
+# Subtest: assessment display equations retain TeX in accessible MathML
+ok 149 - assessment display equations retain TeX in accessible MathML
+  ---
+  duration_ms: 9.733916
+  type: 'test'
+  ...
+# Subtest: project guides render real figures, math and course links outside the download
+ok 150 - project guides render real figures, math and course links outside the download
+  ---
+  duration_ms: 305.322541
+  type: 'test'
+  ...
+# Subtest: planned capstones have valid preparation and stay outside runnable availability
+ok 151 - planned capstones have valid preparation and stay outside runnable availability
+  ---
+  duration_ms: 44.590459
+  type: 'test'
+  ...
+# Subtest: offline practical chapters link permanent lessons and phase guides on the website
+ok 152 - offline practical chapters link permanent lessons and phase guides on the website
+  ---
+  duration_ms: 38.507416
+  type: 'test'
+  ...
+# Subtest: optimizer walkthrough landmarks describe the recorded paths, not a monotone Adam trajectory
+ok 153 - optimizer walkthrough landmarks describe the recorded paths, not a monotone Adam trajectory
+  ---
+  duration_ms: 11.105917
+  type: 'test'
+  ...
+# Subtest: gradient-check and curvature captions agree with scales, initial states, and residuals
+ok 154 - gradient-check and curvature captions agree with scales, initial states, and residuals
+  ---
+  duration_ms: 0.708542
+  type: 'test'
+  ...
+# Subtest: attention explanations preserve row normalization, tied keys, and token-specific corrections
+ok 155 - attention explanations preserve row normalization, tied keys, and token-specific corrections
+  ---
+  duration_ms: 35.221208
+  type: 'test'
+  ...
+# Subtest: recovery and deployment comparisons mean equal adjacent bars; p95 comes from the plotted samples
+ok 156 - recovery and deployment comparisons mean equal adjacent bars; p95 comes from the plotted samples
+  ---
+  duration_ms: 0.656084
+  type: 'test'
+  ...
+# Subtest: interactive interpretations change with the selected point and attention boundary, with typeset math
+ok 157 - interactive interpretations change with the selected point and attention boundary, with typeset math
+  ---
+  duration_ms: 313.80775
+  type: 'test'
+  ...
+# Subtest: Windows recursive asset paths identify the same nested output folder and release key
+ok 158 - Windows recursive asset paths identify the same nested output folder and release key
+  ---
+  duration_ms: 0.516542
+  type: 'test'
+  ...
+# Subtest: public numeric-packet self-check rejects tampering and preserves the failed quality verdict
+ok 159 - public numeric-packet self-check rejects tampering and preserves the failed quality verdict
+  ---
+  duration_ms: 449.359625
+  type: 'test'
+  ...
+# Subtest: optional appendix route is separate from Stage 5 and reports the failed quality floor
+ok 160 - optional appendix route is separate from Stage 5 and reports the failed quality floor
+  ---
+  duration_ms: 4.923458
+  type: 'test'
+  ...
+# Subtest: teaching and parent-rights local links resolve in the extracted project ZIP
+ok 161 - teaching and parent-rights local links resolve in the extracted project ZIP
+  ---
+  duration_ms: 4.107917
+  type: 'test'
+  ...
+# Subtest: POSIX candidate hash command works when the candidate path contains spaces
+ok 162 - POSIX candidate hash command works when the candidate path contains spaces
+  ---
+  duration_ms: 130.47475
+  type: 'test'
+  ...
+# Subtest: bundled approvals are exact-hash and reachable from the extracted guide
+ok 163 - bundled approvals are exact-hash and reachable from the extracted guide
+  ---
+  duration_ms: 0.61875
+  type: 'test'
+  ...
+# Subtest: all appendix math renders with KaTeX and the EPUB renderer preserves MathML
+ok 164 - all appendix math renders with KaTeX and the EPUB renderer preserves MathML
+  ---
+  duration_ms: 130.124834
+  type: 'test'
+  ...
+# Subtest: the bridge source inventory covers eight child inputs and the exact seven parent files
+ok 165 - the bridge source inventory covers eight child inputs and the exact seven parent files
+  ---
+  duration_ms: 0.563084
+  type: 'test'
+  ...
+# Subtest: the offline book routes the third appendix and keeps existing SVG project figures embeddable
+ok 166 - the offline book routes the third appendix and keeps existing SVG project figures embeddable
+  ---
+  duration_ms: 70.652042
+  type: 'test'
+  ...
+# Subtest: book guide canonicalizes the three Astro URL forms and EPUB relative paths
+ok 167 - book guide canonicalizes the three Astro URL forms and EPUB relative paths
+  ---
+  duration_ms: 129.031542
+  type: 'test'
+  ...
+# Subtest: the appendix figure title, image and caption render as one accessible figure group
+ok 168 - the appendix figure title, image and caption render as one accessible figure group
+  ---
+  duration_ms: 7.098084
+  type: 'test'
+  ...
+# Subtest: a later project stage names its own edit file and verifier
+ok 169 - a later project stage names its own edit file and verifier
+  ---
+  duration_ms: 241.46025
+  type: 'test'
+  ...
+# Subtest: stage edit files reject malformed values while old manifests remain valid
+ok 170 - stage edit files reject malformed values while old manifests remain valid
+  ---
+  duration_ms: 11.170084
+  type: 'test'
+  ...
+# Subtest: the GAE teaching figure retains its independent EOS and timeout calculation
+ok 171 - the GAE teaching figure retains its independent EOS and timeout calculation
+  ---
+  duration_ms: 275.245417
+  type: 'test'
+  ...
+# Subtest: the guide-linked plotting source is published byte-for-byte
+ok 172 - the guide-linked plotting source is published byte-for-byte
+  ---
+  duration_ms: 0.346583
+  type: 'test'
+  ...
+# Subtest: project workspace preserves old runs, records changed inputs and rejects invalid configuration
+ok 173 - project workspace preserves old runs, records changed inputs and rejects invalid configuration
+  ---
+  duration_ms: 1638.2075
+  type: 'test'
+  ...
+# Subtest: workflow guide links resolve beneath a deployment base and contain the runnable exercise
+ok 174 - workflow guide links resolve beneath a deployment base and contain the runnable exercise
+  ---
+  duration_ms: 31.572792
+  type: 'test'
+  ...
+# Subtest: radio group escapes user content and preserves form state
+ok 175 - radio group escapes user content and preserves form state
+  ---
+  duration_ms: 20.400708
+  type: 'test'
+  ...
+# Subtest: dynamic option labels are text and disabled state is retained
+ok 176 - dynamic option labels are text and disabled state is retained
+  ---
+  duration_ms: 2.337667
+  type: 'test'
+  ...
+# Subtest: beginner build and practice stay in the extracted workspace
+ok 177 - beginner build and practice stay in the extracted workspace
+  ---
+  duration_ms: 366.728958
+  type: 'test'
+  ...
+# Subtest: stage counts and banner numbers match lessons with four and five stages
+ok 178 - stage counts and banner numbers match lessons with four and five stages
+  ---
+  duration_ms: 158.115459
+  type: 'test'
+  ...
+# Subtest: lesson activity controls share the single stage progress dock
+ok 179 - lesson activity controls share the single stage progress dock
+  ---
+  duration_ms: 107.268583
+  type: 'test'
+  ...
+# Subtest: runtime classification separates CPU execution from target qualification guidance
+ok 180 - runtime classification separates CPU execution from target qualification guidance
+  ---
+  duration_ms: 1.747542
+  type: 'test'
+  ...
+# Subtest: practice guidance links bounded hardware receipts without claiming general qualification
+ok 181 - practice guidance links bounded hardware receipts without claiming general qualification
+  ---
+  duration_ms: 111.683
+  type: 'test'
+  ...
+# Subtest: TPU staging guidance keeps CPU examples and target qualification separate
+ok 182 - TPU staging guidance keeps CPU examples and target qualification separate
+  ---
+  duration_ms: 3.1195
+  type: 'test'
+  ...
+# Subtest: onboarding uses bounded, reviewed TPU targets instead of arbitrary lesson uploads
+ok 183 - onboarding uses bounded, reviewed TPU targets instead of arbitrary lesson uploads
+  ---
+  duration_ms: 2.322083
+  type: 'test'
+  ...
+# Subtest: lesson metadata has no embedded content and rendered content matches every canonical lesson source
+ok 184 - lesson metadata has no embedded content and rendered content matches every canonical lesson source
+  ---
+  duration_ms: 32.566291
+  type: 'test'
+  ...
+# Subtest: downloaded notebooks and Markdown preserve the same runtime boundaries as the reader
+ok 185 - downloaded notebooks and Markdown preserve the same runtime boundaries as the reader
+  ---
+  duration_ms: 105.672917
+  type: 'test'
+  ...
+# Subtest: the offline book links the archive referenced by its beginner setup walkthrough
+ok 186 - the offline book links the archive referenced by its beginner setup walkthrough
+  ---
+  duration_ms: 3897.483209
+  type: 'test'
+  ...
+# Subtest: invalid edition metadata is rejected before any release snapshot is written
+ok 187 - invalid edition metadata is rejected before any release snapshot is written
+  ---
+  duration_ms: 1177.884125
+  type: 'test'
+  ...
+# Subtest: legacy and explicit edition records prepare once and rerun with an unchanged snapshot
+ok 188 - legacy and explicit edition records prepare once and rerun with an unchanged snapshot
+  ---
+  duration_ms: 535.217084
+  type: 'test'
+  ...
+# Subtest: rerunning execution receipts preserves a release while canonical source changes require a new one
+ok 189 - rerunning execution receipts preserves a release while canonical source changes require a new one
+  ---
+  duration_ms: 1013.519625
+  type: 'test'
+  ...
+# Subtest: release notices distinguish first visits, returning learners and acknowledged releases without changing progress
+ok 190 - release notices distinguish first visits, returning learners and acknowledged releases without changing progress
+  ---
+  duration_ms: 54.148208
+  type: 'test'
+  ...
+# Subtest: changed revision notices survive reader enhancement and collapsed phases are not marked visited
+ok 191 - changed revision notices survive reader enhancement and collapsed phases are not marked visited
+  ---
+  duration_ms: 11.699667
+  type: 'test'
+  ...
+# Subtest: a release snapshot detects changed content, retains unchanged revisions and requires a new version
+ok 192 - a release snapshot detects changed content, retains unchanged revisions and requires a new version
+  ---
+  duration_ms: 492.312209
+  type: 'test'
+  ...
+# Subtest: historical reader URLs keep deployment base, route, search and section on the permanent lesson page
+ok 193 - historical reader URLs keep deployment base, route, search and section on the permanent lesson page
+  ---
+  duration_ms: 0.710708
+  type: 'test'
+  ...
+# Subtest: shared CSS composition has no dependency on page feature styles
+ok 194 - shared CSS composition has no dependency on page feature styles
+  ---
+  duration_ms: 3.191958
+  type: 'test'
+  ...
+# Subtest: page templates do not import the lesson reader to obtain shared primitives
+ok 195 - page templates do not import the lesson reader to obtain shared primitives
+  ---
+  duration_ms: 5.7375
+  type: 'test'
+  ...
+# Subtest: CSS imports resolve and feature rules cannot restyle the document globally
+ok 196 - CSS imports resolve and feature rules cannot restyle the document globally
+  ---
+  duration_ms: 194.256125
+  type: 'test'
+  ...
+# Subtest: stylesheets have no duplicate rules, no feature !important overrides, and no dead selectors
+ok 197 - stylesheets have no duplicate rules, no feature !important overrides, and no dead selectors
+  ---
+  duration_ms: 203.531417
+  type: 'test'
+  ...
+# Subtest: TPU guide is reachable from its route and resolves links under the deployment base
+ok 198 - TPU guide is reachable from its route and resolves links under the deployment base
+  ---
+  duration_ms: 91.719292
+  type: 'test'
+  ...
+# Subtest: portable TPU workspace contains the exact shared worker and a standalone CLI help entry
+ok 199 - portable TPU workspace contains the exact shared worker and a standalone CLI help entry
+  ---
+  duration_ms: 409.911166
+  type: 'test'
+  ...
+# Subtest: precision guide exposes measured CPU results, typeset math and deployment-safe artifact links
+ok 200 - precision guide exposes measured CPU results, typeset math and deployment-safe artifact links
+  ---
+  duration_ms: 74.065209
+  type: 'test'
+  ...
+# Subtest: portable precision experiment and figure retain source integrity without importing JAX for help
+ok 201 - portable precision experiment and figure retain source integrity without importing JAX for help
+  ---
+  duration_ms: 353.218875
+  type: 'test'
+  ...
+# Subtest: portable TPU workspace contains the four-device collective target, its exact lesson source and pinned requirements
+ok 202 - portable TPU workspace contains the four-device collective target, its exact lesson source and pinned requirements
+  ---
+  duration_ms: 305.844292
+  type: 'test'
+  ...
+# Subtest: project views preserve exact code and truly empty feedback regions
+ok 203 - project views preserve exact code and truly empty feedback regions
+  ---
+  duration_ms: 133.210791
+  type: 'test'
+  ...
+# Subtest: career and pathway views use explicit inputs without browser state
+ok 204 - career and pathway views use explicit inputs without browser state
+  ---
+  duration_ms: 106.617583
+  type: 'test'
+  ...
+1..204
+# tests 204
+# suites 0
+# pass 204
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 12964.695625
+
+> jaxpathways@0.17.1 check:epub-identity
+> python3 tests/test_epub_identity.py && python3 tests/test_posttraining_appendix_distribution.py
+
+...........
+----------------------------------------------------------------------
+Ran 11 tests in 0.008s
+
+OK
+....
+----------------------------------------------------------------------
+Ran 4 tests in 0.001s
+
+OK
+OK: 104 offline chapters, EPUB XML/references, project/tutor bundle fidelity, authored project prerequisites.
+OK: standalone HTML has embedded figure assets and course appendices.
+OK: beginner workspace source/package/instruction fidelity.
+OK: course workspace includes tutor prerequisites, authored lesson artifacts and project sources without local learner state.
+OK: C03 pilot ZIP and course workspace contain only the exact 28-file source freeze and 30-file public packet.
+OK: TPU workspace has its pinned single-host target, checker and exact base lesson source; coordinated multi-host files remain repository-only.
+OK: 11 synthesis assessments match source, pathway and project.
+
+> jaxpathways@0.17.1 check:site
+> node scripts/check-site.mjs && node scripts/check-seo.mjs
+
+PASS: 220 Astro pages, 14473 local references, accessibility IDs, static catalogs and clean public boundary at /
+PASS: 22 phase guides preserve lesson coverage, evidence and further-work boundaries.
+PASS: 203 learner-facing maturity labels, contextual contribution entries and book status links.
+PASS: 104 pre-rendered lessons; 215 canonical sitemap URLs reachable within three clicks; structured data, share metadata, revisions and feedback at /

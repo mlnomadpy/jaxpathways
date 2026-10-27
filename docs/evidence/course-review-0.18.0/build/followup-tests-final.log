@@ -1,0 +1,245 @@
+TAP version 13
+# Subtest: explicit contract renders independent inputs, outputs, invariants, hints, and TODO code
+ok 1 - explicit contract renders independent inputs, outputs, invariants, hints, and TODO code
+  ---
+  duration_ms: 2.727041
+  type: 'test'
+  ...
+# Subtest: browser writing guide requires the learner contract and never derives a scaffold from the solution
+ok 2 - browser writing guide requires the learner contract and never derives a scaffold from the solution
+  ---
+  duration_ms: 1.514541
+  type: 'test'
+  ...
+# Subtest: held-out learner downloads ignore reference mutations and omit worked answers and expected outputs
+ok 3 - held-out learner downloads ignore reference mutations and omit worked answers and expected outputs
+  ---
+  duration_ms: 1.7005
+  type: 'test'
+  ...
+# Subtest: learner notebook code cells contain editable authored TODO code and task-level pending status
+ok 4 - learner notebook code cells contain editable authored TODO code and task-level pending status
+  ---
+  duration_ms: 0.497333
+  type: 'test'
+  ...
+# Subtest: download labels report accurate full and partial learner-contract coverage
+ok 5 - download labels report accurate full and partial learner-contract coverage
+  ---
+  duration_ms: 0.310792
+  type: 'test'
+  ...
+# Subtest: canonical starter inventory reports each complete and missing exercise or practice contract
+ok 6 - canonical starter inventory reports each complete and missing exercise or practice contract
+  ---
+  duration_ms: 0.398166
+  type: 'test'
+  ...
+# Subtest: distributed, science, kernels, and internals have complete authored learner-only contracts
+ok 7 - distributed, science, kernels, and internals have complete authored learner-only contracts
+  ---
+  duration_ms: 2839.141583
+  type: 'test'
+  ...
+# Subtest: learner download URL and source paths derive from the lesson registry identity
+ok 8 - learner download URL and source paths derive from the lesson registry identity
+  ---
+  duration_ms: 0.360542
+  type: 'test'
+  ...
+# Subtest: held-out shape, mask layout, and PRNG seed flow from the contract rather than a fixed reference fixture
+ok 9 - held-out shape, mask layout, and PRNG seed flow from the contract rather than a fixed reference fixture
+  ---
+  duration_ms: 0.68775
+  type: 'test'
+  ...
+# Subtest: reference artifacts keep their deliberate solution reveal and execution content
+ok 10 - reference artifacts keep their deliberate solution reveal and execution content
+  ---
+  duration_ms: 2.885458
+  type: 'test'
+  ...
+# Subtest: missing contracts are labeled pending instead of copying reference answers
+ok 11 - missing contracts are labeled pending instead of copying reference answers
+  ---
+  duration_ms: 0.316292
+  type: 'test'
+  ...
+# Subtest: inline and display math include accessible MathML without interpreting currency or code
+ok 12 - inline and display math include accessible MathML without interpreting currency or code
+  ---
+  duration_ms: 48.504167
+  type: 'test'
+  ...
+# Subtest: math prose escapes raw HTML, rejects malformed TeX and does not trust URL commands
+ok 13 - math prose escapes raw HTML, rejects malformed TeX and does not trust URL commands
+  ---
+  duration_ms: 2.610792
+  type: 'test'
+  ...
+# Subtest: renderMath normalizes MathML script arity and operator tokens without changing visible HTML
+ok 14 - renderMath normalizes MathML script arity and operator tokens without changing visible HTML
+  ---
+  duration_ms: 22.334833
+  type: 'test'
+  ...
+# Subtest: equations and shape sketches stay distinct, and code panels never typeset source
+ok 15 - equations and shape sketches stay distinct, and code panels never typeset source
+  ---
+  duration_ms: 2.2425
+  type: 'test'
+  ...
+# Subtest: Markdown math conversion preserves Python and inline code exactly
+ok 16 - Markdown math conversion preserves Python and inline code exactly
+  ---
+  duration_ms: 2.754916
+  type: 'test'
+  ...
+# Subtest: regression explanation typesets inline dimensions and loss while preserving the Python expression
+ok 17 - regression explanation typesets inline dimensions and loss while preserving the Python expression
+  ---
+  duration_ms: 15.89025
+  type: 'test'
+  ...
+# Subtest: authored lesson prose does not leave mathematical shapes or operators as plain text
+ok 18 - authored lesson prose does not leave mathematical shapes or operators as plain text
+  ---
+  duration_ms: 34.548834
+  type: 'test'
+  ...
+# Subtest: inlineMath and mathProse render Markdown bold, italic, links, lists, and code in headings
+ok 19 - inlineMath and mathProse render Markdown bold, italic, links, lists, and code in headings
+  ---
+  duration_ms: 12.599667
+  type: 'test'
+  ...
+# Subtest: optimizer walkthrough landmarks describe the recorded paths, not a monotone Adam trajectory
+ok 20 - optimizer walkthrough landmarks describe the recorded paths, not a monotone Adam trajectory
+  ---
+  duration_ms: 1.258458
+  type: 'test'
+  ...
+# Subtest: gradient-check and curvature captions agree with scales, initial states, and residuals
+ok 21 - gradient-check and curvature captions agree with scales, initial states, and residuals
+  ---
+  duration_ms: 0.626416
+  type: 'test'
+  ...
+# Subtest: attention explanations preserve row normalization, tied keys, and token-specific corrections
+ok 22 - attention explanations preserve row normalization, tied keys, and token-specific corrections
+  ---
+  duration_ms: 1.170125
+  type: 'test'
+  ...
+# Subtest: recovery and deployment comparisons mean equal adjacent bars; p95 comes from the plotted samples
+ok 23 - recovery and deployment comparisons mean equal adjacent bars; p95 comes from the plotted samples
+  ---
+  duration_ms: 0.62375
+  type: 'test'
+  ...
+# Subtest: 2D ownership table reports the independently expected local float32 bytes
+ok 24 - 2D ownership table reports the independently expected local float32 bytes
+  ---
+  duration_ms: 4.510917
+  type: 'test'
+  ...
+# Subtest: interactive interpretations change with the selected point and attention boundary, with typeset math
+ok 25 - interactive interpretations change with the selected point and attention boundary, with typeset math
+  ---
+  duration_ms: 93.4305
+  type: 'test'
+  ...
+# Subtest: beginner build and practice stay in the extracted workspace
+ok 26 - beginner build and practice stay in the extracted workspace
+  ---
+  duration_ms: 92.980667
+  type: 'test'
+  ...
+# Subtest: stage counts and banner numbers match lessons with four and five stages
+ok 27 - stage counts and banner numbers match lessons with four and five stages
+  ---
+  duration_ms: 83.1535
+  type: 'test'
+  ...
+# Subtest: lesson activity controls share the single stage progress dock
+ok 28 - lesson activity controls share the single stage progress dock
+  ---
+  duration_ms: 59.471125
+  type: 'test'
+  ...
+# Subtest: runtime classification separates CPU execution from target qualification guidance
+ok 29 - runtime classification separates CPU execution from target qualification guidance
+  ---
+  duration_ms: 1.390375
+  type: 'test'
+  ...
+# Subtest: practice guidance links bounded hardware receipts without claiming general qualification
+ok 30 - practice guidance links bounded hardware receipts without claiming general qualification
+  ---
+  duration_ms: 63.491583
+  type: 'test'
+  ...
+# Subtest: TPU staging guidance keeps CPU examples and target qualification separate
+ok 31 - TPU staging guidance keeps CPU examples and target qualification separate
+  ---
+  duration_ms: 3.030167
+  type: 'test'
+  ...
+# Subtest: onboarding uses bounded, reviewed TPU targets instead of arbitrary lesson uploads
+not ok 32 - onboarding uses bounded, reviewed TPU targets instead of arbitrary lesson uploads
+  ---
+  duration_ms: 3.137542
+  type: 'test'
+  location: '/private/tmp/jaxpathways-content-repairs-review/tests/reader-guidance.test.mjs:167:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    The input did not match the regular expression /CPU reference/. Input:
+    
+    'Save the assembled code as main.py in your course workspace and run it in a fresh process. By default COURSE_EXPECT_PLATFORM is cpu. The program selects that backend explicitly, places both inputs on its first device and waits for the compiled prediction to finish. NumPy independently calculates the same arithmetic. Keep the environment report and predictions.\n' +
+      '\n' +
+      'The tolerance allows small floating-point differences; a successful comparison means this prediction agrees within that tolerance. It is separate from accuracy for a larger model. We use float32 inputs deliberately. Implicit dtype changes and reduced-precision matrix multiplication should be separate experiments after the placement check.'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  actual: |-
+    Save the assembled code as main.py in your course workspace and run it in a fresh process. By default COURSE_EXPECT_PLATFORM is cpu. The program selects that backend explicitly, places both inputs on its first device and waits for the compiled prediction to finish. NumPy independently calculates the same arithmetic. Keep the environment report and predictions.
+    
+    The tolerance allows small floating-point differences; a successful comparison means this prediction agrees within that tolerance. It is separate from accuracy for a larger model. We use float32 inputs deliberately. Implicit dtype changes and reduced-precision matrix multiplication should be separate experiments after the placement check.
+  operator: 'match'
+  stack: |-
+    TestContext.<anonymous> (file:///private/tmp/jaxpathways-content-repairs-review/tests/reader-guidance.test.mjs:200:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: lesson metadata has no embedded content and rendered content matches every canonical lesson source
+ok 33 - lesson metadata has no embedded content and rendered content matches every canonical lesson source
+  ---
+  duration_ms: 23.9535
+  type: 'test'
+  ...
+# Subtest: downloaded notebooks and Markdown preserve the same runtime boundaries as the reader
+ok 34 - downloaded notebooks and Markdown preserve the same runtime boundaries as the reader
+  ---
+  duration_ms: 61.016125
+  type: 'test'
+  ...
+# Subtest: the offline book links the archive referenced by its beginner setup walkthrough
+ok 35 - the offline book links the archive referenced by its beginner setup walkthrough
+  ---
+  duration_ms: 4534.730625
+  type: 'test'
+  ...
+1..35
+# tests 35
+# suites 0
+# pass 34
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 5611.503834

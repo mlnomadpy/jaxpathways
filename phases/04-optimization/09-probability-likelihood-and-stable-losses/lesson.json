@@ -32,7 +32,7 @@
       },
       {
         "title": "Move from probabilities to logits",
-        "body": "A logit \\(z\\) is an unrestricted real score. The sigmoid maps it into a probability: \\(p=1/(1+e^{-z})\\). At \\(z=0\\), the probability is \\(1/2\\) and either binary label has loss \\(\\log 2\\). For a positive label, differentiating the loss gives \\(p-1\\), so gradient descent increases the logit. More generally the derivative is \\(p-y\\). A very wrong, confident prediction still supplies a useful gradient.",
+        "body": "A logit \\(z\\) is an unrestricted real score. The sigmoid maps it into a probability: \\(p=1/(1+e^{-z})\\). At \\(z=0\\), the probability is \\(1/2\\) and either binary label has loss \\(\\log 2\\). For a positive label, differentiating the loss gives \\(p-1\\), so gradient descent increases the logit. More generally the derivative is \\(p-y\\). A very wrong, confident prediction still supplies a useful gradient.\n\nAt logit \\(0\\), the probability is \\(0.5\\). The derivative probability minus label is \\(-0.5\\) for label \\(1\\), so gradient descent raises the logit; it is \\(+0.5\\) for label \\(0\\), so descent lowers it. At logit \\(10\\), positive-label loss is about \\(0.0000458\\), while negative-label loss is about \\(10.0000458\\). These are costs assigned to observed labels, not probabilities.",
         "math": "\\ell(z,y)=\\operatorname{softplus}(z)-yz,\\qquad \\frac{\\partial\\ell}{\\partial z}=\\operatorname{sigmoid}(z)-y"
       },
       {
@@ -93,7 +93,22 @@
         "prompt": "A dataset contains labels \\((1,1,1,0)\\). For a model with one constant logit, show that \\(p=3/4\\) is stationary and has less mean loss than \\(p=1/2\\).",
         "hint": "The mean gradient is \\(p-\\bar y\\). Convert the desired probability to log-odds.",
         "solution": "# Fit a constant probability (Transfer / diagnosis): The constant model matches the observed class frequency.\nys = jnp.array([1.0, 1.0, 1.0, 0.0])\nconstant_loss = lambda z: jnp.mean(binary_loss(z, ys))\noptimum = jnp.log(3.0)\nassert jnp.allclose(jax.grad(constant_loss)(optimum), 0.0, atol=1e-06)\nassert constant_loss(optimum) < constant_loss(jnp.array(0.0))",
-        "explanation": "The constant model matches the observed class frequency. It has learned no feature-dependent discrimination."
+        "explanation": "The constant model matches the observed class frequency. It has learned no feature-dependent discrimination.",
+        "learnerStarter": {
+          "inputs": [
+            "A dataset contains labels \\((1,1,1,0)\\). For a model with one constant logit, show that \\(p=3/4\\) is stationary and has less mean loss than \\(p=1/2\\)."
+          ],
+          "outputs": [
+            "Stationarity at the empirical class fraction and a lower mean loss than the half-probability case."
+          ],
+          "invariants": [
+            "Every label contributes once to the mean binary loss."
+          ],
+          "hints": [
+            "The mean gradient is \\(p-\\bar y\\). Convert the desired probability to log-odds."
+          ],
+          "code": "import jax.numpy as jnp\n\ndef practice_fit_a_constant_probability(labels):\n    \"\"\"Implement the fit a constant probability check.\"\"\"\n    # TODO: Evaluate the constant-logit objective and derivative at logit(log(3)) and at zero.\n    raise NotImplementedError\n"
+        }
       },
       {
         "title": "Catch a reduction mistake",
@@ -101,7 +116,22 @@
         "prompt": "Duplicate every observation. Verify that mean loss stays fixed while total loss doubles. What happens to gradients?",
         "hint": "The mean divides by the new observation count; the sum does not.",
         "solution": "# Catch a reduction mistake (Transfer / diagnosis)\nzs = jnp.array([-1.0, 2.0])\nys2 = jnp.array([0.0, 1.0])\noriginal = binary_loss(zs, ys2)\ndoubled = binary_loss(jnp.tile(zs, 2), jnp.tile(ys2, 2))\nassert jnp.allclose(jnp.mean(original), jnp.mean(doubled))\nassert jnp.allclose(jnp.sum(doubled), 2 * jnp.sum(original))\nmean_grad = lambda z: jax.grad(lambda t: jnp.mean(binary_loss(t * z, ys2)))(1.0)\nduplicated_grad = jax.grad(lambda t: jnp.mean(binary_loss(t * jnp.tile(zs, 2), jnp.tile(ys2, 2))))(1.0)\nassert jnp.allclose(mean_grad(zs), duplicated_grad)",
-        "explanation": "Reduction conventions affect gradient scale and learning-rate interpretation; record them with the objective."
+        "explanation": "Reduction conventions affect gradient scale and learning-rate interpretation; record them with the objective.",
+        "learnerStarter": {
+          "inputs": [
+            "Duplicate every observation. Verify that mean loss stays fixed while total loss doubles. What happens to gradients?"
+          ],
+          "outputs": [
+            "Unchanged mean loss, doubled total loss, and both gradient scales."
+          ],
+          "invariants": [
+            "The duplicated dataset contains two copies of each original example."
+          ],
+          "hints": [
+            "The mean divides by the new observation count; the sum does not."
+          ],
+          "code": "import jax\nimport jax.numpy as jnp\n\ndef practice_catch_a_reduction_mistake(labels):\n    \"\"\"Implement the catch a reduction mistake check.\"\"\"\n    # TODO: Duplicate every observation and compute both mean and total losses and their gradients.\n    raise NotImplementedError\n"
+        }
       }
     ],
     "question": "Why compute binary cross-entropy from logits?",
@@ -132,9 +162,30 @@
       "kind": "executed",
       "prediction": "For a positive label, which direction should the logit move?",
       "reading": "The horizontal axis is a logit, which becomes the predicted probability of label \\(1\\) after a sigmoid. The vertical axis is binary cross-entropy loss. The solid curve assumes the observed label is \\(1\\); the dashed curve assumes it is \\(0\\).\n\nAt logit \\(0\\), the predicted probability is \\(0.5\\), and both losses are \\(\\log 2\\approx0.693\\). Moving right lowers the loss for observed label \\(1\\) but raises it for observed label \\(0\\). At logit \\(10\\), the latter loss is about \\(10\\), while the former is close to zero.",
-      "connection": "A large positive logit strongly favors label \\(1\\). That confidence is rewarded only if label \\(1\\) is actually observed. For label \\(0\\), the same confidence is a large mistake. The mirror-image curves make the dependence on the target explicit.\n\nLoss is not a probability or classification accuracy, so values above \\(1\\) are valid. The near-flat parts approach zero without implying an exact zero probability for the other class. Computing this loss from logits with a stable formula avoids unnecessary overflow or taking the logarithm of a rounded zero.",
+      "connection": "A large positive logit strongly favors label \\(1\\). That confidence is rewarded only if label \\(1\\) is actually observed. For label \\(0\\), the same confidence is a large mistake. The mirror-image curves make the dependence on the target explicit.\n\nLoss is not a probability or classification accuracy, so values above \\(1\\) are valid. The near-flat parts approach zero without implying an exact zero probability for the other class. Computing this loss from logits with a stable formula avoids unnecessary overflow or taking the logarithm of a rounded zero.\n\nBefore moving the logit, compute probability minus label; its sign predicts the descent direction for the observed label.",
       "alt": "Confidence is rewarded only when it matches the label. The horizontal axis is a logit, which becomes the predicted probability of label \\(1\\) after a sigmoid. The vertical axis is binary cross-entropy loss. The solid curve assumes the observed label is \\(1\\); the dashed curve assumes it is \\(0\\). At logit \\(0\\), the predicted probability is \\(0.5\\), and both losses are \\(\\log 2\\approx0.693\\). Moving right lowers the loss for observed label \\(1\\) but raises it for observed label \\(0\\). At logit \\(10\\), the latter loss is about \\(10\\), while the former is close to zero.",
       "code": "grid = jnp.linspace(-10.0, 10.0, 81)\nvisual_data = {'kind': 'line', 'x': grid.tolist(), 'xlabel': 'logit', 'ylabel': 'binary cross-entropy', 'series': [{'label': 'observed label 1', 'y': binary_loss(grid, 1.0).tolist()}, {'label': 'observed label 0', 'y': binary_loss(grid, 0.0).tolist()}]}"
+    },
+    "optionFeedback": [
+      "Numerical stability avoids overflow and cancellation. It does not guarantee that the learned decision boundary classifies every example correctly.",
+      "A logits-based implementation can stay finite for confident mistakes even when probabilities round to zero or one. It does not fix a poor model.",
+      "A stable loss is still a training objective. You need held-out data to estimate generalization and choose model settings."
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "Binary logits and same-shaped binary labels."
+      ],
+      "outputs": [
+        "A finite per-example loss and a declared reduction."
+      ],
+      "invariants": [
+        "Use the logits-based stable loss; duplicated examples preserve a mean and scale a sum."
+      ],
+      "hints": [
+        "Check confident correct and incorrect predictions separately.",
+        "Keep reduction choice explicit so its gradient scale is inspectable."
+      ],
+      "code": "import jax.numpy as jnp\n\ndef binary_cross_entropy(logits, labels):\n    \"\"\"A finite per-example loss and a declared reduction.\"\"\"\n    # TODO: Compute stable per-example binary losses from logits and make the mean-versus-sum reduction explicit.\n    raise NotImplementedError\n"
     }
   }
 }

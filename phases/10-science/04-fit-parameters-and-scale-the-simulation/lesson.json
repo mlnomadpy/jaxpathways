@@ -36,7 +36,7 @@
       },
       {
         "title": "Recognize observations that cannot identify a parameter",
-        "body": "At time zero the state equals the prescribed initial condition regardless of the rate. If the dataset contains only initial observations, the loss gradient is zero for every rate and no optimizer can recover it. This is non-identifiability, not a learning-rate problem. With noisy data, late-time points may also carry little useful signal after the system has nearly decayed. Inspect sensitivities and measurement precision before collecting more equally uninformative data."
+        "body": "The fitted rate on the original grid is about \\(0.700000009\\), against the synthetic truth \\(0.7\\). On new initial values, the original-grid RMSE is near roundoff; refining the step gives an RMSE around \\(7.3\\times10^{-9}\\), slightly larger because the original fitted rate had compensated for RK4's tiny grid bias. A residual need not decrease monotonically when a numerical solver is refined.\n\nThis held-out check changes initial conditions but keeps the same equation and noiseless observation rule. It tests whether the recovered rate transfers across starts within this model, not whether the model matches a real physical process. If observations existed only at time zero, the rate gradient would be exactly zero for every candidate; more optimizer steps could not add missing information."
       },
       {
         "title": "Keep numerical bias separate from physical estimates",
@@ -50,6 +50,15 @@
       {
         "title": "Move from this audit to a scientific workflow",
         "body": "The staged scientific-inverse project asks for a reusable simulation and fitting API with changed parameters, noisy observations, held-out checks and a reproducible report. For stiff or adaptive models, choose and validate a suitable solver before reusing the optimizer. Diffrax, Equinox and Lineax provide ecosystem building blocks, but this phase’s executed core intentionally uses the installed JAX environment; no optional library or target hardware execution is implied."
+      },
+      {
+        "title": "Optional adaptive solve: stiffness and rate identifiability",
+        "body": "The optional project uses a forced-decay equation with exact solution \\(y(t)=\\cos t+(y_0-1)e^{-kt}\\). Tsit5 is an adaptive explicit solver for the nonstiff fixture; Kvaerno3 and Kvaerno5 with a PID step-size controller handle the stiff fixture. Compare accepted/rejected step counts and analytic errors, and treat solver status as part of the result. For inference, early off-manifold observations can reveal the rate, while \\(y_0=1\\) makes predictions exactly independent of \\(k\\). Late observations can be practically insensitive because the transient \\(e^{-kt}\\) has decayed.",
+        "math": "\\ell(k)=\\frac12\\sum_i\\left[\\frac{y(t_i;k)-y_i}{\\sigma}\\right]^2,\\qquad y_0=1\\implies\\frac{\\partial y}{\\partial k}=0\\quad\\text{for all }t,k>0",
+        "check": {
+          "prompt": "Can a low residual establish that the rate is identifiable?",
+          "answer": "No. A parameter is structurally unidentifiable when changing it leaves predictions and the profile objective flat, even if an optimizer returns a particular value."
+        }
       }
     ],
     "experiments": [
@@ -77,7 +86,24 @@
         "hint": "At fixed rate, predictions are amplitude multiplied by a known decay vector.",
         "solution": "# Infer a different physical quantity (Practice): The inverse problem becomes linear when rate is fixed.\nbasis=np.exp(-0.7*np.asarray(times))\nunknown_initial=2.8\nmeasured=unknown_initial*basis\nestimate=float(np.dot(basis,measured)/np.dot(basis,basis))\nassert abs(estimate-unknown_initial)<1e-12\ndef amplitude_loss(amplitude):\n    return jnp.mean((amplitude*jnp.asarray(basis)-jnp.asarray(measured))**2)\nassert abs(float(jax.grad(amplitude_loss)(estimate)))<1e-12\nprint(\"Recovered initial amplitude:\",estimate)",
         "explanation": "The inverse problem becomes linear when rate is fixed. Jointly unknown amplitude and rate require enough distinct observation times to distinguish their effects.",
-        "title": "Infer a different physical quantity"
+        "title": "Infer a different physical quantity",
+        "learnerStarter": {
+          "inputs": [
+            "A fixed rate, observation times, and a trajectory with unknown initial amplitude."
+          ],
+          "outputs": [
+            "Least-squares amplitude estimate and NumPy closed-form estimate."
+          ],
+          "invariants": [
+            "The fitted amplitude uses training observations only.",
+            "The closed form matches a one-parameter linear least-squares solution."
+          ],
+          "hints": [
+            "Factor the unit-amplitude trajectory from the unknown scalar.",
+            "Use dot(b,y)/dot(b,b) for the independent closed form."
+          ],
+          "code": "import numpy as np\n\ndef estimate_initial_amplitude(rate, times, observations):\n    # TODO: solve the scalar least-squares problem and verify its closed form.\n    raise NotImplementedError(\"Estimate amplitude as a linear parameter\")"
+        }
       },
       {
         "difficulty": "Challenge",
@@ -85,7 +111,55 @@
         "hint": "Search a dense one-dimensional grid using the analytic forward model and report the minimizing rate and residual scale.",
         "solution": "# Compare noisy inference with an independent search (Challenge): A noisy optimum need not equal the generating parameter exactly.\nnoisy=np.asarray(observations)+0.005*np.random.default_rng(19).normal(size=observations.shape)\ncandidates=np.linspace(0.65,0.75,1001)\n# Transfer the device result to the host for an independent NumPy comparison.\nreference_predictions=np.asarray(train_initials)[None,:,None]*np.exp(-candidates[:,None,None]*np.asarray(times)[None,None,:])\n# Reduce along axis=(1 to compute `reference_losses`.\nreference_losses=np.mean((reference_predictions-noisy[None,:,:])**2,axis=(1,2))\nbest=float(candidates[np.argmin(reference_losses)])\nassert abs(best-0.7)<0.01\nassert float(np.min(reference_losses))>0\nprint(\"Noisy grid-search estimate:\",best,\"residual MSE:\",float(np.min(reference_losses)))",
         "explanation": "A noisy optimum need not equal the generating parameter exactly. One fixed-seed recovery check is not a calibrated uncertainty interval; repeated datasets or a justified statistical model are needed.",
-        "title": "Compare noisy inference with an independent search"
+        "title": "Compare noisy inference with an independent search",
+        "learnerStarter": {
+          "inputs": [
+            "A deterministic noisy trajectory generated with seed 19, training times, and a candidate rate grid."
+          ],
+          "outputs": [
+            "Training residual per candidate and selected rate.",
+            "Held-out prediction error reported after selection."
+          ],
+          "invariants": [
+            "Selection uses training labels only.",
+            "The search is independent of the JAX autodiff fit."
+          ],
+          "hints": [
+            "Generate noise from a local seeded generator.",
+            "Keep held-out values out of the candidate scoring loop."
+          ],
+          "code": "import numpy as np\n\ndef grid_search_noisy_rate(train_times, train_values, candidates, initial, held_out_times, held_out_values):\n    # TODO: score candidates on training data, select, then report held-out error.\n    raise NotImplementedError(\"Keep candidate selection independent of held-out labels\")"
+        }
+      },
+      {
+        "difficulty": "Optional extension",
+        "title": "Fit and independently audit an adaptive noisy rate estimate",
+        "prompt": "Use the optional `fit_rate` API on early off-manifold observations with initial state $2.6$ and rate near $1.25$. Score the returned rate with an analytic NumPy profile over a positive candidate grid. Then calculate predictions for held-out initial states without using held-out values to select the fit. Independently inspect supplied on-manifold and late-time profiles.",
+        "hint": "Use the same known noise scale in fitting and profile scoring. A small residual alone is not evidence of identifiability; check whether predictions and the entire likelihood profile change across the candidate rates.",
+        "solution": "import numpy as np\n\ndef fit_and_audit_rate(fit_rate, times, observations, initial, noise_scale, candidate_rates,\n                       held_out_times, held_out_initials, on_times, on_observations,\n                       late_times, late_observations):\n    times = np.asarray(times, dtype=np.float64)\n    observations = np.asarray(observations, dtype=np.float64)\n    rates = np.asarray(candidate_rates, dtype=np.float64)\n    if rates.ndim != 1 or np.any(rates <= 0) or not np.isfinite(rates).all():\n        raise ValueError(\"candidate rates must be finite and positive\")\n    fitted = float(fit_rate(times, observations, initial, initial_rate=0.45,\n                            noise_scale=noise_scale))\n\n    def profile(times_for_profile, values, y0):\n        times_for_profile = np.asarray(times_for_profile, dtype=np.float64)\n        values = np.asarray(values, dtype=np.float64)\n        prediction = np.cos(times_for_profile)[None, :] + (y0 - 1.0) * np.exp(\n            -rates[:, None] * times_for_profile[None, :]\n        )\n        nll = 0.5 * np.sum(((prediction - values[None, :]) / noise_scale) ** 2, axis=1)\n        return {\"nll\": nll, \"nll_range\": float(np.ptp(nll)),\n                \"prediction_spread\": float(np.max(np.ptp(prediction, axis=0)))}\n\n    early = profile(times, observations, initial)\n    on_manifold = profile(on_times, on_observations, 1.0)\n    late = profile(late_times, late_observations, initial)\n    fitted_nll = float(profile_nll(np.array([fitted]), times, observations, initial, noise_scale)[0])\n    early_minimum_rate = float(rates[np.argmin(early[\"nll\"])])\n    early_minimum_nll = float(np.min(early[\"nll\"]))\n    held_out = np.cos(np.asarray(held_out_times))[None, :] + (\n        np.asarray(held_out_initials)[:, None] - 1.0\n    ) * np.exp(-fitted * np.asarray(held_out_times)[None, :])\n    return {\"fitted_rate\": fitted, \"early_profile\": early,\n            \"early_profile_minimum_rate\": early_minimum_rate,\n            \"early_profile_minimum_nll\": early_minimum_nll,\n            \"fitted_rate_nll\": fitted_nll,\n            \"fitted_delta_nll\": fitted_nll - early_minimum_nll,\n            \"on_manifold_profile\": on_manifold, \"late_profile\": late,\n            \"held_out_predictions\": held_out}\n",
+        "explanation": "This is a synthetic, known-noise inverse problem. The profile distinguishes structural non-identifiability from weak late-time sensitivity, but it is not a confidence interval or a scientific validation of field measurements.",
+        "learnerStarter": {
+          "inputs": [
+            "Early off-manifold training observations at times from 0 to 1.2, initial state 2.6, known noise scale 0.025, and starting rate 0.45.",
+            "Separate observations for an on-manifold initial state 1.0 and late off-manifold times from 6 to 9, plus a positive rate grid.",
+            "Held-out initial states and times that are not used to choose a rate."
+          ],
+          "outputs": [
+            "Positive fitted rate and an analytic early-profile minimum with their objective difference.",
+            "Held-out predictions computed only after rate selection.",
+            "Likelihood-profile range and prediction spread for early, on-manifold, and late observation regimes."
+          ],
+          "invariants": [
+            "Rate selection uses training observations only.",
+            "Independent profiles use the closed-form solution and do not reuse the fitted solver.",
+            "A case is structurally unidentifiable only when predictions and profile remain flat over distinct positive rates."
+          ],
+          "hints": [
+            "Use a local seeded NumPy generator for any noise you create.",
+            "Report prediction spread across several rates as well as the profile range; optimization difficulty alone does not establish non-identifiability."
+          ],
+          "code": "import numpy as np\n\ndef fit_and_audit_rate(fit_rate, times, observations, initial, noise_scale, candidate_rates,\n                       held_out_times, held_out_initials, on_times, on_observations,\n                       late_times, late_observations):\n    # TODO: fit from early training data and independently score all three profiles.\n    raise NotImplementedError(\"Separate fit selection, analytic profile audit, and held-out prediction\")"
+        }
       }
     ],
     "diagnosis": "If the training loss is tiny but the parameter changes with step size, suspect solver bias. If every candidate has zero derivative, inspect observation times and parameter dependence before adjusting the optimizer. If timing results are implausibly tiny, confirm synchronization and warmup. If test performance drove your learning-rate choice, the test set is no longer untouched.",
@@ -101,8 +175,8 @@
       "title": "Recover a physical rate, then check what the fit means",
       "kind": "executed",
       "prediction": "Does a falling loss alone prove that the recovered rate is physically correct?",
-      "reading": "The top panel shows the positive rate estimate versus completed optimizer updates. Update \\(0\\) is the initial \\(1.4\\), before training. The reference line is the known synthetic rate \\(0.7\\). By update \\(20\\), the fitted rate is about \\(0.7055\\); by update \\(40\\), about \\(0.70006\\).\n\nThe lower panel shows mean squared trajectory error on a logarithmic scale. Its initial value is about \\(0.1168\\), falling to about \\(1.55\\times10^{-5}\\) after twenty updates. The displayed first sixty updates focus on the informative descent rather than the eventual floating-point floor.",
-      "connection": "These recorded post-update values correspond to the same parameters shown above. The reference observations come from the analytic exponential, while fitting uses RK4, so agreement tests a numerical model against independently generated data.\n\nA tiny final loss is plausible for noiseless synthetic data and a single smooth parameter. It is not an uncertainty estimate or proof about real instruments. Held-out starts, grid refinement and the deliberately biased Euler example provide the additional evidence needed to interpret the parameter.",
+      "reading": "The top panel's horizontal axis counts completed optimizer updates and its vertical axis is the positive rate in inverse seconds. The fitted curve starts at 1.4, approaches the known synthetic rate 0.7, and is about 0.7055 at update 20 and 0.70006 at update 40. The lower panel uses the same update axis and shows mean squared trajectory error in squared excess-temperature units on a log scale, falling from about 0.1168 to about \\(1.55\\times10^{-5}\\) by update 20.",
+      "connection": "The observations come from the analytic exponential, while the fit uses RK4, so the curve compares an independently generated target with the numerical forward model. The training fixture is noiseless; its final near-zero loss is not a parameter-uncertainty estimate. New starts and grid refinement expose whether the fitted rate transfers, and the initial-time-only case predicts no recovery because the rate has zero sensitivity there.",
       "alt": "The fitted rate approaches the known value while trajectory mean squared error decreases over optimizer updates.",
       "code": "indices=list(range(61))\nvisual_data={'panels':[{'kind':'line','x':indices,'xlabel':'completed updates','ylabel':'rate (inverse seconds)','series':[{'label':'fitted rate','y':rate_history[:61]},{'label':'known synthetic rate','y':[true_rate]*61}]},{'kind':'line','x':indices,'xlabel':'completed updates','ylabel':'mean squared trajectory error','yscale':'log','series':[{'label':'training error','y':loss_history[:61]}]}]}"
     },
@@ -143,6 +217,14 @@
       {
         "title": "Diffrax solver terms, saved values and solution inspection",
         "url": "https://docs.kidger.site/diffrax/usage/getting-started/"
+      },
+      {
+        "title": "Diffrax solver choice and adaptive solver families",
+        "url": "https://docs.kidger.site/diffrax/usage/how-to-choose-a-solver/"
+      },
+      {
+        "title": "Diffrax solution saving and status inspection",
+        "url": "https://docs.kidger.site/diffrax/usage/getting-started/"
       }
     ],
     "takeaways": [
@@ -154,6 +236,31 @@
       "Measure a bounded scaling experiment",
       "Move from this audit to a scientific workflow"
     ],
-    "output": "The rate moves from 1.4 to approximately 0.700000009. Held-out and refined-grid RMSE stay below 1e-7; initial-only observations have zero rate gradient."
+    "output": "The rate moves from 1.4 to approximately 0.700000009. Held-out and refined-grid RMSE stay below 1e-7; initial-only observations have zero rate gradient.",
+    "optionFeedback": [
+      "A larger accelerator batch repeats the same uninformative time-zero observations. Add measurements that depend on the unknown rate.",
+      "A smaller integration step cannot make a time-zero observation informative about dynamics. Inspect parameter sensitivity of the data.",
+      "The initial state is independent of rate. No optimizer can recover a rate from data whose predictions do not depend on it."
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "Training initial conditions and times with analytically generated observations at true rate 0.4.",
+        "A rate-optimization start of 0.9 and held-out times/initial conditions."
+      ],
+      "outputs": [
+        "Recovered rate from training observations.",
+        "Predictions at held-out times and initial conditions using the fitted rate."
+      ],
+      "invariants": [
+        "The rate parameter starts at 0.9 and converges toward the generating rate 0.4.",
+        "Held-out labels are not used to choose the fitted parameter.",
+        "Predictions use the new fitted rate and corresponding initial conditions."
+      ],
+      "hints": [
+        "Generate training observations from each initial condition and the shared decay rate.",
+        "Optimize the rate using training observations only; evaluate held-out conditions afterward."
+      ],
+      "code": "import jax\nimport jax.numpy as jnp\n\ndef fit_changed_rate(train_times, train_initials, train_values, held_out_times, held_out_initials, initial_rate=0.9):\n    # TODO: fit the shared rate from training trajectories and predict held-out ones.\n    raise NotImplementedError(\"Fit from training trajectories and preserve held-out separation\")"
+    }
   }
 }

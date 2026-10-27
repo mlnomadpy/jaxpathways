@@ -1,0 +1,10 @@
+{
+  "recordedAt": "2026-10-22T02:45:16.867848+00:00",
+  "url": "https://github.com/mlnomadpy/jaxpathways/pull/69",
+  "head": "f858816ead940aeb969e23fbc32df232da51196f",
+  "isDraft": true,
+  "checks": 15,
+  "success": 15,
+  "rawSha256": "ce994e25f0d6530ada66048b13e58b304cd2544336583e631fa1a39d3a6b4fba",
+  "scope": "Hosted checks for exact 0.16.0 source only. No merge or deployment; not evidence for pending 0.16.1 or Transformer bridge."
+}

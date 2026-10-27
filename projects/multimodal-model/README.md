@@ -47,3 +47,13 @@ The final reviewer should be able to trace a raw media request through the relea
 Do not promote until every source image/audio item, caption/question/answer, teacher label, entity group, rights record and split is traceable. Pin encoder/decoder revisions and connector ancestry, and show correct/absent/swapped-media results on a real grounded holdout; synthetic media validates shape contracts only.
 
 Before this plan can change from **planned** to **authored**, provide independently checkable dataset/recipe manifests, staged parent-to-child checkpoint records with full resume state, real held-out evaluation outputs, and runnable plan-specific starter/reference/checks. Keep small CPU fixtures labeled as correctness evidence; they do not establish target-scale training, quality or production readiness.
+
+## Recipe decision rehearsal before target-scale training
+
+The fused system scores well when all modalities are present but fails when one input is missing or contradictory.
+
+**Decide:** Define whether missing inputs are rejected, represented explicitly or handled by a trained fallback. Compare unimodal baselines, fusion and alignment objectives under the same grouped split. Test conflicting captions/images/audio and trace which branch supplies the evidence before changing the fusion architecture.
+
+**Review packet:** A modality-presence matrix, paired/group IDs, unimodal-versus-fused results, contradiction cases and export parity for every supported branch combination. Reject claims for an unimplemented missing-modality path.
+
+This is a design exercise for a planned implementation. Record a hypothesis, a controlled pilot, a stopping criterion and the evidence needed to reject the recipe before requesting target-scale compute. Do not mark the capstone implemented or publish a model card with invented metrics.

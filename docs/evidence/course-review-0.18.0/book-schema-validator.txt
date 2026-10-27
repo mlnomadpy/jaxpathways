@@ -1,0 +1,3 @@
+Browser tab: 1547147095, Title: "Schema Markup Validator", URL: "https://validator.schema.org/".
+There has been no change in the accessibility tree.
+The focused UI element is 0 AXWebArea Schema Markup Validator, URL: validator.schema.org/

@@ -14,7 +14,8 @@ test('workshop joins existing lessons, projects, pathway guides and typeset teac
   for (const id of ['networks', 'recovery']) assert(course.phases.find(p => p.id === id).additionalProjectIds.includes(project.id));
   for (const id of ['models', 'ops']) assert.match(renderPathway(course.pathways.find(p => p.id === id), course, true), /project-guides\/reproducible-experiments.html/);
   const content = projectGuide(project, course);
-  assert.equal(content.sections.length, 8);
+  assert(content.sections.some(section => /Review handoff/.test(section.label)));
+  for (const section of content.sections) assert(content.body.includes(`id="${section.id}"`));
   assert.match(content.body, /class="katex/);
   assert.doesNotMatch(content.body, /katex-error/);
   assert.match(content.body, /project-workflow.html/);

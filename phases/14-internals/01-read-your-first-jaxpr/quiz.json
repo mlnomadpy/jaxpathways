@@ -11,7 +11,12 @@
         "Every equation corresponds to one hardware kernel."
       ],
       "correct": 1,
-      "explanation": "A jaxpr describes traced primitives. Compiler transformations and hardware execution determine kernel boundaries and timing."
+      "explanation": "A jaxpr describes traced primitives. Compiler transformations and hardware execution determine kernel boundaries and timing.",
+      "optionFeedback": [
+        "Equation counts omit fusion, scheduling and memory effects. Measure the workload before ranking runtime cost.",
+        "A jaxpr describes traced primitives. Compiler transformations and hardware execution determine kernel boundaries and timing.",
+        "One jaxpr equation need not become one hardware kernel. Inspect lowered/compiler artifacts and device traces."
+      ]
     }
   ]
 }

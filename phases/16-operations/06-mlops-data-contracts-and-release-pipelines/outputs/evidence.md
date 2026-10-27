@@ -4,7 +4,7 @@ Copy this template into your own portfolio and fill it after running your modifi
 
 ## Evidence required
 
-Keep the leaking-group rejection, data fingerprint, slice counts and MSEs, aggregate/slice gate disagreement, changed-population calculation and a written response to drift without labels.
+Keep reloaded predictions, target/case identities, per-example and slice metrics, independent weighted aggregation and an explicit release decision with leakage and drift caveats.
 
 - Command: `python3 phases/16-operations/06-mlops-data-contracts-and-release-pipelines/code/main.py`
 - Working directory: Repository root

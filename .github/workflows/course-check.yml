@@ -41,9 +41,34 @@ jobs:
       - run: python -m pip install numpy==2.4.4
       - run: python -m pip install black==26.5.1
       - run: npm ci
+      - run: sudo apt-get update && sudo apt-get install -y poppler-utils
+      - run: npx playwright install --with-deps chromium
       - run: npm run check
       - run: npm run check:deployment
       - run: xargs python -m black --check < scripts/python-format-files.txt
+      - uses: actions/upload-artifact@v6
+        with:
+          name: review-book-${{ github.sha }}
+          retention-days: 14
+          path: |
+            public/downloads/jax-foundations.html
+            public/downloads/jax-foundations.epub
+            public/downloads/jax-foundations.build.json
+            docs/review-guide-0.18.1.md
+            docs/review-notes-0.18.1.md
+            docs/evidence/course-review-0.18.1/verification.json
+      - name: Validate EPUB with official W3C EPUBCheck
+        run: |
+          curl -fL https://github.com/w3c/epubcheck/releases/download/v5.4.0/epubcheck-5.4.0.zip -o /tmp/epubcheck.zip
+          echo "33350c61038e71dfb3d45a76aed04bf5481e6d5500cb780f6e98db8bbd15a28c  /tmp/epubcheck.zip" | sha256sum --check
+          unzip -q /tmp/epubcheck.zip -d /tmp/epubcheck
+          java -jar /tmp/epubcheck/epubcheck-5.4.0/epubcheck.jar public/downloads/jax-foundations.epub --json /tmp/epubcheck-report.json
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: epubcheck-report
+          path: /tmp/epubcheck-report.json
+          if-no-files-found: ignore
   browser:
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -91,6 +116,9 @@ jobs:
       - run: npm ci
       - run: npm run build
       - run: npm run smoke:cpu
+      - run: python tests/test_content_math_contracts.py
+      - run: python tests/test_figure_tables.py
+      - run: python phases/15-deployment/08-pytorch-to-flax-numerical-parity/labs/transformer_bridge.py
       - run: npm run test:tpu-lessons
       - run: npm run test:tpu-launcher
       - run: python resources/tpu-gcp/check_collectives_target.py
@@ -124,6 +152,80 @@ jobs:
         with:
           name: project-cpu-receipt-${{ matrix.shard }}
           path: /tmp/projects-${{ matrix.shard }}.json
+  c01-embedding-pilot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.14'
+          cache: pip
+          cache-dependency-path: projects/embedding-model-300m/requirements-embedding-lock.txt
+      - run: python -m pip install --no-deps --index-url https://download.pytorch.org/whl/cpu 'torch==2.11.0'
+      - run: python -m pip install -r projects/embedding-model-300m/requirements-embedding-lock.txt
+      - name: Download frozen SciFact archive
+        run: |
+          curl -fL https://scifact.s3-us-west-2.amazonaws.com/release/latest/data.tar.gz -o /tmp/scifact-c01.tar.gz
+          echo "11c621288d41ac144d29b13b0f8503b3820b7d6e8b1f6ff24dff335c196d76be  /tmp/scifact-c01.tar.gz" | sha256sum --check
+      - name: Check generic phase plotting
+        run: python projects/embedding-model-300m/tests/test_plots.py
+      - name: Prepare frozen data and run full current checker
+        run: |
+          python projects/embedding-model-300m/data/prepare.py --archive /tmp/scifact-c01.tar.gz --output /tmp/jaxpathways-scifact-c01-data
+          python projects/embedding-model-300m/tests/check.py --implementation solution --stage all --data /tmp/jaxpathways-scifact-c01-data --output /tmp/jaxpathways-embedding-c01-check
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: c01-embedding-pilot-check
+          path: |
+            /tmp/jaxpathways-embedding-c01-check/independent-check.json
+            /tmp/jaxpathways-embedding-c01-check/full-run/sourcebound-receipt.json
+            /tmp/jaxpathways-embedding-c01-check/full-run/pilot-report.json
+            /tmp/jaxpathways-embedding-c01-check/full-run/baseline-receipt.json
+          if-no-files-found: ignore
+  c02-causal-pilot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      JAX_PLATFORMS: cpu
+      C02_PREPARED_DATA: /tmp/c02-prepared
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.14'
+          cache: pip
+          cache-dependency-path: projects/causal-model-300m/requirements-c02*.txt
+      - run: python -m pip install --no-deps --index-url https://download.pytorch.org/whl/cpu 'torch==2.11.0'
+      - run: python -m pip install -r projects/causal-model-300m/requirements-c02.txt -r projects/causal-model-300m/requirements-c02-baseline.txt -r projects/causal-model-300m/requirements-c02-lm-eval.txt 'pytest==9.0.3'
+      - name: Prepare exact data and execute all six CPU branches
+        run: |
+          python projects/causal-model-300m/data/prepare.py --download --output /tmp/c02-prepared
+          python projects/causal-model-300m/data/prepare.py --verify --output /tmp/c02-prepared
+          python projects/causal-model-300m/run_pilot.py --data /tmp/c02-prepared --output /tmp/c02-pilot
+          python projects/causal-model-300m/evaluate_pilot.py --data /tmp/c02-prepared --run /tmp/c02-pilot --output /tmp/c02-evaluation
+          python projects/causal-model-300m/export_consumer.py --data /tmp/c02-prepared --run /tmp/c02-pilot --evaluation /tmp/c02-evaluation --branch sft_full_from_domain --output /tmp/c02-consumer
+      - name: Check raw scores, candidate semantics, recovery and local service
+        run: |
+          python projects/causal-model-300m/tests/check.py --implementation projects/causal-model-300m/model.py --stage all --data /tmp/c02-prepared --run /tmp/c02-pilot --evaluation /tmp/c02-evaluation --package /tmp/c02-consumer
+          python -m pytest projects/causal-model-300m/tests -q
+      - name: Execute the pinned eight-record native task smoke
+        run: python projects/causal-model-300m/run_lm_eval.py --package /tmp/c02-consumer --tasks hellaswag,arc_easy --fewshot 0 --limit 8 --output /tmp/c02-native-smoke.json
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: c02-causal-pilot-evidence
+          path: |
+            /tmp/c02-pilot/pilot-index.json
+            /tmp/c02-pilot/*/metrics.json
+            /tmp/c02-evaluation/metrics.json
+            /tmp/c02-native-smoke.json
+          if-no-files-found: ignore
   loggers:
     runs-on: ubuntu-latest
     timeout-minutes: 25
@@ -140,3 +242,75 @@ jobs:
             projects/reproducible-experiments/requirements-loggers.txt
       - run: python -m pip install -r requirements-cpu.txt -r projects/reproducible-experiments/requirements-loggers.txt
       - run: python projects/reproducible-experiments/tests/loggers_check.py
+
+  numpyro:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.14'
+          cache: pip
+          cache-dependency-path: projects/bayesian-regression/requirements-numpyro.txt
+      - run: python -m pip install -r projects/bayesian-regression/requirements-numpyro.txt
+      - name: Verify raw NumPyro samples and independent diagnostic controls
+        run: python projects/bayesian-regression/tests/check_numpyro.py --implementation projects/bayesian-regression/solution/numpyro_workflow.py --evidence-dir /tmp/numpyro-evidence
+        env:
+          JAX_PLATFORMS: cpu
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: numpyro-cpu-evidence
+          path: /tmp/numpyro-evidence
+          if-no-files-found: ignore
+
+  diffrax:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.14'
+          cache: pip
+          cache-dependency-path: projects/scientific-inverse/requirements-science.txt
+      - run: python -m pip install -r projects/scientific-inverse/requirements-science.txt
+      - name: Verify adaptive solves, sensitivities and same-data inverse checks
+        run: python projects/scientific-inverse/tests/check_diffrax.py --implementation projects/scientific-inverse/solution/diffrax_workflow.py --evidence-dir /tmp/diffrax-evidence
+        env:
+          JAX_PLATFORMS: cpu
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: diffrax-cpu-evidence
+          path: /tmp/diffrax-evidence
+          if-no-files-found: ignore
+
+  decoder-foundations:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.14'
+          cache: pip
+          cache-dependency-path: projects/text-harness/foundations/requirements-foundations.txt
+      - run: python -m pip install -r projects/text-harness/foundations/requirements-foundations.txt
+      - name: Verify natural-text training, cache parity and fresh-process recovery
+        run: python projects/text-harness/foundations/tests/check_foundations.py --implementation projects/text-harness/foundations/model.py --output /tmp/decoder-foundations-evidence
+        env:
+          JAX_PLATFORMS: cpu
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: decoder-foundations-cpu-evidence
+          path: /tmp/decoder-foundations-evidence
+          if-no-files-found: ignore

@@ -12,7 +12,9 @@ Keep an independent derivative reference and test changed values, higher derivat
 
 ## Study guide: Which mathematical operation does the transformed program represent?
 
-Use internal representations to explain and verify transformations, not to memorize printed variable names. Separate primal values, tangent directions, cotangents and compiled artifacts.
+Transformations become less mysterious when you follow the quantities they carry. A primal is the ordinary value, a tangent describes change in an input direction, and a cotangent weights changes in outputs. Their shapes and roles explain why forward- and reverse-mode products answer different questions.
+
+Read one transformed equation with an independent derivative beside it. Check the adjoint relationship, then challenge a custom rule at a different base point and direction. Internal printed names are incidental; the mathematical relationship and the supported primitive boundary are what you need to understand.
 
 ### Check your starting point
 
@@ -38,11 +40,11 @@ Review: [JVPs, VJPs, and higher-order derivatives](02-jvps-vjps-and-higher-order
 
 ### Try a changed condition
 
-A custom JVP returns the correct derivative when the tangent equals one but squares the tangent internally. Is it valid?
+A proposed JVP returns \(2xv^2\) for \(f(x)=x^2\). It agrees at direction 1. Test direction 2 and explain the failure.
 
 <details><summary>Compare an approach</summary>
 
-No. Derivatives are linear maps in the direction at a fixed base point. Check multiple directions and linear combinations; agreement for one seed is insufficient.
+The correct derivative map is \(2xv\). At direction 2 the proposal gives \(8x\) instead of \(4x\), except at the uninformative base point zero. Test nonzero base points and linear combinations of directions, then compare against an independent primal derivative.
 
 </details>
 

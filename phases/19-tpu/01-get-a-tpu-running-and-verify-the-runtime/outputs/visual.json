@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
   "lessonId": "tpu-01",
-  "contentHash": "640f815fbd2a3f03b222521ea6936c5c227ab0abf32ea46eb54c70a96e0cb5d9",
-  "rendererHash": "a1bd5b648f4731ae5d5f0a24811c2540d1a0a132149ce589d17c4113509cbedf",
-  "kind": "executed",
-  "generatedAt": "2026-10-20T22:30:04.353539+00:00",
-  "provenance": "recorded_cpu_computation",
+  "contentHash": "72e79e367efb0b2ec723317c3833714daff6867c6e3c64046f96517229ead9ea",
+  "rendererHash": "17e3bbad72ee4c43425845aaee76b86b85e84750551278be03d8c16842f4dc63",
+  "kind": "analytic",
+  "generatedAt": "2026-10-27T17:19:32.592436+00:00",
+  "provenance": "analytic_calculation_not_device_execution",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -13,44 +13,62 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Verified runtime receipt: {\"contract_ok\": true, \"device_count\": 1, \"device_kinds\": [\"cpu\"], \"expected_backend\": \"cpu\", \"expected_sum_of_squares\": 140.0, \"jax\": \"0.9.2\", \"local_device_count\": 1, \"observed_backend\": \"cpu\", \"pmap_sum_of_squares\": 140.0, \"python\": \"3.14.3\", \"receipt_sha256\": \"4ddc0cbb323fe3bd\"}\nSingle-host TPU slice HBM totals (GiB): {'v5litepod-1': 16, 'v5litepod-4': 64, 'v5litepod-8': 128, 'v6e-4': 128}\n",
+  "stdout": "Verified runtime receipt: {\"arithmetic_ok\": true, \"device_count\": 1, \"device_kinds\": [\"cpu\"], \"environment_lock\": \"projects/reproducible-experiments/requirements.txt; jax[tpu]==0.9.2\", \"expected_backend\": \"tpu\", \"expected_backend_ok\": false, \"expected_device_count\": 4, \"expected_sum_of_squares\": 140.0, \"expected_topology_ok\": false, \"jax\": \"0.9.2\", \"local_device_count\": 1, \"observed_backend\": \"cpu\", \"pmap_sum_of_squares\": 140.0, \"process_count\": 1, \"python\": \"3.14.3\", \"receipt_sha256\": \"71ec1d62d8092ac592002e0ca6cd5d79c77fb8ccfee100fb33a747381d7baec8\", \"requested_target_ready\": false, \"source_identity\": \"unavailable: interactive execution has no readable __file__\", \"source_sha256\": null, \"target_topology\": {\"api\": \"Cloud TPU API direct VM/Flex-start\", \"hosts_expected\": 1, \"machine_type\": \"v5litepod-4\", \"physical_chips_expected\": 4, \"topology_source\": \"requested Cloud TPU resource contract; physical chips are not inferred from JAX devices\"}}\nSingle-host TPU slice HBM totals (GiB): {'v5litepod-1': 16, 'v5litepod-4': 64, 'v5litepod-8': 128, 'v6e-4': 128}\n",
   "data": {
     "kind": "bar",
-    "labels": [
-      "v5litepod-1",
-      "v5litepod-4",
-      "v5litepod-8",
-      "v6e-4"
-    ],
-    "xlabel": "single-host Cloud TPU slice",
-    "ylabel": "count / capacity",
-    "series": [
+    "panels": [
       {
-        "label": "TPU chips on host",
-        "y": [
-          1.0,
-          4.0,
-          8.0,
-          4.0
+        "kind": "bar",
+        "labels": [
+          "v5litepod-1",
+          "v5litepod-4",
+          "v5litepod-8",
+          "v6e-4"
+        ],
+        "xlabel": "selected Cloud TPU API topology",
+        "ylabel": "physical chips (count)",
+        "series": [
+          {
+            "label": "physical TPU chips",
+            "y": [
+              1.0,
+              4.0,
+              8.0,
+              4.0
+            ]
+          }
         ]
       },
       {
-        "label": "total HBM (GiB)",
-        "y": [
-          16.0,
-          64.0,
-          128.0,
-          128.0
+        "kind": "bar",
+        "labels": [
+          "v5litepod-1",
+          "v5litepod-4",
+          "v5litepod-8",
+          "v6e-4"
+        ],
+        "xlabel": "selected Cloud TPU API topology",
+        "ylabel": "total HBM (GiB)",
+        "series": [
+          {
+            "label": "HBM capacity",
+            "y": [
+              16.0,
+              64.0,
+              128.0,
+              128.0
+            ]
+          }
         ]
       }
     ]
   },
   "diagram": {
-    "title": "End-to-end Cloud TPU VM lifecycle from create to verified teardown",
-    "prediction": "Where does Python execute when you SSH into a Cloud TPU VM, and when does billing stop?",
-    "reading": "Read top to bottom: your workstation runs `gcloud` to allocate the Cloud TPU VM, SSH starts Python inside `~/jax-tpu-lab/.venv` on the TPU VM host, `libtpu` dispatches XLA programs to the attached TPU chips, `scp` retrieves the runtime receipt, and `tpu-vm delete` releases the resource.",
-    "alt": "Read top to bottom: workstation gcloud create allocates the TPU VM, SSH launches Python inside .venv on the TPU VM host, libtpu runs XLA on attached TPU chips, scp copies the receipt back, and tpu-vm delete stops billing.",
-    "scope": "Architecture and dataflow mechanism diagram.",
+    "title": "Process, JAX-device and physical-chip ownership for a selected Cloud TPU topology",
+    "prediction": "Which counts come from the host launcher, which from JAX, and which from the resource topology?",
+    "reading": "Follow the arrows from the selected API and machine type to the Linux host, then from its JAX process to the device inventory and the generation/API mapping to physical chips. In this one-host `v5litepod-4` example, the resource request names four physical v5e chips, while the CPU rehearsal observed one process and one CPU device. The mapping in the final node is topology-specific, not a rule for all TPUs. Use the resource description for requested chips and the synchronized receipt for observed JAX devices; use per-chip HBM, not aggregate slice HBM, for a fit decision.",
+    "alt": "Workstation requests a TPU topology. One Linux VM host owns one JAX process; that process sees JAX devices; an explicit generation and API topology maps those JAX devices to physical chips and per-chip HBM. Device count and chip count are separate labels.",
+    "scope": "Topology schematic for the named Cloud TPU API routes; check the selected resource and runtime receipt.",
     "height": 6,
     "panel": {
       "kind": "graph",
@@ -58,38 +76,47 @@
         {
           "id": "0",
           "x": 5,
-          "y": 1,
-          "label": "Workstation: gcloud compute tpus tpu-vm create / Flex-start",
+          "y": 0.8,
+          "label": "Cloud control plane: API + machine type + topology determine hosts and chips",
           "tone": "data",
-          "w": 8.4,
-          "h": 1.05
+          "w": 10,
+          "h": 0.95
         },
         {
           "id": "1",
           "x": 5,
-          "y": 2.7,
-          "label": "TPU VM Linux host: ~/jax-tpu-lab/.venv + jax[tpu] + libtpu",
+          "y": 2.1,
+          "label": "Linux VM host 0 runs JAX process 0 (one process in this single-host example)",
           "tone": "state",
-          "w": 8.4,
-          "h": 1.05
+          "w": 10,
+          "h": 0.95
         },
         {
           "id": "2",
           "x": 5,
-          "y": 4.4,
-          "label": "Attached TPU chips: jax.devices() + synchronized pmap receipt",
+          "y": 3.4,
+          "label": "Process 0 records jax.devices() and jax.local_devices() (JAX device counts)",
           "tone": "result",
-          "w": 8.4,
-          "h": 1.05
+          "w": 10,
+          "h": 0.95
         },
         {
           "id": "3",
           "x": 5,
-          "y": 6.1,
-          "label": "scp receipt back + tpu-vm delete + tpu-vm list (0 active)",
+          "y": 4.7,
+          "label": "Generation/API topology maps devices to physical chips; per-chip HBM is separate",
           "tone": "warning",
-          "w": 8.4,
-          "h": 1.05
+          "w": 10,
+          "h": 0.95
+        },
+        {
+          "id": "4",
+          "x": 5,
+          "y": 6,
+          "label": "Example: v5e/v6e mapping 1:1 here; TPU7x example 2 JAX devices per chip",
+          "tone": "result",
+          "w": 10,
+          "h": 0.95
         }
       ],
       "edges": [
@@ -104,10 +131,14 @@
         {
           "from": "2",
           "to": "3"
+        },
+        {
+          "from": "3",
+          "to": "4"
         }
       ],
       "height": 7,
-      "width": 10
+      "width": 12
     }
   }
 }

@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "deployment-08",
-  "contentHash": "c8842cfffbc52bcb1ea707c05c7dca451db1638894c908df81c0356e8a6b6153",
-  "rendererHash": "a1bd5b648f4731ae5d5f0a24811c2540d1a0a132149ce589d17c4113509cbedf",
+  "contentHash": "d606ab94828c1e274c665b201429303f39a4f2f5a8dce1d4eaf77cf28ffba892",
+  "rendererHash": "17e3bbad72ee4c43425845aaee76b86b85e84750551278be03d8c16842f4dc63",
   "kind": "executed",
-  "generatedAt": "2026-10-20T22:29:21.909309+00:00",
+  "generatedAt": "2026-10-27T17:01:39.106723+00:00",
   "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",
@@ -48,7 +48,7 @@
   "diagram": {
     "title": "Small errors need a scale-aware budget",
     "prediction": "Why can a larger absolute difference pass at a larger reference value?",
-    "reading": "Read each row as one elementwise decision using absolute tolerance \\(2\\times10^{-6}\\) and relative tolerance \\(2\\times10^{-5}\\). Near zero the absolute term determines the allowance. At reference \\(100\\), the relative term increases it. These are hand-worked tolerance examples, not measured conversion errors; the executed bar plot below reports the model comparison.",
+    "reading": "Each table row is one elementwise tolerance check: allowed difference is \\(2\\times10^{-6}+2\\times10^{-5}|y|\\). Near zero, a difference of \\(10^{-6}\\) passes and \\(3\\times10^{-6}\\) fails; at reference 100, the budget is 0.002002, so 0.001 passes. These are hand-worked tolerance examples. The executed plot separately shows the epsilon fault\u2019s first mismatch at normalization.",
     "alt": "Read each row as one elementwise decision using absolute tolerance \\(2\\times10^{-6}\\) and relative tolerance \\(2\\times10^{-5}\\). Near zero the absolute term determines the allowance. At reference \\(100\\), the relative term increases it. These are hand-worked tolerance examples, not measured conversion errors; the executed bar plot below reports the model comparison.",
     "scope": "Architecture and dataflow mechanism diagram.",
     "height": 4.2,

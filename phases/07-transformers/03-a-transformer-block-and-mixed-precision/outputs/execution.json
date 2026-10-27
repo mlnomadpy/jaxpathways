@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "transformers-03",
-  "contentHash": "6ad119670f2e09a617446318e6b6244ebbcc3cc84f4c4bf00b4ef473c6515ea5",
-  "executedAt": "2026-10-20T22:22:01.330460+00:00",
+  "contentHash": "1c91b2a28f9bcf80ded32b9cfaca6dae48f792a855cc6528bf469c3f1c21ee13",
+  "executedAt": "2026-10-27T17:05:37.137019+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -50,7 +50,7 @@
       "outputs": []
     },
     {
-      "sourceHash": "25df6d662f9d3f0c4e984c6a201f79fa0cfd7a2633dc4b0773dfba6c2dd4ee6c",
+      "sourceHash": "53dc08a479da44f2b1718bf964cd5c4d3e3305811c536df9d501b1833a6e3476",
       "outputs": [
         {
           "output_type": "display_data",
@@ -82,7 +82,7 @@
       ]
     },
     {
-      "sourceHash": "5fb7df76c5280f20d69b9481f0e844ecea9245b5886cb7391de9c0e6e2a06c9d",
+      "sourceHash": "22d5d8896e54aecd8b70f9aafa0c68cf3475cdb9799648df8d1bbbd8b53d1ac8",
       "outputs": []
     },
     {
@@ -90,7 +90,7 @@
       "outputs": []
     },
     {
-      "sourceHash": "23488015a28740a82ff37c5ed53cf9f47e53194d3830554c9e67764065db0e54",
+      "sourceHash": "22d5d8896e54aecd8b70f9aafa0c68cf3475cdb9799648df8d1bbbd8b53d1ac8",
       "outputs": []
     },
     {
@@ -98,7 +98,7 @@
       "outputs": []
     },
     {
-      "sourceHash": "6a42d9fb0aee2763c69580e3f6ccfcf3e5eeefe676e868cc61d7e75d8644b872",
+      "sourceHash": "22d5d8896e54aecd8b70f9aafa0c68cf3475cdb9799648df8d1bbbd8b53d1ac8",
       "outputs": []
     },
     {

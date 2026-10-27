@@ -4,6 +4,8 @@ Phase 12: Reinforcement learning · about 110 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Batch environments and scan rollouts](https://www.tahabouhsine.com/jaxpathways/lesson-rl-02.html).
+
 ## What you will be able to do
 
 - Derive and implement the score-function policy gradient for complete episodes.
@@ -20,11 +22,7 @@ A policy gradient increases the likelihood of actions with favorable estimated a
 
 ## The clipped objective depends on the advantage sign
 
-Let $r$ be the current-to-old action-probability ratio. With positive advantage, making $r$ much larger than the upper clipping threshold stops improving the clipped surrogate. With negative advantage, moving below the lower threshold has the corresponding saturation.
-
-This does not impose a hard bound on the new policy probabilities. Shared parameters, multiple updates and other loss terms can still move the policy beyond the threshold. Inspect the ratio distribution and KL behavior rather than claiming clipping guarantees a trust region.
-
-Keep old probabilities and advantage estimates fixed for the intended inner updates. The training-return curve reports the particular sampled runs; use the same evaluator and multiple seeds before concluding one procedure reliably performs better.
+The ratio $r$ compares a candidate action probability with the stored behavior probability; the advantage says whether that sampled action did better or worse than its baseline. With positive advantage, increasing probability helps until the upper clip boundary; with negative advantage, decreasing it helps until the lower boundary. For example, the later $A=1, r=1.4, \epsilon=0.2$ case caps the positive surrogate contribution at 1.2. The sign changes which side saturates, so inspect both cases.
 
 ### Pause and reason
 
@@ -38,7 +36,7 @@ No. Clipping modifies the objective incentive, not a hard constraint on ratios. 
 
 ## The derivative does not pass through the sampled action
 
-Let $\theta$ denote the three position logits. We maximize expected episode return $J(\theta)$. The score-function identity gives the expectation below. Rewards before an action do not depend on that action, so reward-to-go is a valid credit signal. Our baseline is zero; we do not fit a critic or use generalized advantage estimation. We freeze sampled actions and targets with stop_gradient. Trying to differentiate through Bernoulli sampling is a different, inappropriate estimator for this exercise.
+The training goal is expected episode return, but a sampled left/right action is discrete. The score-function estimator uses `grad(log pi(action|state))` times reward-to-go, so the code differentiates the log probability while treating the sampled action and its target as fixed. In this lesson the baseline is zero: that keeps the estimator simple but leaves more episode-to-episode variance than a useful value baseline may. There is no critic or GAE in this loop.
 
 $$
 \nabla J(\theta)=\mathbb{E}\!\left[\sum_t \nabla_\theta\log\pi_\theta(a_t\mid s_t)G_t\right]
@@ -46,11 +44,11 @@ $$
 
 ## Normalize by the object you promised to optimize
 
-The objective is return per episode. We sum live action terms and divide by the number of episodes $B$, not the number of live transitions. Dividing by live transitions changes the batch-dependent scale as the policy learns to finish sooner. Each REINFORCE update uses a fresh on-policy rollout once. The learning rate is $0.5$ for this tabular fixture; that value is not a recommendation for neural agents.
+The objective averages episode return, so sum live action terms and divide by batch size $B$. Dividing by the number of live transitions instead changes scale as episodes finish sooner. This matters in the corridor: the same 64 episodes can contribute fewer live rows after the policy learns to reach the goal quickly. The tabular learning rate 0.5 is chosen for this fixture, not as a neural-network default.
 
 ## Freeze the policy that collected the batch
 
-For PPO, store old log probabilities at collection time and keep them fixed through all $3$ optimization epochs. The ratio is computed by subtracting log probabilities before exponentiating. At the first epoch the ratio is $1$. It changes as the candidate policy changes; overwriting old probabilities each epoch would erase the reference point and defeat clipping. Our target $\hat A_t$ is reward-to-go with zero baseline, a noisy but valid first-epoch policy-gradient estimator.
+PPO's ratio needs a fixed reference: store each action's old log probability when the batch is collected, then keep it unchanged through all three optimization epochs. At the first update, candidate and behavior policies match, so $r=1$; later updates change the numerator only. Replacing the stored value each epoch would reset the comparison and remove the intended clipping. Here the credit signal is reward-to-go with zero baseline, so it is noisier than an advantage estimate centered by a value function.
 
 $$
 \rho_t(\theta)=\exp\!\left(\log\pi_\theta(a_t\mid s_t)-\log\pi_{\mathrm{old}}(a_t\mid s_t)\right)
@@ -58,7 +56,7 @@ $$
 
 ## The minimum matters for negative advantages
 
-We maximize the minimum of the ordinary ratio-weighted target and its clipped alternative, with $\epsilon=0.2$. For a positive target $1$ and ratio $1.4$, the clipped objective is $1.2$: extra probability gets no extra reward. For a negative target $-1$ and ratio $0.6$, it is $-0.8$: reducing probability further gets no extra reward. The opposite directions remain penalized. Clipping a ratio inside every term without the minimum is not the same objective.
+The clipped objective takes the minimum of the unclipped and clipped terms. With $\epsilon=0.2$, positive $A=1, r=1.4$ yields $\min(1.4,1.2)=1.2$; negative $A=-1, r=0.6$ yields $\min(-0.6,-0.8)=-0.8$. The minimum prevents extra gain from pushing a sampled action farther in its already favorable direction. Clipping every ratio without this minimum would define a different objective.
 
 $$
 L^{\mathrm{clip}}(\theta)=\frac1B\sum_{b,t}\min\!\left(\rho_{t,b}\hat A_{t,b},\operatorname{clip}(\rho_{t,b},1-\epsilon,1+\epsilon)\hat A_{t,b}\right)
@@ -66,11 +64,11 @@ $$
 
 ## Clipping is not a guaranteed trust region
 
-The surrogate has flat regions for particular sampled actions; it does not constrain every probability or guarantee improvement in true return. Several parameters share data in a neural model, unseen states are absent, and multiple gradient steps can move the policy substantially. Our complete learning loop repeatedly collects fresh episodes and optimizes the frozen batch. It is a small clipped policy-gradient agent, not a production PPO stack: no critic, entropy bonus, observation normalization or minibatch scheduler is included.
+A flat clipped term limits the incentive for a sampled action, but it does not constrain every policy probability or guarantee higher true return. Several gradient steps can still move shared parameters, including at unobserved states. The plotted return is an exact evaluator for this tiny corridor, not the training surrogate; the stochastic gradient estimates still vary across batches. Treat clipping as an objective design, then evaluate learned policies separately.
 
 ## Calculate expected return without sampling
 
-This environment has only three unfinished positions, so dynamic programming can average left and right outcomes exactly for each remaining step budget. Start from zero remaining reward, back up the transition expectation $8$ times, and average the values at initial positions $0$ and $1$. This evaluator does not use rollout samples. An always-left policy earns $-0.08$, the uniform policy earns $0.466875$, and always-right earns $0.985$. It is an unusually strong diagnostic available in a tiny fixture, not a scalable evaluator for arbitrary environments.
+Because only positions 0, 1 and 2 are unfinished and the horizon is eight, dynamic programming can average left and right transitions exactly instead of sampling episodes. It gives `-0.08` for always-left, `0.466875` for a uniform policy and `0.985` for always-right. These values sanity-check the sampled training curve and its ceiling. This exact evaluator is possible because the fixture is tiny; a large environment would need rollouts and uncertainty reporting.
 
 ## Reuse the environment and collector
 
@@ -136,7 +134,8 @@ def rollout(theta, key, batch_size=256, horizon=8):
         # Vectorize across the batch dimension without a Python loop (`(next_states, rewards, terminated, truncated)`).
         next_states, rewards, terminated, truncated = jax.vmap(
             lambda s, a: step(s, a, horizon))(states, actions)
-        record = dict(observation=observations, action=actions, reward=rewards,
+        record = dict(observation=observations, next_observation=next_states.position,
+                      next_elapsed=next_states.elapsed, action=actions, reward=rewards,
                       active=~states.done, terminated=terminated, truncated=truncated,
                       old_logp=log_probability(theta, observations, actions))
         return next_states, record
@@ -304,7 +303,8 @@ def rollout(theta, key, batch_size=256, horizon=8):
         # Vectorize across the batch dimension without a Python loop (`(next_states, rewards, terminated, truncated)`).
         next_states, rewards, terminated, truncated = jax.vmap(
             lambda s, a: step(s, a, horizon))(states, actions)
-        record = dict(observation=observations, action=actions, reward=rewards,
+        record = dict(observation=observations, next_observation=next_states.position,
+                      next_elapsed=next_states.elapsed, action=actions, reward=rewards,
                       active=~states.done, terminated=terminated, truncated=truncated,
                       old_logp=log_probability(theta, observations, actions))
         return next_states, record
@@ -404,11 +404,11 @@ Expected: The reference seed improves exact expected return from $0.466875$ to a
 
 ### Read the figure
 
-The horizontal axis counts freshly collected rollout batches; zero is the untrained policy. Each later point is the exact expected finite-horizon return of the updated policy. Both lines begin at $0.466875$. In this seed the REINFORCE line ends near $0.9522$, while the clipped-update line ends near $0.9758$. The curves measure return, not the optimization surrogate.
+The x-axis counts fresh rollout batches (0 is the initial policy); the y-axis is exact expected episode return, not sampled batch return. Both series start at `0.466875`. At batch 40, REINFORCE reaches about `0.9522` and the clipped update about `0.9758`; the always-right policy is `0.985`. Predict whether a small downward step would prove failure: these are stochastic updates, so inspect the full curve and held-out runs rather than one point.
 
 ### Connect it to the computation
 
-The clipped method takes three gradient steps per collection, while REINFORCE takes one. This is therefore not a compute-matched algorithm comparison. The always-right ceiling in this environment is $0.985$; approaching it shows that the policy has learned this corridor task. Small non-monotonic changes are compatible with stochastic updates, and one seed is distinct from which method is better on other tasks.
+The plotted data comes from exact dynamic-programming evaluation after each update, while gradients were estimated from sampled episodes. The clipped procedure uses three epochs per batch and REINFORCE one, so the curves are not compute-matched. Both improve substantially over the uniform baseline in this seed, but the gap does not establish a general method ranking. The advantage/baseline choice affects estimator variance; the return plot measures resulting policy behavior.
 
 ```python
 visual_data = {'kind':'line','x':list(range(41)),'xlabel':'fresh rollout batches','ylabel':'exact expected episode return','series':[{'label':'REINFORCE: 1 epoch/batch','y':history_pg.tolist()},{'label':'clipped updates: 3 epochs/batch','y':history_ppo.tolist()}]}
@@ -416,7 +416,7 @@ visual_data = {'kind':'line','x':list(range(41)),'xlabel':'fresh rollout batches
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:23:29.815968+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:14:19.731675+00:00. JAX 0.9.2.
 
 ```text
 REINFORCE initial/final exact return: 0.46687505 0.9521624
@@ -472,18 +472,38 @@ Run REINFORCE with a different training seed and retain the initial and final ex
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Exercise solution
+**Inputs:**
+- A fresh integer training seed different from the earlier example.
+- The finite-horizon `train` function using REINFORCE and one epoch per rollout.
+- The initial uniform policy and returned exact-return history.
+
+**Outputs:**
+- The trained policy and its full exact-return history.
+- A comparison against the initial policy under the same exact evaluator.
+
+**Invariants to check:**
+- A changed seed changes the sampled learning path.
+- The final exact return improves for this declared run.
+- Intermediate points need not increase monotonically.
+
+**Hints:**
+- Pass the new seed to training; do not reuse an evaluation key.
+- Use exact expected return for this tiny environment, not a noisy training batch mean.
+
+**Key functions & syntax to use:**
+- `jnp.zeros(shape, dtype=...)` — Creates a JAX array of the requested shape filled with zeros.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-other_theta, other_history = train(...)  # TODO: compute other_theta, other_history
-assert other_history[-1]  # TODO: complete assertion check
-assert other_history[-1]  # TODO: complete assertion check
-assert not jnp.array_equal(other_theta,theta_pg)  # TODO: complete assertion check
-print('changed seed final exact return:', other_history[-1])
+import jax.numpy as jnp
+
+def compare_reinforce_seed(seed, train, exact_return):
+    # TODO: run one fresh REINFORCE training run
+    theta, history = ...
+    initial_policy = jnp.zeros((3,))
+    # TODO: compare initial and final values and return the evidence
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -513,27 +533,33 @@ Compute new probabilities from changed parameters, leaving the rollout dictionar
 
 ### How to write: Inspect a frozen behavior reference — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.zeros / jnp.ones(shape, dtype=...)` — Allocates a tensor of the given `shape` initialized with constants.
-- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
-- `jax.random.PRNGKey(seed) & jax.random.split(key)` — Uses explicit PRNG keys. Split a key when you need independent random draws; reusing a key repeats its random stream.
+**Inputs:**
+- A rollout collected with zero logits and a fixed key.
+- A candidate policy with logits equal to one.
+- Stored behavior log probabilities from the unchanged rollout.
 
-**Step-by-step implementation plan:**
-1. Create or split explicit PRNG key(s) (`(_, b)`) for reproducible randomness.
+**Outputs:**
+- The ratio range and a check that collection-time log probabilities stay fixed.
+
+**Invariants to check:**
+- Ratios compare current action likelihood to the saved behavior likelihood.
+- The saved old log probabilities are not recomputed or mutated.
+
+**Hints:**
+- Copy or retain the old array before evaluating the candidate.
+- Use the recorded actions and observations in both calculations.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Inspect a frozen behavior reference (Transfer / diagnosis)
-# Create or split explicit PRNG key(s) (`(_, b)`) for reproducible randomness.
-_, b = rollout(...)  # TODO: compute _, b
-old = ...  # TODO: compute old
-newlog = log_probability(...)  # TODO: compute newlog
-ratios = jnp.exp(...)  # TODO: compute ratios
-assert jnp.array_equal(old,b['old_logp'])  # TODO: complete assertion check
-assert float(jnp.min(ratios))  # TODO: complete assertion check
-old_grad = jax.grad(...)  # TODO: compute old_grad
-assert jnp.all(old_grad  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+
+def inspect_behavior_ratios(rollout, log_probability, key):
+    # TODO: collect the behavior batch and save its old log probabilities
+    # TODO: evaluate the changed policy on those same observations/actions
+    # TODO: calculate and inspect the action probability ratios
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -569,21 +595,35 @@ From position $0$, two moves earn $-0.02$. From position $1$, they earn $0.99$.
 
 ### How to write: Change the time budget — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.zeros / jnp.ones(shape, dtype=...)` — Allocates a tensor of the given `shape` initialized with constants.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- The always-right policy and horizon 2.
+- The exact finite-horizon evaluator.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- An independent hand calculation and the evaluator result.
+
+**Invariants to check:**
+- Only the starting positions that can reach the goal within the budget contribute a success reward.
+- The exact result changes with the time budget.
+
+**Hints:**
+- Enumerate the two equally likely start positions.
+- Write each path’s transition rewards before taking their mean.
+
+**Key functions & syntax to use:**
+- `jnp.full(shape, fill_value, dtype=...)` — Creates an array of the requested shape with every element set to `fill_value`.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Change the time budget (Transfer / diagnosis): Changing the horizon changes the task itself.
-short = exact_return(...)  # TODO: compute short
-assert jnp.allclose(short,(-.02+.99)/2,atol=1e-6)  # TODO: complete assertion check
-assert short  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def check_short_horizon(exact_return):
+    # TODO: compute the hand expectation from the two starts
+    hand_value = ...
+    evaluated = exact_return(jnp.full((3,), 100.), horizon=2)
+    # TODO: compare the independent value with the evaluator
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -609,7 +649,15 @@ During multiple PPO epochs on one rollout batch, what must remain fixed?
 
 <details><summary>Answer and explanation</summary>
 
-The collected actions, return targets and behavior-policy log probabilities
+**1. Only the current candidate policy**
+
+The candidate policy changes during optimization; the collected actions and behavior log probabilities describe the fixed rollout.
+
+**2. Only the clipping threshold; old probabilities can be recomputed from the candidate**
+
+Recomputing old probabilities with the updated policy destroys the importance ratio. Save them when the rollout is collected.
+
+**3. The collected actions, return targets and behavior-policy log probabilities (correct)**
 
 The probability ratio compares the changing candidate with the policy that actually generated the batch. Replacing its denominator destroys that comparison.
 

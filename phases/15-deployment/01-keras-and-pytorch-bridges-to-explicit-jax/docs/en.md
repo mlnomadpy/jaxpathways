@@ -4,11 +4,14 @@ Phase 15: Deployment, interoperability & edge AI · about 110 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Adapt a pretrained model and choose a post-training objective](https://www.tahabouhsine.com/jaxpathways/lesson-deployment-02.html).
+
 ## What you will be able to do
 
 - Map Dense and Linear weight axes and verify a known output.
 - Separate architecture, weights, non-trainable state, optimizer state and preprocessing.
 - Run a backend-neutral Keras model and explain the boundaries of tensor exchange and export.
+- Carry an explicit attention tensor layout and processor contract into a bounded Transformer conversion rather than assuming a dense transpose is sufficient.
 
 ## The problem
 
@@ -39,6 +42,8 @@ The wrong orientation can still have the expected shape. Unequal dimensions and 
 ## A parameter file is not a model
 
 Our inputs have shape $[\mathrm{batch}, 3]$. Keras Dense uses a $[3, 2]$ kernel; PyTorch Linear stores $[2, 3]$ weights and multiplies by their transpose. Bias has shape $[2]$. For $x=[1, 2, -1]$, the first output is $1+1+1+0.1=3.1$. Verify a hand-derived row before comparing whole arrays. Convolution kernels have additional layout conventions; do not apply this dense transpose rule to them.
+
+The executed two-row batch returns $[[3.1,-0.45],[-4.9,4.55]]$ in both matched implementations. For the first row, the output arithmetic is $1+1+1+0.1=3.1$; for the second output it is $-2+2-0.25-0.2=-0.45$. If the outputs differ while shapes match, check feature order before changing tolerances: the fixture deliberately swaps first and last features and observes $(-0.9,4.05)$.
 
 ## Use Keras as a shared model vocabulary
 
@@ -106,6 +111,22 @@ No. Both changes restore each feature–coefficient pairing. Swapping only the v
 Keep the dense example as a test you can reason through by hand. Then add one operation at a time: a nonlinearity, normalization, and a second layer. Record an intermediate tensor at each boundary. For a convolution, declare both image layout and kernel layout; for attention, declare token order, head order, masks, and how query, key and value weights are packed.
 
 The optional Keras lab runs real backends in separate processes. The default companion below uses NumPy and JAX to expose the mapping arithmetic, so its success alone is verified separately from TensorFlow, PyTorch, or a complete pretrained checkpoint. Carry a table of source names, target names, shapes, axis permutations and test inputs into the model-specific conversion lesson.
+
+## Attention requires a model-family contract
+
+The dense transpose rule does not describe an attention checkpoint. Query, key and value may be separate or fused; fused rows can be stored as Q-then-K-then-V or interleaved by head. Declare the source key, target key, source shape, target shape, axis transform and reshape order. Also bind tokenization or preprocessing identity, position IDs, mask meaning, normalization epsilon, and whether the language-model head shares the embedding table.
+
+The deployment-08 optional lab gives one saved PyTorch-to-NNX example for the course's single pre-normalized decoder block. It is a bounded fixture with an explicit map, asymmetric probes, intermediate comparisons, semantic negative controls, VJP and process reload. It does not imply that arbitrary saved checkpoints can be converted by applying a general transpose rule.
+
+### Pause and reason
+
+Why can a fused-QKV tensor pass shape checks even when its head interpretation is wrong?
+
+<details><summary>Compare your reasoning</summary>
+
+Different reshapes and permutations can preserve the same total dimensions. A numerical probe must exercise asymmetric heads and compare intermediate attention values.
+
+</details>
 
 ## Write the source function and its known input
 
@@ -193,15 +214,11 @@ Expected: Two rows match; the first is $[3.1, -0.45]$ within absolute tolerance 
 
 ### Read the figure
 
-The upper matrix has input features as rows and output features as columns. The lower matrix swaps those axes. The cell values are weights, and the two panels contain the same six numbers in transposed positions.
-
-Track the weight $-1$: it moves from input $2$, output $0$ in the upper panel to output $0$, input $2$ in the lower panel. It still connects the same input feature to the same output feature. The layout changes from shape $(3,2)$ to $(2,3)$.
+The upper heatmap uses input feature as row and output feature as column; the lower uses output as row and input as column. Cell units are weights, and the same six numbers move by transpose: weight $-1$ stays on the connection from input 2 to output 0. The shapes change from $3\times2$ to $2\times3$, but the function should not. Use the known batch output $[[3.1,-0.45],[-4.9,4.55]]$ as the next numerical check.
 
 ### Connect it to the computation
 
-With the first convention, a row batch computes $XW+b$. With the transposed storage convention, the equivalent calculation uses $X\widetilde W^{\mathsf T}+b$, where $\widetilde W=W^{\mathsf T}$. Transposing storage without adapting the computation would change the meaning or produce a shape error.
-
-The picture explains this layout contract using an explicit numerical reference. It does not demonstrate that every layer or serialized model can be transferred between frameworks by one transpose. Check activations, bias, preprocessing, and layer-specific conventions against an independent output reference as well.
+The first layout computes $XW+b$; the transposed storage computes $X\widetilde W^T+b$, with $\widetilde W=W^T$. In the executed fixture both produce scores $(3.1,-0.45)$ and $(-4.9,4.55)$. A feature-order swap instead gives $(-0.9,4.05)$, despite valid dimensions. After checking the transpose, inspect feature names, bias, activation and preprocessing; the dense result does not qualify conversion of a full framework model.
 
 ```python
 visual_data = {'kind': 'panels', 'panels': [{'kind': 'heatmap', 'title': 'Input × output layout', 'values': keras_kernel.tolist(), 'rows': ['input 0', 'input 1', 'input 2'], 'columns': ['output 0', 'output 1'], 'unit': 'weight'}, {'kind': 'heatmap', 'title': 'Output × input layout', 'values': torch_weight.tolist(), 'rows': ['output 0', 'output 1'], 'columns': ['input 0', 'input 1', 'input 2'], 'unit': 'weight'}]}
@@ -209,7 +226,7 @@ visual_data = {'kind': 'panels', 'panels': [{'kind': 'heatmap', 'title': 'Input 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:24:23.045594+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:09:09.907505+00:00. JAX 0.9.2.
 
 ```text
 Matched dense outputs: [[ 3.1  -0.45]
@@ -269,22 +286,30 @@ Add a batch with four rows and preserve the same parameters. Verify each row ind
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `array.reshape(new_shape)` — Reorganizes tensor axes without changing the total element count (`array.size`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- A dense layer weight/bias pair, the source preprocessing rule, and one or more raw input rows.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- JAX-compatible predictions for each input row plus a per-feature independent arithmetic check.
+
+**Invariants to check:**
+- Weight layout, input normalization, bias, activation, and batch axis are all explicit at the framework boundary.
+
+**Hints:**
+- Use an asymmetric weight matrix and inputs so a transpose or scale mismatch is visible.
+- Compare the same raw values through both paths before testing a new batch.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Add a batch with four rows and preserve the same parameters.
-changed = np.arange(...)  # TODO: compute changed
-expected = np.stack(...)  # TODO: compute expected
-np.testing.assert_allclose(predict(params, changed), expected, atol = ...  # TODO: compute np.testing.assert_allclose(predict(params, changed), expected, atol
-print("Changed batch verified")
+import numpy as np
+import jax
+import jax.numpy as jnp
+
+def map_dense_inference(weights, bias, inputs, input_transform):
+    """JAX-compatible predictions for each input row plus a per-feature independent arithmetic check."""
+    # TODO: Keep raw input normalization and dense weight layout explicit, then compare each output row with a NumPy reference.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -313,22 +338,30 @@ Compute both predictions from the same raw input: once with the source normaliza
 
 ### How to write: Detect a preprocessing mismatch — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- Suppose the source model expects inputs divided by $255$, while the target receives raw pixels. Demonstrate why correct weight transfer still fails.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- A pair of prediction paths using identical transferred weights.
+
+**Invariants to check:**
+- Changing only input normalization changes the model input seen by the dense layer.
+
+**Hints:**
+- Compute both predictions from the same raw input: once with the source normalization and once without it. Matching weights cannot cancel an input-scale mismatch.
+- Transform the raw pixel row before inference and compare it with the target path.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Detect a preprocessing mismatch (Transfer): Input normalization belongs in the deployment contract.
-pixels = np.array(...)  # TODO: compute pixels
-source = predict(...)  # TODO: compute source
-wrong = predict(...)  # TODO: compute wrong
-assert not np.allclose(source, wrong)  # TODO: complete assertion check
-np.testing.assert_allclose(source, predict(params, pixels / 255.), atol=1e-6)
+import numpy as np
+import jax
+import jax.numpy as jnp
+
+def practice_detect_a_preprocessing_mismatch(source_model, target_model, raw_pixels, source_scale):
+    """Complete the detect a preprocessing mismatch check."""
+    # TODO: ('Apply source scaling and target raw-input paths to the same pixels and compare their dense outputs.', 'Two predictions and a mismatch attributable to preprocessing while weights remain fixed.', 'The only changed factor is input normalization; transferred parameters are identical.')
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -360,29 +393,30 @@ Compute both first-layer rows by hand, replace negative entries by zero, and app
 
 ### How to write: Map a second layer and locate an omitted activation — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- Extend the dense mapping with ReLU and a second dense layer. Use independently computed final scores to catch a converter that forgets ReLU. Then show why an all-positive probe would be a weak test.
 
-**Step-by-step implementation plan:**
-1. Transfer the device result to the host for an independent NumPy comparison.
-2. Transfer the device result to the host for an independent NumPy comparison.
+**Outputs:**
+- Independent scores for a two-layer dense mapping with an intermediate activation.
+
+**Invariants to check:**
+- A negative hidden preactivation exercises the ReLU boundary in the parity check.
+
+**Hints:**
+- Compute both first-layer rows by hand, replace negative entries by zero, and apply the new output weights.
+- Compare the first layer, activation, and second layer in sequence.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Map a second layer and locate an omitted activation (Transfer / diagnosis)
-second_kernel = np.array(...)  # TODO: compute second_kernel
-second_bias = np.array(...)  # TODO: compute second_bias
-# Transfer the device result to the host for an independent NumPy comparison.
-hidden = np.maximum(...)  # TODO: compute hidden
-bridged_scores = ...  # TODO: compute bridged_scores
-np.testing.assert_allclose(bridged_scores[:, 0], [6.5, -4.25], atol=2e-6)
-# Transfer the device result to the host for an independent NumPy comparison.
-omitted_relu = np.asarray(...)  # TODO: compute omitted_relu
-assert not np.allclose(omitted_relu, bridged_scores)  # TODO: complete assertion check
-positive_probe = np.array(...)  # TODO: compute positive_probe
-np.testing.assert_array_equal(np.maximum(positive_probe, 0), positive_probe)
-print('Two-layer reference scores:', bridged_scores[:, 0])
+import numpy as np
+import jax
+import jax.numpy as jnp
+
+def practice_map_a_second_layer_and_locate_an_omitted_activation(weight1, bias1, weight2, bias2, inputs):
+    """Complete the map a second layer and locate an omitted activation check."""
+    # TODO: ('Implement both dense layers with the intermediate ReLU and compare against independent feature-by-feature scores on a probe containing a negative hidden activation.', 'Independent two-layer scores and a converter failure when the activation is omitted.', 'The comparison includes a probe where ReLU changes the intermediate representation.')
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -417,9 +451,17 @@ The Dense predictions match after transposing weights. What has been established
 
 <details><summary>Answer and explanation</summary>
 
-The tested inference mapping matches for these inputs.
+**1. The tested inference mapping matches for these inputs. (correct)**
 
 The comparison establishes bounded numerical equivalence. Training state, other operators, shapes and target runtime support each need their own evidence.
+
+**2. Optimizer and random state are now equivalent.**
+
+Inference-weight parity does not map optimizer history or random state. Training continuation requires a larger conversion contract.
+
+**3. Any runtime can execute the model.**
+
+A tested Dense mapping cannot establish compatibility with every runtime, operator or architecture. Expand cases before expanding the claim.
 
 </details>
 

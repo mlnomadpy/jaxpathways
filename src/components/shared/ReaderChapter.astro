@@ -3,11 +3,14 @@ import { materialStatus, materialStatusLabel } from '../../lib/material-status.j
 import { inlineMath, renderMath } from '../../lib/math.js';
 import { executionScope } from '../../lib/runtime.js';
 import Prose from './Prose.astro';
-import { renderBuildStepCodeBreakdown } from '../../lib/code-teaching.js';
+import {
+  renderBuildStepCodeBreakdown,
+  renderLearnerStarterContract,
+} from '../../lib/code-teaching.js';
 import { codePanel as sharedCodePanel } from '../../lib/lesson-content.js';
 import { lessonVisual, lessonExecution, lessonMechanism } from '../../lib/lesson-visuals.js';
 import { embeddedImage } from '../../lib/server/reader-assets.js';
-import type { authoredLessons } from '../../lib/course-data.js';
+import { authoredLessons } from '../../lib/course-data.js';
 interface Props {
   lesson: (typeof authoredLessons)[number];
   index: number;
@@ -15,6 +18,10 @@ interface Props {
 }
 const { lesson, index } = Astro.props;
 const c = lesson.content!;
+const preparation = lesson.prerequisites.map((id) => {
+  const position = authoredLessons.findIndex((item) => item.id === id);
+  return { id, position, title: authoredLessons[position]?.title || id };
+});
 const scope = executionScope(lesson);
 const maturity = materialStatus('lessons', lesson.id);
 const statusUrl = new URL(
@@ -39,6 +46,17 @@ const { offline = false } = Astro.props;
     this chapter and its practice tasks.
   </p>
   <p set:html={inlineMath(lesson.objective)} />
+  {preparation.length > 0 && (
+    <nav class="chapter-preparation" aria-label="Chapter preparation">
+      <strong>Before this chapter:</strong>{' '}
+      {preparation.map((item, i) => (
+        <Fragment>
+          {i > 0 && '; '}
+          <a href={`#chapter-${item.position}`}>{item.title}</a>
+        </Fragment>
+      ))}
+    </nav>
+  )}
   {c.setupBundle && (
     <p>
       <a href={new URL(c.setupBundle.url, 'https://www.tahabouhsine.com/jaxpathways/').href}>
@@ -151,6 +169,10 @@ const { offline = false } = Astro.props;
   ))}
   <h2>Your exercise</h2>
   <Prose text={c.exercise} />
+  <Fragment set:html={renderLearnerStarterContract(c.learnerStarter, 'Exercise learner starter')} />
+  <p class="print-solution-link">
+    <a href={`#chapter-${index}-print-solutions`}>Printed reference solutions and reasoning</a>
+  </p>
   <details class="solution-reveal">
     <summary>Reveal the reference solution</summary>
     <Fragment set:html={codePanel(c.solution, 'Python · reference solution')} />
@@ -162,6 +184,15 @@ const { offline = false } = Astro.props;
       <Prose text={practice.prompt} />
       <h3>Hint</h3>
       <Prose text={practice.hint} />
+      <Fragment
+        set:html={renderLearnerStarterContract(
+          practice.learnerStarter,
+          `${practice.title} learner starter`,
+        )}
+      />
+      <p class="print-solution-link">
+        <a href={`#chapter-${index}-print-solutions`}>Printed reference solutions and reasoning</a>
+      </p>
       <details class="solution-reveal">
         <summary>Reveal the reference solution</summary>
         <Fragment set:html={codePanel(practice.solution, 'Python · practice solution')} />
@@ -181,7 +212,22 @@ const { offline = false } = Astro.props;
     <p>
       <span set:html={inlineMath(`Answer: ${c.options[c.answer]}. ${c.explanation}`)} />
     </p>
+    <h3>Reason through the other choices</h3>
+    <ul>
+      {c.options.map(
+        (option, index) =>
+          index !== c.answer && (
+            <li>
+              <strong set:html={inlineMath(option)} />
+              <Prose text={c.optionFeedback[index]} />
+            </li>
+          ),
+      )}
+    </ul>
   </details>
+  <p class="print-solution-link">
+    <a href={`#chapter-${index}-print-solutions`}>Printed checkpoint answer and reasoning</a>
+  </p>
   {c.diagnosis && (
     <>
       <h2>Diagnose the result</h2>
@@ -212,4 +258,49 @@ const { offline = false } = Astro.props;
       </ul>
     </>
   )}
+  <section
+    class="print-solutions"
+    id={`chapter-${index}-print-solutions`}
+    aria-label="Printed reference solutions and reasoning"
+  >
+    <p class="chapter-kicker">
+      Chapter {index + 1} · {lesson.id}
+    </p>
+    <h2>{lesson.title}: reference solutions and checkpoint reasoning</h2>
+    {c.buildCode && (
+      <>
+        <h3>Numerical estimate code</h3>
+        <Fragment set:html={codePanel(c.buildCode, 'Python · numerical estimate')} />
+      </>
+    )}
+    <h3>Assembled example code</h3>
+    <Fragment set:html={codePanel(c.code, 'Python · complete example')} />
+    <h3>Exercise solution</h3>
+    <Fragment set:html={codePanel(c.solution, 'Python · reference solution')} />
+    {c.practice?.map((practice) => (
+      <section class="printed-practice-solution">
+        <h3>{practice.title} · reference solution</h3>
+        <Fragment set:html={codePanel(practice.solution, 'Python · practice solution')} />
+        <Prose text={practice.explanation} />
+      </section>
+    ))}
+    <section class="printed-checkpoint-reasoning">
+      <h3>Checkpoint answer and explanation</h3>
+      <p>
+        <span set:html={inlineMath(`Answer: ${c.options[c.answer]}. ${c.explanation}`)} />
+      </p>
+      <h4>Reason through the other choices</h4>
+      <ul>
+        {c.options.map(
+          (option, optionIndex) =>
+            optionIndex !== c.answer && (
+              <li>
+                <strong set:html={inlineMath(option)} />
+                <Prose text={c.optionFeedback[optionIndex]} />
+              </li>
+            ),
+        )}
+      </ul>
+    </section>
+  </section>
 </article>

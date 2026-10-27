@@ -15,7 +15,7 @@
       {
         "id": "guided-reasoning",
         "title": "Locate your transformation in the compilation pipeline",
-        "body": "Imagine an interpreter carrying a value and a directional derivative through each supported operation. Addition combines both pairs; multiplication applies the product rule. The interpreter must explicitly define behavior for every primitive it accepts.\n\nReject unsupported operations instead of silently passing them through with a made-up derivative. Compare the transformed result with an analytic or independently calculated direction on a small composition.\n\nThe directional-derivative curve checks the bounded interpreter example. It is separate from a general-purpose compiler or support for all JAX primitives. Identify which stage your code implements and which later stages JAX supplies.",
+        "body": "Imagine an interpreter carrying a value and a directional derivative through each supported operation. Addition combines both pairs; multiplication applies the product rule. The interpreter must explicitly define behavior for every primitive it accepts.\n\nReject unsupported operations instead of silently passing them through with a made-up derivative. Compare the transformed result with an analytic or independently calculated direction on a small composition.\n\nThe directional-derivative curve checks the bounded interpreter example. It is separate from a general-purpose compiler or support for all JAX primitives. Identify which stage your code implements and which later stages JAX supplies.\n\nFor this interpreter the accepted set is explicit: add, multiply, negate, sine and sum-reduction. The executed fixture uses `sin`, `mul`, `add` and `reduce_sum`; an `exp` trace is deliberately rejected. This boundary lets the derivative rule be audited operation by operation. When adding a primitive, first write its primal and tangent rule, then add a small independent comparison before extending the accepted set.",
         "check": {
           "prompt": "What should a tiny interpreter do when it sees a primitive without a defined rule?",
           "answer": "Raise a clear unsupported-operation error. A plausible fallback would hide a gap in the transformation's mathematical contract."
@@ -36,7 +36,7 @@
       },
       {
         "title": "Verify a complete transformed program",
-        "body": "Our example is \\(F(x)=\\sum_i(x_i\\sin x_i+c_i)\\), with captured offset \\(c\\). Its analytic directional derivative is \\(\\sum_i(\\sin x_i+x_i\\cos x_i)v_i\\). The interpreter implements that derivative through local primitive rules, while the reference derives it from the whole expression. Comparing those approaches checks both the local rules and how they are composed."
+        "body": "Our example is \\(F(x)=\\sum_i(x_i\\sin x_i+c_i)\\), with captured offset \\(c\\). Its analytic directional derivative is \\(\\sum_i(\\sin x_i+x_i\\cos x_i)v_i\\). The interpreter implements that derivative through local primitive rules, while the reference derives it from the whole expression. Comparing those approaches checks both the local rules and how they are composed.\n\nFor the recorded center point, the interpreted primal is about 2.30998 and its tangent is 0.439129; both match the analytic directional derivative and JAX’s JVP. As the base point moves from \\(\\alpha=-1\\) to \\(1\\), the derivative changes from about \\(-0.09853\\) to a sampled peak of 0.43913 at zero, then to about 0.04102. Agreement across this curve checks composition of the local rules, not just one hand-picked value."
       },
       {
         "title": "Trace, lower and compile are separate stages",
@@ -73,7 +73,25 @@
         "prompt": "Replace the captured offset by an explicit argument, seed that argument with a nonzero direction, and verify its contribution to the total tangent.",
         "hint": "The new program has two input variables and needs two tangent arguments.",
         "solution": "# Make a constant into a differentiable input (Practice)\ndef explicit(z,c):\n    return jnp.sum(jnp.sin(z)*z+c)\n# Trace or lower the function to inspect its compiler representation (`explicit_closed`).\nexplicit_closed=jax.make_jaxpr(explicit)(x,offset)\nconstant_direction=jnp.array([.2,.1,-.4])\nev,et=tiny_jvp(explicit_closed,(x,offset),(direction,constant_direction))\n# Transfer the device result to the host for an independent NumPy comparison.\nnp.testing.assert_allclose(et[0],reference_tangent+np.sum(np.asarray(constant_direction)),rtol=1e-12)\nprint(\"Explicit offset tangent contribution:\",float(jnp.sum(constant_direction)))",
-        "explanation": "Zero tangent belonged to a captured constant relative to the old input signature. An explicit input is allowed to vary, so its seed must propagate."
+        "explanation": "Zero tangent belonged to a captured constant relative to the old input signature. An explicit input is allowed to vary, so its seed must propagate.",
+        "learnerStarter": {
+          "inputs": [
+            "Three-element primal vector x and captured offset vector with shape (3,).",
+            "A nonzero direction for x and a nonzero three-element direction for the explicit offset argument."
+          ],
+          "outputs": [
+            "JVP tangent including the contribution from the newly explicit offset argument."
+          ],
+          "invariants": [
+            "A closed-over offset receives no tangent; an explicit argument receives its supplied tangent.",
+            "The explicit-argument JVP matches an independent directional derivative."
+          ],
+          "hints": [
+            "Compare the closed-over function signature with the explicit signature.",
+            "Seed the added argument with a nonzero tangent."
+          ],
+          "code": "import jax\nimport jax.numpy as jnp\n\ndef compare_captured_and_explicit(value, offset, value_tangent, offset_tangent):\n    # TODO: trace the explicit offset as an input and include both seed directions.\n    raise NotImplementedError(\"Expose the vector offset as a differentiable argument\")"
+        }
       },
       {
         "title": "Verify multiple outputs and negation",
@@ -81,7 +99,27 @@
         "prompt": "Trace a supported function returning both a scalar sum and a negated vector. Check the tuple of primal/tangent outputs and reject a mismatched tangent shape.",
         "hint": "Multiple program outputs are supported even though each supported primitive returns one result.",
         "solution": "# Verify multiple outputs and negation (Challenge): Output structure and primitive result structure are distinct.\nmulti=lambda z:(jnp.sum(z*z),-z)\n# Trace or lower the function to inspect its compiler representation (`multi_closed`).\nmulti_closed=jax.make_jaxpr(multi)(x)\nmp,mt=tiny_jvp(multi_closed,(x,),(direction,))\n# Transfer the device result to the host for an independent NumPy comparison.\nnp.testing.assert_allclose(mp[0],np.sum(np.asarray(x)**2),rtol=1e-12)\n# Transfer the device result to the host for an independent NumPy comparison.\nnp.testing.assert_allclose(mp[1],-np.asarray(x),rtol=1e-12)\n# Transfer the device result to the host for an independent NumPy comparison.\nnp.testing.assert_allclose(mt[0],2*np.dot(np.asarray(x),np.asarray(direction)),rtol=1e-12)\n# Transfer the device result to the host for an independent NumPy comparison.\nnp.testing.assert_allclose(mt[1],-np.asarray(direction),rtol=1e-12)\nrejected=False\ntry:tiny_jvp(multi_closed,(x,),(jnp.ones(2),))\nexcept ValueError:rejected=True\nassert rejected\nprint(\"Multiple output contract and malformed tangent rejection verified\")",
-        "explanation": "Output structure and primitive result structure are distinct. The interpreter returns a flat tuple matching the jaxpr outputs, not an arbitrary original Python pytree."
+        "explanation": "Output structure and primitive result structure are distinct. The interpreter returns a flat tuple matching the jaxpr outputs, not an arbitrary original Python pytree.",
+        "learnerStarter": {
+          "inputs": [
+            "A three-element vector and a same-shaped tangent.",
+            "A supported function returning the scalar sum of elementwise squares and the negated vector.",
+            "A deliberately mismatched tangent shape."
+          ],
+          "outputs": [
+            "Tuple-structured scalar/vector primals and matching scalar/vector tangents.",
+            "A clear shape rejection for the mismatched tangent."
+          ],
+          "invariants": [
+            "The scalar tangent is the directional derivative of the square-sum output.",
+            "The vector tangent preserves shape and sign for the negated output."
+          ],
+          "hints": [
+            "Use multiplication and reduction rather than an unsupported power primitive.",
+            "Validate tangent shape against the traced primal signature."
+          ],
+          "code": "import jax\nimport jax.numpy as jnp\n\ndef check_multi_output_jvp(values, tangent):\n    # TODO: define and trace the two-output function, then check matching and malformed seeds.\n    raise NotImplementedError(\"Preserve the tuple output structure and reject a mismatched tangent\")"
+        }
       }
     ],
     "diagnosis": "If primals match but tangents fail, audit multiplication’s two terms and zero tangents for constants. If an unknown primitive appears, stop and inspect its semantics instead of bypassing the error. If compilation rejects a changed shape, rebuild the trace and executable for that signature. Do not infer speed or optimization quality from IR text length.",
@@ -97,8 +135,8 @@
       "title": "A composed interpreter tracks the analytic directional derivative",
       "kind": "executed",
       "prediction": "As the base point moves along a line, should its directional derivative remain constant?",
-      "reading": "The horizontal axis is a scalar displacement \\(\\alpha\\) of the base point \\(x+\\alpha v\\). The vertical axis is the directional derivative of the scalar program along the fixed direction \\(v\\). Each point comes from a new evaluation of the same supported trace at a shape-compatible input.\n\nThe interpreter and analytic curves overlap. Their derivative is about \\(-0.09853\\) at \\(\\alpha=-1\\), rises to a sampled peak of about \\(0.43913\\) at the original point \\(\\alpha=0\\), then falls to about \\(0.04102\\) at \\(\\alpha=1\\). The sign change and nonmonotone shape reflect a changing Jacobian, not disagreement between the two methods.",
-      "connection": "The interpreter obtains each value by composing local tangent rules; the reference directly evaluates \\(\\sum_i(\\sin z_i+z_i\\cos z_i)v_i\\) at \\(z=x+\\alpha v\\). The code also checks the middle point against JAX’s JVP and checks the lowered, compiled transformed program.\n\nAgreement applies to this primitive subset and tested inputs. It does not validate an unsupported operation, nested control flow, compiler performance or device portability. Those require new rules and new evidence rather than extrapolation from this plot.",
+      "reading": "The horizontal axis is displacement \\(\\alpha\\) along the fixed direction, from \\(-1\\) to \\(1\\); the vertical axis is directional derivative. The tiny interpreter and analytic reference curves overlap: the values are about \\(-0.09853\\) at \\(-1\\), 0.43913 at 0, and 0.04102 at 1. The slope changes with the base point, so a constant derivative prediction is wrong. Next check a new point, then an unsupported primitive, which should fail explicitly.",
+      "connection": "The analytic curve evaluates \\(\\sum_i(\\sin z_i+z_i\\cos z_i)v_i\\) at \\(z=x+\\alpha v\\); the interpreter composes local tangent rules for the same program. At the center, the executed primal/tangent are 2.3099803 and 0.4391292. The compiled transformed result matches, and `exp` is rejected as unsupported. This supports the declared primitive subset only, not arbitrary jaxprs or compiler speed.",
       "alt": "Interpreted and analytic directional derivatives overlap while changing along a line through input space.",
       "code": "alphas=np.linspace(-1,1,9)\ninterpreted=[]\nanalytic=[]\nfor alpha in alphas:\n    point=x+alpha*direction\n    interpreted.append(float(tiny_jvp(closed,(point,),(direction,))[1][0]))\n    # Transfer the device result to the host for an independent NumPy comparison.\n    host=np.asarray(point)\n    # Transfer the device result to the host for an independent NumPy comparison.\n    analytic.append(float(np.dot(np.sin(host)+host*np.cos(host),np.asarray(direction))))\nvisual_data={'kind':'line','x':alphas.tolist(),'xlabel':'base-point displacement alpha','ylabel':'directional derivative','series':[{'label':'tiny interpreted tangent','y':interpreted},{'label':'whole-expression analytic reference','y':analytic}]}"
     },
@@ -148,6 +186,30 @@
       "Verify a complete transformed program",
       "Trace, lower and compile are separate stages",
       "Specialization is part of the artifact contract"
-    ]
+    ],
+    "optionFeedback": [
+      "The primal operation can be mathematically differentiable while your interpreter lacks its rule. State the supported primitive set.",
+      "The missing piece is this interpreter’s derivative rule and semantics, not necessarily JAX support or mathematical differentiability. Explicit rejection keeps the supported contract honest.",
+      "JAX can differentiate exp. This exercise deliberately limits its own interpreter and should reject operations without verified rules."
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "A three-element vector x, a second point x+0.6, and a three-element tangent direction.",
+        "A polynomial using only the interpreter-supported add, multiply, negation, and reduction operations."
+      ],
+      "outputs": [
+        "Scalar primal and tangent at both points from the interpreted transformation.",
+        "Matching scalar primal/tangent pairs from a separately compiled transformed computation."
+      ],
+      "invariants": [
+        "The interpreted derivative agrees with an independent directional check at both points.",
+        "The compiled computation preserves the traced vector input signature."
+      ],
+      "hints": [
+        "Inspect the primitives emitted by jax.make_jaxpr before interpreting the program.",
+        "Lower and compile the transformed function separately from the interpreted check."
+      ],
+      "code": "import jax\nimport jax.numpy as jnp\n\ndef inspect_supported_polynomial(points, direction):\n    # TODO: trace a supported vector polynomial, interpret its tangent at both points, then compile it.\n    raise NotImplementedError(\"Keep the supported primitive set and interpreted/compiled checks explicit\")"
+    }
   }
 }

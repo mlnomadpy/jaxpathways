@@ -33,3 +33,11 @@ The hypothetical replica estimate is \(\lceil300/(0.7\cdot200)\rceil=3\). This i
 ## Container delivery extension
 
 Check actual Docker evidence rather than the presence of a Dockerfile. Model/image identities must match the evaluated artifact and mounted bytes; readiness must follow a successful load/prediction. Ask for wrong-digest rejection and explain the service's concurrency/request limits. Base digest pinning and non-root execution are useful controls, not a claim of comprehensive security or production qualification.
+
+## Discussion-case review notes
+
+The quantized artifact is smaller and matches one example, but some operators fall back to CPU and rare-slice quality drops.
+
+Separate file size, represented-input numerical error, held-out quality and actual target placement/latency. Require each claimed acceptance gate; no single compression number substitutes for all four.
+
+Record the learner’s original explanation, the requested evidence and the revised claim. This discussion is qualitative review; it adds no automatic score and is not an independent teaching-review receipt.

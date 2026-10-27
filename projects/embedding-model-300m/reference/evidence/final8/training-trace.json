@@ -1,0 +1,3009 @@
+[
+  {
+    "cursor": 4,
+    "dropout_key": [
+      1586148834,
+      4079524004
+    ],
+    "epoch": 0,
+    "indices": [
+      39,
+      25,
+      121,
+      45
+    ],
+    "input_tokens": 256,
+    "learning_rate": 0.0003,
+    "loss_nats_per_masked_token": 6.255799293518066,
+    "mask_key": [
+      304838930,
+      2451771691
+    ],
+    "selected_tokens": 34,
+    "stage": "phase1_mlm",
+    "step": 1
+  },
+  {
+    "cursor": 8,
+    "dropout_key": [
+      495592926,
+      3593531146
+    ],
+    "epoch": 0,
+    "indices": [
+      14,
+      105,
+      94,
+      26
+    ],
+    "input_tokens": 256,
+    "learning_rate": 0.0003,
+    "loss_nats_per_masked_token": 6.230916500091553,
+    "mask_key": [
+      1869396805,
+      445870748
+    ],
+    "selected_tokens": 36,
+    "stage": "phase1_mlm",
+    "step": 2
+  },
+  {
+    "cursor": 12,
+    "dropout_key": [
+      3492471718,
+      3209785095
+    ],
+    "epoch": 0,
+    "indices": [
+      77,
+      113,
+      36,
+      82
+    ],
+    "input_tokens": 256,
+    "learning_rate": 0.00025714285714285715,
+    "loss_nats_per_masked_token": 6.254334449768066,
+    "mask_key": [
+      3719016878,
+      3897674769
+    ],
+    "selected_tokens": 33,
+    "stage": "phase1_mlm",
+    "step": 3
+  },
+  {
+    "cursor": 16,
+    "dropout_key": [
+      1135103828,
+      836414773
+    ],
+    "epoch": 0,
+    "indices": [
+      125,
+      40,
+      78,
+      95
+    ],
+    "input_tokens": 256,
+    "learning_rate": 0.00021428571428571427,
+    "loss_nats_per_masked_token": 6.276651382446289,
+    "mask_key": [
+      2490604232,
+      3239680897
+    ],
+    "selected_tokens": 32,
+    "stage": "phase1_mlm",
+    "step": 4
+  },
+  {
+    "cursor": 20,
+    "dropout_key": [
+      2020329773,
+      1952285787
+    ],
+    "epoch": 0,
+    "indices": [
+      38,
+      52,
+      32,
+      35
+    ],
+    "input_tokens": 256,
+    "learning_rate": 0.0001714285714285714,
+    "loss_nats_per_masked_token": 6.227052211761475,
+    "mask_key": [
+      1245618426,
+      277008928
+    ],
+    "selected_tokens": 38,
+    "stage": "phase1_mlm",
+    "step": 5
+  },
+  {
+    "cursor": 24,
+    "dropout_key": [
+      140451072,
+      2122814131
+    ],
+    "epoch": 0,
+    "indices": [
+      120,
+      17,
+      18,
+      15
+    ],
+    "input_tokens": 256,
+    "learning_rate": 0.00012857142857142858,
+    "loss_nats_per_masked_token": 6.208186626434326,
+    "mask_key": [
+      1229946006,
+      287978201
+    ],
+    "selected_tokens": 38,
+    "stage": "phase1_mlm",
+    "step": 6
+  },
+  {
+    "cursor": 28,
+    "dropout_key": [
+      1900959914,
+      193846907
+    ],
+    "epoch": 0,
+    "indices": [
+      110,
+      67,
+      9,
+      1
+    ],
+    "input_tokens": 256,
+    "learning_rate": 8.57142857142857e-05,
+    "loss_nats_per_masked_token": 6.226919174194336,
+    "mask_key": [
+      2336914520,
+      81936080
+    ],
+    "selected_tokens": 34,
+    "stage": "phase1_mlm",
+    "step": 7
+  },
+  {
+    "cursor": 32,
+    "dropout_key": [
+      2738315691,
+      2163006826
+    ],
+    "epoch": 0,
+    "indices": [
+      65,
+      83,
+      34,
+      41
+    ],
+    "input_tokens": 256,
+    "learning_rate": 4.285714285714287e-05,
+    "loss_nats_per_masked_token": 6.253174781799316,
+    "mask_key": [
+      336318275,
+      2189265885
+    ],
+    "selected_tokens": 36,
+    "stage": "phase1_mlm",
+    "step": 8
+  },
+  {
+    "contrastive_plus_weighted_mlm_loss": 0.9530768394470215,
+    "cursor": 4,
+    "dropout_key": [
+      701692359,
+      186408124
+    ],
+    "epoch": 0,
+    "indices": [
+      22,
+      13,
+      4,
+      30
+    ],
+    "learning_rate": 0.0001,
+    "mlm_indices": [],
+    "mlm_input_tokens": 0,
+    "mlm_key": null,
+    "mlm_selected_tokens": 0,
+    "pair_input_tokens": 454,
+    "stage": "phase2_contrastive_only",
+    "step": 1,
+    "weighted_mlm_component": null
+  },
+  {
+    "contrastive_plus_weighted_mlm_loss": 5.043364524841309,
+    "cursor": 8,
+    "dropout_key": [
+      4032332818,
+      2399727449
+    ],
+    "epoch": 0,
+    "indices": [
+      5,
+      29,
+      11,
+      14
+    ],
+    "learning_rate": 0.0001,
+    "mlm_indices": [],
+    "mlm_input_tokens": 0,
+    "mlm_key": null,
+    "mlm_selected_tokens": 0,
+    "pair_input_tokens": 485,
+    "stage": "phase2_contrastive_only",
+    "step": 2,
+    "weighted_mlm_component": null
+  },
+  {
+    "contrastive_plus_weighted_mlm_loss": 2.8827221393585205,
+    "cursor": 12,
+    "dropout_key": [
+      4009201261,
+      2567680810
+    ],
+    "epoch": 0,
+    "indices": [
+      6,
+      27,
+      28,
+      20
+    ],
+    "learning_rate": 8.571428571428573e-05,
+    "mlm_indices": [],
+    "mlm_input_tokens": 0,
+    "mlm_key": null,
+    "mlm_selected_tokens": 0,
+    "pair_input_tokens": 425,
+    "stage": "phase2_contrastive_only",
+    "step": 3,
+    "weighted_mlm_component": null
+  },
+  {
+    "contrastive_plus_weighted_mlm_loss": 5.324756622314453,
+    "cursor": 16,
+    "dropout_key": [
+      1743196722,
+      2763867148
+    ],
+    "epoch": 0,
+    "indices": [
+      25,
+      18,
+      12,
+      16
+    ],
+    "learning_rate": 7.142857142857143e-05,
+    "mlm_indices": [],
+    "mlm_input_tokens": 0,
+    "mlm_key": null,
+    "mlm_selected_tokens": 0,
+    "pair_input_tokens": 457,
+    "stage": "phase2_contrastive_only",
+    "step": 4,
+    "weighted_mlm_component": null
+  },
+  {
+    "contrastive_plus_weighted_mlm_loss": 2.1119630336761475,
+    "cursor": 20,
+    "dropout_key": [
+      2142806870,
+      2321284987
+    ],
+    "epoch": 0,
+    "indices": [
+      7,
+      15,
+      9,
+      17
+    ],
+    "learning_rate": 5.714285714285714e-05,
+    "mlm_indices": [],
+    "mlm_input_tokens": 0,
+    "mlm_key": null,
+    "mlm_selected_tokens": 0,
+    "pair_input_tokens": 442,
+    "stage": "phase2_contrastive_only",
+    "step": 5,
+    "weighted_mlm_component": null
+  },
+  {
+    "contrastive_plus_weighted_mlm_loss": 0.5515542030334473,
+    "cursor": 24,
+    "dropout_key": [
+      3387555555,
+      967145660
+    ],
+    "epoch": 0,
+    "indices": [
+      10,
+      21,
+      3,
+      23
+    ],
+    "learning_rate": 4.285714285714286e-05,
+    "mlm_indices": [],
+    "mlm_input_tokens": 0,
+    "mlm_key": null,
+    "mlm_selected_tokens": 0,
+    "pair_input_tokens": 471,
+    "stage": "phase2_contrastive_only",
+    "step": 6,
+    "weighted_mlm_component": null
+  },
+  {
+    "contrastive_plus_weighted_mlm_loss": 1.37827467918396,
+    "cursor": 28,
+    "dropout_key": [
+      2503492121,
+      3347705258
+    ],
+    "epoch": 0,
+    "indices": [
+      19,
+      2,
+      31,
+      8
+    ],
+    "learning_rate": 2.857142857142857e-05,
+    "mlm_indices": [],
+    "mlm_input_tokens": 0,
+    "mlm_key": null,
+    "mlm_selected_tokens": 0,
+    "pair_input_tokens": 426,
+    "stage": "phase2_contrastive_only",
+    "step": 7,
+    "weighted_mlm_component": null
+  },
+  {
+    "contrastive_plus_weighted_mlm_loss": 3.416426658630371,
+    "cursor": 32,
+    "dropout_key": [
+      3064834838,
+      4063605327
+    ],
+    "epoch": 0,
+    "indices": [
+      1,
+      24,
+      26,
+      0
+    ],
+    "learning_rate": 1.428571428571429e-05,
+    "mlm_indices": [],
+    "mlm_input_tokens": 0,
+    "mlm_key": null,
+    "mlm_selected_tokens": 0,
+    "pair_input_tokens": 499,
+    "stage": "phase2_contrastive_only",
+    "step": 8,
+    "weighted_mlm_component": null
+  },
+  {
+    "contrastive_plus_weighted_mlm_loss": 1.5757081508636475,
+    "cursor": 4,
+    "dropout_key": [
+      701692359,
+      186408124
+    ],
+    "epoch": 0,
+    "indices": [
+      22,
+      13,
+      4,
+      30
+    ],
+    "learning_rate": 0.0001,
+    "mlm_indices": [
+      22,
+      13,
+      4,
+      30
+    ],
+    "mlm_input_tokens": 256,
+    "mlm_key": [
+      1679867419,
+      3165615531
+    ],
+    "mlm_selected_tokens": 40,
+    "pair_input_tokens": 454,
+    "stage": "phase2_contrastive_plus_retained_mlm",
+    "step": 1,
+    "weighted_mlm_component": 0.6226313591003418
+  },
+  {
+    "contrastive_plus_weighted_mlm_loss": 5.677857875823975,
+    "cursor": 8,
+    "dropout_key": [
+      4032332818,
+      2399727449
+    ],
+    "epoch": 0,
+    "indices": [
+      5,
+      29,
+      11,
+      14
+    ],
+    "learning_rate": 0.0001,
+    "mlm_indices": [
+      5,
+      29,
+      11,
+      14
+    ],
+    "mlm_input_tokens": 256,
+    "mlm_key": [
+      3537427687,
+      427261738
+    ],
+    "mlm_selected_tokens": 30,
+    "pair_input_tokens": 485,
+    "stage": "phase2_contrastive_plus_retained_mlm",
+    "step": 2,
+    "weighted_mlm_component": 0.6253867626190186
+  },
+  {
+    "contrastive_plus_weighted_mlm_loss": 3.502537250518799,
+    "cursor": 12,
+    "dropout_key": [
+      4009201261,
+      2567680810
+    ],
+    "epoch": 0,
+    "indices": [
+      6,
+      27,
+      28,
+      20
+    ],
+    "learning_rate": 8.571428571428573e-05,
+    "mlm_indices": [
+      6,
+      27,
+      28,
+      20
+    ],
+    "mlm_input_tokens": 256,
+    "mlm_key": [
+      3653421579,
+      911713701
+    ],
+    "mlm_selected_tokens": 33,
+    "pair_input_tokens": 425,
+    "stage": "phase2_contrastive_plus_retained_mlm",
+    "step": 3,
+    "weighted_mlm_component": 0.625881052017212
+  },
+  {
+    "contrastive_plus_weighted_mlm_loss": 5.9250922203063965,
+    "cursor": 16,
+    "dropout_key": [
+      1743196722,
+      2763867148
+    ],
+    "epoch": 0,
+    "indices": [
+      25,
+      18,
+      12,
+      16
+    ],
+    "learning_rate": 7.142857142857143e-05,
+    "mlm_indices": [
+      25,
+      18,
+      12,
+      16
+    ],
+    "mlm_input_tokens": 256,
+    "mlm_key": [
+      2636729936,
+      74387476
+    ],
+    "mlm_selected_tokens": 48,
+    "pair_input_tokens": 457,
+    "stage": "phase2_contrastive_plus_retained_mlm",
+    "step": 4,
+    "weighted_mlm_component": 0.6237435817718506
+  },
+  {
+    "contrastive_plus_weighted_mlm_loss": 2.7805185317993164,
+    "cursor": 20,
+    "dropout_key": [
+      2142806870,
+      2321284987
+    ],
+    "epoch": 0,
+    "indices": [
+      7,
+      15,
+      9,
+      17
+    ],
+    "learning_rate": 5.714285714285714e-05,
+    "mlm_indices": [
+      7,
+      15,
+      9,
+      17
+    ],
+    "mlm_input_tokens": 256,
+    "mlm_key": [
+      309365553,
+      734325329
+    ],
+    "mlm_selected_tokens": 43,
+    "pair_input_tokens": 442,
+    "stage": "phase2_contrastive_plus_retained_mlm",
+    "step": 5,
+    "weighted_mlm_component": 0.621235990524292
+  },
+  {
+    "contrastive_plus_weighted_mlm_loss": 1.1722111701965332,
+    "cursor": 24,
+    "dropout_key": [
+      3387555555,
+      967145660
+    ],
+    "epoch": 0,
+    "indices": [
+      10,
+      21,
+      3,
+      23
+    ],
+    "learning_rate": 4.285714285714286e-05,
+    "mlm_indices": [
+      10,
+      21,
+      3,
+      23
+    ],
+    "mlm_input_tokens": 256,
+    "mlm_key": [
+      4230819193,
+      2833560169
+    ],
+    "mlm_selected_tokens": 38,
+    "pair_input_tokens": 471,
+    "stage": "phase2_contrastive_plus_retained_mlm",
+    "step": 6,
+    "weighted_mlm_component": 0.6252440929412842
+  },
+  {
+    "contrastive_plus_weighted_mlm_loss": 2.0038113594055176,
+    "cursor": 28,
+    "dropout_key": [
+      2503492121,
+      3347705258
+    ],
+    "epoch": 0,
+    "indices": [
+      19,
+      2,
+      31,
+      8
+    ],
+    "learning_rate": 2.857142857142857e-05,
+    "mlm_indices": [
+      19,
+      2,
+      31,
+      8
+    ],
+    "mlm_input_tokens": 256,
+    "mlm_key": [
+      3880366294,
+      3575621700
+    ],
+    "mlm_selected_tokens": 31,
+    "pair_input_tokens": 426,
+    "stage": "phase2_contrastive_plus_retained_mlm",
+    "step": 7,
+    "weighted_mlm_component": 0.6222717285156251
+  },
+  {
+    "contrastive_plus_weighted_mlm_loss": 4.048871994018555,
+    "cursor": 32,
+    "dropout_key": [
+      3064834838,
+      4063605327
+    ],
+    "epoch": 0,
+    "indices": [
+      1,
+      24,
+      26,
+      0
+    ],
+    "learning_rate": 1.428571428571429e-05,
+    "mlm_indices": [
+      1,
+      24,
+      26,
+      0
+    ],
+    "mlm_input_tokens": 256,
+    "mlm_key": [
+      1643092125,
+      2120810919
+    ],
+    "mlm_selected_tokens": 29,
+    "pair_input_tokens": 499,
+    "stage": "phase2_contrastive_plus_retained_mlm",
+    "step": 8,
+    "weighted_mlm_component": 0.6208270549774171
+  },
+  {
+    "candidate_doc_ids": [
+      4162857,
+      19205437,
+      21932050,
+      26064662,
+      34016987
+    ],
+    "candidate_document_input_tokens": 320,
+    "cursor": 4,
+    "dropout_key": [
+      1623241652,
+      3921678951
+    ],
+    "epoch": 0,
+    "learning_rate": 5e-05,
+    "multi_positive_loss": 3.1535470485687256,
+    "positive_pairs": 5,
+    "query_ids": [
+      220,
+      1224,
+      963,
+      499
+    ],
+    "query_indices": [
+      33,
+      243,
+      192,
+      99
+    ],
+    "query_input_tokens": 191,
+    "stage": "phase3_human_pairs",
+    "step": 1
+  },
+  {
+    "candidate_doc_ids": [
+      1456068,
+      9669099,
+      12258338,
+      13023410
+    ],
+    "candidate_document_input_tokens": 256,
+    "cursor": 8,
+    "dropout_key": [
+      2309482782,
+      1013122874
+    ],
+    "epoch": 0,
+    "learning_rate": 5e-05,
+    "multi_positive_loss": 1.3416938781738281,
+    "positive_pairs": 4,
+    "query_ids": [
+      177,
+      396,
+      1261,
+      601
+    ],
+    "query_indices": [
+      27,
+      82,
+      254,
+      122
+    ],
+    "query_input_tokens": 206,
+    "stage": "phase3_human_pairs",
+    "step": 2
+  },
+  {
+    "candidate_doc_ids": [
+      5389095,
+      6540064,
+      10546779,
+      11902109,
+      25413327,
+      36651210
+    ],
+    "candidate_document_input_tokens": 384,
+    "cursor": 12,
+    "dropout_key": [
+      2803543596,
+      2795787887
+    ],
+    "epoch": 0,
+    "learning_rate": 4.928571428571429e-05,
+    "multi_positive_loss": 4.185644149780273,
+    "positive_pairs": 6,
+    "query_ids": [
+      603,
+      530,
+      736,
+      347
+    ],
+    "query_indices": [
+      123,
+      104,
+      146,
+      68
+    ],
+    "query_input_tokens": 192,
+    "stage": "phase3_human_pairs",
+    "step": 3
+  },
+  {
+    "candidate_doc_ids": [
+      3944632,
+      9505402,
+      11328820,
+      43329366
+    ],
+    "candidate_document_input_tokens": 256,
+    "cursor": 16,
+    "dropout_key": [
+      3451139453,
+      3296848051
+    ],
+    "epoch": 0,
+    "learning_rate": 4.8571428571428576e-05,
+    "multi_positive_loss": 2.192652940750122,
+    "positive_pairs": 4,
+    "query_ids": [
+      1293,
+      264,
+      1376,
+      1346
+    ],
+    "query_indices": [
+      257,
+      46,
+      273,
+      266
+    ],
+    "query_input_tokens": 199,
+    "stage": "phase3_human_pairs",
+    "step": 4
+  },
+  {
+    "candidate_doc_ids": [
+      2052720,
+      15488881,
+      16066726,
+      18956141
+    ],
+    "candidate_document_input_tokens": 256,
+    "cursor": 20,
+    "dropout_key": [
+      4273342189,
+      1969406978
+    ],
+    "epoch": 0,
+    "learning_rate": 4.785714285714286e-05,
+    "multi_positive_loss": 1.0467369556427002,
+    "positive_pairs": 4,
+    "query_ids": [
+      152,
+      860,
+      447,
+      1171
+    ],
+    "query_indices": [
+      23,
+      171,
+      86,
+      234
+    ],
+    "query_input_tokens": 186,
+    "stage": "phase3_human_pairs",
+    "step": 5
+  },
+  {
+    "candidate_doc_ids": [
+      3355397,
+      5468807,
+      7098463,
+      16120395
+    ],
+    "candidate_document_input_tokens": 256,
+    "cursor": 24,
+    "dropout_key": [
+      4114133487,
+      1441960302
+    ],
+    "epoch": 0,
+    "learning_rate": 4.714285714285714e-05,
+    "multi_positive_loss": 1.9561877250671387,
+    "positive_pairs": 4,
+    "query_ids": [
+      952,
+      566,
+      631,
+      341
+    ],
+    "query_indices": [
+      187,
+      112,
+      126,
+      66
+    ],
+    "query_input_tokens": 192,
+    "stage": "phase3_human_pairs",
+    "step": 6
+  },
+  {
+    "candidate_doc_ids": [
+      6477536,
+      6503185,
+      12685434,
+      20333864
+    ],
+    "candidate_document_input_tokens": 256,
+    "cursor": 28,
+    "dropout_key": [
+      605378770,
+      3883364235
+    ],
+    "epoch": 0,
+    "learning_rate": 4.642857142857143e-05,
+    "multi_positive_loss": 1.585395097732544,
+    "positive_pairs": 4,
+    "query_ids": [
+      885,
+      470,
+      640,
+      571
+    ],
+    "query_indices": [
+      174,
+      94,
+      130,
+      115
+    ],
+    "query_input_tokens": 200,
+    "stage": "phase3_human_pairs",
+    "step": 7
+  },
+  {
+    "candidate_doc_ids": [
+      7209559,
+      12824568,
+      13497630,
+      44265107
+    ],
+    "candidate_document_input_tokens": 256,
+    "cursor": 32,
+    "dropout_key": [
+      2015712043,
+      900137767
+    ],
+    "epoch": 0,
+    "learning_rate": 4.5714285714285716e-05,
+    "multi_positive_loss": 2.5607526302337646,
+    "positive_pairs": 4,
+    "query_ids": [
+      9,
+      349,
+      1249,
+      1114
+    ],
+    "query_indices": [
+      0,
+      69,
+      250,
+      218
+    ],
+    "query_input_tokens": 190,
+    "stage": "phase3_human_pairs",
+    "step": 8
+  },
+  {
+    "candidate_doc_ids": [
+      4200695,
+      6710713,
+      16066726
+    ],
+    "candidate_document_input_tokens": 192,
+    "cursor": 36,
+    "dropout_key": [
+      391258295,
+      851363729
+    ],
+    "epoch": 0,
+    "learning_rate": 4.5e-05,
+    "multi_positive_loss": 2.153444528579712,
+    "positive_pairs": 4,
+    "query_ids": [
+      1106,
+      454,
+      453,
+      861
+    ],
+    "query_indices": [
+      217,
+      89,
+      88,
+      172
+    ],
+    "query_input_tokens": 217,
+    "stage": "phase3_human_pairs",
+    "step": 9
+  },
+  {
+    "candidate_doc_ids": [
+      3430789,
+      4506414,
+      4928057,
+      20418809
+    ],
+    "candidate_document_input_tokens": 256,
+    "cursor": 40,
+    "dropout_key": [
+      946146439,
+      912162357
+    ],
+    "epoch": 0,
+    "learning_rate": 4.428571428571428e-05,
+    "multi_positive_loss": 1.1039867401123047,
+    "positive_pairs": 4,
+    "query_ids": [
+      1065,
+      228,
+      246,
+      317
+    ],
+    "query_indices": [
+      210,
+      37,
+      42,
+      58
+    ],
+    "query_input_tokens": 150,
+    "stage": "phase3_human_pairs",
+    "step": 10
+  },
+  {
+    "candidate_doc_ids": [
+      3355397,
+      9505448,
+      13439128,
+      44048701
+    ],
+    "candidate_document_input_tokens": 256,
+    "cursor": 44,
+    "dropout_key": [
+      10731223,
+      945079013
+    ],
+    "epoch": 0,
+    "learning_rate": 4.3571428571428576e-05,
+    "multi_positive_loss": 3.600132703781128,
+    "positive_pairs": 4,
+    "query_ids": [
+      157,
+      953,
+      331,
+      1115
+    ],
+    "query_indices": [
+      24,
+      188,
+      60,
+      219
+    ],
+    "query_input_tokens": 164,
+    "stage": "phase3_human_pairs",
+    "step": 11
+  },
+  {
+    "candidate_doc_ids": [
+      4162857,
+      12810152,
+      13899137,
+      13910150
+    ],
+    "candidate_document_input_tokens": 256,
+    "cursor": 48,
+    "dropout_key": [
+      2388025099,
+      1141401647
+    ],
+    "epoch": 0,
+    "learning_rate": 4.285714285714286e-05,
+    "multi_positive_loss": 1.3348121643066406,
+    "positive_pairs": 4,
+    "query_ids": [
+      645,
+      60,
+      1177,
+      964
+    ],
+    "query_indices": [
+      131,
+      7,
+      236,
+      193
+    ],
+    "query_input_tokens": 184,
+    "stage": "phase3_human_pairs",
+    "step": 12
+  },
+  {
+    "candidate_doc_ids": [
+      3874000,
+      13497630,
+      13794374,
+      18231807
+    ],
+    "candidate_document_input_tokens": 256,
+    "cursor": 52,
+    "dropout_key": [
+      316825140,
+      301702560
+    ],
+    "epoch": 0,
+    "learning_rate": 4.214285714285714e-05,
+    "multi_positive_loss": 2.0865683555603027,
+    "positive_pairs": 4,
+    "query_ids": [
+      40,
+      200,
+      210,
+      1102
+    ],
+    "query_indices": [
+      4,
+      30,
+      32,
+      215
+    ],
+    "query_input_tokens": 209,
+    "stage": "phase3_human_pairs",
+    "step": 13
+  },
+  {
+    "candidate_doc_ids": [
+      2052720,
+      4421578,
+      7821634,
+      52874170
+    ],
+    "candidate_document_input_tokens": 256,
+    "cursor": 56,
+    "dropout_key": [
+      1642675381,
+      3533720266
+    ],
+    "epoch": 0,
+    "learning_rate": 4.142857142857143e-05,
+    "multi_positive_loss": 2.1420607566833496,
+    "positive_pairs": 4,
+    "query_ids": [
+      189,
+      309,
+      448,
+      160
+    ],
+    "query_indices": [
+      28,
+      57,
+      87,
+      26
+    ],
+    "query_input_tokens": 166,
+    "stage": "phase3_human_pairs",
+    "step": 14
+  },
+  {
+    "candidate_doc_ids": [
+      1456068,
+      6540064,
+      13023410,
+      18199839
+    ],
+    "candidate_document_input_tokens": 256,
+    "cursor": 60,
+    "dropout_key": [
+      2537639198,
+      1386799843
+    ],
+    "epoch": 0,
+    "learning_rate": 4.0714285714285717e-05,
+    "multi_positive_loss": 2.394274950027466,
+    "positive_pairs": 4,
+    "query_ids": [
+      548,
+      1220,
+      397,
+      901
+    ],
+    "query_indices": [
+      107,
+      242,
+      83,
+      177
+    ],
+    "query_input_tokens": 167,
+    "stage": "phase3_human_pairs",
+    "step": 15
+  },
+  {
+    "candidate_doc_ids": [
+      3654468,
+      13956305,
+      19912367,
+      25001628
+    ],
+    "candidate_document_input_tokens": 256,
+    "cursor": 64,
+    "dropout_key": [
+      1675665052,
+      3918519162
+    ],
+    "epoch": 0,
+    "learning_rate": 4e-05,
+    "multi_positive_loss": 1.1184053421020508,
+    "positive_pairs": 4,
+    "query_ids": [
+      1237,
+      1324,
+      280,
+      366
+    ],
+    "query_indices": [
+      247,
+      263,
+      49,
+      72
+    ],
+    "query_input_tokens": 183,
+    "stage": "phase3_human_pairs",
+    "step": 16
+  },
+  {
+    "candidate_doc_ids": [
+      6490571,
+      6710713,
+      12258338,
+      25079962
+    ],
+    "candidate_document_input_tokens": 256,
+    "cursor": 68,
+    "dropout_key": [
+      3856313609,
+      3986832917
+    ],
+    "epoch": 0,
+    "learning_rate": 3.928571428571429e-05,
+    "multi_positive_loss": 2.0501410961151123,
+    "positive_pairs": 4,
+    "query_ids": [
+      334,
+      22,
+      1105,
+      940
+    ],
+    "query_indices": [
+      63,
+      1,
+      216,
+      183
+    ],
+    "query_input_tokens": 183,
+    "stage": "phase3_human_pairs",
+    "step": 17
+  },
+  {
+    "candidate_doc_ids": [
+      5172048,
+      9167230,
+      23078022,
+      27099731
+    ],
+    "candidate_document_input_tokens": 256,
+    "cursor": 72,
+    "dropout_key": [
+      611600574,
+      1368873932
+    ],
+    "epoch": 0,
+    "learning_rate": 3.857142857142858e-05,
+    "multi_positive_loss": 1.6667149066925049,
+    "positive_pairs": 4,
+    "query_ids": [
+      740,
+      1297,
+      368,
+      633
+    ],
+    "query_indices": [
+      149,
+      259,
+      74,
+      128
+    ],
+    "query_input_tokens": 197,
+    "stage": "phase3_human_pairs",
+    "step": 18
+  },
+  {
+    "candidate_doc_ids": [
+      3654468,
+      11527199,
+      12440953,
+      24384587
+    ],
+    "candidate_document_input_tokens": 256,
+    "cursor": 76,
+    "dropout_key": [
+      2484910225,
+      208937213
+    ],
+    "epoch": 0,
+    "learning_rate": 3.785714285714286e-05,
+    "multi_positive_loss": 0.5252716541290283,
+    "positive_pairs": 4,
+    "query_ids": [
+      1393,
+      1238,
+      653,
+      942
+    ],
+    "query_indices": [
+      279,
+      248,
+      135,
+      185
+    ],
+    "query_input_tokens": 165,
+    "stage": "phase3_human_pairs",
+    "step": 19
+  },
+  {
+    "candidate_doc_ids": [
+      2488880,
+      15041758,
+      24922825,
+      27466734
+    ],
+    "candidate_document_input_tokens": 256,
+    "cursor": 80,
+    "dropout_key": [
+      1917137616,
+      1237500769
+    ],
+    "epoch": 0,
+    "learning_rate": 3.7142857142857143e-05,
+    "multi_positive_loss": 3.0487592220306396,
+    "positive_pairs": 4,
+    "query_ids": [
+      1127,
+      767,
+      647,
+      772
+    ],
+    "query_indices": [
+      224,
+      153,
+      133,
+      154
+    ],
+    "query_input_tokens": 175,
+    "stage": "phase3_human_pairs",
+    "step": 20
+  },
+  {
+    "candidate_doc_ids": [
+      4398832,
+      4468861,
+      10546779,
+      22080671,
+      25413327,
+      36651210
+    ],
+    "candidate_document_input_tokens": 384,
+    "cursor": 84,
+    "dropout_key": [
+      994334365,
+      3119155312
+    ],
+    "epoch": 0,
+    "learning_rate": 3.642857142857144e-05,
+    "multi_positive_loss": 0.8128292560577393,
+    "positive_pairs": 6,
+    "query_ids": [
+      576,
+      529,
+      296,
+      663
+    ],
+    "query_indices": [
+      116,
+      103,
+      53,
+      139
+    ],
+    "query_input_tokens": 205,
+    "stage": "phase3_human_pairs",
+    "step": 21
+  },
+  {
+    "candidate_doc_ids": [
+      5172048,
+      8148304,
+      13481880,
+      34071621
+    ],
+    "candidate_document_input_tokens": 256,
+    "cursor": 88,
+    "dropout_key": [
+      2457823169,
+      476728037
+    ],
+    "epoch": 0,
+    "learning_rate": 3.571428571428572e-05,
+    "multi_positive_loss": 2.9244537353515625,
+    "positive_pairs": 4,
+    "query_ids": [
+      1381,
+      632,
+      815,
+      917
+    ],
+    "query_indices": [
+      275,
+      127,
+      162,
+      178
+    ],
+    "query_input_tokens": 146,
+    "stage": "phase3_human_pairs",
+    "step": 22
+  },
+  {
+    "candidate_doc_ids": [
+      4928282,
+      6766459,
+      13513790,
+      16939583
+    ],
+    "candidate_document_input_tokens": 256,
+    "cursor": 92,
+    "dropout_key": [
+      4289423284,
+      2257453956
+    ],
+    "epoch": 0,
+    "learning_rate": 3.5e-05,
+    "multi_positive_loss": 1.2632043361663818,
+    "positive_pairs": 4,
+    "query_ids": [
+      1391,
+      810,
+      1210,
+      1254
+    ],
+    "query_indices": [
+      277,
+      161,
+      240,
+      251
+    ],
+    "query_input_tokens": 153,
+    "stage": "phase3_human_pairs",
+    "step": 23
+  },
+  {
+    "candidate_doc_ids": [
+      6441369,
+      12428497,
+      14340571,
+      14682243
+    ],
+    "candidate_document_input_tokens": 256,
+    "cursor": 96,
+    "dropout_key": [
+      1183657835,
+      2227212136
+    ],
+    "epoch": 0,
+    "learning_rate": 3.428571428571429e-05,
+    "multi_positive_loss": 1.0331635475158691,
+    "positive_pairs": 4,
+    "query_ids": [
+      1030,
+      591,
+      32,
+      867
+    ],
+    "query_indices": [
+      202,
+      119,
+      2,
+      173
+    ],
+    "query_input_tokens": 203,
+    "stage": "phase3_human_pairs",
+    "step": 24
+  },
+  {
+    "candidate_doc_ids": [
+      4319174,
+      13513790,
+      22500262,
+      23418635
+    ],
+    "candidate_document_input_tokens": 256,
+    "cursor": 100,
+    "dropout_key": [
+      53194969,
+      3230873886
+    ],
+    "epoch": 0,
+    "learning_rate": 3.357142857142858e-05,
+    "multi_positive_loss": 1.663543939590454,
+    "positive_pairs": 4,
+    "query_ids": [
+      568,
+      1044,
+      1169,
+      111
+    ],
+    "query_indices": [
+      113,
+      205,
+      232,
+      19
+    ],
+    "query_input_tokens": 238,
+    "stage": "phase3_human_pairs",
+    "step": 25
+  },
+  {
+    "candidate_doc_ids": [
+      2867345,
+      8190282,
+      11659421,
+      20128547
+    ],
+    "candidate_document_input_tokens": 256,
+    "cursor": 104,
+    "dropout_key": [
+      2257931191,
+      2499727463
+    ],
+    "epoch": 0,
+    "learning_rate": 3.285714285714286e-05,
+    "multi_positive_loss": 0.679863452911377,
+    "positive_pairs": 4,
+    "query_ids": [
+      855,
+      980,
+      979,
+      563
+    ],
+    "query_indices": [
+      168,
+      197,
+      196,
+      109
+    ],
+    "query_input_tokens": 182,
+    "stage": "phase3_human_pairs",
+    "step": 26
+  },
+  {
+    "candidate_doc_ids": [
+      1780819,
+      9315213,
+      19205437,
+      21003930
+    ],
+    "candidate_document_input_tokens": 256,
+    "cursor": 108,
+    "dropout_key": [
+      3813483691,
+      3127855512
+    ],
+    "epoch": 0,
+    "learning_rate": 3.2142857142857144e-05,
+    "multi_positive_loss": 1.5452418327331543,
+    "positive_pairs": 4,
+    "query_ids": [
+      222,
+      420,
+      488,
+      1373
+    ],
+    "query_indices": [
+      35,
+      84,
+      98,
+      272
+    ],
+    "query_input_tokens": 180,
+    "stage": "phase3_human_pairs",
+    "step": 27
+  },
+  {
+    "candidate_doc_ids": [
+      597790,
+      9505448,
+      13001323,
+      16120395
+    ],
+    "candidate_document_input_tokens": 256,
+    "cursor": 112,
+    "dropout_key": [
+      1325047961,
+      1301671439
+    ],
+    "epoch": 0,
+    "learning_rate": 3.142857142857143e-05,
+    "multi_positive_loss": 2.7199149131774902,
+    "positive_pairs": 4,
+    "query_ids": [
+      778,
+      565,
+      458,
+      330
+    ],
+    "query_indices": [
+      155,
+      111,
+      91,
+      59
+    ],
+    "query_input_tokens": 182,
+    "stage": "phase3_human_pairs",
+    "step": 28
+  },
+  {
+    "candidate_doc_ids": [
+      1522647,
+      6191684,
+      6227220,
+      21009874,
+      22995579,
+      23865182
+    ],
+    "candidate_document_input_tokens": 384,
+    "cursor": 116,
+    "dropout_key": [
+      2176478223,
+      701972446
+    ],
+    "epoch": 0,
+    "learning_rate": 3.071428571428572e-05,
+    "multi_positive_loss": 1.0613436698913574,
+    "positive_pairs": 6,
+    "query_ids": [
+      375,
+      1125,
+      108,
+      149
+    ],
+    "query_indices": [
+      79,
+      222,
+      17,
+      22
+    ],
+    "query_input_tokens": 177,
+    "stage": "phase3_human_pairs",
+    "step": 29
+  },
+  {
+    "candidate_doc_ids": [
+      1686997,
+      4469125,
+      4926049,
+      17814815
+    ],
+    "candidate_document_input_tokens": 256,
+    "cursor": 120,
+    "dropout_key": [
+      1233261078,
+      3698171497
+    ],
+    "epoch": 0,
+    "learning_rate": 3e-05,
+    "multi_positive_loss": 2.1524531841278076,
+    "positive_pairs": 4,
+    "query_ids": [
+      1006,
+      818,
+      666,
+      635
+    ],
+    "query_indices": [
+      201,
+      164,
+      140,
+      129
+    ],
+    "query_input_tokens": 180,
+    "stage": "phase3_human_pairs",
+    "step": 30
+  },
+  {
+    "candidate_doc_ids": [
+      1410197,
+      12800122,
+      16390264,
+      25641414,
+      38380061
+    ],
+    "candidate_document_input_tokens": 320,
+    "cursor": 124,
+    "dropout_key": [
+      139174469,
+      66262564
+    ],
+    "epoch": 0,
+    "learning_rate": 2.9285714285714284e-05,
+    "multi_positive_loss": 1.4174683094024658,
+    "positive_pairs": 5,
+    "query_ids": [
+      926,
+      469,
+      355,
+      1227
+    ],
+    "query_indices": [
+      180,
+      93,
+      70,
+      244
+    ],
+    "query_input_tokens": 180,
+    "stage": "phase3_human_pairs",
+    "step": 31
+  },
+  {
+    "candidate_doc_ids": [
+      4740447,
+      14711483,
+      19205437,
+      22703082
+    ],
+    "candidate_document_input_tokens": 256,
+    "cursor": 128,
+    "dropout_key": [
+      3857501502,
+      2181768507
+    ],
+    "epoch": 0,
+    "learning_rate": 2.857142857142857e-05,
+    "multi_positive_loss": 0.8507671356201172,
+    "positive_pairs": 4,
+    "query_ids": [
+      505,
+      787,
+      221,
+      933
+    ],
+    "query_indices": [
+      101,
+      157,
+      34,
+      182
+    ],
+    "query_input_tokens": 204,
+    "stage": "phase3_human_pairs",
+    "step": 32
+  },
+  {
+    "candidate_doc_ids": [
+      1649738,
+      1780819,
+      4200695,
+      18956141
+    ],
+    "candidate_document_input_tokens": 256,
+    "cursor": 132,
+    "dropout_key": [
+      3008985694,
+      3472210397
+    ],
+    "epoch": 0,
+    "learning_rate": 2.785714285714286e-05,
+    "multi_positive_loss": 1.817387342453003,
+    "positive_pairs": 4,
+    "query_ids": [
+      335,
+      1056,
+      1333,
+      1170
+    ],
+    "query_indices": [
+      64,
+      209,
+      265,
+      233
+    ],
+    "query_input_tokens": 228,
+    "stage": "phase3_human_pairs",
+    "step": 33
+  },
+  {
+    "candidate_doc_ids": [
+      5691302,
+      6796297,
+      13763195,
+      22500262
+    ],
+    "candidate_document_input_tokens": 256,
+    "cursor": 136,
+    "dropout_key": [
+      1463549374,
+      1425603564
+    ],
+    "epoch": 0,
+    "learning_rate": 2.7142857142857148e-05,
+    "multi_positive_loss": 2.2297420501708984,
+    "positive_pairs": 4,
+    "query_ids": [
+      1311,
+      1138,
+      1084,
+      1045
+    ],
+    "query_indices": [
+      260,
+      225,
+      213,
+      206
+    ],
+    "query_input_tokens": 165,
+    "stage": "phase3_human_pairs",
+    "step": 34
+  },
+  {
+    "candidate_doc_ids": [
+      3355397,
+      6477536,
+      8148304,
+      21009874
+    ],
+    "candidate_document_input_tokens": 256,
+    "cursor": 140,
+    "dropout_key": [
+      3897660082,
+      2920705984
+    ],
+    "epoch": 0,
+    "learning_rate": 2.642857142857143e-05,
+    "multi_positive_loss": 3.661621570587158,
+    "positive_pairs": 4,
+    "query_ids": [
+      1126,
+      886,
+      954,
+      816
+    ],
+    "query_indices": [
+      223,
+      175,
+      189,
+      163
+    ],
+    "query_input_tokens": 161,
+    "stage": "phase3_human_pairs",
+    "step": 35
+  },
+  {
+    "candidate_doc_ids": [
+      301838,
+      1974176,
+      2734421,
+      3952288,
+      9394119,
+      12040627
+    ],
+    "candidate_document_input_tokens": 384,
+    "cursor": 144,
+    "dropout_key": [
+      536104692,
+      417746628
+    ],
+    "epoch": 0,
+    "learning_rate": 2.5714285714285714e-05,
+    "multi_positive_loss": 1.2958621978759766,
+    "positive_pairs": 6,
+    "query_ids": [
+      283,
+      1004,
+      159,
+      1258
+    ],
+    "query_indices": [
+      50,
+      199,
+      25,
+      253
+    ],
+    "query_input_tokens": 180,
+    "stage": "phase3_human_pairs",
+    "step": 36
+  },
+  {
+    "candidate_doc_ids": [
+      4928282,
+      14682243,
+      21003930,
+      31460499
+    ],
+    "candidate_document_input_tokens": 256,
+    "cursor": 148,
+    "dropout_key": [
+      506511522,
+      2767764714
+    ],
+    "epoch": 0,
+    "learning_rate": 2.5e-05,
+    "multi_positive_loss": 0.2714543342590332,
+    "positive_pairs": 4,
+    "query_ids": [
+      1211,
+      592,
+      122,
+      1372
+    ],
+    "query_indices": [
+      241,
+      120,
+      21,
+      271
+    ],
+    "query_input_tokens": 172,
+    "stage": "phase3_human_pairs",
+    "step": 37
+  },
+  {
+    "candidate_doc_ids": [
+      2867345,
+      6325527,
+      14797520,
+      15048300
+    ],
+    "candidate_document_input_tokens": 256,
+    "cursor": 152,
+    "dropout_key": [
+      2081419942,
+      1380379320
+    ],
+    "epoch": 0,
+    "learning_rate": 2.4285714285714288e-05,
+    "multi_positive_loss": 2.1341745853424072,
+    "positive_pairs": 4,
+    "query_ids": [
+      564,
+      292,
+      480,
+      305
+    ],
+    "query_indices": [
+      110,
+      52,
+      96,
+      54
+    ],
+    "query_input_tokens": 150,
+    "stage": "phase3_human_pairs",
+    "step": 38
+  },
+  {
+    "candidate_doc_ids": [
+      6540064,
+      7209559,
+      13910150,
+      25641414
+    ],
+    "candidate_document_input_tokens": 256,
+    "cursor": 156,
+    "dropout_key": [
+      1336430133,
+      3466669676
+    ],
+    "epoch": 0,
+    "learning_rate": 2.357142857142857e-05,
+    "multi_positive_loss": 1.7825038433074951,
+    "positive_pairs": 4,
+    "query_ids": [
+      98,
+      1228,
+      1176,
+      1248
+    ],
+    "query_indices": [
+      14,
+      245,
+      235,
+      249
+    ],
+    "query_input_tokens": 161,
+    "stage": "phase3_human_pairs",
+    "step": 39
+  },
+  {
+    "candidate_doc_ids": [
+      3578380,
+      12810152,
+      15048300,
+      34139429
+    ],
+    "candidate_document_input_tokens": 256,
+    "cursor": 160,
+    "dropout_key": [
+      1687883263,
+      1803221428
+    ],
+    "epoch": 0,
+    "learning_rate": 2.285714285714286e-05,
+    "multi_positive_loss": 1.8432514667510986,
+    "positive_pairs": 4,
+    "query_ids": [
+      646,
+      579,
+      290,
+      1284
+    ],
+    "query_indices": [
+      132,
+      117,
+      51,
+      256
+    ],
+    "query_input_tokens": 212,
+    "stage": "phase3_human_pairs",
+    "step": 40
+  },
+  {
+    "candidate_doc_ids": [
+      9315213,
+      16355392,
+      28369117,
+      29023309
+    ],
+    "candidate_document_input_tokens": 256,
+    "cursor": 164,
+    "dropout_key": [
+      353998850,
+      3283069344
+    ],
+    "epoch": 0,
+    "learning_rate": 2.214285714285714e-05,
+    "multi_positive_loss": 1.5608274936676025,
+    "positive_pairs": 4,
+    "query_ids": [
+      1351,
+      333,
+      681,
+      626
+    ],
+    "query_indices": [
+      267,
+      62,
+      142,
+      125
+    ],
+    "query_input_tokens": 214,
+    "stage": "phase3_human_pairs",
+    "step": 41
+  },
+  {
+    "candidate_doc_ids": [
+      12258338,
+      13868795,
+      15058155,
+      15488881,
+      16939583
+    ],
+    "candidate_document_input_tokens": 320,
+    "cursor": 168,
+    "dropout_key": [
+      1762343570,
+      4028140911
+    ],
+    "epoch": 0,
+    "learning_rate": 2.142857142857143e-05,
+    "multi_positive_loss": 1.7434241771697998,
+    "positive_pairs": 5,
+    "query_ids": [
+      749,
+      1255,
+      941,
+      1361
+    ],
+    "query_indices": [
+      150,
+      252,
+      184,
+      270
+    ],
+    "query_input_tokens": 164,
+    "stage": "phase3_human_pairs",
+    "step": 42
+  },
+  {
+    "candidate_doc_ids": [
+      13497630,
+      13764090,
+      15984735,
+      21414718
+    ],
+    "candidate_document_input_tokens": 256,
+    "cursor": 172,
+    "dropout_key": [
+      3785764209,
+      4238622965
+    ],
+    "epoch": 0,
+    "learning_rate": 2.0714285714285715e-05,
+    "multi_positive_loss": 2.908182144165039,
+    "positive_pairs": 4,
+    "query_ids": [
+      1356,
+      39,
+      791,
+      951
+    ],
+    "query_indices": [
+      269,
+      3,
+      159,
+      186
+    ],
+    "query_input_tokens": 158,
+    "stage": "phase3_human_pairs",
+    "step": 43
+  },
+  {
+    "candidate_doc_ids": [
+      2692522,
+      8002887,
+      9315213,
+      17421851
+    ],
+    "candidate_document_input_tokens": 256,
+    "cursor": 176,
+    "dropout_key": [
+      3229791855,
+      724709369
+    ],
+    "epoch": 0,
+    "learning_rate": 2e-05,
+    "multi_positive_loss": 3.838622808456421,
+    "positive_pairs": 4,
+    "query_ids": [
+      93,
+      432,
+      1042,
+      680
+    ],
+    "query_indices": [
+      13,
+      85,
+      203,
+      141
+    ],
+    "query_input_tokens": 141,
+    "stage": "phase3_human_pairs",
+    "step": 44
+  },
+  {
+    "candidate_doc_ids": [
+      2078658,
+      4200695,
+      11328820,
+      22703082,
+      30041340,
+      30507607
+    ],
+    "candidate_document_input_tokens": 384,
+    "cursor": 180,
+    "dropout_key": [
+      982392959,
+      3421954806
+    ],
+    "epoch": 0,
+    "learning_rate": 1.9285714285714285e-05,
+    "multi_positive_loss": 1.4293174743652344,
+    "positive_pairs": 6,
+    "query_ids": [
+      483,
+      263,
+      1069,
+      1294
+    ],
+    "query_indices": [
+      97,
+      45,
+      211,
+      258
+    ],
+    "query_input_tokens": 223,
+    "stage": "phase3_human_pairs",
+    "step": 45
+  },
+  {
+    "candidate_doc_ids": [
+      5099266,
+      10072941,
+      13899137,
+      24922825
+    ],
+    "candidate_document_input_tokens": 256,
+    "cursor": 184,
+    "dropout_key": [
+      1758367337,
+      2801461341
+    ],
+    "epoch": 0,
+    "learning_rate": 1.8571428571428572e-05,
+    "multi_positive_loss": 1.0826010704040527,
+    "positive_pairs": 4,
+    "query_ids": [
+      372,
+      1054,
+      61,
+      78
+    ],
+    "query_indices": [
+      78,
+      208,
+      8,
+      11
+    ],
+    "query_input_tokens": 193,
+    "stage": "phase3_human_pairs",
+    "step": 46
+  },
+  {
+    "candidate_doc_ids": [
+      5256564,
+      15041758,
+      22544171,
+      40164383
+    ],
+    "candidate_document_input_tokens": 256,
+    "cursor": 188,
+    "dropout_key": [
+      4138106811,
+      2683579543
+    ],
+    "epoch": 0,
+    "learning_rate": 1.7857142857142855e-05,
+    "multi_positive_loss": 0.6406674385070801,
+    "positive_pairs": 4,
+    "query_ids": [
+      1355,
+      466,
+      104,
+      648
+    ],
+    "query_indices": [
+      268,
+      92,
+      15,
+      134
+    ],
+    "query_input_tokens": 204,
+    "stage": "phase3_human_pairs",
+    "step": 47
+  },
+  {
+    "candidate_doc_ids": [
+      5323845,
+      11659421,
+      12584053,
+      13907928,
+      18997216,
+      22194407,
+      24241932
+    ],
+    "candidate_document_input_tokens": 448,
+    "cursor": 192,
+    "dropout_key": [
+      3984103367,
+      4041586077
+    ],
+    "epoch": 0,
+    "learning_rate": 1.7142857142857145e-05,
+    "multi_positive_loss": 3.6998729705810547,
+    "positive_pairs": 7,
+    "query_ids": [
+      382,
+      1158,
+      1327,
+      1120
+    ],
+    "query_indices": [
+      80,
+      230,
+      264,
+      221
+    ],
+    "query_input_tokens": 179,
+    "stage": "phase3_human_pairs",
+    "step": 48
+  },
+  {
+    "candidate_doc_ids": [
+      5850219,
+      11360768,
+      19878070,
+      22696649
+    ],
+    "candidate_document_input_tokens": 256,
+    "cursor": 196,
+    "dropout_key": [
+      2317886902,
+      2752607091
+    ],
+    "epoch": 0,
+    "learning_rate": 1.6428571428571432e-05,
+    "multi_positive_loss": 1.3247814178466797,
+    "positive_pairs": 4,
+    "query_ids": [
+      256,
+      394,
+      1050,
+      846
+    ],
+    "query_indices": [
+      43,
+      81,
+      207,
+      165
+    ],
+    "query_input_tokens": 173,
+    "stage": "phase3_human_pairs",
+    "step": 49
+  },
+  {
+    "candidate_doc_ids": [
+      3981729,
+      4506414,
+      5099266,
+      6766459
+    ],
+    "candidate_document_input_tokens": 256,
+    "cursor": 200,
+    "dropout_key": [
+      4099911401,
+      2142629735
+    ],
+    "epoch": 0,
+    "learning_rate": 1.5714285714285715e-05,
+    "multi_positive_loss": 0.760594367980957,
+    "positive_pairs": 4,
+    "query_ids": [
+      1392,
+      607,
+      79,
+      1263
+    ],
+    "query_indices": [
+      278,
+      124,
+      12,
+      255
+    ],
+    "query_input_tokens": 170,
+    "stage": "phase3_human_pairs",
+    "step": 50
+  },
+  {
+    "candidate_doc_ids": [
+      1071991,
+      4319844,
+      4899981,
+      5151024,
+      14332945,
+      22080671,
+      25515907
+    ],
+    "candidate_document_input_tokens": 448,
+    "cursor": 204,
+    "dropout_key": [
+      3150466589,
+      272388303
+    ],
+    "epoch": 0,
+    "learning_rate": 1.5000000000000004e-05,
+    "multi_positive_loss": 0.7988734245300293,
+    "positive_pairs": 7,
+    "query_ids": [
+      258,
+      106,
+      1003,
+      694
+    ],
+    "query_indices": [
+      44,
+      16,
+      198,
+      145
+    ],
+    "query_input_tokens": 182,
+    "stage": "phase3_human_pairs",
+    "step": 51
+  },
+  {
+    "candidate_doc_ids": [
+      1550937,
+      2033917,
+      4319174,
+      7821634
+    ],
+    "candidate_document_input_tokens": 256,
+    "cursor": 208,
+    "dropout_key": [
+      1718917603,
+      733335869
+    ],
+    "epoch": 0,
+    "learning_rate": 1.4285714285714285e-05,
+    "multi_positive_loss": 0.9708867073059082,
+    "positive_pairs": 4,
+    "query_ids": [
+      306,
+      265,
+      109,
+      370
+    ],
+    "query_indices": [
+      55,
+      47,
+      18,
+      76
+    ],
+    "query_input_tokens": 132,
+    "stage": "phase3_human_pairs",
+    "step": 52
+  },
+  {
+    "candidate_doc_ids": [
+      935538,
+      4306711,
+      13509809,
+      13931771,
+      16390264,
+      19800147
+    ],
+    "candidate_document_input_tokens": 384,
+    "cursor": 212,
+    "dropout_key": [
+      2950751553,
+      3644559724
+    ],
+    "epoch": 0,
+    "learning_rate": 1.3571428571428574e-05,
+    "multi_positive_loss": 0.9430415630340576,
+    "positive_pairs": 6,
+    "query_ids": [
+      962,
+      893,
+      927,
+      751
+    ],
+    "query_indices": [
+      191,
+      176,
+      181,
+      151
+    ],
+    "query_input_tokens": 222,
+    "stage": "phase3_human_pairs",
+    "step": 53
+  },
+  {
+    "candidate_doc_ids": [
+      1676568,
+      9315213,
+      12206390,
+      12643937
+    ],
+    "candidate_document_input_tokens": 256,
+    "cursor": 216,
+    "dropout_key": [
+      1364339796,
+      1697575232
+    ],
+    "epoch": 0,
+    "learning_rate": 1.2857142857142857e-05,
+    "multi_positive_loss": 1.4650003910064697,
+    "positive_pairs": 4,
+    "query_ids": [
+      455,
+      1229,
+      854,
+      683
+    ],
+    "query_indices": [
+      90,
+      246,
+      167,
+      144
+    ],
+    "query_input_tokens": 207,
+    "stage": "phase3_human_pairs",
+    "step": 54
+  },
+  {
+    "candidate_doc_ids": [
+      5558754,
+      7821634,
+      19912367,
+      29023309
+    ],
+    "candidate_document_input_tokens": 256,
+    "cursor": 220,
+    "dropout_key": [
+      2166315489,
+      3682086667
+    ],
+    "epoch": 0,
+    "learning_rate": 1.2142857142857144e-05,
+    "multi_positive_loss": 1.5949814319610596,
+    "positive_pairs": 4,
+    "query_ids": [
+      1323,
+      1205,
+      332,
+      308
+    ],
+    "query_indices": [
+      262,
+      239,
+      61,
+      56
+    ],
+    "query_input_tokens": 199,
+    "stage": "phase3_human_pairs",
+    "step": 55
+  },
+  {
+    "candidate_doc_ids": [
+      2212067,
+      9315213,
+      19800147,
+      21295300
+    ],
+    "candidate_document_input_tokens": 256,
+    "cursor": 224,
+    "dropout_key": [
+      2282829067,
+      3937622551
+    ],
+    "epoch": 0,
+    "learning_rate": 1.1428571428571427e-05,
+    "multi_positive_loss": 2.3383264541625977,
+    "positive_pairs": 4,
+    "query_ids": [
+      682,
+      752,
+      68,
+      241
+    ],
+    "query_indices": [
+      143,
+      152,
+      10,
+      38
+    ],
+    "query_input_tokens": 134,
+    "stage": "phase3_human_pairs",
+    "step": 56
+  },
+  {
+    "candidate_doc_ids": [
+      2462673,
+      5323845,
+      6826100,
+      8148122,
+      13907928,
+      18997216
+    ],
+    "candidate_document_input_tokens": 384,
+    "cursor": 228,
+    "dropout_key": [
+      217117175,
+      244093315
+    ],
+    "epoch": 0,
+    "learning_rate": 1.0714285714285716e-05,
+    "multi_positive_loss": 1.1728336811065674,
+    "positive_pairs": 6,
+    "query_ids": [
+      243,
+      1119,
+      369,
+      201
+    ],
+    "query_indices": [
+      40,
+      220,
+      75,
+      31
+    ],
+    "query_input_tokens": 204,
+    "stage": "phase3_human_pairs",
+    "step": 57
+  },
+  {
+    "candidate_doc_ids": [
+      12584053,
+      14541844,
+      26973393,
+      39264456
+    ],
+    "candidate_document_input_tokens": 256,
+    "cursor": 232,
+    "dropout_key": [
+      4247114880,
+      3536259564
+    ],
+    "epoch": 0,
+    "learning_rate": 9.999999999999997e-06,
+    "multi_positive_loss": 3.3061587810516357,
+    "positive_pairs": 4,
+    "query_ids": [
+      977,
+      227,
+      1159,
+      1182
+    ],
+    "query_indices": [
+      195,
+      36,
+      231,
+      238
+    ],
+    "query_input_tokens": 199,
+    "stage": "phase3_human_pairs",
+    "step": 58
+  },
+  {
+    "candidate_doc_ids": [
+      14260013,
+      24177706,
+      27099731,
+      43334921
+    ],
+    "candidate_document_input_tokens": 256,
+    "cursor": 236,
+    "dropout_key": [
+      1418476577,
+      1286785411
+    ],
+    "epoch": 0,
+    "learning_rate": 9.285714285714286e-06,
+    "multi_positive_loss": 2.7353081703186035,
+    "positive_pairs": 4,
+    "query_ids": [
+      367,
+      584,
+      1312,
+      857
+    ],
+    "query_indices": [
+      73,
+      118,
+      261,
+      170
+    ],
+    "query_input_tokens": 208,
+    "stage": "phase3_human_pairs",
+    "step": 59
+  },
+  {
+    "candidate_doc_ids": [
+      301838,
+      380526,
+      1550937,
+      2734421,
+      3952288,
+      6609935,
+      16562534,
+      33912020,
+      39128592
+    ],
+    "candidate_document_input_tokens": 576,
+    "cursor": 240,
+    "dropout_key": [
+      582645046,
+      950111932
+    ],
+    "epoch": 0,
+    "learning_rate": 8.57142857142857e-06,
+    "multi_positive_loss": 1.890620231628418,
+    "positive_pairs": 9,
+    "query_ids": [
+      738,
+      371,
+      46,
+      1181
+    ],
+    "query_indices": [
+      148,
+      77,
+      5,
+      237
+    ],
+    "query_input_tokens": 166,
+    "stage": "phase3_human_pairs",
+    "step": 60
+  },
+  {
+    "candidate_doc_ids": [
+      10883736,
+      26996935,
+      31460499,
+      43334921
+    ],
+    "candidate_document_input_tokens": 256,
+    "cursor": 244,
+    "dropout_key": [
+      2663957684,
+      422696896
+    ],
+    "epoch": 0,
+    "learning_rate": 7.857142857142858e-06,
+    "multi_positive_loss": 0.8766932487487793,
+    "positive_pairs": 4,
+    "query_ids": [
+      856,
+      47,
+      121,
+      504
+    ],
+    "query_indices": [
+      169,
+      6,
+      20,
+      100
+    ],
+    "query_input_tokens": 193,
+    "stage": "phase3_human_pairs",
+    "step": 61
+  },
+  {
+    "candidate_doc_ids": [
+      2617858,
+      4828631,
+      37204802,
+      40817021
+    ],
+    "candidate_document_input_tokens": 256,
+    "cursor": 248,
+    "dropout_key": [
+      697544396,
+      1184831902
+    ],
+    "epoch": 0,
+    "learning_rate": 7.142857142857145e-06,
+    "multi_positive_loss": 2.2701327800750732,
+    "positive_pairs": 4,
+    "query_ids": [
+      662,
+      965,
+      1406,
+      1148
+    ],
+    "query_indices": [
+      138,
+      194,
+      280,
+      227
+    ],
+    "query_input_tokens": 139,
+    "stage": "phase3_human_pairs",
+    "step": 62
+  },
+  {
+    "candidate_doc_ids": [
+      2890952,
+      5691302,
+      6609935,
+      16562534,
+      19688024
+    ],
+    "candidate_document_input_tokens": 320,
+    "cursor": 252,
+    "dropout_key": [
+      1128981404,
+      1177886243
+    ],
+    "epoch": 0,
+    "learning_rate": 6.428571428571429e-06,
+    "multi_positive_loss": 2.751244068145752,
+    "positive_pairs": 5,
+    "query_ids": [
+      737,
+      1390,
+      1081,
+      542
+    ],
+    "query_indices": [
+      147,
+      276,
+      212,
+      106
+    ],
+    "query_input_tokens": 173,
+    "stage": "phase3_human_pairs",
+    "step": 63
+  },
+  {
+    "candidate_doc_ids": [
+      6325527,
+      10546779,
+      20101846,
+      22405338,
+      25413327,
+      36651210
+    ],
+    "candidate_document_input_tokens": 384,
+    "cursor": 256,
+    "dropout_key": [
+      734020721,
+      2557605790
+    ],
+    "epoch": 0,
+    "learning_rate": 5.714285714285716e-06,
+    "multi_positive_loss": 1.7200531959533691,
+    "positive_pairs": 6,
+    "query_ids": [
+      531,
+      266,
+      479,
+      562
+    ],
+    "query_indices": [
+      105,
+      48,
+      95,
+      108
+    ],
+    "query_input_tokens": 169,
+    "stage": "phase3_human_pairs",
+    "step": 64
+  },
+  {
+    "candidate_doc_ids": [
+      3874000,
+      11902109,
+      12584053,
+      17671145
+    ],
+    "candidate_document_input_tokens": 256,
+    "cursor": 260,
+    "dropout_key": [
+      2103180338,
+      152574651
+    ],
+    "epoch": 0,
+    "learning_rate": 4.999999999999999e-06,
+    "multi_positive_loss": 1.2642807960510254,
+    "positive_pairs": 4,
+    "query_ids": [
+      1043,
+      1157,
+      346,
+      1101
+    ],
+    "query_indices": [
+      204,
+      229,
+      67,
+      214
+    ],
+    "query_input_tokens": 210,
+    "stage": "phase3_human_pairs",
+    "step": 65
+  },
+  {
+    "candidate_doc_ids": [
+      7433668,
+      12258338,
+      12584053,
+      13001323
+    ],
+    "candidate_document_input_tokens": 256,
+    "cursor": 264,
+    "dropout_key": [
+      807164118,
+      1938036314
+    ],
+    "epoch": 0,
+    "learning_rate": 4.285714285714287e-06,
+    "multi_positive_loss": 1.4095792770385742,
+    "positive_pairs": 4,
+    "query_ids": [
+      506,
+      600,
+      1156,
+      779
+    ],
+    "query_indices": [
+      102,
+      121,
+      228,
+      156
+    ],
+    "query_input_tokens": 198,
+    "stage": "phase3_human_pairs",
+    "step": 66
+  },
+  {
+    "candidate_doc_ids": [
+      3430789,
+      4740447,
+      5260382,
+      8533245
+    ],
+    "candidate_document_input_tokens": 256,
+    "cursor": 268,
+    "dropout_key": [
+      3501386847,
+      3751621364
+    ],
+    "epoch": 0,
+    "learning_rate": 3.57142857142857e-06,
+    "multi_positive_loss": 0.8988480567932129,
+    "positive_pairs": 4,
+    "query_ids": [
+      788,
+      245,
+      1142,
+      657
+    ],
+    "query_indices": [
+      158,
+      41,
+      226,
+      136
+    ],
+    "query_input_tokens": 180,
+    "stage": "phase3_human_pairs",
+    "step": 67
+  },
+  {
+    "candidate_doc_ids": [
+      301838,
+      2212067,
+      2734421,
+      3952288,
+      20333864,
+      24922825
+    ],
+    "candidate_document_input_tokens": 384,
+    "cursor": 272,
+    "dropout_key": [
+      1088659351,
+      3411212733
+    ],
+    "epoch": 0,
+    "learning_rate": 2.857142857142858e-06,
+    "multi_positive_loss": 2.64977765083313,
+    "positive_pairs": 6,
+    "query_ids": [
+      1005,
+      853,
+      570,
+      242
+    ],
+    "query_indices": [
+      200,
+      166,
+      114,
+      39
+    ],
+    "query_input_tokens": 215,
+    "stage": "phase3_human_pairs",
+    "step": 68
+  },
+  {
+    "candidate_doc_ids": [
+      2078658,
+      2488880,
+      7098463,
+      16422880,
+      30507607
+    ],
+    "candidate_document_input_tokens": 320,
+    "cursor": 276,
+    "dropout_key": [
+      3706797478,
+      323248593
+    ],
+    "epoch": 0,
+    "learning_rate": 2.142857142857141e-06,
+    "multi_positive_loss": 3.8655266761779785,
+    "positive_pairs": 5,
+    "query_ids": [
+      1378,
+      340,
+      955,
+      919
+    ],
+    "query_indices": [
+      274,
+      65,
+      190,
+      179
+    ],
+    "query_input_tokens": 185,
+    "stage": "phase3_human_pairs",
+    "step": 69
+  },
+  {
+    "candidate_doc_ids": [
+      3610080,
+      6144337,
+      21295300,
+      37204802
+    ],
+    "candidate_document_input_tokens": 256,
+    "cursor": 280,
+    "dropout_key": [
+      1053650982,
+      2850525707
+    ],
+    "epoch": 0,
+    "learning_rate": 1.428571428571429e-06,
+    "multi_positive_loss": 2.6473093032836914,
+    "positive_pairs": 4,
+    "query_ids": [
+      661,
+      792,
+      67,
+      356
+    ],
+    "query_indices": [
+      137,
+      160,
+      9,
+      71
+    ],
+    "query_input_tokens": 165,
+    "stage": "phase3_human_pairs",
+    "step": 70
+  },
+  {
+    "candidate_doc_ids": [
+      19313533
+    ],
+    "candidate_document_input_tokens": 64,
+    "cursor": 281,
+    "dropout_key": [
+      1512596887,
+      2528819740
+    ],
+    "epoch": 0,
+    "learning_rate": 7.142857142857118e-07,
+    "multi_positive_loss": 0.0,
+    "positive_pairs": 1,
+    "query_ids": [
+      196
+    ],
+    "query_indices": [
+      29
+    ],
+    "query_input_tokens": 42,
+    "stage": "phase3_human_pairs",
+    "step": 71
+  }
+]

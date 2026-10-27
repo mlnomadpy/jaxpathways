@@ -4,14 +4,19 @@
   "questions": [
     {
       "stage": "post",
-      "question": "Which command sequence proves that your Cloud TPU VM is both usable by JAX and no longer billing when you finish?",
+      "question": "Which workflow records a small synchronized TPU computation and checks that the lab’s cloud resources were removed?",
       "options": [
         "Running `gcloud compute tpus tpu-vm create` and closing your laptop lid when done",
-        "Running a Python check on the TPU VM that verifies `jax.default_backend() == 'tpu'` and a synchronized computation, copying receipts back, running `gcloud compute tpus tpu-vm delete`, and confirming `list` is empty",
+        "Assert the remote TPU backend, run and synchronize the verifier, retrieve evidence, delete the VM and any owning request, then check their absence",
         "Checking `pip list` on your local laptop"
       ],
       "correct": 1,
-      "explanation": "Only an in-process JAX check on the TPU VM confirms TPU device discovery and execution, and only `tpu-vm delete` verified by `tpu-vm list` stops Cloud TPU VM billing."
+      "explanation": "The computation receipt identifies a bounded tested runtime. The separate cleanup checks cover the named VM and request. Neither a small arithmetic pass nor an empty resource listing proves all workload behavior or a final bill.",
+      "optionFeedback": [
+        "Closing a laptop does not stop a remote job or release capacity. Retrieve the receipt, then inspect both the VM and any owning request.",
+        "The computation receipt identifies a bounded tested runtime. The separate cleanup checks cover the named VM and request. Neither a small arithmetic pass nor an empty resource listing proves all workload behavior or a final bill.",
+        "Local packages describe the workstation, not the remote backend. Execute and synchronize the verifier on the TPU host."
+      ]
     }
   ]
 }

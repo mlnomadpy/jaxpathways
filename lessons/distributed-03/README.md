@@ -4,6 +4,8 @@ Phase 09: Distributed training · about 100 minutes · 4 logical CPU devices
 
 This reference configures logical CPU devices to practice placement and sharding. Logical devices do not measure TPU performance. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [A sharded training step](https://www.tahabouhsine.com/jaxpathways/lesson-distributed-02.html).
+
 ## What you will be able to do
 
 - Compare all-reduce and reduce-scatter against the same independent global gradient.
@@ -20,11 +22,9 @@ A collective combines or redistributes values among participants. Track chunk id
 
 ## Track reduced chunks through communication
 
-Reduce-scatter combines contributions and leaves each participant with its assigned portion of the result. An all-gather can then distribute those portions so each holds the full result. Together they can implement the corresponding all-reduce.
+The eight-value gradient is the same global mathematical result in each program, but its ownership differs. All-reduce gives every device all eight reduced values. Reduce-scatter first sums corresponding contributions, then leaves each device with its assigned two-value slice; an all-gather restores the full vector on each device.
 
-Distinguish an original contribution from a chunk whose contributions have already been combined. Sending values and reducing values are different actions, even when arrows look similar.
-
-The byte bars are modeled payloads under the lesson's assumptions. They do not capture all protocol overhead or establish physical overlap. Use them to predict a tradeoff, then measure the actual topology if network performance is the question.
+The diagram uses two ranks and four entries to expose the sequence: $[1,2]+[3,4]=[4,6]$, then each rank owns one reduced entry before gathering. In the executed four-device example, the gradient has eight entries, so each reduce-scatter shard has two. A transmitted contribution is not yet the reduced chunk; the reduction happens before ownership is divided.
 
 ### Reduce-scatter followed by all-gather
 
@@ -34,7 +34,7 @@ The byte bars are modeled payloads under the lesson's assumptions. They do not c
 
 *Architecture and dataflow mechanism diagram.*
 
-Contributions $[1,2]$ and $[3,4]$ are summed into portions $[4]$ and $[6]$. After reduce-scatter neither participant holds the full result. All-gather then gives each $[4,6]$. This analytic example shows ownership, not a physical schedule or measured traffic.
+The table's two participants contribute $[1,2]$ and $[3,4]$. Reduce-scatter sums matching entries to $[4,6]$ and assigns one entry to each participant; neither local result is the full vector yet. All-gather then gives both participants $[4,6]$. In the lesson's actual four-rank, eight-value case, the corresponding reduced pieces have two entries each. The table explains ownership and order, not a physical schedule or measured traffic.
 
 ### Pause and reason
 
@@ -48,7 +48,7 @@ No. Each holds its reduced portion. Replicating the complete result requires the
 
 ## Keep normalization independent of device count
 
-Our regression problem has sixteen observations and eight weights. Each of four devices receives four observations. Inside shard_map, the local function sees that local batch, but its gradient contribution still divides by the global count $N=16$. Summing those contributions produces the derivative of the global mean loss. Dividing by the local count and summing would multiply the gradient by four. The NumPy expression calculates the complete derivative without JAX collectives.
+There are sixteen observations and eight weights, with four observations on each of four devices. Each local gradient contribution uses the global denominator $N=16$, so summing the four contributions gives the derivative of the global mean loss. If each device divided by its local count 4 and those local means were then summed, the result would be four times too large. A changed batch size must update the global count, not redefine the objective as a sum of local means.
 
 $$
 g_r=\frac{2}{N}X_r^\mathsf{T}(X_rw-y_r),\qquad g=\sum_{r=0}^{p-1}g_r,\qquad N=16,\quad p=4
@@ -60,7 +60,7 @@ Both programs return a global vector with shape $(8,)$. With all-reduce, each de
 
 ## Derive a communication model with its assumptions visible
 
-Let $G$ be the byte size of one complete gradient and $p$ the number of ranks. In an idealized ring, reduce-scatter sends a total of $(p-1)G/p$ bytes per rank. A subsequent all-gather sends the same amount. Their sum gives the usual two-phase ring all-reduce payload. For eight float32 values, $G=32$ bytes and $p=4$: the modeled payloads are twenty-four and forty-eight bytes per rank. These are algorithmic payload counts, not measured traffic or total memory use. They omit latency, protocol overhead and topology.
+Let $G$ be one gradient's byte size and $p$ the rank count. The idealized ring model gives $(p-1)G/p$ bytes sent per rank for reduce-scatter, and the same for all-gather. Here eight float32 values give $G=32$ bytes; with four ranks the model predicts 24 bytes for reduce-scatter and 48 for the two phases together. The chart's 48/24/48 bars encode those calculated payloads, not network counters. If the same vector were split across eight ranks, the modeled scatter payload would be 28 bytes per rank and the two-phase total 56, while each rank would own one value. Actual timings can still reverse that apparent tradeoff because the model omits latency, implementation and topology.
 
 $$
 B_{\mathrm{RS}}=\frac{p-1}{p}G,\qquad B_{\mathrm{AG}}=\frac{p-1}{p}G,\qquad B_{\mathrm{AR}}=2\frac{p-1}{p}G
@@ -74,9 +74,9 @@ Our example implements the gather explicitly and checks the reconstructed vector
 
 ## Separate observed execution from the payload model and run on a TPU mesh
 
-The lowered StableHLO is inspected for the requested collective operations. The benchmark warms each exact function and waits for every result; it prints seven CPU timing samples summarized by their medians. Compilation is excluded. These logical devices share one host and do not reproduce a TPU network.
+The recorded CPU medians vary across repeated runs: in one execution all-reduce was about 123 microseconds and reduce-scatter about 105; another had all-reduce about 94 and reduce-scatter about 103. These small-job measurements do not establish a stable winner, and neither corresponds to the idealized byte bars. The timed functions are warmed and synchronized, but compilation is excluded and all four logical devices share one host.
 
-A reduce-scatter may time slower than an all-reduce on this tiny workload. That observation does not invalidate the byte calculation: timing also depends on dispatch, implementation and synchronization. The separate gather timing is an isolated call; summing isolated medians is not a measured fused training-step latency. Benchmark the complete consuming algorithm on its actual hardware before reporting a system improvement. When you run this lesson on a 4-chip TPU VM (`v5litepod-4` or `v6e-4`) from the TPU course (`phase-tpu`), remove the CPU platform override so `shard_map` lowers `psum` and `psum_scatter` onto physical TPU ICI links.
+Choose the consumer before choosing the collective. If the optimizer can update each parameter and momentum slice locally, reduce-scatter can leave the gradient partitioned; if the next operation requires replicated weights, all-gather returns the storage and communication. Benchmark the complete consuming step on the target topology before claiming a system benefit.
 
 **Run all-reduce and reduce-scatter across 4 TPU chips on a TPU VM**
 
@@ -336,11 +336,11 @@ Expected: All three global gradients agree with NumPy. The replicated and recons
 
 ### Read the figure
 
-The upper panel counts values in one local result: eight for all-reduce, two for reduce-scatter, and eight after gathering. These counts come from actual addressable shards. All three global vectors contain the same eight gradient values. The lower panel shows the idealized ring payload in bytes per rank: forty-eight for all-reduce, twenty-four for reduce-scatter alone, and forty-eight when gathering is added. It is a model, not measured device traffic.
+In the upper panel, the vertical axis counts locally stored gradient values per device: 8 after all-reduce, 2 after reduce-scatter, and 8 after the following gather. These counts come from the executed shard shapes, and each state represents the same global eight-value gradient. In the lower panel, the vertical axis is modeled ring payload in bytes per rank: 48 for all-reduce, 24 for reduce-scatter alone, and 48 for scatter plus gather. These are calculated model values, not observed traffic.
 
 ### Connect it to the computation
 
-The reduction in the middle storage bar comes from partitioning the summed gradient. The return of both bars after gathering explains why a local memory benefit and a complete communication benefit are different claims. The momentum experiment consumes slices before reconstructing weights. Its numerical comparison checks correctness; the separate synchronized CPU samples check a different question and is distinct from accelerator speed.
+The middle upper bar shows what the optimizer can consume locally when parameters and momentum are sharded the same way. The final bar returns to eight values per device because gathering restores replication. Thus lower local storage during one step does not imply lower communication for the full training step. The CPU timing output is a separate observation and varies between runs; use the payload model to form a hypothesis, then measure the whole algorithm on the intended hardware.
 
 ```python
 visual_data={'panels':[{'kind':'bar','labels':['all-reduce','reduce-scatter','after gather'],'ylabel':'values stored per device','series':[{'label':'observed local shape','y':[ga.addressable_shards[0].data.size,gs.addressable_shards[0].data.size,gg.addressable_shards[0].data.size]}]},{'kind':'bar','labels':['all-reduce','reduce-scatter','scatter + gather'],'ylabel':'modeled bytes per rank','series':[{'label':'idealized ring payload','y':[ring_all_bytes,ring_scatter_bytes,ring_scatter_bytes*2]}]}]}
@@ -348,17 +348,17 @@ visual_data={'panels':[{'kind':'bar','labels':['all-reduce','reduce-scatter','af
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:22:23.581942+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:06:05.104234+00:00. JAX 0.9.2.
 
 ```text
 Gradient reference: [0.0029296851716935635, 0.00219726306386292, 0.0014648411888629198, 0.0007324193138629198, -2.6193447411060333e-09, -0.000732424552552402, -0.001464846427552402, -0.002197268418967724]
 Local result shapes: replicated (8,), reduce-scatter (2,), gathered (8,)
 Idealized ring bytes per rank: 48.0 24.0
-Completed CPU median microseconds: {'all_reduce': 365.9161739051342, 'reduce_scatter': 139.08278197050095, 'all_gather_only': 111.58362030982971}
+Completed CPU median microseconds: {'all_reduce': 146.91567048430443, 'reduce_scatter': 140.70887118577957, 'all_gather_only': 121.54225260019302}
 Gradient reference: [0.0029296851716935635, 0.00219726306386292, 0.0014648411888629198, 0.0007324193138629198, -2.6193447411060333e-09, -0.000732424552552402, -0.001464846427552402, -0.002197268418967724]
 Local result shapes: replicated (8,), reduce-scatter (2,), gathered (8,)
 Idealized ring bytes per rank: 48.0 24.0
-Completed CPU median microseconds: {'all_reduce': 118.75014752149582, 'reduce_scatter': 106.83387517929077, 'all_gather_only': 87.7920538187027}
+Completed CPU median microseconds: {'all_reduce': 104.37518358230591, 'reduce_scatter': 143.50004494190216, 'all_gather_only': 126.37488543987274}
 Sharded momentum matches the independent elementwise update.
 Joint permutation preserves the gradient; label-only reversal does not.
 Idealized payload/storage budget, not observed network traffic: [{'ranks': 2, 'all_reduce_bytes': 1048576, 'scatter_gather_bytes': 1048576, 'shard_storage_bytes': 524288}, {'ranks': 4, 'all_reduce_bytes': 1572864, 'scatter_gather_bytes': 1572864, 'shard_storage_bytes': 262144}, {'ranks': 8, 'all_reduce_bytes': 1835008, 'scatter_gather_bytes': 1835008, 'shard_storage_bytes': 131072}]
@@ -401,35 +401,30 @@ Repeat the gradient comparison after reversing both observation rows and labels 
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `Mesh + PartitionSpec + NamedSharding` — Maps logical tensor axes onto physical device mesh axes for SPMD data, tensor, or pipeline parallelism.
+**Inputs:**
+- Reversed observation rows and labels, changed initial weights, and the distributed gradient routine from the lesson.
 
-**Step-by-step implementation plan:**
-1. Exercise solution
-2. Place `w2` explicitly onto the target JAX device.
-3. Transfer the device result to the host for an independent NumPy comparison.
-4. Transfer the device result to the host for an independent NumPy comparison.
+**Outputs:**
+- Gradients and updated parameters after the changed data ordering.
+- Reconstructed local replicas and all-reduce comparisons.
+- A comparison showing why reversing labels without the corresponding rows changes the gradient problem.
+
+**Invariants to check:**
+- Reversing both paired arrays preserves examples; reversing labels alone changes targets.
+- Each local replica matches the globally updated parameter vector.
+
+**Hints:**
+- Apply the same row permutation to features and labels.
+- Compare local contributions, reduced gradients, and replica state independently.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-x2 = jax.device_put(...)  # TODO: compute x2
-y2 = jax.device_put(...)  # TODO: compute y2
-w2h = ...  # TODO: compute w2h
-# Place `w2` explicitly onto the target JAX device.
-w2 = jax.device_put(...)  # TODO: compute w2
-r2 = ...  # TODO: compute r2
-for answer in [all_gradient(x2, y2, w2), gather(shard_gradient(x2, y2, w2))]:
-    # Transfer the device result to the host for an independent NumPy comparison.
-    np.testing.assert_allclose(np.asarray(answer), r2, atol = ...  # TODO: compute np.testing.assert_allclose(np.asarray(answer), r2, atol
-    for shard in answer.addressable_shards:
-        # Transfer the device result to the host for an independent NumPy comparison.
-        np.testing.assert_allclose(np.asarray(shard.data), r2, atol = ...  # TODO: compute np.testing.assert_allclose(np.asarray(shard.data), r2, atol
-wrong_labels = ...  # TODO: compute wrong_labels
-assert np.max(np.abs(wrong_labels-r2))  # TODO: complete assertion check
-print('Joint permutation preserves the gradient; label-only reversal does not.')
+import numpy as np
+
+def verify_changed_distributed_step(features, labels, initial_weights, update):
+    # TODO: reverse paired observations, change the initial state, and audit replicas.
+    raise NotImplementedError("Check pairing, reduction, and replica agreement")
 ```
 
 <details><summary>Reference solution</summary>
@@ -469,26 +464,28 @@ Use the same full gradient byte count for both collectives; one mebibyte is 2**2
 
 ### How to write: Account for the complete communication cycle — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Inputs:**
+- A one-mebibyte gradient payload and rank counts 2, 4, and 8.
+- A ring collective communication model.
+
+**Outputs:**
+- Per-rank storage and communicated bytes for each complete strategy.
+
+**Invariants to check:**
+- The all-reduce comparison includes both reduce-scatter and all-gather phases.
+- Per-rank storage is distinct from network bytes transferred.
+
+**Hints:**
+- For a ring, account for (P-1) chunks in each phase.
+- Keep byte units explicit and divide payload by rank count only for shard storage.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Account for the complete communication cycle (Transfer)
-budget = ...  # TODO: compute budget
-for p in [2, 4, 8]:
-    size = ...  # TODO: compute size
-    rs = ...  # TODO: compute rs
-    ar = ...  # TODO: compute ar
-    cycle = ...  # TODO: compute cycle
-    assert ar  # TODO: complete assertion check
-    assert size // p * p  # TODO: complete assertion check
-    budget.append({'ranks': p, 'all_reduce_bytes': ar,
-                   'scatter_gather_bytes': cycle, 'shard_storage_bytes': size // p})
-assert [row['all_reduce_bytes'] for row  # TODO: complete assertion check
-print('Idealized payload/storage budget, not observed network traffic:', budget)
+def compare_ring_collectives(payload_bytes, rank_counts):
+    # TODO: calculate complete all-reduce and reduce-scatter/all-gather costs.
+    # Return storage and communication in separately named fields.
+    raise NotImplementedError("Count both ring phases and per-rank storage")
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -523,9 +520,17 @@ A program replaces all-reduce with reduce-scatter and immediately gathers the fu
 
 <details><summary>Answer and explanation</summary>
 
-The same two-phase payload, despite a temporarily smaller local result.
+**1. Half the communication of the original all-reduce.**
+
+Count bytes in both collective phases. Replacing an all-reduce with reduce-scatter plus all-gather need not reduce the ideal ring payload.
+
+**2. The same two-phase payload, despite a temporarily smaller local result. (correct)**
 
 The scatter and gather each contribute one phase. The advantage depends on what consumes the partitioned value and when reconstruction is required.
+
+**3. No communication because the global shape is unchanged.**
+
+A global shape describes array semantics, not how replicas or shards become consistent. Communication still has to move the contributions.
 
 </details>
 

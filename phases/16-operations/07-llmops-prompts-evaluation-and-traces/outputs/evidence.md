@@ -4,7 +4,7 @@ Copy this template into your own portfolio and fill it after running your modifi
 
 ## Evidence required
 
-Keep all case IDs and per-slice replay scores, missing/duplicate-response rejections, the retained failed case, trace identities and application-version fields. Explain what requires separate live-model evaluation.
+Keep heterogeneous case IDs, actual local-stage traces and retrieved context, missing/duplicate/out-of-order controls, component diagnoses and a same-case candidate comparison. The local adapter is not an LLM quality benchmark.
 
 - Command: `python3 phases/16-operations/07-llmops-prompts-evaluation-and-traces/code/main.py`
 - Working directory: Repository root

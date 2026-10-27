@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "pretraining-01",
-  "contentHash": "237417e175319caeaf6f3750c4e6c1ae0a9fc8f1ec11e3c4f10262e522470152",
-  "executedAt": "2026-10-20T22:26:40.595336+00:00",
+  "contentHash": "aa5c03a2b92ec9486480a50f0a90bdcda7b1af8c058e756965aaacca26234173",
+  "executedAt": "2026-10-27T16:11:23.672853+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -11,7 +11,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "MLM initial/final/changed-mask: 1.0986123085021973 0.010633035562932491 0.010457751341164112\nMLM initial/final/changed-mask: 1.0986123085021973 0.010633035562932491 0.010457751341164112\nUnselected output logits have zero direct loss gradient.\nToken-weighted / sequence-weighted: 0.6577723026275635 0.51289606\nChanged position loss: 0.010457751341164112\nEmpty mask rejected\nIndependent masked softmax gradient agrees.\nPASS: pretraining-01\n",
+  "stdout": "MLM initial/final/changed-mask: 1.0986123085021973 0.010633035562932491 0.010457751341164112\nMLM changed-mask loss / uniform baseline / frozen held-out probe accuracy: 3.571091890335083 1.0986122886681098 0.6666666666666666\nArtifact path: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jaxpathways-mlm-transfer-9wnh3y8w/encoder.npz\nIdentity sidecar: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jaxpathways-mlm-transfer-9wnh3y8w/identity.json\nSaved identity: mlm-attention-4x6-v1 lesson-vocab:0=zero,1=one,2=two,3=MASK synthetic-repeated-token-v1:g0-g2/g4-g6\nMLM initial/final/changed-mask: 1.0986123085021973 0.010633035562932491 0.010457751341164112\nUnselected output logits have zero direct loss gradient.\nToken-weighted / sequence-weighted: 0.6577723026275635 0.51289606\nMLM changed-mask loss / uniform baseline / frozen held-out probe accuracy: 3.571091890335083 1.0986122886681098 0.6666666666666666\nArtifact path: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jaxpathways-mlm-transfer-pue6iqn6/encoder.npz\nIdentity sidecar: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jaxpathways-mlm-transfer-pue6iqn6/identity.json\nSaved identity: mlm-attention-4x6-v1 lesson-vocab:0=zero,1=one,2=two,3=MASK synthetic-repeated-token-v1:g0-g2/g4-g6\nChanged position loss: 0.010457751341164112\nEmpty mask rejected\nIndependent masked softmax gradient agrees.\nPASS: pretraining-01\n",
   "notebookCells": [
     {
       "sourceHash": "90cdcf604d5682f7599a6f5ee3b5b2eeeb9ed21bbaaa217a602a49f8b92a254e",
@@ -34,6 +34,21 @@
       ]
     },
     {
+      "sourceHash": "e9d99f3c5b2dfd4bde47959aef20d9e60421cae323318117f7bf1acfde0c843d",
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "MLM changed-mask loss / uniform baseline / frozen held-out probe accuracy: 3.571091890335083 1.0986122886681098 0.6666666666666666\n",
+            "Artifact path: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jaxpathways-mlm-transfer-7vstip1p/encoder.npz\n",
+            "Identity sidecar: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jaxpathways-mlm-transfer-7vstip1p/identity.json\n",
+            "Saved identity: mlm-attention-4x6-v1 lesson-vocab:0=zero,1=one,2=two,3=MASK synthetic-repeated-token-v1:g0-g2/g4-g6\n"
+          ]
+        }
+      ]
+    },
+    {
       "sourceHash": "2aeed2ab906ddf873ca7311012317cfa5dc56c40ed647e7fac1c2e2dd4f2ae96",
       "outputs": [
         {
@@ -50,7 +65,7 @@
       "outputs": []
     },
     {
-      "sourceHash": "25df6d662f9d3f0c4e984c6a201f79fa0cfd7a2633dc4b0773dfba6c2dd4ee6c",
+      "sourceHash": "53dc08a479da44f2b1718bf964cd5c4d3e3305811c536df9d501b1833a6e3476",
       "outputs": [
         {
           "output_type": "display_data",
@@ -89,7 +104,22 @@
       ]
     },
     {
-      "sourceHash": "40b9867c856a03047e35db1912b0224212d97e76e1defe2b7db788ed02107494",
+      "sourceHash": "e9d99f3c5b2dfd4bde47959aef20d9e60421cae323318117f7bf1acfde0c843d",
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "MLM changed-mask loss / uniform baseline / frozen held-out probe accuracy: 3.571091890335083 1.0986122886681098 0.6666666666666666\n",
+            "Artifact path: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jaxpathways-mlm-transfer-m47tsz43/encoder.npz\n",
+            "Identity sidecar: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jaxpathways-mlm-transfer-m47tsz43/identity.json\n",
+            "Saved identity: mlm-attention-4x6-v1 lesson-vocab:0=zero,1=one,2=two,3=MASK synthetic-repeated-token-v1:g0-g2/g4-g6\n"
+          ]
+        }
+      ]
+    },
+    {
+      "sourceHash": "22d5d8896e54aecd8b70f9aafa0c68cf3475cdb9799648df8d1bbbd8b53d1ac8",
       "outputs": []
     },
     {
@@ -105,7 +135,7 @@
       ]
     },
     {
-      "sourceHash": "23b47309ed70f878ca923b82ea215b9e0b23a0053ecfc1d35d6f3b9c7d023f57",
+      "sourceHash": "22d5d8896e54aecd8b70f9aafa0c68cf3475cdb9799648df8d1bbbd8b53d1ac8",
       "outputs": []
     },
     {
@@ -121,7 +151,7 @@
       ]
     },
     {
-      "sourceHash": "1a707263c81e83727380c681ebb940c0fbd8d817c7e4cdbd548ca122f6957a42",
+      "sourceHash": "22d5d8896e54aecd8b70f9aafa0c68cf3475cdb9799648df8d1bbbd8b53d1ac8",
       "outputs": []
     },
     {

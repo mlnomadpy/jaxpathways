@@ -11,7 +11,12 @@
         "Nothing; INT8 guarantees acceleration."
       ],
       "correct": 0,
-      "explanation": "Bit width alone is incomplete. Arithmetic, scale metadata, calibration and runtime support determine both behavior and practical benefit."
+      "explanation": "Bit width alone is incomplete. Arithmetic, scale metadata, calibration and runtime support determine both behavior and practical benefit.",
+      "optionFeedback": [
+        "Bit width alone is incomplete. Arithmetic, scale metadata, calibration and runtime support determine both behavior and practical benefit.",
+        "A filename or container format does not define tensor scales, calibration or accumulation. Write the numerical contract explicitly.",
+        "Smaller storage does not guarantee faster execution. Check native operator support, data movement and measured target latency."
+      ]
     }
   ]
 }

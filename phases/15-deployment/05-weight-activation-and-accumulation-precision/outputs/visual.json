@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "deployment-05",
-  "contentHash": "0577618741532bdb6eeb6c2761385723059d56ddbece0be84f02d50eec2721de",
-  "rendererHash": "a1bd5b648f4731ae5d5f0a24811c2540d1a0a132149ce589d17c4113509cbedf",
+  "contentHash": "66aff04404704fef56d076d5917039b9560b8a799b843a80dedb632d3c8a3cdc",
+  "rendererHash": "17e3bbad72ee4c43425845aaee76b86b85e84750551278be03d8c16842f4dc63",
   "kind": "executed",
-  "generatedAt": "2026-10-20T22:29:24.249059+00:00",
+  "generatedAt": "2026-10-27T17:01:31.408845+00:00",
   "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",
@@ -75,7 +75,7 @@
   "diagram": {
     "title": "Integer values need scales and zero-points",
     "prediction": "What happens if you ignore a nonzero zero-point when interpreting quantized values?",
-    "reading": "Follow affine integer codes into centered products, wide accumulation and compatible bias units, then output rescaling. Exact accumulator dtype and per-channel scale axes belong to the declared runtime policy. These arrows describe arithmetic dependencies, not a specific hardware kernel.",
+    "reading": "The nodes follow real values to rounded codes, then zero-point-centered products, wide accumulation with bias in matching units, and finally output rescaling. In the example, omitting the input zero point changes outputs from \\( (0.625,0.9375)\\) to \\( (-0.125,0.5625)\\); a narrow output grid clips both to 0.52734. When values disagree, inspect the first boundary where the numeric units stop matching. The arrows describe arithmetic, not a particular hardware kernel.",
     "alt": "Follow affine integer codes into centered products, wide accumulation and compatible bias units, then output rescaling. Exact accumulator dtype and per-channel scale axes belong to the declared runtime policy. These arrows describe arithmetic dependencies, not a specific hardware kernel.",
     "scope": "Architecture and dataflow mechanism diagram.",
     "height": 6.4,

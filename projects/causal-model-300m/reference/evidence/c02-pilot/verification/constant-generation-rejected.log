@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "/Users/tahabsn/Documents/ChatGPT/jaxpathways/projects/causal-model-300m/tests/check.py", line 730, in <module>
+    main()
+    ~~~~^^
+  File "/Users/tahabsn/Documents/ChatGPT/jaxpathways/projects/causal-model-300m/tests/check.py", line 706, in main
+    check_model(candidate)
+    ~~~~~~~~~~~^^^^^^^^^^^
+  File "/Users/tahabsn/Documents/ChatGPT/jaxpathways/projects/causal-model-300m/tests/check.py", line 181, in check_model
+    raise AssertionError(
+        "candidate generation differs from independent greedy full-forward tokens"
+    )
+AssertionError: candidate generation differs from independent greedy full-forward tokens

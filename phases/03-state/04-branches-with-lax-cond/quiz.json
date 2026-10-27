@@ -11,7 +11,12 @@
         "Only if the predicate is negative"
       ],
       "correct": 1,
-      "explanation": "Compiled control flow requires compatible output structures and array types across branches."
+      "explanation": "Compiled control flow requires compatible output structures and array types across branches.",
+      "optionFeedback": [
+        "Both branches are traced into one conditional contract. A scalar and a length-three vector cannot be alternative results of that contract.",
+        "Compiled control flow requires compatible output structures and array types across branches.",
+        "The sign selects the runtime branch but does not remove the need to trace and type-check the other branch."
+      ]
     }
   ]
 }

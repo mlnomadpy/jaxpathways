@@ -4,6 +4,8 @@ Phase 01: Arrays & pure functions · about 45 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Pure functions and explicit inputs](https://www.tahabouhsine.com/jaxpathways/lesson-arrays-03.html).
+
 ## What you will be able to do
 
 - Predict the values returned by functional indexed set and add.
@@ -21,14 +23,12 @@ An indexed update in JAX returns an array value. This makes the relationship bet
 
 ## Separate a new value from a new physical buffer
 
-Start with $[2,4,6]$. Setting the middle entry to $10$ produces $[2,10,6]$. Adding $10$ at that position produces $[2,14,6]$. Both operations begin from the same original values; the second is not automatically applied to the result of the first.
+Start from the displayed original array $[1,2,3,4]$. The set operation replaces index $1$ with $20$, producing $[1,20,3,4]$. The add operation contributes $5$ at indices $0$ and $2$, producing $[6,2,8,4]$. Both outputs branch from the same original, so the add result still has $2$ at index $1$; it did not inherit the set result.
 
-Draw two arrows from the original array, one labeled set and one labeled add. If you want sequential updates, explicitly feed the first result into the second operation. This is the same state-flow idea we will use in optimization and recurrent loops.
-
-Do not infer allocation cost from that drawing. A compiler may reuse storage when it can preserve the program's semantics. First verify old/new values and duplicate-index behavior for the operation you use, then measure memory behavior separately.
+Draw two arrows from the original, labeled set and add. If you want both effects in sequence, pass the first returned array into the second operation; the final values would then be $[6,20,8,4]$. These are value semantics. The drawing does not establish whether the compiler allocated a distinct physical buffer.
 
 $$
-C_{i,k} = \sum_{j=1}^{N} A_{i,j} B_{j,k} = \text{einsum}(\texttt{'ij,jk->ik'}, A, B)
+x^{\mathrm{set}}_i=\begin{cases}10&i=1\\x_i&i\ne1\end{cases},\qquad x^{\mathrm{add}}_i=x_i+10\,\mathbf{1}_{i=1}
 $$
 
 ### Pause and reason
@@ -43,9 +43,9 @@ The returned updated value was discarded. Assign or pass that result into the ne
 
 ## A Python name and an array value are different
 
-After `y = x.at[1].set(20)`, $x$ still denotes the original array and $y$ denotes the updated value. After `x = x.at[1].set(20)`, the Python name $x$ is rebound to the new value. That spelling does not retroactively change another name holding the original value.
+After `y = x.at[1].set(20)`, the name `x` still refers to $[1,2,3,4]$ and `y` refers to $[1,20,3,4]$. If instead you write `x = x.at[1].set(20)`, Python rebinds the name `x`; it does not alter an earlier value held through `original = x`.
 
-Keep `original = x` before an update when you want a reference for tests. Comparing original and updated makes the semantics visible. Repeatedly inspecting only the newly rebound name can make a functional update look like mutation even though the old value still exists.
+The execution receipt prints the original, set result, and add result side by side, and the heatmap uses those as three rows. Keeping a second name for the original makes the distinction observable. Before running a changed index, predict which positions should differ and check the untouched positions too.
 
 ## Set replaces; add accumulates
 
@@ -149,7 +149,7 @@ visual_data = {'kind': 'heatmap', 'values': jnp.stack([x, y, z]).tolist(), 'rows
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:20:02.846523+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:02:44.373932+00:00. JAX 0.9.2.
 
 ```text
 Original: [1. 2. 3. 4.]
@@ -209,21 +209,30 @@ Replace the last two elements with zero in a new array. Keep $x$ unchanged.
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- A one-dimensional four-value array `x`.
+- A request to replace its final two positions in a new value.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- A changed array and the unchanged original input.
+
+**Invariants to check:**
+- The source array remains unchanged.
+- Output shape matches input shape.
+- Only requested positions change.
+
+**Hints:**
+- Use a functional indexed update and keep its returned array.
+- Compare the input after the update.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Replace the last two elements with zero in a new array.
-masked = ...  # TODO: compute masked
-assert jnp.allclose(masked, jnp.array([1.,2.,0.,0.]))  # TODO: complete assertion check
-assert jnp.allclose(x, jnp.array([1.,2.,3.,4.]))  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def replace_suffix(x):
+    # TODO: make the requested functional indexed update
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -251,23 +260,29 @@ The slice [:, $-1$] selects every row and the last column. A scalar replacement 
 
 ### How to write: Replace a region of a matrix — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.arange(n, dtype=...)` — Creates a 1-D JAX array of evenly spaced values `[0, 1, ..., n-1]` on the target device.
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `array.reshape(new_shape)` — Reorganizes tensor axes without changing the total element count (`array.size`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- A three-by-three matrix of consecutive values.
 
-**Step-by-step implementation plan:**
-1. Replace a region of a matrix (Practice)
+**Outputs:**
+- A new matrix with its final column replaced.
+
+**Invariants to check:**
+- Nonselected entries match the input.
+- The original matrix is unchanged.
+- The returned shape remains `(3, 3)`.
+
+**Hints:**
+- Select the last column in every row.
+- Check the entire result and original.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Replace a region of a matrix (Practice)
-matrix = jnp.arange(...)  # TODO: compute matrix
-updated_matrix = ...  # TODO: compute updated_matrix
-assert jnp.allclose(updated_matrix, jnp.array([[0., 1., -1.], [3., 4., -1.], [6., 7., -1.]]))  # TODO: complete assertion check
-assert jnp.allclose(matrix, jnp.arange(9).reshape(3, 3))  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def replace_final_column(matrix):
+    # TODO: update the selected region in a returned array
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -298,27 +313,28 @@ Use where for the fixed-shape result. Boolean indexing produces selected values,
 
 ### How to write: Keep shape while masking values — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- A one-dimensional input `x` and threshold two.
 
-**Step-by-step implementation plan:**
-1. Keep shape while masking values (Challenge)
-2. Check tensor shape invariant: `fixed_shape.shape == (4,)`
-3. Check tensor shape invariant: `selected.shape == (2,)`
+**Outputs:**
+- A fixed-shape masked value and a compact selected value.
+
+**Invariants to check:**
+- The masked result keeps input shape.
+- The compact result contains only selected entries.
+
+**Hints:**
+- Use elementwise selection for fixed shape.
+- Inspect both output shapes.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Keep shape while masking values (Challenge)
-fixed_shape = jnp.where(...)  # TODO: compute fixed_shape
-selected = ...  # TODO: compute selected
-# Check tensor shape invariant: `fixed_shape.shape == (4,)`
-assert fixed_shape.shape  # TODO: complete assertion check
-# Check tensor shape invariant: `selected.shape == (2,)`
-assert selected.shape  # TODO: complete assertion check
-assert jnp.allclose(fixed_shape, jnp.array([0., 0., 3., 4.]))  # TODO: complete assertion check
-assert jnp.allclose(selected, jnp.array([3., 4.]))  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def compare_mask_and_selection(x, threshold=2.):
+    # TODO: construct both fixed-shape mask and compact selection
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -349,9 +365,17 @@ After `y = x.at[1].set(20.)`, what happens to $x$?
 
 <details><summary>Answer and explanation</summary>
 
-Its value remains unchanged
+**1. Its second element becomes $20$**
+
+The update expression creates a new array value. Compare x with the returned value; assignment to a new name does not mutate x.
+
+**2. Its value remains unchanged (correct)**
 
 The expression returns the updated value. Assign it to a name to keep it; $x$ retains its original value.
+
+**3. It becomes a Python list**
+
+The .at update preserves array semantics. Inspect the returned shape and dtype rather than expecting a Python list.
 
 </details>
 

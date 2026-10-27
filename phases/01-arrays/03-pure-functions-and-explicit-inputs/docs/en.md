@@ -4,6 +4,8 @@ Phase 01: Arrays & pure functions · about 45 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Shapes, broadcasting, and dtypes](https://www.tahabouhsine.com/jaxpathways/lesson-arrays-02.html).
+
 ## What you will be able to do
 
 - Identify hidden inputs and side effects in a numerical function.
@@ -21,14 +23,14 @@ A pure function makes its changing inputs visible and returns its result without
 
 ## Make a repeated call explainable
 
-Imagine a prediction function that receives features and weights but reads a global bias. You compile it, change that Python global, and call the compiled function again. The source file now displays the new bias, but the already-traced computation may still embody the old value. The hidden dependency makes the result difficult to reason about.
+Imagine a predictor whose source accepts features and weights but reads its bias from a Python global. You compile it, edit the global, and call the compiled function again. The source now displays a different bias, but the traced computation may still contain the earlier value. The real dependency is hidden from the function signature.
 
-Pass the bias as an explicit argument instead. Then two calls with different bias arrays are visibly two computations with different data. For a linear prediction, increasing the bias by $1$ must increase every output by $1$, while changing the weight vector can affect rows differently.
+Make the bias an explicit input so each call states which value it uses. The recorded prediction series make this dependence visible: with weight $2$, inputs $0,1,2$, and biases $1$ and $3$, the outputs are $[1,3,5]$ and $[3,5,7]$. Increasing only the bias by $2$ raises every prediction by $2$, while preserving the slope.
 
-Purity does not mean a whole application has no state. It means the numerical function receives the state it needs and returns any new state. Files, logs and orchestration can live outside that numerical boundary.
+Purity does not mean an application has no state. It means the numerical function receives the state it needs and returns values; orchestration and reporting can remain outside that boundary.
 
 $$
-X'[i] = \begin{cases} v & \text{if } i = k \\ X[i] & \text{otherwise} \end{cases}
+f(X,w,b)=Xw+b\mathbf{1},\qquad f(X,w,b+1)-f(X,w,b)=\mathbf{1}
 $$
 
 ### Pause and reason
@@ -49,9 +51,9 @@ Passing the weight explicitly makes the dependency visible. It also allows two m
 
 ## Array immutability does not make a dictionary immutable
 
-JAX arrays are immutable values, but a Python dictionary holding them is still a mutable container. Assigning `params["weight"] = ...` changes which value the dictionary holds. If another variable refers to the same dictionary, it sees the changed entry.
+An array stored in a Python dictionary is immutable as an array value, but the dictionary binding is mutable. After `params["weight"] = new_weight`, any alias to that same dictionary sees the new entry. The recorded example therefore reports aliased container weight $9.0$, even though no JAX array was edited in place.
 
-Constructing `{**params, "weight": new_weight}` makes a new dictionary with a changed binding and keeps the old container intact. This is a shallow copy: nested mutable objects can still be shared. Our example has only array leaves, so the shallow update is sufficient for the declared structure. More general parameter trees will need deliberate tree-aware transformations.
+Constructing `{**params, "weight": new_weight}` instead returns a new dictionary and leaves the old mapping available for comparison. This is a shallow copy, which is enough for this example because the leaves are arrays. If you change the example, keep both mappings and predict their `weight` entries before printing; that separates container mutation from array-value semantics.
 
 ## Treat a step as an input/output contract
 
@@ -151,7 +153,7 @@ visual_data = {'kind': 'line', 'x': x.tolist(), 'xlabel': 'input', 'ylabel': 'pr
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:20:00.809634+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:02:41.212050+00:00. JAX 0.9.2.
 
 ```text
 [1. 3. 5.]
@@ -205,21 +207,30 @@ Create new parameters with weight $3$ while retaining the original bias. Show th
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- A parameter mapping with weight and bias.
+- A requested new weight and the prediction inputs.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- A new parameter mapping and predictions under both versions.
+
+**Invariants to check:**
+- The original mapping remains unchanged.
+- The retained field keeps its original value.
+- Original predictions can be replayed.
+
+**Hints:**
+- Return a new mapping instead of assigning into the input.
+- Pass the changed mapping explicitly to prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Create new parameters with weight 3 while retaining the original bias.
-updated = ...  # TODO: compute updated
-assert jnp.allclose(predict(updated, x), jnp.array([1.,4.,7.]))  # TODO: complete assertion check
-assert float(params["weight"])  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def update_weight(params, new_weight):
+    # TODO: return a new mapping with only the requested field changed
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -247,23 +258,28 @@ A new dictionary is required; changing a binding in the original dictionary brea
 
 ### How to write: Update the bias without changing either parameter input — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- The original parameters, a new bias value, and the lesson prediction function.
 
-**Step-by-step implementation plan:**
-1. Update the bias without changing either parameter input (Practice)
+**Outputs:**
+- A new mapping and predictions for both parameter versions.
+
+**Invariants to check:**
+- The returned mapping is a distinct container.
+- Changing bias does not alter the original prediction.
+
+**Hints:**
+- Create a copy with one updated field.
+- Check identity and numerical replay separately.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Update the bias without changing either parameter input (Practice)
-def with_bias(parameters, new_bias):
-    return ...  # TODO: return computed result
-changed_bias = with_bias(...)  # TODO: compute changed_bias
-assert changed_bias is not params  # TODO: complete assertion check
-assert jnp.allclose(predict(changed_bias, x), jnp.array([-2., 0., 2.]))  # TODO: complete assertion check
-assert jnp.allclose(predict(params, x), jnp.array([1., 3., 5.]))  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def with_bias(params, new_bias, predict, inputs):
+    # TODO: return a new mapping and compare both prediction paths
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -296,31 +312,29 @@ Compute data inside the numerical core and report it outside. A tuple return doe
 
 ### How to write: Return predictions and metrics together — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- Two parameter configurations, inputs, and targets.
 
-**Step-by-step implementation plan:**
-1. Return predictions and metrics together (Challenge)
-2. Check tensor shape invariant: `error.shape == ()`
+**Outputs:**
+- Predictions and scalar loss for both configurations.
+
+**Invariants to check:**
+- Evaluation returns numerical data without printing.
+- The loss reduces example errors to one scalar.
+- Parameter inputs are not mutated.
+
+**Hints:**
+- Keep reporting outside the function.
+- Use the supplied prediction function.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Return predictions and metrics together (Challenge)
-def evaluate(parameters, inputs, targets):
-    predictions = predict(...)  # TODO: compute predictions
-    return ...  # TODO: return computed result
-labels = jnp.array(...)  # TODO: compute labels
-outputs, error = evaluate(...)  # TODO: compute outputs, error
-other_outputs, other_error = evaluate(...)  # TODO: compute other_outputs, other_error
-# Check tensor shape invariant: `error.shape == ()`
-assert error.shape  # TODO: complete assertion check
-assert jnp.allclose(error, 0.)  # TODO: complete assertion check
-assert jnp.allclose(other_error, 6.)  # TODO: complete assertion check
-assert jnp.allclose(outputs, first_output)  # TODO: complete assertion check
-print("evaluation losses:", float(error), float(other_error))
+import jax.numpy as jnp
+
+def evaluate(params, inputs, targets, predict):
+    # TODO: return predictions and scalar mean squared error
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -355,9 +369,17 @@ What makes predict easier to transform and test?
 
 <details><summary>Answer and explanation</summary>
 
-Passing parameters and data explicitly
+**1. Reading an editable global weight**
+
+A mutable global makes the result depend on hidden state and can be captured during tracing. Pass the current parameters explicitly.
+
+**2. Passing parameters and data explicitly (correct)**
 
 Explicit inputs expose the computation and let you compare calls with controlled parameter values.
+
+**3. Printing inside every numerical operation**
+
+Printing exposes a trace or value but does not make the function pure. Check whether the return depends only on explicit inputs.
 
 </details>
 

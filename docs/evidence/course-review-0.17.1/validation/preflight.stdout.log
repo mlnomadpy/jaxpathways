@@ -1,0 +1,23 @@
+{
+  "approval_kind": "sol-transformer-lineage-recipe-approval",
+  "approval_sha256": "28f625fa4a1e8f705ce6b0e4a4ae56e241ce33d7ec5f3ec091e8428df738838b",
+  "approval_status": "source-reviewed-nonrun",
+  "fixture_sha256": "6a47dbe54012ed3013753ca8089fbcd51e57b3d0cbd61ffdb50a6877e0a534ff",
+  "mutation_controls_rejected": [
+    "projects/posttraining-audit/transformer_lineage/recipe.json",
+    "projects/posttraining-audit/transformer_lineage/fixture.json"
+  ],
+  "parent_foundation_source_sha256": {
+    "config.py": "5c05801a7ec1a15b3978c87c77ac4e64d1b056c60487cbcff3cdf72475c8bb64",
+    "data.py": "ff8ff698090866d46bc1f2b3540393b9a16db2121ad824110bd2ba53db645bd8",
+    "model.py": "94a88ae7fd6a251b5b190b4631496e04bb71a31c1bfe418511fdd37ffef034c9",
+    "train.py": "ee9f3bc73505ce8e00fe9680589d97805593e5c8c035cba4709b5f334eb27a2b"
+  },
+  "parent_package_files_sha256": {
+    "package.json": "02b92a9f56325e5a38be2c40bf263d2ca91db6122ba84dd4df266339457bf278",
+    "params.npz": "271cb6457de5da3f727c343c64b7bd350c00e503ea7ac847eecf51fbd5558802",
+    "tokenizer.json": "c92b534443cc6a1eacd5e78406b2c42e59553df704a07102a03c639d3694f586"
+  },
+  "recipe_sha256": "8411afc4412c59973d56b2cceae530dd642a5aa1c9e6f57a5dbb7f6ba110bc57",
+  "run_authorized": false
+}

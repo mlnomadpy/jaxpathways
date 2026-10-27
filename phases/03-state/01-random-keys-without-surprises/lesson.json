@@ -21,7 +21,7 @@
       {
         "id": "guided-reasoning",
         "title": "A key is an input, not a moving cursor",
-        "body": "Imagine a training step that needs dropout randomness and a key for the next step. Split the incoming key, use one child for dropout, and return the other as the continuation key. The drawing should branch once; it should not show a sampler secretly advancing the parent key.\n\nIf two augmentation calls receive the same key and otherwise identical inputs, they can produce the same augmentation. Different variable names do not make the underlying key values different. This is a data-flow bug that ordinary shape checks will miss.\n\nFor recovery, save the continuation key at the same boundary as model and data position. Reconstructing an initial seed and restarting the random stream is not equivalent to restoring the next key after many training steps.",
+        "body": "Reproducible randomness begins with ownership: a function receives a key, uses it for one draw, and returns or derives the key for later work. Splitting makes this flow visible instead of relying on a hidden generator that mutates itself.\n\nThe diagram should be read as a branch: one child continues the stream and one child belongs to the immediate sample. If dropout and augmentation both need randomness, give them distinct child keys. Passing the same key to two identical draws intentionally replays the same result, even if the variables have different names.",
         "check": {
           "prompt": "Does calling a sampler consume or mutate the key variable?",
           "answer": "No. The key is an explicit value. Your program must choose new child keys and carry the next key forward; otherwise repeated calls can replay the same sample."
@@ -30,20 +30,20 @@
       },
       {
         "title": "Treat a key as an explicit input",
-        "body": "A JAX random operation is deterministic given its key and other arguments. The key is not a mutable generator that automatically advances after a call. Calling normal twice with the same key, shape and dtype reproduces the draw. That property is useful for replay and dangerous when accidental reuse makes samples correlated.\n\nA seed is only the initial description of an experiment. Splitting describes where subsequent random choices come from. Write down which function owns the continuation key and which subkey is consumed by a draw. Do not pass one subkey to two independent components.",
+        "body": "A JAX random operation is deterministic from its key and arguments. The plotted horizontal coordinate is the position in a length-three draw; the vertical value is the sampled number. The first-draw and same-key replay curves overlap exactly at approximately \\((0.606,0.799,-0.909)\\); the split-key draw is approximately \\((-0.211,-1.363,-0.045)\\). The connected lines help compare coordinates, but this is neither time nor a probability-density plot.\n\nThe execution output confirms replay equality and a different split-key draw for this seed. Unequal samples in one example do not establish statistical independence. Use the same key for deliberate replay, and split before requesting a distinct stochastic operation.",
         "formula": "seed → root key\nroot key --split--> continuation key + sample key\nsample key --normal(shape=(3,))--> one sample"
       },
       {
         "title": "Carry the continuation key explicitly",
-        "body": "In the worked program, `key, sample_key = split(key)` replaces the variable key with a continuation value. The old key was not mutated; Python rebound a name. sample_key belongs to the immediate draw. The next split uses the retained continuation, not sample_key.\n\nThis convention gives each training or simulation step a small state transition: receive key → split → sample → return next key. Later, checkpoints need to store that next key alongside model and optimizer state. Storing parameters alone cannot reproduce the next random batch."
+        "body": "In the code, `key, sample_key = split(key)` rebinds the name `key` to the continuation value; it does not mutate the old key. `sample_key` is passed to the immediate sampler, and the continuation is what the next step splits.\n\nThat makes the random stream part of the transition state: receive a key, derive the next sample, return the continuation. A checkpoint that stores parameters but omits this continuation cannot reproduce the next stochastic step. Save the key at the same boundary as the rest of the simulation state."
       },
       {
         "title": "Separate replay from a statistical claim",
-        "body": "For this fixed seed, fresh subkeys produce visibly different draws. That observation is not proof of statistical independence, and different random draws can theoretically coincide. Equality of a single pair is therefore not a general test of randomness quality.\n\nThe reliable replay test is to reconstruct the same program from the same seed and compare its results. A change to key allocation can alter all later samples. Do not promise identical streams across arbitrary JAX versions, PRNG implementations, shapes or devices."
+        "body": "A replay test asks whether the same program and initial key reproduce the same result. It says nothing by itself about distribution quality or independence. In the recorded run, identical-key draws compare equal and a split-key draw differs; a coincidence between distinct draws would still be possible.\n\nFor reproducible work, record the seed, key derivation and PRNG implementation as well as the program. Changes to key allocation can change later draws. Avoid promising bitwise-identical streams across versions or implementations unless that specific boundary has been established."
       },
       {
         "title": "Allocate randomness by sample identity",
-        "body": "Splitting a root into four keys is useful for one fixed batch. If the batch membership changes, assignment by position may associate a different draw with a particular sample. fold_in lets you combine a stable integer identity with a base key, which can make per-example randomness stable under reordering.\n\nKeep identifiers unique where distinct randomness is intended. Reusing an identifier repeats its derived key. This is deterministic bookkeeping, not a security primitive or a substitute for recording the PRNG implementation."
+        "body": "Splitting a root key into a fixed batch of child keys assigns randomness by position. If the batch is reordered, the same sample identity may receive another key. `fold_in` can instead derive a key from a base key and stable integer identity.\n\nUse distinct identifiers when distinct per-example randomness is intended; reusing an identifier derives the same key under the same base. Check the result by reordering rows and matching draws by identifier. This is deterministic allocation, not a claim that samples are statistically independent or that the construction is a security mechanism."
       }
     ],
     "experiments": [
@@ -69,7 +69,24 @@
         "hint": "Reuse the random construction for a controlled comparison, not accidentally across independent training steps.",
         "solution": "# Replay a noisy prediction (Practice): Holding noise fixed isolates the changed numerical input.\ndef noisy_prediction(seed,x):\n    # Create or split explicit PRNG key(s) (`eps`) for reproducible randomness.\n    eps=jax.random.normal(jax.random.key(seed),x.shape)\n    return 2*x+1+eps\ninputs=jnp.array([0.,1.,2.])\nassert jnp.array_equal(noisy_prediction(4,inputs),noisy_prediction(4,inputs))\nassert jnp.allclose(noisy_prediction(4,inputs+1)-noisy_prediction(4,inputs),2.,atol=1e-6)",
         "explanation": "Holding noise fixed isolates the changed numerical input. That is a deliberately coupled experiment.",
-        "difficulty": "Practice"
+        "difficulty": "Practice",
+        "learnerStarter": {
+          "inputs": [
+            "A seed and a one-dimensional input array x."
+          ],
+          "outputs": [
+            "A reproducible batch of noisy predictions."
+          ],
+          "invariants": [
+            "The same seed and x produce identical results.",
+            "Holding the seed fixed while shifting every x by one shifts each prediction by two."
+          ],
+          "hints": [
+            "Use one normal draw per input element.",
+            "Reconstruct the key from the seed on every call to make replay explicit."
+          ],
+          "code": "import jax\nimport jax.numpy as jnp\n\ndef noisy_prediction(seed: int, x: jax.Array) -> jax.Array:\n    \"\"\"Add replayable, elementwise noise to the prediction 2*x+1.\"\"\"\n    # TODO: sample noise from a key made from seed and preserve x.shape.\n    raise NotImplementedError\n"
+        }
       },
       {
         "title": "Diagnose key reuse in a loop",
@@ -77,7 +94,24 @@
         "hint": "The draw function does not mutate the key.",
         "solution": "# Diagnose key reuse in a loop (Challenge): The repeated-row symptom comes from key allocation.\n# Create or split explicit PRNG key(s) (`root`) for reproducible randomness.\nroot=jax.random.key(5)\n# Sample deterministic random values into `broken` using an explicit PRNG key.\nbroken=jnp.stack([jax.random.normal(root,(2,)) for _ in range(3)])\nassert jnp.array_equal(broken[0],broken[1])\ncurrent=root\nrows=[]\nfor _ in range(3):\n    current,noise=noise_step(current)\n    rows.append(noise)\nfixed=jnp.stack(rows)\n# Check tensor shape invariant: `fixed.shape==(3,2)`\nassert fixed.shape==(3,2)\nassert not jnp.array_equal(fixed[0],fixed[1])",
         "explanation": "The repeated-row symptom comes from key allocation. The last inequality checks this fixed demonstration, not every possible random stream.",
-        "difficulty": "Challenge"
+        "difficulty": "Challenge",
+        "learnerStarter": {
+          "inputs": [
+            "A root PRNG key and a requested number of two-value draws."
+          ],
+          "outputs": [
+            "A broken batch showing repeated draws and a repaired batch of independent subkey draws."
+          ],
+          "invariants": [
+            "Reusing a key reproduces the same row.",
+            "Each repaired draw consumes a new key and has shape (2,)."
+          ],
+          "hints": [
+            "Keep the broken case as a diagnostic demonstration.",
+            "Thread the continuation key through the loop; collect only the sample subkeys."
+          ],
+          "code": "import jax\nimport jax.numpy as jnp\n\ndef compare_key_use(root: jax.Array, count: int = 3) -> tuple[jax.Array, jax.Array]:\n    \"\"\"Return repeated-key draws and draws made from distinct subkeys.\"\"\"\n    # TODO: build both batches and return arrays with shape (count, 2).\n    raise NotImplementedError\n"
+        }
       }
     ],
     "objectives": [
@@ -121,10 +155,32 @@
       "title": "Reused keys replay the same sample",
       "kind": "executed",
       "prediction": "Will a repeated draw lie on top of the original?",
-      "reading": "The horizontal axis selects a coordinate within a three-element random draw; the vertical axis gives its sampled value. The solid first-draw line and dashed same-key replay line lie on top of each other. The dash-dot line comes from a new split key.\n\nThe replay repeats approximately \\((0.606,0.799,-0.909)\\), while the split-key draw is approximately \\((-0.211,-1.363,-0.045)\\). Two curves are hard to distinguish precisely because their coordinates are equal.",
-      "connection": "A JAX random function is deterministic given the same key and arguments. Calling it again with that key replays the result; it does not silently advance a hidden random state. Splitting produces a new key for a new draw.\n\nThe lines only connect coordinates to make equality visible. This is not a time series or a probability density, and three different values is distinct from statistical independence. The practical check is reproducibility: reuse for deliberate replay, split for the next stochastic operation.",
+      "reading": "The horizontal axis indexes the three entries in one draw; the vertical axis is sampled value. The solid first draw and dashed same-key replay overlap at approximately \\((0.606,0.799,-0.909)\\). The dash-dot split-key draw is approximately \\((-0.211,-1.363,-0.045)\\). The connected lines only make coordinate-by-coordinate equality visible; they do not show time or a distribution.",
+      "connection": "The overlapping curves demonstrate deterministic replay for this key and sampler. A split key produces the displayed different draw, but one pair of different values does not establish statistical independence. Use the plot to check key ownership: reuse for replay, split when the next operation needs its own random input.",
       "alt": "Reused keys replay the same sample. The horizontal axis selects a coordinate within a three-element random draw; the vertical axis gives its sampled value. The solid first-draw line and dashed same-key replay line lie on top of each other. The dash-dot line comes from a new split key. The replay repeats approximately \\((0.606,0.799,-0.909)\\), while the split-key draw is approximately \\((-0.211,-1.363,-0.045)\\). Two curves are hard to distinguish precisely because their coordinates are equal.",
       "code": "visual_data = {'kind': 'line', 'x': [0, 1, 2], 'xlabel': 'sample coordinate', 'ylabel': 'normal draw', 'series': [{'label': 'first draw', 'y': a.tolist()}, {'label': 'same key replay', 'y': repeated.tolist()}, {'label': 'split next draw', 'y': b.tolist()}]}"
+    },
+    "optionFeedback": [
+      "A JAX key is an explicit value, not an advancing generator. Split it and pass a distinct key for each intended random draw.",
+      "Keys are explicit immutable inputs. Identical inputs reproduce the draw; split keys to describe independent randomness.",
+      "Key reuse need not raise an exception. Compare the actual samples; reproducibility requires managing keys even when execution succeeds."
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "An integer seed and a batch-shaped input array x."
+      ],
+      "outputs": [
+        "A noisy prediction batch that can be replayed exactly from the same seed."
+      ],
+      "invariants": [
+        "Randomness is derived from an explicit JAX PRNG key.",
+        "Changing x while holding the seed fixed changes the deterministic prediction by the corresponding 2x+1 input difference."
+      ],
+      "hints": [
+        "Create a root key from the seed and draw one noise value for every element of x.",
+        "Do not reuse a consumed subkey for another independent draw."
+      ],
+      "code": "import jax\nimport jax.numpy as jnp\n\ndef noisy_prediction(seed: int, x: jax.Array) -> jax.Array:\n    \"\"\"Return 2*x+1 plus reproducible elementwise Gaussian noise.\"\"\"\n    # TODO: derive a key from seed, sample noise with x.shape, and form the prediction.\n    raise NotImplementedError\n"
     }
   }
 }

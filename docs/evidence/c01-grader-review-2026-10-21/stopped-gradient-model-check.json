@@ -1,0 +1,21 @@
+{
+  "scope": "Frozen model sub-check only; forward-identical owned stop-gradient mutation. No full workflow verdict or historical training invalidity implied.",
+  "checker_sha256": "6f8f2b360f0a306508b6c658256cbac91195e4e665ad29741bafbcd7bc618aeb",
+  "candidate_sha256": "4b3c52de1f53173a1497f3f083c51d8372c0e2c0f701665bf79b049398609521",
+  "candidate_model_check_passed": true,
+  "checks": {
+    "target_encoder_params": 302090240,
+    "target_with_mlm_params": 303191040,
+    "bidirectional_future_context": true,
+    "numpy_encoder_attention_rope_mask_pooling_oracle": true,
+    "uniform_attention_mutation_rejected": true,
+    "padding_and_batch_isolation": true,
+    "nonzero_dropout_responds_to_prng": true,
+    "mlm_numpy_oracle_and_gradient_fd": true,
+    "multi_positive_numpy_oracle_and_gradient_fd": true,
+    "candidate": "/private/tmp/jaxpathways-c01-root-mlm-probe/stopped_encoder_gradient.py"
+  },
+  "candidate_encoder_block_gradient_norm": 0.0,
+  "reference_encoder_block_gradient_norm": 0.8123749733633909,
+  "forward_logit_max_delta": 0.0
+}

@@ -11,7 +11,12 @@
         "The observations contain no information about the cooling rate."
       ],
       "correct": 2,
-      "explanation": "The initial state is independent of rate. No optimizer can recover a rate from data whose predictions do not depend on it."
+      "explanation": "The initial state is independent of rate. No optimizer can recover a rate from data whose predictions do not depend on it.",
+      "optionFeedback": [
+        "A larger accelerator batch repeats the same uninformative time-zero observations. Add measurements that depend on the unknown rate.",
+        "A smaller integration step cannot make a time-zero observation informative about dynamics. Inspect parameter sensitivity of the data.",
+        "The initial state is independent of rate. No optimizer can recover a rate from data whose predictions do not depend on it."
+      ]
     }
   ]
 }

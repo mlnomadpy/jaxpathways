@@ -78,3 +78,13 @@ Before this plan can change from **planned** to **authored**, provide independen
 
 - [CLIP paper](https://arxiv.org/abs/2103.00020): source for the dual-encoder softmax objective and zero-shot transfer formulation.
 - [OpenAI CLIP implementation](https://github.com/openai/CLIP): reference preprocessing and inference contracts; pin a revision when implementing parity.
+
+## Recipe decision rehearsal before target-scale training
+
+The real-pair pilot improves training alignment but zero-shot class scores drop.
+
+**Decide:** Hold tokenizer, image processor, evaluation groups, prompt templates and candidate labels fixed. Compare initialization, deduplication and source weighting one at a time. Report both retrieval directions and class-slice zero-shot results; do not select a recipe from training similarity alone.
+
+**Review packet:** Frozen pair/group manifests, a source-exposure table, per-query ranks and labeled image/error contact sheets. Reject a release if evaluation overlap or processor mismatch is unresolved.
+
+This is a design exercise for a planned implementation. Record a hypothesis, a controlled pilot, a stopping criterion and the evidence needed to reject the recipe before requesting target-scale compute. Do not mark the capstone implemented or publish a model card with invented metrics.

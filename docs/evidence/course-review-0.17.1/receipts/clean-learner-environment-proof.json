@@ -1,0 +1,126 @@
+{
+  "kind": "clean-isolated-learner-environment",
+  "pythonPath": "/private/tmp/jaxpathways-0170-clean-learner-env/bin/python",
+  "pythonVersion": "3.14.3 | packaged by conda-forge | (main, Feb  9 2026, 22:09:14) [Clang 20.1.8 ]",
+  "venvConfig": "home = /Users/tahabsn/.pixi/envs/python/bin\ninclude-system-site-packages = false\nversion = 3.14.3\nexecutable = /Users/tahabsn/.pixi/envs/python/bin/python3.14\ncommand = /Users/tahabsn/.pixi/envs/python/bin/python3 -m venv /private/tmp/jaxpathways-0170-clean-learner-env\n",
+  "directPins": {
+    "jax": "0.9.2",
+    "numpy": "2.4.4",
+    "optax": "0.2.8",
+    "tokenizers": "0.22.2"
+  },
+  "allPackages": [
+    {
+      "name": "absl-py",
+      "version": "2.5.1"
+    },
+    {
+      "name": "anyio",
+      "version": "4.15.1"
+    },
+    {
+      "name": "certifi",
+      "version": "2026.10.19"
+    },
+    {
+      "name": "click",
+      "version": "8.5.0"
+    },
+    {
+      "name": "filelock",
+      "version": "4.2.4"
+    },
+    {
+      "name": "fsspec",
+      "version": "2026.9.0"
+    },
+    {
+      "name": "h11",
+      "version": "0.16.0"
+    },
+    {
+      "name": "hf-xet",
+      "version": "1.7.0"
+    },
+    {
+      "name": "httpcore",
+      "version": "1.0.9"
+    },
+    {
+      "name": "httpx",
+      "version": "0.28.1"
+    },
+    {
+      "name": "huggingface_hub",
+      "version": "1.33.0"
+    },
+    {
+      "name": "idna",
+      "version": "3.20"
+    },
+    {
+      "name": "jax",
+      "version": "0.9.2"
+    },
+    {
+      "name": "jaxlib",
+      "version": "0.9.2"
+    },
+    {
+      "name": "ml_dtypes",
+      "version": "0.6.0"
+    },
+    {
+      "name": "numpy",
+      "version": "2.4.4"
+    },
+    {
+      "name": "opt_einsum",
+      "version": "3.4.0"
+    },
+    {
+      "name": "optax",
+      "version": "0.2.8"
+    },
+    {
+      "name": "packaging",
+      "version": "26.3"
+    },
+    {
+      "name": "pip",
+      "version": "25.3"
+    },
+    {
+      "name": "PyYAML",
+      "version": "6.0.3"
+    },
+    {
+      "name": "scipy",
+      "version": "1.18.1"
+    },
+    {
+      "name": "tokenizers",
+      "version": "0.22.2"
+    },
+    {
+      "name": "tqdm",
+      "version": "4.70.1"
+    },
+    {
+      "name": "typing_extensions",
+      "version": "4.16.0"
+    }
+  ],
+  "pipCheck": {
+    "exit": 0,
+    "stdout": "No broken requirements found.\n",
+    "stderr": "WARNING: The directory '/Users/tahabsn/Library/Caches/pip' or its parent directory is not owned or is not writable by the current user. The cache has been disabled. Check the permissions and owner of that directory. If executing pip with sudo, you should use sudo's -H flag.\n"
+  },
+  "backend": "cpu",
+  "devices": [
+    "TFRT_CPU_0"
+  ],
+  "installLogSha256": "107b73b847e0c1aa39ec8b175c1dc927d5a856ded610e1cf5ae978f5eeb59ebb",
+  "candidateImported": false,
+  "optimizerUpdates": 0
+}

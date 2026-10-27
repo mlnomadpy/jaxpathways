@@ -21,7 +21,7 @@
       {
         "id": "guided-reasoning",
         "title": "Match leaves by meaning as well as shape",
-        "body": "Suppose parameters contain a dense-layer weight matrix and a bias vector. Each gradient leaf describes sensitivity to its corresponding parameter leaf. Match paths such as layer/weight and layer/bias before comparing shapes; two equal-shaped leaves can still be swapped.\n\nOptimizer state is related but need not have exactly the parameter tree's structure. It may contain moment trees plus a scalar step counter or other metadata. A useful diagram aligns matching parameter/gradient paths and then shows the additional optimizer state separately.\n\nWhen a tree operation fails, inspect structure, leaf paths, shapes and dtypes in that order. Flattening everything immediately may hide the semantic distinction that would explain the error.",
+        "body": "A model can have several parameter groups, so the gradient must stay paired with the parameter it describes. A pytree preserves these relationships through dictionaries, lists and tuples while allowing transformations to act on array leaves. The container gives identity; each leaf holds a scalar or array.\n\nIn the diagram, follow each parameter path to its gradient partner. The two weight coordinates and bias are distinct values even if two leaves happen to share a shape. Optimizer state may add its own moment trees or counters, so do not assume every state object has exactly the parameter structure.",
         "check": {
           "prompt": "Two parameter leaves have the same shape. Is swapping their gradients safe?",
           "answer": "No. Shape compatibility does not identify which parameter a derivative belongs to. Preserve tree paths and compare the result with an independently known update."
@@ -29,21 +29,21 @@
       },
       {
         "title": "Identify containers, leaves and structure",
-        "body": "A pytree separates a nested container structure from its leaves. A dictionary with weight and bias keys is a tree; each array is a leaf. A leaf can itself have many numerical elements. Two leaves therefore do not mean two scalar parameters.\n\nJAX transformations understand common dictionaries, lists and tuples. tree.flatten returns an ordered leaf list plus a tree definition that can reconstruct the original containers. Treat that definition as part of the contract, rather than manually guessing where each flattened value belongs.",
+        "body": "Pytree structure matters because JAX transformations preserve the organization of nested inputs and outputs. In the example, the dictionary contains a weight vector of shape \\((2,)\\) and scalar bias of shape \\(()\\): two leaves, three numerical parameter values. The leaf count is not the number of scalar parameters.\n\n`tree.flatten` returns both an ordered list of leaves and a tree definition that can reconstruct their containers. Keep that definition with the values; manually guessing the flattening order risks reconnecting a number to the wrong parameter path.",
         "formula": "params\n├── weight: float32[2]\n└── bias: float32[]\n2 leaves, 3 numerical parameter values"
       },
       {
         "title": "Derive the matching gradient tree",
-        "body": "Let’s check one example. Take \\(x=[2,1]\\), weights \\(w=[1,-1]\\), and bias \\(b=0\\). The prediction is \\(1\\), while the target is \\(3\\), so the residual is \\(-2\\). For squared loss, the derivative with respect to the prediction is \\(-4\\). Multiplying by the input gives the weight gradient \\(-4[2,1]=[-8,-4]\\); the bias gradient is \\(-4\\).\n\nWith learning rate \\(0.05\\), the new weights are \\([1.4,-0.8]\\), and the bias becomes \\(0.2\\). The new prediction is \\(2.2\\), the residual is \\(-0.8\\), and the loss is \\(0.64\\). We can compare each of these values with the gradient tree and update. This tells us more than checking only whether the loss decreased.",
+        "body": "The gradient tree is easiest to trust when one update can be calculated by hand. With input \\((2,1)\\), weights \\((1,-1)\\), bias \\(0\\), and target \\(3\\), prediction is \\(1\\), residual is \\(-2\\), and squared loss is \\(4\\). The derivative with respect to prediction is \\(-4\\); multiplying by the input gives weight gradient \\((-8,-4)\\), and the bias gradient is \\(-4\\).\n\nAt step size \\(0.05\\), subtracting this gradient gives weights \\((1.4,-0.8)\\) and bias \\(0.2\\). The updated prediction is \\(2.2\\) and loss about \\(0.64\\), matching the execution receipt. Check each leaf’s value and role, not just the final loss decrease.",
         "math": "\\begin{aligned}\\hat y&=2(1)+1(-1)+0=1\\\\L&=(1-3)^2=4\\\\\\nabla_w L&=(-8,-4),\\qquad \\frac{\\partial L}{\\partial b}=-4\\end{aligned}"
       },
       {
         "title": "Apply corresponding leaves, not unrelated arrays",
-        "body": "tree.map can apply \\(p-\\eta g\\) to corresponding leaves in the parameter and gradient trees. The containers must agree. A missing key is a structural error; an incompatible leaf shape is a numerical contract error. A matching tree structure alone does not prove that each leaf has the correct shape.\n\nDictionary leaves are traversed in a deterministic key order. Do not zip unrelated dictionaries merely because they have equal lengths. Use the tree definition to preserve identity and add shape checks at model boundaries."
+        "body": "An elementwise update must pair each parameter leaf with its corresponding gradient leaf. `tree.map` can apply \\(p-\\eta g\\) over two matching structures, but matching structure alone is not proof of semantic identity. A swapped pair of equal-shaped leaves may produce valid arithmetic and a wrong model.\n\nCompare paths, shape and dtype before applying an update. A missing dictionary key is a tree-structure mismatch; incompatible leaf dimensions are a shape mismatch. Then verify an independently calculated prediction or update, as in the one-example check, to catch errors that structure checks cannot see."
       },
       {
         "title": "Keep metadata separate from differentiated state",
-        "body": "Trainable leaves should be appropriate floating-point arrays. A Python string such as a model name is not a floating-point parameter. Keep such configuration separate, or register a carefully designed custom structure when the model requires it.\n\nOptimizer state is another tree with its own meaning. Its structure need not be identical to parameters. Model parameters, gradients and optimizer statistics are connected, but they are not interchangeable objects. This separation will matter in the Optax lesson and in recovery."
+        "body": "Differentiation needs numerical trainable leaves, while configuration and bookkeeping have different meanings. A model name string is not a floating-point parameter; keep it outside the differentiated tree unless a custom pytree explicitly defines how it participates.\n\nOptimizer state is also not interchangeable with parameters. It may contain moment estimates shaped like the parameter leaves plus a scalar counter. Preserve those meanings and structures separately, then update each with its appropriate rule. The useful invariant is correspondence by path and role, not that every object in training has one identical tree."
       }
     ],
     "experiments": [
@@ -69,7 +69,24 @@
         "hint": "At the starting point prediction is \\(1\\) and residual is \\(-2\\), so the scale derivative is \\(-4\\).",
         "solution": "# Extend to a nested model (Practice): Nested parameter identity survives differentiation.\nnested={\"layer\":params,\"scale\":jnp.array(1.)}\ndef nested_loss(p):\n    pred=p[\"scale\"]*(jnp.dot(p[\"layer\"][\"weight\"],x)+p[\"layer\"][\"bias\"])\n    return (pred-3.)**2\ng=jax.grad(nested_loss)(nested)\nassert jax.tree.structure(g)==jax.tree.structure(nested)\nassert jnp.allclose(g[\"scale\"],-4.)",
         "explanation": "Nested parameter identity survives differentiation. The independent scale calculation checks the new path.",
-        "difficulty": "Practice"
+        "difficulty": "Practice",
+        "learnerStarter": {
+          "inputs": [
+            "A weight vector, scalar bias, scalar scale, and input vector."
+          ],
+          "outputs": [
+            "The gradient pytree for the squared prediction loss of scale*(weight dot x + bias)."
+          ],
+          "invariants": [
+            "Gradient leaves follow the same nested structure as the parameters.",
+            "The scale derivative is computed by autodiff for the supplied values."
+          ],
+          "hints": [
+            "Put weight and bias below a layer key, with scale as a separate leaf.",
+            "Differentiate a scalar loss with jax.grad."
+          ],
+          "code": "import jax\nimport jax.numpy as jnp\n\ndef nested_gradients(weight: jax.Array, bias: jax.Array, scale: jax.Array, x: jax.Array, target: jax.Array) -> dict:\n    \"\"\"Return gradients for a nested scaled linear model.\"\"\"\n    # TODO: construct the parameter pytree and differentiate its scalar loss.\n    raise NotImplementedError\n"
+        }
       },
       {
         "title": "Repair a mismatched update tree",
@@ -77,7 +94,24 @@
         "hint": "Matching leaf counts is not enough; key paths matter.",
         "solution": "# Repair a mismatched update tree (Challenge): A missing bias gradient is a tree mismatch.\ntry:\n    jax.tree.map(lambda p,g:p-0.05*g,params,{\"weight\":grads[\"weight\"]})\nexcept ValueError:\n    print(\"Expected tree mismatch\")\nelse:\n    raise AssertionError(\"Expected a missing-key failure\")\nfixed=jax.tree.map(lambda p,g:p-0.05*g,params,grads)\nassert jnp.allclose(loss(fixed),0.64,atol=1e-6)",
         "explanation": "A missing bias gradient is a tree mismatch. Broadcasting weights or changing a learning rate cannot supply the missing parameter identity.",
-        "difficulty": "Challenge"
+        "difficulty": "Challenge",
+        "learnerStarter": {
+          "inputs": [
+            "A parameter pytree and a matching gradient pytree."
+          ],
+          "outputs": [
+            "A gradient tree validated against the parameter structure and a matching updated parameter pytree."
+          ],
+          "invariants": [
+            "Every parameter path has exactly one gradient leaf.",
+            "A missing bias gradient is rejected instead of broadcast or silently omitted."
+          ],
+          "hints": [
+            "Use tree structure comparison or a tree map to validate alignment.",
+            "Apply the hand update only after the structures match."
+          ],
+          "code": "import jax\nimport jax.numpy as jnp\n\ndef checked_tree_update(params: dict, grads: dict, learning_rate: float = 0.05) -> dict:\n    \"\"\"Reject a mismatched pytree and otherwise perform one aligned update.\"\"\"\n    # TODO: check structure compatibility, then update corresponding leaves.\n    raise NotImplementedError\n"
+        }
       }
     ],
     "objectives": [
@@ -121,10 +155,32 @@
       "title": "A gradient tree matches parameter leaves",
       "kind": "executed",
       "prediction": "Which weight changes more, and why?",
-      "reading": "Each pair of bars compares one parameter before and after a gradient step. Read the categories as the two weight coordinates followed by the bias. The weights move from \\((1,-1)\\) to \\((1.4,-0.8)\\), and the bias moves from \\(0\\) to \\(0.2\\).\n\nThe second weight’s bar remains below zero, but becomes less negative. All three parameters increased; an upward update does not require the parameter itself to be positive.",
-      "connection": "For the input \\((2,1)\\), the initial prediction is \\(1\\), below the target \\(3\\). The parameter gradients are \\((-8,-4,-4)\\). Subtracting them with learning rate \\(0.05\\) adds \\((0.4,0.2,0.2)\\), exactly the changes visible between the paired bars.\n\nThe updated prediction is \\(2.2\\), so squared error falls from \\(4\\) to \\(0.64\\). The tree structure lets each gradient reach its corresponding parameter leaf. The chart’s vertical axis is parameter value, not loss; you need the prediction calculation to establish improvement.",
+      "reading": "The horizontal categories name weight coordinate one, weight coordinate two and bias; the vertical axis is parameter value. Each pair compares before and after one update: weights move from \\((1,-1)\\) to \\((1.4,-0.8)\\), and bias from \\(0\\) to \\(0.2\\). The second weight remains negative but moves upward toward zero.",
+      "connection": "For input \\((2,1)\\), the initial prediction is \\(1\\) against target \\(3\\), giving gradient leaves \\((-8,-4,-4)\\). Subtracting that gradient with step \\(0.05\\) produces the plotted increases \\((0.4,0.2,0.2)\\). The updated prediction \\(2.2\\) lowers loss from \\(4\\) to about \\(0.64\\); the chart shows parameter values, so verify loss separately.",
       "alt": "A gradient tree matches parameter leaves. Each pair of bars compares one parameter before and after a gradient step. Read the categories as the two weight coordinates followed by the bias. The weights move from \\((1,-1)\\) to \\((1.4,-0.8)\\), and the bias moves from \\(0\\) to \\(0.2\\). The second weight’s bar remains below zero, but becomes less negative. All three parameters increased; an upward update does not require the parameter itself to be positive.",
       "code": "visual_data = {'kind': 'bar', 'labels': ['weight[0]', 'weight[1]', 'bias'], 'ylabel': 'parameter value', 'series': [{'label': 'before', 'y': [float(params['weight'][0]), float(params['weight'][1]), float(params['bias'])]}, {'label': 'after', 'y': [float(updated['weight'][0]), float(updated['weight'][1]), float(updated['bias'])]}]}"
+    },
+    "optionFeedback": [
+      "The loss is scalar, but there is one gradient leaf for each differentiable parameter leaf. Compare tree structures and leaf shapes.",
+      "The differentiated input determines the gradient structure. Each floating-point parameter leaf gets a corresponding gradient leaf.",
+      "Automatic differentiation follows array operations, not source line numbers. Inspect the gradient pytree alongside the parameter pytree."
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "A nested parameter pytree with weight and bias leaves and a matching gradient pytree."
+      ],
+      "outputs": [
+        "The squared Euclidean norm of all gradient leaves."
+      ],
+      "invariants": [
+        "Every gradient leaf contributes exactly once.",
+        "The pytree structure is preserved while reducing the scalar contributions."
+      ],
+      "hints": [
+        "Map a square operation over gradient leaves, then reduce the resulting leaves.",
+        "Compare your result to direct weight and bias contributions."
+      ],
+      "code": "import jax\nimport jax.numpy as jnp\n\ndef squared_gradient_norm(grads: dict) -> jax.Array:\n    \"\"\"Return the sum of squared values across all gradient leaves.\"\"\"\n    # TODO: traverse the pytree leaves and reduce their squared entries.\n    raise NotImplementedError\n"
     }
   }
 }

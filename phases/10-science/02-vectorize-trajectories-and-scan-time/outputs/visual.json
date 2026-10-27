@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "science-02",
-  "contentHash": "e209d0ae039048221b5ec3b673287b7790b27f5e333ca009869013923d129862",
-  "rendererHash": "a1bd5b648f4731ae5d5f0a24811c2540d1a0a132149ce589d17c4113509cbedf",
+  "contentHash": "3a5eb91aa375551a74c3a9480e47f76ea3ec9e50b861e78632548dd0771496d0",
+  "rendererHash": "17e3bbad72ee4c43425845aaee76b86b85e84750551278be03d8c16842f4dc63",
   "kind": "executed",
-  "generatedAt": "2026-10-20T22:28:41.280964+00:00",
+  "generatedAt": "2026-10-27T17:01:30.434390+00:00",
   "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",
@@ -205,7 +205,7 @@
   "diagram": {
     "title": "Vectorize across systems; scan through time",
     "prediction": "What should happen if you permute independent initial conditions?",
-    "reading": "Each row is an independent initial condition. Horizontal arrows advance only that system; there are no cross-row state dependencies. Vectorization groups rows and scan represents recurrence. Boxes show state positions in the computation, not physical coordinates or measured durations.",
+    "reading": "Each row is one independent system; the horizontal arrows link that system's successive states over time. There are no arrows between rows, matching the uncoupled equations in the code. Vectorization represents the row axis and `scan` the within-row recurrence. If the physical model introduced heat exchange between systems, cross-row dependencies would be required; the current diagram would no longer describe it.",
     "alt": "Each row is an independent initial condition. Horizontal arrows advance only that system; there are no cross-row state dependencies. Vectorization groups rows and scan represents recurrence. Boxes show state positions in the computation, not physical coordinates or measured durations.",
     "scope": "Architecture and dataflow mechanism diagram.",
     "height": 5,

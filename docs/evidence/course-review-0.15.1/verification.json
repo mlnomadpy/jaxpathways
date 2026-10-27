@@ -1,0 +1,188 @@
+{
+  "schema": 1,
+  "edition": "0.15.1",
+  "verified_source_commit": "1660731fb3877d193d8a017ec6ee91394cc868a6",
+  "observed_at": "2026-10-22T00:16:37.687966+00:00",
+  "release_source_fingerprint": "abab42927c9582d1d3c5b19c661a0907113b26a02c54308a0cd474f5fc2770f2",
+  "changedLessons": [],
+  "changedPhases": [],
+  "checks": {
+    "main": {
+      "command": "npm run check",
+      "exit_code": 0,
+      "node_tests": 173,
+      "identity_python_tests": 11,
+      "astro_files": 146,
+      "astro_errors": 0,
+      "astro_warnings": 0,
+      "pages": 219,
+      "local_references_root": 14402
+    },
+    "browser": {
+      "command": "CI=1 PLAYWRIGHT_BROWSERS_PATH=/private/tmp/jaxpathways-playwright PLAYWRIGHT_PORT=4210 npm run test:browser",
+      "exit_code": 0,
+      "tests": 50,
+      "scope": "Desktop and mobile Chromium; local root build"
+    },
+    "deployment": {
+      "command": "npm run check:deployment",
+      "exit_code": 0,
+      "bases": [
+        "/",
+        "/jaxpathways/"
+      ],
+      "canonical_sitemap_urls": 214
+    },
+    "epubcheck": {
+      "version": "5.4.0",
+      "exit_code": 0,
+      "fatal": 0,
+      "error": 0,
+      "warning": 0
+    },
+    "formatter": {
+      "version": "26.5.1",
+      "exit_code": 0,
+      "files": 49,
+      "scope": "Retained 0.15 check; all 49 current file hashes independently equal the already green 615be5fd sources.",
+      "source_sha256": {
+        "projects/arrays-audit/solution/model.py": "957ec6c2b8b241bbba905068f1731f5e370403b256938c68db94f914fbf67124",
+        "projects/arrays-audit/tests/check.py": "2e547d8a97d8e7607322bc633286c24a12c36dfed7f7c0d04bfa85cded42a0a4",
+        "projects/causal-lineage/data/build_data.py": "aa24eaf3006161c0f4f6edb934c00448aab198e9add99735abbf9fca8e24f7de",
+        "projects/causal-lineage/network.py": "7ecf3831c5b5e42d2480ee06d67187c4eadb47ade7db70b44d8e04b20acaa659",
+        "projects/causal-lineage/probe_export.py": "4b56e7ff5f3421e426a5b21afa8ed4556085ec61cf5e3df338815066346dcc6b",
+        "projects/causal-lineage/render_results.py": "099374540bc247f382e602c0f0f0547a3aed50f822fc128ff8b7342fea7ac0b1",
+        "projects/causal-lineage/run.py": "697920603edfa051de5490811009617311ba6a2448ec7c64b1e992e5603a5c79",
+        "projects/causal-lineage/solution/model.py": "a315828ec6c118f2a74f8489d8e7a823a3bd7e4674a039710b2c7adb4bd45f21",
+        "projects/causal-lineage/starter/model.py": "03a32d2b3efe60553666284666883b1ad2955a2cab7e946247c8075b126f5e13",
+        "projects/causal-lineage/tests/check.py": "f46e57d05947f98886f0c14f36f6eb0f4a4ca1439bb3edb5bb6d7fb921370bc0",
+        "projects/embedding-lineage/plot-pilot.py": "5cbbbec70cfcfe564527ae4ab334a384570f8cf5edf48f2da7c09a4d4753d071",
+        "projects/embedding-lineage/probe_export.py": "a2b4c9fe4d9d26fad20b4ef24ea4d327b074b7a47f4e94a8463ed287d7b69b26",
+        "projects/embedding-lineage/run.py": "32ae728e7ad475deec8c48872612450ebf6512672e626cd5a01f88a89ea72e88",
+        "projects/performance-audit/solution/model.py": "3a4ff60126aec361dec5cd999f91b04800670ff14fde11fa8832f9a98b14c0e3",
+        "projects/performance-audit/tests/check.py": "704bc09cf67bb1a548a042e10badab85cae42443a5b0cbb8d9350ccf7f46962e",
+        "projects/posttraining-audit/solution/model.py": "82810305599ea48173a87fb4251c2fa4347de11b0b39c1a27ac4e09abd927f05",
+        "projects/posttraining-audit/tests/check.py": "ffb8f860173839e7f8fdf817ed00348e0e013a00451558a063e76a675b6addf8",
+        "projects/recovery-audit/solution/model.py": "bcb7fdf96ad705709b0ee3acddc2b9d5d21e1b2cd5d3fe76e4d601e0467eaa45",
+        "projects/recovery-audit/tests/check.py": "d3bb84bcd31ef23e290aa8883f4b6c32ce0e3bcd97bde0174997be08831de7fb",
+        "projects/tpu-runtime-audit/solution/model.py": "fd45c6a7c0e66bf72a3b08d65f2be3d9a552ce50562e46d97edcca1b04d17f26",
+        "projects/tpu-runtime-audit/tests/check.py": "123acfc23eaebe71b7f029e9c4253cdb753c5025fce6837bf520cf6e7eef3f1c",
+        "projects/tpu-systems-audit/solution/model.py": "88148f4e7e61e87c99536015ab08d4ea2543d8cd107a701ffd01020f9bba4540",
+        "projects/tpu-systems-audit/tests/check.py": "232e36b8e7a584d1e779dd4169e9ba06be1e8dc67605502953e44c7f45eba1bf",
+        "projects/tpu-workflow-audit/solution/model.py": "8f742ba0a6e39fe0100f0094224d7296acd51e4563a47ec5007e9ab0a1478406",
+        "projects/tpu-workflow-audit/tests/check.py": "23559d3a702b722bb78e025c0154ae38aba0e24ec38c5667435ba08ad7023d25",
+        "projects/transforms-audit/solution/model.py": "f70cefc40840554d9afc2fcbe068fc0a596a31053219a0ce57cdd738cd735824",
+        "projects/transforms-audit/tests/check.py": "3c2b42b5d922393b2ffcb1e5c73cb2ede37052d926a3210c6bf58911c5835079",
+        "projects/welcome-audit/tests/check.py": "2bffa5de9ed3392666e158795c9bc8918f9d7c3087109743c7cf3c567c3a2b55",
+        "scripts/smoke-tpu.py": "2e3a52dbb125a428d1660e9c3798af2719a94b7c6a1df3ed300c3dccc1961c5b",
+        "resources/tpu-gcp/collectives_target.py": "4d51220153bd50d52b131c3c15451ff6a47ca3a4e7fa2a815ebde1e3409ef744",
+        "resources/tpu-gcp/check_collectives_target.py": "d20554ae13a77dcdec7a284d15bebd421e74ce9120cbd08e3e2d551458e622cc",
+        "resources/tpu-gcp/multihost_target.py": "d8dc46e58f869a94c9f0fc3c18b4098427cd44c9fa35ab864f4507270c726820",
+        "resources/tpu-gcp/check_multihost_target.py": "2746e472159728134fea74e124e97fdf85aaa78b429405bbb4498b02564a5d33",
+        "docs/evidence/tpu-qualification-2026-10-20/v5e16/restore-on-cpu.py": "56a302c6eeaa37785ebbadc02e2202cf657d31b16848279fac0cbdd2c72b6f7d",
+        "projects/policy-evaluation/starter/model.py": "748892c53f911040c68e4edc64ecd935277424e74e349ea9a1efefe1f883e207",
+        "projects/bayesian-regression/starter/numpyro_workflow.py": "4623426c8c83d9fc73210c7c6e03dec50adcd7908885220f2c14580d03bfe542",
+        "projects/bayesian-regression/solution/numpyro_workflow.py": "26274aefb4a43896ea7bb9e3592a9bb8c30b7fa67be4bbabca7c3862cb4075a5",
+        "projects/bayesian-regression/tests/check_numpyro.py": "9a23ca6582a88bb56565b20ca95959009023d75e7427c1a10fd2da6eb0862340",
+        "projects/scientific-inverse/solution/diffrax_workflow.py": "fd50773f1ab343a8cc90480ea00347bde923a0484c72ae0f13f0eccfff0ab45c",
+        "projects/scientific-inverse/starter/diffrax_workflow.py": "150fe7c6262dacb1cf243579dcab5d84291b1c5c4f3468cf4e232ff40fc531fd",
+        "projects/scientific-inverse/tests/check_diffrax.py": "c894d8676638f3929e3b49ae4ebd96c2108e50ee1907e853f11631ab0afce579",
+        "projects/text-harness/foundations/config.py": "5c05801a7ec1a15b3978c87c77ac4e64d1b056c60487cbcff3cdf72475c8bb64",
+        "projects/text-harness/foundations/data.py": "ff8ff698090866d46bc1f2b3540393b9a16db2121ad824110bd2ba53db645bd8",
+        "projects/text-harness/foundations/model.py": "94a88ae7fd6a251b5b190b4631496e04bb71a31c1bfe418511fdd37ffef034c9",
+        "projects/text-harness/foundations/reference/make_pilot_figure.py": "c52819be17cd9a984d257e71cdeee5072d5057cebde55dbe9fd760b2ccfefa3e",
+        "projects/text-harness/foundations/starter.py": "ab31f1d47ffeda55f22fda3e6d105b01eef88a4f8ce9f3a478d3dedcb63f548a",
+        "projects/text-harness/foundations/tests/check_foundations.py": "dbd4f2714f18e020f2dde31fdc4704b167d9b7d7ec56048ac31285f88ae77bb4",
+        "projects/text-harness/foundations/train.py": "ee9f3bc73505ce8e00fe9680589d97805593e5c8c035cba4709b5f334eb27a2b",
+        "phases/21-tpu-systems/02-bfloat16-int8-precision-and-xprof-profiling/labs/precision_contract_probe.py": "f85d5c329e74752d4a573be22b9048ad3c00a2e54502e3979428a1b3955d80b8"
+      }
+    },
+    "multiprocess_recovery": {
+      "exit_code": 0,
+      "receipt": "../multiprocess-recovery-2026-10-21/verification.json",
+      "scope": "Fresh root two-controller local CPU all-stage receipt binds unchanged five executable sources"
+    },
+    "image_pilot": {
+      "receipt": "../image-pilot-2026-10-21/verification.json",
+      "actual_optimizer_updates": 384,
+      "stages": 11,
+      "quality_gate": "FAIL",
+      "public_packet_files": 58,
+      "loose_public_assets": 26,
+      "canonical_optional_pilots": 3
+    }
+  },
+  "post_main_source_delta": {
+    "path": "scripts/epub_identity.py",
+    "change": "Removed one extra blank line at EOF after the full main check; AST equality verified and all 11 focused identity tests rerun successfully. No behavior, release source fingerprint or frozen artifact change."
+  },
+  "artifact_sha256": {
+    "book.html": "961278e7c0ef0e906a14828342a8e3136ca1dc70f2de96794f0a3d7adf188c0c",
+    "project-guides/image-model-300m-pilot.html": "6378cf704f915f80b0513cc3c69958fec3380442c3d722039113b86eb5a5b78f",
+    "project-guides/sharded-training-multiprocess.html": "c1413511de6d23fc68670a67400e610b8b7c3df01d34aeebd5c546b04650689e",
+    "downloads/jax-foundations.html": "3fe34fba83b1887f3c839883e829809c3f1cbfdcf28f8fdc8b19a460bb1232ff",
+    "downloads/jax-foundations.epub": "beb260ff734a1149d92bfd44638fad901deb1d6188ac7019e39a33aae3102150",
+    "downloads/jax-foundations.build.json": "530280ec1d0b76ade2af9000881efeb5532d14ae9eb8fc57b8dd6acd369bb0ec",
+    "downloads/image-model-300m-pilot.zip": "0de26094a97114c9ce33605ac6c382c4a6a06c1f84f03438bf0d9f466689f9bc",
+    "downloads/sharded-training.zip": "4217c10dfc14a7409a036738976212492e484f9d614011b21e9f8b9035ac9bc3",
+    "downloads/jax-course-workspace.zip": "7e0cb10d273089e11bdb935ec914b37fbdc9622d7f0cdb419c51b1fa95b1d87b"
+  },
+  "epub_metadata": {
+    "modifiedAt": "2026-10-22T00:11:05Z",
+    "primaryPublicationId": "urn:uuid:31fc1c76-2a99-5d82-bfae-b46e5b1a4d3e",
+    "releaseVersion": "0.15.1",
+    "renderedEditionFingerprint": "sha256:29e201124864f311a4a349f6aafb927c1f83118f0a6f37a2b54993aab90b6d0c",
+    "schema": "jaxpathways-epub-build-v1"
+  },
+  "log_sha256": {
+    "main-check.log": "96feec0e560590e0c4ccc2db6c9c0e4250554d67aa90a4e918fb7b37136db11f",
+    "browser.log": "3e2bcae86dbc4ee5690dccdbcb259b6eea18be25ecc0809932dbff3ece73d78d",
+    "deployment.log": "358c918f57e94e7bab478cafb498fa01d58132e400892a4fbd2d79d5f5ac9fd5",
+    "epubcheck.log": "7762882cc0e77ad791a4d3cbda6ae124ed8682e19906d72b6983987e55585d12",
+    "epubcheck.json": "d16b439a17b9858827ec3260d137d949dfb85681b80b5354dbf36074ac15400f",
+    "identity-final.log": "770a5a7cfd5ed30408387c611037fc3fb16dc0c5873dba409dd6aae6c67d7bb1",
+    "formatter-retained.log": "12c7f682dc3513c131e5233a8b5dacd1d75040892cde9f8c5642f687c47dac9d"
+  },
+  "visual_sha256": {
+    "book-plot.png": "e18f880e923a8baeb96f3459e29daeb2862349ff0269c7ca75cd0eda5aedf0a9",
+    "image-status.png": "63fd7a32ff77f4e862ca803cf760d0d0efa13b9fb7b0e6b0380fa761c9d42474",
+    "book-reasoning.png": "29d94f5f04e836e1f8261dfc38aa2df71026fc0b5d831b04bba7cb98f4dc7411",
+    "image-guide.png": "3cd5d8026d1d79d394b0637b0b7da949b079264c0a00652037da2cfa2d4186ad",
+    "book-preview.png": "a2d29cf881c8e24179b852c6ca7ce2a7890b8cfef76f1f8ee7941493e5b024c5",
+    "book-plot-explanation.png": "1fb9b50fc40ce210d342ebd48e913d116f871f96f0508b52520f108cbdd89bea",
+    "book-code.png": "b76e030403b0b5f011499511b17b12393639c8930c421e61cdda1890f6670624"
+  },
+  "native_scope": "Earlier 0.14 bounded Apple Books sample retained separately. Native 0.15.1 import/rendering remains pending: CUA reports Mac locked after browser checks; user input is pending. Earlier follow-up captures from Finder and Books were white. No native pass inferred.",
+  "retained_execution_scope": "104 unchanged lesson bodies keep their earlier source-matching CPU receipts. No claim of fresh execution of every lesson or unaffected project.",
+  "hosted_scope": "Not yet dispatched for this new branch. Previous frozen PR #67 has 15 successful checks.",
+  "not_qualified": [
+    "13 developing phases",
+    "10 Planned full model/retrieval capstones",
+    "Model-quality promotion for failed image, embedding or causal pilots",
+    "Completed audio corpus pilot: one partial failed attempt has two durable updates; execution is closed",
+    "Linux optional workflow execution, remote cluster, TPU or storage durability for the new recovery extension",
+    "Native 0.15.1 EPUB rendering and disclosures, a second EPUB engine, actual assistive-technology speech and full print",
+    "Independent human teaching and career calibration",
+    "Production deployment"
+  ],
+  "preview": "http://127.0.0.1:4199/book.html",
+  "superseded_local_preview": "The 0.15.0 preview on port 4198 was frozen before the scope-label corrections. Use port 4199 for this candidate.",
+  "browser_visual_scope": {
+    "edition": "0.15.1",
+    "method": "CUA in-app browser, 1280 x 720 screenshots",
+    "observations": [
+      "Book overview and corrected image-pilot In development notice visible.",
+      "Least-squares inline weights/vectors and display norm/condition-number equations readable.",
+      "Reasoning reveal changed from closed to open, with answer visible.",
+      "Complete three-row chart, axes, legend and numeric labels readable; adjacent prose explains signed residuals and nonzero MSE.",
+      "Python code block has readable syntax, preserved structure and no observed clipping in this sample."
+    ],
+    "not_qualified": [
+      "Every chapter or zoom setting",
+      "Native EPUB rendering",
+      "Actual assistive-technology speech",
+      "Full print layout",
+      "Independent learner acceptance"
+    ]
+  }
+}

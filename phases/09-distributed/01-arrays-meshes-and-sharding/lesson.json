@@ -9,16 +9,16 @@
       {
         "id": "guided-reasoning",
         "title": "Compare the global array with each local piece",
-        "body": "A four-by-four array on two devices can be split into two-by-four row shards or four-by-two column shards. Both layouts contain the same global values. Their local operations and communication requirements differ.\n\nReplication gives each participant the full value instead of a disjoint portion. Use explicit labels so duplicated ownership cannot be mistaken for partitioning.\n\nConnect each PartitionSpec entry to its array axis and named mesh axis. Inspect actual addressable shards and compare reconstructed values with a global reference. Logical CPU devices validate this placement exercise without reproducing a multi-host network.",
+        "body": "The recorded global array has shape \\(8,4\\), not four-by-four: it contains rows 0 through 7 and four columns. On four logical CPU devices, row sharding assigns two complete rows to each device, while column sharding assigns one complete column. Both layouts preserve the same 32 values; they change which values are local.\n\nFor example, device 0 owns rows 0 and 1 in the row layout, but column 0 across all eight rows in the column layout. Replication would instead give every device all 32 values. Keep those three ownership patterns distinct when predicting the shape of local work.\n\nThe ownership heatmaps show device IDs, not matrix values or speed. Read one cell at a time: the upper panel's first two rows are device 0, while every cell in its first column belongs to device 0 in the lower panel. The execution confirms local shapes \\(2,4\\) and \\(8,1\\).",
         "check": {
           "prompt": "Must changing row sharding to column sharding change the answer?",
-          "answer": "No. A correct compatible computation preserves the intended global result. Storage and communication can change even when the result agrees."
+          "answer": "No. A correct compatible computation preserves the intended global result. Storage and communication can change even when the result agrees. In the following lesson, the batch uses the data axis and parameter output columns use the model axis, so a local parameter shard has shape \\((4,2)\\)."
         },
-        "math": "\\text{Mesh}(D, (\\texttt{'data'}, \\texttt{'model'})) \\implies \\operatorname{shard}(X) \\in \\mathbb{R}^{(B/P_d) \\times (H/P_m)}"
+        "math": "\\text{Mesh}((P_d,P_m), (\\texttt{'data'},\\texttt{'model'}));\\quad P(\\texttt{data},\\texttt{model}):Y\\mapsto\\mathbb{R}^{(B/P_d)\\times(H/P_m)}"
       },
       {
         "title": "Read the mapping from left to right",
-        "body": "Start with eight rows and four columns. Our one-dimensional mesh contains four devices along data. `P(\"data\",None)` partitions eight rows into four groups of two and preserves four features per shard. `P(None,\"data\")` leaves rows intact and assigns one of four columns to each device. The same global shape supports both arrangements.\n\nNone means an array dimension is not partitioned by this specification, not that the values are missing. `P()` replicates the whole array. A device mesh axis may not be reused across multiple array dimensions within one PartitionSpec. More complex two-dimensional meshes need distinct axis names and a reason for assigning each dimension.",
+        "body": "Start with the executed global array \\(8,4\\) and a one-dimensional mesh of four devices named `data`. `P(\"data\", None)` divides the first axis into four two-row slices and leaves all four columns together, so each local shape is \\(2,4\\). `P(None, \"data\")` leaves all eight rows together and divides the second axis into four one-column slices, so each local shape is \\(8,1\\).\n\n`None` means that this array axis is not partitioned by the spec; `P()` instead replicates the full array. If the row count changed from 8 to 10 while the mesh still had four devices, the even split would no longer hold. The lesson's divisibility check makes that changed condition visible instead of silently describing equal shards.",
         "formula": "Array (8,4) → P(data,None) → 4 pieces (2,4)\nArray (8,4) → P(None,data) → 4 pieces (8,1)\nArray (8,4) → P() → 4 full copies (8,4)"
       },
       {
@@ -27,7 +27,7 @@
       },
       {
         "title": "A reduction has a communication requirement",
-        "body": "For rows \\(0\\) through \\(31\\) reshaped to \\((8,4)\\), the first column is \\(0\\),\\(4\\),\\(8\\),\\(12\\),\\(16\\),\\(20\\),\\(24\\),\\(28\\) and sums to \\(112\\). Each row shard can sum its own two rows, but no one shard initially sees all eight. Producing a replicated global column sum requires combining contributions across the data axis.\n\nWe use a jitted ordinary sum and declare replicated output. JAX compiles the placement-aware global operation and arranges necessary communication. The source-level need to combine partial sums is a reasoning argument; exact collective lowering is compiler/version dependent and would require lowered code or profiler evidence to characterize. This CPU lesson does not estimate accelerator communication latency.",
+        "body": "The array is `arange(32).reshape(8,4)`, so row 0 is \\([0,1,2,3]\\) and row 1 is \\([4,5,6,7]\\). Under row sharding, device 0 can sum those rows locally to \\([4,6,8,10]\\); device 1 contributes \\([20,22,24,26]\\), with devices 2 and 3 contributing the remaining partial sums. Combining them gives the executed global column sums \\([112,120,128,136]\\).\n\nThe first result, 112, is the sum of the first column's values \\(0+4+8+\\cdots+28\\). No row shard contains all eight terms, so a replicated result requires combining partial sums across the mesh. JAX executes the placement-aware sum; the values establish the needed global result, while this CPU fixture does not measure how a particular accelerator lowers or times that communication.",
         "formula": "partial sums device 0: [4,6,8,10]\npartial sums device 1: [20,22,24,26]\npartial sums device 2: [36,38,40,42]\npartial sums device 3: [52,54,56,58]\ncombine → [112,120,128,136]"
       },
       {
@@ -68,7 +68,25 @@
         "prompt": "Use a \\((12,8)\\) array. Verify row and column layouts and predict every local shape.",
         "hint": "Four devices divide twelve rows or eight columns.",
         "solution": "# Change both dimensions (Challenge)\nother = np.arange(96,dtype=np.float32).reshape(12,8)\nfor spec, expected in [(rows,(3,8)),(columns,(12,2))]:\n    # Place `placed` explicitly onto the target JAX device.\n    placed = jax.device_put(other,spec)\n    for shard in placed.addressable_shards:\n        # Check tensor shape invariant: `shard.data.shape == expected`\n        assert shard.data.shape == expected\n        # Transfer the device result to the host for an independent NumPy comparison.\n        np.testing.assert_array_equal(np.asarray(shard.data),other[shard.index])",
-        "explanation": "The row layout owns three complete feature vectors per device; the column layout owns two features for every observation."
+        "explanation": "The row layout owns three complete feature vectors per device; the column layout owns two features for every observation.",
+        "learnerStarter": {
+          "inputs": [
+            "A (12,8) host matrix and four logical CPU devices.",
+            "Row and column shardings from the lesson."
+          ],
+          "outputs": [
+            "Exact per-device shapes for both placements."
+          ],
+          "invariants": [
+            "Every shard contains the indexed global slice.",
+            "The global matrix is unchanged by placement."
+          ],
+          "hints": [
+            "Divide the partitioned dimension by four.",
+            "Check shard.index as well as shard.data.shape."
+          ],
+          "code": "import numpy as np\nimport jax\n\ndef verify_changed_layout(host, row_sharding, column_sharding):\n    # TODO: place the matrix under both shardings and check each local slice.\n    raise NotImplementedError(\"Verify both local shapes and indexed values\")"
+        }
       },
       {
         "title": "Pad an uneven batch without corrupting its mean",
@@ -76,7 +94,25 @@
         "prompt": "Ten observations cannot be row-partitioned over four devices. Pad to twelve and use a mask to recover the true column mean. Demonstrate the wrong unmasked mean.",
         "hint": "The divisor is the sum of the mask, not padded length.",
         "solution": "# Pad an uneven batch without corrupting its mean (Challenge): Padding repairs the shape but adds artificial rows.\noriginal = np.arange(40,dtype=np.float32).reshape(10,4)\ntry:\n    jax.device_put(original, rows)\nexcept ValueError:\n    print(\"Expected indivisible batch\")\nelse:\n    raise AssertionError(\"Expected divisibility failure\")\n# Place `padded` explicitly onto the target JAX device.\npadded = jax.device_put(np.pad(original,((0,2),(0,0))),rows)\nmask_sharding = NamedSharding(mesh,P(\"data\"))\nmask = jax.device_put(np.array([1]*10+[0]*2,dtype=np.float32),mask_sharding)\n# Wrap with `jax.jit` (`masked_mean`) so XLA traces and compiles the function.\nmasked_mean = jax.jit(lambda a,m:(a*m[:,None]).sum(axis=0)/m.sum(),in_shardings=(rows,mask_sharding),out_shardings=replicated)(padded,mask)\n# Transfer the device result to the host for an independent NumPy comparison.\nnp.testing.assert_allclose(np.asarray(masked_mean),original.mean(axis=0),rtol=1e-6)\nassert not np.allclose(np.asarray(padded.mean(axis=0)), original.mean(axis=0))",
-        "explanation": "Padding repairs the shape but adds artificial rows. The mask keeps them out of both numerator and denominator. Checking only divisibility would miss this statistical error."
+        "explanation": "Padding repairs the shape but adds artificial rows. The mask keeps them out of both numerator and denominator. Checking only divisibility would miss this statistical error.",
+        "learnerStarter": {
+          "inputs": [
+            "A ten-row host batch with four features and a four-device row sharding."
+          ],
+          "outputs": [
+            "Masked column mean with shape (4,).",
+            "Unmasked padded mean as a diagnostic."
+          ],
+          "invariants": [
+            "Padding contributes zero to both the numerator and valid-count denominator.",
+            "The masked result matches the original ten-row host mean."
+          ],
+          "hints": [
+            "Pad only the row axis to a device-divisible length.",
+            "Mask invalid rows before summing and divide by valid rows."
+          ],
+          "code": "import numpy as np\nimport jax\nimport jax.numpy as jnp\n\ndef masked_column_mean(batch, row_sharding):\n    # TODO: pad rows, place the values and mask, then compute both means.\n    # Return device results as host arrays for comparison.\n    raise NotImplementedError(\"Implement masked statistics for the ten valid rows\")"
+        }
       }
     ],
     "question": "With row sharding, why does a global column sum need results from other devices?",
@@ -140,10 +176,35 @@
       "title": "Row sharding and column sharding place the same array differently",
       "kind": "executed",
       "prediction": "Which dimension is split across devices in each panel?",
-      "reading": "Both panels represent the same global array with shape \\((8,4)\\). Each cell’s number and color identify its owning logical device, not the array value stored there. Device colors are categorical and do not rank speed or capacity.\n\nIn the upper panel, each device owns two complete rows: device \\(0\\) owns rows \\(0\\) and \\(1\\), for example. In the lower panel, each device owns one complete column across all eight rows. The horizontal bands become vertical bands when the partitioned axis changes.",
-      "connection": "Each device owns eight scalar entries in either layout, but their local shapes differ: \\((2,4)\\) for row partitioning and \\((8,1)\\) for column partitioning. Equal local element counts do not mean that the same operations will have the same communication needs.\n\nFor example, a whole row is locally available in the upper layout but split across devices in the lower one. A row-wise reduction therefore has different placement implications. The figure establishes ownership only; communication volume and execution time are not measured, and these four logical devices share one CPU host.",
+      "reading": "Both heatmaps have array row on the vertical axis and array column on the horizontal axis; each cell is colored and labeled by its logical CPU device ID. The upper, row-partition panel has two-row bands: device 0 owns rows 0 and 1. The lower, column-partition panel has one-column bands: device 0 owns column 0 across all eight rows. The displayed IDs are categorical ownership labels, not array values.",
+      "connection": "The actual local shapes are \\(2,4\\) in the upper panel and \\(8,1\\) below, so each device owns eight values in either layout. For the row-0 sum, \\(0+4+8+\\cdots+28=112\\), row sharding makes two terms local to each device and the global reduction combines four partials; column sharding leaves the whole first column local to one device. The next decision is therefore to match the partitioned axis to the operation, then check whether the chosen output must be combined or replicated.",
       "alt": "Row sharding and column sharding place the same array differently. Both panels represent the same global array with shape \\((8,4)\\). Each cell’s number and color identify its owning logical device, not the array value stored there. Device colors are categorical and do not rank speed or capacity. In the upper panel, each device owns two complete rows: device \\(0\\) owns rows \\(0\\) and \\(1\\), for example. In the lower panel, each device owns one complete column across all eight rows. The horizontal bands become vertical bands when the partitioned axis changes.",
       "code": "panels = []\nfor name, array in [('Row partition', x), ('Column partition', x_columns)]:\n    owner = np.empty(host.shape, dtype=int)\n    for s in array.addressable_shards:\n        owner[s.index] = s.device.id\n    panels.append({'kind': 'heatmap', 'title': name, 'values': owner.tolist(), 'unit': 'logical CPU device ID'})\nvisual_data = {'kind': 'panels', 'panels': panels}"
+    },
+    "optionFeedback": [
+      "The reduction spans the partitioned row dimension, so partial contributions must be combined.",
+      "The array reduction can execute as device collectives. Global semantics do not require collecting the rows into a Python list.",
+      "The sum is still over the same global observations. Placement changes the required communication, not the mathematical definition."
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "Four logical CPU devices; row and column NamedSharding objects.",
+        "A (12, 8) matrix and a separate ten-observation, four-feature batch."
+      ],
+      "outputs": [
+        "Per-device local shapes and values for both (12, 8) layouts.",
+        "A masked ten-row column mean plus an unmasked padded mean for diagnosis."
+      ],
+      "invariants": [
+        "Both placements preserve the same global matrix and each shard matches its indexed host slice.",
+        "Padded rows contribute to neither the masked numerator nor the valid-row denominator.",
+        "The masked mean agrees with the original ten-row host mean."
+      ],
+      "hints": [
+        "Read each PartitionSpec against the axis it partitions.",
+        "Use shard.index for local-value comparisons; mask padded rows before summing and divide by valid rows."
+      ],
+      "code": "import numpy as np\nimport jax\nimport jax.numpy as jnp\n\ndef verify_layouts_and_masked_mean(host, uneven_batch, row_sharding, column_sharding):\n    # TODO: compare both placements and their indexed shard values.\n    # Then pad the ten-row batch, place a validity mask, and compare masked/unmasked means.\n    raise NotImplementedError(\"Verify both shard layouts and mask-preserved batch statistics\")"
     }
   }
 }

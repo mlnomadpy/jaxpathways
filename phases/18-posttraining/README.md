@@ -4,7 +4,7 @@ Training systems.
 
 Connect supervised demonstrations, frozen-base LoRA, reward modeling, sampled PPO and direct preference optimization. Keep the reference, behavior policy, reward model and dataset identities separate.
 
-Predict the mask, denominator or preference direction before training. Keep independent objective checks and changed-condition evidence.
+Predict the mask, denominator or preference direction before training. Keep independent objective checks and changed-condition evidence. SFT, LoRA, reward ranking and DPO can follow the supervised route. Before the PPO lesson, complete the explicitly linked RL rollout, policy and evaluation preparation. DPO branches from reward learning and does not require completing PPO.
 
 **Prerequisites:** 17: Self-supervised pretraining: masked and contrastive learning.
 
@@ -12,7 +12,9 @@ Predict the mask, denominator or preference direction before training. Keep inde
 
 ## Study guide: Which parameters and signals change during adaptation?
 
-Connect supervised demonstrations, frozen-base LoRA, reward modeling, sampled PPO and direct preference optimization. Keep the reference, behavior policy, reward model and dataset identities separate.
+A pretrained model can be adapted with demonstrations, low-rank updates or preference evidence, but these methods ask different questions of the data. Response-only SFT scores demonstrated tokens; LoRA restricts which parameter changes are available; reward learning and preference objectives use comparisons between alternatives.
+
+Keep the base, reference, behavior policy and reward model identities separate as you follow a concrete example through each objective. Derive the scored positions and likelihood reductions before comparing curves. The PPO route needs its RL preparation, while DPO follows its own reference-scoring branch; shared bookkeeping does not make the algorithms interchangeable.
 
 ### Check your starting point
 
@@ -20,7 +22,7 @@ Should response-only loss remove prompt tokens from the model context?
 
 <details><summary>Compare your reasoning</summary>
 
-No. Prompt inputs remain visible under the causal attention contract; the shifted response mask controls which targets receive loss.
+No. Prompt inputs remain visible under the causal attention contract; the shifted response mask controls which targets receive loss. The PPO branch additionally requires the declared RL lessons. Test your readiness by explaining why old behavior log probabilities stay frozen during multiple optimizer epochs. SFT, LoRA and DPO can be studied without taking that branch.
 
 </details>
 
@@ -40,7 +42,7 @@ Review: [Supervised fine-tuning with response-only token loss](01-sft/docs/en.md
 
    Lessons: [Learn a reward model from pairwise preferences](03-reward/docs/en.md).
 
-4. **RLHF mechanics: a frozen reward and PPO policy updates.** Identify current, behavior, reference and reward states; work both clipping signs; verify baseline cancellation by enumeration; and compare the trained bandit with its regularized optimum and probability plot.
+4. **RLHF mechanics: a frozen reward and PPO policy updates.** First complete rl-01 through rl-04. Explain which mask stops reset leakage, how a frozen behavior log probability differs from the current policy, and which unit is an evaluation replicate. Then identify current, behavior, reference and reward states; work both clipping signs and verify the small bandit against its exact optimum. The optional saved-decoder appendix remains a separate mechanics/replay result with a failed quality gate.
 
    Lessons: [RLHF mechanics: a frozen reward and PPO policy updates](04-rlhf/docs/en.md).
 
@@ -50,11 +52,11 @@ Review: [Supervised fine-tuning with response-only token loss](01-sft/docs/en.md
 
 ### Try a changed condition
 
-Reward rises, but independently reviewed outputs get worse. What has been established?
+A preference update changes chosen/rejected log probabilities from \((-2,-3)\) to \((-3,-5)\), with the reference fixed. Did the chosen absolute probability increase?
 
 <details><summary>Compare an approach</summary>
 
-Only improvement against the learned reward. Investigate reward exploitation, preference coverage and independent task metrics; do not label the result human alignment.
+No. The log-probability margin improves from 1 to 2 while the chosen probability falls. DPO compares reference-corrected relative likelihoods. Record chosen, rejected and margin values separately, and use independent task/retention evaluation before calling the model better.
 
 </details>
 
@@ -64,11 +66,11 @@ Only improvement against the learned reward. Investigate reward exploitation, pr
 
 ### Decide what is ready
 
-Complete stages 4–8 of training-methods. Retain shifted token-mask checks, frozen-base/merge evidence, preference oracles, signed PPO clipping and fixed-reference DPO comparisons. Add the new lesson evidence: ragged likelihood oracle, rank-capacity counterexample, conflicting preferences, exact bandit optimum and a DPO ratio improvement with lower chosen probability. State which model integrations remain absent.
+Complete stages 4–8 of training-methods. Retain shifted token-mask checks, frozen-base/merge evidence, preference oracles, signed PPO clipping and fixed-reference DPO comparisons. Add the new lesson evidence: ragged likelihood oracle, rank-capacity counterexample, conflicting preferences, exact bandit optimum and a DPO ratio improvement with lower chosen probability. State which model integrations remain absent. Complete the saved-decoder SFT and sequence-scoring handoffs with a frozen reference, held-out preference/disagreement cases and source retention. Use the full course workspace for the pinned inference package and tokenizer. Enforce the LoRA base manifest on reload.
 
 ### Further work
 
-The PPO lab is a terminal synthetic preference bandit, not full language-model RLHF. Human preference collection, sequence PPO/value models, large-model PEFT and held-out human evaluation remain separate work. For the learned-reward PPO lesson, complete rl-01 through rl-04 first. Response-only SFT and dense LoRA do not require the RL phase.
+The PPO lesson uses a terminal synthetic preference bandit. The optional, registered project Stage 5 table-policy exercise adds a separate synthetic sequence PPO exercise with a learned table critic and a declared deterministic continuation target at the collection boundary. The [optional saved-decoder appendix](https://www.tahabouhsine.com/jaxpathways/project-guides/posttraining-transformer-lineage.html) demonstrates bounded sequence-PPO mechanics and replay, but its strict heldout reward quality floor failed; this is not evidence of language-model quality. Keep it separate from registered Stage 5. Neither exercise is full language-model RLHF. Real preference provenance, large-model PEFT, task quality, retention and held-out human evaluation remain separate work. Complete rl-01 through rl-04 before the learned-reward PPO lesson; rl-05 is useful optional preparation for project Stage 5. Response-only SFT and dense LoRA do not require the RL phase.
 
 ## Lesson sequence
 
@@ -78,9 +80,9 @@ The PPO lab is a terminal synthetic preference bandit, not full language-model R
 
 Status: authored lesson with CPU exercise.
 
-**Intended outcome:** Align predictions with their target tokens. Separate the attention mask from the loss mask.
+**Intended outcome:** Align response-only shifted targets, then apply a bounded saved-decoder SFT transfer with frozen baselines, tokenizer identity and held-out reporting.
 
-**Evidence:** Keep shifted target/role masks, valid response-token counts, gradient support and the changed target-selection result.
+**Evidence:** Keep ragged mask/gradient oracles and saved-decoder/tokenizer identities, declared one-step SFT budget, pre/post held-out response NLL and the parent-bound child manifest. This is synthetic transfer evidence.
 
 **Checkpoint:** Should prompt inputs disappear when using response-only loss?
 
@@ -90,9 +92,9 @@ Status: authored lesson with CPU exercise.
 
 Status: authored lesson with CPU exercise.
 
-**Intended outcome:** Separate the frozen base from trainable adapters. Understand initialization and the first gradient.
+**Intended outcome:** Separate frozen-base and low-rank updates, then save and reload a base-bound adapter with nonunit scaling and wrong-base rejection.
 
-**Evidence:** Keep base-training evidence, unchanged base arrays, adapter factors/rank/alpha, initial-gradient checks and reloaded/new-input merge parity.
+**Evidence:** Keep frozen-base and gradient asymmetry checks, rank/alpha scaling, the serialized base digest and target/tensor manifest, fresh-process merge parity on new inputs and incompatible-base/metadata rejections.
 
 **Checkpoint:** Does LoRA require updating the base weights during adapter training?
 
@@ -102,9 +104,9 @@ Status: authored lesson with CPU exercise.
 
 Status: authored lesson with CPU exercise.
 
-**Intended outcome:** Represent a preference as a comparison. Fit score differences with a stable likelihood.
+**Intended outcome:** Fit pairwise reward differences and evaluate unchanged held-out unanimous and disagreement cases against a pre-fit baseline.
 
-**Evidence:** Keep synthetic label provenance, stable preference-loss and gradient references, offset/scale tests and the learned ordering.
+**Evidence:** Keep stable likelihood and gradient checks, contradictory preference controls, pre-fit and post-fit held-out probability/Brier metrics, separate disagreement slices and score-offset/scale limitations.
 
 **Checkpoint:** What do pairwise preferences identify directly?
 
@@ -126,19 +128,19 @@ Status: authored lesson with CPU exercise.
 
 Status: authored lesson with CPU exercise.
 
-**Intended outcome:** Compare chosen and rejected response log probabilities. Subtract the reference preference.
+**Intended outcome:** Compare reference-corrected preference margins, then score unequal-length saved-decoder responses with explicit masks and a bounded sequence update.
 
-**Evidence:** Keep reference identity, response log-probability conventions, log(2) initialization, independent margin loss, reversed labels and frozen-reference checks.
+**Evidence:** Keep reference-cancellation and falling-chosen-probability counterexamples, exact tokenizer/model identity, summed shifted response log probabilities with EOS/padding checks, pre/post held-out and retention records and the unchanged failed PPO quality result.
 
 **Checkpoint:** Does this DPO loop require a separately trained reward model and fresh policy rollouts?
 
 ## Phase project
 
-Audit response-token SFT masking and preference-pair loss.
+Audit SFT, DPO and sequence PPO.
 
 **Demonstrate:** Complete stages 4–8 of training-methods. Retain shifted token-mask checks, frozen-base/merge evidence, preference oracles, signed PPO clipping and fixed-reference DPO comparisons.
 
-Project status: implemented staged practice · [Open source](../../projects/posttraining-audit/README.md). Use stages 1, 2, 3, 4 for this phase. Work in projects/posttraining-audit/starter/model.py. Complete stages 1 and 2 for independent calculations and changed-condition diagnosis, then retain the stage 3 evidence with --evidence-dir runs/posttraining-audit. Stage 4 integrates the checks. Learner commands explicitly select the starter; --implementation solution is instructor reference execution. This bounded practice does not certify the entire phase or target hardware.
+Project status: implemented staged practice · [Open source](../../projects/posttraining-audit/README.md). Use stages 1, 2, 3, 4, 5 for this phase. Begin in projects/posttraining-audit/starter/model.py for the response-mask and preference-pair checks. Stages 1 and 2 compare independent calculations and changed conditions; stage 3 retains evidence, and stage 4 integrates those checks. Stage 5 uses starter/sequence_ppo.py to collect synthetic responses, fit a critic, distinguish EOS from truncation, freeze rollout snapshots across PPO epochs and retain token-level evidence. Each stage lists its own edit file and command. This local mechanics exercise does not qualify a Transformer, human preferences, the full capstone or target hardware.
 
 Additional project: [Audit pretraining and post-training objectives](../../projects/training-methods/README.md).
 

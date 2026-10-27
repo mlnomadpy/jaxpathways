@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="576pt" height="475.2pt" viewBox="0 0 576 475.2" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:description>GraphDef contains module wiring and shared-reference identity, while State contains named arrays for hidden.kernel, hidden.bias, out.kernel, out.bias, and calls. GraphDef plus State enters nnx.merge to reconstruct the model. A shared state reference retains variable identity; copied state leaves reconstruct equal values with independent mutable identity.</dc:description>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.10.8, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 475.2
+L 576 475.2
+L 576 0
+L 0 0
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 146.767781 101.74189
+Q 216.751388 187.330247 285.531873 271.447213
+" style="fill: none; stroke: #536273; stroke-width: 1.7; stroke-linecap: round"/>
+    <path d="M 284.253042 265.77583
+L 285.531873 271.447213
+L 280.227467 269.067448
+z
+" style="fill: #536273; stroke: #536273; stroke-width: 1.7; stroke-linecap: round"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 428.547291 99.778266
+Q 288.001949 70.029155 149.316066 40.673635
+" style="fill: none; stroke: #536273; stroke-width: 1.7; stroke-linecap: round"/>
+    <path d="M 153.86494 44.294097
+L 149.316066 40.673635
+L 154.941761 39.206814
+z
+" style="fill: #536273; stroke: #536273; stroke-width: 1.7; stroke-linecap: round"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 147.470104 251.330022
+Q 216.746522 262.735106 284.147528 273.831438
+" style="fill: none; stroke: #536273; stroke-width: 1.7; stroke-linecap: round"/>
+    <path d="M 279.438953 270.421259
+L 284.147528 273.831438
+L 278.59424 275.552191
+z
+" style="fill: #536273; stroke: #536273; stroke-width: 1.7; stroke-linecap: round"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 286.090898 335.375026
+Q 216.750143 356.575567 149.226989 377.220387
+" style="fill: none; stroke: #536273; stroke-width: 1.7; stroke-linecap: round"/>
+    <path d="M 154.959952 378.186375
+L 149.226989 377.220387
+L 153.439558 373.213609
+z
+" style="fill: #536273; stroke: #536273; stroke-width: 1.7; stroke-linecap: round"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 289.909102 335.375026
+Q 359.249857 356.575567 426.773011 377.220387
+" style="fill: none; stroke: #536273; stroke-width: 1.7; stroke-linecap: round"/>
+    <path d="M 422.560442 373.213609
+L 426.773011 377.220387
+L 421.040048 378.186375
+z
+" style="fill: #536273; stroke: #536273; stroke-width: 1.7; stroke-linecap: round"/>
+   </g>
+   <g id="patch_7">
+    <path d="M 48.125202 38.525347
+L 242.875038 38.525347
+Q 246.200035 38.525347 246.200035 43.217342
+L 246.200035 96.840144
+Q 246.200035 101.532139 242.875038 101.532139
+L 48.125202 101.532139
+Q 44.800205 101.532139 44.800205 96.840144
+L 44.800205 43.217342
+Q 44.800205 38.525347 48.125202 38.525347
+z
+" clip-path="url(#p2df684befa)" style="fill: #eef3ff; stroke: #3559a8; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_8">
+    <path d="M 333.124962 38.525347
+L 527.874798 38.525347
+Q 531.199795 38.525347 531.199795 43.217342
+L 531.199795 96.840144
+Q 531.199795 101.532139 527.874798 101.532139
+L 333.124962 101.532139
+Q 329.799965 101.532139 329.799965 96.840144
+L 329.799965 43.217342
+Q 329.799965 38.525347 333.124962 38.525347
+z
+" clip-path="url(#p2df684befa)" style="fill: #fff0e6; stroke: #a64d20; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_9">
+    <path d="M 10.125234 129.013825
+L 280.875006 129.013825
+Q 284.200003 129.013825 284.200003 133.705821
+L 284.200003 247.654275
+Q 284.200003 252.346271 280.875006 252.346271
+L 10.125234 252.346271
+Q 6.800237 252.346271 6.800237 247.654275
+L 6.800237 133.705821
+Q 6.800237 129.013825 10.125234 129.013825
+z
+" clip-path="url(#p2df684befa)" style="fill: #f0eafa; stroke: #6240ad; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_10">
+    <path d="M 185.875086 273.125107
+L 390.124914 273.125107
+Q 393.449911 273.125107 393.449911 277.817102
+L 393.449911 331.439904
+Q 393.449911 336.131899 390.124914 336.131899
+L 185.875086 336.131899
+Q 182.550089 336.131899 182.550089 331.439904
+L 182.550089 277.817102
+Q 182.550089 273.125107 185.875086 273.125107
+z
+" clip-path="url(#p2df684befa)" style="fill: #e5f4ee; stroke: #17735c; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_11">
+    <path d="M 29.125218 377.019286
+L 261.875022 377.019286
+Q 265.200019 377.019286 265.200019 381.711281
+L 265.200019 455.442634
+Q 265.200019 460.134629 261.875022 460.134629
+L 29.125218 460.134629
+Q 25.800221 460.134629 25.800221 455.442634
+L 25.800221 381.711281
+Q 25.800221 377.019286 29.125218 377.019286
+z
+" clip-path="url(#p2df684befa)" style="fill: #fff0e6; stroke: #a64d20; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_12">
+    <path d="M 314.124978 377.019286
+L 546.874782 377.019286
+Q 550.199779 377.019286 550.199779 381.711281
+L 550.199779 455.442634
+Q 550.199779 460.134629 546.874782 460.134629
+L 314.124978 460.134629
+Q 310.799981 460.134629 310.799981 455.442634
+L 310.799981 381.711281
+Q 310.799981 377.019286 314.124978 377.019286
+z
+" clip-path="url(#p2df684befa)" style="fill: #e5f4ee; stroke: #17735c; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="text_1">
+    <text style="font-size: 11px; font-family: 'DejaVu Sans'; fill: #172334" transform="translate(93.090276 66.905258)">GraphDef: TinyMLP</text>
+    <text style="font-size: 11px; font-family: 'DejaVu Sans'; fill: #172334" transform="translate(69.051839 79.222852)">hidden → out · calls counter</text>
+   </g>
+   <g id="text_2">
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; fill: #172334" transform="translate(392.086599 60.311399)">Identity variant</text>
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; fill: #172334" transform="translate(396.051443 71.509212)">left.hidden ─┐</text>
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; fill: #172334" transform="translate(360.19988 85.264837)">right.hidden ─┴ same object</text>
+   </g>
+   <g id="text_3">
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; fill: #172334" transform="translate(116.704026 171.043798)">State paths</text>
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; fill: #172334" transform="translate(90.032151 182.24161)">hidden.kernel [Param]</text>
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; fill: #172334" transform="translate(95.193089 193.439423)">hidden.bias [Param]</text>
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; fill: #172334" transform="translate(52.884495 204.637235)">out.kernel [Param] · out.bias [Param]</text>
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; fill: #172334" transform="translate(108.568089 215.835048)">calls [Variable]</text>
+   </g>
+   <g id="text_4">
+    <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="288" y="307.939753" transform="rotate(-0 288 307.939753)">nnx.merge(GraphDef, State)</text>
+   </g>
+   <g id="text_5">
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; fill: #172334" transform="translate(88.88762 410.13852)">Reuse Variable objects</text>
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; fill: #172334" transform="translate(92.810276 421.336333)">equal starting values</text>
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; fill: #172334" transform="translate(65.18762 432.534145)">mutable identity may be shared</text>
+   </g>
+   <g id="text_6">
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; fill: #172334" transform="translate(352.92488 410.13852)">Copy State leaves, then merge</text>
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; fill: #172334" transform="translate(377.810036 421.336333)">equal starting values</text>
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; fill: #172334" transform="translate(350.350661 432.534145)">mutable identity is independent</text>
+   </g>
+   <g id="text_7">
+    <g id="patch_13">
+     <path d="M 163.849279 363.414655
+L 269.650841 363.414655
+L 269.650841 349.73653
+L 163.849279 349.73653
+z
+" style="fill: #ffffff"/>
+    </g>
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #394658" x="216.75006" y="359.334968" transform="rotate(-0 216.75006 359.334968)">state objects reused</text>
+   </g>
+   <g id="text_8">
+    <g id="patch_14">
+     <path d="M 308.613221 363.414655
+L 409.886659 363.414655
+L 409.886659 349.73653
+L 308.613221 349.73653
+z
+" style="fill: #ffffff"/>
+    </g>
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #394658" x="359.24994" y="359.334968" transform="rotate(-0 359.24994 359.334968)">state leaves copied</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="p2df684befa">
+   <rect x="3.00024" y="3.00024" width="569.99952" height="469.19952"/>
+  </clipPath>
+ </defs>
+</svg>

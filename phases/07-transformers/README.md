@@ -12,7 +12,9 @@ Inspect what each token can attend to and count only valid targets in the loss.
 
 ## Study guide: Can you prove that a predicted token cannot see its future?
 
-Attention is a weighted mixing operation whose axes and masks are testable. Build a causal model from these contracts before interpreting a generated sentence as evidence of learning.
+Attention lets each query mix values according to its relationship with the keys. Its matrix looks abstract until you follow one row: which positions are allowed, what probabilities do they receive, and which values are combined? Shapes, masks and target shifts determine the meaning of that calculation.
+
+Build the causal model from those local contracts. Change a future token and check an earlier output, trace the prompt-to-answer target boundary, and keep padding or packed documents out of valid comparisons. Read generation as the result of both a model and a declared decoding policy.
 
 ### Check your starting point
 
@@ -38,11 +40,11 @@ Review: [Attention from small pieces](01-attention-from-small-pieces/docs/en.md)
 
 ### Try a changed condition
 
-Two documents are packed into one sequence. Causal masking passes, but one document still changes the other’s predictions. What is missing?
+Pack document A at positions 0 and 1 and document B at positions 2 and 3. Which keys may B’s first query use? What if A changes?
 
 <details><summary>Compare an approach</summary>
 
-Causality only blocks future positions. Require matching segment identities too, align targets within each document, and exclude padding or invalid boundaries from the loss. Test a change to the other document while holding the target document fixed.
+With causal and same-segment masking, query 2 may use key 2 only, assuming it is a valid input. A pure causal mask incorrectly permits keys 0 and 1. Change A while keeping B fixed and require B outputs to remain unchanged. Align shifted targets so an end-of-document position does not learn the next document’s first token.
 
 </details>
 
@@ -68,7 +70,7 @@ Status: authored lesson with CPU exercise.
 
 **Intended outcome:** Implement scaled dot-product attention and test its output shape.
 
-**Evidence:** Save the Q/K/V axis diagram, uniform hand calculation, NumPy nonuniform reference, paired permutation check, and wrong-axis repair.
+**Evidence:** Keep the Q/K/V axis diagram, zero-query hand mean, independent nonuniform fixture and NumPy output, paired permutation invariance and one value-only permutation result. Explain the zero-query exception and repair a wrong softmax axis.
 
 **Checkpoint:** Which dimension should softmax normalize for one query to combine all key/value pairs?
 

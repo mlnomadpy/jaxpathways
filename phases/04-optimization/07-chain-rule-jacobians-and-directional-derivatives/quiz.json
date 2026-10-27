@@ -11,7 +11,12 @@
         "Only a scalar learning rate"
       ],
       "correct": 0,
-      "explanation": "A VJP multiplies an output sensitivity by the transposed Jacobian. A JVP instead propagates an input direction forward."
+      "explanation": "A VJP multiplies an output sensitivity by the transposed Jacobian. A JVP instead propagates an input direction forward.",
+      "optionFeedback": [
+        "A VJP multiplies an output sensitivity by the transposed Jacobian. A JVP instead propagates an input direction forward.",
+        "An input direction belongs to a JVP. A VJP takes an output cotangent and maps it back into the input space.",
+        "A learning rate belongs to the optimizer. The VJP is a derivative operation and exists before any update rule is chosen."
+      ]
     }
   ]
 }

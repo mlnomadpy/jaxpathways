@@ -1,0 +1,48 @@
+{
+  "source_report": "run/pilot-results.json",
+  "source_report_sha256": "a10b3148d1d0a667e793a5ef0ef00dacff1bda7ecfa68cf48e7329baf5abeee3",
+  "units": {
+    "training_step_loss": "nats per predicted BPE token, minibatch objective",
+    "evaluation_nll": "nats per predicted BPE token, full split",
+    "dev_byte_rate": "bits per normalized paragraph UTF-8 byte"
+  },
+  "training_steps": [
+    {
+      "step": 1,
+      "loss_nats_per_token": 5.943746089935303
+    },
+    {
+      "step": 2,
+      "loss_nats_per_token": 5.9401726722717285
+    },
+    {
+      "step": 3,
+      "loss_nats_per_token": 5.932987689971924
+    },
+    {
+      "step": 4,
+      "loss_nats_per_token": 5.921127796173096
+    },
+    {
+      "step": 5,
+      "loss_nats_per_token": 5.914412498474121
+    },
+    {
+      "step": 6,
+      "loss_nats_per_token": 5.923952579498291
+    }
+  ],
+  "evaluation_token_nll": {
+    "train_before": 5.943827799011424,
+    "train_after": 5.9119038205107115,
+    "dev_before": 5.9448846942359435,
+    "dev_after": 5.915552166164539,
+    "test_final": 5.915624774906969
+  },
+  "development_bits_per_normalized_paragraph_byte": {
+    "train_only_byte_unigram": 4.578319777999313,
+    "trained_bpe": 4.325190632748022,
+    "normalized_paragraph_utf8_bytes": 11620
+  },
+  "scope": "Six-update FP32 CPU pilot on one public-domain novel; held-out chapters are fixed and this is not a blind benchmark."
+}

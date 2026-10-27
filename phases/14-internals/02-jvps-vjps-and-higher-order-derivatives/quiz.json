@@ -11,7 +11,12 @@
         "A complete Hessian for every possible loss."
       ],
       "correct": 1,
-      "explanation": "The pullback applies the transpose Jacobian to the output weighting. It maps an output cotangent into the input space at the stored base point."
+      "explanation": "The pullback applies the transpose Jacobian to the output weighting. It maps an output cotangent into the input space at the stored base point.",
+      "optionFeedback": [
+        "A VJP is a linear map on output sensitivity at a fixed input, not a finite perturbation of the forward function.",
+        "The pullback applies the transpose Jacobian to the output weighting. It maps an output cotangent into the input space at the stored base point.",
+        "A VJP uses first derivatives. A Hessian requires differentiating a gradient or composing appropriate derivative operations."
+      ]
     }
   ]
 }

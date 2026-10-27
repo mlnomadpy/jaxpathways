@@ -213,4 +213,46 @@ best=float(candidates[np.argmin(reference_losses)])
 assert abs(best-0.7)<0.01
 assert float(np.min(reference_losses))>0
 print("Noisy grid-search estimate:",best,"residual MSE:",float(np.min(reference_losses)))
+
+# Reference practice: Fit and independently audit an adaptive noisy rate estimate
+import numpy as np
+
+def fit_and_audit_rate(fit_rate, times, observations, initial, noise_scale, candidate_rates,
+                       held_out_times, held_out_initials, on_times, on_observations,
+                       late_times, late_observations):
+    times = np.asarray(times, dtype=np.float64)
+    observations = np.asarray(observations, dtype=np.float64)
+    rates = np.asarray(candidate_rates, dtype=np.float64)
+    if rates.ndim != 1 or np.any(rates <= 0) or not np.isfinite(rates).all():
+        raise ValueError("candidate rates must be finite and positive")
+    fitted = float(fit_rate(times, observations, initial, initial_rate=0.45,
+                            noise_scale=noise_scale))
+
+    def profile(times_for_profile, values, y0):
+        times_for_profile = np.asarray(times_for_profile, dtype=np.float64)
+        values = np.asarray(values, dtype=np.float64)
+        prediction = np.cos(times_for_profile)[None, :] + (y0 - 1.0) * np.exp(
+            -rates[:, None] * times_for_profile[None, :]
+        )
+        nll = 0.5 * np.sum(((prediction - values[None, :]) / noise_scale) ** 2, axis=1)
+        return {"nll": nll, "nll_range": float(np.ptp(nll)),
+                "prediction_spread": float(np.max(np.ptp(prediction, axis=0)))}
+
+    early = profile(times, observations, initial)
+    on_manifold = profile(on_times, on_observations, 1.0)
+    late = profile(late_times, late_observations, initial)
+    fitted_nll = float(profile_nll(np.array([fitted]), times, observations, initial, noise_scale)[0])
+    early_minimum_rate = float(rates[np.argmin(early["nll"])])
+    early_minimum_nll = float(np.min(early["nll"]))
+    held_out = np.cos(np.asarray(held_out_times))[None, :] + (
+        np.asarray(held_out_initials)[:, None] - 1.0
+    ) * np.exp(-fitted * np.asarray(held_out_times)[None, :])
+    return {"fitted_rate": fitted, "early_profile": early,
+            "early_profile_minimum_rate": early_minimum_rate,
+            "early_profile_minimum_nll": early_minimum_nll,
+            "fitted_rate_nll": fitted_nll,
+            "fitted_delta_nll": fitted_nll - early_minimum_nll,
+            "on_manifold_profile": on_manifold, "late_profile": late,
+            "held_out_predictions": held_out}
+
 print("PASS: science-04")

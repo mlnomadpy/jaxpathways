@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "deployment-07",
-  "contentHash": "091a84105423934a262810668e533ec296cfced9f4f3f1632011574c820aab84",
-  "rendererHash": "a1bd5b648f4731ae5d5f0a24811c2540d1a0a132149ce589d17c4113509cbedf",
+  "contentHash": "0e02697da92e459ae248d0e47ff891a5cecc8da922ea821b7e4ce336aeb50249",
+  "rendererHash": "17e3bbad72ee4c43425845aaee76b86b85e84750551278be03d8c16842f4dc63",
   "kind": "executed",
-  "generatedAt": "2026-10-20T22:29:25.202749+00:00",
+  "generatedAt": "2026-10-27T17:01:33.131074+00:00",
   "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",
@@ -35,7 +35,7 @@
   "diagram": {
     "title": "What each deployment receipt proves",
     "prediction": "Which evidence would still be missing after the Python subprocess tests pass?",
-    "reading": "Each row identifies an object and the evidence needed to make a claim about it. The current companion supplies artifact checks and fresh-process predictions. An actual container run must add image, user and runtime evidence; device qualification adds hardware and workload measurements. Do not fill later rows with results from an earlier boundary.",
+    "reading": "Rows progress from artifact to local process, container image and target device; each row needs its own evidence. Here two predictions and three rejections support the process contract, while the image and device rows remain unproven by this companion. For a container result, add image digest, non-root identity, mounted-artifact check and readiness; do not copy process evidence into those rows.",
     "alt": "Each row identifies an object and the evidence needed to make a claim about it. The current companion supplies artifact checks and fresh-process predictions. An actual container run must add image, user and runtime evidence; device qualification adds hardware and workload measurements. Do not fill later rows with results from an earlier boundary.",
     "scope": "Architecture and dataflow mechanism diagram.",
     "height": 4.2,

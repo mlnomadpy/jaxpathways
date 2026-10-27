@@ -12,7 +12,9 @@ For the initial regression project, focus on Linear algebra and loss intuition, 
 
 ## Study guide: Can you explain an optimizer’s behavior from the objective and data?
 
-Use a model small enough to solve independently. Connect residuals, gradients, curvature and update state before comparing optimizer names. A lower training loss is useful evidence, but it does not by itself establish better held-out predictions.
+A learning curve is easier to understand when you can derive the update that produced it. Begin with vectors and residuals, then connect the gradient's direction to curvature and step size. A least-squares solve, a directional derivative and a finite-difference sweep provide different ways to challenge your answer.
+
+Read every optimizer experiment as a controlled comparison: what objective, data reduction, initialization and update budget stayed fixed? Work through one numerical step before interpreting a trajectory. Keep training fit, validation selection and final held-out reporting distinct as the examples become richer.
 
 ### Check your starting point
 
@@ -42,11 +44,11 @@ Review: [Linear algebra and loss intuition](01-linear-algebra-and-loss-intuition
 
 ### Try a changed condition
 
-Rescale one feature by a factor of ten. Is the same learning rate automatically a fair comparison?
+For the scalar loss \(L(w)=w^2\), predict the next error multipliers for learning rates 0.4, 1.0 and 1.1. Which curve can oscillate without converging?
 
 <details><summary>Compare an approach</summary>
 
-No. The parameterization changes directional curvature. Map coefficients to preserve predictions, verify the objective and compare trajectories under stated rates. Fit preprocessing on training data only; never use test performance to choose the rate.
+The update is \(w_{t+1}=(1-2\eta)w_t\). The factors are \(0.2\), \(-1\) and \(-1.2\). The middle case alternates at constant magnitude; the last grows. A plotting window can hide divergence when the starting value is tiny. Check the recurrence and plot absolute error on a logarithmic scale where nonzero.
 
 </details>
 

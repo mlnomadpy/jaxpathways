@@ -4,7 +4,7 @@ Copy this template into your own portfolio and fill it after running your modifi
 
 ## Evidence required
 
-Keep source pairing, temperature, stable two-direction loss checks, collapse and duplicate baselines, training outputs and broken-pair diagnosis.
+Keep pair/temperature/false-negative checks, held-out source-group membership, saved encoder identity, multiple-positive Recall@k and mAP calculations against an independent ranking oracle.
 
 - Command: `python3 phases/17-pretraining/03-contrastive/code/main.py`
 - Working directory: Repository root

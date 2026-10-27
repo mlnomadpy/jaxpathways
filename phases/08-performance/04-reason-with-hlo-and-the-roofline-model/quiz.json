@@ -11,7 +11,12 @@
         "Only the number of Python source lines."
       ],
       "correct": 1,
-      "explanation": "A typed intermediate representation and an optimistic ceiling do not measure execution. Workload equivalence, synchronization, device evidence and appropriate model assumptions are still required."
+      "explanation": "A typed intermediate representation and an optimistic ceiling do not measure execution. Workload equivalence, synchronization, device evidence and appropriate model assumptions are still required.",
+      "optionFeedback": [
+        "An HLO operation and a theoretical ceiling do not measure achieved throughput. Run the target workload with a defined synchronized boundary.",
+        "A typed intermediate representation and an optimistic ceiling do not measure execution. Workload equivalence, synchronization, device evidence and appropriate model assumptions are still required.",
+        "Source line counts do not describe data traffic or hardware utilization. Inspect operation shapes, precision and measured execution."
+      ]
     }
   ]
 }

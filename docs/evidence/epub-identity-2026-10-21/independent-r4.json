@@ -1,0 +1,29 @@
+{
+  "independent_checks": {
+    "distribution_checker": "pass",
+    "node_actual_CLI_snapshot_tests": "3 pass",
+    "python_focused_tests": "11 pass"
+  },
+  "limits": "No release preparation or archive rebuild in this independent R4 check; prior full-archive fingerprint evidence remains the coverage basis.",
+  "source_bound_findings": [
+    "Python and Node use exact plain X.Y.Z regex with no leading-zero numeric components or suffix acceptance.",
+    "Both gates require editionKey and modifiedAt as a pair; missing both is allowed for legacy 0.14.1 and rejected for >=0.15.0, including 1.x.",
+    "Both gates reject empty or padded edition keys and invalid UTC timestamps including impossible calendar dates.",
+    "Node release guard validates before reading or writing release snapshots; actual CLI tests show invalid records leave absent or existing snapshot bytes unchanged and valid legacy/new records rerun stably.",
+    "EPUB builder and checker hashes are unchanged from prior accepted full-payload fingerprint review."
+  ],
+  "source_hashes": {
+    "/private/tmp/jaxpathways-epub-identity-work/scripts/build-distribution.py": "2485246ca92d3595855cb8101438cf153e820db1439ff3ef460fc05ce36103c1",
+    "/private/tmp/jaxpathways-epub-identity-work/scripts/check-distribution.py": "b090554de88f77b9a18738601f6fa7f443fbeca82cb02169c0ae0fb839191b99",
+    "/private/tmp/jaxpathways-epub-identity-work/scripts/epub_identity.py": "4057d0a947d8311044c5c45b40f619ce257d5bfe727a1012ae7874498d452c29",
+    "/private/tmp/jaxpathways-epub-identity-work/tests/test_epub_identity.py": "3e9778420b5571f873e0c7d156e316b34e369aee38d6a94d32d08f21f16485f5",
+    "/private/tmp/jaxpathways-reader-review-fix/scripts/release.mjs": "6013b75a6d7f90bd4cab020d05bebdc8ca484e8caaaa07b29dd5767f970845a4",
+    "/private/tmp/jaxpathways-reader-review-fix/tests/release-edition-metadata.test.mjs": "636d022d2fc00aa7e6bc297785f5e2ddb27a85ee542279b3103a9058de52c972",
+    "/private/tmp/jaxpathways-reader-review-fix/tests/release-receipts.test.mjs": "22b970d55659fb989a87d5e553060ed0235cd0027267a6a30ba0982a72d2b923"
+  },
+  "status": "accepted_bounded_R4",
+  "upstream_report_hashes": {
+    "/private/tmp/jaxpathways-epub-identity-r4-20261021/report.json": "4b597c3e2e13bc124a7a22d15965508464887ca2acefcb2747630ee29ca67f63",
+    "/private/tmp/jaxpathways-release-edition-guard-r4-20261021/release-report.json": "5ebcffac6e4c0a3b59bbfdf6a274d3772e5fbaaf9a68c104a796ddf1dda34b57"
+  }
+}

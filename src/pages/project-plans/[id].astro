@@ -14,6 +14,13 @@ export function getStaticPaths() {
   return plans.map((project) => ({ params: { id: project.id }, props: { project } }));
 }
 const { project } = Astro.props;
+const hasPilot = Boolean(project.pilot);
+const pageTitle = hasPilot
+  ? `${project.title}: CPU pilot and project plan`
+  : `${project.title}: project plan`;
+const pageDescription = project.pilot
+  ? `${project.summary} ${project.pilot.scope}`
+  : project.summary;
 const harnessProject = registry.projects.find((item) => item.id === project.harnessId);
 const harnessLayout = harnessProject ? projectFileLayout(harnessProject) : null;
 const content = projectGuide(
@@ -24,8 +31,8 @@ const content = projectGuide(
 ---
 
 <GuideLayout
-  title={`${project.title}: project plan`}
-  description={project.summary}
+  title={pageTitle}
+  description={pageDescription}
   active="projects"
   skipLabel="Skip to project plan"
   mainClass="project-plan"
@@ -33,13 +40,26 @@ const content = projectGuide(
   <PageIntro
     backHref="projects.html#alignment-retrieval"
     backLabel="Model lifecycle projects"
-    edition="Planned capstone · implementation pending"
+    edition={
+      hasPilot
+        ? 'Full capstone planned · bounded CPU pilot available'
+        : 'Planned capstone · implementation pending'
+    }
     intro={project.summary}
   >
     <Fragment slot="title" set:html={content.heading} />
-    <p>
-      This specification has no runnable workspace yet. The preparation projects are available now.
-    </p>
+    {hasPilot ? (
+      <p>
+        The full capstone remains planned. A separately scoped CPU pilot is available for learning
+        the workflow and inspecting its measured results. Read its scope and quality results before
+        starting.
+      </p>
+    ) : (
+      <p>
+        This specification has no runnable workspace yet. The preparation projects are available
+        now.
+      </p>
+    )}
     {harnessLayout && (
       <div class="project-guide-brief">
         <p class="edition">Where to build your preparation harness now</p>
@@ -63,7 +83,34 @@ const content = projectGuide(
       Start with the runnable harness
     </a>
   </PageIntro>
-  <MaterialStatus kind="plans" id={project.id} />
+  {project.pilot && (
+    <section id={project.pilot.anchor} class="project-pilot" aria-labelledby="pilot-heading">
+      <h2 id="pilot-heading">{project.pilot.title}</h2>
+      <p>{project.pilot.scope}</p>
+      <div class="actions">
+        <a class="button primary" href={siteUrl(`downloads/${project.pilot.download}`)} download>
+          {project.pilot.downloadLabel || 'Download optional CPU pilot'}
+        </a>
+        <a class="button" href={siteUrl(`project-assets/${project.id}/${project.pilot.evidence}`)}>
+          {project.pilot.evidenceLabel || 'Read the pilot evidence index'}
+        </a>
+        {project.pilot.guide && (
+          <a class="button" href={siteUrl(project.pilot.guide.path)}>
+            {project.pilot.guide.label}
+          </a>
+        )}
+      </div>
+      <p>
+        These files provide a bounded research workflow and evidence. They are not a completed
+        project workspace or a model release. The preparation harness remains a separate starting
+        point.
+      </p>
+    </section>
+  )}
+  <section class="project-capstone-status" aria-labelledby="capstone-status-heading">
+    <h2 id="capstone-status-heading">Full capstone status</h2>
+    <MaterialStatus kind="plans" id={project.id} />
+  </section>
   <GuideContents sections={content.sections} label="Project plan sections" title="In this plan" />
   <section aria-labelledby="preparation-heading">
     <h2 id="preparation-heading">Available preparation lessons</h2>

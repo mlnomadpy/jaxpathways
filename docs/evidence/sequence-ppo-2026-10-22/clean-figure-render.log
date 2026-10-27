@@ -1,0 +1,80 @@
+
+Fontconfig error: No writable cache directories
+	/opt/homebrew/var/cache/fontconfig
+	/Users/tahabsn/.cache/fontconfig
+	/Users/tahabsn/.fontconfig
+
+Fontconfig error: No writable cache directories
+	/opt/homebrew/var/cache/fontconfig
+	/Users/tahabsn/.cache/fontconfig
+	/Users/tahabsn/.fontconfig
+
+Fontconfig error: No writable cache directories
+	/opt/homebrew/var/cache/fontconfig
+	/Users/tahabsn/.cache/fontconfig
+	/Users/tahabsn/.fontconfig
+
+Fontconfig error: No writable cache directories
+	/opt/homebrew/var/cache/fontconfig
+	/Users/tahabsn/.cache/fontconfig
+	/Users/tahabsn/.fontconfig
+
+Fontconfig error: No writable cache directories
+	/opt/homebrew/var/cache/fontconfig
+	/Users/tahabsn/.cache/fontconfig
+	/Users/tahabsn/.fontconfig
+
+Fontconfig error: No writable cache directories
+	/opt/homebrew/var/cache/fontconfig
+	/Users/tahabsn/.cache/fontconfig
+	/Users/tahabsn/.fontconfig
+
+Fontconfig error: No writable cache directories
+	/opt/homebrew/var/cache/fontconfig
+	/Users/tahabsn/.cache/fontconfig
+	/Users/tahabsn/.fontconfig
+
+Fontconfig error: No writable cache directories
+	/opt/homebrew/var/cache/fontconfig
+	/Users/tahabsn/.cache/fontconfig
+	/Users/tahabsn/.fontconfig
+
+Fontconfig error: No writable cache directories
+	/opt/homebrew/var/cache/fontconfig
+	/Users/tahabsn/.cache/fontconfig
+	/Users/tahabsn/.fontconfig
+
+Fontconfig error: No writable cache directories
+	/opt/homebrew/var/cache/fontconfig
+	/Users/tahabsn/.cache/fontconfig
+	/Users/tahabsn/.fontconfig
+Matplotlib is building the font cache; this may take a moment.
+{
+  "fixtureSha256": "c6d2b035cc7f7a9bc5671b995a10b557c538ddedb608212a93ec9aec9f4845dd",
+  "results": [
+    {
+      "deltas": [
+        0.14,
+        1.4
+      ],
+      "advantages": [
+        1.1480000000000001,
+        1.4
+      ],
+      "bootstrap": 0.0
+    },
+    {
+      "deltas": [
+        0.07,
+        0.15000000000000002,
+        1.2200000000000002
+      ],
+      "advantages": [
+        0.8104480000000005,
+        1.0284000000000004,
+        1.2200000000000002
+      ],
+      "bootstrap": 0.8
+    }
+  ]
+}

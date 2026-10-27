@@ -30,12 +30,12 @@
       },
       {
         "title": "Derive one update before writing the loop",
-        "body": "Starting at \\(w=0\\), our gradient is \\(-4\\). Subtracting \\(0.1\\) times \\(-4\\) gives \\(w=0.4\\), whose loss is \\(2.56\\). A second step gives \\(w=0.72\\) and loss \\(1.6384\\). These two hand-computed steps check the sign, learning rate, and whether your history records loss before or after the update.\n\nDefine the error \\(e=w-2\\). The next error is \\((1-2\\eta)e\\). This recurrence explains the whole trajectory for this quadratic. An optimizer update must follow the negative gradient; adding it moves away from the minimum. The subscript \\(k\\) counts updates. The symbol \\(\\eta\\) is the learning rate, and \\(e_k=w_k-2\\) is the remaining error. Focus on the multiplier \\(1-2\\eta\\): its magnitude tells us whether this particular error shrinks.",
+        "body": "Starting at \\(w=0\\), our gradient is \\(-4\\). Subtracting \\(0.1\\) times \\(-4\\) gives \\(w=0.4\\), whose loss is \\(2.56\\). A second step gives \\(w=0.72\\) and loss \\(1.6384\\). These two hand-computed steps check the sign, learning rate, and whether your history records loss before or after the update.\n\nDefine the error \\(e=w-2\\). The next error is \\((1-2\\eta)e\\). This recurrence explains the whole trajectory for this quadratic. An optimizer update must follow the negative gradient; adding it moves away from the minimum. The subscript \\(k\\) counts updates. The symbol \\(\\eta\\) is the learning rate, and \\(e_k=w_k-2\\) is the remaining error. Focus on the multiplier \\(1-2\\eta\\): its magnitude tells us whether this particular error shrinks.\n\nThe update is current weight minus eta times 2 times (weight minus 2), so the error from the minimizer is multiplied by \\(1-2\\eta\\). Starting at weight \\(0\\) means the initial error is \\(-2\\). At \\(\\eta=0.1\\), the next error is \\(-1.6\\), hence weight \\(0.4\\) and loss \\(1.6^2=2.56\\). Loss is squared distance to the minimizer, while the derivative is signed local slope; the update uses that slope with a minus sign.",
         "math": "\\begin{aligned}w_{k+1}&=w_k-\\eta\\,2(w_k-2)\\\\0&\\longrightarrow0.4\\longrightarrow0.72\\quad(\\eta=0.1)\\\\e_k&=(1-2\\eta)^k e_0\\end{aligned}"
       },
       {
         "title": "Read the learning rate through curvature",
-        "body": "Rates between \\(0\\) and \\(0.5\\) approach the optimum without crossing it. A rate of \\(0.5\\) reaches it in one ideal step. Rates between \\(0.5\\) and \\(1\\) alternate around the optimum with shrinking error. A rate of \\(1\\) alternates forever; values above \\(1\\) grow in magnitude. These statements follow from the error multiplier for this specific loss.\n\nFor \\(L=a(w-c)^2\\) with positive a, the stable interval is \\(0<\\eta<\\frac{1}{a}\\). Scaling a loss changes the curvature and the safe update scale. There is no universal threshold such as \\(0.1\\) for neural networks."
+        "body": "Rates between \\(0\\) and \\(0.5\\) approach the optimum without crossing it. A rate of \\(0.5\\) reaches it in one ideal step. Rates between \\(0.5\\) and \\(1\\) alternate around the optimum with shrinking error. A rate of \\(1\\) alternates forever; values above \\(1\\) grow in magnitude. These statements follow from the error multiplier for this specific loss.\n\nFor \\(L=a(w-c)^2\\) with positive a, the stable interval is \\(0<\\eta<\\frac{1}{a}\\). Scaling a loss changes the curvature and the safe update scale. There is no universal threshold such as \\(0.1\\) for neural networks.\n\nFor L=a(w-c)^2, the derivative is 2a(w-c), so the error multiplier is 1-2a eta. Requiring its magnitude below one gives \\(0<\\eta<1/a\\). That bound belongs to this one-dimensional quadratic and follows from its curvature 2a, not from an optimizer default."
       },
       {
         "title": "Make the trajectory part of the state contract",
@@ -80,7 +80,22 @@
         "prompt": "For \\(4(w-3)^2\\), derive a stable rate and verify convergence from zero.",
         "hint": "The error multiplier is \\(1-8\\eta\\); use \\(\\eta=0.1\\).",
         "solution": "# Transfer the stability analysis (Transfer / diagnosis)\ndef scaled_loss(w):\n    return 4*(w-3.)**2\ndef scaled_step(w, _):\n    new = w-0.1*jax.grad(scaled_loss)(w)\n    return new, scaled_loss(new)\nscaled_w, scaled_history = jax.lax.scan(scaled_step, jnp.array(0.), None, length=20)\nassert jnp.allclose(scaled_w, 3., atol=1e-5)\nassert jnp.all(jnp.diff(scaled_history) <= 1e-6)",
-        "explanation": "Changing curvature changes the stability interval to \\(0<\\eta<0.25\\)."
+        "explanation": "Changing curvature changes the stability interval to \\(0<\\eta<0.25\\).",
+        "learnerStarter": {
+          "inputs": [
+            "For \\(4(w-3)^2\\), derive a stable rate and verify convergence from zero."
+          ],
+          "outputs": [
+            "A finite loss history that contracts under the derived rate."
+          ],
+          "invariants": [
+            "The rate is checked against the new curvature rather than copied from the earlier example."
+          ],
+          "hints": [
+            "The error multiplier is \\(1-8\\eta\\); use \\(\\eta=0.1\\)."
+          ],
+          "code": "import jax.numpy as jnp\n\ndef practice_transfer_the_stability_analysis(rate):\n    \"\"\"Implement the transfer the stability analysis check.\"\"\"\n    # TODO: Derive the update multiplier for the changed quadratic, select a stable rate, and retain loss history from zero.\n    raise NotImplementedError\n"
+        }
       },
       {
         "title": "Reproduce an uphill update and repair it",
@@ -88,7 +103,22 @@
         "prompt": "Show how adding the gradient increases loss, then verify subtraction at the same starting point.",
         "hint": "The derivative at zero is \\(-4\\).",
         "solution": "# Reproduce an uphill update and repair it (Transfer / diagnosis)\nuphill = 0. + 0.1*jax.grad(loss)(0.)\ndownhill = 0. - 0.1*jax.grad(loss)(0.)\nassert loss(uphill) > loss(0.)\nassert loss(downhill) < loss(0.)\nassert jnp.allclose(downhill, 0.4)",
-        "explanation": "The sign error is isolated using the same input and rate; the repaired first step matches the analytic result."
+        "explanation": "The sign error is isolated using the same input and rate; the repaired first step matches the analytic result.",
+        "learnerStarter": {
+          "inputs": [
+            "Show how adding the gradient increases loss, then verify subtraction at the same starting point."
+          ],
+          "outputs": [
+            "Both candidate losses and an explicit direction check."
+          ],
+          "invariants": [
+            "The candidates share the same starting point and learning rate."
+          ],
+          "hints": [
+            "The derivative at zero is \\(-4\\)."
+          ],
+          "code": "import jax\nimport jax.numpy as jnp\n\ndef practice_reproduce_an_uphill_update_and_repair_it(initial, rate):\n    \"\"\"Implement the reproduce an uphill update and repair it check.\"\"\"\n    # TODO: Apply a plus-gradient step and a minus-gradient step from the same initial value, then compare their losses.\n    raise NotImplementedError\n"
+        }
       }
     ],
     "references": [
@@ -137,9 +167,30 @@
       "kind": "executed",
       "prediction": "Which rate will cause errors to grow rather than shrink?",
       "reading": "The horizontal axis counts completed updates, including the initial state at \\(0\\). The vertical axis is squared error. It uses a symmetric-log scale: values near zero are on a linear region, while large values are compressed logarithmically. That lets the zero-loss trajectory remain visible.\n\nAll three curves begin at loss \\(4\\). Learning rate \\(0.1\\) decreases it gradually; rate \\(0.5\\) reaches zero after one update and stays there. Rate \\(1.1\\) increases it from \\(4\\) to \\(5.76\\), then beyond \\(200\\) by the last plotted update.",
-      "connection": "Here the loss is \\((w-2)^2\\). One update multiplies the weight error \\(w-2\\) by \\(1-2\\eta\\). The three rates therefore multiply that error by \\(0.8\\), \\(0\\), and \\(-1.2\\), respectively. Squaring gives loss multipliers \\(0.64\\), \\(0\\), and \\(1.44\\).\n\nThe large rate crosses the optimum and lands farther away on each step. The loss plot shows the growing distance, while the sign change follows from the update equation; loss alone does not reveal which side the weight is on. The one-step success of rate \\(0.5\\) depends on this simple quadratic’s curvature and is not a universal best learning rate.",
+      "connection": "Here the loss is \\((w-2)^2\\). One update multiplies the weight error \\(w-2\\) by \\(1-2\\eta\\). The three rates therefore multiply that error by \\(0.8\\), \\(0\\), and \\(-1.2\\), respectively. Squaring gives loss multipliers \\(0.64\\), \\(0\\), and \\(1.44\\).\n\nThe large rate crosses the optimum and lands farther away on each step. The loss plot shows the growing distance, while the sign change follows from the update equation; loss alone does not reveal which side the weight is on. The one-step success of rate \\(0.5\\) depends on this simple quadratic’s curvature and is not a universal best learning rate.\n\nBefore running another rate, compute 1-2 eta: its sign predicts crossing, and its magnitude predicts whether this quadratic error shrinks.",
       "alt": "Gradient descent trades step size for stability. The horizontal axis counts completed updates, including the initial state at \\(0\\). The vertical axis is squared error. It uses a symmetric-log scale: values near zero are on a linear region, while large values are compressed logarithmically. That lets the zero-loss trajectory remain visible. All three curves begin at loss \\(4\\). Learning rate \\(0.1\\) decreases it gradually; rate \\(0.5\\) reaches zero after one update and stays there. Rate \\(1.1\\) increases it from \\(4\\) to \\(5.76\\), then beyond \\(200\\) by the last plotted update.",
       "code": "rates = [0.1, 0.5, 1.1]\nseries = []\nfor rate_plot in rates:\n    position_plot = jnp.array(0.0)\n    losses = []\n    for _ in range(12):\n        losses.append(float((position_plot - 2) ** 2))\n        position_plot = position_plot - rate_plot * 2 * (position_plot - 2)\n    series.append({'label': 'rate ' + str(rate_plot), 'y': losses})\nvisual_data = {'kind': 'line', 'x': list(range(12)), 'xlabel': 'completed update', 'ylabel': 'squared error', 'yscale': 'symlog', 'series': series}"
+    },
+    "optionFeedback": [
+      "The recurrence multiplies the error by \\(-1.2\\), so its magnitude grows while its sign alternates.",
+      "scan repeats the update you give it. Derive the one-step error factor; the instability is already present in that recurrence.",
+      "A safe learning rate depends on curvature. For this quadratic, use the magnitude of the error multiplier rather than a universal threshold."
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "An initial scalar parameter, step size, and fixed number of updates."
+      ],
+      "outputs": [
+        "The parameter/loss history for the requested update schedule."
+      ],
+      "invariants": [
+        "Each update uses the gradient evaluated at the current parameter; report divergence rather than clipping it away."
+      ],
+      "hints": [
+        "Use value_and_grad to measure the loss and gradient at one point.",
+        "Check whether the update changes the loss in the direction predicted by curvature."
+      ],
+      "code": "import jax\nimport jax.numpy as jnp\nimport optax\n\ndef gradient_descent(initial, rate, steps):\n    \"\"\"The parameter/loss history for the requested update schedule.\"\"\"\n    # TODO: Record parameter and loss after each explicit gradient-descent transition, including the high-rate case.\n    raise NotImplementedError\n"
     }
   }
 }

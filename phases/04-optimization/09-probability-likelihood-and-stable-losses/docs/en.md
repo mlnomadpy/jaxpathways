@@ -4,6 +4,8 @@ Phase 04: Math & optimization · about 80 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Write gradient descent yourself](https://www.tahabouhsine.com/jaxpathways/lesson-optimization-03.html).
+
 ## What you will be able to do
 
 - Derive binary cross-entropy from a probability model and compute it safely from logits.
@@ -49,6 +51,8 @@ $$
 ## Move from probabilities to logits
 
 A logit $z$ is an unrestricted real score. The sigmoid maps it into a probability: $p=1/(1+e^{-z})$. At $z=0$, the probability is $1/2$ and either binary label has loss $\log 2$. For a positive label, differentiating the loss gives $p-1$, so gradient descent increases the logit. More generally the derivative is $p-y$. A very wrong, confident prediction still supplies a useful gradient.
+
+At logit $0$, the probability is $0.5$. The derivative probability minus label is $-0.5$ for label $1$, so gradient descent raises the logit; it is $+0.5$ for label $0$, so descent lowers it. At logit $10$, positive-label loss is about $0.0000458$, while negative-label loss is about $10.0000458$. These are costs assigned to observed labels, not probabilities.
 
 $$
 \ell(z,y)=\operatorname{softplus}(z)-yz,\qquad \frac{\partial\ell}{\partial z}=\operatorname{sigmoid}(z)-y
@@ -170,6 +174,8 @@ A large positive logit strongly favors label $1$. That confidence is rewarded on
 
 Loss is not a probability or classification accuracy, so values above $1$ are valid. The near-flat parts approach zero without implying an exact zero probability for the other class. Computing this loss from logits with a stable formula avoids unnecessary overflow or taking the logarithm of a rounded zero.
 
+Before moving the logit, compute probability minus label; its sign predicts the descent direction for the observed label.
+
 ```python
 grid = jnp.linspace(-10.0, 10.0, 81)
 visual_data = {'kind': 'line', 'x': grid.tolist(), 'xlabel': 'logit', 'ylabel': 'binary cross-entropy', 'series': [{'label': 'observed label 1', 'y': binary_loss(grid, 1.0).tolist()}, {'label': 'observed label 0', 'y': binary_loss(grid, 0.0).tolist()}]}
@@ -177,7 +183,7 @@ visual_data = {'kind': 'line', 'x': grid.tolist(), 'xlabel': 'logit', 'ylabel': 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:20:40.204598+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:03:46.964706+00:00. JAX 0.9.2.
 
 ```text
 uncertain loss / confident-wrong loss: 0.6931472 100.0
@@ -228,21 +234,28 @@ Compute the binary losses for positive labels at probabilities $0.8$ and $0.2$, 
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- Binary logits and same-shaped binary labels.
 
-**Step-by-step implementation plan:**
-1. Exercise solution
+**Outputs:**
+- A finite per-example loss and a declared reduction.
+
+**Invariants to check:**
+- Use the logits-based stable loss; duplicated examples preserve a mean and scale a sum.
+
+**Hints:**
+- Check confident correct and incorrect predictions separately.
+- Keep reduction choice explicit so its gradient scale is inspectable.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-probabilities = jnp.array(...)  # TODO: compute probabilities
-z_from_p = jnp.log(...)  # TODO: compute z_from_p
-assert jnp.allclose(binary_loss(z_from_p, 1.0), -jnp.log(probabilities), atol=1e-06)  # TODO: complete assertion check
-assert binary_loss(z_from_p[0], 1.0)  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def binary_cross_entropy(logits, labels):
+    """A finite per-example loss and a declared reduction."""
+    # TODO: Compute stable per-example binary losses from logits and make the mean-versus-sum reduction explicit.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -271,25 +284,27 @@ The mean gradient is $p-\bar y$. Convert the desired probability to log-odds.
 
 ### How to write: Fit a constant probability — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
+**Inputs:**
+- A dataset contains labels $(1,1,1,0)$. For a model with one constant logit, show that $p=3/4$ is stationary and has less mean loss than $p=1/2$.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- Stationarity at the empirical class fraction and a lower mean loss than the half-probability case.
+
+**Invariants to check:**
+- Every label contributes once to the mean binary loss.
+
+**Hints:**
+- The mean gradient is $p-\bar y$. Convert the desired probability to log-odds.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Fit a constant probability (Transfer / diagnosis): The constant model matches the observed class frequency.
-ys = jnp.array(...)  # TODO: compute ys
-constant_loss = ...  # TODO: compute constant_loss
-optimum = jnp.log(...)  # TODO: compute optimum
-assert jnp.allclose(jax.grad(constant_loss)(optimum), 0.0, atol=1e-06)  # TODO: complete assertion check
-assert constant_loss(optimum)  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def practice_fit_a_constant_probability(labels):
+    """Implement the fit a constant probability check."""
+    # TODO: Evaluate the constant-logit objective and derivative at logit(log(3)) and at zero.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -321,29 +336,28 @@ The mean divides by the new observation count; the sum does not.
 
 ### How to write: Catch a reduction mistake — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
+**Inputs:**
+- Duplicate every observation. Verify that mean loss stays fixed while total loss doubles. What happens to gradients?
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- Unchanged mean loss, doubled total loss, and both gradient scales.
+
+**Invariants to check:**
+- The duplicated dataset contains two copies of each original example.
+
+**Hints:**
+- The mean divides by the new observation count; the sum does not.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Catch a reduction mistake (Transfer / diagnosis)
-zs = jnp.array(...)  # TODO: compute zs
-ys2 = jnp.array(...)  # TODO: compute ys2
-original = binary_loss(...)  # TODO: compute original
-doubled = binary_loss(...)  # TODO: compute doubled
-assert jnp.allclose(jnp.mean(original), jnp.mean(doubled))  # TODO: complete assertion check
-assert jnp.allclose(jnp.sum(doubled), 2 * jnp.sum(original))  # TODO: complete assertion check
-mean_grad = ...  # TODO: compute mean_grad
-duplicated_grad = jax.grad(...)  # TODO: compute duplicated_grad
-assert jnp.allclose(mean_grad(zs), duplicated_grad)  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+
+def practice_catch_a_reduction_mistake(labels):
+    """Implement the catch a reduction mistake check."""
+    # TODO: Duplicate every observation and compute both mean and total losses and their gradients.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -375,9 +389,17 @@ Why compute binary cross-entropy from logits?
 
 <details><summary>Answer and explanation</summary>
 
-It avoids unstable probability and logarithm intermediates
+**1. It makes all classifications correct**
+
+Numerical stability avoids overflow and cancellation. It does not guarantee that the learned decision boundary classifies every example correctly.
+
+**2. It avoids unstable probability and logarithm intermediates (correct)**
 
 A logits-based implementation can stay finite for confident mistakes even when probabilities round to zero or one. It does not fix a poor model.
+
+**3. It removes the need for held-out evaluation**
+
+A stable loss is still a training objective. You need held-out data to estimate generalization and choose model settings.
 
 </details>
 

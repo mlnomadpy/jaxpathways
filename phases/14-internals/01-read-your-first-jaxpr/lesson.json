@@ -16,7 +16,7 @@
       {
         "id": "guided-reasoning",
         "title": "Read a jaxpr as a typed computation",
-        "body": "Start at the inputs and trace one intermediate to its consumers. For a reduction, identify the consumed axes and resulting shape. Distinguish array inputs from closed constants: both can affect the output, but they enter the program differently.\n\nThen connect each primitive to the corresponding part of the original expression. A variable name in a printed jaxpr is a local label, not a stable API to test verbatim.\n\nThe intermediate-value heatmap is a numerical aid. Pair it with the typed dependency graph to explain how those values were produced. Lowering and compilation can change representation later; a primitive count alone does not predict executed kernel count or runtime.",
+        "body": "Start at the inputs and trace one intermediate to its consumers. For a reduction, identify the consumed axes and resulting shape. Distinguish array inputs from closed constants: both can affect the output, but they enter the program differently.\n\nThen connect each primitive to the corresponding part of the original expression. A variable name in a printed jaxpr is a local label, not a stable API to test verbatim.\n\nThe intermediate-value heatmap is a numerical aid. Pair it with the typed dependency graph to explain how those values were produced. Lowering and compilation can change representation later; a primitive count alone does not predict executed kernel count or runtime.\n\nThe executed trace makes the shape change visible: `add` and `mul` each return `f32[3]`, then `reduce_sum[axes=(0,)]` returns `f32[]`. For the recorded input, the scalar is 29 and `grad` returns `[4, 6, 8]`. When inspecting a trace, check the output shape at each equation before interpreting its value; this catches a mistaken reduction axis immediately.",
         "check": {
           "prompt": "Why avoid a correctness test that compares the entire printed jaxpr string?",
           "answer": "Formatting, names and primitive details can change across versions. Test intended structure where appropriate and verify numerical behavior independently."
@@ -77,7 +77,24 @@
         "prompt": "Implement four repetitions of \\(z\\leftarrow0.5z+1\\) using a fixed Python loop and scan. Print both representations and check the final result from \\(z=0\\).",
         "hint": "The exact four-step result is \\(1.875\\); scan carries a scalar.",
         "solution": "# Compare unrolled and scanned recurrences (Transfer / diagnosis): The outer scan equation has a nested body.\ndef unrolled(z):\n    for _ in range(4):\n        z = 0.5*z + 1.\n    return z\n# Define `scanned(z)` to carry state across steps with `jax.lax.scan`:\ndef scanned(z):\n    def step(carry, _):\n        new = 0.5*carry + 1.\n        return new, new\n    return jax.lax.scan(step, z, None, length=4)[0]\nprint(\"Unrolled:\", jax.make_jaxpr(unrolled)(jnp.array(0.)))\nprint(\"Scanned:\", jax.make_jaxpr(scanned)(jnp.array(0.)))\nassert jnp.allclose(unrolled(jnp.array(0.)), 1.875)\nassert jnp.allclose(scanned(jnp.array(0.)), 1.875)",
-        "explanation": "The outer scan equation has a nested body. Equal numeric results and a shorter outer list are separate from a speedup."
+        "explanation": "The outer scan equation has a nested body. Equal numeric results and a shorter outer list are separate from a speedup.",
+        "learnerStarter": {
+          "inputs": [
+            "Initial scalar state 0 and an affine recurrence applied four times."
+          ],
+          "outputs": [
+            "Unrolled and lax.scan representations and equal final states."
+          ],
+          "invariants": [
+            "Both implementations use the same number of recurrence steps.",
+            "The final value agrees with an independent scalar calculation."
+          ],
+          "hints": [
+            "Keep the unrolled Python loop static.",
+            "Return scan carry explicitly and inspect the jaxpr structures."
+          ],
+          "code": "import jax\nimport jax.numpy as jnp\n\ndef compare_recurrences(initial):\n    # TODO: express the same four updates with a static loop and lax.scan.\n    raise NotImplementedError(\"Compare unrolled and scanned recurrence representations\")"
+        }
       },
       {
         "title": "Reproduce and repair a traced boolean failure",
@@ -85,7 +102,24 @@
         "prompt": "Write a Python branch that chooses `sum(z)` or −`sum(z)` based on \\(z\\)\\([0]\\)>\\(0\\). Reproduce the make_jaxpr error, replace the branch with cond, and verify positive and negative cases.",
         "hint": "Both cond branches must return matching scalar types.",
         "solution": "# Reproduce and repair a traced boolean failure (Transfer / diagnosis)\ndef bad_branch(z):\n    if z[0] > 0:\n        return jnp.sum(z)\n    return -jnp.sum(z)\ntry:\n    jax.make_jaxpr(bad_branch)(x)\nexcept jax.errors.TracerBoolConversionError:\n    print(\"Expected failure: traced boolean used by Python if\")\nelse:\n    raise AssertionError(\"expected tracing failure\")\ndef repaired(z):\n    return jax.lax.cond(z[0] > 0, lambda v: jnp.sum(v), lambda v: -jnp.sum(v), z)\nprint(\"Repaired:\", jax.make_jaxpr(repaired)(x))\nassert jnp.allclose(jax.jit(repaired)(x), 6.)\nassert jnp.allclose(jax.jit(repaired)(-x), 6.)",
-        "explanation": "The repair makes runtime control flow explicit and verifies both branches; it does not force the input array to become static."
+        "explanation": "The repair makes runtime control flow explicit and verifies both branches; it does not force the input array to become static.",
+        "learnerStarter": {
+          "inputs": [
+            "A traced vector with positive and negative first elements."
+          ],
+          "outputs": [
+            "Captured-boolean tracing failure and a lax.cond implementation for both signs."
+          ],
+          "invariants": [
+            "The condition is a scalar traced predicate.",
+            "Both branches return compatible scalar shapes."
+          ],
+          "hints": [
+            "First reproduce Python if on a traced boolean.",
+            "Replace it with lax.cond without converting the predicate to Python."
+          ],
+          "code": "import jax\nimport jax.numpy as jnp\n\ndef repair_traced_branch(vector):\n    # TODO: demonstrate the Python-branch trace error, then use lax.cond.\n    raise NotImplementedError(\"Replace data-dependent Python control flow with lax.cond\")"
+        }
       }
     ],
     "question": "A jaxpr has more equations after grad. What can you conclude from that observation alone?",
@@ -141,10 +175,34 @@
       "title": "Follow values through the jaxpr operations",
       "kind": "executed",
       "prediction": "Which operation reduces an array to one scalar?",
-      "reading": "Columns track the three array coordinates, while rows track stages of a computation. The first row is input \\((1,2,3)\\). Adding \\(1\\) produces \\((2,3,4)\\), and multiplying those values by themselves produces \\((4,9,16)\\).\n\nFollow one column downward: the final coordinate changes from \\(3\\) to \\(4\\) to \\(16\\). Its darker bottom cell reflects a larger intermediate value, not a more expensive operation or longer runtime.",
-      "connection": "The final reduction adds the bottom row to obtain \\(4+9+16=29\\). That scalar is not another row in the heatmap because it no longer has three separate coordinates. This change of shape connects the elementwise operations to the reduction in the jaxpr.\n\nA jaxpr describes operations and abstract values. The figure supplies concrete intermediate values for this one input, making that program easier to trace by hand. Changing the input changes these numbers without necessarily changing the jaxpr’s structure.",
+      "reading": "Read columns as coordinates 0–2 and rows as the input, add-one result, and elementwise square; the cell unit is the intermediate numeric value. The rows are \\( [1,2,3] \\), \\( [2,3,4] \\), and \\( [4,9,16] \\). Coordinate 2 grows from 3 to 4 to 16, while coordinate 0 grows from 1 to 2 to 4. Shading encodes value magnitude, not cost. Predict the next operation: summing the last row removes the coordinate axis and yields scalar 29.",
+      "connection": "The trace confirms the same path: add and multiply produce shape \\( (3,) \\), and reduce-sum produces \\( () \\) with value 29. Differentiating this scalar gives \\(2(x+1)=[4,6,8]\\), as recorded by the execution output. Use the heatmap to check the primal intermediates and the derivative output to check the transformed program; neither equation count nor color predicts runtime.",
       "alt": "Follow values through the jaxpr operations. Columns track the three array coordinates, while rows track stages of a computation. The first row is input \\((1,2,3)\\). Adding \\(1\\) produces \\((2,3,4)\\), and multiplying those values by themselves produces \\((4,9,16)\\). Follow one column downward: the final coordinate changes from \\(3\\) to \\(4\\) to \\(16\\). Its darker bottom cell reflects a larger intermediate value, not a more expensive operation or longer runtime.",
       "code": "visual_data = {'kind': 'heatmap', 'values': jnp.stack([x, x + 1, (x + 1) ** 2]).tolist(), 'rows': ['input', 'add 1', 'multiply by self'], 'columns': ['coordinate 0', 'coordinate 1', 'coordinate 2'], 'unit': 'intermediate value'}"
+    },
+    "optionFeedback": [
+      "Equation counts omit fusion, scheduling and memory effects. Measure the workload before ranking runtime cost.",
+      "A jaxpr describes traced primitives. Compiler transformations and hardware execution determine kernel boundaries and timing.",
+      "One jaxpr equation need not become one hardware kernel. Inspect lowered/compiler artifacts and device traces."
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "Initial vector [1,2,3] and the original scalar offset 1.",
+        "Changed scalar offset 2 and the original/modified functions to compare."
+      ],
+      "outputs": [
+        "Hand-derived changed function value and input gradient.",
+        "jaxprs for both the original and changed-offset functions."
+      ],
+      "invariants": [
+        "Changing the offset changes constants/values while preserving the relevant traced operation structure.",
+        "The gradient is with respect to the input vector, not the scalar offset."
+      ],
+      "hints": [
+        "Trace both offset values at the same input shape.",
+        "Differentiate the changed function and compare its value flow with the original."
+      ],
+      "code": "import jax\nimport jax.numpy as jnp\n\ndef inspect_offset_function(values, original_offset=1.0, changed_offset=2.0):\n    # TODO: compare hand-derived value flow, input gradient, and both jaxprs.\n    raise NotImplementedError(\"Compare the original and changed scalar-offset traces\")"
     }
   }
 }

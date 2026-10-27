@@ -4,6 +4,8 @@ Phase 14: Autodiff & JAX internals · about 120 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [JVPs, VJPs, and higher-order derivatives](https://www.tahabouhsine.com/jaxpathways/lesson-internals-02.html).
+
 ## What you will be able to do
 
 - Implement actual custom_jvp and custom_vjp rules with correct return and residual contracts.
@@ -40,6 +42,8 @@ It can expose a rule that is incorrectly nonlinear in the sensitivity input. Mat
 ## Keep the primal stable before customizing its derivative
 
 Softplus is $s(x)=\log(1+e^x)$. Direct exponentiation overflows for a large positive input, even though the correct output is approximately $x$. logaddexp computes the same mathematical function without forming the dangerous exponential. Its derivative is the sigmoid $\sigma(x)$, and its second derivative is $\sigma(x)(1-\sigma(x))$. We use these identities as checks, not as permission to ignore the primal calculation.
+
+For the executed points $x=-4,0,3$, the custom rule’s slopes are approximately $0.017986,0.5,0.952574$, while the curvatures are $0.017663,0.25,0.045177$. The peak curvature at zero and smaller tail values give a concrete second-derivative check; comparing only one slope could miss an incorrect curvature rule. The separate extreme-value probe returns softplus(1000)=1000 while direct `log(1+exp(x))` overflows to infinity.
 
 $$
 s(x)=\log(1+e^x),\qquad s\prime(x)=\sigma(x),\qquad s\prime\prime(x)=\sigma(x)(1-\sigma(x))
@@ -253,15 +257,11 @@ Expected: Softplus derivatives at zero are 0.5 and 0.25. Stable values at [-1000
 
 ### Read the figure
 
-The upper panel plots the first derivative of the custom softplus against its scalar input. It rises smoothly from near zero to near one and passes through $0.5$ at zero. This is sensitivity, not the softplus value itself.
-
-The lower panel plots the second derivative on the same input range. It reaches $0.25$ at zero and falls to about $0.01766$ at both $-4$ and $4$. The curvature is symmetric even though the first derivative is not.
+The horizontal axis is input $x$ from $-8$ to $8$; the upper vertical axis is slope and the lower is curvature. The custom-rule curves rise from near zero to slope 0.5 and curvature 0.25 at $x=0$; curvature is symmetric and falls to about 0.01766 at $x=\pm4$. That peak is the best place in this fixture to catch a wrong curvature coefficient. In the tails, predict a slope near 0 on the left and near 1 on the right, with curvature near 0 in both.
 
 ### Connect it to the computation
 
-The plotted values come from differentiating the registered custom rule, including differentiating it twice. Independent sigmoid and sigmoid-times-one-minus-sigmoid formulas check the numerical values at named points. The high-curvature central region is useful for detecting a wrong coefficient.
-
-The separate extreme-input test reaches magnitude one thousand, beyond this display, to check overflow behavior. A smooth curve here is distinct from correctness in every transform or dtype; the VJP interface-boundary experiment and changed-size practice test other parts of the contract.
+The plotted derivatives come from differentiating the registered custom JVP rule once and twice; the execution output independently reports slopes $0.017986,0.5,0.952574$ and curvatures $0.017663,0.25,0.045177$ at $-4,0,3$. The extreme test is outside the plot: stable softplus returns 1000 at input 1000, while the naive expression returns infinity. Treat these as separate checks of smooth derivative behavior and primal stability.
 
 ```python
 grid=jnp.linspace(-8.,8.,65)
@@ -275,7 +275,7 @@ visual_data={'panels':[{'kind':'line','x':np.asarray(grid).tolist(),'xlabel':'in
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:24:14.787278+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:08:55.586330+00:00. JAX 0.9.2.
 
 ```text
 Softplus first/second: [0.01798621 0.5        0.95257413] [0.01766271 0.25       0.04517666]
@@ -352,38 +352,30 @@ Check the custom log-sum-exp gradient on $(-3,0.2,2,5)$ against an independent s
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
+**Inputs:**
+- Logits (-3, 0.2, 2, 5), explicit scalar output cotangent, and two directions.
 
-**Step-by-step implementation plan:**
-1. Exercise solution
-2. Transfer the device result to the host for an independent NumPy comparison.
-3. Accumulate the next contribution into `p`.
-4. Transfer the device result to the host for an independent NumPy comparison.
+**Outputs:**
+- Custom-gradient result, stable softmax reference, and centered directional differences.
+
+**Invariants to check:**
+- The custom gradient scales by the explicit cotangent.
+- Softmax reference is stable under large logits.
+
+**Hints:**
+- Subtract the maximum before exponentiating.
+- Use the same cotangent for autodiff and independent directional checks.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-changed = jnp.array(...)  # TODO: compute changed
-# Transfer the device result to the host for an independent NumPy comparison.
-# Accumulate the next contribution into `p`.
-host = np.asarray(...)  # TODO: compute host
-p = np.exp(...)  # TODO: compute p
-p/=p.sum()
-actual = jax.grad(...)  # TODO: compute actual
-np.testing.assert_allclose(actual,p,rtol = ...  # TODO: compute np.testing.assert_allclose(actual,p,rtol
-for direction in (np.array([1.,-.5,.2,0.]),np.array([0.,1.,-1.,.3])):
-    eps = ...  # TODO: compute eps
-    reference = ...  # TODO: compute reference
-    fd = ...  # TODO: compute fd
-    # Transfer the device result to the host for an independent NumPy comparison.
-    np.testing.assert_allclose(np.dot(np.asarray(actual),direction),fd,rtol = ...  # TODO: compute np.testing.assert_allclose(np.dot(np.asarray(actual),direction),fd,rtol
-np.testing.assert_allclose(jax.vjp(stable_logsumexp,changed)[1](2.5)[0],2.5*p,rtol=1e-12)
-print("Changed-size gradient and cotangent scaling verified")
+import numpy as np
+import jax
+import jax.numpy as jnp
+
+def check_custom_logsumexp(logits, cotangent, directions, epsilon):
+    # TODO: compare custom VJP with stable softmax and directional differences.
+    raise NotImplementedError("Audit the explicit cotangent and two independent directions")
 ```
 
 <details><summary>Reference solution</summary>
@@ -424,26 +416,29 @@ Use stable references and avoid direct exponentiation of the shifted logits.
 
 ### How to write: Check common-shift invariance of curvature — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
-- `jax.jvp / jax.vjp / jax.jacfwd / jax.hessian` — Computes JVPs, VJPs, Jacobians or Hessians by differentiating the implemented operations. Results still have floating-point error.
+**Inputs:**
+- A stable log-sum-exp custom derivative, a logit vector, and a common shift of 1000.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- Value shift, gradient comparison, and Hessian row sums before/after shift.
+
+**Invariants to check:**
+- The value increases by the common shift.
+- Gradient stays invariant and Hessian has near-zero row sums.
+
+**Hints:**
+- Use centered logits for numerical stability.
+- Compute Hessian row sums from derivatives, not from a stored expected answer.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Check common-shift invariance of curvature (Practice): The common shift leaves probabilities unchanged.
-shift = ...  # TODO: compute shift
-np.testing.assert_allclose(stable_logsumexp(x+shift)-stable_logsumexp(x),shift,rtol=1e-12)
-np.testing.assert_allclose(jax.grad(stable_logsumexp)(x+shift),jax.grad(stable_logsumexp)(x),rtol=1e-12)
-hess = jax.jacrev(...)  # TODO: compute hess
-np.testing.assert_allclose(jnp.sum(hess,axis = ...  # TODO: compute np.testing.assert_allclose(jnp.sum(hess,axis
-print("Stable shift invariance and zero common-direction curvature verified")
+import jax
+import jax.numpy as jnp
+
+def check_shift_curvature(logsumexp, logits, shift):
+    # TODO: compare values, gradients, and Hessian row sums under a common shift.
+    raise NotImplementedError("Check shift invariance of first and second derivatives")
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -476,24 +471,28 @@ At fixed x, compare the response to twice a tangent with twice the response.
 
 ### How to write: Audit a nonlinear seed rule before registering it — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.jvp / jax.vjp / jax.jacfwd / jax.hessian` — Computes JVPs, VJPs, Jacobians or Hessians by differentiating the implemented operations. Results still have floating-point error.
+**Inputs:**
+- A proposed JVP rule returning sigmoid(x)*dx**2 and a repaired tangent-linear rule.
 
-**Step-by-step implementation plan:**
-1. Audit a nonlinear seed rule before registering it (Challenge)
+**Outputs:**
+- A mixed-seed counterexample to additivity and a repaired-rule check.
+
+**Invariants to check:**
+- A derivative is linear in the tangent at fixed primal input.
+- The repaired rule passes mixed linear-combination checks.
+
+**Hints:**
+- Compare the rule at dx1, dx2, and dx1+dx2.
+- Keep the primal input fixed in each additivity test.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Audit a nonlinear seed rule before registering it (Challenge)
-coefficient = float(...)  # TODO: compute coefficient
-bad = ...  # TODO: compute bad
-assert not np.isclose(bad(2.0),2*bad(1.0))  # TODO: complete assertion check
-good = ...  # TODO: compute good
-np.testing.assert_allclose(good(2*.7-.3),2*good(.7)-good(.3),rtol=1e-12)
-print("Nonlinear seed rule rejected by its contract; repaired JVP is linear")
+import jax.numpy as jnp
+
+def audit_jvp_rule(primal, dx1, dx2):
+    # TODO: expose nonlinearity in the proposed seed rule, then repair it.
+    raise NotImplementedError("Require additivity and homogeneity in every tangent seed")
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -522,9 +521,17 @@ A custom derivative is linear in its tangent and returns finite values. What add
 
 <details><summary>Answer and explanation</summary>
 
-Agreement with the actual primal derivative through an independent derivation or numerical check.
+**1. Agreement with the actual primal derivative through an independent derivation or numerical check. (correct)**
 
 Linearity is necessary, but a wrong constant multiple of the true derivative is also linear and finite. Independent comparisons establish the missing mathematical agreement.
+
+**2. A larger batch size so its bars look smoother.**
+
+A bigger batch does not supply an independent derivative reference. Compare the custom rule against the intended primal function.
+
+**3. No additional evidence: linearity guarantees the coefficient is correct.**
+
+Many wrong derivative rules are linear and finite. Test against an analytic derivative or a carefully chosen finite difference.
 
 </details>
 

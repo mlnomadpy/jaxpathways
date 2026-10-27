@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "rl-02",
-  "contentHash": "eed062567019977867672fc990722e1e7684c5333282bd5509dad37ca67d46c8",
-  "rendererHash": "a1bd5b648f4731ae5d5f0a24811c2540d1a0a132149ce589d17c4113509cbedf",
+  "contentHash": "7b528ad51529dfe46002c1ed073ccc425ff35a90356227790a35c54d7c30a6c1",
+  "rendererHash": "17e3bbad72ee4c43425845aaee76b86b85e84750551278be03d8c16842f4dc63",
   "kind": "executed",
-  "generatedAt": "2026-10-20T22:28:56.822404+00:00",
+  "generatedAt": "2026-10-27T17:11:03.526514+00:00",
   "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",
@@ -47,7 +47,7 @@
   "diagram": {
     "title": "A terminal transition still counts",
     "prediction": "Should every cell after the first done flag be treated identically to the transition that caused done?",
-    "reading": "Each row is one environment. A terminating transition can still earn reward; later cells are padding under this absorbing-state contract. Tensor length stays fixed while activity changes. This is a conceptual rollout example, not an auto-reset implementation.",
+    "reading": "Read each table row as an environment and each column as a transition in time. `active \u2192 terminal + reward \u2192 padding` shows that the ending transition is still data; later cells are fixed-shape padding. Row C stays active through the displayed window. Predict what would be lost if masking used the next state's `done` flag: the transition carrying the goal reward would disappear. This is absorbing padding, not an auto-reset stream.",
     "alt": "Each row is one environment. A terminating transition can still earn reward; later cells are padding under this absorbing-state contract. Tensor length stays fixed while activity changes. This is a conceptual rollout example, not an auto-reset implementation.",
     "scope": "Architecture and dataflow mechanism diagram.",
     "height": 4.1,

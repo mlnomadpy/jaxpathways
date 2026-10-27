@@ -4,7 +4,7 @@ Copy this template into your own portfolio and fill it after running your modifi
 
 ## Evidence required
 
-Keep the JSON runtime receipt (observed_backend, device_count, pmap_sum_of_squares, receipt_sha256) and the 1-chip vs 4-chip vs 8-chip pmap reference values.
+Keep arithmetic_ok, expected_backend_ok, expected_topology_ok, requested_target_ready, expected/observed backend and counts, source identity or its explicit absence, observed/expected reduction and receipt digest. Separate calculated 4-/8-device expectations from observed execution and require the gated target preflight to fail closed.
 
 - Command: `python3 phases/19-tpu/02-bootstrap-venv-and-verify-tpu-runtime-receipt/code/main.py`
 - Working directory: Repository root

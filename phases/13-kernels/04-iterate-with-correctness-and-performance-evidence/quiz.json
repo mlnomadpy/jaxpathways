@@ -11,7 +11,12 @@
         "Implementation correctness passed for the declared precision policy; the separate representation gap must still be reported."
       ],
       "correct": 2,
-      "explanation": "The references answer different questions. Correct execution of a low-precision contract does not imply identical values to a higher-precision dataset."
+      "explanation": "The references answer different questions. Correct execution of a low-precision contract does not imply identical values to a higher-precision dataset.",
+      "optionFeedback": [
+        "First compare against an oracle using the same represented operands. Error from casting the original FP32 inputs is a separate numerical budget.",
+        "Numerical agreement says nothing about TPU throughput. Native lowering and target timing need separate evidence.",
+        "The references answer different questions. Correct execution of a low-precision contract does not imply identical values to a higher-precision dataset."
+      ]
     }
   ]
 }

@@ -18,7 +18,7 @@ Learn JAX through a shared course, then follow the work you want to do.
 Then build **models → data and recovery → Transformers → performance**, or branch into scientific computing, probabilistic modeling, RL, distributed systems, kernels, internals, inference, or operations. Each route maps its prerequisites, project and synthesis assessment. Registered projects provide staged practice across foundations, research domains, model training, deployment and systems work.
 
 <!-- COURSE-STATUS:START -->
-Current registry: **22 phases, 103 authored lessons, 10 pathways, 7 career routes, 31 registered practice projects, 11 synthesis assessments, and 10 planned model-lifecycle capstones.** Read the [curriculum](CURRICULUM.md) and [current status](docs/course-status.md) for scope and evidence boundaries.
+Current registry: **22 phases, 104 authored lessons, 10 pathways, 7 career routes, 31 registered practice projects, 11 synthesis assessments, and 10 planned model-lifecycle capstones.** Read the [curriculum](CURRICULUM.md) and [current status](docs/course-status.md) for scope and evidence boundaries.
 <!-- COURSE-STATUS:END -->
 
 The [whole-content audit](docs/content-audit.md) and source-bound execution receipts distinguish authored material, numerical checks and review status.

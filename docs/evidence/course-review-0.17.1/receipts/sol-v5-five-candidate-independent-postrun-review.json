@@ -1,0 +1,112 @@
+{
+  "actualExposure": {
+    "actor": 6,
+    "critic": 6,
+    "outer": 3,
+    "reward": 20
+  },
+  "candidateResults": [
+    {
+      "candidateSha256": "02503c4b04cbf4a4bd026a2df830c7db9ad419bad89eaff1bc0328f52cc80849",
+      "eos": 2,
+      "evidenceSha256": "ebc1b86af522a6041865bcc9a5ff734d6bed551ad5637575eb5c08e02c2a72f1",
+      "id": "completed-six-positive",
+      "maxRawObjectiveError": {
+        "advantage": 1.462101938132232e-08,
+        "critic": 4.2824747957873055e-10,
+        "delta": 5.215406426173352e-09,
+        "policy": 9.542102830106813e-09,
+        "target": 1.462101938132232e-08
+      },
+      "padding": 2,
+      "qualityScored": false,
+      "result": "pass",
+      "timeouts": 1,
+      "validActions": 10
+    },
+    {
+      "candidateSha256": "5499d91e0ffd721472932f9d694dcf56dc4a5691aa014541c785ae5e826a235f",
+      "eos": 2,
+      "evidenceSha256": "a886b932f42bfe08fc75b6b5374ef99f135dba39083d45418fd8e25d95f0beb0",
+      "id": "alternate-spelling-positive",
+      "maxRawObjectiveError": {
+        "advantage": 1.462101938132232e-08,
+        "critic": 4.2824747957873055e-10,
+        "delta": 5.215406426173352e-09,
+        "policy": 9.542102830106813e-09,
+        "target": 1.462101938132232e-08
+      },
+      "padding": 2,
+      "qualityScored": false,
+      "result": "pass",
+      "timeouts": 1,
+      "validActions": 10
+    },
+    {
+      "actualExposure": {
+        "actorOptimizerSteps": 0,
+        "criticOptimizerSteps": 0,
+        "outerUpdates": 0,
+        "qualityScored": false,
+        "rewardFitOptimizerSteps": 4,
+        "trainingRollouts": 0
+      },
+      "candidateSha256": "1b29533b39f4c01f0d3e04b362c423abfac39659c1365c92147e4f9b60b095db",
+      "id": "unchanged-train-negative",
+      "rejection": "AssertionError: learner candidate did not use exactly one outer update and both frozen-target epochs",
+      "result": "rejected-as-expected",
+      "stderrSha256": "6de94b0a9fd6ec8d6ea7d320fa184eec770c75e4ac428183865a85d90735a1fa"
+    },
+    {
+      "actualExposure": {
+        "actorOptimizerSteps": 0,
+        "criticOptimizerSteps": 0,
+        "outerUpdates": 0,
+        "qualityScored": false,
+        "rewardFitOptimizerSteps": 4,
+        "trainingRollouts": 0
+      },
+      "candidateSha256": "4111af91275a1c0d15f6048fc9bfb582625cd777983019e7d14eea2649ad7c2f",
+      "id": "wrong-reward-rate-negative",
+      "rejection": "AssertionError: reward head does not match the independently reconstructed four-step Adam fit",
+      "result": "rejected-as-expected",
+      "stderrSha256": "51a178073cacb8c388d5a9917ae808e9af7e4981687595e7b40e8776dcb4157f"
+    },
+    {
+      "actualExposure": {
+        "actorOptimizerSteps": 2,
+        "criticOptimizerSteps": 2,
+        "innerEpochs": 2,
+        "outerUpdates": 1,
+        "qualityScored": false,
+        "rewardFitOptimizerSteps": 4,
+        "trainPrompts": [
+          0,
+          1,
+          2
+        ],
+        "trainingRolloutBatches": 1,
+        "validActionTraceRetained": false
+      },
+      "candidateSha256": "a3d28424ccbcb8bbc64a5d944878f51fe9f1fd96c38885269371e5a66bf4048a",
+      "id": "wrong-actor-update-negative",
+      "rejection": "AssertionError: recorded post-update actor logps differ from the independent decoder replay",
+      "result": "rejected-as-expected",
+      "stderrSha256": "6acdaa87d5c6e75eb80fce73c67c50d64d2ed8d6c35b383bca3bf44b84d2d198"
+    }
+  ],
+  "freezeManifestSha256": "13864993bb881d4dc0f454c2f48d5517d4c22c7fbe5caabe4e7866085d836b74",
+  "heldoutQualityScores": 0,
+  "kind": "sol-transformer-lineage-v5-five-candidate-independent-postrun-review",
+  "limitations": [
+    "Only synthetic one-update learner mechanics in old exact ZIP, not heldout quality or campaign retry.",
+    "Final documentation-reconciled ZIP is a distinct artifact requiring exact member-delta and extracted non-run checks.",
+    "Completed-six is scaffold sufficiency proof, not independent learner authorship.",
+    "Negative cases stop before positive evidence writer; raw stderr and absent output files retained."
+  ],
+  "mechanicsApprovalSha256": "72ecd919095e2fcc4bc095afee6f27a74571ba61aa1a56ae7c9ca442399c3c48",
+  "preRunReviewSha256": "ec8a8f4e648b93808871c7c54e5f64f50d04a4eaedffb7b24d315b06a7486442",
+  "status": "accepted-bounded-learner-mechanics",
+  "workerReceiptSha256": "7aff09ad5cc50d770a22804316003bf8f3890b052b1f23a0982b128d6477ba6f",
+  "zipSha256": "3de18328abfc8499f6c2c785aae39d075a48fe01325e9aa7feff31ed408fcb30"
+}

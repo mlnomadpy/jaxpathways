@@ -15,7 +15,7 @@
       {
         "id": "guided-reasoning",
         "title": "Differentiate the computation you actually executed",
-        "body": "For \\(y'=-ay\\), Euler gives \\(y_N=(1-ah)^N y_0\\), where \\(h\\) is step size and \\(N\\) is step count. Differentiating that expression gives \\(-Nh(1-ah)^{N-1}y_0\\). The continuous derivative at time \\(T=Nh\\) is instead \\(-Ty_0e^{-aT}\\).\n\nThese expressions give two distinct references: one checks differentiation through the discrete steps, and the other measures convergence toward the continuous sensitivity. Hold final time fixed as you refine the grid.\n\nIn the sensitivity plot, disagreement with the continuous answer can be discretization error even when autodiff is correct. Compare the discrete analytic derivative first, then inspect refinement behavior.",
+        "body": "For the executed RK4 example, the final state is \\(u_0R(-kh)^N\\), where \\(R\\) is the fourth-order step polynomial and \\(T=Nh=2\\) seconds. Differentiating this discrete expression gives the sensitivity of the calculation that actually ran. The continuous model's sensitivity is instead \\(-Tu_0e^{-kT}\\), a different reference at finite step size.\n\nJAX gives \\(-0.9863878097\\); the independently differentiated RK4 expression agrees to float64 roundoff, while the continuous derivative is \\(-0.9863878558\\). That small difference is solver bias, not autodiff failure. Hold the two-second horizon fixed while refining, then check whether the discrete sensitivity approaches the continuous one.",
         "check": {
           "prompt": "Which reference isolates an autodiff implementation error from solver approximation error?",
           "answer": "The derivative of the same discrete update rule. The continuous sensitivity is valuable for convergence, but includes the effect of discretization."
@@ -42,6 +42,15 @@
       {
         "title": "Know which solver problem you have solved",
         "body": "The grid is fixed and the output length is static. We have not implemented adaptive error control, event handling, stiffness detection or a custom adjoint. A Python integer controls scan length; a parameter-dependent early exit would introduce a different differentiation problem. For richer systems, Diffrax exposes solver choice, tolerances, saved times and adjoint strategies. Its optional extension belongs in a separately pinned and executed environment; these core CPU checks do not validate that library or an adaptive solver."
+      },
+      {
+        "title": "Optional extension: adaptive ODE sensitivities",
+        "body": "The project extension solves a forced decay equation with an adaptive Diffrax solver and saves values at requested observation times. Its closed-form solution is \\(y(t)=\\cos t+(y_0-1)e^{-kt}\\), so the continuous log-rate sensitivity is \\(\\partial y/\\partial\\log k=-kt(y_0-1)e^{-kt}\\). Reverse-mode autodiff through an adaptive solve differentiates the numerical computation; compare it with the continuous derivative at more than one tolerance. Diffrax defaults to RecursiveCheckpointAdjoint, which supports reverse-mode differentiation; use ForwardMode explicitly for forward-mode JVPs.",
+        "math": "y\\prime=-k(y-\\cos t)-\\sin t,\\qquad y(t)=\\cos t+(y_0-1)e^{-kt},\\qquad \\frac{\\partial y}{\\partial\\log k}=-kt(y_0-1)e^{-kt}",
+        "check": {
+          "prompt": "What changes when you tighten the adaptive solver tolerance?",
+          "answer": "The sensitivity of the executed numerical solve can approach the continuous derivative as numerical error decreases, but finite tolerances and adaptive step choices still affect the computed derivative."
+        }
       }
     ],
     "experiments": [
@@ -69,7 +78,24 @@
         "hint": "Weights change the observation importance and must be normalized explicitly.",
         "solution": "# Weight observations without losing normalization (Practice)\nweights=np.linspace(0.2,2.0,41)\ndef weighted_objective(k):\n    residual=solve(k,jnp.array(2.0))-observations\n    return jnp.sum(jnp.asarray(weights)*residual**2)/np.sum(weights)\nk=1.0\nh=0.05\nn=np.arange(41)\nz=-k*h\nr=1+z+z*z/2+z**3/6+z**4/24\ndr=-h*(1+z+z*z/2+z**3/6)\nu=2*r**n\nsensitivity=2*n*r**np.maximum(n-1,0)*dr\nreference=np.sum(2*weights*(u-np.asarray(observations))*sensitivity)/weights.sum()\nnp.testing.assert_allclose(jax.grad(weighted_objective)(k),reference,rtol=1e-11,atol=1e-12)\nprint(\"Weighted derivative reference:\",reference)",
         "explanation": "The independent expression checks reduction normalization and the derivative at every saved time, rather than only the endpoint.",
-        "title": "Weight observations without losing normalization"
+        "title": "Weight observations without losing normalization",
+        "learnerStarter": {
+          "inputs": [
+            "Observation times, weights emphasizing later observations, initial value, and a rate parameter."
+          ],
+          "outputs": [
+            "Weighted observation-loss gradient and an independent NumPy chain-rule value."
+          ],
+          "invariants": [
+            "Normalization uses the sum of observation weights.",
+            "The independent path differentiates the RK4 polynomial rather than calling JAX autodiff."
+          ],
+          "hints": [
+            "Write the weighted residual loss explicitly.",
+            "Propagate a scalar derivative through each RK4 stage in the reference calculation."
+          ],
+          "code": "import numpy as np\nimport jax\nimport jax.numpy as jnp\n\ndef weighted_loss_gradient(times, observations, weights, initial, rate):\n    # TODO: define the weighted loss and build an independent RK4 derivative check.\n    raise NotImplementedError(\"Preserve weighted-loss normalization and independent derivative check\")"
+        }
       },
       {
         "difficulty": "Challenge",
@@ -77,7 +103,56 @@
         "hint": "stop_gradient preserves values but removes their derivative.",
         "solution": "# Diagnose a detached backward path (Challenge): A plausible forward curve does not validate backward behavior.\ndef detached_objective(k):\n    prediction=jax.lax.stop_gradient(solve(k,jnp.array(2.0)))\n    return jnp.mean((prediction-observations)**2)\nassert float(jax.grad(detached_objective)(1.0)) == 0.0\nfd=(float(detached_objective(1.0001))-float(detached_objective(0.9999)))/0.0002\nassert abs(fd)>1e-3\nprint(\"Detached autodiff is zero; actual value sensitivity:\",fd)",
         "explanation": "A plausible forward curve does not validate backward behavior. Remove an unintended gradient barrier and repeat the independent check.",
-        "title": "Diagnose a detached backward path"
+        "title": "Diagnose a detached backward path",
+        "learnerStarter": {
+          "inputs": [
+            "The decay solver, observations generated for initial value 2.0, and scalar rate parameter.",
+            "A differentiable objective and the same objective with its simulated prediction detached.",
+            "Parameter point 1.0 and centered finite-difference step 1e-4."
+          ],
+          "outputs": [
+            "Autodiff gradients for attached and detached objectives.",
+            "Centered finite-difference estimate exposing the detached-path error."
+          ],
+          "invariants": [
+            "The detached autodiff path can be zero while the objective value still changes with the parameter.",
+            "Centered finite differences use the same held observations and initial state."
+          ],
+          "hints": [
+            "Keep the forward objective identical and detach only its simulated prediction in the intentionally broken variant.",
+            "Compare autodiff with a centered difference around the stated parameter."
+          ],
+          "code": "import jax\nimport jax.numpy as jnp\n\ndef diagnose_detached_path(solve, observations, parameter=1.0, initial=2.0, epsilon=1e-4):\n    # TODO: compare attached and detached autodiff with a centered difference.\n    raise NotImplementedError(\"Find the gradient path severed by stop_gradient\")"
+        }
+      },
+      {
+        "difficulty": "Optional extension",
+        "title": "Check adaptive log-rate sensitivity at multiple tolerances",
+        "prompt": "In the isolated Diffrax environment, evaluate the numerical derivative with respect to $\\log k$ at $k=1.1$, $y_0=2.4$, and the stated observation grid. Compare all requested tolerances with the continuous derivative and a centered finite difference. Explain why agreement can improve as tolerances tighten without making the finite-tolerance solve identical to the continuous system.",
+        "hint": "The chain rule gives $\\partial y/\\partial\\log k=k\\,\\partial y/\\partial k$. Differentiate the numerical solve at each tolerance; compute the analytic reference from the closed form, not from another solver call.",
+        "solution": "import numpy as np\n\ndef compare_adaptive_sensitivities(log_rate_sensitivity, solve_forced_decay, rate, initial, times, tolerances):\n    times = np.asarray(times, dtype=np.float64)\n    if times.ndim != 1 or not np.isfinite(times).all():\n        raise ValueError(\"times must be a finite vector starting at zero\")\n    analytic = -rate * times * (initial - 1.0) * np.exp(-rate * times)\n    epsilon = 2e-5\n    results = {}\n    for tolerance in tolerances:\n        values = np.asarray(log_rate_sensitivity(\n            np.log(rate), initial, times, rtol=tolerance, atol=tolerance * 1e-2\n        ))\n        plus = solve_forced_decay(\n            rate * np.exp(epsilon), initial, times, rtol=tolerance, atol=tolerance * 1e-2\n        )\n        minus = solve_forced_decay(\n            rate * np.exp(-epsilon), initial, times, rtol=tolerance, atol=tolerance * 1e-2\n        )\n        if not plus[\"success\"] or not minus[\"success\"]:\n            raise RuntimeError(\"finite-difference solve failed\")\n        finite_difference = (plus[\"values\"] - minus[\"values\"]) / (2.0 * epsilon)\n        if values.shape != times.shape or not np.isfinite(values).all():\n            raise ValueError(\"sensitivity API returned invalid values\")\n        results[float(tolerance)] = {\n            \"values\": values,\n            \"continuous_max_error\": float(np.max(np.abs(values - analytic))),\n            \"finite_difference_max_error\": float(np.max(np.abs(values - finite_difference))),\n        }\n    return {\"analytic\": analytic, \"by_tolerance\": results}\n",
+        "explanation": "This extension uses adaptive Diffrax and requires its separate pinned environment. It does not change the fixed-grid RK4 contract or install packages into the course CPU environment.",
+        "learnerStarter": {
+          "inputs": [
+            "Rate 1.1, initial state 2.4, observation times from 0 to 2, and tolerances 1e-5, 1e-8, and 1e-10.",
+            "The optional project API `log_rate_sensitivity(log_rate, initial, times, solver, rtol, atol)`.",
+            "The optional project API `solve_forced_decay(rate, initial, times, solver, rtol, atol)` for numerical centered differences."
+          ],
+          "outputs": [
+            "Numerical dy/dlog(k) at each requested time for every tolerance.",
+            "Maximum error against the continuous derivative and centered finite difference for each tolerance."
+          ],
+          "invariants": [
+            "The differentiated parameter is log(k), so the positive rate equals exp(log_rate).",
+            "All evaluations return one finite sensitivity per requested time in the input order.",
+            "The continuous reference is -k*t*(y0-1)*exp(-k*t) and is calculated independently of Diffrax."
+          ],
+          "hints": [
+            "Use the same observation grid for all tolerance settings.",
+            "Use a symmetric perturbation in log(k) for the finite-difference check."
+          ],
+          "code": "import numpy as np\n\ndef compare_adaptive_sensitivities(log_rate_sensitivity, solve_forced_decay, rate, initial, times, tolerances):\n    # TODO: evaluate the submitted sensitivity API and compare with independent references.\n    raise NotImplementedError(\"Compare numerical and continuous log-rate sensitivities\")"
+        }
       }
     ],
     "diagnosis": "If the analytic continuous derivative differs from autodiff, first compare with the discrete polynomial derivative. If only the continuous comparison fails, refine the grid. If a finite difference is nonzero but autodiff is zero, inspect stop_gradient or host conversions. If changing the step count also changes the horizon, repair the experiment before interpreting convergence.",
@@ -93,8 +168,8 @@
       "title": "A solver gradient converges toward the physical sensitivity",
       "kind": "executed",
       "prediction": "How much should the gradient error fall when a fourth-order method doubles its steps?",
-      "reading": "The horizontal axis shows the number of updates over the same two-second horizon. The vertical axis is absolute error in the endpoint derivative with respect to rate, on a logarithmic scale. A lower point means closer agreement with the exact continuous derivative, not a smaller temperature or lower training loss.\n\nWith five steps the error is about \\(2.449\\times10^{-4}\\). At ten, twenty and forty steps it is about \\(1.319\\times10^{-5}\\), \\(7.654\\times10^{-7}\\) and \\(4.609\\times10^{-8}\\). The final doubling improves agreement by about \\(16.6\\), consistent with fourth-order convergence in this range.",
-      "connection": "The plotted derivatives come from JAX differentiating scan. The reference is the independently derived continuous sensitivity \\(-tu_0e^{-kt}\\). A separate polynomial check verifies the derivative of the discrete RK4 program to much tighter tolerance.\n\nThe downward trend does not prove convergence for a stiff or discontinuous system, and it cannot continue indefinitely at fixed precision. It shows why checking only autodiff against another differentiation of the same program would miss solver bias.",
+      "reading": "The horizontal axis is the number of RK4 updates over a fixed two-second horizon. The vertical axis is absolute endpoint derivative error relative to the exact continuous sensitivity, in excess-temperature units per rate unit, on a logarithmic scale. The plotted errors fall from about \\(2.449\\times10^{-4}\\) at 5 steps to \\(4.609\\times10^{-8}\\) at 40 steps; the last doubling improves the error by about 16.6 times, consistent with fourth-order behavior over this range.",
+      "connection": "The plotted derivative is JAX autodiff through the discrete `scan`; the reference is \\(-tu_0e^{-kt}\\) for the continuous cooling equation. A separate polynomial oracle checks that autodiff differentiated the RK4 computation correctly. If we compared only against that discrete oracle, we would validate differentiation but miss physical-sensitivity bias; if the system were stiff or the precision fixed at a coarser value, this refinement trend need not continue.",
       "alt": "Derivative error decreases rapidly as the fixed-horizon RK4 grid is refined from five to forty steps.",
       "code": "counts=[5,10,20,40]\nerrors=[abs(float(jax.grad(lambda k: solve(k,jnp.array(2.0),n,2.0/n)[-1])(0.7))+4*np.exp(-1.4)) for n in counts]\nvisual_data={'kind':'line','x':counts,'xlabel':'RK4 steps over two seconds','ylabel':'absolute endpoint sensitivity error','yscale':'log','series':[{'label':'autodiff versus continuous derivative','y':errors}]}"
     },
@@ -135,6 +210,14 @@
       {
         "title": "Diffrax solver terms, saved values and solution inspection",
         "url": "https://docs.kidger.site/diffrax/usage/getting-started/"
+      },
+      {
+        "title": "Diffrax solver choice: Tsit5 for nonstiff systems; Kvaerno methods for stiff systems",
+        "url": "https://docs.kidger.site/diffrax/usage/how-to-choose-a-solver/"
+      },
+      {
+        "title": "Diffrax adjoints: reverse-mode and forward-mode choices",
+        "url": "https://docs.kidger.site/diffrax/api/adjoints/"
       }
     ],
     "takeaways": [
@@ -144,6 +227,30 @@
       "Use a finite-difference window, not one magical epsilon",
       "Know which solver problem you have solved"
     ],
-    "output": "Endpoint autodiff approximately -0.9863878097; continuous reference approximately -0.9863878558. The loss gradient agrees with central differences and decreases the loss when subtracted."
+    "output": "Endpoint autodiff approximately -0.9863878097; continuous reference approximately -0.9863878558. The loss gradient agrees with central differences and decreases the loss when subtracted.",
+    "optionFeedback": [
+      "A nonzero derivative can be correct for the discretized computation. Compare it with that computation’s independent derivative.",
+      "The implementation derivative is consistent with the executed solver. A fixed-horizon refinement study tests whether its discretization bias is becoming small enough.",
+      "Changing the optimizer does not reduce the solver’s time-discretization error. Refine the time grid while holding the horizon fixed."
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "RK4 endpoint solver, initial value 3.0, rate 0.4, and the lesson final time."
+      ],
+      "outputs": [
+        "Endpoint derivatives with respect to rate and initial value.",
+        "An analytic continuous-time comparison for both sensitivities."
+      ],
+      "invariants": [
+        "The rate derivative matches -t*u0*exp(-rate*t) within numerical tolerance.",
+        "The initial-value derivative matches exp(-rate*t).",
+        "Derivatives are taken through the discrete solver before comparison with the continuous reference."
+      ],
+      "hints": [
+        "Differentiate the actual discrete endpoint with respect to each input separately.",
+        "Use the same final time in the two analytic sensitivity formulas."
+      ],
+      "code": "import numpy as np\nimport jax\nimport jax.numpy as jnp\n\ndef endpoint_sensitivities(solve_endpoint, final_time, initial=3.0, rate=0.4):\n    # TODO: differentiate the discrete endpoint with respect to both inputs.\n    # Compare each result with its continuous-time sensitivity.\n    raise NotImplementedError(\"Check rate and initial-state endpoint sensitivities\")"
+    }
   }
 }

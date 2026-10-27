@@ -4,6 +4,8 @@ Phase 15: Deployment, interoperability & edge AI · about 110 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Convert PyTorch weights to Flax and locate numerical errors](https://www.tahabouhsine.com/jaxpathways/lesson-deployment-08.html).
+
 ## What you will be able to do
 
 - Serialize and reload a fixed-shape JAX inference computation.
@@ -26,6 +28,8 @@ Serialize, load the file again and call the restored computation on new inputs. 
 
 If preprocessing lives outside the export, version it alongside the model. A correct graph can still return wrong application results when the caller normalizes inputs differently. A local round trip does not automatically qualify another runtime, hardware target or version.
 
+The recorded direct and restored artifact outputs are $(3.1,-0.45)$ for the same float32 request. Comparing coordinates separately matters: an aggregate norm could hide a sign or score swap. Keep one hand-calculated input as a readable oracle, then test a changed valid input and an invalid shape to identify whether the failure is numerical or contractual.
+
 $$
 \hat{y}_{\text{deserialized}}(x) = \hat{y}_{\text{eager}}(x), \qquad \forall x \in \mathcal{D}_{\text{canary}}
 $$
@@ -38,7 +42,7 @@ $$
 
 *Architecture and dataflow mechanism diagram.*
 
-Read top to bottom from the raw request to the response. Each row has a distinct contract and a distinct failure. The exported computation handles the numeric call; request fields, artifact identity and response meaning require surrounding checks. The fresh-process experiment exercises loading and calling under the installed CPU runtime.
+Follow the flow from validated raw request through preprocessing and artifact loading to the numeric call and encoded response. The exported object proves only its graph/signature boundary; the wrapper owns request validation and response meaning. The recorded fresh process reloads the bytes and reproduces $ (3.1,-0.45)$, while the $ (2,3)$ shape is rejected. To extend the claim, retain evidence for every new runtime boundary.
 
 ### Pause and reason
 
@@ -179,15 +183,11 @@ Expected: The serialized artifact reloads and returns $[3.1, -0.45]$. File size 
 
 ### Read the figure
 
-Each category is one output score. The paired bars compare the direct computation with the restored serialized artifact on the same input. Both give approximately $3.1$ for score $0$ and $-0.45$ for score $1$.
-
-The matching heights show numerical agreement. The bars are adjacent, rather than one line hiding another. A negative second score is valid because these are raw outputs, not probabilities constrained to lie between zero and one.
+The horizontal axis lists score 0 and score 1; the vertical unit is raw output score. Direct execution and restored bytes overlap at about 3.1 and $-0.45$, respectively. The negative score is valid because these are unconstrained outputs, not probabilities. Agreement establishes this artifact’s numerical round trip on the declared $ (1,3)$ float32 signature; next try the known changed request and confirm a $ (2,3)$ input is rejected.
 
 ### Connect it to the computation
 
-This is the first behavior to check after serialization: does the restored computation preserve the result within the declared tolerance? The figure makes a coordinate-by-coordinate mismatch visible instead of reducing all outputs to one aggregate number.
-
-The example exports a specific float32 input signature with shape $(1,3)$. Agreement for this case is separate from acceptance of arbitrary shapes or support in every serving runtime. Keep the signature and input preprocessing with the artifact, then expand parity checks to the cases your application actually needs.
+Both bars share exact displayed values: 3.0999999 and $-0.45000005$ for direct and restored calls. That coordinate check is the first behavior to verify after serialization. The execution also rejects an incompatible shape and reloads bytes in a fresh interpreter. These checks establish the installed CPU runtime and fixed signature, not another runtime, accelerator or dynamic batch contract.
 
 ```python
 # Transfer the device result to the host for an independent NumPy comparison.
@@ -197,7 +197,7 @@ visual_data = {'kind': 'bar', 'labels': ['score 0', 'score 1'], 'ylabel': 'outpu
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:24:42.546071+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:09:38.856642+00:00. JAX 0.9.2.
 
 ```text
 Verified serialized bytes: 1172
@@ -267,21 +267,27 @@ Verify a new input $[-2, 0, 3]$ against an independent NumPy expression.
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- The exported computation and the new input vector [-2, 0, 3].
 
-**Step-by-step implementation plan:**
-1. Transfer the device result to the host for an independent NumPy comparison.
+**Outputs:**
+- The exported result and an independent NumPy result for the same input.
+
+**Invariants to check:**
+- The fresh request matches the declared numerical expression within the lesson tolerance.
+
+**Hints:**
+- Evaluate the request through the exported computation.
+- Build the host reference directly from the declared expression rather than reusing the export wrapper.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Verify a new input [-2, 0, 3] against an independent NumPy expression.
-changed = np.array(...)  # TODO: compute changed
-# Transfer the device result to the host for an independent NumPy comparison.
-expected = ...  # TODO: compute expected
-np.testing.assert_allclose(restored.call(changed), expected, atol = ...  # TODO: compute np.testing.assert_allclose(restored.call(changed), expected, atol
-print("Changed exported request verified")
+import numpy as np
+
+def check_exported_new_input(exported_function, inputs):
+    # TODO: Run the requested input through the export and compare with independent NumPy arithmetic.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -311,31 +317,33 @@ Validate shape and finiteness on the host before calling inference. Include a si
 
 ### How to write: Validate a request before inference — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jnp.isfinite(x)` — Returns a boolean mask verifying that no element is `NaN` or `Inf`.
+**Inputs:**
+- Write a host-side request checker that rejects nonfinite values and the wrong shape. Test a NaN input and a wrong feature count.
 
-**Step-by-step implementation plan:**
-1. Transfer the device result to the host for an independent NumPy comparison.
+**Outputs:**
+- Host-side results for malformed and valid requests.
+
+**Invariants to check:**
+- A malformed request is rejected before the exported function is called.
+
+**Hints:**
+- Validate shape and finiteness on the host before calling inference. Include a singleton batch, the wrong feature count and a NaN; specify which cases your serving signature permits.
+- Check finiteness and feature count at the serving boundary.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Validate a request before inference (Transfer): Validation belongs before the runtime call.
-def validate_request(values):
-    # Transfer the device result to the host for an independent NumPy comparison.
-    array = np.asarray(...)  # TODO: compute array
-    if array.shape != (1, 3) or not np.isfinite(array).all():
-        raise ValueError("expected finite float32 [1, 3]")
-    return ...  # TODO: return computed result
-for invalid in ([[1., 2.]], [[1., float("nan"), 3.]]):
-    try:
-        validate_request(invalid)
-    except ValueError:
-        pass
-    else:
-        raise AssertionError("invalid input accepted")
-np.testing.assert_allclose(restored.call(validate_request([[1.,2.,-1.]])), [[3.1,-.45]], atol=1e-6)
+import tempfile
+from pathlib import Path
+import numpy as np
+import jax
+import jax.numpy as jnp
+from jax import export
+
+def practice_validate_a_request_before_inference(infer, request, expected_features):
+    """Complete the validate a request before inference check."""
+    # TODO: ('Reject nonfinite values and wrong feature counts on the host before invoking the exported computation.', 'NaN and wrong-width rejections plus a valid request check.', 'Malformed requests do not reach inference.')
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -376,33 +384,33 @@ Increment the counter only after validation succeeds. An error message alone doe
 
 ### How to write: Prove that request validation precedes exported inference — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- Build a request wrapper that records how often inference runs. Reject both a malformed feature row and a nonfinite row before calling the exported computation. Then verify one valid request.
 
-**Step-by-step implementation plan:**
-1. Accumulate the next contribution into `inference_calls[0]`.
+**Outputs:**
+- Call-count evidence for rejected and accepted requests.
+
+**Invariants to check:**
+- Only a fully valid finite request increments the inference counter.
+
+**Hints:**
+- Increment the counter only after validation succeeds. An error message alone does not prove which boundary rejected the input.
+- Test shape and numeric validity separately.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Prove that request validation precedes exported inference (Transfer / diagnosis): The wrapper tests ordering as well as acceptance.
-inference_calls = ...  # TODO: compute inference_calls
-def checked_prediction(values):
-    array = validate_request(...)  # TODO: compute array
-    # Accumulate the next contribution into `inference_calls[0]`.
-    inference_calls[0] += 1
-    return ...  # TODO: return computed result
-for invalid in ([[1., 2.]], [[1., float('inf'), 3.]]):
-    try:
-        checked_prediction(invalid)
-    except ValueError:
-        pass
-    else:
-        raise AssertionError('invalid request reached inference')
-assert inference_calls[0]  # TODO: complete assertion check
-np.testing.assert_allclose(checked_prediction([[1.,2.,-1.]]), [[3.1,-.45]], atol=1e-6)
-assert inference_calls[0]  # TODO: complete assertion check
-print('Invalid requests rejected before the one valid inference call.')
+import tempfile
+from pathlib import Path
+import numpy as np
+import jax
+import jax.numpy as jnp
+from jax import export
+
+def practice_prove_that_request_validation_precedes_exported_inference(infer, validator, requests):
+    """Complete the prove that request validation precedes exported inference check."""
+    # TODO: ('Wrap inference with a call counter and submit malformed-shape, nonfinite, and valid rows.', 'Two rejections with no calls and one valid request with exactly one call.', 'Only a validated finite row increments the inference call count.')
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -442,9 +450,17 @@ What does a successful local export round trip prove?
 
 <details><summary>Answer and explanation</summary>
 
-The saved computation matches the tested CPU contract.
+**1. The saved computation matches the tested CPU contract. (correct)**
 
 A successful round trip verifies the tested artifact and local runtime. Other consumers, device kernels and request systems require separate checks.
+
+**2. The file is an edge executable on every NPU.**
+
+Other targets may lack operators or lower them differently. Preserve the tested CPU scope until the actual target runner is exercised.
+
+**3. An HTTP service now exists.**
+
+An exported function is an artifact, not a running service. Loading, request validation and serving behavior need their own tests.
 
 </details>
 

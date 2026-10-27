@@ -1,0 +1,12 @@
+{
+  "status": "pass",
+  "zipMembers": 80,
+  "sourceFilesVerified": 19,
+  "publicFilesVerified": 48,
+  "newRendererAndPlotTestBytesMatch": true,
+  "plotTests": 3,
+  "cwd": "/private/tmp",
+  "extracted": "/private/tmp/jaxpathways-v013-final-extracted",
+  "plotTestOutput": "...\n----------------------------------------------------------------------\nRan 3 tests in 0.002s\n\nOK\n",
+  "sourceZipSha256": "91679ed87de3946865f111e1d2e383a3b648b71e4fed5efaaa69b97a44bec83e"
+}

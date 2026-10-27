@@ -11,7 +11,12 @@
         "The step includes time outside the model region; inspect the other regions and lanes to explain it."
       ],
       "correct": 2,
-      "explanation": "The annotation boundaries establish inclusion, not a universal attribution of the remaining time. Our injected wait is known from code; an actual workload needs trace evidence."
+      "explanation": "The annotation boundaries establish inclusion, not a universal attribution of the remaining time. Our injected wait is known from code; an actual workload needs trace evidence.",
+      "optionFeedback": [
+        "The difference can include host work, transfers, synchronization or scheduling. Inspect trace lanes before assigning all of it to idle time.",
+        "A wide step region alone cannot isolate data loading. Compare input, host and device events within the same time interval.",
+        "The annotation boundaries establish inclusion, not a universal attribution of the remaining time. Our injected wait is known from code; an actual workload needs trace evidence."
+      ]
     }
   ]
 }

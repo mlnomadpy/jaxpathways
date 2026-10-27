@@ -1,0 +1,119 @@
+{
+  "headRefOid": "d7bc44afbd723ab698932e566d622b6e640c8551",
+  "isDraft": true,
+  "statusCheckRollup": [
+    {
+      "__typename": "CheckRun",
+      "completedAt": "2026-10-21T16:45:45Z",
+      "conclusion": "SUCCESS",
+      "detailsUrl": "https://github.com/mlnomadpy/jaxpathways/actions/runs/39637552378/job/119352111687",
+      "name": "tpu-dependencies",
+      "startedAt": "2026-10-21T16:45:01Z",
+      "status": "COMPLETED",
+      "workflowName": "Course checks"
+    },
+    {
+      "__typename": "CheckRun",
+      "completedAt": "2026-10-21T16:46:35Z",
+      "conclusion": "SUCCESS",
+      "detailsUrl": "https://github.com/mlnomadpy/jaxpathways/actions/runs/39637552507/job/119352111046",
+      "name": "powershell",
+      "startedAt": "2026-10-21T16:45:02Z",
+      "status": "COMPLETED",
+      "workflowName": "Windows beginner workspace"
+    },
+    {
+      "__typename": "CheckRun",
+      "completedAt": "2026-10-21T16:49:25Z",
+      "conclusion": "SUCCESS",
+      "detailsUrl": "https://github.com/mlnomadpy/jaxpathways/actions/runs/39637552378/job/119352112147",
+      "name": "site",
+      "startedAt": "2026-10-21T16:45:03Z",
+      "status": "COMPLETED",
+      "workflowName": "Course checks"
+    },
+    {
+      "__typename": "CheckRun",
+      "completedAt": "2026-10-21T16:46:21Z",
+      "conclusion": "SUCCESS",
+      "detailsUrl": "https://github.com/mlnomadpy/jaxpathways/actions/runs/39637552378/job/119352111783",
+      "name": "browser",
+      "startedAt": "2026-10-21T16:45:01Z",
+      "status": "COMPLETED",
+      "workflowName": "Course checks"
+    },
+    {
+      "__typename": "CheckRun",
+      "completedAt": "2026-10-21T17:01:39Z",
+      "conclusion": "SUCCESS",
+      "detailsUrl": "https://github.com/mlnomadpy/jaxpathways/actions/runs/39637552378/job/119352112001",
+      "name": "lessons",
+      "startedAt": "2026-10-21T16:45:01Z",
+      "status": "COMPLETED",
+      "workflowName": "Course checks"
+    },
+    {
+      "__typename": "CheckRun",
+      "completedAt": "2026-10-21T16:49:38Z",
+      "conclusion": "SUCCESS",
+      "detailsUrl": "https://github.com/mlnomadpy/jaxpathways/actions/runs/39637552378/job/119352111831",
+      "name": "projects (0)",
+      "startedAt": "2026-10-21T16:45:01Z",
+      "status": "COMPLETED",
+      "workflowName": "Course checks"
+    },
+    {
+      "__typename": "CheckRun",
+      "completedAt": "2026-10-21T16:50:11Z",
+      "conclusion": "SUCCESS",
+      "detailsUrl": "https://github.com/mlnomadpy/jaxpathways/actions/runs/39637552378/job/119352111644",
+      "name": "projects (1)",
+      "startedAt": "2026-10-21T16:45:01Z",
+      "status": "COMPLETED",
+      "workflowName": "Course checks"
+    },
+    {
+      "__typename": "CheckRun",
+      "completedAt": "2026-10-21T16:50:52Z",
+      "conclusion": "SUCCESS",
+      "detailsUrl": "https://github.com/mlnomadpy/jaxpathways/actions/runs/39637552378/job/119352112331",
+      "name": "projects (2)",
+      "startedAt": "2026-10-21T16:45:02Z",
+      "status": "COMPLETED",
+      "workflowName": "Course checks"
+    },
+    {
+      "__typename": "CheckRun",
+      "completedAt": "2026-10-21T16:49:08Z",
+      "conclusion": "SUCCESS",
+      "detailsUrl": "https://github.com/mlnomadpy/jaxpathways/actions/runs/39637552378/job/119352111946",
+      "name": "projects (3)",
+      "startedAt": "2026-10-21T16:45:02Z",
+      "status": "COMPLETED",
+      "workflowName": "Course checks"
+    },
+    {
+      "__typename": "CheckRun",
+      "completedAt": "2026-10-21T16:47:50Z",
+      "conclusion": "SUCCESS",
+      "detailsUrl": "https://github.com/mlnomadpy/jaxpathways/actions/runs/39637552378/job/119352111515",
+      "name": "loggers",
+      "startedAt": "2026-10-21T16:45:01Z",
+      "status": "COMPLETED",
+      "workflowName": "Course checks"
+    },
+    {
+      "__typename": "CheckRun",
+      "completedAt": "2026-10-21T16:47:13Z",
+      "conclusion": "SUCCESS",
+      "detailsUrl": "https://github.com/mlnomadpy/jaxpathways/actions/runs/39637552378/job/119352112551",
+      "name": "numpyro",
+      "startedAt": "2026-10-21T16:45:02Z",
+      "status": "COMPLETED",
+      "workflowName": "Course checks"
+    }
+  ],
+  "url": "https://github.com/mlnomadpy/jaxpathways/pull/62",
+  "observedAt": "2026-10-21T17:04:19.672093+00:00",
+  "scope": "Hosted checks at the exact 0.11.0 candidate commit. Subsequent discovery of standalone-reader contract/print gaps requires the separate 0.11.1 repair; green checks do not imply complete teaching or native-reader acceptance."
+}

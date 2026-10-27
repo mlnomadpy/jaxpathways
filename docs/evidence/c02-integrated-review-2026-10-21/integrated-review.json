@@ -1,0 +1,72 @@
+{
+  "source_sha256": {
+    "requirements-c02.txt": "f8ff69203fcf2610a0c23f10d1ac225adcadace61ec58c40e98d6b1bdef45b1d",
+    "render_c02_figures.py": "c224b8d3d5c11fdf99732fcff110267283273a9b14e94fa3d75986b1a3756bfd",
+    "config.py": "53e0990fcf6d8fb08486398097919a9430f768cda54540740b3a453a21ed1db9",
+    "serve_local.py": "aa2923a37bdcf1b31ac074ea82368a0ded9b3b197b5128cb8c39430b84807335",
+    "evaluate_pythia_qa.py": "cbb3755fc318878da6700e85492e215ef9f8cbc1f041620b9eafc64d19c626c4",
+    "lm_eval_adapter.py": "f0c0879eb045e166e425e9c28bbb0cd612911ee81de72431cab132a16b13d74d",
+    "evaluate_qa_diagnostics.py": "c4e265f8e2554bb69e2108836f03fc52d065cabf354c828f0849aaa88f1c13dd",
+    "model.py": "efec0774f84e19f870368f7965e3e779641935f4670140065226ec8a27e71932",
+    "README.md": "255cc88cbfe87b437041d3d4bbec25d9b77e08dd1ad6c7a6db4f07d1a3180482",
+    "evaluate_pilot.py": "48e57589b5319b18f7bca92e9084439eeef5e12e41037403b46eb487d5d6bf01",
+    "consumer.py": "1b0934337eb746c1c6e1039b13fbf006cc2acc4dd43ea505464b3a65734fbc9a",
+    "fetch_pythia_baseline.py": "5101e0679fc19e2903933e944fe13facbe569c1c003056b25552266ba72041a3",
+    "evaluate_pythia_baseline.py": "7890b1bd2be2ea27911bd0fe7fbb384d49a9cef84b77f2f3e58f92ee739aec14",
+    "squad_scoring.py": "ec23c43c0909e5bd529f69b7c8a6f0c2157597e35c624c5d528360eaca76ece3",
+    "requirements-c02-lm-eval.txt": "bc67b16f14d338d910cb3f654f7d6c0897ed6f22de4b86ef291927d781a2ea3e",
+    "run_lm_eval.py": "2ac22a0f233760d1d125defd9f2e66154532e4b7f983c76a9f9e597a633e7324",
+    "run_pilot.py": "ff570c4431c9fd326d0ee163b01d35d3354a2c8ec45b58ff280b73f3e9812303",
+    "training.py": "87cd3754268552ed5ce4f3d95774591c57c3546afc352768324e459a86e5caf7",
+    "requirements-c02-baseline.txt": "4705ef545acce89923166a2a16d9d530e105a7f28f832f7b4c7af571601f805d",
+    "export_consumer.py": "4fe1abd3fedb7e58be97fa57ab802e9bbc328674b924ccf2dfe557f50115075d",
+    "tests/test_pythia_baseline.py": "92078925a1f3ade5822569ff740d8677a5dda87d1bbaf8c2f721658658d9ff6f",
+    "tests/test_data_freeze.py": "0dcccca59f473a65bb265e3629bef747e1eaff9999dbb0e81ac38731f169377a",
+    "tests/test_qa_diagnostics.py": "e6bfeaf20777fd0bffebe7f761ef0d452ecc246610cbcfda4220f4c08817e2db",
+    "tests/check.py": "479d132c0b4e7fdd0f6a416bdc6968acce31578505c6198d12145ff77383edba",
+    "tests/test_runner_integrity.py": "0c76665d6ceaba14d56725b3ab2991e3ae5f74cec8af5cba64a1d44407b1016f",
+    "tests/test_training_recovery.py": "d8748e8bab325b057f5cda9b251b45e516f950beee0a278093e823e25ce1789e",
+    "tests/test_export_consumer.py": "b2e33881a6159291ba138e9c4d9a198b655f95523dd6802a44227fd7f5c5575d",
+    "tests/test_service_live.py": "21654d10230a2540e51366da6412412cd9c7612e7eee48f97b8b71274986893e",
+    "tests/replay_branch.py": "8b0c0ec5bdd0c4140502ecd03569a622cc183c6a3f6b082885c60987adcb1ed3",
+    "tests/test_model_math.py": "873a10984041978ff423f59989468befa8e73cb998fea94a5f7e14f026ca694b",
+    "tests/test_evaluation.py": "27d632a6b6c44da8f23aca5ca044d416f51c9bb1e6d75ac167e516096d4f49e2",
+    "tests/resume_worker.py": "74f04c033bfdc6b21beb1908b3933a033e7b31e83fae433c3d5ca27ea34ee307",
+    "tests/test_lm_eval_adapter.py": "a676c87b2ed98695098e2c2107a72072aba01730bf0f2063e28444fb76735783",
+    "tests/test_consumer.py": "e5b2a340d46342d4560ae9b3dffafd907e5d602ee67928ed22b21d0020bd4957",
+    "starter/model.py": "578410200acd1c2a4ad1bb74a0f08f4cbda67cef3f17576b4f6faf157cfeed04",
+    "data/RIGHTS.md": "9511283c1ba440b6b8416ba86d8cf40fdf4c740680134de78a3a74b6c0984af5",
+    "data/frozen_recipe.json": "fe81ffbca439f7fd2da791ba2d695aee349172ab214bbc95ac6202558963751c",
+    "data/prepare.py": "dc496fb8fb34f8e804b95ee2b383789bd5cbc919fe167bccf962dfd7238043f1",
+    "data/foundation-reuse.json": "bfc1f2be67a8bf3bcf77f835fc5b238a3df5514259bf887208e5200e21b49297",
+    "data/lm_eval_tasks/arc_easy/arc_easy.yaml": "3ce21576ac078164025714cd87d88a0362d6d66b058a72a5c9118b03cc6d501e",
+    "data/lm_eval_tasks/hellaswag/utils.py": "61a9347e30cd375161502aed3396c3a8d6ac1e7436d0b29683b662752948fd88",
+    "data/lm_eval_tasks/hellaswag/hellaswag.yaml": "d9f8b06f195cdf0d90d3508b3642d4f34d4553bf1bebbbc4cdb6f426156e86a2"
+  },
+  "reference_staged_check": {
+    "log": "/private/tmp/c02-sol-full-staged-check.log",
+    "sha256": "d4c7f6b0a94f703f33991872238135fe617c4b18769890adcb5aaa4e2db24c19",
+    "exit_code": 0
+  },
+  "pytest": {
+    "command": "C02_PREPARED_DATA=/private/tmp/jaxpathways-c02-datafreeze-luna-20261021 /private/tmp/jaxpathways-c02-lm-eval-venv/bin/python -m pytest -q projects/causal-model-300m/tests --ignore=projects/causal-model-300m/tests/test_service_live.py -rs",
+    "observed": "37 passed, 9 subtests passed, no skips; 2 dependency deprecation warnings"
+  },
+  "live_loopback": {
+    "command": "/private/tmp/jaxpathways-c02-lm-eval-venv/bin/python projects/causal-model-300m/tests/test_service_live.py",
+    "observed": "5 tests passed; GatedModel fixtures only, not native JAX interruption qualification"
+  },
+  "constant_generation_candidate": {
+    "source": "/private/tmp/c02-sol-constant-generation-candidate.py",
+    "source_sha256": "34a1375fde8672113aa3bf92613fdecbb595d9867fe051b20f8cf7079725f9d8",
+    "check_log_sha256": "d4c7f6b0a94f703f33991872238135fe617c4b18769890adcb5aaa4e2db24c19",
+    "all_stages_accepted": true
+  },
+  "counterexamples": {
+    "c02-sol-adapter-context-probe.json": "1131b2cb0e4e688f821cc3826e96fac6ca6250cec6c2ab7b135e67af9e7f151b",
+    "c02-sol-baseline-pin-probe.json": "5004c06587cdd3d0d2659772a20ba86f82f90ce4193260765ad1b88ad0a2af84",
+    "c02-sol-evidence-mutation-probe.json": "e9abc4d0d45d572b1dc0ab66c237a3640a55b9964317fe29455caa2178a7eea9"
+  },
+  "package_manifest_sha256": "9398fce72a2a1e1977eb6e728d82f536416913f43868ba58e35dd59b583dc955",
+  "diagnostics_sha256": "3a64103a5a216e4db0b1af3fc41567ce849bdb0b0cb6e82b4f6b5dac5ab6d2bf"
+}

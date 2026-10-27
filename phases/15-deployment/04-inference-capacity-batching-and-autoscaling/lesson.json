@@ -15,7 +15,7 @@
       {
         "id": "guided-reasoning",
         "title": "A request spends time before and after computation",
-        "body": "A request may wait for a batch, wait behind existing work, execute and then be encoded for response. Larger batches can improve work per call while increasing the first waiting request's latency. These objectives can conflict.\n\nDraw arrival, enqueue, dispatch and completion on one timeline. Then measure or model each interval with its source stated. Tail latency depends on the arrival pattern and concurrency, not just the mean of isolated calls.\n\nThis lesson combines measured CPU batch computation with a separately simulated queue. Keep those panels distinct. A queue simulation explores stated assumptions; it is not an observed autoscaling system or a production traffic measurement.",
+        "body": "A request may wait for a batch, wait behind existing work, execute and then be encoded for response. Larger batches can improve work per call while increasing the first waiting request's latency. These objectives can conflict.\n\nDraw arrival, enqueue, dispatch and completion on one timeline. Then measure or model each interval with its source stated. Tail latency depends on the arrival pattern and concurrency, not just the mean of isolated calls.\n\nThis lesson combines measured CPU batch computation with a separately simulated queue. Keep those panels distinct. A queue simulation explores stated assumptions; it is not an observed autoscaling system or a production traffic measurement.\n\nThe upper panel measures resident-input CPU computation per batch; it reports a median and p95 for each of three batch shapes. These very short timings can change order across captures, so use them to practice reading per-batch units rather than declaring an optimal batch size. The lower panel is a separate queue simulation using one measured service duration as its time unit.",
         "check": {
           "prompt": "Can higher batch throughput coexist with worse user latency?",
           "answer": "Yes. Requests can wait longer to form a batch or reach service. Report both completed throughput and the declared end-to-end latency distribution."
@@ -72,21 +72,21 @@
       {
         "title": "Compute a replica estimate with explicit units",
         "prediction": "At 300 requests per second, 200 requests per second of effective capacity per replica, and 70% target utilization, how many replicas does the planning formula suggest?",
-        "code": "# Experiment — Compute a replica estimate with explicit units\narrival_per_s=300.\ncapacity_per_s=200.\ntarget_utilization=.7\nreplicas=math.ceil(arrival_per_s/(target_utilization*capacity_per_s))\nassert replicas==3\nprint(\"hypothetical planned replicas:\",replicas)",
+        "code": "# Experiment \u2014 Compute a replica estimate with explicit units\narrival_per_s=300.\ncapacity_per_s=200.\ntarget_utilization=.7\nreplicas=math.ceil(arrival_per_s/(target_utilization*capacity_per_s))\nassert replicas==3\nprint(\"hypothetical planned replicas:\",replicas)",
         "output": "The formula suggests three replicas under the stated assumptions.",
         "explanation": "This is arithmetic on hypothetical effective capacities, not an executed autoscaling test."
       },
       {
         "title": "Estimate batch-collection delay",
         "prediction": "For eight requests arriving two milliseconds apart, how long do the earliest and average request wait for a full batch before computation?",
-        "code": "# Experiment — Estimate batch-collection delay\nbatch=8\nspacing_ms=2.\ncollection_wait=(batch-1-np.arange(batch))*spacing_ms\nassert collection_wait[0]==14.\nassert collection_wait.mean()==7.",
+        "code": "# Experiment \u2014 Estimate batch-collection delay\nbatch=8\nspacing_ms=2.\ncollection_wait=(batch-1-np.arange(batch))*spacing_ms\nassert collection_wait[0]==14.\nassert collection_wait.mean()==7.",
         "output": "The first waits fourteen milliseconds; mean collection delay is seven milliseconds.",
         "explanation": "A throughput improvement can be overwhelmed by waiting for a batch at low arrival rates."
       },
       {
         "title": "Inspect the interpolation behind p95",
         "prediction": "With nineteen \\(1\\)-millisecond samples and one \\(100\\)-millisecond sample, must p95 equal an observed sample?",
-        "code": "# Experiment — Inspect the interpolation behind p95\nillustrative_ms=np.array([1.]*19+[100.])\ninterpolated_p95=float(np.percentile(illustrative_ms,95,method='linear'))\nnp.testing.assert_allclose(interpolated_p95,5.95,atol=1e-10)\nassert interpolated_p95 not in illustrative_ms and illustrative_ms.max()==100.\nprint('Analytic sample p95 / max (ms):',interpolated_p95,illustrative_ms.max())",
+        "code": "# Experiment \u2014 Inspect the interpolation behind p95\nillustrative_ms=np.array([1.]*19+[100.])\ninterpolated_p95=float(np.percentile(illustrative_ms,95,method='linear'))\nnp.testing.assert_allclose(interpolated_p95,5.95,atol=1e-10)\nassert interpolated_p95 not in illustrative_ms and illustrative_ms.max()==100.\nprint('Analytic sample p95 / max (ms):',interpolated_p95,illustrative_ms.max())",
         "output": "The interpolated p95 is \\(5.95\\) milliseconds and the maximum is \\(100\\) milliseconds.",
         "explanation": "These deliberately constructed values explain the percentile calculation. They are not measurements of the course model or an accelerator. The timed figure retains its actual measured samples."
       }
@@ -98,7 +98,23 @@
         "prompt": "Compare five requests spaced three milliseconds apart with five simultaneous requests. Use two-millisecond service and compare maximum response latency.",
         "hint": "The worker is idle between spaced requests but never idle during the burst.",
         "solution": "# Expose burst sensitivity (Transfer / diagnosis)\n_,_,smooth=simulate_queue(np.arange(5)*3.,2.)\n_,_,burst=simulate_queue(np.zeros(5),2.)\nassert smooth.max()==2. and burst.max()==10.",
-        "explanation": "An average arrival rate alone does not describe a burst or tail latency."
+        "explanation": "An average arrival rate alone does not describe a burst or tail latency.",
+        "learnerStarter": {
+          "inputs": [
+            "Compare five requests spaced three milliseconds apart with five simultaneous requests. Use two-millisecond service and compare maximum response latency."
+          ],
+          "outputs": [
+            "Two simulated response-time vectors and their maxima."
+          ],
+          "invariants": [
+            "Both cases use five arrivals and the same 2 ms service assumption."
+          ],
+          "hints": [
+            "The worker is idle between spaced requests but never idle during the burst.",
+            "Keep spaced and simultaneous arrival vectors separate."
+          ],
+          "code": "import math\n\ndef practice_expose_burst_sensitivity(spaced_arrivals_ms, simultaneous_arrivals_ms, service_ms):\n    \"\"\"Complete the expose burst sensitivity check.\"\"\"\n    # TODO: ('Simulate five requests spaced 3 ms apart and five simultaneous requests with 2 ms service.', 'Two response-time vectors and their maximum latencies.', 'Service duration is fixed at 2 ms and the two scenarios differ only in arrivals.')\n    raise NotImplementedError\n"
+        }
       },
       {
         "title": "Reject a broken timeline",
@@ -106,7 +122,23 @@
         "prompt": "Pass an out-of-order arrival vector and a zero service duration. Confirm both are rejected instead of returning a plausible chart.",
         "hint": "Public simulation inputs need finite, ordered values and positive service time.",
         "solution": "# Reject a broken timeline (Transfer / diagnosis)\nfor arrivals,duration in [([2.,1.],2.),([0.,1.],0.)]:\n    try:\n        simulate_queue(arrivals,duration)\n    except ValueError:\n        pass\n    else:\n        raise AssertionError(\"invalid timeline was accepted\")",
-        "explanation": "Validating assumptions prevents a simulation from silently supporting a false capacity story."
+        "explanation": "Validating assumptions prevents a simulation from silently supporting a false capacity story.",
+        "learnerStarter": {
+          "inputs": [
+            "Pass an out-of-order arrival vector and a zero service duration. Confirm both are rejected instead of returning a plausible chart."
+          ],
+          "outputs": [
+            "Explicit input errors for unsorted arrivals and nonpositive service."
+          ],
+          "invariants": [
+            "Queue calculation runs only for ordered arrivals and positive service duration."
+          ],
+          "hints": [
+            "Public simulation inputs need finite, ordered values and positive service time.",
+            "Validate the timeline before deriving finish times."
+          ],
+          "code": "import math\n\ndef practice_reject_a_broken_timeline(arrival_ms, service_ms):\n    \"\"\"Complete the reject a broken timeline check.\"\"\"\n    # TODO: ('Validate monotone arrival times and strictly positive service duration before queue simulation.', 'Clear errors for out-of-order arrivals and zero service time.', 'Invalid timing inputs are rejected instead of yielding a chart or capacity estimate.')\n    raise NotImplementedError\n"
+        }
       },
       {
         "title": "Measure the margin below a response deadline",
@@ -114,7 +146,23 @@
         "prompt": "For five simultaneous requests and a \\(2\\)-millisecond serial service, count responses that exceed a \\(6\\)-millisecond deadline. Explain why adding a faster model alone is not the only intervention.",
         "hint": "Compute finish minus arrival for each request. Here a response exactly at the deadline is accepted; declare that convention.",
         "solution": "# Measure the margin below a response deadline (Transfer / diagnosis): Two responses miss the deadline in this serial simulation.\n_,_,deadline_latencies=simulate_queue(np.zeros(5),2.)\nnp.testing.assert_array_equal(deadline_latencies,[2.,4.,6.,8.,10.])\nmissed_deadlines=int(np.count_nonzero(deadline_latencies>6.))\nassert missed_deadlines==2\nprint('Requests beyond the declared deadline:',missed_deadlines)",
-        "explanation": "Two responses miss the deadline in this serial simulation. Admission control, batching policy or additional workers could change the queue, but each requires a new model or measurement. The example does not execute a real autoscaler."
+        "explanation": "Two responses miss the deadline in this serial simulation. Admission control, batching policy or additional workers could change the queue, but each requires a new model or measurement. The example does not execute a real autoscaler.",
+        "learnerStarter": {
+          "inputs": [
+            "For five simultaneous requests and a \\(2\\)-millisecond serial service, count responses that exceed a \\(6\\)-millisecond deadline. Explain why adding a faster model alone is not the only intervention."
+          ],
+          "outputs": [
+            "A simulated count of requests past the deadline."
+          ],
+          "invariants": [
+            "Deadline violations use completion-minus-arrival response time."
+          ],
+          "hints": [
+            "Compute finish minus arrival for each request. Here a response exactly at the deadline is accepted; declare that convention.",
+            "Label the result as serial queue simulation, not a measured service SLO."
+          ],
+          "code": "import math\n\ndef practice_measure_the_margin_below_a_response_deadline(arrival_ms, service_ms, deadline_ms):\n    \"\"\"Complete the measure the margin below a response deadline check.\"\"\"\n    # TODO: ('Count serial burst responses exceeding the declared 6 ms deadline and compare with an alternative queue intervention.', 'Deadline violation count and an explicitly labeled simulated response-time result.', 'The deadline and service-time assumptions remain fixed across the comparison.')\n    raise NotImplementedError\n"
+        }
       }
     ],
     "takeaways": [
@@ -136,31 +184,52 @@
       "title": "Measured batch computation and a separately simulated queue",
       "kind": "executed",
       "prediction": "Can a queue grow even when the duration of each individual model call is unchanged?",
-      "reading": "The upper panel shows measured CPU warm p50 and p95 milliseconds per batch for batch sizes \\(1,8,32\\). Each timing waits for completion; inputs are already resident. These are sample percentiles, not confidence bounds or a speedup guarantee. The lower panel uses request index on the horizontal axis and simulated response time divided by the measured batch-one median on the vertical axis. Stable arrivals stay at \\(1\\); overloaded arrivals rise from \\(1\\) to \\(24.6\\).",
-      "connection": "The lower panel’s growth comes entirely from the chosen arrival schedule and serial queue recurrence. The service duration stays fixed in the simulation. Normalizing by the measured service duration makes the buildup visible without freezing host-dependent milliseconds into the prose. Real requests can add networking, preprocessing, variable service times and batch collection; those costs are not inferred from this graph.",
+      "reading": "Read the upper panel as milliseconds per complete batch, with batch sizes \\(1\\), \\(8\\) and \\(32\\) along the horizontal axis. For each shape, p50 summarizes the middle of its warm sample and p95 describes a higher sample percentile. Compare those bars within the same batch before comparing shapes. Dividing a batch time by its size gives an amortized per-example cost; it does not make an individual request finish before its batch completes.\n\nThe lower panel uses request index horizontally and response time divided by the chosen service time vertically. Spaced arrivals stay at \\(1\\) service-time unit. Overloaded arrivals increase from \\(1\\) to \\(24.6\\) units by request index \\(59\\). The queue panel therefore explains backlog under its declared arrivals; it does not measure live traffic or prove a production latency target.",
+      "connection": "The measured batch bars answer a compute question, while the simulated curves answer a waiting question. With arrivals \\(0.6t\\) apart and service duration \\(t\\), each request adds \\(0.4t\\) of backlog in the serial-worker model. That arithmetic explains the rising lower curve even though the numerical model and service duration are unchanged.\n\nPredict two different interventions: a shorter service duration can increase capacity, while collecting a larger batch can add intentional waiting before service. Measure each boundary and replay an arrival pattern before deciding which intervention helps the user's response time. Small CPU timing differences between these batches are not a device ranking.",
       "code": "visual_data={\"kind\":\"panels\",\"panels\":[{\"kind\":\"bar\",\"x\":[0,1,2],\"labels\":[\"batch 1\",\"batch 8\",\"batch 32\"],\"xlabel\":\"resident-input batch shape\",\"ylabel\":\"measured CPU milliseconds per batch\",\"series\":[{\"label\":\"warm p50\",\"y\":[r[\"p50_ms\"] for r in measurements]},{\"label\":\"warm p95\",\"y\":[r[\"p95_ms\"] for r in measurements]}]},{\"kind\":\"line\",\"x\":request_index.tolist(),\"xlabel\":\"request index (simulation)\",\"ylabel\":\"simulated response / measured service\",\"series\":[{\"label\":\"spaced arrivals\",\"y\":(stable_latency/service_ms).tolist()},{\"label\":\"overloaded arrivals\",\"y\":(overloaded_latency/service_ms).tolist()}]}]}",
       "alt": "Measured batch computation and a separately simulated queue. The upper panel shows measured CPU warm p50 and p95 milliseconds per batch for batch sizes \\(1,8,32\\). Each timing waits for completion; inputs are already resident. These are sample percentiles, not confidence bounds or a speedup guarantee. The lower panel uses request index on the horizontal axis and simulated response time divided by the measured batch-one median on the vertical axis. Stable arrivals stay at \\(1\\); overloaded arrivals rise from \\(1\\) to \\(24.6\\)."
     },
-    "code": "# Step 1 — 1. Define and check the inference workload\nimport math\nimport time\nimport numpy as np\nimport jax\nimport jax.numpy as jnp\nrng=np.random.default_rng(82)\nW1=jnp.asarray(rng.normal(0,.1,(64,32)).astype(np.float32))\nW2=jnp.asarray(rng.normal(0,.1,(32,8)).astype(np.float32))\n# Define and JIT-compile `infer(inputs)` so XLA traces and fuses the operations:\n@jax.jit\ndef infer(inputs):\n    return jnp.tanh(inputs@W1)@W2\ndef measure(batch_size,repeats=40):\n    host=rng.normal(size=(batch_size,64)).astype(np.float32)\n    device=jnp.asarray(host)\n    began=time.perf_counter()\n    # Wait for device work to finish before timing it or comparing its result on the host.\n    first=infer(device).block_until_ready()\n    first_ms=(time.perf_counter()-began)*1000\n    # Transfer the device result to the host for an independent NumPy comparison.\n    expected=np.tanh(host@np.asarray(W1))@np.asarray(W2)\n    np.testing.assert_allclose(first,expected,rtol=2e-5,atol=2e-6)\n    samples=[]\n    for _ in range(repeats):\n        began=time.perf_counter()\n        # Wait for device work to finish before timing it or comparing its result on the host.\n        infer(device).block_until_ready()\n        samples.append((time.perf_counter()-began)*1000)\n    p50=float(np.percentile(samples,50))\n    return {'batch':batch_size,'first_call_ms':first_ms,'samples_ms':samples,\n            'p50_ms':p50,'p95_ms':float(np.percentile(samples,95)),\n            'steady_examples_per_second':1000*batch_size/p50}\n\n# Step 2 — 2. Measure each batch shape separately: Do not assume a larger batch is faster per request.\nmeasurements=[measure(batch) for batch in (1,8,32)]\nfor report in measurements:\n    assert len(report['samples_ms'])==40\n    # Ensure all array elements remain finite: `all(value>0 and np.isfinite(value) for value in report['samples_m...`\n    assert all(value>0 and np.isfinite(value) for value in report['samples_ms'])\n    print({key:value for key,value in report.items() if key!='samples_ms'})\nservice_ms=measurements[0]['p50_ms']\n\n# Step 3 — 3. Model a queue with an independent hand-check\ndef simulate_queue(arrival_ms,service_ms):\n    # Transfer the device result to the host for an independent NumPy comparison.\n    arrivals=np.asarray(arrival_ms,dtype=float)\n    if arrivals.ndim!=1 or np.any(~np.isfinite(arrivals)) or np.any(np.diff(arrivals)<0):\n        raise ValueError('arrivals must be a finite ordered vector')\n    if not np.isfinite(service_ms) or service_ms<=0:\n        raise ValueError('service duration must be positive milliseconds')\n    ready=0.\n    starts=[]\n    finishes=[]\n    for arrival in arrivals:\n        start=max(float(arrival),ready)\n        ready=start+service_ms\n        starts.append(start)\n        finishes.append(ready)\n    return np.array(starts),np.array(finishes),np.array(finishes)-arrivals\nhand_start,hand_finish,hand_latency=simulate_queue([0.,1.,4.],2.)\nnp.testing.assert_allclose(hand_start,[0.,2.,4.])\nnp.testing.assert_allclose(hand_finish,[2.,4.,6.])\nnp.testing.assert_allclose(hand_latency,[2.,3.,2.])\nrequest_index=np.arange(60)\nstable_arrivals=request_index*1.5*service_ms\noverloaded_arrivals=request_index*.6*service_ms\n_,_,stable_latency=simulate_queue(stable_arrivals,service_ms)\n_,_,overloaded_latency=simulate_queue(overloaded_arrivals,service_ms)\nassert np.allclose(stable_latency,service_ms)\nassert np.isclose(overloaded_latency[-1],24.6*service_ms)\nprint('measured batch-one service proxy (ms):',service_ms)\nprint('simulated last stable/overloaded response (ms):',stable_latency[-1],overloaded_latency[-1])",
+    "code": "# Step 1 \u2014 1. Define and check the inference workload\nimport math\nimport time\nimport numpy as np\nimport jax\nimport jax.numpy as jnp\nrng=np.random.default_rng(82)\nW1=jnp.asarray(rng.normal(0,.1,(64,32)).astype(np.float32))\nW2=jnp.asarray(rng.normal(0,.1,(32,8)).astype(np.float32))\n# Define and JIT-compile `infer(inputs)` so XLA traces and fuses the operations:\n@jax.jit\ndef infer(inputs):\n    return jnp.tanh(inputs@W1)@W2\ndef measure(batch_size,repeats=40):\n    host=rng.normal(size=(batch_size,64)).astype(np.float32)\n    device=jnp.asarray(host)\n    began=time.perf_counter()\n    # Wait for device work to finish before timing it or comparing its result on the host.\n    first=infer(device).block_until_ready()\n    first_ms=(time.perf_counter()-began)*1000\n    # Transfer the device result to the host for an independent NumPy comparison.\n    expected=np.tanh(host@np.asarray(W1))@np.asarray(W2)\n    np.testing.assert_allclose(first,expected,rtol=2e-5,atol=2e-6)\n    samples=[]\n    for _ in range(repeats):\n        began=time.perf_counter()\n        # Wait for device work to finish before timing it or comparing its result on the host.\n        infer(device).block_until_ready()\n        samples.append((time.perf_counter()-began)*1000)\n    p50=float(np.percentile(samples,50))\n    return {'batch':batch_size,'first_call_ms':first_ms,'samples_ms':samples,\n            'p50_ms':p50,'p95_ms':float(np.percentile(samples,95)),\n            'steady_examples_per_second':1000*batch_size/p50}\n\n# Step 2 \u2014 2. Measure each batch shape separately: Do not assume a larger batch is faster per request.\nmeasurements=[measure(batch) for batch in (1,8,32)]\nfor report in measurements:\n    assert len(report['samples_ms'])==40\n    # Ensure all array elements remain finite: `all(value>0 and np.isfinite(value) for value in report['samples_m...`\n    assert all(value>0 and np.isfinite(value) for value in report['samples_ms'])\n    print({key:value for key,value in report.items() if key!='samples_ms'})\nservice_ms=measurements[0]['p50_ms']\n\n# Step 3 \u2014 3. Model a queue with an independent hand-check\ndef simulate_queue(arrival_ms,service_ms):\n    # Transfer the device result to the host for an independent NumPy comparison.\n    arrivals=np.asarray(arrival_ms,dtype=float)\n    if arrivals.ndim!=1 or np.any(~np.isfinite(arrivals)) or np.any(np.diff(arrivals)<0):\n        raise ValueError('arrivals must be a finite ordered vector')\n    if not np.isfinite(service_ms) or service_ms<=0:\n        raise ValueError('service duration must be positive milliseconds')\n    ready=0.\n    starts=[]\n    finishes=[]\n    for arrival in arrivals:\n        start=max(float(arrival),ready)\n        ready=start+service_ms\n        starts.append(start)\n        finishes.append(ready)\n    return np.array(starts),np.array(finishes),np.array(finishes)-arrivals\nhand_start,hand_finish,hand_latency=simulate_queue([0.,1.,4.],2.)\nnp.testing.assert_allclose(hand_start,[0.,2.,4.])\nnp.testing.assert_allclose(hand_finish,[2.,4.,6.])\nnp.testing.assert_allclose(hand_latency,[2.,3.,2.])\nrequest_index=np.arange(60)\nstable_arrivals=request_index*1.5*service_ms\noverloaded_arrivals=request_index*.6*service_ms\n_,_,stable_latency=simulate_queue(stable_arrivals,service_ms)\n_,_,overloaded_latency=simulate_queue(overloaded_arrivals,service_ms)\nassert np.allclose(stable_latency,service_ms)\nassert np.isclose(overloaded_latency[-1],24.6*service_ms)\nprint('measured batch-one service proxy (ms):',service_ms)\nprint('simulated last stable/overloaded response (ms):',stable_latency[-1],overloaded_latency[-1])",
     "buildSteps": [
       {
         "title": "1. Define and check the inference workload",
         "instruction": "Create a fresh main.py. This fixed dense-network fixture measures an inference boundary; its random weights are not presented as a pretrained or accurate model.",
-        "code": "# Step 1 — 1. Define and check the inference workload\nimport math\nimport time\nimport numpy as np\nimport jax\nimport jax.numpy as jnp\nrng=np.random.default_rng(82)\nW1=jnp.asarray(rng.normal(0,.1,(64,32)).astype(np.float32))\nW2=jnp.asarray(rng.normal(0,.1,(32,8)).astype(np.float32))\n# Define and JIT-compile `infer(inputs)` so XLA traces and fuses the operations:\n@jax.jit\ndef infer(inputs):\n    return jnp.tanh(inputs@W1)@W2\ndef measure(batch_size,repeats=40):\n    host=rng.normal(size=(batch_size,64)).astype(np.float32)\n    device=jnp.asarray(host)\n    began=time.perf_counter()\n    # Wait for device work to finish before timing it or comparing its result on the host.\n    first=infer(device).block_until_ready()\n    first_ms=(time.perf_counter()-began)*1000\n    # Transfer the device result to the host for an independent NumPy comparison.\n    expected=np.tanh(host@np.asarray(W1))@np.asarray(W2)\n    np.testing.assert_allclose(first,expected,rtol=2e-5,atol=2e-6)\n    samples=[]\n    for _ in range(repeats):\n        began=time.perf_counter()\n        # Wait for device work to finish before timing it or comparing its result on the host.\n        infer(device).block_until_ready()\n        samples.append((time.perf_counter()-began)*1000)\n    p50=float(np.percentile(samples,50))\n    return {'batch':batch_size,'first_call_ms':first_ms,'samples_ms':samples,\n            'p50_ms':p50,'p95_ms':float(np.percentile(samples,95)),\n            'steady_examples_per_second':1000*batch_size/p50}",
+        "code": "# Step 1 \u2014 1. Define and check the inference workload\nimport math\nimport time\nimport numpy as np\nimport jax\nimport jax.numpy as jnp\nrng=np.random.default_rng(82)\nW1=jnp.asarray(rng.normal(0,.1,(64,32)).astype(np.float32))\nW2=jnp.asarray(rng.normal(0,.1,(32,8)).astype(np.float32))\n# Define and JIT-compile `infer(inputs)` so XLA traces and fuses the operations:\n@jax.jit\ndef infer(inputs):\n    return jnp.tanh(inputs@W1)@W2\ndef measure(batch_size,repeats=40):\n    host=rng.normal(size=(batch_size,64)).astype(np.float32)\n    device=jnp.asarray(host)\n    began=time.perf_counter()\n    # Wait for device work to finish before timing it or comparing its result on the host.\n    first=infer(device).block_until_ready()\n    first_ms=(time.perf_counter()-began)*1000\n    # Transfer the device result to the host for an independent NumPy comparison.\n    expected=np.tanh(host@np.asarray(W1))@np.asarray(W2)\n    np.testing.assert_allclose(first,expected,rtol=2e-5,atol=2e-6)\n    samples=[]\n    for _ in range(repeats):\n        began=time.perf_counter()\n        # Wait for device work to finish before timing it or comparing its result on the host.\n        infer(device).block_until_ready()\n        samples.append((time.perf_counter()-began)*1000)\n    p50=float(np.percentile(samples,50))\n    return {'batch':batch_size,'first_call_ms':first_ms,'samples_ms':samples,\n            'p50_ms':p50,'p95_ms':float(np.percentile(samples,95)),\n            'steady_examples_per_second':1000*batch_size/p50}",
         "explanation": "The timer includes dispatch and completion for already resident inputs. JSON, networking, queueing and host-to-device placement are outside this boundary."
       },
       {
         "title": "2. Measure each batch shape separately",
         "instruction": "Append three batch shapes and print all timing boundaries. Each shape has its own first call and warmed sample distribution.",
-        "code": "# Step 2 — 2. Measure each batch shape separately: Do not assume a larger batch is faster per request.\nmeasurements=[measure(batch) for batch in (1,8,32)]\nfor report in measurements:\n    assert len(report['samples_ms'])==40\n    # Ensure all array elements remain finite: `all(value>0 and np.isfinite(value) for value in report['samples_m...`\n    assert all(value>0 and np.isfinite(value) for value in report['samples_ms'])\n    print({key:value for key,value in report.items() if key!='samples_ms'})\nservice_ms=measurements[0]['p50_ms']",
+        "code": "# Step 2 \u2014 2. Measure each batch shape separately: Do not assume a larger batch is faster per request.\nmeasurements=[measure(batch) for batch in (1,8,32)]\nfor report in measurements:\n    assert len(report['samples_ms'])==40\n    # Ensure all array elements remain finite: `all(value>0 and np.isfinite(value) for value in report['samples_m...`\n    assert all(value>0 and np.isfinite(value) for value in report['samples_ms'])\n    print({key:value for key,value in report.items() if key!='samples_ms'})\nservice_ms=measurements[0]['p50_ms']",
         "explanation": "Do not assume a larger batch is faster per request. Examples per second and milliseconds per batch answer different questions."
       },
       {
         "title": "3. Model a queue with an independent hand-check",
         "instruction": "Append the FCFS simulator and two hypothetical arrival schedules. Times are milliseconds throughout the simulation.",
-        "code": "# Step 3 — 3. Model a queue with an independent hand-check\ndef simulate_queue(arrival_ms,service_ms):\n    # Transfer the device result to the host for an independent NumPy comparison.\n    arrivals=np.asarray(arrival_ms,dtype=float)\n    if arrivals.ndim!=1 or np.any(~np.isfinite(arrivals)) or np.any(np.diff(arrivals)<0):\n        raise ValueError('arrivals must be a finite ordered vector')\n    if not np.isfinite(service_ms) or service_ms<=0:\n        raise ValueError('service duration must be positive milliseconds')\n    ready=0.\n    starts=[]\n    finishes=[]\n    for arrival in arrivals:\n        start=max(float(arrival),ready)\n        ready=start+service_ms\n        starts.append(start)\n        finishes.append(ready)\n    return np.array(starts),np.array(finishes),np.array(finishes)-arrivals\nhand_start,hand_finish,hand_latency=simulate_queue([0.,1.,4.],2.)\nnp.testing.assert_allclose(hand_start,[0.,2.,4.])\nnp.testing.assert_allclose(hand_finish,[2.,4.,6.])\nnp.testing.assert_allclose(hand_latency,[2.,3.,2.])\nrequest_index=np.arange(60)\nstable_arrivals=request_index*1.5*service_ms\noverloaded_arrivals=request_index*.6*service_ms\n_,_,stable_latency=simulate_queue(stable_arrivals,service_ms)\n_,_,overloaded_latency=simulate_queue(overloaded_arrivals,service_ms)\nassert np.allclose(stable_latency,service_ms)\nassert np.isclose(overloaded_latency[-1],24.6*service_ms)\nprint('measured batch-one service proxy (ms):',service_ms)\nprint('simulated last stable/overloaded response (ms):',stable_latency[-1],overloaded_latency[-1])",
+        "code": "# Step 3 \u2014 3. Model a queue with an independent hand-check\ndef simulate_queue(arrival_ms,service_ms):\n    # Transfer the device result to the host for an independent NumPy comparison.\n    arrivals=np.asarray(arrival_ms,dtype=float)\n    if arrivals.ndim!=1 or np.any(~np.isfinite(arrivals)) or np.any(np.diff(arrivals)<0):\n        raise ValueError('arrivals must be a finite ordered vector')\n    if not np.isfinite(service_ms) or service_ms<=0:\n        raise ValueError('service duration must be positive milliseconds')\n    ready=0.\n    starts=[]\n    finishes=[]\n    for arrival in arrivals:\n        start=max(float(arrival),ready)\n        ready=start+service_ms\n        starts.append(start)\n        finishes.append(ready)\n    return np.array(starts),np.array(finishes),np.array(finishes)-arrivals\nhand_start,hand_finish,hand_latency=simulate_queue([0.,1.,4.],2.)\nnp.testing.assert_allclose(hand_start,[0.,2.,4.])\nnp.testing.assert_allclose(hand_finish,[2.,4.,6.])\nnp.testing.assert_allclose(hand_latency,[2.,3.,2.])\nrequest_index=np.arange(60)\nstable_arrivals=request_index*1.5*service_ms\noverloaded_arrivals=request_index*.6*service_ms\n_,_,stable_latency=simulate_queue(stable_arrivals,service_ms)\n_,_,overloaded_latency=simulate_queue(overloaded_arrivals,service_ms)\nassert np.allclose(stable_latency,service_ms)\nassert np.isclose(overloaded_latency[-1],24.6*service_ms)\nprint('measured batch-one service proxy (ms):',service_ms)\nprint('simulated last stable/overloaded response (ms):',stable_latency[-1],overloaded_latency[-1])",
         "explanation": "This simulator assumes one serial worker and a constant service duration derived from the measured median. It is not a load test, an HTTP server or an autoscaler."
       }
-    ]
+    ],
+    "optionFeedback": [
+      "Dividing batch time by eight gives an amortized throughput cost, not each request\u2019s elapsed latency. Requests still wait for batch execution.",
+      "Eight examples per four milliseconds gives two thousand per second when batches remain full. A request still waits for collection and the full execution, plus any other boundary costs.",
+      "Arrival rate and batching wait change latency. Measure the chosen traffic pattern instead of inferring a universal service guarantee."
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "Four arrival times all equal to zero and a two-millisecond serial service time."
+      ],
+      "outputs": [
+        "The four finish times and four response times in arrival order."
+      ],
+      "invariants": [
+        "Each request starts when the prior serial request finishes; response time is finish time minus arrival time."
+      ],
+      "hints": [
+        "Derive each finish as the previous finish plus service time.",
+        "Keep queue arithmetic separate from model execution timing."
+      ],
+      "code": "import numpy as np\n\ndef simulate_four_request_burst(service_ms):\n    # TODO: Calculate serial finish and response times for four arrivals at time zero.\n    raise NotImplementedError\n"
+    }
   }
 }

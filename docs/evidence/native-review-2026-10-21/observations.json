@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "observed_at": "2026-10-21T22:01:48.001884+00:00",
+  "candidate_commit": "a3df5706b43355a8f218d86fdd100c74ff17ec94",
+  "edition": "0.14.0",
+  "method": "CUA browser and native Books UI; observations do not establish full-reader or assistive-technology acceptance",
+  "artifacts": {
+    "book.html": "9bbd799773445aaa213749e27f3d96ed1addd8c5618d77c7d801a72b84a680f7",
+    "downloads/jax-foundations.html": "fbd5ad01c8a20322c28c4de9c97a91ffe6ccec1991208e53b7fd03f95a3647f3",
+    "downloads/jax-foundations.epub": "f1dffaaf634c077c333a0376f752621fd4b4a6d533b527dd4ebedfae33d29284"
+  },
+  "browser": {
+    "url": "http://127.0.0.1:4196/downloads/jax-foundations.html#chapter-19",
+    "status": "bounded visual inspection passed",
+    "observations": [
+      "Cover visibly identifies version0.14.0, date2026-10-21 and Taha Bouhsine.",
+      "Least-squares chapter has visible maturity status and CPU evidence limits.",
+      "Inline vectors, residual equation, norm/subscript/superscript and transpose render legibly.",
+      "Target/least-squares-fit bar chart has readable values, legend and axes.",
+      "Read the figure and Connect it to the computation explain predictions, residual signs, mean squared error1/9 and why exact fitting is impossible.",
+      "A Python build-step block in the least-squares chapter renders syntax colors, indentation, code header and Copy code button legibly beside its instructions. Copy interaction was not tested in this session."
+    ],
+    "not_checked": [
+      "Every chapter",
+      "Native screen reader speech",
+      "Printing",
+      "Every code block and clipboard interaction"
+    ]
+  },
+  "apple_books": {
+    "status": "pending; import accepted but current edition not located",
+    "observations": [
+      "File Import selected frozen EPUB from known absolute path.",
+      "Library status progressed from Importing1of1 Failed0 through syncing to Uploaded to iCloud.",
+      "Library/search exposed only older0.10.0 and0.11.0 editions.",
+      "No0.14 reader page was observed.",
+      "Native screenshots returned blank white images; further import/control reads failed with ScreenCaptureKit invalid-parameter error-3812."
+    ],
+    "followup_file": "/private/tmp/jax-pathways-0.14.0-native-review.epub",
+    "followup_file_is_exact_copy": true,
+    "full_reader_acceptance": false
+  },
+  "preview_server": {
+    "session": 69066,
+    "url": "http://127.0.0.1:4196/book.html",
+    "note": "Prior server handle was absent and browser connection refused after interruption; restarted same frozen directory."
+  }
+}

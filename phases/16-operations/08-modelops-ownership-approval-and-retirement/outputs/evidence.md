@@ -4,7 +4,7 @@ Copy this template into your own portfolio and fill it after running your modifi
 
 ## Evidence required
 
-Keep the reviewed bundle hash, owner and target, expiry boundary, failed-transition pointer equality and changed-owner rejection. Explain why the local reviewer field is not authenticated approval.
+Keep approval/bundle identity, predictions across activation and rollback, retirement/cache/reload behavior, stale/expired/retired-target failures and an audit trail. Scope is a local single-writer policy fixture.
 
 - Command: `python3 phases/16-operations/08-modelops-ownership-approval-and-retirement/code/main.py`
 - Working directory: Repository root

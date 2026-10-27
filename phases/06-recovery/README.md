@@ -12,7 +12,9 @@ Compare sample IDs, optimizer memory, random state and losses after restore.
 
 ## Study guide: Can an interrupted run make exactly the same next update?
 
-Recovery is a contract between data order, model state and publication. Tracking explains which run produced an artifact; a checkpoint supplies the values needed to continue it. Neither replaces the other.
+Imagine a run stops just after an update. Loading the weights is only part of continuing: the optimizer, next random draw and next data record must correspond to the same boundary. A seed can replay a sequence from its beginning, while iterator state identifies where to continue it.
+
+Trace record IDs and complete training state across a save, interruption and fresh restore. Then distinguish a requested save from a completed, verified and accepted checkpoint. Experiment tracking supplies the source and data lineage around that continuation; it does not replace the state required to resume.
 
 ### Check your starting point
 
@@ -42,11 +44,11 @@ Review: [Save model, optimizer, and random state](03-save-model-optimizer-and-ra
 
 ### Try a changed condition
 
-The checkpoint is valid, but the dataset was reordered without changing its filename. Is the saved cursor sufficient?
+Two restored parameter arrays both have norm 5: \((3,4)\) and \((0,5)\). Did the checkpoint replay pass?
 
 <details><summary>Compare an approach</summary>
 
-No. The cursor is meaningful relative to a dataset identity and ordering configuration. Verify content/version identity first; reject mismatches rather than silently resuming on different records.
+No. Equal norms discard direction. Elementwise differences are \((3,-1)\), and the arrays can produce different predictions. Compare every required state leaf, the next batch IDs and subsequent updates under a declared tolerance, not only a norm or final scalar loss.
 
 </details>
 
@@ -132,7 +134,7 @@ Status: authored lesson with CPU exercise.
 
 **Intended outcome:** Track, retrieve and compare two JAX experiments using explicit data identity, metric steps and downloaded model artifacts.
 
-**Evidence:** Keep both MLflow run IDs, source/data hashes, complete loss histories, the selection metric and predictions independently recomputed from the downloaded artifact.
+**Evidence:** Keep retrieved metric histories and data tags, all three model artifacts, actual train/validation predictions after reload, and the different training-only versus held-out selections. Explain the memorizer's zero training MSE and validation MSE of 6.
 
 **Checkpoint:** A run is tagged champion. What does that establish?
 

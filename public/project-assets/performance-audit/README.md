@@ -25,3 +25,11 @@ Stage 2 invokes the same compiled function at shapes 16 by 16 and 32 by 32. The 
 Stage 3 writes `report.json` and `workload.jaxpr.txt` under `runs/performance-audit/`. The report explicitly says `memory_measured: false`. Stage 4 integrates the checks. Passing output begins `PASS performance-audit stage N`.
 
 This records CPU first-call and repeated-call observations plus a symbolic program. It is not a hardware profile, a memory measurement, or TPU qualification. Reference command: `python3 projects/performance-audit/tests/check.py --implementation solution --stage 4`.
+
+## Review handoff: explain a changed condition
+
+A 10 ms component of a 100 ms step is halved. Predict the 95 ms total before collecting a new timing.
+
+**Keep for review:** The estimate, synchronized unprofiled samples and trace boundaries. Explain any discrepancy through measured overlap or other changed work, not by reporting the local 2x as an end-to-end gain.
+
+Write your prediction before opening the reference implementation. Distinguish what the existing checker verifies from your proposed extension; record any extension command, actual output and limitation separately. A reviewer should be able to locate the first failed contract from your saved evidence.

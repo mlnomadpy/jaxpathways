@@ -11,7 +11,12 @@
         "It is automatically saved to disk"
       ],
       "correct": 0,
-      "explanation": "Trainability and mutability are different properties. Filtering controls differentiation; the forward function still controls state updates."
+      "explanation": "Trainability and mutability are different properties. Filtering controls differentiation; the forward function still controls state updates.",
+      "optionFeedback": [
+        "Trainability and mutability are different properties. Filtering controls differentiation; the forward function still controls state updates.",
+        "Excluding a value from nnx.Param does not freeze it. State such as a counter can still change in the forward computation.",
+        "State classification does not persist anything to disk. Saving and restoring requires an explicit checkpoint contract."
+      ]
     }
   ]
 }

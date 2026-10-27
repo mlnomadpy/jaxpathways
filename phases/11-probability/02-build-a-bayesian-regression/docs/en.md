@@ -4,6 +4,8 @@ Phase 11: Probabilistic modeling · about 110 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Distributions and sampling](https://www.tahabouhsine.com/jaxpathways/lesson-probability-01.html).
+
 ## What you will be able to do
 
 - State the prior, likelihood and observation-noise assumptions
@@ -169,11 +171,11 @@ Expected: The posterior mean is approximately $(0.9231,1.7778)$. Latent variance
 
 ### Read the figure
 
-The horizontal axis is the input value. The vertical axis is predictive standard deviation, in target units. The lower curve propagates posterior weight uncertainty; the upper curve also adds the assumed observation noise before taking a square root. At input zero they are about $0.555$ and $1.144$. The curves rise symmetrically toward both ends because centered training inputs produce zero intercept-slope covariance.
+The horizontal axis is input value, and the vertical axis is predictive standard deviation in target units. The lower curve is uncertainty in the latent line; the upper curve adds the assumed unit observation-noise variance before taking the square root. At input zero, the executed model gives standard deviations about $\sqrt{4/13}=0.555$ and $\sqrt{17/13}=1.144$. At input two, they are about 1.444 and 1.757 because slope uncertainty grows away from the centered training inputs.
 
 ### Connect it to the computation
 
-The gap is not a fixed standard deviation of one: variances add, then we take the square root. The lower curve is narrowest near the observed center and grows under extrapolation. These are exact Gaussian-model standard deviations, not measured error bars or empirical coverage on a real test set.
+The curves come from the exact Gaussian posterior for fixed inputs $-1,0,1$, prior scale 2 and known noise scale 1. Variances add before taking the square root; observation noise is not added as a standard deviation. If we changed the assumed noise scale, only the upper predictive variance would receive that additional noise term directly, while refitting would also change the posterior covariance. These are conditional model quantities, not empirical coverage.
 
 ```python
 grid=jnp.linspace(-3,3,61)
@@ -183,7 +185,7 @@ visual_data={"kind":"line","x":grid.tolist(),"xlabel":"input value","ylabel":"pr
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:23:04.706399+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:07:04.106433+00:00. JAX 0.9.2.
 
 ```text
 posterior mean: [0.923077  1.7777778] covariance: [[0.30769232 0.        ]
@@ -233,17 +235,28 @@ Strengthen the prior by changing its scale from two to one half. Predict the dir
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Inputs:**
+- A design matrix with an explicit intercept column, outcomes, known noise scale, and two prior scales.
+
+**Outputs:**
+- Posterior mean and covariance for both prior choices.
+
+**Invariants to check:**
+- The covariance is symmetric positive definite.
+- The stronger zero-centered prior cannot increase the posterior mean norm in this fixed fixture.
+
+**Hints:**
+- Build posterior precision from prior and likelihood precision.
+- Solve linear systems instead of explicitly inverting a matrix.
+- Interpret the changed posterior separately from predictive model quality.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Strengthen the prior by changing its scale from two to one half.
-strong_mean,strong_cov = posterior(...)  # TODO: compute strong_mean,strong_cov
-assert jnp.linalg.norm(strong_mean)  # TODO: complete assertion check
-assert jnp.all(jnp.diag(strong_cov)  # TODO: complete assertion check
+def compare_prior_strength(X, y, noise_scale, prior_scales):
+    """Return posterior moments under two prior scales."""
+    # TODO: solve both Gaussian precision systems and compare their means.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -271,26 +284,27 @@ The intercept and slope can compensate for each other when features are not cent
 
 ### How to write: Move away from centered inputs — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- The requested design rows, outcomes, known noise scale, and prior scale.
 
-**Step-by-step implementation plan:**
-1. Transfer the device result to the host for an independent NumPy comparison.
-2. Transfer the device result to the host for an independent NumPy comparison.
+**Outputs:**
+- The JAX posterior mean/covariance, host NumPy solve results, and an off-diagonal covariance check.
+
+**Invariants to check:**
+- The two solves use the same precision system; the shifted design yields a full posterior covariance with a nonzero off-diagonal entry.
+
+**Hints:**
+- Construct the precision matrix in float64 on the host for an independent solve.
+- Check the covariance off-diagonal directly instead of reducing it to a diagonal summary.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Move away from centered inputs (Transfer / diagnosis)
-shift_X = jnp.array(...)  # TODO: compute shift_X
-shift_m,shift_c = posterior(...)  # TODO: compute shift_m,shift_c
-# Transfer the device result to the host for an independent NumPy comparison.
-host_X = np.asarray(...)  # TODO: compute host_X
-host_P = np.eye(...)  # TODO: compute host_P
-# Transfer the device result to the host for an independent NumPy comparison.
-np.testing.assert_allclose(shift_m,np.linalg.solve(host_P,host_X.T@np.asarray(y)),rtol=1e-5,atol=1e-6)
-assert shift_c[0,1]  # TODO: complete assertion check
+import numpy as np
+
+def compare_posterior_with_host_solve(posterior, outcomes, noise_scale, prior_scale):
+    # TODO: Solve the requested design case with JAX and independent host NumPy arithmetic.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -325,25 +339,28 @@ Use separate keys for weights and noise; sample with a Cholesky factor.
 
 ### How to write: Verify total predictive variance — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jax.random.PRNGKey(seed) & jax.random.split(key)` — Uses explicit PRNG keys. Split a key when you need independent random draws; reusing a key repeats its random stream.
+**Inputs:**
+- Posterior weight mean/covariance, observation noise scale, an explicit random key, and the requested sample count.
 
-**Step-by-step implementation plan:**
-1. Create or split explicit PRNG key(s) (`(kw, kn)`) for reproducible randomness.
-2. Sample deterministic random values into `weights` using an explicit PRNG key.
-3. Sample deterministic random values into `replicated` using an explicit PRNG key.
+**Outputs:**
+- Empirical prediction variance from sampled weights plus observation noise and analytic observation variance at input zero.
+
+**Invariants to check:**
+- The sampled observation variance is compared with the analytic predictive variance, including the noise contribution.
+
+**Hints:**
+- Draw parameter samples from the full posterior covariance.
+- Use a separate subkey for observation noise and evaluate the prediction at input zero.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Verify total predictive variance (Transfer / diagnosis)
-# Create or split explicit PRNG key(s) (`(kw, kn)`) for reproducible randomness.
-kw,kn = jax.random.split(...)  # TODO: compute kw,kn
-# Sample deterministic random values into `weights` using an explicit PRNG key.
-weights = ...  # TODO: compute weights
-# Sample deterministic random values into `replicated` using an explicit PRNG key.
-replicated = ...  # TODO: compute replicated
-assert abs(float(replicated.var())-float(observation_var[0]))  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+
+def compare_sampled_and_analytic_observation_variance(mean, covariance, noise_scale, key, sample_count):
+    # TODO: Sample posterior weights and independent observation noise, then compare variances at x=0.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -373,9 +390,17 @@ Which variance describes a new noisy reading at a given input?
 
 <details><summary>Answer and explanation</summary>
 
-The propagated weight uncertainty plus observation-noise variance
+**1. Only the posterior variance of the intercept**
+
+A future prediction depends on all relevant coefficient uncertainty at its input, including covariance, plus observation noise.
+
+**2. The propagated weight uncertainty plus observation-noise variance (correct)**
 
 Both the unknown line and a new independent observation error contribute. Omitting the latter gives an interval for the latent mean, not for a future reading.
+
+**3. The training mean squared error divided by the number of weights**
+
+Training MSE divided by parameter count is not this posterior predictive calculation. Propagate the coefficient covariance through the new input.
 
 </details>
 

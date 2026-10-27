@@ -8,7 +8,7 @@ This worked reference is validated on CPU. Accelerator compatibility requires a 
 
 - Stage the TPU launcher (`resources/tpu-gcp/launch.py`) to a Cloud TPU VM with `gcloud compute tpus tpu-vm scp`.
 - Separate XLA compile warmup time from steady-state step time in structured `events.jsonl` logs.
-- Write atomic checkpoints using `temp` + `os.fsync` + `os.replace` so preemption never corrupts the latest checkpoint.
+- Write atomic checkpoints using `temp` + `os.fsync` + `os.replace` so preemption does not expose a partially replaced destination under the tested single-writer local-filesystem model the latest checkpoint.
 - Interrupt, resume from an atomic checkpoint, and verify zero drift against an uninterrupted control run.
 
 ## The problem
@@ -21,14 +21,12 @@ The launcher records warmup and synchronized updates separately, then checkpoint
 
 ## Why launching a TPU experiment is different from running a notebook cell
 
-When you launch a JAX script on a TPU VM, the first call to a `@jax.jit` step traces Python and compiles an XLA HLO program for the attached TPU chips. If you time step $1$ together with steps $2\dots N$, your step-time measurement is dominated by XLA compilation rather than TPU execution.
+A script makes the run sequence and its evidence repeatable. The first `@jax.jit` call traces and compiles; the launcher records that synchronized warmup separately, then synchronizes each timed update before writing its event. The CPU fixture records both intervals so you can compare their own samples; exact timings vary across captures. For example, a hypothetical $1$-second warmup followed by $100$ updates of $0.01$ seconds takes $1+100\times0.01=2$ seconds in total. Averaging that total gives $2/100=0.02$ seconds per update including startup, while the steady update interval is $0.01$ seconds. State which question your summary answers; neither CPU duration estimates TPU performance. Use the actual number of `step` events to compute a steady-state summary, and leave `compile_warmup_s` outside that summary.
 
-A production-grade TPU launcher runs one synchronized warmup call before the training loop and logs `compile_warmup_s` in a dedicated `warmup` event. Subsequent `step` events measure synchronized steady-state updates (`jax.block_until_ready`).
-
-Whenever a checkpoint step arrives, writing directly to `checkpoint-latest.json` risks leaving a half-written file if a Spot TPU VM is preempted mid-write. Writing to a temporary sibling file (`checkpoint-latest.json.tmp`), flushing with `os.fsync`, and atomically renaming with `os.replace` makes the visible checkpoint path switch atomically on supported local filesystems. This does not by itself promise survival across power loss or distributed publication. A checkpoint hash detects changed serialized state; a separately hashed configuration binds data identity, seed, learning rate, batch schedule, and optimizer rule.
+The checkpoint contains parameters, optimizer moments and PRNG key, plus a state hash and run-configuration identity. The tested single-writer local-filesystem path writes a sibling `.tmp`, flushes it, and replaces the destination. If interrupted, load only the published checkpoint after checking schema, hash and run identity; a leftover temp file is not a checkpoint. If the destination is missing or invalid, this fixture has no backup to restore, so restart from initial state or use a separately retained validated checkpoint. Atomic name replacement does not by itself promise power-loss durability, concurrent-writer safety or distributed publication.
 
 $$
-T_{\text{step}} = \frac{T_{\text{total}}(S) - T_{\text{compile}}(1)}{S - 1}
+\bar{T}_{\text{step}} = \frac{\sum_{i=1}^{N_{\text{updates}}} \Delta t_i}{N_{\text{updates}}}, \quad \Delta t_i = t^{\text{end}}_i - t^{\text{start}}_i
 $$
 
 ### Checkpointed TPU job launcher lifecycle from warmup to zero-drift resume
@@ -39,7 +37,7 @@ $$
 
 *Architecture and dataflow mechanism diagram.*
 
-Read top to bottom: the launcher loads either the initial state or `checkpoint-latest.json`, runs one synchronized `@jax.jit` warmup call to compile XLA HLO without mutating state, executes timed steady-state steps while appending to `events.jsonl`, and writes `checkpoint-latest.json` atomically via `.tmp` + `fsync` + `os.replace`.
+Read the arrows as a job lifecycle: load initial or validated checkpoint state, compile one synchronized warmup without changing that state, run synchronized updates while appending `step` events, then publish a checkpoint through `.tmp` and atomic replacement. After interruption, validate the published file's schema, state hash and run identity before resume; discard a leftover `.tmp`. The measured CPU example separates about 196.9 ms warmup from a 1.018 ms median step. The next decision is whether the named checkpoint is valid; an invalid or missing destination needs a separately saved backup or a restart, not a guess.
 
 ### Pause and reason
 
@@ -53,7 +51,7 @@ Without restoring the optimizer momentum/variance buffers (`m_w`, `m_b`) and the
 
 ## 1. Stage the launcher and run a checkpoint-resumed TPU experiment
 
-Use the local CPU exercise first to test the resume contract: a missing requested checkpoint raises an error; modified state or changed configuration is rejected; resuming an already completed run returns its saved final state without executing another update. Only after these checks should you run the same launcher on a TPU VM.
+First run the CPU fixture to check the resume contract, then treat its receipt as a logical rehearsal. It stops at step 4, resumes to step 8 and compares the final state hash with the uninterrupted control; both are `eba1c0bc…eccbed9`, an exact match in the recorded run. It also rejects a modified checkpoint hash. This establishes the tested deterministic resume path on CPU only. A TPU job needs its own saved receipt naming the source, pinned environment, requested topology and observed TPU backend before its timing or recovery result is called TPU evidence.
 
 **Stage launch.py and verify checkpoint resume on the Cloud TPU VM**
 
@@ -443,11 +441,13 @@ Expected: Prints the matching 64-character state_hash for the resumed and contro
 
 ### Read the figure
 
-The horizontal axis shows training steps 1 through 6, with a vertical dotted boundary at step 3 where the first run stopped and wrote its checkpoint. The solid line is the uninterrupted 6-step control run; the dashed line is the run that stopped at step 3 and resumed for steps 4–6.
+The horizontal axis is training step 1 through 6; the vertical axis is minibatch mean-squared loss (unitless). The solid curve is the uninterrupted CPU control; the dashed curve stops after step 3 and resumes at step 4. At steps 1 to 6 both show 3.6712, 3.78913, 1.91372, 2.09553, 1.81174 and 1.16636, so their maximum absolute difference is 0. The overlap means this recorded CPU resume reproduced the control trajectory. It does not measure TPU speed. For a changed checkpoint or configuration, first expect the state-hash check to reject a mismatch.
 
 ### Connect it to the computation
 
-Because the checkpoint at step 3 saved `(w, b, m_w, m_b, key)` atomically and the warmup call did not consume the restored state, the two loss trajectories lie directly on top of each other (`max_abs_diff == 0`).
+The plotted six-step example saves after step $3$, carrying $(w,b,m_w,m_b,key)$ into the next update. The runnable launcher example uses a separate eight-step check that pauses after step $4$; its resumed and uninterrupted final state hashes also match (`eba1c0bc…eccbed9`). Keep each example's step boundary with its own results rather than mixing their step numbers.
+
+Both examples ask the same recovery question: does restoring the complete accepted state produce the continuation that the control run would have produced? Use the curve for step-by-step loss agreement and the complete-state comparison for information a scalar loss can hide. Obtain a separate named target receipt before interpreting either CPU example as TPU recovery evidence.
 
 ```python
 visual_data = {
@@ -465,14 +465,14 @@ visual_data = {
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:27:11.475158+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:17:01.239752+00:00. JAX 0.9.2.
 
 ```text
 Resumed state_hash matches uninterrupted control: ecba6a13e41beb0003af0371f8422efa3b08538c4420efb07a9bc61b0a10cdc1
 Losses across 6 steps: [3.6712, 3.78913, 1.91372, 2.09553, 1.81174, 1.16636]
 Resumed state_hash matches uninterrupted control: ecba6a13e41beb0003af0371f8422efa3b08538c4420efb07a9bc61b0a10cdc1
 Losses across 6 steps: [3.6712, 3.78913, 1.91372, 2.09553, 1.81174, 1.16636]
-Warmup ms: 81.296 Median steady step ms: 0.0319
+Warmup ms: 148.079 Median steady step ms: 0.2248
 Resume rejection: checkpoint state hash mismatch
 Step 8 resumed vs control hash: eba1c0bcfb80184d9f5108c1d6539369e21f95276e5d6806234237f41eccbed9 eba1c0bcfb80184d9f5108c1d6539369e21f95276e5d6806234237f41eccbed9
 Recorded event sequence: ['started', 'warmup', 'step', 'step', 'checkpoint', 'completed', 'restored', 'warmup', 'step', 'step', 'checkpoint', 'completed']
@@ -531,22 +531,28 @@ Run `run_tpu_ready_job` for $4$ steps (`save_every=2`), resume to $8$ steps, and
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Exercise solution
-2. Keep this run’s database and artifacts in a scratch directory removed on exit.
+**Inputs:**
+- A scratch job directory, checkpoint interval, deterministic job config, and step targets four and eight.
+
+**Outputs:**
+- Resumed and uninterrupted final state hashes at step eight.
+
+**Invariants to check:**
+- The final hashes match only when resume restores the complete deterministic state and compatible configuration.
+
+**Hints:**
+- Run the first segment, resume from its checkpoint, then run an uninterrupted control.
+- Keep each run's files isolated.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-# Keep this run’s database and artifacts in a scratch directory removed on exit.
-with tempfile.TemporaryDirectory(prefix="tpu-ex-") as tmp:
-    ex_root = Path(...)  # TODO: compute ex_root
-    r1 = run_tpu_ready_job(...)  # TODO: compute r1
-    r2 = run_tpu_ready_job(...)  # TODO: compute r2
-    ctrl8 = run_tpu_ready_job(...)  # TODO: compute ctrl8
-print("Step 8 resumed vs control hash:", r2["state_hash"], ctrl8["state_hash"])
-assert r2["state_hash"]  # TODO: complete assertion check
+import jax.numpy as jnp
+import numpy as np
+
+def compare_resumed_and_uninterrupted_runs(run_tpu_ready_job, root):
+    # TODO: run the staged and control trajectories and compare final state hashes.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -579,22 +585,28 @@ Read `events.jsonl` line by line with `json.loads`.
 
 ### How to write: Inspect the JSONL event sequence from a resumed run — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Inspect the JSONL event sequence from a resumed run (Foundations)
-2. Keep this run’s database and artifacts in a scratch directory removed on exit.
+**Inputs:**
+- A temporary job directory and the public two-step/resume-to-four-step launcher.
+
+**Outputs:**
+- The ordered event names recorded in JSONL after resume.
+
+**Invariants to check:**
+- Event order comes from the durable log, not from an assumed event sequence.
+
+**Hints:**
+- Parse one JSON object per line.
+- Include both the initial and resumed launch events.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Inspect the JSONL event sequence from a resumed run (Foundations)
-# Keep this run’s database and artifacts in a scratch directory removed on exit.
-with tempfile.TemporaryDirectory(prefix="tpu-events-") as tmp:
-    ev_dir = Path(...)  # TODO: compute ev_dir
-    run_tpu_ready_job(ev_dir, steps = ...  # TODO: compute run_tpu_ready_job(ev_dir, steps
-    run_tpu_ready_job(ev_dir, steps = ...  # TODO: compute run_tpu_ready_job(ev_dir, steps
-    event_names = ...  # TODO: compute event_names
-print("Recorded event sequence:", event_names)
-assert "started"  # TODO: complete assertion check
+import jax.numpy as jnp
+import numpy as np
+
+def read_resumed_event_names(run_tpu_ready_job, root):
+    # TODO: launch both segments and return the event names in file order.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -629,24 +641,28 @@ Check `list(Path(tmp).glob('*.tmp')) == []`.
 
 ### How to write: Verify atomic checkpoint file replacement — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Keep this run’s database and artifacts in a scratch directory removed on exit.
-2. Assert invariant `loaded["step"] == 4 and leftovers == []` holds
+**Inputs:**
+- A temporary target path and two JSON payloads written through atomic_write_json.
+
+**Outputs:**
+- The final decoded second payload and a check for leftover temporary siblings.
+
+**Invariants to check:**
+- The destination contains a complete JSON object; no staging temp file remains after success.
+
+**Hints:**
+- Write twice to the same target.
+- Inspect the directory after the second replacement.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Verify atomic checkpoint file replacement (Transfer / diagnosis)
-# Keep this run’s database and artifacts in a scratch directory removed on exit.
-with tempfile.TemporaryDirectory(prefix="tpu-atomic-") as tmp:
-    target = Path(...)  # TODO: compute target
-    atomic_write_json(target, {"step": 2})
-    atomic_write_json(target, {"step": 4})
-    leftovers = list(...)  # TODO: compute leftovers
-    loaded = json.loads(...)  # TODO: compute loaded
-print("Loaded step:", loaded["step"], "Leftover tmp files:", leftovers)
-# Assert invariant `loaded["step"] == 4 and leftovers == []` holds
-assert loaded["step"]  # TODO: complete assertion check
+import jax.numpy as jnp
+import numpy as np
+
+def check_atomic_json_replacement(atomic_write_json, root):
+    # TODO: write two payloads and inspect the final file and temporary-file cleanup.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -679,9 +695,17 @@ Why does `run_tpu_ready_job` execute `train_step` once and discard its outputs b
 
 <details><summary>Answer and explanation</summary>
 
-To trigger XLA compilation and synchronize the warmup result without altering the initial or restored training state, keeping compilation latency out of steady-state step measurements
+**1. To mutate the parameters one extra time before step 1**
 
-JAX compiles `@jax.jit` functions on their first call for a given input shape and dtype; warming up on the initial state without overwriting `(w, b, m_w, m_b, key)` isolates compile time from step time while preserving exact state trajectories.
+Retaining warmup output would advance this example’s state. Discard its returned state and begin the measured trajectory from the intended checkpoint.
+
+**2. To trigger XLA compilation and synchronize the warmup result without altering the initial or restored training state, keeping compilation latency out of steady-state step measurements (correct)**
+
+This fixed-signature example warms and synchronizes the compiled step, then discards its returned state so the measured trajectory starts at the intended state. A later shape, dtype or static-argument change can still recompile. Warmup is not a general steady-state guarantee.
+
+**3. Because JAX cannot save checkpoints without a warmup call**
+
+Checkpoint compatibility is not created by warmup. Warmup separates initial compilation from timing for the tested signature.
 
 </details>
 

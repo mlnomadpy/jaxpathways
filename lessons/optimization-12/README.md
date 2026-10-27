@@ -4,6 +4,8 @@ Phase 04: Math & optimization · about 90 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Optimize with Optax](https://www.tahabouhsine.com/jaxpathways/lesson-optimization-04.html).
+
 ## What you will be able to do
 
 - Explain Adam’s moments, inspect clipping and schedule order, and compare optimizers with a controlled update budget.
@@ -37,7 +39,7 @@ The existing optimizer plot uses its labeled learning rates and shows nonmonoton
 
 *Architecture and dataflow mechanism diagram.*
 
-The blue arrow is $(3,4)$. Green scales it to norm $2.5$ along the same ray. Orange clips each coordinate to $2.5$, landing at the box corner with norm $2.5\sqrt{2}$. The circle and box are analytic constraints, not training measurements.
+The blue arrow is $(3,4)$. Green scales it to norm $2.5$ along the same ray. Orange clips each coordinate to $2.5$, landing at the box corner with norm $2.5\sqrt{2}$. The circle and box are analytic constraints, not training measurements. The circle marks the global norm cap and the square marks coordinate bounds. Predict which endpoint changes if the threshold shrinks: global clipping moves along the same ray, while coordinate clipping can move toward a different direction.
 
 ### Pause and reason
 
@@ -53,6 +55,8 @@ No. For the clipped vector $(2.5,2.5)$, the norm is $2.5\sqrt{2}$. A coordinate 
 
 Let $g_t$ be the gradient at update $t$. Adam tracks a first moment $m_t$ and a second raw moment $v_t$, using decay rates $\beta_1$ and $\beta_2$. Starting at zero makes the early averages small; divide by $1-\beta_1^t$ and $1-\beta_2^t$ to correct that bias. At the first step, corrected moments are $g_1$ and $g_1^2$. With a small $\epsilon$, each nonzero coordinate initially moves close to the learning rate in the opposite sign direction. This does not mean later steps ignore magnitude.
 
+For a coordinate with first gradient 2 and zero initial moments, the bias-corrected first moment is 2 and the corrected second moment is 4. Its normalized direction is 2 divided by square root of 4 plus epsilon, approximately 1. At the next step, each moment blends the new gradient with its prior trace, so the update depends on the sequence, not only on the latest gradient.
+
 $$
 \begin{aligned}m_t&=\beta_1m_{t-1}+(1-\beta_1)g_t\\v_t&=\beta_2v_{t-1}+(1-\beta_2)g_t^2\\\hat m_t&=m_t/(1-\beta_1^t),\quad \hat v_t=v_t/(1-\beta_2^t)\\\Delta w_t&=-\eta_t\frac{\hat m_t}{\sqrt{\hat v_t}+\epsilon}\end{aligned}
 $$
@@ -61,6 +65,8 @@ $$
 
 Global norm clipping rescales a gradient only when its length exceeds a threshold $c$. For $g=(3,4)$, the norm is $5$, so clipping at $c=1$ gives $(0.6,0.8)$. Coordinate-wise clipping to the same threshold instead gives $(1,1)$, changing direction. Clipping before Adam limits the gradient entering its moments; it does not impose that same bound on the final parameter update. Clipping cannot repair NaNs, wrong labels or a wrong objective.
 
+The global clipping scale is threshold divided by norm, $1/5$, so the clipped vector is $(0.6,0.8)$ with norm exactly $1$. Coordinate clipping at the same threshold gives $(1,1)$, whose norm is $\sqrt{2}>1$. The cap applies to the gradient entering the optimizer; Adam normalization can produce a parameter update with a different norm.
+
 $$
 \tilde g=g\min\!\left(1,\frac{c}{\|g\|_2}\right)\quad\text{for }\|g\|_2>0
 $$
@@ -68,6 +74,8 @@ $$
 ## Make the schedule clock explicit
 
 A schedule maps an optimizer update count to a learning rate. Our linear example goes from $0.1$ at count $0$ to $0.01$ at count $4$, then stays there. Count $0$ is the first update, not an epoch. Gradient accumulation changes how many optimizer updates occur per data pass. Restoring only model weights loses the moments and schedule position; retain optimizer state to continue the same run.
+
+The supplied schedule values at counts 0 through 5 are $0.1,0.0775,0.055,0.0325,0.01,0.01$. Before the floor, each count changes the rate by $(0.01-0.1)/4=-0.0225$. Since the rate is indexed by optimizer update, accumulating four microbatches means one schedule tick for that group.
 
 ## Compare decisions with evidence
 
@@ -189,6 +197,8 @@ The dash-dot Adam curve makes the same caution especially clear. It reaches abou
 
 At update $50$, the losses are approximately $1.28\times10^{-4}$ for Adam, $2.96\times10^{-3}$ for SGD, and $2.49\times10^{-2}$ for momentum. Adam finishes lowest under these settings, although it was not lowest at every earlier update. Compare the same update budget, read the endpoint as well as the dips, and remember that equal update counts do not imply equal runtime. This figure uses fixed rates without clipping or a schedule; the later experiments examine those separate choices.
 
+Before changing configuration, predict which part changes: clipping changes the incoming gradient vector, the schedule changes its scalar rate over update count, and Adam state changes history-dependent normalization.
+
 ```python
 def plot_bowl(z):
     return 0.5 * (z[0] ** 2 + 10 * z[1] ** 2)
@@ -207,7 +217,7 @@ visual_data = {'kind': 'line', 'x': list(range(51)), 'xlabel': 'completed update
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:20:53.825684+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:13:39.223809+00:00. JAX 0.9.2.
 
 ```text
 step / update: 1 [-0.09999993  0.09999993]
@@ -281,22 +291,27 @@ Compare global norm clipping with coordinate-wise clipping on $(3,4)$. Check whi
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- The gradient vector (3, 4) and the global and coordinate clipping bound used in the lesson.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- The globally clipped vector and coordinate-wise clipped vector, their coordinate ratios, and which operation preserves the original ratio.
+
+**Invariants to check:**
+- Global norm clipping scales both coordinates by one factor, while coordinate clipping can change their ratio.
+
+**Hints:**
+- Compute the vector norm before the global rescaling.
+- Apply coordinate clipping independently to each component and compare ratios.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Compare global norm clipping with coordinate-wise clipping on (3,4).
-coordinate = jnp.clip(...)  # TODO: compute coordinate
-assert jnp.allclose(coordinate, jnp.array([1.0, 1.0]))  # TODO: complete assertion check
-assert jnp.allclose(clipped[0] / clipped[1], g[0] / g[1])  # TODO: complete assertion check
-assert not jnp.allclose(coordinate[0] / coordinate[1], g[0] / g[1])  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def compare_global_and_coordinate_clipping(gradient, max_norm):
+    # TODO: Compute both clipped vectors for the supplied gradient and report their coordinate ratios.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -325,29 +340,28 @@ The retained count has reached the final rate; a reset count starts at $0$.
 
 ### How to write: Catch schedule restart — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `optax.adam(lr) / optax.apply_updates(params, updates)` — Optax gradient transformations and numerically stable loss functions over parameter PyTrees.
+**Inputs:**
+- After five scheduled SGD steps with constant gradient $1$, compare a retained optimizer state with a freshly initialized state for the next update.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- Both parameter updates and the scheduler/optimizer states.
+
+**Invariants to check:**
+- Only the optimizer-state reset differs between the two continuations.
+
+**Hints:**
+- The retained count has reached the final rate; a reset count starts at $0$.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Catch schedule restart (Transfer / diagnosis)
-tx = optax.sgd(...)  # TODO: compute tx
-p = jnp.array(...)  # TODO: compute p
-s = tx.init(...)  # TODO: compute s
-for _ in range(5):
-    delta, s = tx.update(...)  # TODO: compute delta, s
-    p = optax.apply_updates(...)  # TODO: compute p
-continued, _ = tx.update(...)  # TODO: compute continued, _
-restarted, _ = tx.update(...)  # TODO: compute restarted, _
-assert jnp.allclose(continued, -0.01, atol=1e-06)  # TODO: complete assertion check
-assert jnp.allclose(restarted, -0.1, atol=1e-06)  # TODO: complete assertion check
+import jax.numpy as jnp
+import optax
+
+def practice_catch_schedule_restart(gradient, state, next_step):
+    """Implement the catch schedule restart check."""
+    # TODO: Apply the next scheduled update with retained state and with reset state after the same first five steps.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -384,25 +398,29 @@ The un-clipped SGD update already has norm $0.5$, below the threshold $1$.
 
 ### How to write: Check transformation order — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.zeros / jnp.ones(shape, dtype=...)` — Allocates a tensor of the given `shape` initialized with constants.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `optax.adam(lr) / optax.apply_updates(params, updates)` — Optax gradient transformations and numerically stable loss functions over parameter PyTrees.
+**Inputs:**
+- For gradient $(3,4)$, compare clipping before SGD at rate $0.1$ with clipping after it. Write a decision memo explaining which quantity you intended to bound.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- Both transformed gradients and their global norms.
+
+**Invariants to check:**
+- The declared bound names whether it applies to raw gradients or scaled updates.
+
+**Hints:**
+- The un-clipped SGD update already has norm $0.5$, below the threshold $1$.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Check transformation order (Transfer / diagnosis): Transformation order changes the algorithm.
-before = optax.chain(...)  # TODO: compute before
-after = optax.chain(...)  # TODO: compute after
-u_before, _ = before.update(...)  # TODO: compute u_before, _
-u_after, _ = after.update(...)  # TODO: compute u_after, _
-assert jnp.allclose(jnp.linalg.norm(u_before), 0.1, atol=1e-06)  # TODO: complete assertion check
-assert jnp.allclose(jnp.linalg.norm(u_after), 0.5, atol=1e-06)  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+import optax
+
+def practice_check_transformation_order(gradient, learning_rate, max_norm):
+    """Implement the check transformation order check."""
+    # TODO: Apply clipping before the learning-rate transform and after it, recording both bounded quantities.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -431,9 +449,17 @@ Does clipping gradients before Adam guarantee that final updates obey the same n
 
 <details><summary>Answer and explanation</summary>
 
-No; Adam subsequently rescales coordinates
+**1. Yes, every later transformation preserves that bound**
+
+Adam rescales coordinates using its moment estimates after clipping. Inspect the norm of the actual parameter delta separately.
+
+**2. No; Adam subsequently rescales coordinates (correct)**
 
 The clipping threshold bounds the incoming gradient. Adam’s stateful rescaling and learning rate determine the final update.
+
+**3. Only if the loss is a scalar**
+
+A scalar loss can have a large or poorly scaled gradient. Compute the gradient norm and update norm rather than inferring them from loss shape.
 
 </details>
 

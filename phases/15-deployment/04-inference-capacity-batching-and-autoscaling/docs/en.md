@@ -4,6 +4,8 @@ Phase 15: Deployment, interoperability & edge AI · about 130 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Containerize a model service and verify its boundary](https://www.tahabouhsine.com/jaxpathways/lesson-deployment-07.html).
+
 ## What you will be able to do
 
 - Measure completed inference after warming each batch shape
@@ -26,6 +28,8 @@ A request may wait for a batch, wait behind existing work, execute and then be e
 Draw arrival, enqueue, dispatch and completion on one timeline. Then measure or model each interval with its source stated. Tail latency depends on the arrival pattern and concurrency, not just the mean of isolated calls.
 
 This lesson combines measured CPU batch computation with a separately simulated queue. Keep those panels distinct. A queue simulation explores stated assumptions; it is not an observed autoscaling system or a production traffic measurement.
+
+The upper panel measures resident-input CPU computation per batch; it reports a median and p95 for each of three batch shapes. These very short timings can change order across captures, so use them to practice reading per-batch units rather than declaring an optimal batch size. The lower panel is a separate queue simulation using one measured service duration as its time unit.
 
 ### Pause and reason
 
@@ -273,11 +277,15 @@ Expected: The program prints first-call, warm p50/p95 and examples-per-second me
 
 ### Read the figure
 
-The upper panel shows measured CPU warm p50 and p95 milliseconds per batch for batch sizes $1,8,32$. Each timing waits for completion; inputs are already resident. These are sample percentiles, not confidence bounds or a speedup guarantee. The lower panel uses request index on the horizontal axis and simulated response time divided by the measured batch-one median on the vertical axis. Stable arrivals stay at $1$; overloaded arrivals rise from $1$ to $24.6$.
+Read the upper panel as milliseconds per complete batch, with batch sizes $1$, $8$ and $32$ along the horizontal axis. For each shape, p50 summarizes the middle of its warm sample and p95 describes a higher sample percentile. Compare those bars within the same batch before comparing shapes. Dividing a batch time by its size gives an amortized per-example cost; it does not make an individual request finish before its batch completes.
+
+The lower panel uses request index horizontally and response time divided by the chosen service time vertically. Spaced arrivals stay at $1$ service-time unit. Overloaded arrivals increase from $1$ to $24.6$ units by request index $59$. The queue panel therefore explains backlog under its declared arrivals; it does not measure live traffic or prove a production latency target.
 
 ### Connect it to the computation
 
-The lower panel’s growth comes entirely from the chosen arrival schedule and serial queue recurrence. The service duration stays fixed in the simulation. Normalizing by the measured service duration makes the buildup visible without freezing host-dependent milliseconds into the prose. Real requests can add networking, preprocessing, variable service times and batch collection; those costs are not inferred from this graph.
+The measured batch bars answer a compute question, while the simulated curves answer a waiting question. With arrivals $0.6t$ apart and service duration $t$, each request adds $0.4t$ of backlog in the serial-worker model. That arithmetic explains the rising lower curve even though the numerical model and service duration are unchanged.
+
+Predict two different interventions: a shorter service duration can increase capacity, while collecting a larger batch can add intentional waiting before service. Measure each boundary and replay an arrival pattern before deciding which intervention helps the user's response time. Small CPU timing differences between these batches are not a device ranking.
 
 ```python
 visual_data={"kind":"panels","panels":[{"kind":"bar","x":[0,1,2],"labels":["batch 1","batch 8","batch 32"],"xlabel":"resident-input batch shape","ylabel":"measured CPU milliseconds per batch","series":[{"label":"warm p50","y":[r["p50_ms"] for r in measurements]},{"label":"warm p95","y":[r["p95_ms"] for r in measurements]}]},{"kind":"line","x":request_index.tolist(),"xlabel":"request index (simulation)","ylabel":"simulated response / measured service","series":[{"label":"spaced arrivals","y":(stable_latency/service_ms).tolist()},{"label":"overloaded arrivals","y":(overloaded_latency/service_ms).tolist()}]}]}
@@ -285,19 +293,19 @@ visual_data={"kind":"panels","panels":[{"kind":"bar","x":[0,1,2],"labels":["batc
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:24:50.076919+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:15:10.318871+00:00. JAX 0.9.2.
 
 ```text
-{'batch': 1, 'first_call_ms': 46.82129202410579, 'p50_ms': 0.014874851331114769, 'p95_ms': 0.05815287586301563, 'steady_examples_per_second': 67227.56266533097}
-{'batch': 8, 'first_call_ms': 29.957707971334457, 'p50_ms': 0.012104865163564682, 'p95_ms': 0.10387939400970919, 'steady_examples_per_second': 660891.2938642047}
-{'batch': 32, 'first_call_ms': 28.894834220409393, 'p50_ms': 0.04816637374460697, 'p95_ms': 0.07945015095174311, 'steady_examples_per_second': 664363.901872163}
-measured batch-one service proxy (ms): 0.014874851331114769
-simulated last stable/overloaded response (ms): 0.014874851331114769 0.3659213427454233
-{'batch': 1, 'first_call_ms': 30.956625007092953, 'p50_ms': 0.008833128958940506, 'p95_ms': 0.051093427464365945, 'steady_examples_per_second': 113210.1664821551}
-{'batch': 8, 'first_call_ms': 31.71129198744893, 'p50_ms': 0.05616643466055393, 'p95_ms': 0.0935911200940609, 'steady_examples_per_second': 142433.8227688583}
-{'batch': 32, 'first_call_ms': 32.31158386915922, 'p50_ms': 0.08312496356666088, 'p95_ms': 0.7933102780953047, 'steady_examples_per_second': 384962.5747425207}
-measured batch-one service proxy (ms): 0.008833128958940506
-simulated last stable/overloaded response (ms): 0.008833128958940506 0.21729497238993645
+{'batch': 1, 'first_call_ms': 49.99895812943578, 'p50_ms': 0.02291705459356308, 'p95_ms': 0.06364851724356407, 'steady_examples_per_second': 43635.624984760434}
+{'batch': 8, 'first_call_ms': 34.4394170679152, 'p50_ms': 0.02925051376223564, 'p95_ms': 0.24676243774592854, 'steady_examples_per_second': 273499.46961712965}
+{'batch': 32, 'first_call_ms': 33.450540620833635, 'p50_ms': 0.03277091309428215, 'p95_ms': 0.0826959265395999, 'steady_examples_per_second': 976475.6907424511}
+measured batch-one service proxy (ms): 0.02291705459356308
+simulated last stable/overloaded response (ms): 0.02291705459356308 0.5637595430016518
+{'batch': 1, 'first_call_ms': 30.60975018888712, 'p50_ms': 0.025562476366758347, 'p95_ms': 0.0629498856142163, 'steady_examples_per_second': 39119.84056835777}
+{'batch': 8, 'first_call_ms': 28.963209129869938, 'p50_ms': 0.027937814593315125, 'p95_ms': 0.07306882180273531, 'steady_examples_per_second': 286350.2430828722}
+{'batch': 32, 'first_call_ms': 26.724332943558693, 'p50_ms': 0.04395795986056328, 'p95_ms': 0.07016286253929117, 'steady_examples_per_second': 727968.2701723535}
+measured batch-one service proxy (ms): 0.025562476366758347
+simulated last stable/overloaded response (ms): 0.025562476366758347 0.6288369186222553
 hypothetical planned replicas: 3
 Analytic sample p95 / max (ms): 5.95000000000007 100.0
 Requests beyond the declared deadline: 2
@@ -363,19 +371,27 @@ Simulate a burst of four requests arriving at time zero with a two-millisecond s
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- Four arrival times all equal to zero and a two-millisecond serial service time.
 
-**Step-by-step implementation plan:**
-1. Exercise solution
+**Outputs:**
+- The four finish times and four response times in arrival order.
+
+**Invariants to check:**
+- Each request starts when the prior serial request finishes; response time is finish time minus arrival time.
+
+**Hints:**
+- Derive each finish as the previous finish plus service time.
+- Keep queue arithmetic separate from model execution timing.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-_,burst_finish,burst_latency = simulate_queue(...)  # TODO: compute _,burst_finish,burst_latency
-np.testing.assert_allclose(burst_finish,[2.,4.,6.,8.])
-np.testing.assert_allclose(burst_latency,[2.,4.,6.,8.])
+import numpy as np
+
+def simulate_four_request_burst(service_ms):
+    # TODO: Calculate serial finish and response times for four arrivals at time zero.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -403,17 +419,28 @@ The worker is idle between spaced requests but never idle during the burst.
 
 ### How to write: Expose burst sensitivity — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Inputs:**
+- Compare five requests spaced three milliseconds apart with five simultaneous requests. Use two-millisecond service and compare maximum response latency.
+
+**Outputs:**
+- Two simulated response-time vectors and their maxima.
+
+**Invariants to check:**
+- Both cases use five arrivals and the same 2 ms service assumption.
+
+**Hints:**
+- The worker is idle between spaced requests but never idle during the burst.
+- Keep spaced and simultaneous arrival vectors separate.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Expose burst sensitivity (Transfer / diagnosis)
-_,_,smooth = simulate_queue(...)  # TODO: compute _,_,smooth
-_,_,burst = simulate_queue(...)  # TODO: compute _,_,burst
-assert smooth.max()  # TODO: complete assertion check
+import math
+
+def practice_expose_burst_sensitivity(spaced_arrivals_ms, simultaneous_arrivals_ms, service_ms):
+    """Complete the expose burst sensitivity check."""
+    # TODO: ('Simulate five requests spaced 3 ms apart and five simultaneous requests with 2 ms service.', 'Two response-time vectors and their maximum latencies.', 'Service duration is fixed at 2 ms and the two scenarios differ only in arrivals.')
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -443,21 +470,28 @@ Public simulation inputs need finite, ordered values and positive service time.
 
 ### How to write: Reject a broken timeline — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Inputs:**
+- Pass an out-of-order arrival vector and a zero service duration. Confirm both are rejected instead of returning a plausible chart.
+
+**Outputs:**
+- Explicit input errors for unsorted arrivals and nonpositive service.
+
+**Invariants to check:**
+- Queue calculation runs only for ordered arrivals and positive service duration.
+
+**Hints:**
+- Public simulation inputs need finite, ordered values and positive service time.
+- Validate the timeline before deriving finish times.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Reject a broken timeline (Transfer / diagnosis)
-for arrivals,duration in [([2.,1.],2.),([0.,1.],0.)]:
-    try:
-        simulate_queue(arrivals,duration)
-    except ValueError:
-        pass
-    else:
-        raise AssertionError("invalid timeline was accepted")
+import math
+
+def practice_reject_a_broken_timeline(arrival_ms, service_ms):
+    """Complete the reject a broken timeline check."""
+    # TODO: ('Validate monotone arrival times and strictly positive service duration before queue simulation.', 'Clear errors for out-of-order arrivals and zero service time.', 'Invalid timing inputs are rejected instead of yielding a chart or capacity estimate.')
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -491,19 +525,28 @@ Compute finish minus arrival for each request. Here a response exactly at the de
 
 ### How to write: Measure the margin below a response deadline — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Inputs:**
+- For five simultaneous requests and a $2$-millisecond serial service, count responses that exceed a $6$-millisecond deadline. Explain why adding a faster model alone is not the only intervention.
+
+**Outputs:**
+- A simulated count of requests past the deadline.
+
+**Invariants to check:**
+- Deadline violations use completion-minus-arrival response time.
+
+**Hints:**
+- Compute finish minus arrival for each request. Here a response exactly at the deadline is accepted; declare that convention.
+- Label the result as serial queue simulation, not a measured service SLO.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Measure the margin below a response deadline (Transfer / diagnosis): Two responses miss the deadline in this serial simulation.
-_,_,deadline_latencies = simulate_queue(...)  # TODO: compute _,_,deadline_latencies
-np.testing.assert_array_equal(deadline_latencies,[2.,4.,6.,8.,10.])
-missed_deadlines = int(...)  # TODO: compute missed_deadlines
-assert missed_deadlines  # TODO: complete assertion check
-print('Requests beyond the declared deadline:',missed_deadlines)
+import math
+
+def practice_measure_the_margin_below_a_response_deadline(arrival_ms, service_ms, deadline_ms):
+    """Complete the measure the margin below a response deadline check."""
+    # TODO: ('Count serial burst responses exceeding the declared 6 ms deadline and compare with an alternative queue intervention.', 'Deadline violation count and an explicitly labeled simulated response-time result.', 'The deadline and service-time assumptions remain fixed across the comparison.')
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -531,9 +574,17 @@ A batch of eight finishes in four milliseconds. Which statement follows for a fu
 
 <details><summary>Answer and explanation</summary>
 
-The compute-throughput proxy is two thousand examples per second, while batch execution still takes four milliseconds
+**1. Every example experiences half a millisecond of response latency**
+
+Dividing batch time by eight gives an amortized throughput cost, not each request’s elapsed latency. Requests still wait for batch execution.
+
+**2. The compute-throughput proxy is two thousand examples per second, while batch execution still takes four milliseconds (correct)**
 
 Eight examples per four milliseconds gives two thousand per second when batches remain full. A request still waits for collection and the full execution, plus any other boundary costs.
+
+**3. The service can guarantee the same throughput for every arrival pattern**
+
+Arrival rate and batching wait change latency. Measure the chosen traffic pattern instead of inferring a universal service guarantee.
 
 </details>
 

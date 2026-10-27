@@ -1,0 +1,15 @@
+{
+  "changed_total_steps": 5,
+  "no_transition_2": true,
+  "old_total_steps": 4,
+  "pointer_unchanged": true,
+  "rank_info_exists": [
+    true,
+    true
+  ],
+  "restore_identity_errors": [
+    true,
+    true
+  ],
+  "status": "worker failure [{'rank': 0, 'pid': 72509, 'returncode': 1}, {'rank': 1, 'pid': 72510, 'returncode': 1}]; logs={'0': 'Traceback (most recent call last):\\n  File \"/private/tmp/l10b-final-config-prefligh"
+}

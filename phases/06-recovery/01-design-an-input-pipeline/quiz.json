@@ -11,7 +11,12 @@
         "Nothing: parameters reveal consumed example IDs."
       ],
       "correct": 0,
-      "explanation": "Model state cannot reconstruct which records should be read next."
+      "explanation": "Model state cannot reconstruct which records should be read next.",
+      "optionFeedback": [
+        "Model state cannot reconstruct which records should be read next.",
+        "Column definitions do not identify the next examples, shuffle state or configuration. Compare the exact next batch IDs after restore.",
+        "Parameters summarize updates and cannot reconstruct the input cursor. Save the loader state and data identity explicitly."
+      ]
     }
   ]
 }

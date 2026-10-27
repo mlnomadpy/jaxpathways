@@ -4,7 +4,7 @@ Copy this template into your own portfolio and fill it after running your modifi
 
 ## Evidence required
 
-Keep source checkpoint and architecture identity, complete parameter mapping, per-layer max-absolute/relative-L2 errors, elementwise tolerances, input-gradient comparisons, wrong-epsilon diagnosis and a fresh-process converted-artifact receipt.
+Keep MLP normalization/activation parity, first-divergence evidence, the optional QKV/head layout and mask canaries, nonuniform VJP, processor/position identity and fresh-process reload results.
 
 - Command: `python3 phases/15-deployment/08-pytorch-to-flax-numerical-parity/code/main.py`
 - Working directory: Repository root

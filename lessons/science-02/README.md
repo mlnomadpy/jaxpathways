@@ -4,6 +4,8 @@ Phase 10: Scientific computing · about 100 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [A functional physical simulation](https://www.tahabouhsine.com/jaxpathways/lesson-science-01.html).
+
 ## What you will be able to do
 
 - Construct and verify a fourth-order fixed-step transition.
@@ -21,11 +23,9 @@ A simulation ensemble repeats one rule across independent systems and across tim
 
 ## There are two different axes of repetition
 
-Picture a grid with time running left to right and one independent trajectory per row. State arrows connect adjacent times within a row. No state arrow crosses into another trajectory unless the physical model explicitly couples them.
+Think of the output as a table: each row is one independent experiment and each column is a saved time. In this fixture the rows start at $0.5,1,2$, and the columns run from time zero through two seconds. A state update connects neighboring columns in one row; no update uses another row's value.
 
-Initial conditions can vary by trajectory while a physical parameter stays shared, or both may vary. That is an argument-mapping choice, not merely a shape convenience. Record it before applying vectorization.
-
-The trajectory plot shows outputs of that grid. Preserve the returned time/batch axis order when plotting; an accidental transpose can connect different systems instead of successive times. Compare one row with an independently run single trajectory.
+The plot follows the three rows of this batch-major table. At two seconds the endpoints are about $0.1233,0.2466,0.4932$, so the top-starting trajectory remains four times the lowest. If the physical systems exchanged heat, this independence assumption would fail and a coupled state update would be needed rather than simply adding more `vmap` lanes.
 
 ### Vectorize across systems; scan through time
 
@@ -35,7 +35,7 @@ The trajectory plot shows outputs of that grid. Preserve the returned time/batch
 
 *Architecture and dataflow mechanism diagram.*
 
-Each row is an independent initial condition. Horizontal arrows advance only that system; there are no cross-row state dependencies. Vectorization groups rows and scan represents recurrence. Boxes show state positions in the computation, not physical coordinates or measured durations.
+Each row is one independent system; the horizontal arrows link that system's successive states over time. There are no arrows between rows, matching the uncoupled equations in the code. Vectorization represents the row axis and `scan` the within-row recurrence. If the physical model introduced heat exchange between systems, cross-row dependencies would be required; the current diagram would no longer describe it.
 
 ### Pause and reason
 
@@ -57,7 +57,9 @@ $$
 
 ## Read shapes as physical statements
 
-Three initial values and forty updates produce a batch-major array of shape $(3,41)$. Row $b$ is one trajectory; column $n$ holds all experiment values at time $nh$. The extra time point is the initial state. We deliberately use different axis sizes to make an accidental transpose visible. A mean over the batch answers a different question from a mean over time.
+Three initial states and forty updates produce shape $(3,41)$: row $b$ is one trajectory, and column $n$ stores that trajectory at time $nh$. Column zero stores the initial state at $t=0$; the next forty columns store the forty updates, giving 41 saved times in total. Since the dimensions differ, transposing by mistake is visible: it would plot 41 systems with three time samples rather than three systems with 41 samples.
+
+A mean over rows would summarize the ensemble at each time; a mean over columns would average each trajectory over time. Neither operation is a shape-only convenience: each asks a different physical question.
 
 ## One transformation handles independence; another handles dependency
 
@@ -65,7 +67,9 @@ vmap transforms a scalar simulation into an ensemble operation. scan still enfor
 
 ## Use physical structure as a second check
 
-This equation is linear in the initial state. Starting at $2$ must produce four times the trajectory starting at $0.5$. That check is separate from the exponential comparison and catches unintended normalization over the batch axis. Linearity is special to this model; do not impose it on a nonlinear reaction model simply because batching worked here.
+The equation is linear in its initial value: doubling $u_0$ doubles every later state. Thus the trajectory from 2 should be four times the trajectory from 0.5 at each of the 41 saved times, including the endpoint $0.4932$ versus $0.1233$. This relationship independently checks that batching did not mix or normalize the rows.
+
+If the rate varies by experiment, that same proportionality still applies when each compared pair shares a rate, but their endpoints no longer have one common decay fraction. If the equation becomes nonlinear in state, do not assume proportional trajectories; check against the model's actual structure instead.
 
 ## Choose saved outputs deliberately
 
@@ -215,15 +219,11 @@ Expected: Shape (3, 41); endpoints approximately [0.12329849, 0.24659697, 0.4931
 
 ### Read the figure
 
-Time in seconds runs horizontally; excess temperature runs vertically. The three curves correspond to initial values $0.5$, $1$ and $2$. Each is one row of the batch-major output, including its initial observation.
-
-At two seconds their values are approximately $0.1233$, $0.2466$ and $0.4932$. Their absolute changes differ, but every curve retains the same fraction of its initial value. The highest remains four times the lowest throughout.
+The horizontal axis is time from 0 to 2 seconds; the vertical axis is excess temperature. Each curve is one row of the executed $3\times41$ batch-major output, including its time-zero value: starts 0.5, 1 and 2. At two seconds the curves end near 0.1233, 0.2466 and 0.4932. The highest endpoint is four times the lowest because the equation is linear in the initial state and shares one rate across the batch.
 
 ### Connect it to the computation
 
-The common rate produces that shared relative decay. vmap adds independent experiments without inserting a mean, normalization or interaction between them. The code checks both this proportional relationship and the analytic exponential.
-
-The plot has no runtime or memory axis. It establishes numerical behavior for this ensemble, not a speedup from vectorization. The last lesson adds synchronized measurements with their own limitations.
+The analytic exponential and the proportional-endpoint check both pass for these three independent starts. `vmap` evaluates the same rule across rows; `scan` carries each row's state through columns. The figure has no speed or memory axis, so vectorization here establishes a correct ensemble calculation, not a performance gain. If one trajectory's state affected another, the no-cross-row assumption would need to change before batching.
 
 ```python
 # Transfer the device result to the host for an independent NumPy comparison.
@@ -232,7 +232,7 @@ visual_data={'kind':'line','x':times.tolist(),'xlabel':'time (seconds)','ylabel'
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:22:32.553795+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:06:15.539480+00:00. JAX 0.9.2.
 
 ```text
 Shape: (3, 41) endpoints: [0.12329848 0.24659697 0.49319394]
@@ -290,34 +290,33 @@ Add a fourth initial condition, verify the changed output shape and exponential 
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.vmap(fn, in_axes=..., out_axes=...)` — Vectorizes a single-example function across a batch axis without writing a Python loop.
+**Inputs:**
+- Rate 0.7, a four-element initial-condition vector, and the lesson time grid with 41 points.
+- A permutation of the four initial conditions.
 
-**Step-by-step implementation plan:**
-1. Exercise solution
-2. Vectorize across the batch dimension with `jax.vmap` (`changed`).
-3. Check tensor shape invariant: `changed.shape == (4,41)`
-4. Transfer the device result to the host for an independent NumPy comparison.
-5. Vectorize across the batch dimension with `jax.vmap` (`reordered`).
+**Outputs:**
+- Batched trajectory with shape (4, 41), checked against initial * exp(-rate*time).
+- Reordered trajectories whose rows follow the changed initial-condition order.
+
+**Invariants to check:**
+- Each initial condition scales the same scalar decay trajectory.
+- Reordering inputs changes rows only; time columns remain unchanged.
+- The batch/time axes have shape (4, 41).
+
+**Hints:**
+- Vectorize over initial values while preserving the time axis.
+- Compare all values with the analytic exponential and apply the same row permutation.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-changed_initials = jnp.array(...)  # TODO: compute changed_initials
-# Vectorize across the batch dimension with `jax.vmap` (`changed`).
-changed = jax.vmap(...)  # TODO: compute changed
-# Check tensor shape invariant: `changed.shape == (4,41)`
-assert changed.shape  # TODO: complete assertion check
-# Transfer the device result to the host for an independent NumPy comparison.
-np.testing.assert_allclose(changed,np.asarray(changed_initials)[:,None]*np.exp(-0.7*times),rtol=3e-8)
-order = jnp.array(...)  # TODO: compute order
-# Vectorize across the batch dimension with `jax.vmap` (`reordered`).
-reordered = jax.vmap(...)  # TODO: compute reordered
-np.testing.assert_allclose(reordered,changed[order],rtol = ...  # TODO: compute np.testing.assert_allclose(reordered,changed[order],rtol
-print("Permutation preserves trajectory identity")
+import numpy as np
+import jax
+import jax.numpy as jnp
+
+def verify_batched_trajectories(solve, initial_values, rate, times, permutation):
+    # TODO: evaluate four starts, check shape and exponential values, then row reordering.
+    raise NotImplementedError("Check analytic trajectories and preserve batch/time axes")
 ```
 
 <details><summary>Reference solution</summary>
@@ -354,28 +353,32 @@ scan may emit None while its carry still advances.
 
 ### How to write: Save only what the objective needs — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.vmap(fn, in_axes=..., out_axes=...)` — Vectorizes a single-example function across a batch axis without writing a Python loop.
-- `jax.lax.scan(step_fn, init_carry, xs, length=...)` — Compiles a sequential loop where `step_fn(carry, x)` returns `(next_carry, y)`, returning `(final_carry, stacked_ys)`.
+**Inputs:**
+- A vector of four initial conditions, fixed scalar rate, and saved time grid.
 
-**Step-by-step implementation plan:**
-1. Define `final_only(rate, initial, steps, dt)` to carry state across steps with `jax.lax.scan`:
-2. Vectorize across the batch dimension with `jax.vmap` (`finals`).
+**Outputs:**
+- Final-state-only values and the final column from the trajectory solve.
+- A short explanation naming the intermediate-trajectory allocation no longer retained.
+
+**Invariants to check:**
+- Both methods agree at the final time.
+- The final-only solve avoids retaining intermediate states.
+- Final-only evaluation carries the state without storing every time point.
+
+**Hints:**
+- Use the same integrator, step count, and initial values in both paths.
+- Compare arrays by shape and values, not a single selected element.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Save only what the objective needs (Practice): The explicit trajectory output is removed.
-# Define `final_only(rate, initial, steps, dt)` to carry state across steps with `jax.lax.scan`:
-def final_only(rate, initial, steps=40, dt=0.05):
-    def advance(value, unused):
-        return ...  # TODO: return computed result
-    return jax.lax.scan(advance,initial,None,length = ...  # TODO: compute return jax.lax.scan(advance,initial,None,length
-# Vectorize across the batch dimension with `jax.vmap` (`finals`).
-finals = jax.vmap(...)  # TODO: compute finals
-np.testing.assert_allclose(finals,trajectories[:,-1],rtol=1e-12)
-print("Only final states returned:", np.asarray(finals))
+import numpy as np
+import jax
+import jax.numpy as jnp
+
+def compare_final_only(initial_values, rate, dt, steps):
+    # TODO: implement a scan that returns only its carry, then compare with saved states.
+    raise NotImplementedError("Compare final-only integration with the saved trajectory")
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -411,25 +414,31 @@ Use nested vmap; identify the rate, initial-condition and time axes explicitly.
 
 ### How to write: Pairing versus Cartesian products — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.arange(n, dtype=...)` — Creates a 1-D JAX array of evenly spaced values `[0, 1, ..., n-1]` on the target device.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.vmap(fn, in_axes=..., out_axes=...)` — Vectorizes a single-example function across a batch axis without writing a Python loop.
+**Inputs:**
+- Three rates and three initial values for the scalar decay model.
 
-**Step-by-step implementation plan:**
-1. Vectorize across the batch dimension with `jax.vmap` (`grid`).
-2. Check tensor shape invariant: `grid.shape == (3,3,41)`
+**Outputs:**
+- Paired outputs and a full rate-by-initial-value grid.
+
+**Invariants to check:**
+- Paired evaluation returns one output per matching input pair.
+- Cartesian evaluation returns a (3, 3) grid; its diagonal matches paired results.
+
+**Hints:**
+- Use vmap over both arguments for pairing.
+- Nest vectorization over rates and initial values for the Cartesian grid.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Pairing versus Cartesian products (Challenge): Paired batches and Cartesian products are different experiments.
-# Vectorize across the batch dimension with `jax.vmap` (`grid`).
-grid = jax.vmap(...)  # TODO: compute grid
-# Check tensor shape invariant: `grid.shape == (3,3,41)`
-assert grid.shape  # TODO: complete assertion check
-np.testing.assert_allclose(grid[jnp.arange(3),jnp.arange(3)],paired,rtol = ...  # TODO: compute np.testing.assert_allclose(grid[jnp.arange(3),jnp.arange(3)],paired,rtol
-print("Grid axes: rate, initial condition, time", grid.shape)
+import numpy as np
+import jax
+import jax.numpy as jnp
+
+def compare_pairing_and_grid(solve, rates, initials):
+    # TODO: construct paired and Cartesian evaluations.
+    # Return both arrays and an explicit diagonal consistency check.
+    raise NotImplementedError("Distinguish paired mapping from a Cartesian product")
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -458,9 +467,17 @@ What does a shape of (3, 41) mean in the batch-major solver?
 
 <details><summary>Answer and explanation</summary>
 
-Three independent initial conditions, each with the initial state plus forty updates.
+**1. Three independent initial conditions, each with the initial state plus forty updates. (correct)**
 
 vmap contributes the leading independent-experiment axis. The scalar solve contributes its forty-one saved states; no device placement is specified.
+
+**2. Three time points, each with forty-one parameters.**
+
+The first axis indexes initial conditions, not times. The second includes the initial value and forty subsequent states.
+
+**3. Forty-one independent devices.**
+
+A batch dimension does not imply device placement. Inspect array sharding separately from its logical shape.
 
 </details>
 

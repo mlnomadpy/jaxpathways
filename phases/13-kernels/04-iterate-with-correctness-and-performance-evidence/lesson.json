@@ -15,36 +15,46 @@
       {
         "id": "guided-reasoning",
         "title": "Use two references to locate a precision gap",
-        "body": "First compare the kernel with an independent computation using the same represented inputs. That isolates implementation behavior under the chosen numeric contract. Then compare the represented-input reference with the original high-precision calculation to estimate representation effects.\n\nIf the first comparison passes while the second shows a gap, changing indexing is unlikely to fix that gap. Investigate the precision policy and whether downstream quality tolerates it.\n\nThe error bars should keep those comparisons separate and state scale, dtype and tolerance. A passed numerical check also says nothing about speed. Keep workload identity, synchronization and target-device measurements with any optimization claim.",
+        "body": "Two comparisons answer different questions. First compare the kernel with an oracle using the same represented inputs and output-cast rule; this tests the implementation. Then compare that oracle with the original float32 calculation; this reveals representation effects. In the retained audit, implementation error is zero for both dtypes on all four fixtures, while bfloat16 still differs from original float32 data. A correct low-precision contract can have a real precision gap.",
         "check": {
           "prompt": "Which comparison should you inspect before blaming quantization for a wrong output?",
           "answer": "Compare against an independent reference on the same represented inputs. A mismatch there may be an implementation error rather than unavoidable representation error."
         },
-        "math": "\\text{Speedup}(S_{\\text{total}}) = \\frac{1}{(1 - p) + p / s_{\\text{kernel}}}"
+        "math": "e_{\\rm impl}=\\lVert y_{\\rm kernel}-y_{\\rm represented\\ ref}\\rVert_\\infty,\\qquad e_{\\rm total}=\\lVert y_{\\rm kernel}-y_{\\rm original\\ FP32\\ ref}\\rVert_\\infty"
       },
       {
         "title": "Choose cases that challenge the contract",
-        "body": "The fixtures include a singleton matrix, one exact tile, a small tail and a larger tail. The same frozen random data is tested in float32 and bfloat16. A benchmark-sized divisible matrix alone would miss many boundary bugs. Every implementation must return the original logical shape; padding is internal work, not extra observations in the output."
+        "body": "The fixture list moves from \\((1,1)\\) to exact tile \\((8,128)\\), then tails \\((9,129)\\) and \\((17,257)\\). The same frozen inputs are checked in float32 and bfloat16. This sequence challenges singleton indexing, aligned coverage, row/column tails and larger padding without changing the logical operation. Predict which shape can expose an off-by-one at the edge: either tail, unlike the aligned tile."
       },
       {
         "title": "Use two references for two different questions",
-        "body": "The represented-input oracle promotes the actual stored inputs to float32, computes \\(2X+Y\\), then applies the declared output cast. Kernel agreement with that reference checks implementation correctness. Comparing against the original float32 dataset instead reveals input and output rounding. These differences should not be merged into one unexplained error number or hidden by arbitrarily loose tolerances."
+        "body": "The represented-input oracle promotes stored inputs to float32, computes \\(2X+Y\\), then applies the declared output cast. Matching it means the kernel implements that dtype policy. Comparing with original float32 operands answers how much value changed through representation. For example, a represented input may round before computation even if the kernel is exact for that represented value; report these errors separately."
       },
       {
         "title": "Make target timing a complete operation",
-        "body": "The target protocol compiles separately, warms up five times and synchronizes every measured output. Inputs are already placed on the target before timing. The measured boundary includes logical-shape padding, the Pallas call and cropping, because those are part of this wrapper’s user-visible cost. A kernel-only benchmark would need a different explicit boundary and could not be compared directly with these results."
+        "body": "The target protocol compiles separately, warms five times and synchronizes each measured output. Inputs are already on device; the reported wrapper boundary includes padding, Pallas call and crop. That boundary matches what a caller receives. A kernel-only time would answer another question and should not be compared directly. The retained execution refuses to benchmark CPU interpretation."
       },
       {
         "title": "Compare a strong baseline with the same contract",
-        "body": "The baseline is jitted ordinary JAX with float32 arithmetic and the same final dtype cast. XLA can fuse simple expressions, so the custom kernel may lose. Report every sample, median and ninetieth percentile, plus compilation time and actual device. The percentile is a distribution summary, not the maximum. Repeated samples expose variability but do not erase cache, thermal or system-load effects."
+        "body": "Compare against jitted ordinary JAX using the same dtype, represented inputs, padding, output cast and measurement boundary; XLA may already fuse \\(2X+Y\\). Report samples, median, 90th percentile, compile time and actual device so another learner can distinguish setup from steady state. This review's CPU receipt contains no target timing, so it cannot say which implementation is faster."
       },
       {
         "title": "Relate local kernels to the distributed workload",
-        "body": "A kernel optimizes an operation on local arrays; it does not automatically reduce all-reduce or resharding costs. Use a profile to determine whether the workload is limited by local compute, memory movement, input staging or communication. Keep the partitioning decision explicit and verify the same global numerical objective. A faster local operation may have little end-to-end benefit when another part dominates."
+        "body": "A local elementwise kernel cannot remove all-reduce, resharding or input staging. First use the workload profile to determine whether local compute, memory movement or communication dominates. Then measure the candidate in that same partitioned workload while preserving the global objective. A faster isolated operation can have little effect if another cost dominates."
       },
       {
         "title": "Accept, revise or decline the optimization",
-        "body": "Keep the change only when representative correctness and the declared target boundary improve enough to justify maintenance and specialization costs. If performance is unchanged or worse, retain the simpler baseline and record the experiment. If target hardware is unavailable, retain the tested kernel and its runnable target protocol, mark performance unverified, and do not fill the gap with interpret-mode timings. The scale synthesis assessment asks for profiling and partitioning evidence as well as the local kernel audit."
+        "body": "Keep a specialized kernel when representative correctness passes and target measurements improve the declared end-to-end boundary enough to justify its maintenance. If it is slower or unchanged, retain the simpler baseline. Here interpretation checks and precision comparisons are available, but the retained receipt has no target performance data; the honest result is that speed remains unmeasured."
+      },
+      {
+        "id": "amdahl-opportunity",
+        "title": "Derive a conditional end-to-end bound",
+        "body": "A local speedup matters only in proportion to its measured share of total time. If the operation accounts for \\(p=0.3\\) and becomes \\(s=2\\) times faster, normalized total time is \\(0.7+0.3/2=0.85\\), so total speedup is about 1.176. If its cost vanished, the limit is \\(1/0.7\\approx1.429\\). These are conditional calculations, not kernel or TPU measurements; reprofile if other costs change.",
+        "math": "S_{\\rm total}=\\frac{1}{(1-p)+p/s},\\qquad S_{\\rm limit}=\\frac{1}{1-p}\\quad(0\\le p<1)",
+        "check": {
+          "prompt": "Why is a twofold local improvement not necessarily a twofold application improvement?",
+          "answer": "Only the fraction p changes in the model; the remaining fraction still takes time. Reprofile if the optimization also changes other work."
+        }
       }
     ],
     "output": "All eight shape/dtype cases exactly match the represented-input oracle. bfloat16 differs from original float32 values by a separately reported precision gap. The benchmark refuses CPU execution; no target speedup is reported.",
@@ -73,7 +83,25 @@
         "hint": "The wrapper promises matching float32 or bfloat16 inputs.",
         "solution": "# Reject unsupported dtype mixing (Practice): Supported dtype boundaries are a correctness decision.\nfor first,second in [(jnp.ones((8,128),jnp.float32),jnp.ones((8,128),jnp.bfloat16)),(jnp.ones((8,128),jnp.int32),jnp.ones((8,128),jnp.int32))]:\n    rejected=False\n    try:pipelined_axpy(first,second)\n    except ValueError:rejected=True\n    assert rejected\nprint(\"Mixed and integer dtypes rejected\")",
         "explanation": "Supported dtype boundaries are a correctness decision. Adding a new dtype requires a reference, target support and justified tolerances.",
-        "difficulty": "Practice"
+        "difficulty": "Practice",
+        "learnerStarter": {
+          "inputs": [
+            "Float32 and bfloat16 matrices plus integer matrix inputs.",
+            "A wrapper with an observable launch callback."
+          ],
+          "outputs": [
+            "Rejection for mixed floating dtypes and integer inputs before launch."
+          ],
+          "invariants": [
+            "The wrapper does not silently cast unsupported inputs.",
+            "No launch occurs on either invalid case."
+          ],
+          "hints": [
+            "Compare declared dtype contracts before conversion or dispatch.",
+            "Test each invalid pair independently."
+          ],
+          "code": "def reject_unsupported_dtypes(wrapper, float_matrix, bf16_matrix, integer_matrix):\n    # TODO: assert mixed and integer inputs fail before launch.\n    raise NotImplementedError(\"Enforce the documented same-floating-dtype contract\")"
+        }
       },
       {
         "title": "Bound the end-to-end opportunity",
@@ -81,7 +109,24 @@
         "hint": "Keep the remaining workload time unchanged in the calculation.",
         "solution": "# Bound the end-to-end opportunity (Challenge): These are conditional analytic estimates, not measured speedups.\nfraction=.3\nlocal_speedup=2.0\nend_to_end=1/((1-fraction)+fraction/local_speedup)\nlimit=1/(1-fraction)\nnp.testing.assert_allclose(end_to_end,1.1764705882352942)\nnp.testing.assert_allclose(limit,1.4285714285714286)\nprint(\"Modeled twofold-local speedup and zero-cost limit:\",end_to_end,limit)",
         "explanation": "These are conditional analytic estimates, not measured speedups. Communication or scheduling changes can alter the fraction, so reprofile the complete workload.",
-        "difficulty": "Challenge"
+        "difficulty": "Challenge",
+        "learnerStarter": {
+          "inputs": [
+            "Amdahl fraction 0.30 and local speedup 2.0."
+          ],
+          "outputs": [
+            "End-to-end speedup for the stated improvement and the zero-cost limit."
+          ],
+          "invariants": [
+            "Unaccelerated fraction remains unchanged.",
+            "The limiting result is finite and bounded by the accelerated fraction."
+          ],
+          "hints": [
+            "Apply S=1/((1-p)+p/s).",
+            "Set s to infinity for the zero-cost limit."
+          ],
+          "code": "def amdahl_bounds(fraction, local_speedup):\n    # TODO: return achieved and asymptotic end-to-end speedup.\n    raise NotImplementedError(\"Bound system-level gains from a local optimization\")"
+        }
       }
     ],
     "diagnosis": "If bfloat16 disagrees only with the original float32 data, check whether the represented-input oracle still passes before calling it a kernel bug. If timings are implausibly tiny, inspect synchronization and device placement. If a local speedup fails to improve the training step, reprofile communication and other unchanged work. Never replace missing target evidence with simulated-device labels.",
@@ -97,8 +142,8 @@
       "title": "Precision gaps remain after kernel correctness passes",
       "kind": "executed",
       "prediction": "Can a kernel have zero implementation error and still differ from the original higher-precision data?",
-      "reading": "The horizontal axis names four frozen matrix fixtures. The vertical axis is maximum absolute difference between the actual simulated Pallas output and the original float32 dataset calculation. Float32 bars have zero height; bfloat16 bars are positive because stored inputs and final outputs are rounded.\n\nThe bfloat16 gaps are approximately \\(0.000862\\), \\(0.02522\\), \\(0.03079\\) and \\(0.02922\\). The largest matrix does not have the largest gap in this run. These are different frozen inputs, so the bar heights are separate from a monotonic law relating shape and error.",
-      "connection": "The separate represented-input oracle checks in the code report zero implementation error for every shape and dtype. This plot answers the additional precision question: what changed relative to the original float32 values despite correct execution of the chosen contract?\n\nThe figure contains no runtime or target-memory data. It is distinct from throughput, pipeline overlap or TPU correctness. Those claims require the guarded target runner and actual completed accelerator execution.",
+      "reading": "The x-axis lists frozen matrix shapes \\((1,1)\\), \\((8,128)\\), \\((9,129)\\), \\((17,257)\\); the y-axis is maximum absolute gap from the original float32 result. Float32 bars are all zero. Bfloat16 gaps are about 0.000862, 0.02522, 0.03079 and 0.02922 respectively. Compare the two series at each fixture: the largest gap is \\((9,129)\\), not the largest shape. Predict whether zero implementation error rules out this gap; it does not, because the references use different represented inputs.",
+      "connection": "The execution reports zero kernel error against the represented-input oracle for all eight shape/dtype cases, then reports the bfloat16 gaps plotted here against original float32 values. The bars therefore show representation difference, not implementation failure. No bar represents latency, memory use or target execution. Before changing indexing, check which reference fails; before claiming speed, obtain a real target measurement.",
       "alt": "Float32 bars show zero gap to the original data calculation, while bfloat16 gaps range from about 0.000862 to 0.03079 after all represented-input correctness checks pass.",
       "code": "labels=['1 x 1','8 x 128','9 x 129','17 x 257']\nvisual_data={'kind':'bar','labels':labels,'ylabel':'max gap versus original float32 values','series':[{'label':'float32','y':[r[0] for r in precision_gaps]},{'label':'bfloat16','y':[r[1] for r in precision_gaps]}]}"
     },
@@ -148,6 +193,30 @@
       "Compare a strong baseline with the same contract",
       "Relate local kernels to the distributed workload",
       "Accept, revise or decline the optimization"
-    ]
+    ],
+    "optionFeedback": [
+      "First compare against an oracle using the same represented operands. Error from casting the original FP32 inputs is a separate numerical budget.",
+      "Numerical agreement says nothing about TPU throughput. Native lowering and target timing need separate evidence.",
+      "The references answer different questions. Correct execution of a low-precision contract does not imply identical values to a higher-precision dataset."
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "Two frozen float32 inputs shaped (15,255), generated once for all candidates.",
+        "Two tile choices, (8,128) and (16,256), and two/three input-buffer counts."
+      ],
+      "outputs": [
+        "Numerical error against the independent NumPy expression for each candidate.",
+        "Padded work calculated from tile geometry and reported separately from numerical error."
+      ],
+      "invariants": [
+        "All candidates receive the same input arrays.",
+        "Logical output shape remains (15,255); error and padded work are distinct measurements."
+      ],
+      "hints": [
+        "Generate the matrix once, outside the candidate loop.",
+        "Compute padded work from launch geometry rather than wall-clock time."
+      ],
+      "code": "import numpy as np\n\ndef compare_kernel_candidates(run_candidate, first, second, tiles, input_buffer_counts):\n    # TODO: keep the fixture fixed while comparing each tile/buffer combination.\n    raise NotImplementedError(\"Compare numerical error and padded work on identical inputs\")"
+    }
   }
 }

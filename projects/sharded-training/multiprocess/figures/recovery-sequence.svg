@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 610" role="img" aria-labelledby="title desc">
+  <title id="title">Whole-cluster restart after committed and incomplete checkpoint events</title>
+  <desc id="desc">Two observed sequences from the source-bound local CPU run. In the first, generation 1 is committed, rank 1 receives SIGKILL and rank 0 later exits during JAX shutdown; a fresh two-controller attempt restores. In the second, a generation 2 write has only rank-0.json.tmp, no rank-1 final shard, and no manifest when rank 1 receives SIGKILL. Rank 0 is observed alive and exits cleanly after checker cleanup. CURRENT stays at step 1, then both controllers restart and replay sample IDs 1 and 4.</desc>
+  <style>
+    text { font-family: system-ui, -apple-system, sans-serif; fill: #152238; }
+    .title { font-size: 22px; font-weight: 700; }
+    .panel-title { font-size: 17px; font-weight: 700; }
+    .label { font-size: 14px; font-weight: 650; }
+    .body { font-size: 13px; }
+    .small { font-size: 12px; }
+    .panel { fill: #f7f9fc; stroke: #718096; stroke-width: 1.5; }
+    .commit { fill: #d9f2e6; stroke: #176b45; stroke-width: 2; }
+    .event { fill: #fff2cc; stroke: #795900; stroke-width: 2; }
+    .restart { fill: #e4ebff; stroke: #294b9b; stroke-width: 2; }
+    .line { stroke: #34445d; stroke-width: 2.5; fill: none; }
+    .muted { fill: #35445b; }
+  </style>
+  <rect x="0" y="0" width="1000" height="610" fill="#ffffff"/>
+  <text x="30" y="38" class="title">Observed recovery timeline · local two-controller CPU run</text>
+
+  <rect x="24" y="58" width="952" height="218" rx="12" class="panel"/>
+  <text x="44" y="87" class="panel-title">A · worker killed after a complete generation commit</text>
+  <rect x="48" y="112" width="240" height="124" rx="8" class="commit"/>
+  <text x="64" y="137" class="label">Attempt A · step 1 committed</text>
+  <text x="64" y="160" class="body">rank-0.json + rank-1.json</text>
+  <text x="64" y="181" class="body">manifest → CURRENT (step 1)</text>
+  <text x="64" y="210" class="small">all-rank write barrier completed</text>
+  <path d="M292 174 H350" class="line"/><path d="M350 174 l-10 -7 v14 z" fill="#34445d"/>
+  <rect x="357" y="112" width="260" height="124" rx="8" class="event"/>
+  <text x="374" y="137" class="label">Rank 1: SIGKILL (−9)</text>
+  <text x="374" y="160" class="body">Rank 0 observed alive</text>
+  <text x="374" y="181" class="body">then return code −6 at</text>
+  <text x="374" y="202" class="body">JAX shutdown</text>
+  <path d="M622 174 H678" class="line"/><path d="M678 174 l-10 -7 v14 z" fill="#34445d"/>
+  <rect x="685" y="112" width="264" height="124" rx="8" class="restart"/>
+  <text x="702" y="137" class="label">Fresh two-process attempt</text>
+  <text x="702" y="160" class="body">restores committed generation 1</text>
+  <text x="702" y="181" class="body">both ranks restart together</text>
+  <text x="702" y="210" class="small">not survivor continuity</text>
+
+  <rect x="24" y="294" width="952" height="290" rx="12" class="panel"/>
+  <text x="44" y="323" class="panel-title">B · separate attempt killed during an incomplete generation-2 write</text>
+  <rect x="48" y="348" width="240" height="124" rx="8" class="commit"/>
+  <text x="64" y="373" class="label">Attempt B · step 1 committed</text>
+  <text x="64" y="396" class="body">CURRENT → generation 1</text>
+  <text x="64" y="417" class="body">step 2 is being staged</text>
+  <text x="64" y="446" class="small">IDs [1, 4] will be replayed</text>
+  <path d="M292 410 H350" class="line"/><path d="M350 410 l-10 -7 v14 z" fill="#34445d"/>
+  <rect x="357" y="348" width="260" height="124" rx="8" class="event"/>
+  <text x="374" y="373" class="label">Incomplete generation 2</text>
+  <text x="374" y="396" class="body">rank-0.json.tmp only</text>
+  <text x="374" y="417" class="body">no rank-1 final; no manifest</text>
+  <text x="374" y="446" class="small">rank 1: −9 · rank 0 observed alive</text>
+  <path d="M622 410 H678" class="line"/><path d="M678 410 l-10 -7 v14 z" fill="#34445d"/>
+  <rect x="685" y="348" width="264" height="124" rx="8" class="restart"/>
+  <text x="702" y="373" class="label">CURRENT remains step 1</text>
+  <text x="702" y="396" class="body">rank 0 exits 0 after cleanup</text>
+  <text x="702" y="417" class="body">new attempt restarts both ranks</text>
+  <text x="702" y="446" class="small">replays IDs [1, 4] from step 1</text>
+  <text x="48" y="516" class="small muted">Evidence: l10b-final-preflight-all-20261021/report.json · SHA-256 ba21af2c1e37d1862a53b119fc4ed56ac0a5f1172d6c13d78b73df16f30856d5</text>
+  <text x="48" y="541" class="small muted">Five source hashes and exact process outcomes are recorded in the adjacent project README.</text>
+  <text x="48" y="566" class="small muted">This is a local process/filesystem observation; it does not establish remote storage or power-loss durability.</text>
+</svg>

@@ -11,7 +11,12 @@
         "Undefined because attention has zero scores"
       ],
       "correct": 1,
-      "explanation": "Zero scores create uniform attention, but zero projections make sublayer contributions zero; both residual paths preserve \\(x\\)."
+      "explanation": "Zero scores create uniform attention, but zero projections make sublayer contributions zero; both residual paths preserve \\(x\\).",
+      "optionFeedback": [
+        "The attention branch vanishes but the skip connection remains. Substitute a zero branch into input plus branch.",
+        "Zero scores create uniform attention, but zero projections make sublayer contributions zero; both residual paths preserve \\(x\\).",
+        "Zero scores produce a defined softmax over valid keys. The zero value/output projections remove the branch contribution, leaving the residual."
+      ]
     }
   ]
 }

@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
   "auditedAt": "2026-10-21",
-  "baseCommit": "972cbb07870ab60758bc9ce38540855c2275463e",
+  "baseCommit": "7554817ed19a26dabfb1e183220cf84308382906",
   "method": "Complete source/companion/receipt inventory and per-item scope review; exercises and transfer prompts inspected across all phases. Mathematical/code close review and visual inspection are selective, not a proof of every sentence or a novice/expert acceptance.",
   "levels": {
     "available-draft": "Material is available for its stated practice scope. Teaching review and learner validation are still pending.",
     "in-development": "Useful material exists, but important parts of this course or project are still being developed. Read its stated scope before starting.",
-    "planned": "A specification or brief exists; no runnable capstone implementation is supplied.",
+    "planned": "The full capstone is not yet implemented and qualified. A separately scoped pilot may be available.",
     "needs-repair": "Required material is missing or its current checks fail. Do not rely on it until repaired."
   },
   "findings": [
@@ -46,24 +46,26 @@
     {
       "id": "checkpoint-feedback",
       "priority": "P2",
-      "title": "Every lesson checkpoint uses one explanation for all answer choices",
+      "title": "Choice-specific checkpoint reasoning is implemented; learner validation remains open",
       "evidence": [
         "src/scripts/reader.js",
         "phases"
       ],
-      "action": "Author misconception-specific feedback and pilot changed-condition tasks. Option shuffling alone does not repair an assessment.",
-      "status": "open"
+      "action": "Review the three rationales in every lesson and pilot changed-condition tasks. Author revision is not independent teaching acceptance.",
+      "status": "partly-addressed"
     },
     {
       "id": "starter-contract",
       "priority": "P2",
-      "title": "Reference notebooks and generated scaffolds are practice aids, not independent assessment",
+      "title": "Learner-only contracts are authored; independent assessment calibration remains open",
       "evidence": [
         "src/lib/code-teaching.js",
-        "scripts/lesson-artifacts.mjs"
+        "scripts/lesson-artifacts.mjs",
+        "tests/learner-starters.test.mjs",
+        "docs/review-guide-0.11.md"
       ],
-      "action": "Author learner-only starter contracts and changed unseen fixtures where appropriate; keep solutions behind an explicit reveal and retain review rubrics.",
-      "status": "open"
+      "action": "Review all 305 authored task contracts and pilot unseen transfer cases. Learner-only downloads omit reference solutions and checkpoint answers; this author revision does not establish independent learner success or calibrated grading.",
+      "status": "partly-addressed"
     },
     {
       "id": "figure-review",
@@ -137,7 +139,7 @@
     {
       "id": "networks",
       "level": "available-draft",
-      "strength": "MLP, NNX and CNN examples test gradients, evaluation isolation and synthetic image errors.",
+      "strength": "Tiny MLP, NNX and CNN references now include real multilayer failure localization, named state identity and BatchNorm/Dropout evaluation isolation.",
       "contribution": "Add a licensed natural-image pilot with frozen source-group splits, a simple baseline and per-class error slices."
     },
     {
@@ -149,8 +151,8 @@
     {
       "id": "transformers",
       "level": "in-development",
-      "strength": "Attention, packing and a small causal harness are runnable; natural-data pilots are separate projects.",
-      "contribution": "Connect tokenizer choices and a complete configurable Transformer to real-corpus evaluation, cache checks and saved phase handoffs."
+      "strength": "Attention and packing lessons connect to a separate configurable multi-layer decoder with train-only BPE, a measured natural-text CPU pilot, cache parity and fresh-process full-state recovery.",
+      "contribution": "Review tokenizer and length policies on broader licensed corpora, extend the measured short pilot into staged training and evaluate generation quality. Target-scale training and independent teaching review remain open."
     },
     {
       "id": "performance",
@@ -161,26 +163,26 @@
     {
       "id": "distributed",
       "level": "in-development",
-      "strength": "Logical CPU sharding is checked; separate v5e collectives and same-process multi-host restore receipts exist.",
+      "strength": "Logical CPU references include an oracle-checked 2x2 parameter/momentum-sharded update with unequal and empty valid counts; physical target evidence remains separately scoped.",
       "contribution": "Qualify fresh-process multi-host restart and worker-loss recovery with explicit data ownership; do not infer scaling results from logical CPU devices."
     },
     {
       "id": "science",
       "level": "in-development",
-      "strength": "Scalar ODE, sensitivity and inverse-problem labs use discrete and continuous references.",
-      "contribution": "Add an adaptive or stiff-solver example, identifiable noisy observations and domain-expert review before claiming a general scientific-computing pathway."
+      "strength": "Fixed-grid ODE references connect to a separately pinned adaptive Diffrax extension with stiff solves, tolerance-sensitive gradients, noisy inversion and identifiable versus insensitive profiles.",
+      "contribution": "Review the solver and inference assumptions with a domain specialist, extend the synthetic fixture to real measurements and validate uncertainty or model misspecification before broader scientific claims."
     },
     {
       "id": "probability",
       "level": "in-development",
-      "strength": "Exact Bayesian regression, instructional HMC and VI provide independent oracles.",
-      "contribution": "Add a real NumPyro or equivalent library workflow, modern chain diagnostics and a deliberately failing posterior predictive check."
+      "strength": "Exact Bayesian regression, instructional HMC/VI and an optional real NumPyro workflow with raw chains, modern diagnostics and paired model-mismatch checks.",
+      "contribution": "Review the probabilistic assumptions with a specialist and extend the synthetic model checks to a licensed real-data case with calibrated predictive evaluation."
     },
     {
       "id": "rl",
       "level": "in-development",
-      "strength": "A tabular environment, policy updates and paired-seed evaluation have exact finite-task checks.",
-      "contribution": "Implement a learned value function, GAE and timeout bootstrapping before extending to continuous actions or larger benchmark environments."
+      "strength": "Tabular policy objectives, paired-seed evaluation, a separately learned value table and explicit GAE terminal/cutoff/reset checks have bounded CPU references.",
+      "contribution": "Connect the learned critic and GAE to actor updates, then evaluate larger tasks or continuous actions with independent learner and expert review."
     },
     {
       "id": "kernels",
@@ -197,26 +199,26 @@
     {
       "id": "deployment",
       "level": "in-development",
-      "strength": "Dense framework conversion, exports, precision contracts and process boundaries are checked.",
+      "strength": "Dense and small saved-decoder PyTorch-to-NNX parity, shifted/masked sequence semantics, fresh-process artifacts and quantization contracts have bounded CPU checks.",
       "contribution": "Execute and document a real container service, concurrent request workload and named edge-device/delegate report; dense parity is not full architecture portability."
     },
     {
       "id": "operations",
       "level": "in-development",
-      "strength": "Local job incidents, checksummed recovery and release/rollback drills are runnable.",
+      "strength": "Local job incidents, reloaded-prediction slice gates, executed local retrieval traces, behavioral rollback and identity-bound retirement drills are runnable teaching fixtures.",
       "contribution": "Add authenticated approvals, multi-writer release control, load-driven SLO incidents and application-specific LLM evaluation beyond deterministic fixtures."
     },
     {
       "id": "pretraining",
       "level": "in-development",
-      "strength": "Small masked-token, masked-image and contrastive objective labs run on CPU.",
-      "contribution": "Integrate the objectives with saved encoder architectures, licensed data recipes and downstream probes; the larger modality capstones are still plans."
+      "strength": "Masked-token, masked-image and contrastive mechanics now connect to saved small encoders, held-out masks/groups and frozen probes with explicit failed-baseline limitations.",
+      "contribution": "Extend saved-encoder teaching fixtures to licensed data recipes and larger architectures with independent representation evaluation; the full modality capstones remain planned."
     },
     {
       "id": "posttraining",
       "level": "in-development",
-      "strength": "Response masks, dense LoRA, learned rewards, PPO-bandit and DPO mechanics are implemented.",
-      "contribution": "Adapt a real saved Transformer and compare target quality, retained behavior and reference drift; sequence PPO/value models and human preferences are not supplied."
+      "strength": "Response masks, base-bound LoRA artifacts, held-out synthetic reward checks and bounded saved-decoder SFT/DPO handoffs accompany the separately recorded failed-quality PPO extension.",
+      "contribution": "The saved-decoder extension failed its strict heldout reward quality floor. Human preference quality, retained behavior and target-quality evaluation remain open and need separately reviewed evidence."
     },
     {
       "id": "tpu",
@@ -233,8 +235,8 @@
     {
       "id": "tpu-systems",
       "level": "in-development",
-      "strength": "Memory/precision models and retained profiling paths connect to narrow v5e targets.",
-      "contribution": "Teach target trace interpretation and native low-bit kernel/storage evidence; distinguish per-chip capacity, sharded state and dequantized reference arithmetic."
+      "strength": "Per-device training/inference memory ledgers and policy-specific precision bytes connect to stable warmed profiling and an actual CPU trace-reading example; physical targets remain narrowly qualified.",
+      "contribution": "Add retained target-specific trace interpretation and native low-bit kernel/peak-HBM measurements. CPU event accounting and dequantized references do not qualify those target claims."
     }
   ],
   "projects": [
@@ -253,20 +255,20 @@
     {
       "id": "scientific-inverse",
       "level": "available-draft",
-      "strength": "Bounded physical simulation, sensitivities and parameter recovery.",
-      "contribution": "Add noisy observations, identifiability stress tests and domain-expert interpretation."
+      "strength": "Fixed-grid simulation plus an optional executed Diffrax workflow with adaptive/stiff solves, sensitivity refinement, same-data noisy fitting and explained identifiability figures.",
+      "contribution": "Add licensed real measurements, an explicit uncertainty or discrepancy model and domain-expert review. Existing evidence is synthetic CPU computation."
     },
     {
       "id": "policy-evaluation",
       "level": "available-draft",
-      "strength": "Tabular environment, policy objectives and held-out evaluation.",
-      "contribution": "Add learned value estimates and a larger task after validating timeout semantics."
+      "strength": "Tabular environment, policy objectives, held-out evaluation and a separately checked learned value table with GAE.",
+      "contribution": "Integrate the critic/GAE with actor updates and evaluate a larger task with a fixed held-out protocol and learner review."
     },
     {
       "id": "bayesian-regression",
       "level": "available-draft",
-      "strength": "Exact regression oracle and instructional sampler/predictive checks.",
-      "contribution": "Add library inference, modern diagnostics and reviewer-checked model mismatch cases."
+      "strength": "Exact regression oracle and an optional, separately pinned NumPyro NUTS workflow with raw-chain diagnostics and paired predictive checks.",
+      "contribution": "Validate assumptions, diagnostics and model mismatch interpretation with specialist and learner review, then extend to a real-data example."
     },
     {
       "id": "derivative-audit",
@@ -325,8 +327,8 @@
     {
       "id": "text-harness",
       "level": "available-draft",
-      "strength": "Tiny byte-level causal training, full recovery, KV cache and export.",
-      "contribution": "Add tokenizer/corpus studies and nonperiodic held-out generation before any language-quality claim."
+      "strength": "Tiny causal training, recovery, KV cache and export, plus a separate train-only BPE decoder workflow with natural chapter splits, measured short-run results and an explained baseline comparison.",
+      "contribution": "Broaden source and tokenizer studies, complete larger staged training and assess generation on genuinely unseen material. Repeatedly inspected Alice chapters are not a blind benchmark."
     },
     {
       "id": "optimizer-audit",
@@ -423,6 +425,26 @@
       "level": "in-development",
       "strength": "A real-text CPU Transformer pilot with continuation, held-out perplexity and export; quality is weak.",
       "contribution": "Improve baseline-relative held-out quality and tokenizer/data decisions before scaling or publishing a production model."
+    }
+  ],
+  "revisionFollowUp": {
+    "date": "2026-10-27",
+    "baseCommit": "db4bc9012d053681509c2aecf03411c77c6a785a",
+    "guide": "docs/review-guide-0.18.1.md",
+    "scope": "All 104 authored lessons now have an editorial pass across 0.18.0 and 0.18.1, including explanations of worked examples and figures; all 22 chapter introductions connect their learning progression. Human acceptance, target qualification and model-quality outcomes remain separate."
+  },
+  "revisionFollowUpHistory": [
+    {
+      "date": "2026-10-27",
+      "baseCommit": "15bf7aa4fbd4460501cc4d6d7802324673a89f6f",
+      "guide": "docs/review-guide-0.18.0.md",
+      "scope": "Repairs for content issues #74 through #91 with independent AI review, bounded CPU teaching checks and regenerated book companions. Existing maturity levels, failed model-quality results and human/native-reader/target qualification limits remain unchanged."
+    },
+    {
+      "date": "2026-10-21",
+      "baseCommit": "7554817ed19a26dabfb1e183220cf84308382906",
+      "guide": "docs/review-guide-0.11.md",
+      "scope": "Authored learner workspaces across the lessons, deeper bounded RL and optional NumPyro implementations, MathML conformance repairs and an author review packet. Preserve original audit provenance, developing-phase and planned-capstone labels; no human acceptance or new physical hardware qualification is asserted."
     }
   ]
 }

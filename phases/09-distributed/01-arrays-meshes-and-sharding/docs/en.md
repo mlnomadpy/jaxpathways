@@ -21,14 +21,14 @@ Sharding places one global array across a named mesh. Global shape, local shard 
 
 ## Compare the global array with each local piece
 
-A four-by-four array on two devices can be split into two-by-four row shards or four-by-two column shards. Both layouts contain the same global values. Their local operations and communication requirements differ.
+The recorded global array has shape $8,4$, not four-by-four: it contains rows 0 through 7 and four columns. On four logical CPU devices, row sharding assigns two complete rows to each device, while column sharding assigns one complete column. Both layouts preserve the same 32 values; they change which values are local.
 
-Replication gives each participant the full value instead of a disjoint portion. Use explicit labels so duplicated ownership cannot be mistaken for partitioning.
+For example, device 0 owns rows 0 and 1 in the row layout, but column 0 across all eight rows in the column layout. Replication would instead give every device all 32 values. Keep those three ownership patterns distinct when predicting the shape of local work.
 
-Connect each PartitionSpec entry to its array axis and named mesh axis. Inspect actual addressable shards and compare reconstructed values with a global reference. Logical CPU devices validate this placement exercise without reproducing a multi-host network.
+The ownership heatmaps show device IDs, not matrix values or speed. Read one cell at a time: the upper panel's first two rows are device 0, while every cell in its first column belongs to device 0 in the lower panel. The execution confirms local shapes $2,4$ and $8,1$.
 
 $$
-\text{Mesh}(D, (\texttt{'data'}, \texttt{'model'})) \implies \operatorname{shard}(X) \in \mathbb{R}^{(B/P_d) \times (H/P_m)}
+\text{Mesh}((P_d,P_m), (\texttt{'data'},\texttt{'model'}));\quad P(\texttt{data},\texttt{model}):Y\mapsto\mathbb{R}^{(B/P_d)\times(H/P_m)}
 $$
 
 ### Pause and reason
@@ -37,15 +37,15 @@ Must changing row sharding to column sharding change the answer?
 
 <details><summary>Compare your reasoning</summary>
 
-No. A correct compatible computation preserves the intended global result. Storage and communication can change even when the result agrees.
+No. A correct compatible computation preserves the intended global result. Storage and communication can change even when the result agrees. In the following lesson, the batch uses the data axis and parameter output columns use the model axis, so a local parameter shard has shape $(4,2)$.
 
 </details>
 
 ## Read the mapping from left to right
 
-Start with eight rows and four columns. Our one-dimensional mesh contains four devices along data. `P("data",None)` partitions eight rows into four groups of two and preserves four features per shard. `P(None,"data")` leaves rows intact and assigns one of four columns to each device. The same global shape supports both arrangements.
+Start with the executed global array $8,4$ and a one-dimensional mesh of four devices named `data`. `P("data", None)` divides the first axis into four two-row slices and leaves all four columns together, so each local shape is $2,4$. `P(None, "data")` leaves all eight rows together and divides the second axis into four one-column slices, so each local shape is $8,1$.
 
-None means an array dimension is not partitioned by this specification, not that the values are missing. `P()` replicates the whole array. A device mesh axis may not be reused across multiple array dimensions within one PartitionSpec. More complex two-dimensional meshes need distinct axis names and a reason for assigning each dimension.
+`None` means that this array axis is not partitioned by the spec; `P()` instead replicates the full array. If the row count changed from 8 to 10 while the mesh still had four devices, the even split would no longer hold. The lesson's divisibility check makes that changed condition visible instead of silently describing equal shards.
 
 ```text
 Array (8,4) → P(data,None) → 4 pieces (2,4)
@@ -61,9 +61,9 @@ All four devices are addressable here because we have one process. In a multi-pr
 
 ## A reduction has a communication requirement
 
-For rows $0$ through $31$ reshaped to $(8,4)$, the first column is $0$,$4$,$8$,$12$,$16$,$20$,$24$,$28$ and sums to $112$. Each row shard can sum its own two rows, but no one shard initially sees all eight. Producing a replicated global column sum requires combining contributions across the data axis.
+The array is `arange(32).reshape(8,4)`, so row 0 is $[0,1,2,3]$ and row 1 is $[4,5,6,7]$. Under row sharding, device 0 can sum those rows locally to $[4,6,8,10]$; device 1 contributes $[20,22,24,26]$, with devices 2 and 3 contributing the remaining partial sums. Combining them gives the executed global column sums $[112,120,128,136]$.
 
-We use a jitted ordinary sum and declare replicated output. JAX compiles the placement-aware global operation and arranges necessary communication. The source-level need to combine partial sums is a reasoning argument; exact collective lowering is compiler/version dependent and would require lowered code or profiler evidence to characterize. This CPU lesson does not estimate accelerator communication latency.
+The first result, 112, is the sum of the first column's values $0+4+8+\cdots+28$. No row shard contains all eight terms, so a replicated result requires combining partial sums across the mesh. JAX executes the placement-aware sum; the values establish the needed global result, while this CPU fixture does not measure how a particular accelerator lowers or times that communication.
 
 ```text
 partial sums device 0: [4,6,8,10]
@@ -217,15 +217,11 @@ Expected: Four row shards $(2,4)$; four column shards $(8,1)$. Column sums $[112
 
 ### Read the figure
 
-Both panels represent the same global array with shape $(8,4)$. Each cell’s number and color identify its owning logical device, not the array value stored there. Device colors are categorical and do not rank speed or capacity.
-
-In the upper panel, each device owns two complete rows: device $0$ owns rows $0$ and $1$, for example. In the lower panel, each device owns one complete column across all eight rows. The horizontal bands become vertical bands when the partitioned axis changes.
+Both heatmaps have array row on the vertical axis and array column on the horizontal axis; each cell is colored and labeled by its logical CPU device ID. The upper, row-partition panel has two-row bands: device 0 owns rows 0 and 1. The lower, column-partition panel has one-column bands: device 0 owns column 0 across all eight rows. The displayed IDs are categorical ownership labels, not array values.
 
 ### Connect it to the computation
 
-Each device owns eight scalar entries in either layout, but their local shapes differ: $(2,4)$ for row partitioning and $(8,1)$ for column partitioning. Equal local element counts do not mean that the same operations will have the same communication needs.
-
-For example, a whole row is locally available in the upper layout but split across devices in the lower one. A row-wise reduction therefore has different placement implications. The figure establishes ownership only; communication volume and execution time are not measured, and these four logical devices share one CPU host.
+The actual local shapes are $2,4$ in the upper panel and $8,1$ below, so each device owns eight values in either layout. For the row-0 sum, $0+4+8+\cdots+28=112$, row sharding makes two terms local to each device and the global reduction combines four partials; column sharding leaves the whole first column local to one device. The next decision is therefore to match the partitioned axis to the operation, then check whether the chosen output must be combined or replicated.
 
 ```python
 panels = []
@@ -239,7 +235,7 @@ visual_data = {'kind': 'panels', 'panels': panels}
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:22:20.038431+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:06:02.965182+00:00. JAX 0.9.2.
 
 ```text
 Row-shard shapes: [(2, 4), (2, 4), (2, 4), (2, 4)]
@@ -299,49 +295,34 @@ Compare row and column layouts of a $(12,8)$ array, and repair a ten-row mean wi
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `array.reshape(new_shape)` — Reorganizes tensor axes without changing the total element count (`array.size`).
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.jit(fn) / @jax.jit` — Traces `fn` for its input signatures and compiles an executable. Changed shapes, dtypes or static arguments can trigger another compilation.
+**Inputs:**
+- Four logical CPU devices; row and column NamedSharding objects.
+- A (12, 8) matrix and a separate ten-observation, four-feature batch.
 
-**Step-by-step implementation plan:**
-1. Exercise solution
-2. Place `placed` explicitly onto the target JAX device.
-3. Check tensor shape invariant: `shard.data.shape == expected`
-4. Transfer the device result to the host for an independent NumPy comparison.
-5. Place `padded` explicitly onto the target JAX device.
+**Outputs:**
+- Per-device local shapes and values for both (12, 8) layouts.
+- A masked ten-row column mean plus an unmasked padded mean for diagnosis.
+
+**Invariants to check:**
+- Both placements preserve the same global matrix and each shard matches its indexed host slice.
+- Padded rows contribute to neither the masked numerator nor the valid-row denominator.
+- The masked mean agrees with the original ten-row host mean.
+
+**Hints:**
+- Read each PartitionSpec against the axis it partitions.
+- Use shard.index for local-value comparisons; mask padded rows before summing and divide by valid rows.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-other = np.arange(...)  # TODO: compute other
-for spec, expected in [(rows,(3,8)),(columns,(12,2))]:
-    # Place `placed` explicitly onto the target JAX device.
-    placed = jax.device_put(...)  # TODO: compute placed
-    for shard in placed.addressable_shards:
-        # Check tensor shape invariant: `shard.data.shape == expected`
-        assert shard.data.shape  # TODO: complete assertion check
-        # Transfer the device result to the host for an independent NumPy comparison.
-        np.testing.assert_array_equal(np.asarray(shard.data),other[shard.index])
+import numpy as np
+import jax
+import jax.numpy as jnp
 
-original = np.arange(...)  # TODO: compute original
-try:
-    jax.device_put(original, rows)
-except ValueError:
-    print("Expected indivisible batch")
-else:
-    raise AssertionError("Expected divisibility failure")
-# Place `padded` explicitly onto the target JAX device.
-padded = jax.device_put(...)  # TODO: compute padded
-mask_sharding = NamedSharding(...)  # TODO: compute mask_sharding
-mask = jax.device_put(...)  # TODO: compute mask
-# Wrap with `jax.jit` (`masked_mean`) so XLA traces and compiles the function.
-masked_mean = jax.jit(...)  # TODO: compute masked_mean
-# Transfer the device result to the host for an independent NumPy comparison.
-np.testing.assert_allclose(np.asarray(masked_mean),original.mean(axis = ...  # TODO: compute np.testing.assert_allclose(np.asarray(masked_mean),original.mean(axis
-assert not np.allclose(np.asarray(padded.mean(axis=0)), original.mean(axis=0))  # TODO: complete assertion check
+def verify_layouts_and_masked_mean(host, uneven_batch, row_sharding, column_sharding):
+    # TODO: compare both placements and their indexed shard values.
+    # Then pad the ten-row batch, place a validity mask, and compare masked/unmasked means.
+    raise NotImplementedError("Verify both shard layouts and mask-preserved batch statistics")
 ```
 
 <details><summary>Reference solution</summary>
@@ -392,29 +373,30 @@ Four devices divide twelve rows or eight columns.
 
 ### How to write: Change both dimensions — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `array.reshape(new_shape)` — Reorganizes tensor axes without changing the total element count (`array.size`).
-- `Mesh + PartitionSpec + NamedSharding` — Maps logical tensor axes onto physical device mesh axes for SPMD data, tensor, or pipeline parallelism.
+**Inputs:**
+- A (12,8) host matrix and four logical CPU devices.
+- Row and column shardings from the lesson.
 
-**Step-by-step implementation plan:**
-1. Change both dimensions (Challenge)
-2. Place `placed` explicitly onto the target JAX device.
-3. Check tensor shape invariant: `shard.data.shape == expected`
-4. Transfer the device result to the host for an independent NumPy comparison.
+**Outputs:**
+- Exact per-device shapes for both placements.
+
+**Invariants to check:**
+- Every shard contains the indexed global slice.
+- The global matrix is unchanged by placement.
+
+**Hints:**
+- Divide the partitioned dimension by four.
+- Check shard.index as well as shard.data.shape.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Change both dimensions (Challenge)
-other = np.arange(...)  # TODO: compute other
-for spec, expected in [(rows,(3,8)),(columns,(12,2))]:
-    # Place `placed` explicitly onto the target JAX device.
-    placed = jax.device_put(...)  # TODO: compute placed
-    for shard in placed.addressable_shards:
-        # Check tensor shape invariant: `shard.data.shape == expected`
-        assert shard.data.shape  # TODO: complete assertion check
-        # Transfer the device result to the host for an independent NumPy comparison.
-        np.testing.assert_array_equal(np.asarray(shard.data),other[shard.index])
+import numpy as np
+import jax
+
+def verify_changed_layout(host, row_sharding, column_sharding):
+    # TODO: place the matrix under both shardings and check each local slice.
+    raise NotImplementedError("Verify both local shapes and indexed values")
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -450,37 +432,32 @@ The divisor is the sum of the mask, not padded length.
 
 ### How to write: Pad an uneven batch without corrupting its mean — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `array.reshape(new_shape)` — Reorganizes tensor axes without changing the total element count (`array.size`).
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.jit(fn) / @jax.jit` — Traces `fn` for its input signatures and compiles an executable. Changed shapes, dtypes or static arguments can trigger another compilation.
+**Inputs:**
+- A ten-row host batch with four features and a four-device row sharding.
 
-**Step-by-step implementation plan:**
-1. Place `padded` explicitly onto the target JAX device.
-2. Wrap with `jax.jit` (`masked_mean`) so XLA traces and compiles the function.
-3. Transfer the device result to the host for an independent NumPy comparison.
+**Outputs:**
+- Masked column mean with shape (4,).
+- Unmasked padded mean as a diagnostic.
+
+**Invariants to check:**
+- Padding contributes zero to both the numerator and valid-count denominator.
+- The masked result matches the original ten-row host mean.
+
+**Hints:**
+- Pad only the row axis to a device-divisible length.
+- Mask invalid rows before summing and divide by valid rows.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Pad an uneven batch without corrupting its mean (Challenge): Padding repairs the shape but adds artificial rows.
-original = np.arange(...)  # TODO: compute original
-try:
-    jax.device_put(original, rows)
-except ValueError:
-    print("Expected indivisible batch")
-else:
-    raise AssertionError("Expected divisibility failure")
-# Place `padded` explicitly onto the target JAX device.
-padded = jax.device_put(...)  # TODO: compute padded
-mask_sharding = NamedSharding(...)  # TODO: compute mask_sharding
-mask = jax.device_put(...)  # TODO: compute mask
-# Wrap with `jax.jit` (`masked_mean`) so XLA traces and compiles the function.
-masked_mean = jax.jit(...)  # TODO: compute masked_mean
-# Transfer the device result to the host for an independent NumPy comparison.
-np.testing.assert_allclose(np.asarray(masked_mean),original.mean(axis = ...  # TODO: compute np.testing.assert_allclose(np.asarray(masked_mean),original.mean(axis
-assert not np.allclose(np.asarray(padded.mean(axis=0)), original.mean(axis=0))  # TODO: complete assertion check
+import numpy as np
+import jax
+import jax.numpy as jnp
+
+def masked_column_mean(batch, row_sharding):
+    # TODO: pad rows, place the values and mask, then compute both means.
+    # Return device results as host arrays for comparison.
+    raise NotImplementedError("Implement masked statistics for the ten valid rows")
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -519,9 +496,17 @@ With row sharding, why does a global column sum need results from other devices?
 
 <details><summary>Answer and explanation</summary>
 
-Each device initially holds only some rows.
+**1. Each device initially holds only some rows. (correct)**
 
 The reduction spans the partitioned row dimension, so partial contributions must be combined.
+
+**2. Every sum requires host Python.**
+
+The array reduction can execute as device collectives. Global semantics do not require collecting the rows into a Python list.
+
+**3. Partitioning changes the mathematical definition of sum.**
+
+The sum is still over the same global observations. Placement changes the required communication, not the mathematical definition.
 
 </details>
 

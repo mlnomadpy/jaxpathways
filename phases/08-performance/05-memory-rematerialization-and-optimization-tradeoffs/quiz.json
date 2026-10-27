@@ -11,7 +11,12 @@
         "The model must train faster because fewer values were listed."
       ],
       "correct": 1,
-      "explanation": "Residual lists and compiler buffer estimates describe different levels. Report the observed equality and investigate the real target workload before claiming a memory or speed benefit."
+      "explanation": "Residual lists and compiler buffer estimates describe different levels. Report the observed equality and investigate the real target workload before claiming a memory or speed benefit.",
+      "optionFeedback": [
+        "AD residuals and compiler temporary-buffer estimates describe different stages. Fewer saved intermediates need not lower the reported buffer peak.",
+        "Residual lists and compiler buffer estimates describe different levels. Report the observed equality and investigate the real target workload before claiming a memory or speed benefit.",
+        "Rematerialization trades storage for recomputation. Measure latency and peak memory separately before claiming an improvement."
+      ]
     }
   ]
 }

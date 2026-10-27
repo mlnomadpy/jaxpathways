@@ -4,6 +4,8 @@ Phase 12: Reinforcement learning · about 90 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Policy gradients and PPO](https://www.tahabouhsine.com/jaxpathways/lesson-rl-03.html).
+
 ## What you will be able to do
 
 - Separate training seeds, evaluation streams and individual episodes.
@@ -20,11 +22,7 @@ A policy's result can vary because training produced a different policy and beca
 
 ## Separate training randomness from evaluation randomness
 
-Train several agents with distinct training seeds. Evaluate each on a declared set of held-out conditions. First summarize within-agent episode variability; then compare the results across independently trained agents.
-
-When methods share evaluation conditions, paired comparisons can make differences easier to interpret. Preserve that pairing rather than mixing episode identities. A large number of episodes from one trained agent does not replace multiple training seeds.
-
-The mean-return bars summarize the fixture. Inspect individual seed results before trusting a small average difference. If you add an uncertainty interval, state its unit of resampling and method rather than attaching an unexplained error bar.
+A policy can look strong on the episodes that guided its updates. Train separate agents with training seeds `(0,7,23,41,59)`, then evaluate each on held-out seeds shared across agents. Episode-to-episode spread describes one policy; spread among five trained-agent means describes sensitivity to training randomness. Keep those units distinct when reading the figure, and do not let thousands of episodes from one agent stand in for more trained agents.
 
 ### Pause and reason
 
@@ -38,11 +36,11 @@ No. They improve knowledge of that policy's evaluation behavior. Training variab
 
 ## Write the protocol before inspecting results
 
-Fix the environment, horizon, training budget and evaluation procedure before seeing the held-out metrics. We use training seeds $(0,7,23,41,59)$ and evaluation seeds $(1000,1001,1002,1003)$. These seed identifiers are part of this protocol, not proof of statistical independence by themselves. The generator receives separate keys for fitting and testing. Do not change the learning rate after inspecting final test results and still call the same results held out.
+Freeze the environment, horizon, training budget and evaluation procedure before looking at test returns. This lesson uses five training seeds and four evaluation seeds, with separate random keys for fitting and testing. Seed labels make the run reproducible; they do not by themselves prove independent samples. If a hyperparameter is changed after inspecting these evaluation results, use a new held-out evaluation set.
 
 ## Name the experimental unit
 
-Within an agent, averaging $2048$ evaluation episodes reduces uncertainty about that particular policy. Across five independently trained agents, differences reveal sensitivity to training randomness. A large episode count does not make the number of trained agents large. We retain all episode returns and stream means, then summarize the five agent means with their sample standard deviation. That standard deviation describes variability; it is not a confidence interval.
+The code evaluates 2,048 episodes per agent, which reduces uncertainty about that particular policy's mean. The five independently trained agents are the units for describing training-seed variation. Their sample standard deviation is a spread summary, not a confidence interval. Retain raw returns and per-agent means so another reader can recompute a summary at the right level.
 
 $$
 \bar R_i=\frac1E\sum_{e=1}^E R_{i,e},\qquad s=\sqrt{\frac1{K-1}\sum_{i=1}^K(\bar R_i-\bar R)^2}
@@ -50,19 +48,19 @@ $$
 
 ## Pair the comparison deliberately
 
-Using the same evaluation seed set across agents and baselines keeps the reset draws aligned and may reduce comparison noise. Actions still depend on the policy, so trajectories diverge. Shared evaluation randomness means the agent estimates are not wholly independent measurement errors. Preserve paired differences when comparing methods; do not pool every episode and pretend there were thousands of independent training runs. A broader study would use more training seeds, predeclared metrics and uncertainty estimates suited to its dependence structure.
+Using the same evaluation reset seeds aligns the initial states for each agent and baseline, which can make paired differences easier to interpret. Policy-dependent actions still lead to different trajectories, so the outcomes are not identical paired paths. Preserve per-seed differences and avoid pooling all episodes as though they were independent training runs. More training seeds would support a broader claim.
 
 ## A baseline can catch a broken evaluator
 
-The uniform policy has exact expected return $0.466875$. Always-left earns $-0.08$, because it never reaches the goal and receives eight costs. Always-right earns $0.985$, averaged over the two starts. If the sampled evaluator places these in the wrong order, inspect masks, reward sums and horizon before celebrating the learned policy. Test a changed horizon too: it should change the known returns in predictable ways.
+The known ordering is a useful check: always-left earns `-0.08`, uniform earns `0.466875`, and always-right earns `0.985`. If code reports a different order, inspect the reward sum, terminal mask and eight-step horizon before interpreting learned-agent bars. These exact fixture values test the evaluator; they do not certify a learned policy.
 
 ## Evaluation must leave training state alone
 
-The policy array is passed to the evaluator as a value. We copy it before evaluation and compare afterward. Evaluation creates its own keys and never calls an optimizer. In a neural model this contract also includes running statistics, dropout mode and any other mutable model state. The tabular example cannot certify that a future network implementation handles those correctly.
+The evaluator receives the policy, uses fresh evaluation keys, and never calls the optimizer. The code copies policy parameters and checks they are unchanged after evaluation. That makes the test read-only for this tabular case. A neural version would also have to control mutable statistics and stochastic layers, which this example does not test.
 
 ## Keep a report another learner can challenge
 
-Retain source revision, package versions, policy parameters, train/evaluation seeds, horizon, step budget, raw episode returns and per-agent means. Add an exact-versus-sampled comparison, a failure diagnosis, and the limits: one small deterministic-transition environment, a randomized start distribution, stationary tabular policies, CPU execution and no hyperparameter search. High return here demonstrates a correct teaching harness, not general control capability.
+Record source revision, package versions, parameters, seeds, horizon, raw returns and per-agent means. Here the scope is one small corridor with randomized starts, stationary tabular policies and CPU execution. An exact-return comparison helps catch sampling noise, but high return here is not evidence of general control ability. State the experimental unit whenever reporting uncertainty.
 
 ## Assemble the verified learning system
 
@@ -128,7 +126,8 @@ def rollout(theta, key, batch_size=256, horizon=8):
         # Vectorize across the batch dimension without a Python loop (`(next_states, rewards, terminated, truncated)`).
         next_states, rewards, terminated, truncated = jax.vmap(
             lambda s, a: step(s, a, horizon))(states, actions)
-        record = dict(observation=observations, action=actions, reward=rewards,
+        record = dict(observation=observations, next_observation=next_states.position,
+                      next_elapsed=next_states.elapsed, action=actions, reward=rewards,
                       active=~states.done, terminated=terminated, truncated=truncated,
                       old_logp=log_probability(theta, observations, actions))
         return next_states, record
@@ -315,7 +314,8 @@ def rollout(theta, key, batch_size=256, horizon=8):
         # Vectorize across the batch dimension without a Python loop (`(next_states, rewards, terminated, truncated)`).
         next_states, rewards, terminated, truncated = jax.vmap(
             lambda s, a: step(s, a, horizon))(states, actions)
-        record = dict(observation=observations, action=actions, reward=rewards,
+        record = dict(observation=observations, next_observation=next_states.position,
+                      next_elapsed=next_states.elapsed, action=actions, reward=rewards,
                       active=~states.done, terminated=terminated, truncated=truncated,
                       old_logp=log_probability(theta, observations, actions))
         return next_states, record
@@ -434,11 +434,11 @@ Expected: All five independently trained agents outperform the held-out uniform 
 
 ### Read the figure
 
-The horizontal categories identify the five training seeds. Each group compares sampled held-out episode return with that policy’s exact expectation. The third bar is the uniform-policy baseline, repeated as a shared reference. Taller bars mean better return in this fixed corridor task; they do not mean higher accuracy or greater statistical confidence. Seed $41$ has the lowest sampled mean, about $0.9694$, and exact mean, about $0.9711$. Seed $0$ is around $0.9760$ sampled and $0.9758$ exact. The visible spread is small compared with the roughly $0.51$ improvement over the uniform baseline.
+The x-axis groups five independently trained agents by training seed; the y-axis is episode return in this fixed corridor. In each group, the sampled held-out mean is compared with that policy's exact expectation; a repeated uniform-policy bar is the shared baseline. Seed 41 is lowest at about 0.9694 sampled and 0.9711 exact, while seed 0 is about 0.9760 and 0.9758. Taller means better return here, not higher confidence. Predict what a large sampled/exact gap would suggest: evaluation noise or a protocol mismatch to investigate.
 
 ### Connect it to the computation
 
-The trained policies cluster close to the always-right limit of $0.985$, while the uniform baseline remains around $0.47$. Small gaps between sampled and exact bars are evaluation noise. Differences among exact bars reflect differences in the trained policies. The plot has no confidence intervals: five training runs and shared evaluation streams support a descriptive comparison here, not a broad claim about PPO.
+All five exact means cluster near the always-right limit 0.985; the uniform baseline is about 0.47. Sampled means sit close to exact values, so this run's episode noise is small relative to the roughly 0.51 baseline gap. Differences among exact bars reflect trained-policy differences, while differences between sampled and exact bars reflect finite evaluation. No uncertainty intervals are plotted; five runs support a descriptive fixture comparison, not a broad claim about PPO.
 
 ```python
 visual_data = {'kind':'bar','labels':[str(s) for s in training_seeds],'xlabel':'training seed','ylabel':'mean episode return','series':[{'label':'held-out sampled','y':trained_means.tolist()},{'label':'exact expectation','y':exact_means.tolist()},{'label':'uniform baseline (shared)','y':[baseline['mean']]*5}]}
@@ -446,7 +446,7 @@ visual_data = {'kind':'bar','labels':[str(s) for s in training_seeds],'xlabel':'
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:23:33.386062+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:07:45.041603+00:00. JAX 0.9.2.
 
 ```text
 training seeds: [0, 7, 23, 41, 59]
@@ -511,23 +511,32 @@ Compute the paired held-out improvement over the uniform baseline for each train
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
+**Inputs:**
+- A vector of five held-out means, one per trained policy.
+- The baseline mean evaluated on the same streams.
 
-**Step-by-step implementation plan:**
-1. Exercise solution
-2. Check tensor shape invariant: `deltas.shape == (5,)`
+**Outputs:**
+- The five paired per-agent improvements and their mean.
+
+**Invariants to check:**
+- Keep one result per training run.
+- The baseline uses the same held-out streams for every agent.
+- Do not treat episodes as independent training runs.
+
+**Hints:**
+- Subtract the shared baseline from each agent mean before averaging.
+- Preserve the per-agent differences for inspection.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-deltas = ...  # TODO: compute deltas
-# Check tensor shape invariant: `deltas.shape == (5,)`
-assert deltas.shape  # TODO: complete assertion check
-assert np.all(deltas  # TODO: complete assertion check
-print('paired improvements:', deltas)
-print('mean improvement across trained agents:', deltas.mean())
+import numpy as np
+
+def paired_improvements(agent_means, baseline_mean):
+    # TODO: compute one difference for each independently trained policy
+    differences = ...
+    # TODO: return the individual differences and their average
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -558,22 +567,31 @@ Weight each shard mean by its episode count.
 
 ### How to write: Expose an unequal-batch averaging bug — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
+**Inputs:**
+- Two evaluation shards with means 1 and 0.
+- Episode counts 1 and 9.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- An unweighted average of shard means and the episode-weighted mean.
+
+**Invariants to check:**
+- Each episode has equal weight in the episode-level mean.
+- Unequal shard sizes change the result if shard means are averaged equally.
+
+**Hints:**
+- Use the episode counts as weights.
+- Keep the two summaries named to expose the aggregation choice.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Expose an unequal-batch averaging bug (Transfer / diagnosis): Equal shard weighting changes the unit from episode to shard.
-means = np.array(...)  # TODO: compute means
-counts = np.array(...)  # TODO: compute counts
-wrong = means.mean(...)  # TODO: compute wrong
-right = np.average(...)  # TODO: compute right
-assert wrong  # TODO: complete assertion check
+import numpy as np
+
+def compare_shard_averages():
+    means = np.array([1., 0.])
+    counts = np.array([1, 9])
+    # TODO: compute an unweighted and episode-weighted summary
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -605,20 +623,30 @@ Use sample standard deviation with ddof=1; a standard error divides by the squar
 
 ### How to write: Distinguish spread from standard error — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Inputs:**
+- Three trained-agent means: 0.8, 0.9, and 1.0.
+- A sample-standard-deviation calculation and the number of agents.
+
+**Outputs:**
+- Across-agent spread and a naive standard-error calculation.
+
+**Invariants to check:**
+- Use sample standard deviation with ddof=1.
+- Label the unit of observation as a trained agent.
+
+**Hints:**
+- The standard error divides spread by the square root of the independent-agent count.
+- Explain the limits of that calculation under shared evaluation streams.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Distinguish spread from standard error (Transfer / diagnosis)
-values = np.array(...)  # TODO: compute values
-sd = values.std(...)  # TODO: compute sd
-naive_se = ...  # TODO: compute naive_se
-assert abs(sd-.1)  # TODO: complete assertion check
-assert abs(naive_se-.0577350269)  # TODO: complete assertion check
-print('sample sd / independence-assuming SE:',sd,naive_se)
+import numpy as np
+
+def summarize_agent_spread():
+    agent_means = np.array([.8, .9, 1.])
+    # TODO: calculate sample spread and the naive standard error
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -647,9 +675,17 @@ What does evaluating one policy on many episodes fail to measure?
 
 <details><summary>Answer and explanation</summary>
 
-Sensitivity to training randomness across independently fitted policies
+**1. Its mean return on those sampled episodes**
+
+Repeated episodes can estimate the return of this fitted policy. They do not measure variation across independently trained policies.
+
+**2. Sensitivity to training randomness across independently fitted policies (correct)**
 
 More evaluation episodes estimate one policy more precisely. To study training variability, repeat training with different seeds and preserve those runs as separate units.
+
+**3. Variation in returns between the sampled episodes**
+
+Episode variation is exactly what those repeated evaluations observe. Add separate training seeds to measure training variability.
 
 </details>
 

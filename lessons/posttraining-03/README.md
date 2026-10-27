@@ -4,6 +4,8 @@ Phase 18: Post-training: SFT, LoRA, reward models and RLHF · about 105 minutes 
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [LoRA: adapt, save and merge low-rank updates](https://www.tahabouhsine.com/jaxpathways/lesson-posttraining-02.html).
+
 ## What you will be able to do
 
 - Represent a preference as a comparison
@@ -20,11 +22,9 @@ A pairwise reward model learns to give a preferred item a higher score than its 
 
 ## A preference compares scores rather than calibrating utility
 
-If chosen and rejected scores are $3$ and $1$, their margin is $2$. Adding $10$ to both scores leaves the margin unchanged and therefore leaves a difference-based preference loss unchanged. The absolute offset is not identified by those comparisons.
+A preference label says which of two responses was favored under a shared prompt and rubric. The model turns the score difference into a preference probability: $p=\sigma(r_+-r_-)$. That probability describes the label likelihood; each response still receives a scalar reward score, not a calibrated probability of being good. Adding the same constant to both rewards leaves $p$ unchanged.
 
-Conflicting labels can make an intermediate preference probability more appropriate than an extreme one. Inspect disagreement and source quality rather than assuming the model should confidently fit every pair.
-
-The margin plot shows separation on the fixture. To support downstream policy optimization, evaluate generalization and possible exploitation separately. A reward that ranks a few training pairs correctly can still be unreliable on policy-generated outputs.
+In the recorded three-pair synthetic fit, mean pairwise NLL falls from 0.693 nats (a 50/50 tie) to 0.087, and all three training margins become positive. This shows the fitted ranking on those pairs, not human agreement. Before using the scores downstream, inspect held-out pairs and ask whether disagreements and unseen prompts are represented.
 
 ### Pause and reason
 
@@ -48,7 +48,7 @@ Keep the prompt identity, chosen/rejected response identities, label source and 
 
 ## Fit score differences with a stable likelihood
 
-The probability of preferring a chosen response is the sigmoid of its reward difference. The negative log likelihood is softplus of the negative margin. A tied pair starts at $\log 2$. A common offset to all rewards cancels, so comparisons alone do not identify an absolute reward origin.
+For margin $m=r_+-r_-$, the chance assigned to the observed preference is $\sigma(m)$, while the training loss is $\log(1+e^{-m})$. At $m=0$, the probability is one half and loss is $\log2$; at $m=\log3$, the probability is three quarters. Those are probabilities of the pairwise label under the model, not probabilities that a reward score is correct in general. The scalar score itself remains relative: the shared prompt comparison cancels any common offset.
 
 $$
 L_{\mathrm{RM}}=\mathbb E\left[\operatorname{softplus}\!\left(-(r_w(x,y^+)-r_w(x,y^-))\right)\right]
@@ -66,13 +66,11 @@ $$
 
 ## Disagreement changes the optimum
 
-If the same two responses appear once with each preference direction, the average loss is minimized at a tied score, not at infinite confidence in either label. With unequal vote frequencies, the optimum reflects those frequencies under this likelihood model. Collapsing disputed examples into one apparently certain label discards information.
-
-Group train and evaluation splits by prompt/source. Report agreement, likelihood and calibration under the labeling protocol, and inspect disagreements. A scalar metric can hide systematic preferences that conflict between raters or domains. The next policy optimizer will amplify the score signal, so keep a separate evaluator for qualities the reward model may have missed.
+Conflicting labels provide evidence about uncertainty. If the same pair appears once in each direction, the average likelihood is best at margin zero, which assigns one-half to each direction; forcing a huge positive margin would fit one label and contradict the other. For uneven votes, the fitted probability can reflect their frequency. Preserve the vote fraction and source rather than reducing every pair to an unquestioned majority.
 
 ## Separate ranking from calibration
 
-Check ordering, held-out pair likelihood and agreement by prompt/source slice. A large positive margin means the model is confident under its likelihood, not that a response is universally good. Separable preferences can drive growing margins; regularization, validation and stopping rules matter even when every training comparison is correct.
+On the held-out synthetic set, the pre-fit zero-score model assigns 0.5 to all four comparisons, with mean Brier error 0.1406 and 0/1 accuracy on unanimous cases. After fitting the three training pairs, held-out Brier error is 0.0223 and unanimous accuracy is 1/1. On the two disagreement cases, Brier error changes only from 0.0313 to 0.0294; their probabilities are retained rather than forced into a unanimous label. This is a tiny synthetic check, not human or language-response validation. Use held-out slices to decide whether this reward is ready for the next experiment.
 
 ## Preserve disagreement and data provenance
 
@@ -80,13 +78,27 @@ Real raters may disagree for legitimate reasons. Retain the rating rubric, task,
 
 ## Keep the reward model fixed during policy evaluation
 
-The next lesson freezes the learned reward while optimizing a policy. If reward changes mid-comparison, observed improvement may reflect a moving evaluator. Retain a reference policy, independent task metrics and adversarial examples to detect reward exploitation.
+The next lesson freezes this reward model while a policy changes. If scores moved during that comparison, a policy could appear to improve because the evaluator changed. Carry the reward-model identity and its held-out behavior with the run, keep an independent task metric, and inspect outputs the reward may score incorrectly. A rising reward alone is not evidence of better responses.
 
 ## Audit both what scores identify and what they do not
 
-Adding one common offset leaves every preference margin unchanged, so pair comparisons cannot identify an absolute zero of reward. Positive scaling preserves ranking but changes probabilities and confidence. The scale also changes the reward-versus-KL tradeoff in policy optimization. Save normalization and model identity when handing scores to the next phase.
+Pairwise comparisons identify relative margins, not an absolute zero: adding a common offset changes no training probability. Scaling the weights preserves ordering but changes confidence and the reward scale, which changes how strongly a downstream KL penalty competes with reward. In this recorded fit, the margins are about 1.65, 4.29, and 2.64 for the three ordered pairs. Save model identity and normalization so the next policy run uses a known score scale.
 
-A perfectly fitted training ranking can coexist with overconfidence or poor held-out ranking. On separable data the model can keep increasing margins without learning a new ordering. Track weight norms, held-out likelihood and error slices; choose regularization and stopping on development data rather than demanding the smallest possible training loss.
+## Freeze a baseline before fitting and inspect held-out disagreement cases
+
+The three comparisons in the fitted example define training only. Add a separate fixed set of held-out feature pairs, including unanimous and split votes, before fitting the reward weights. Compute baseline pairwise probabilities from zero weights first, then score the same cases after the update. Report held-out Brier error and preference accuracy for unanimous cases; for disagreement cases, report predicted probabilities and Brier error against the vote fraction rather than forcing a majority label.
+
+This small finite fixture can expose a broken pairwise objective or a train/held-out mismatch. Its scores and votes are synthetic. They are not human reward calibration, language-response usefulness, or evidence that a downstream policy should optimize these scores.
+
+### Pause and reason
+
+How should a 50/50 disagreement pair enter held-out evaluation?
+
+<details><summary>Compare your reasoning</summary>
+
+Keep it in a separate disagreement slice and compare the predicted preference probability with the 0.5 vote fraction, for example with Brier error. Do not relabel it as unanimous.
+
+</details>
 
 ## 1. Define chosen-minus-rejected likelihood
 
@@ -122,6 +134,34 @@ step = jax.jit(
 ```
 
 Write the desired order before fitting: response zero above one, and one above two. These labels are synthetic.
+
+## Freeze held-out reward pairs before fitting
+
+Insert this block after constructing the three training comparisons and before the fit loop. It records the fixed synthetic held-out baseline before reward weights are updated.
+
+```python
+# Held-out examples are fixed before the optimizer loop; they are not used for fitting.
+heldout_chosen = jnp.array([[1.0, 0.0], [0.0, 1.0], [0.2, 0.2], [-1.0, -1.0]])
+heldout_rejected = jnp.array([[0.0, 1.0], [-1.0, -1.0], [-0.1, 0.0], [0.0, 1.0]])
+heldout_votes = np.array([1.0, 1.0, 0.5, 0.25], dtype=np.float64)
+heldout_slices = np.array(["unanimous", "unanimous", "disagreement", "disagreement"])
+w_baseline = jnp.zeros_like(w)
+def heldout_report(weights):
+    margins = np.asarray((heldout_chosen - heldout_rejected) @ weights, dtype=np.float64)
+    probabilities = 1.0 / (1.0 + np.exp(-margins))
+    brier = (probabilities - heldout_votes) ** 2
+    unanimous = heldout_slices == "unanimous"
+    disagreement = ~unanimous
+    return {"probabilities": probabilities, "brier_mean": float(np.mean(brier)),
+            "unanimous_accuracy": float(np.mean((probabilities[unanimous] > 0.5) == (heldout_votes[unanimous] > 0.5))),
+            "disagreement_probabilities": probabilities[disagreement],
+            "disagreement_brier": float(np.mean(brier[disagreement]))}
+pretraining_heldout_baseline = heldout_report(w)
+assert np.allclose(pretraining_heldout_baseline["probabilities"], 0.5)
+print("Frozen held-out reward baseline before fit:", pretraining_heldout_baseline)
+```
+
+This code runs after the training comparisons are defined and before the optimizer loop. The zero-weight probabilities and fractional-vote Brier score are the baseline for this fixed held-out set.
 
 ## 3. Fit rewards and check their invariances
 
@@ -228,13 +268,11 @@ Expected: The model learns all three declared preferences; common reward offsets
 
 ### Read the figure
 
-The vertical axis is pairwise negative log likelihood in nats. It starts near $0.693=\log2$, then falls to about $0.087$. Each point is before an update on the same three synthetic comparisons; it is not a human agreement rate.
-
-The second panel reports final chosen-minus-rejected score margins for the three training comparisons. All are positive, so each ordering agrees with its synthetic label. The zero-versus-two comparison spans the other two and has the largest margin. A common reward offset would leave every bar unchanged; multiplying weights by two would double them without changing ordering. Neither operation is visible in a ranking-only accuracy number.
+The first panel uses completed parameter updates on x and pairwise NLL in nats on y; on the same three synthetic training pairs it falls from 0.693 (a tied 50/50 prediction) to 0.087. The second panel gives final chosen-minus-rejected reward margins: about 1.65, 4.29, and 2.64 for 0>1, 0>2, and 1>2. All are positive, and the widest comparison has the largest margin.
 
 ### Connect it to the computation
 
-The initial zero weights tie all response scores. Training increases the chosen-minus-rejected margins. The offset and scaling exercises explain why reward values must be interpreted relative to their model and downstream objective.
+This confirms the model learned the fixture's three relative orderings, not an absolute or universally calibrated notion of quality. The held-out report is a separate check: Brier error falls from 0.1406 to 0.0223 and unanimous accuracy rises from 0/1 to 1/1, while disagreement Brier changes only from 0.0313 to 0.0294. Because the held-out set has only four synthetic comparisons, use a larger prompt-grouped evaluation before trusting the score in policy optimization.
 
 ```python
 visual_data={'kind':'line','xlabel':'completed parameter updates before measurement','ylabel':'pairwise preference NLL (nats)','series':[{'label':'recorded CPU training loss','x':list(range(len(history))),'y':history}]}
@@ -248,9 +286,10 @@ visual_data={"panels":[*visual_data.get("panels",[visual_data]),extra_panel]}
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:26:58.074779+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:26:59.191516+00:00. JAX 0.9.2.
 
 ```text
+Frozen held-out reward baseline before fit: {'probabilities': array([0.5, 0.5, 0.5, 0.5]), 'brier_mean': 0.140625, 'unanimous_accuracy': 0.0, 'disagreement_probabilities': array([0.5, 0.5]), 'disagreement_brier': 0.03125}
 Synthetic preference NLL initial/final: 0.6931471824645996 0.08669456839561462 ; rewards: [ 1.9811294  0.327278  -2.3084073]
 Synthetic preference NLL initial/final: 0.6931471824645996 0.08669456839561462 ; rewards: [ 1.9811294  0.327278  -2.3084073]
 Forward/reversed preference NLL: 0.08596369624137878 2.94565486907959
@@ -258,6 +297,9 @@ Balanced conflicting labels prefer a zero margin.
 Tied baseline and preference directions verified.
 Ranking unchanged; confidence and downstream reward scale change.
 Independent reward gradients agree in both label directions.
+heldout reward baseline: {'probabilities': array([0.5, 0.5, 0.5, 0.5]), 'brier_mean': 0.140625, 'unanimous_accuracy': 0.0, 'disagreement_probabilities': array([0.5, 0.5]), 'disagreement_brier': 0.03125}
+heldout reward after training-pair fit: {'probabilities': array([0.8394109 , 0.93312322, 0.65921421, 0.06687678]), 'brier_mean': 0.022286160720660468, 'unanimous_accuracy': 1.0, 'disagreement_probabilities': array([0.65921421, 0.06687678]), 'disagreement_brier': 0.029441639707967603}
+Synthetic, four-pair evaluation only; no human or language-quality claim.
 PASS: posttraining-03
 
 ```
@@ -304,22 +346,29 @@ Calculate the initial loss for tied reward scores independently and verify the t
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.zeros / jnp.ones(shape, dtype=...)` — Allocates a tensor of the given `shape` initialized with constants.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- Chosen and rejected feature pairs plus a zero-initialized reward vector.
+- A trained reward vector for the same comparisons.
 
-**Step-by-step implementation plan:**
-1. Exercise solution
+**Outputs:**
+- Initial tied-score preference loss and a check of the trained chosen-over-rejected ordering.
+
+**Invariants to check:**
+- At equal scores, each binary preference contributes the same finite loss.
+- The ordering check compares chosen and rejected scores for each labeled pair.
+
+**Hints:**
+- Compute the score difference for each pair before applying the softplus loss.
+- Keep the initial calculation independent from the trained ordering check.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-np.testing.assert_allclose(
-    preference_loss(jnp.zeros(2), chosen, rejected), -np.log(0.5), atol=1e-6
-)
-assert np.all(np.asarray((chosen - rejected) @ w)  # TODO: complete assertion check
-print('Tied baseline and preference directions verified.')
+import jax.numpy as jnp
+
+def audit_initial_and_trained_preferences(chosen, rejected, trained_weights):
+    # TODO: calculate the tied-score loss and audit the trained pair ordering.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -349,20 +398,26 @@ Positive scaling preserves ordering but sharpens probabilities.
 
 ### How to write: Show that feature scale can change scores without changing ranking — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Inputs:**
+- Feature pairs, the trained reward weights, and the same weights multiplied by two.
+
+**Outputs:**
+- Score-order comparisons and preference probabilities before and after scaling.
+
+**Invariants to check:**
+- Positive scaling preserves ordering while it changes probability sharpness.
+
+**Hints:**
+- Compare score order and sigmoid probability as separate quantities.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Show that feature scale can change scores without changing ranking (Transfer): A policy’s reward-versus-KL tradeoff depends on reward scale.
-scaled_rewards = ...  # TODO: compute scaled_rewards
-np.testing.assert_array_equal(np.argsort(rewards), np.argsort(scaled_rewards))
-assert float(preference_loss(2 * w, chosen, rejected))  # TODO: complete assertion check
-    preference_loss(w, chosen, rejected)
-)
-print('Ranking unchanged; confidence and downstream reward scale change.')
+import jax.numpy as jnp
+
+def compare_reward_scale(features, chosen, rejected, weights):
+    # TODO: compare pair ordering and probabilities at both scales.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -395,36 +450,28 @@ Use NumPy sigmoid values for the independent calculation; reversing both feature
 
 ### How to write: Derive the linear reward gradient — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
+**Inputs:**
+- Chosen and rejected feature matrices plus a fresh reward weight vector.
 
-**Step-by-step implementation plan:**
-1. Derive the linear reward gradient (Challenge)
-2. Transfer the device result to the host for an independent NumPy comparison.
-3. Reduce along axis=0 to compute `analytic`.
+**Outputs:**
+- Mean feature-difference gradient from the likelihood formula and autodiff, repeated with reversed labels.
+
+**Invariants to check:**
+- The gradient is averaged across comparisons and flips consistently when every label is reversed.
+
+**Hints:**
+- Differentiate the scalar loss with respect to the weight vector.
+- Use the same parameter values for both labelings.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Derive the linear reward gradient (Challenge)
-probe_w = jnp.array(...)  # TODO: compute probe_w
-for positive, negative in [(chosen, rejected), (rejected, chosen)]:
-    # Transfer the device result to the host for an independent NumPy comparison.
-    difference = np.asarray(...)  # TODO: compute difference
-    margin_host = ...  # TODO: compute margin_host
-    # Reduce along axis=0 to compute `analytic`.
-    analytic = np.mean(...)  # TODO: compute analytic
-        (1 / (1 + np.exp(-margin_host)) - 1)[:, None] * difference, axis=0
-    )
-    np.testing.assert_allclose(
-        jax.grad(preference_loss)(probe_w, positive, negative),
-        analytic,
-        atol = ...  # TODO: compute atol
-    )
-print('Independent reward gradients agree in both label directions.')
+import jax
+import jax.numpy as jnp
+
+def compare_linear_reward_gradient(weights, chosen, rejected):
+    # TODO: derive and check the preference-loss gradient before and after label reversal.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -452,6 +499,86 @@ Checking both directions catches a sign error that a single decreasing training 
 
 </details>
 
+## Evaluate held-out reward pairs and keep disagreement visible
+
+**Transfer**
+
+Define held-out feature pairs and their vote fractions before fitting. Calculate zero-weight baseline probabilities first. Fit the existing three training comparisons, then report held-out Brier score, unanimous-case accuracy, and the disagreement slice before and after. Keep the same pairs and labels for both measurements.
+
+<details><summary>Hint</summary>
+
+The probability that the chosen item wins is sigmoid((chosen - rejected) dot w). For a fractional vote v, Brier error is (p - v)^2. A disagreement pair does not have a single hard correctness label.
+
+</details>
+
+### How to write: Evaluate held-out reward pairs and keep disagreement visible — Step-by-step recipe & starter scaffold
+
+**Inputs:**
+- The existing three training feature comparisons and fitted reward weights
+- Four fixed held-out chosen/rejected feature pairs and vote fractions
+- A declared slice label for unanimous and disagreement examples
+
+**Outputs:**
+- Pre-fit baseline probabilities and Brier score
+- Post-fit held-out Brier score and unanimous-case accuracy
+- Separate disagreement probabilities and Brier score
+
+**Invariants to check:**
+- Hold out the examples before fitting
+- Use identical held-out pairs and vote fractions for baseline and post-fit metrics
+- Score disagreement against its fractional vote; do not force a hard label
+- Describe every score as a synthetic finite-fixture result
+
+**Hints:**
+- Use the chosen-minus-rejected feature vector in the sigmoid margin.
+- Compute baseline with `w_baseline = zeros_like(w)` before the optimizer update.
+- Report unanimity and disagreement slices separately.
+
+**Starter code scaffold (fill in the TODOs):**
+
+```python
+# Complete the baseline-first held-out report for fixed pair features.
+raise NotImplementedError
+```
+
+<details><summary>Reference solution and reasoning</summary>
+
+```python
+# Fixed synthetic held-out reward pairs. Baseline is calculated at w=0 before fitting.
+heldout_chosen = jnp.array([[1.0, 0.0], [0.0, 1.0], [0.2, 0.2], [-1.0, -1.0]])
+heldout_rejected = jnp.array([[0.0, 1.0], [-1.0, -1.0], [-0.1, 0.0], [0.0, 1.0]])
+heldout_votes = np.array([1.0, 1.0, 0.5, 0.25], dtype=np.float64)
+heldout_slices = np.array(["unanimous", "unanimous", "disagreement", "disagreement"])
+
+# Define the baseline before any reward-model optimization.
+w_baseline = jnp.zeros_like(w)
+def heldout_report(weights):
+    margins = np.asarray((heldout_chosen - heldout_rejected) @ weights, dtype=np.float64)
+    probabilities = 1.0 / (1.0 + np.exp(-margins))
+    brier = (probabilities - heldout_votes) ** 2
+    unanimous = heldout_slices == "unanimous"
+    disagreement = ~unanimous
+    return {
+        "probabilities": probabilities,
+        "brier_mean": float(np.mean(brier)),
+        "unanimous_accuracy": float(np.mean((probabilities[unanimous] > 0.5) == (heldout_votes[unanimous] > 0.5))),
+        "disagreement_probabilities": probabilities[disagreement],
+        "disagreement_brier": float(np.mean(brier[disagreement])),
+    }
+
+baseline = pretraining_heldout_baseline
+after = heldout_report(w)
+assert len(baseline["disagreement_probabilities"]) == 2
+assert np.all(np.isfinite(after["probabilities"]))
+print("heldout reward baseline:", baseline)
+print("heldout reward after training-pair fit:", after)
+print("Synthetic, four-pair evaluation only; no human or language-quality claim.")
+```
+
+The baseline is explicitly tied to zero reward weights before fitting. The same held-out examples are scored after training. Unanimous accuracy and disagreement Brier are reported separately; the fractional vote remains a target probability, not a hard label. This is a finite synthetic mechanism check.
+
+</details>
+
 ## Check your understanding
 
 What do pairwise preferences identify directly?
@@ -462,9 +589,17 @@ What do pairwise preferences identify directly?
 
 <details><summary>Answer and explanation</summary>
 
-Reward differences under the chosen comparison model, not an absolute universal utility.
+**1. Reward differences under the chosen comparison model, not an absolute universal utility. (correct)**
 
 A shared additive offset cancels from every pairwise probability.
+
+**2. A unique zero point for individual response rewards across unrelated prompts.**
+
+Pairwise losses are unchanged by a shared score offset for each compared pair. They do not identify an absolute utility zero.
+
+**3. A scale-invariant objective whose positive rescaling leaves downstream KL regularization unchanged.**
+
+Changing reward scale changes its balance with the KL penalty. Compare the terms in the actual policy objective.
 
 </details>
 
@@ -479,7 +614,7 @@ If margins have the wrong sign, inspect chosen/rejected order. If training ranki
 
 ## Keep your evidence
 
-Keep synthetic label provenance, stable preference-loss and gradient references, offset/scale tests and the learned ordering.
+Keep stable likelihood and gradient checks, contradictory preference controls, pre-fit and post-fit held-out probability/Brier metrics, separate disagreement slices and score-offset/scale limitations.
 
 Save your predictions, modified code, terminal outputs, and reasoning in your engineering portfolio.
 

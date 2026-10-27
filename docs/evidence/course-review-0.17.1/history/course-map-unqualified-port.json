@@ -1,0 +1,21 @@
+{
+  "scope": "reader-stage-dock final lesson browser regression",
+  "qualification": "unqualified: PLAYWRIGHT_PORT was unset, so Playwright used default port 4173; served HTML identity was not captured",
+  "managedBrowser": "/private/tmp/jaxpathways-playwright",
+  "runs": [
+    {
+      "candidate": "latest test source before locator correction",
+      "command": "PLAYWRIGHT_BROWSERS_PATH=/private/tmp/jaxpathways-playwright npx playwright test browser-tests/reader-stage-dock.spec.ts --grep 'final lesson' --repeat-each=3 --workers=1",
+      "port": 4173,
+      "status": "failed",
+      "result": "6 failures at the dock-scoped next-activity locator; target identity was not captured"
+    },
+    {
+      "candidate": "earlier test source using accessible Lesson activities link",
+      "command": "PLAYWRIGHT_BROWSERS_PATH=/private/tmp/jaxpathways-playwright npx playwright test browser-tests/reader-stage-dock.spec.ts --grep 'final lesson' --repeat-each=3 --workers=1",
+      "port": 4173,
+      "status": "passed",
+      "result": "6 passes; target identity was not captured and this is not candidate-qualified"
+    }
+  ]
+}

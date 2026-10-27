@@ -1,0 +1,48 @@
+{
+  "discovery": {
+    "c03_llms_present": true,
+    "c03_quality_gate": "failed",
+    "canonical_optional_pilots": 3,
+    "full_capstones_planned": 10
+  },
+  "frozen_packet": {
+    "loose_public_assets": 26,
+    "packet_manifest_sha256": "3b1dcfe589fffc25a43da336beb07d82334b6f8971a73084e2b989b6e8f2a794",
+    "public_manifest_entries": 29,
+    "source_files": 28,
+    "zip_files": 58,
+    "zip_sha256": "0de26094a97114c9ce33605ac6c382c4a6a06c1f84f03438bf0d9f466689f9bc"
+  },
+  "limitations": [
+    "C03 classification quality gate failed",
+    "No full approximately-300M qualification",
+    "No release preparation/deployment performed"
+  ],
+  "result": "accepted",
+  "schema": "c03-sol-canonical-0151-review-v1",
+  "scope": "bounded source/site/discovery review, no release preparation or optimizer update",
+  "source_sha256": {
+    "browser-tests/image-pilot.spec.ts": "0e936ea553d5828153548dde7e8923376064c1e1381ecf4de885c169333d1b18",
+    "curriculum/project-plans.json": "641036462df0ecea89bffb26711e68fbbc17ea55bf998069a4d38c1e49a668ab",
+    "scripts/audit-learning-material.py": "a5e0a8c61f733186e354bad2944ee8401397d20f3524049aa95241c824c9f131",
+    "scripts/render-curriculum.mjs": "8cc67cec540ebd62112fb14e2125091eaf9b07c8be0eb9e50d870e52fe26a547",
+    "src/components/projects/ProjectEntryCard.astro": "eec68b79275bae99cdbff3e25b2057ebd5215a86245f4bc092d4ae22f4a4bd51",
+    "src/pages/project-guides/image-model-300m-pilot.astro": "3516e25b8fa8a0504cc52dc6bc6af9f94266912fb55f6538e06812029ac44bb3",
+    "src/pages/project-guides/sharded-training-multiprocess.astro": "82dade6f33ed4e13be0a4d8211abf35ddfbb10e9ceb00cb81deec02647af9738",
+    "src/pages/project-plans/[id].astro": "81272b02f66d9d0d32416fc76a963ed36771f0c50dfd465d78ba762cffdfee1b",
+    "tests/c01-optional-pilot.test.mjs": "01666b00b523b8fc9404d21975ec4ca93126b7bb5c0631dd647801cd5e5b6e81",
+    "tests/image-pilot-evidence.test.mjs": "fc961c059c4cb7495396aa91b02e70904adf1ba6f38eb9f6f4dfe229135cf8d1",
+    "tests/optional-workflow-evidence.test.mjs": "e88c52ec1741b13accaf34a0732440a89cba693d86b646fef4bf014b3b40a5f5"
+  },
+  "verification": {
+    "distribution_checker": "pass",
+    "focused_browser_desktop_mobile": "4/4 pass",
+    "focused_node_tests": "12/12 pass",
+    "isolated_negative_controls": [
+      "manifest-byte: renderer reject, audit unavailable",
+      "source-byte: renderer reject, audit unavailable",
+      "public-byte: renderer reject, audit unavailable",
+      "descriptor-pin: renderer reject, audit unavailable"
+    ]
+  }
+}

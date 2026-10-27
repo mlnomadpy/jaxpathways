@@ -11,7 +11,12 @@
         "The final loss is finite"
       ],
       "correct": 1,
-      "explanation": "Recovery preserves a continuation, so the first resumed update and subsequent state are the relevant evidence. Startup and a finite scalar loss are much weaker."
+      "explanation": "Recovery preserves a continuation, so the first resumed update and subsequent state are the relevant evidence. Startup and a finite scalar loss are much weaker.",
+      "optionFeedback": [
+        "Starting a process does not show correct continuation. Compare the next batches, state and losses with an uninterrupted baseline.",
+        "Recovery preserves a continuation, so the first resumed update and subsequent state are the relevant evidence. Startup and a finite scalar loss are much weaker.",
+        "A finite loss can belong to a different trajectory. Test state equality and several subsequent updates at the same boundary."
+      ]
     }
   ]
 }

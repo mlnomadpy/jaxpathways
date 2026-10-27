@@ -16,7 +16,7 @@ Classify short sound events from fixed windows and explain what happens with sil
 
 ## Figures to explain
 
-Inspect the actual held-out error as waveform and spectrogram with a shared seconds axis. Color is log(1 + window-normalized power), not probability. Read confusion by true-class rows and predicted-class columns, and explain the high-tone/background error.
+Place a waveform in seconds beside a spectrogram with time and frequency axes, sample rate, window and hop recorded. Trace one tone to its expected frequency bin before interpreting errors. Show confusion counts and representative mistaken clips; altered sample rate, clipping and background noise are separate perturbations. The synthetic tone harness is not a speech-recognition benchmark.
 
 ## 1. Define the data contract
 

@@ -4,6 +4,8 @@ A checkpoint is useful when the next update means the same thing after a restart
 
 This is one connected project for the recovery, performance and distributed phases. The four devices are logical partitions of one CPU host. They execute real JAX sharding and collectives, but they do **not** establish four-machine speed, network behavior, accelerator throughput or multi-host recovery. The task needs no external data and uses `requirements-cpu.txt` from the repository root.
 
+After the single-controller stages, try the optional [two-controller recovery exercise](multiprocess/README.md). It uses two actual local JAX processes, unequal sample counts and an empty rank, then kills a worker and restarts both controllers from a committed generation. Its worked timeline and separate process checks qualify a bounded local CPU protocol; remote machines, physical TPUs and storage durability still need their own evidence.
+
 ## Start with the learner scaffold
 
 ```bash
@@ -103,3 +105,11 @@ The supplied project checker intentionally forces one-process CPU execution. Por
 Submit your implementation, passing stage output, full-state recovery comparison, changed-seed/batch results, deliberate failure explanations, actual trace, placement/IR excerpt and synchronized samples. In your short report, name the device topology and measurement boundaries, justify the global denominator, and explain why checkpoint step count alone cannot reconstruct random/data-order state. A useful next optimization is a falsifiable hypothesis grounded in the actual profile, with a correctness gate before timing.
 
 Primary references: [JAX shard_map](https://docs.jax.dev/en/latest/notebooks/shard_map.html), [profiling](https://docs.jax.dev/en/latest/profiling.html), [benchmarking](https://docs.jax.dev/en/latest/benchmarking.html), and [multi-process JAX](https://docs.jax.dev/en/latest/multi_process.html). Installed execution was checked on JAX 0.9.2; future API/backend changes require a fresh receipt.
+
+## Review handoff: explain a changed condition
+
+Let the final shard contain zero valid observations. Predict numerator/count reductions, then decide what a globally empty batch should do.
+
+**Keep for review:** A count-weighted unsharded reference, zero-contribution handling and an explicit globally-empty policy. Do not take an undefined local mean and hope a collective removes NaNs.
+
+Write your prediction before opening the reference implementation. Distinguish what the existing checker verifies from your proposed extension; record any extension command, actual output and limitation separately. A reviewer should be able to locate the first failed contract from your saved evidence.

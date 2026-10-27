@@ -182,3 +182,9 @@ After the pretraining and post-training phases, use the training-methods project
 For adaptation, change adapter rank or scaling, retain the base weights exactly and verify merged predictions on new inputs. Compare original-task and adapted-task measurements separately. For text objectives, draw the shifted response mask and distinguish SFT, learned-reward PPO and DPO by their data, reference and rollout requirements. Synthetic preference success is not human alignment evidence.
 
 Use the weight-conversion project to introduce one deliberate operation mismatch. Report the earliest differing intermediate tensor, the numerical error budget and the repaired result, then reload the converted artifact in a fresh process. Passing the provided MLP is verified separately from parity for a convolutional or attention architecture.
+
+## Reviewer discussion: distinguish evidence from a plausible claim
+
+Accuracy improves after changing preprocessing, but the validation set was also used to refit normalization and choose thresholds.
+
+Before opening the reviewer notes, name the first unsupported claim and the smallest additional artifact that would resolve it. Keep correct partial reasoning even when the overall submission needs repair.

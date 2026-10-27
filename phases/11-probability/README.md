@@ -12,7 +12,9 @@ Start with likelihoods, stable losses and explicit random keys. Check a known po
 
 ## Study guide: Which uncertainty does your model actually represent?
 
-Use an exactly solvable Bayesian regression to check inference. Separate uncertainty about weights, uncertainty about a future observation, and mismatch between the assumed likelihood and the data.
+A point estimate answers which parameters fit, but it leaves open how uncertain they are and how uncertain a future observation should be. A small solvable Bayesian regression lets you calculate those quantities separately and compare an approximate method with a known target.
+
+Read distribution plots by their units: density height is not the probability of one value, and latent-function uncertainty does not include all observation noise. Follow the mean, covariance and predictive intervals through sampling or variational inference. Use residuals to question the assumed likelihood as well as the inference algorithm.
 
 ### Check your starting point
 
@@ -38,11 +40,11 @@ Review: [Build a Bayesian regression](02-build-a-bayesian-regression/docs/en.md)
 
 ### Try a changed condition
 
-Chains agree closely, but prediction residuals bend systematically with the input. What should be changed first?
+A correlated Gaussian target has unit marginal variances and correlation 0.8. A diagonal Gaussian variational fit gets the mean right but reports variance 0.36. Must optimization have failed?
 
 <details><summary>Compare an approach</summary>
 
-Investigate the model’s mean function and observation assumptions. Agreement between chains concerns exploration of the chosen posterior; it does not certify that the chosen model describes the data.
+Not necessarily. In the reverse-KL Gaussian case the optimal diagonal variances equal inverse precision diagonals, which here are \(1-0.8^2=0.36\). The family cannot represent correlation. Compare mean, covariance and predictive intervals with the exact target; a small optimizer gradient does not certify uncertainty calibration.
 
 </details>
 

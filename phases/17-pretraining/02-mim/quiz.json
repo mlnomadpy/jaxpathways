@@ -11,7 +11,12 @@
         "Flattening an image without transposing grid and patch axes changes the shape of the patch tensor."
       ],
       "correct": 0,
-      "explanation": "Correct reduction does not prevent input leakage. Audit the visible-only boundary and validate patch order."
+      "explanation": "Correct reduction does not prevent input leakage. Audit the visible-only boundary and validate patch order.",
+      "optionFeedback": [
+        "Correct reduction does not prevent input leakage. Audit the visible-only boundary and validate patch order.",
+        "A hidden-target loss mask does not prevent leakage if the target remains visible in the encoder input. Check both masks.",
+        "A patch permutation can preserve shape while corrupting spatial correspondence. Check content/order against a known image, not shape alone."
+      ]
     }
   ]
 }

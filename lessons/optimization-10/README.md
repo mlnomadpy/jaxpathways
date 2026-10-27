@@ -4,6 +4,8 @@ Phase 04: Math & optimization · about 75 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Probability, likelihood, and stable losses](https://www.tahabouhsine.com/jaxpathways/lesson-optimization-09.html).
+
 ## What you will be able to do
 
 - Derive a ridge solution, distinguish data loss from penalized loss, and select a penalty using held-out data.
@@ -41,6 +43,8 @@ The test data has influenced model selection. Its score no longer represents a s
 ## State the exact objective
 
 Let $n$ be the training sample count and $\lambda\ge0$ the penalty strength. We use mean squared error plus $\lambda\|w\|_2^2$, without a factor of one half. Differentiating gives $2X^\mathsf{T}(Xw-y)/n+2\lambda w$. Setting it to zero gives the linear system below. Other conventions change the numerical meaning of the same penalty value, so copy the objective along with a reported hyperparameter.
+
+For this fixture, $X=(-1,1)$ and $y=(-3,3)=3X$, so $X^\mathsf{T}X=2$ and $X^\mathsf{T}y=6$. Setting the stated derivative to zero with n=2 gives $2(w-3)+2\lambda w=0$, hence $w=3/(1+\lambda)$. The mean and penalty conventions are explicit; changing either changes the numerical meaning of the same lambda.
 
 $$
 L_\lambda(w)=\frac1n\|Xw-y\|_2^2+\lambda\|w\|_2^2,\qquad (X^\mathsf{T}X+n\lambda I)w=X^\mathsf{T}y
@@ -164,6 +168,8 @@ The fitted weight is $w=3/(1+\lambda)$. The training targets favor slope $3$, wh
 
 Select the penalty using the validation minimum, not the intersection of the curves or the smallest training error. Here that choice is $0.5$. A zero validation error is a property of this tiny synthetic example, not a promise that regularization removes all error on real data.
 
+Before selecting a penalty, predict how fitted slope 3/(1+lambda) compares with validation slope 2; validation error is smallest when these match.
+
 ```python
 grid = jnp.linspace(0.0, 2.0, 41)
 visual_data = {'kind': 'line', 'x': grid.tolist(), 'xlabel': 'ridge penalty', 'ylabel': 'mean squared prediction error', 'series': [{'label': 'training', 'y': [float(mse(ridge(X, y, float(a)), X, y)) for a in grid]}, {'label': 'validation', 'y': [float(mse(ridge(X, y, float(a)), Xv, yv)) for a in grid]}]}
@@ -171,7 +177,7 @@ visual_data = {'kind': 'line', 'x': grid.tolist(), 'xlabel': 'ridge penalty', 'y
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:20:43.467134+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:03:52.414138+00:00. JAX 0.9.2.
 
 ```text
 train / validation / objective: 1.0 0.0 3.0
@@ -222,23 +228,28 @@ For a target slope of $4$ and penalty $\lambda=1$, derive the fitted slope and v
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.zeros / jnp.ones(shape, dtype=...)` — Allocates a tensor of the given `shape` initialized with constants.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
+**Inputs:**
+- Training features, targets, and a nonnegative penalty.
 
-**Step-by-step implementation plan:**
-1. Exercise solution
+**Outputs:**
+- Fitted coefficients and predictions on supplied rows.
+
+**Invariants to check:**
+- Only designated coefficients are penalized; preprocessing statistics come from training data alone.
+
+**Hints:**
+- Separate the intercept from the penalized slope.
+- Compare validation transforms using the training-only statistics.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-y4 = jnp.array(...)  # TODO: compute y4
-w4 = ridge(...)  # TODO: compute w4
-assert jnp.allclose(w4, jnp.array([2.0]))  # TODO: complete assertion check
-assert jnp.allclose(jax.grad(lambda z: mse(z, X, y4) + jnp.dot(z, z))(w4), jnp.zeros(1), atol=1e-06)  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def ridge_fit(features, targets, penalty):
+    """Fitted coefficients and predictions on supplied rows."""
+    # TODO: Fit the stated penalized objective while separating intercept penalty and training-only preprocessing.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -267,27 +278,27 @@ Use a diagonal mask $\operatorname{diag}(1,0)$.
 
 ### How to write: Do not accidentally shrink the intercept — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.zeros / jnp.ones(shape, dtype=...)` — Allocates a tensor of the given `shape` initialized with constants.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- Fit constant targets $(5,5,5)$ using inputs $(-1,0,1)$ and a bias. Compare penalizing only the slope with penalizing both parameters at $\lambda=1$.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- Two fitted parameter sets with a prediction comparison.
+
+**Invariants to check:**
+- The intercept penalty choice is explicit and the unpenalized fit uses training rows only.
+
+**Hints:**
+- Use a diagonal mask $\operatorname{diag}(1,0)$.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Do not accidentally shrink the intercept (Transfer / diagnosis)
-x = jnp.array(...)  # TODO: compute x
-A = jnp.stack(...)  # TODO: compute A
-target = jnp.full(...)  # TODO: compute target
-mask = jnp.diag(...)  # TODO: compute mask
-correct = jnp.linalg.solve(...)  # TODO: compute correct
-all_penalized = ridge(...)  # TODO: compute all_penalized
-assert jnp.allclose(correct, jnp.array([0.0, 5.0]))  # TODO: complete assertion check
-assert jnp.allclose(all_penalized, jnp.array([0.0, 2.5]))  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def practice_do_not_accidentally_shrink_the_intercept(features, targets):
+    """Implement the do not accidentally shrink the intercept check."""
+    # TODO: Fit the constant target data with slope-only and all-parameter penalties and compare both parameter pairs.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -322,26 +333,27 @@ Fit the mean on training data; do not refit it on validation data.
 
 ### How to write: Catch preprocessing leakage — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- Training inputs are $(0,2)$ and validation input is $100$. Compare training-only centering with centering all inputs together. Which can be reused for a truly unseen example?
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- Both centers and the transformed unseen example under the training-only center.
+
+**Invariants to check:**
+- Validation data does not influence preprocessing statistics used for fitting.
+
+**Hints:**
+- Fit the mean on training data; do not refit it on validation data.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Catch preprocessing leakage (Transfer / diagnosis): Validation data must not influence fitted preprocessing.
-train_x = jnp.array(...)  # TODO: compute train_x
-val_x = jnp.array(...)  # TODO: compute val_x
-train_mean = jnp.mean(...)  # TODO: compute train_mean
-leaked_mean = jnp.mean(...)  # TODO: compute leaked_mean
-assert jnp.allclose(val_x - train_mean, jnp.array([99.0]))  # TODO: complete assertion check
-assert not jnp.allclose(train_mean, leaked_mean)  # TODO: complete assertion check
-assert jnp.allclose(jnp.mean(train_x - train_mean), 0.0)  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def practice_catch_preprocessing_leakage(train_features, validation_features):
+    """Implement the catch preprocessing leakage check."""
+    # TODO: Compute the center from training inputs alone and compare it with a center that includes the held-out value.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -371,9 +383,17 @@ Which loss should select the penalty in this exercise?
 
 <details><summary>Answer and explanation</summary>
 
-Unpenalized validation prediction loss
+**1. The penalized training objective alone**
+
+Penalized training losses mix prediction error with a penalty and are not directly comparable evidence of held-out prediction quality.
+
+**2. Unpenalized validation prediction loss (correct)**
 
 Validation compares predictive performance of candidates fitted on training data. A separate final test set is for reporting after selection.
+
+**3. A repeatedly inspected final test loss**
+
+Repeatedly choosing settings on the test set makes it part of model selection. Use validation data, then evaluate the frozen choice on test data.
 
 </details>
 

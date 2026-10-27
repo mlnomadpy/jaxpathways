@@ -189,10 +189,11 @@ Specializations. Start after: 05: Neural network training.
 - Batch environments and scan rollouts (lesson and exercise available)
 - Policy gradients and PPO (lesson and exercise available)
 - Evaluate agents across seeds (lesson and exercise available)
+- Learn value functions and generalized advantage estimation (lesson and exercise available)
 
 **Build:** An evaluated policy in a functional environment.
 
-**Checkpoint:** Compare a trained policy to a baseline across several seeds and report variability.
+**Checkpoint:** Compare a trained policy to baselines across independent seeds, then defend a learned value estimate and a hand-computed GAE trace at terminal and collector-cutoff boundaries.
 
 ### [13: Pallas kernels](phases/13-kernels/README.md)
 
@@ -276,7 +277,7 @@ Training systems. Start after: 17: Self-supervised pretraining: masked and contr
 - RLHF mechanics: a frozen reward and PPO policy updates (lesson and exercise available)
 - Direct preference optimization and reference-corrected margins (lesson and exercise available)
 
-**Build:** Audit response-token SFT masking and preference-pair loss.
+**Build:** Audit SFT, DPO and sequence PPO.
 
 **Checkpoint:** Complete stages 4–8 of training-methods. Retain shifted token-mask checks, frozen-base/merge evidence, preference oracles, signed PPO clipping and fixed-reference DPO comparisons.
 
@@ -311,7 +312,7 @@ Start here. Start after: 20: TPU Workflows: Launching Jobs & Checkpointed Experi
 
 **Build:** Estimate optimizer-state bytes and calculate supplied-rate scaling efficiency.
 
-**Checkpoint:** Compare TPU v5e, v5p, and v6e ridge points, budget training and KV-cache HBM, measure BF16/INT8 matmul error with FP32 accumulation, and capture a warmed XProf trace.
+**Checkpoint:** Compare published TPU roofline estimates, budget training and KV-cache HBM, compare BF16 result-dtype policies and an INT8 weight-dequantization reference, and retain a warmed profiler trace with its observed backend.
 
 ## Choose the work you want to do
 
@@ -505,7 +506,7 @@ Learn how arrays, derivatives and explicit state fit together by building and ch
 
 **First artifact:** A regression implementation with an independent gradient check and held-out predictions.
 
-**Study advice:** Begin with setup, arrays, transformations and explicit state, completing one foundation-toolkit stage per phase. In Math & optimization, first complete loss intuition, gradient checking, handwritten descent and Optax; then build the regression project. Return for the deeper math sequence and optimizer-audit to explain conditioning, curvature, noisy updates and regularization. Predict each output before running it, then test your explanation with a changed input.
+**Study advice:** Begin with setup, arrays, transformations and explicit state, completing one foundation-toolkit stage per phase. In Math & optimization, first complete loss intuition, gradient checking, handwritten descent and Optax; then build the regression project. Return for the deeper math sequence and optimizer-audit to explain conditioning, curvature, noisy updates and regularization. Predict each output before running it, then test your explanation with a changed input. For review, defend the residual shape before the gradient. Bring one deliberately broadcasted counterexample and an independent scalar calculation; a decreasing curve alone cannot establish the intended objective.
 
 **Engineering extensions (follow each lesson prerequisite):** recovery-06. See [the engineering release project](projects/engineering-release/README.md).
 
@@ -528,7 +529,7 @@ Train a CPU image classifier, preserve its complete state through interruption, 
 
 **First artifact:** A CPU classifier with stable loss, replay checks and count-weighted evaluation.
 
-**Study advice:** Build the classifier first, freeze its evaluation split and add optimizer, random and data-position state before rehearsing interruption. Continue through CPU performance and deployment to the image harness. Use the reproducible-experiments workshop to compare changes. The optional language branch starts at Transformers after recovery; add pretraining and supervised adaptation next. Complete the RL phase before learned-reward PPO. These branches are separate from the classifier evidence.
+**Study advice:** Build the classifier first, freeze its evaluation split and add optimizer, random and data-position state before rehearsing interruption. Continue through CPU performance and deployment to the image harness. Use the reproducible-experiments workshop to compare changes. The optional language branch starts at Transformers after recovery; add pretraining and supervised adaptation next. Complete the RL phase before learned-reward PPO. These branches are separate from the classifier evidence. For review, bring a class-count baseline and one error example per failing class. Explain which preprocessing was fitted on training data and which threshold was selected on validation data before showing the final held-out result.
 
 **Engineering extensions (follow each lesson prerequisite):** recovery-06, deployment-07, operations-06. See [the engineering release project](projects/engineering-release/README.md).
 
@@ -551,7 +552,7 @@ Simulate physical dynamics, check numerical and derivative accuracy, and recover
 
 **First artifact:** A cooling simulator with a convergence table and an independent sensitivity check.
 
-**Study advice:** Work from the cooling model through batched trajectories, sensitivities and parameter fitting. At each step compare against the analytic solution before changing the physical rate or time grid. Use the deeper linear algebra and curvature lessons when parameters are hard to identify. Finish the inverse-problem project, then attempt the two-compartment assessment with its independent conservation check.
+**Study advice:** Work from the cooling model through batched trajectories, sensitivities and parameter fitting. At each step compare against the analytic solution before changing the physical rate or time grid. Use the deeper linear algebra and curvature lessons when parameters are hard to identify. Finish the inverse-problem project, then attempt the two-compartment assessment with its independent conservation check. For review, place solver-grid refinement beside parameter recovery. Explain which derivative belongs to the discretized program and which reference describes the continuous system.
 
 **Engineering extensions (follow each lesson prerequisite):** recovery-06. See [the engineering release project](projects/engineering-release/README.md).
 
@@ -574,7 +575,7 @@ Express assumptions as probability models, verify a known posterior, then implem
 
 **First artifact:** An exact Bayesian regression posterior checked against an independent host calculation.
 
-**Study advice:** Start with distributions and the exact regression posterior so you have a reference for approximate inference. Run multiple HMC chains and deliberately inspect an unstable sampler before studying variational inference. Compare latent uncertainty with uncertainty in a future observation. Complete the Bayesian project with a changed prior and held-out data before moving to an optional NumPyro model.
+**Study advice:** Start with distributions and the exact regression posterior so you have a reference for approximate inference. Run multiple HMC chains and deliberately inspect an unstable sampler before studying variational inference. Compare latent uncertainty with uncertainty in a future observation. Complete the Bayesian project with a changed prior and held-out data before moving to an optional NumPyro model. For review, compare the full covariance and predictive intervals with an exact small target. Distinguish Monte Carlo error, variational-family error and model misspecification before selecting a diagnostic.
 
 **Engineering extensions (follow each lesson prerequisite):** recovery-06. See [the engineering release project](projects/engineering-release/README.md).
 
@@ -597,7 +598,7 @@ Train a policy from actual environment interaction, verify its objective against
 
 **First artifact:** A tested environment transition table and reproducible batched trajectories.
 
-**Study advice:** Test one environment transition before batching it. Reconstruct a trajectory by hand, then compare the policy gradient with the small-state enumeration reference. Train multiple agents with different seeds and freeze the evaluation policy and random streams. Use the policy project to separate an implementation bug, Monte Carlo variation and an algorithm that learns poorly.
+**Study advice:** Test one environment transition before batching it. Reconstruct a trajectory by hand, then compare the policy gradient with the small-state enumeration reference. Train multiple agents with different seeds and freeze the evaluation policy and random streams. Use the policy project to separate an implementation bug, Monte Carlo variation and an algorithm that learns poorly. For review, draw one terminal and one cutoff transition, showing the bootstrap observation. Then present per-agent held-out returns across independently trained seeds; episode count alone does not quantify training robustness. Finish rl-05 by checking the value fit and deriving the GAE recursion by hand. The value/advantage exercise is separate from the actor training loop; do not describe it as a complete actor-critic benchmark.
 
 **Engineering extensions (follow each lesson prerequisite):** recovery-06, operations-06. See [the engineering release project](projects/engineering-release/README.md).
 
@@ -611,6 +612,7 @@ Train a policy from actual environment interaction, verify its objective against
 - Verified transitions, terminal masks and reconstructed return targets
 - A policy-gradient comparison against independent state enumeration
 - Learning curves and fixed held-out evaluation for several trained seeds, with failed trajectories explained
+- A fitted tabular value table with independently checked masked error, and hand-calculated GAE across true terminal, collector-cutoff and reset boundaries
 
 ### Make it fast. Make it scale.
 
@@ -620,7 +622,7 @@ Profile a correct workload, preserve its global objective while partitioning arr
 
 **First artifact:** A synchronized timing report and a checked array placement on logical CPU devices.
 
-**Study advice:** Keep one correct reference workload throughout this path. Measure completed work, inspect its trace and relate the bottleneck to memory traffic or computation. Verify partitioning and collectives on logical devices, then audit a Pallas kernel against independent references. Run the separate guarded TPU measurement only on supported target hardware before claiming a device or system speedup.
+**Study advice:** Keep one correct reference workload throughout this path. Measure completed work, inspect its trace and relate the bottleneck to memory traffic or computation. Verify partitioning and collectives on logical devices, then audit a Pallas kernel against independent references. Run the separate guarded TPU measurement only on supported target hardware before claiming a device or system speedup. For review, use an uneven final batch and an empty partition. Derive numerator/count aggregation by hand, compare with an unsharded reference and separate logical-CPU semantics from actual TPU scaling.
 
 **Engineering extensions (follow each lesson prerequisite):** deployment-07, operations-06. See [the engineering release project](projects/engineering-release/README.md).
 
@@ -643,7 +645,7 @@ Trace a function into jaxpr, verify forward and reverse sensitivities, write exa
 
 **First artifact:** An annotated jaxpr that explains a computation and a changed input shape.
 
-**Study advice:** Start by connecting each jaxpr primitive to the function that produced it. Revisit directional derivatives and the chain rule before studying JVPs, VJPs and custom rules. Keep an independent derivative reference beside every transformation. Finish the derivative audit, then extend the tiny interpreter in the synthesis assessment and explain its unsupported cases.
+**Study advice:** Start by connecting each jaxpr primitive to the function that produced it. Revisit directional derivatives and the chain rule before studying JVPs, VJPs and custom rules. Keep an independent derivative reference beside every transformation. Finish the derivative audit, then extend the tiny interpreter in the synthesis assessment and explain its unsupported cases. For review, bring a nonzero-base-point tangent counterexample, a linearity test and an independent primal derivative. Explain why a trace or a passing tangent-one case is insufficient.
 
 **Engineering extensions (follow each lesson prerequisite):** deployment-07. See [the engineering release project](projects/engineering-release/README.md).
 
@@ -666,7 +668,7 @@ Build and recover an experiment on CPU, then learn GCP provisioning, TPU generat
 
 **First artifact:** A verified TPU runtime receipt, a checkpoint-resumed TPU experiment log, and a memory/precision/XProf decision dossier.
 
-**Study advice:** Complete the 3-part Cloud TPU mini-course (19: TPU Setup, 20: TPU Workflows, 21: TPU Systems) immediately after 00: Setup & first steps so you know how to get a TPU running, stage scripts with gcloud compute tpus tpu-vm scp, launch single-host and --worker=all jobs, and capture XProf traces before starting any TPU-dependent course. Then build the tiny Transformer, verify causal masking and held-out token loss, restore the complete state in a fresh process, and run the distributed, pretraining, post-training, and operations experiments on your TPU VM in parallel with the course.
+**Study advice:** Complete the 3-part Cloud TPU mini-course (19: TPU Setup, 20: TPU Workflows, 21: TPU Systems) immediately after 00: Setup & first steps so you know how to get a TPU running, stage scripts with gcloud compute tpus tpu-vm scp, launch single-host and --worker=all jobs, and capture XProf traces before starting any TPU-dependent course. Then build the tiny Transformer, verify causal masking and held-out token loss, restore the complete state in a fresh process, and run the distributed, pretraining, post-training, and operations experiments on your TPU VM in parallel with the course. For review, identify the provisioning API, machine type, process/device topology and receipt scope. Present synchronized work and named-resource cleanup separately; do not equate every device with a chip.
 
 **Engineering extensions (follow each lesson prerequisite):** tpu-01, tpu-04, tpu-02, tpu-05, tpu-03, tpu-06, recovery-06, deployment-07, operations-07, performance-03, performance-04. See [the engineering release project](projects/engineering-release/README.md).
 
@@ -693,7 +695,7 @@ Move trained computations into a measured inference service. Check framework/pre
 
 **First artifact:** An exported computation checked against its source on the same inputs.
 
-**Study advice:** Begin with one saved model and a fixed set of parity inputs. Trace preprocessing, parameter layout and output semantics across each framework boundary. Separate training precision, exported precision and the target runtime before benchmarking. Use the precision and edge lessons to build a validation checklist; measure a real target device before claiming device latency or memory savings.
+**Study advice:** Begin with one saved model and a fixed set of parity inputs. Trace preprocessing, parameter layout and output semantics across each framework boundary. Separate training precision, exported precision and the target runtime before benchmarking. Use the precision and edge lessons to build a validation checklist; measure a real target device before claiming device latency or memory savings. For review, trace one raw input through preprocessing, source inference, export and target inference. Show numerical/quality gates before discussing compression or speed, and label any unmeasured device path.
 
 **Engineering extensions (follow each lesson prerequisite):** recovery-06, deployment-07, operations-06, operations-07, operations-08. See [the engineering release project](projects/engineering-release/README.md).
 
@@ -716,7 +718,7 @@ Operate reproducible model workloads from tracked experiments to containerized i
 
 **First artifact:** An interrupted CPU run whose next data batches, losses and full state match uninterrupted execution.
 
-**Study advice:** First reproduce the next update after a local interruption. Then inspect workload traces and placement so an incident has interpretable signals. Work through the operations project’s process, event, restore, release and capacity stages. Keep a runbook naming the accepted checkpoint and rollback decision; validate an actual cluster separately before claiming accelerator operations experience. After the deployment bridge, complete engineering-release to connect MLflow, a verified container and application/release policy. Keep local Docker evidence separate from cloud and accelerator qualification.
+**Study advice:** First reproduce the next update after a local interruption. Then inspect workload traces and placement so an incident has interpretable signals. Work through the operations project’s process, event, restore, release and capacity stages. Keep a runbook naming the accepted checkpoint and rollback decision; validate an actual cluster separately before claiming accelerator operations experience. After the deployment bridge, complete engineering-release to connect MLflow, a verified container and application/release policy. Keep local Docker evidence separate from cloud and accelerator qualification. For review, show an injected failure that leaves the prior accepted artifact active. Connect the process exit, checkpoint identity, gate decision and release pointer in one inspectable timeline.
 
 **Engineering extensions (follow each lesson prerequisite):** recovery-06, deployment-07, operations-06, operations-07, operations-08. See [the engineering release project](projects/engineering-release/README.md).
 

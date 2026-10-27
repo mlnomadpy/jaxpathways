@@ -1,0 +1,391 @@
+{
+  "actualAggregateBudget": {
+    "actorOptimizerSteps": 6,
+    "criticOptimizerSteps": 6,
+    "heldoutQualityScores": 0,
+    "outerUpdateExecutions": 3,
+    "rewardHeadOptimizerSteps": 20
+  },
+  "authorizedMaximumBudget": {
+    "actorOptimizerSteps": 10,
+    "criticOptimizerSteps": 10,
+    "heldoutQualityScores": 0,
+    "outerUpdateExecutions": 5,
+    "rewardHeadOptimizerSteps": 20
+  },
+  "candidateAstProofPath": "/private/tmp/transformer-lineage-v5-five-candidate-freeze-v2-20261022/candidate-ast-delta-proof.json",
+  "candidateAstProofSha256": "3028c683662437f79fc6bfb68871d0348f8cbb55d11553049ec9191b26d12e32",
+  "candidateFreezeManifestFileSha256": "13864993bb881d4dc0f454c2f48d5517d4c22c7fbe5caabe4e7866085d836b74",
+  "candidateFreezeManifestPath": "/private/tmp/transformer-lineage-v5-five-candidate-freeze-v2-20261022/candidate-freeze-manifest.json",
+  "candidateFreezeManifestSelfHash": "cea95a3a225fb0a243d23bfdc871aaa5700179b149be95f5f0f08e467aa7f0e3",
+  "candidateSourceInventoryUnchanged": true,
+  "environmentProofPath": "/private/tmp/jaxpathways-0170-clean-learner-env-proof.json",
+  "environmentProofSha256": "d42c409e6f6b057dceb8cc776f6c78696af97f9d9eaf3c8f2065d8a117c88d30",
+  "extractionFileInventorySha256": "5b13458f7f29dc2aff8f1e665745ff65bee1f9fd3013450bb8721e134bf40ea1",
+  "extractionRoot": "/private/tmp/transformer-lineage-v5-clean-extract-five-candidate-20261022",
+  "isolatedEnvironment": {
+    "backend": "cpu",
+    "device": "TFRT_CPU_0",
+    "includeSystemSitePackages": false,
+    "pins": {
+      "jax": "0.9.2",
+      "numpy": "2.4.4",
+      "optax": "0.2.8",
+      "tokenizers": "0.22.2"
+    },
+    "pipCheckExitCode": 0,
+    "python": "/private/tmp/jaxpathways-0170-clean-learner-env/bin/python",
+    "pythonVersion": "3.14.3"
+  },
+  "kind": "transformer-lineage-v5-five-candidate-mechanics-postrun-receipt",
+  "mechanicsApprovalSha256": "72ecd919095e2fcc4bc095afee6f27a74571ba61aa1a56ae7c9ca442399c3c48",
+  "negativeFailureArtifactsRetained": true,
+  "noAdditionalCandidateRuns": true,
+  "preRunReviewPath": "/private/tmp/sol-transformer-lineage-five-candidate-pre-run-review-v2.json",
+  "preRunReviewSha256": "ec8a8f4e648b93808871c7c54e5f64f50d04a4eaedffb7b24d315b06a7486442",
+  "qualificationScope": "Mechanics-only one-update candidate verification. No stage=all run, campaign retry, heldout quality score, candidate extension, or source modification.",
+  "results": [
+    {
+      "actorChanged": true,
+      "actual": "passed",
+      "argv": [
+        "/private/tmp/jaxpathways-0170-clean-learner-env/bin/python",
+        "projects/posttraining-audit/transformer_lineage/check.py",
+        "--candidate",
+        "/private/tmp/transformer-lineage-v5-five-candidate-freeze-v2-20261022/candidates/completed-six-todo.py",
+        "--candidate-sha256",
+        "02503c4b04cbf4a4bd026a2df830c7db9ad419bad89eaff1bc0328f52cc80849",
+        "--stage",
+        "learner-check",
+        "--approval",
+        "projects/posttraining-audit/transformer_lineage/learner-mechanics-approval.json",
+        "--expected-approval-sha256",
+        "72ecd919095e2fcc4bc095afee6f27a74571ba61aa1a56ae7c9ca442399c3c48",
+        "--output",
+        "/private/tmp/transformer-lineage-v5-shipping-learner-output-completed-six-positive-v2-20261022"
+      ],
+      "candidateSha256": "02503c4b04cbf4a4bd026a2df830c7db9ad419bad89eaff1bc0328f52cc80849",
+      "checkpointFiles": {
+        "final-state/state.json": "604882720c832b313e5da53664ce261db3ef3861d9dd61f2be3ad18fecf7954f",
+        "final-state/state.npz": "5bab76954c68021b85248d89f6f155985c3a6bc207821f113b25584977e93d57"
+      },
+      "criticChanged": true,
+      "evidencePath": "/private/tmp/transformer-lineage-v5-shipping-learner-output-completed-six-positive-v2-20261022/learner-verification-evidence.json",
+      "evidenceSha256": "ebc1b86af522a6041865bcc9a5ff734d6bed551ad5637575eb5c08e02c2a72f1",
+      "exitCode": 0,
+      "expected": "pass",
+      "generatedLengths": [
+        3,
+        4,
+        3
+      ],
+      "id": "completed-six-positive",
+      "independentFirstPpoUpdate": {
+        "actor_two_epoch_adam_match": true,
+        "critic_two_epoch_adam_match": true,
+        "old_logps_parent_reconstructed": true,
+        "old_values_features_reconstructed": true
+      },
+      "independentUpdateMath": {
+        "independent_gae": true,
+        "independent_inner_epoch_losses": true,
+        "valid_action_denominator": 10
+      },
+      "innerEpochs": 2,
+      "learnerCheck": "passed",
+      "outerUpdates": 1,
+      "outputPath": "/private/tmp/transformer-lineage-v5-shipping-learner-output-completed-six-positive-v2-20261022",
+      "prompts": [
+        0,
+        1,
+        2
+      ],
+      "qualityScored": false,
+      "rewardFitUpdates": 4,
+      "stderrLogPath": "/private/tmp/transformer-lineage-v5-shipping-learner-completed-six-positive-v2-20261022.stderr.log",
+      "stderrLogSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdoutLogPath": "/private/tmp/transformer-lineage-v5-shipping-learner-completed-six-positive-v2-20261022.stdout.log",
+      "stdoutLogSha256": "4f337e684ebf5ce63d5f6e7edae46b20a9b6f89dbd71314869191ed4e65c85b0",
+      "validActionCount": 10
+    },
+    {
+      "actorChanged": true,
+      "actual": "passed",
+      "argv": [
+        "/private/tmp/jaxpathways-0170-clean-learner-env/bin/python",
+        "projects/posttraining-audit/transformer_lineage/check.py",
+        "--candidate",
+        "/private/tmp/transformer-lineage-v5-five-candidate-freeze-v2-20261022/candidates/alternate-spelling.py",
+        "--candidate-sha256",
+        "5499d91e0ffd721472932f9d694dcf56dc4a5691aa014541c785ae5e826a235f",
+        "--stage",
+        "learner-check",
+        "--approval",
+        "projects/posttraining-audit/transformer_lineage/learner-mechanics-approval.json",
+        "--expected-approval-sha256",
+        "72ecd919095e2fcc4bc095afee6f27a74571ba61aa1a56ae7c9ca442399c3c48",
+        "--output",
+        "/private/tmp/transformer-lineage-v5-shipping-learner-output-alternate-spelling-positive-v2-20261022"
+      ],
+      "candidateSha256": "5499d91e0ffd721472932f9d694dcf56dc4a5691aa014541c785ae5e826a235f",
+      "checkpointFiles": {
+        "final-state/state.json": "fef69ce61cf8b084f6741885d6182c590a878dea4a6341a17a6058fdce1e30ed",
+        "final-state/state.npz": "5bab76954c68021b85248d89f6f155985c3a6bc207821f113b25584977e93d57"
+      },
+      "criticChanged": true,
+      "evidencePath": "/private/tmp/transformer-lineage-v5-shipping-learner-output-alternate-spelling-positive-v2-20261022/learner-verification-evidence.json",
+      "evidenceSha256": "a886b932f42bfe08fc75b6b5374ef99f135dba39083d45418fd8e25d95f0beb0",
+      "exitCode": 0,
+      "expected": "pass",
+      "generatedLengths": [
+        3,
+        4,
+        3
+      ],
+      "id": "alternate-spelling-positive",
+      "independentFirstPpoUpdate": {
+        "actor_two_epoch_adam_match": true,
+        "critic_two_epoch_adam_match": true,
+        "old_logps_parent_reconstructed": true,
+        "old_values_features_reconstructed": true
+      },
+      "independentUpdateMath": {
+        "independent_gae": true,
+        "independent_inner_epoch_losses": true,
+        "valid_action_denominator": 10
+      },
+      "innerEpochs": 2,
+      "learnerCheck": "passed",
+      "outerUpdates": 1,
+      "outputPath": "/private/tmp/transformer-lineage-v5-shipping-learner-output-alternate-spelling-positive-v2-20261022",
+      "prompts": [
+        0,
+        1,
+        2
+      ],
+      "qualityScored": false,
+      "rewardFitUpdates": 4,
+      "stderrLogPath": "/private/tmp/transformer-lineage-v5-shipping-learner-alternate-spelling-positive-v2-20261022.stderr.log",
+      "stderrLogSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdoutLogPath": "/private/tmp/transformer-lineage-v5-shipping-learner-alternate-spelling-positive-v2-20261022.stdout.log",
+      "stdoutLogSha256": "43d06048e9f8de1278040666718b459ac1afd3429475a1ccff823b3f577e86bb",
+      "validActionCount": 10
+    },
+    {
+      "actual": "rejected-as-expected",
+      "actualExposure": {
+        "actorOptimizerSteps": 0,
+        "criticOptimizerSteps": 0,
+        "outerUpdates": 0,
+        "qualityScored": false,
+        "rewardFitOptimizerSteps": 4,
+        "trainingRollouts": 0
+      },
+      "argv": [
+        "/private/tmp/jaxpathways-0170-clean-learner-env/bin/python",
+        "projects/posttraining-audit/transformer_lineage/check.py",
+        "--candidate",
+        "/private/tmp/transformer-lineage-v5-five-candidate-freeze-v2-20261022/candidates/unchanged-train.py",
+        "--candidate-sha256",
+        "1b29533b39f4c01f0d3e04b362c423abfac39659c1365c92147e4f9b60b095db",
+        "--stage",
+        "learner-check",
+        "--approval",
+        "projects/posttraining-audit/transformer_lineage/learner-mechanics-approval.json",
+        "--expected-approval-sha256",
+        "72ecd919095e2fcc4bc095afee6f27a74571ba61aa1a56ae7c9ca442399c3c48",
+        "--output",
+        "/private/tmp/transformer-lineage-v5-shipping-learner-output-unchanged-train-negative-v2-20261022"
+      ],
+      "candidateSha256": "1b29533b39f4c01f0d3e04b362c423abfac39659c1365c92147e4f9b60b095db",
+      "exitCode": 1,
+      "expected": "reject",
+      "filesProduced": {},
+      "id": "unchanged-train-negative",
+      "outputPath": "/private/tmp/transformer-lineage-v5-shipping-learner-output-unchanged-train-negative-v2-20261022",
+      "rejection": "AssertionError: learner candidate did not use exactly one outer update and both frozen-target epochs",
+      "stderrBytes": 943,
+      "stderrLogPath": "/private/tmp/transformer-lineage-v5-shipping-learner-unchanged-train-negative-v2-20261022.stderr.log",
+      "stderrLogSha256": "6de94b0a9fd6ec8d6ea7d320fa184eec770c75e4ac428183865a85d90735a1fa",
+      "stdoutBytes": 0,
+      "stdoutLogPath": "/private/tmp/transformer-lineage-v5-shipping-learner-unchanged-train-negative-v2-20261022.stdout.log",
+      "stdoutLogSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "whyRawTrainingArraysAbsent": "The candidate was rejected before the positive-only evidence writer ran; stderr contains the preserved assertion, and the output directory has no files."
+    },
+    {
+      "actual": "rejected-as-expected",
+      "actualExposure": {
+        "actorOptimizerSteps": 0,
+        "criticOptimizerSteps": 0,
+        "outerUpdates": 0,
+        "qualityScored": false,
+        "rewardFitOptimizerSteps": 4,
+        "trainingRollouts": 0
+      },
+      "argv": [
+        "/private/tmp/jaxpathways-0170-clean-learner-env/bin/python",
+        "projects/posttraining-audit/transformer_lineage/check.py",
+        "--candidate",
+        "/private/tmp/transformer-lineage-v5-five-candidate-freeze-v2-20261022/candidates/wrong-reward-rate.py",
+        "--candidate-sha256",
+        "4111af91275a1c0d15f6048fc9bfb582625cd777983019e7d14eea2649ad7c2f",
+        "--stage",
+        "learner-check",
+        "--approval",
+        "projects/posttraining-audit/transformer_lineage/learner-mechanics-approval.json",
+        "--expected-approval-sha256",
+        "72ecd919095e2fcc4bc095afee6f27a74571ba61aa1a56ae7c9ca442399c3c48",
+        "--output",
+        "/private/tmp/transformer-lineage-v5-shipping-learner-output-wrong-reward-rate-negative-v2-20261022"
+      ],
+      "candidateSha256": "4111af91275a1c0d15f6048fc9bfb582625cd777983019e7d14eea2649ad7c2f",
+      "exitCode": 1,
+      "expected": "reject",
+      "filesProduced": {},
+      "id": "wrong-reward-rate-negative",
+      "outputPath": "/private/tmp/transformer-lineage-v5-shipping-learner-output-wrong-reward-rate-negative-v2-20261022",
+      "rejection": "AssertionError: reward head does not match the independently reconstructed four-step Adam fit",
+      "stderrBytes": 1241,
+      "stderrLogPath": "/private/tmp/transformer-lineage-v5-shipping-learner-wrong-reward-rate-negative-v2-20261022.stderr.log",
+      "stderrLogSha256": "51a178073cacb8c388d5a9917ae808e9af7e4981687595e7b40e8776dcb4157f",
+      "stdoutBytes": 0,
+      "stdoutLogPath": "/private/tmp/transformer-lineage-v5-shipping-learner-wrong-reward-rate-negative-v2-20261022.stdout.log",
+      "stdoutLogSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "whyRawTrainingArraysAbsent": "The candidate was rejected before the positive-only evidence writer ran; stderr contains the preserved assertion, and the output directory has no files."
+    },
+    {
+      "actual": "rejected-as-expected",
+      "actualExposure": {
+        "actorOptimizerSteps": 2,
+        "criticOptimizerSteps": 2,
+        "innerEpochs": 2,
+        "outerUpdates": 1,
+        "qualityScored": false,
+        "rewardFitOptimizerSteps": 4,
+        "trainPrompts": [
+          0,
+          1,
+          2
+        ],
+        "trainingRolloutBatches": 1,
+        "validActionTraceRetained": false
+      },
+      "argv": [
+        "/private/tmp/jaxpathways-0170-clean-learner-env/bin/python",
+        "projects/posttraining-audit/transformer_lineage/check.py",
+        "--candidate",
+        "/private/tmp/transformer-lineage-v5-five-candidate-freeze-v2-20261022/candidates/wrong-actor-update.py",
+        "--candidate-sha256",
+        "a3d28424ccbcb8bbc64a5d944878f51fe9f1fd96c38885269371e5a66bf4048a",
+        "--stage",
+        "learner-check",
+        "--approval",
+        "projects/posttraining-audit/transformer_lineage/learner-mechanics-approval.json",
+        "--expected-approval-sha256",
+        "72ecd919095e2fcc4bc095afee6f27a74571ba61aa1a56ae7c9ca442399c3c48",
+        "--output",
+        "/private/tmp/transformer-lineage-v5-shipping-learner-output-wrong-actor-update-negative-v2-20261022"
+      ],
+      "candidateSha256": "a3d28424ccbcb8bbc64a5d944878f51fe9f1fd96c38885269371e5a66bf4048a",
+      "exitCode": 1,
+      "expected": "reject",
+      "filesProduced": {},
+      "id": "wrong-actor-update-negative",
+      "outputPath": "/private/tmp/transformer-lineage-v5-shipping-learner-output-wrong-actor-update-negative-v2-20261022",
+      "rejection": "AssertionError: recorded post-update actor logps differ from the independent decoder replay",
+      "stderrBytes": 1245,
+      "stderrLogPath": "/private/tmp/transformer-lineage-v5-shipping-learner-wrong-actor-update-negative-v2-20261022.stderr.log",
+      "stderrLogSha256": "6acdaa87d5c6e75eb80fce73c67c50d64d2ed8d6c35b383bca3bf44b84d2d198",
+      "stdoutBytes": 0,
+      "stdoutLogPath": "/private/tmp/transformer-lineage-v5-shipping-learner-wrong-actor-update-negative-v2-20261022.stdout.log",
+      "stdoutLogSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "whyRawTrainingArraysAbsent": "The candidate was rejected before the positive-only evidence writer ran; stderr contains the preserved assertion, and the output directory has no files."
+    }
+  ],
+  "runCampaignApprovalUsed": false,
+  "schemaVersion": 1,
+  "shipping15SourceFiles": {
+    "projects/posttraining-audit/transformer_lineage/README.md": {
+      "actualSha256": "2d0f9db1a2ec5c3eec8845c7b8267e6cd3044a97d66ecfc37c7eef97d9ec7c98",
+      "expectedSha256": "2d0f9db1a2ec5c3eec8845c7b8267e6cd3044a97d66ecfc37c7eef97d9ec7c98",
+      "match": true
+    },
+    "projects/posttraining-audit/transformer_lineage/check.py": {
+      "actualSha256": "12f6709ef0683067ee10d871891bb4d67736c6d5039d5a2809d2dfa92115a0e3",
+      "expectedSha256": "12f6709ef0683067ee10d871891bb4d67736c6d5039d5a2809d2dfa92115a0e3",
+      "match": true
+    },
+    "projects/posttraining-audit/transformer_lineage/evidence-schema.json": {
+      "actualSha256": "59f5ba83b7129b531fb790c0ac62bae22b70a297b3f35caacd3f4e314418e798",
+      "expectedSha256": "59f5ba83b7129b531fb790c0ac62bae22b70a297b3f35caacd3f4e314418e798",
+      "match": true
+    },
+    "projects/posttraining-audit/transformer_lineage/fixture.json": {
+      "actualSha256": "6a47dbe54012ed3013753ca8089fbcd51e57b3d0cbd61ffdb50a6877e0a534ff",
+      "expectedSha256": "6a47dbe54012ed3013753ca8089fbcd51e57b3d0cbd61ffdb50a6877e0a534ff",
+      "match": true
+    },
+    "projects/posttraining-audit/transformer_lineage/recipe.json": {
+      "actualSha256": "8411afc4412c59973d56b2cceae530dd642a5aa1c9e6f57a5dbb7f6ba110bc57",
+      "expectedSha256": "8411afc4412c59973d56b2cceae530dd642a5aa1c9e6f57a5dbb7f6ba110bc57",
+      "match": true
+    },
+    "projects/posttraining-audit/transformer_lineage/requirements.txt": {
+      "actualSha256": "14c6bdedf000ba836f74beedc4c7aa50bc818939d30b75030a2c47a0cf6df537",
+      "expectedSha256": "14c6bdedf000ba836f74beedc4c7aa50bc818939d30b75030a2c47a0cf6df537",
+      "match": true
+    },
+    "projects/posttraining-audit/transformer_lineage/solution.py": {
+      "actualSha256": "df56c036a57e8ad1c7be61341290422e7dfa47ea3326b3c82e5cecad5806b569",
+      "expectedSha256": "df56c036a57e8ad1c7be61341290422e7dfa47ea3326b3c82e5cecad5806b569",
+      "match": true
+    },
+    "projects/posttraining-audit/transformer_lineage/starter.py": {
+      "actualSha256": "8196af0f989c382ab5c4833102f11a2d1fe2263614e35e8ac1be8ab1ce501d32",
+      "expectedSha256": "8196af0f989c382ab5c4833102f11a2d1fe2263614e35e8ac1be8ab1ce501d32",
+      "match": true
+    },
+    "projects/text-harness/foundations/config.py": {
+      "actualSha256": "5c05801a7ec1a15b3978c87c77ac4e64d1b056c60487cbcff3cdf72475c8bb64",
+      "expectedSha256": "5c05801a7ec1a15b3978c87c77ac4e64d1b056c60487cbcff3cdf72475c8bb64",
+      "match": true
+    },
+    "projects/text-harness/foundations/data.py": {
+      "actualSha256": "ff8ff698090866d46bc1f2b3540393b9a16db2121ad824110bd2ba53db645bd8",
+      "expectedSha256": "ff8ff698090866d46bc1f2b3540393b9a16db2121ad824110bd2ba53db645bd8",
+      "match": true
+    },
+    "projects/text-harness/foundations/model.py": {
+      "actualSha256": "94a88ae7fd6a251b5b190b4631496e04bb71a31c1bfe418511fdd37ffef034c9",
+      "expectedSha256": "94a88ae7fd6a251b5b190b4631496e04bb71a31c1bfe418511fdd37ffef034c9",
+      "match": true
+    },
+    "projects/text-harness/foundations/reference/run/inference-package/package.json": {
+      "actualSha256": "02b92a9f56325e5a38be2c40bf263d2ca91db6122ba84dd4df266339457bf278",
+      "expectedSha256": "02b92a9f56325e5a38be2c40bf263d2ca91db6122ba84dd4df266339457bf278",
+      "match": true
+    },
+    "projects/text-harness/foundations/reference/run/inference-package/params.npz": {
+      "actualSha256": "271cb6457de5da3f727c343c64b7bd350c00e503ea7ac847eecf51fbd5558802",
+      "expectedSha256": "271cb6457de5da3f727c343c64b7bd350c00e503ea7ac847eecf51fbd5558802",
+      "match": true
+    },
+    "projects/text-harness/foundations/reference/run/inference-package/tokenizer.json": {
+      "actualSha256": "c92b534443cc6a1eacd5e78406b2c42e59553df704a07102a03c639d3694f586",
+      "expectedSha256": "c92b534443cc6a1eacd5e78406b2c42e59553df704a07102a03c639d3694f586",
+      "match": true
+    },
+    "projects/text-harness/foundations/train.py": {
+      "actualSha256": "ee9f3bc73505ce8e00fe9680589d97805593e5c8c035cba4709b5f334eb27a2b",
+      "expectedSha256": "ee9f3bc73505ce8e00fe9680589d97805593e5c8c035cba4709b5f334eb27a2b",
+      "match": true
+    }
+  },
+  "shipping15SourceFilesAllMatch": true,
+  "sourceAndRecipeUnchanged": true,
+  "status": "completed-with-two-positive-and-three-expected-negative-results",
+  "zipMemberCount": 40,
+  "zipMemberInventoryMatches": true,
+  "zipPath": "/private/tmp/jaxpathways-0170-learner-qualified-source.zip",
+  "zipSha256": "3de18328abfc8499f6c2c785aae39d075a48fe01325e9aa7feff31ed408fcb30"
+}

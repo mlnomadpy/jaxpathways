@@ -1,0 +1,556 @@
+
+> jaxpathways@0.12.0 check:deployment
+> node scripts/check-deployment.mjs
+
+11:18:27 [types] Generated 31ms
+11:18:27 [build] output: "static"
+11:18:27 [build] mode: "static"
+11:18:27 [build] directory: /private/tmp/jaxpathways-reader-review-fix/dist/
+11:18:27 [build] Collecting build info...
+11:18:27 [build] ✓ Completed in 59ms.
+11:18:27 [build] Building static entrypoints...
+11:18:27 [vite] ✓ built in 429ms
+11:18:29 [vite] ✓ built in 1.36s
+11:18:29 [build] Rearranging server assets...
+
+ generating static routes 
+11:18:29   ├─ /assessments/foundations.html (+28ms) 
+11:18:29   ├─ /assessments/models.html (+11ms) 
+11:18:29   ├─ /assessments/math.html (+6ms) 
+11:18:29   ├─ /assessments/science.html (+8ms) 
+11:18:29   ├─ /assessments/rl.html (+5ms) 
+11:18:29   ├─ /assessments/probability.html (+5ms) 
+11:18:29   ├─ /assessments/internals.html (+5ms) 
+11:18:29   ├─ /assessments/ship.html (+5ms) 
+11:18:29   ├─ /assessments/ops.html (+5ms) 
+11:18:29   ├─ /assessments/scale.html (+4ms) 
+11:18:29   ├─ /assessments/tpu.html (+2ms) 
+11:18:29   ├─ /book.html (+2ms) 
+11:18:29   ├─ /career-guides/training-engineer.html (+2ms) 
+11:18:29   ├─ /career-guides/research-engineer.html (+1ms) 
+11:18:29   ├─ /career-guides/scientific-ml.html (+1ms) 
+11:18:29   ├─ /career-guides/rl-engineer.html (+1ms) 
+11:18:29   ├─ /career-guides/performance-engineer.html (+1ms) 
+11:18:29   ├─ /career-guides/inference-engineer.html (+1ms) 
+11:18:29   ├─ /career-guides/operations-engineer.html (+1ms) 
+11:18:29   ├─ /careers.html (+3ms) 
+11:18:29   ├─ /content-status.html (+12ms) 
+11:18:29   ├─ /course.html (+8ms) 
+11:18:29   ├─ /developer.html (+5ms) 
+11:18:29   ├─ /downloads/jax-foundations.html (+365ms) 
+11:18:29   ├─ /learning-paths/foundations.html (+2ms) 
+11:18:29   ├─ /learning-paths/models.html (+1ms) 
+11:18:29   ├─ /learning-paths/science.html (+1ms) 
+11:18:29   ├─ /learning-paths/probability.html (+1ms) 
+11:18:29   ├─ /learning-paths/rl.html (+1ms) 
+11:18:29   ├─ /learning-paths/scale.html (+1ms) 
+11:18:29   ├─ /learning-paths/internals.html (+1ms) 
+11:18:29   ├─ /learning-paths/tpu.html (+1ms) 
+11:18:29   ├─ /learning-paths/ship.html (+1ms) 
+11:18:29   ├─ /learning-paths/ops.html (+1ms) 
+11:18:29   ├─ /lesson.html (+2ms) 
+11:18:29   ├─ /notebook.html (+2ms) 
+11:18:29   ├─ /organizer.html (+2ms) 
+11:18:29   ├─ /pathways.html (+3ms) 
+11:18:29   ├─ /phase-guides/welcome.html (+2ms) 
+11:18:29   ├─ /phase-guides/arrays.html (+1ms) 
+11:18:29   ├─ /phase-guides/transforms.html (+1ms) 
+11:18:29   ├─ /phase-guides/state.html (+1ms) 
+11:18:29   ├─ /phase-guides/optimization.html (+1ms) 
+11:18:29   ├─ /phase-guides/networks.html (+1ms) 
+11:18:29   ├─ /phase-guides/recovery.html (+1ms) 
+11:18:29   ├─ /phase-guides/transformers.html (+1ms) 
+11:18:29   ├─ /phase-guides/performance.html (+1ms) 
+11:18:29   ├─ /phase-guides/distributed.html (+1ms) 
+11:18:29   ├─ /phase-guides/science.html (+1ms) 
+11:18:29   ├─ /phase-guides/probability.html (+1ms) 
+11:18:29   ├─ /phase-guides/rl.html (+1ms) 
+11:18:29   ├─ /phase-guides/kernels.html (+1ms) 
+11:18:29   ├─ /phase-guides/internals.html (+1ms) 
+11:18:29   ├─ /phase-guides/deployment.html (+1ms) 
+11:18:29   ├─ /phase-guides/operations.html (+1ms) 
+11:18:29   ├─ /phase-guides/pretraining.html (+1ms) 
+11:18:29   ├─ /phase-guides/posttraining.html (+1ms) 
+11:18:29   ├─ /phase-guides/tpu.html (+1ms) 
+11:18:29   ├─ /phase-guides/tpu-workflows.html (+1ms) 
+11:18:29   ├─ /phase-guides/tpu-systems.html (+1ms) 
+11:18:29   ├─ /project.html (+3ms) 
+11:18:29   ├─ /project-guides/text-harness-foundations.html (+3ms) 
+11:18:29   ├─ /project-guides/regression-audit.html (+2ms) 
+11:18:29   ├─ /project-guides/mlp-classifier.html (+2ms) 
+11:18:29   ├─ /project-guides/scientific-inverse.html (+3ms) 
+11:18:29   ├─ /project-guides/policy-evaluation.html (+2ms) 
+11:18:29   ├─ /project-guides/bayesian-regression.html (+2ms) 
+11:18:29   ├─ /project-guides/derivative-audit.html (+2ms) 
+11:18:29   ├─ /project-guides/deployment-audit.html (+2ms) 
+11:18:29   ├─ /project-guides/workload-operations.html (+2ms) 
+11:18:29   ├─ /project-guides/audio-harness.html (+4ms) 
+11:18:29   ├─ /project-guides/cross-modal-harness.html (+2ms) 
+11:18:29   ├─ /project-guides/kernel-audit.html (+2ms) 
+11:18:29   ├─ /project-guides/image-harness.html (+2ms) 
+11:18:29   ├─ /project-guides/foundation-toolkit.html (+2ms) 
+11:18:29   ├─ /project-guides/sharded-training.html (+4ms) 
+11:18:29   ├─ /project-guides/text-harness.html (+3ms) 
+11:18:29   ├─ /project-guides/optimizer-audit.html (+7ms) 
+11:18:29   ├─ /project-guides/engineering-release.html (+3ms) 
+11:18:29   ├─ /project-guides/training-methods.html (+2ms) 
+11:18:29   ├─ /project-guides/weight-conversion.html (+2ms) 
+11:18:29   ├─ /project-guides/welcome-audit.html (+3ms) 
+11:18:29   ├─ /project-guides/arrays-audit.html (+2ms) 
+11:18:29   ├─ /project-guides/transforms-audit.html (+2ms) 
+11:18:29   ├─ /project-guides/recovery-audit.html (+1ms) 
+11:18:29   ├─ /project-guides/performance-audit.html (+1ms) 
+11:18:29   ├─ /project-guides/posttraining-audit.html (+2ms) 
+11:18:29   ├─ /project-guides/tpu-runtime-audit.html (+2ms) 
+11:18:29   ├─ /project-guides/tpu-workflow-audit.html (+1ms) 
+11:18:29   ├─ /project-guides/tpu-systems-audit.html (+1ms) 
+11:18:29   ├─ /project-guides/reproducible-experiments.html (+3ms) 
+11:18:29   ├─ /project-guides/embedding-lineage.html (+2ms) 
+11:18:29   ├─ /project-guides/causal-lineage.html (+2ms) 
+11:18:29   ├─ /project-plans/clip-model.html (+3ms) 
+11:18:29   ├─ /project-plans/siglip-model.html (+3ms) 
+11:18:29   ├─ /project-plans/retrieval-system.html (+2ms) 
+11:18:29   ├─ /project-plans/embedding-model-300m.html (+2ms) 
+11:18:29   ├─ /project-plans/causal-model-300m.html (+3ms) 
+11:18:29   ├─ /project-plans/image-model-300m.html (+1ms) 
+11:18:29   ├─ /project-plans/image-generation-model.html (+2ms) 
+11:18:29   ├─ /project-plans/audio-model-300m.html (+1ms) 
+11:18:29   ├─ /project-plans/audio-generation-model.html (+1ms) 
+11:18:29   ├─ /project-plans/multimodal-model.html (+1ms) 
+11:18:29   ├─ /project-workflow.html (+3ms) 
+11:18:29   ├─ /projects.html (+4ms) 
+11:18:29   ├─ /robots.txt (+1ms) 
+11:18:29   ├─ /sitemap.xml (+2ms) 
+11:18:29   ├─ /tpu-gcp.html (+3ms) 
+11:18:29   ├─ /tpu-performance.html (+7ms) 
+11:18:29   ├─ /tracks/image.html (+2ms) 
+11:18:29   ├─ /tracks/text.html (+1ms) 
+11:18:29   ├─ /tracks/audio.html (+1ms) 
+11:18:29   ├─ /tracks/cross-modal.html (+1ms) 
+11:18:29   ├─ /updates.html (+3ms) 
+11:18:29   ├─ /lesson-welcome-01.html (+3ms) 
+11:18:29   ├─ /lesson-welcome-02.html (+3ms) 
+11:18:29   ├─ /lesson-welcome-cpu.html (+4ms) 
+11:18:29   ├─ /lesson-welcome-03.html (+4ms) 
+11:18:29   ├─ /lesson-arrays-01.html (+4ms) 
+11:18:29   ├─ /lesson-arrays-02.html (+3ms) 
+11:18:29   ├─ /lesson-arrays-03.html (+2ms) 
+11:18:29   ├─ /lesson-arrays-04.html (+4ms) 
+11:18:29   ├─ /lesson-first-gradient.html (+5ms) 
+11:18:29   ├─ /lesson-transforms-02.html (+5ms) 
+11:18:29   ├─ /lesson-transforms-03.html (+3ms) 
+11:18:29   ├─ /lesson-transforms-04.html (+3ms) 
+11:18:29   ├─ /lesson-transforms-05.html (+3ms) 
+11:18:29   ├─ /lesson-state-01.html (+3ms) 
+11:18:29   ├─ /lesson-state-02.html (+3ms) 
+11:18:29   ├─ /lesson-state-03.html (+4ms) 
+11:18:29   ├─ /lesson-state-04.html (+3ms) 
+11:18:29   ├─ /lesson-optimization-05.html (+4ms) 
+11:18:29   ├─ /lesson-optimization-01.html (+5ms) 
+11:18:29   ├─ /lesson-optimization-06.html (+5ms) 
+11:18:29   ├─ /lesson-optimization-07.html (+5ms) 
+11:18:29   ├─ /lesson-optimization-02.html (+3ms) 
+11:18:29   ├─ /lesson-optimization-08.html (+6ms) 
+11:18:29   ├─ /lesson-optimization-03.html (+5ms) 
+11:18:29   ├─ /lesson-optimization-09.html (+4ms) 
+11:18:30   ├─ /lesson-optimization-10.html (+4ms) 
+11:18:30   ├─ /lesson-optimization-11.html (+4ms) 
+11:18:30   ├─ /lesson-optimization-04.html (+4ms) 
+11:18:30   ├─ /lesson-optimization-12.html (+5ms) 
+11:18:30   ├─ /lesson-networks-01.html (+3ms) 
+11:18:30   ├─ /lesson-networks-02.html (+3ms) 
+11:18:30   ├─ /lesson-networks-03.html (+4ms) 
+11:18:30   ├─ /lesson-networks-04.html (+4ms) 
+11:18:30   ├─ /lesson-networks-05.html (+4ms) 
+11:18:30   ├─ /lesson-recovery-01.html (+4ms) 
+11:18:30   ├─ /lesson-recovery-02.html (+3ms) 
+11:18:30   ├─ /lesson-recovery-03.html (+4ms) 
+11:18:30   ├─ /lesson-recovery-04.html (+5ms) 
+11:18:30   ├─ /lesson-recovery-05.html (+3ms) 
+11:18:30   ├─ /lesson-recovery-06.html (+4ms) 
+11:18:30   ├─ /lesson-transformers-01.html (+4ms) 
+11:18:30   ├─ /lesson-transformers-02.html (+6ms) 
+11:18:30   ├─ /lesson-transformers-03.html (+4ms) 
+11:18:30   ├─ /lesson-transformers-04.html (+5ms) 
+11:18:30   ├─ /lesson-performance-01.html (+4ms) 
+11:18:30   ├─ /lesson-performance-02.html (+3ms) 
+11:18:30   ├─ /lesson-performance-03.html (+3ms) 
+11:18:30   ├─ /lesson-performance-04.html (+4ms) 
+11:18:30   ├─ /lesson-performance-05.html (+3ms) 
+11:18:30   ├─ /lesson-distributed-01.html (+3ms) 
+11:18:30   ├─ /lesson-distributed-02.html (+5ms) 
+11:18:30   ├─ /lesson-distributed-03.html (+4ms) 
+11:18:30   ├─ /lesson-distributed-04.html (+5ms) 
+11:18:30   ├─ /lesson-science-01.html (+5ms) 
+11:18:30   ├─ /lesson-science-02.html (+4ms) 
+11:18:30   ├─ /lesson-science-03.html (+6ms) 
+11:18:30   ├─ /lesson-science-04.html (+5ms) 
+11:18:30   ├─ /lesson-probability-01.html (+3ms) 
+11:18:30   ├─ /lesson-probability-02.html (+5ms) 
+11:18:30   ├─ /lesson-probability-03.html (+4ms) 
+11:18:30   ├─ /lesson-probability-04.html (+4ms) 
+11:18:30   ├─ /lesson-rl-01.html (+4ms) 
+11:18:30   ├─ /lesson-rl-02.html (+4ms) 
+11:18:30   ├─ /lesson-rl-03.html (+6ms) 
+11:18:30   ├─ /lesson-rl-04.html (+6ms) 
+11:18:30   ├─ /lesson-rl-05.html (+5ms) 
+11:18:30   ├─ /lesson-kernels-01.html (+3ms) 
+11:18:30   ├─ /lesson-kernels-02.html (+3ms) 
+11:18:30   ├─ /lesson-kernels-03.html (+4ms) 
+11:18:30   ├─ /lesson-kernels-04.html (+5ms) 
+11:18:30   ├─ /lesson-internals-01.html (+3ms) 
+11:18:30   ├─ /lesson-internals-02.html (+4ms) 
+11:18:30   ├─ /lesson-internals-03.html (+4ms) 
+11:18:30   ├─ /lesson-internals-04.html (+4ms) 
+11:18:30   ├─ /lesson-deployment-02.html (+4ms) 
+11:18:30   ├─ /lesson-deployment-01.html (+3ms) 
+11:18:30   ├─ /lesson-deployment-08.html (+6ms) 
+11:18:30   ├─ /lesson-deployment-03.html (+3ms) 
+11:18:30   ├─ /lesson-deployment-05.html (+6ms) 
+11:18:30   ├─ /lesson-deployment-07.html (+3ms) 
+11:18:30   ├─ /lesson-deployment-04.html (+4ms) 
+11:18:30   ├─ /lesson-deployment-06.html (+3ms) 
+11:18:30   ├─ /lesson-operations-01.html (+4ms) 
+11:18:30   ├─ /lesson-operations-02.html (+5ms) 
+11:18:30   ├─ /lesson-operations-03.html (+4ms) 
+11:18:30   ├─ /lesson-operations-04.html (+5ms) 
+11:18:30   ├─ /lesson-operations-05.html (+5ms) 
+11:18:30   ├─ /lesson-operations-06.html (+3ms) 
+11:18:30   ├─ /lesson-operations-07.html (+3ms) 
+11:18:30   ├─ /lesson-operations-08.html (+3ms) 
+11:18:30   ├─ /lesson-pretraining-01.html (+4ms) 
+11:18:30   ├─ /lesson-pretraining-02.html (+4ms) 
+11:18:30   ├─ /lesson-pretraining-03.html (+3ms) 
+11:18:30   ├─ /lesson-posttraining-01.html (+3ms) 
+11:18:30   ├─ /lesson-posttraining-02.html (+4ms) 
+11:18:30   ├─ /lesson-posttraining-03.html (+3ms) 
+11:18:30   ├─ /lesson-posttraining-04.html (+4ms) 
+11:18:30   ├─ /lesson-posttraining-05.html (+4ms) 
+11:18:30   ├─ /lesson-tpu-01.html (+2ms) 
+11:18:30   ├─ /lesson-tpu-04.html (+2ms) 
+11:18:30   ├─ /lesson-tpu-02.html (+4ms) 
+11:18:30   ├─ /lesson-tpu-05.html (+3ms) 
+11:18:30   ├─ /lesson-tpu-03.html (+2ms) 
+11:18:30   ├─ /lesson-tpu-06.html (+3ms) 
+11:18:30   ├─ /index.html (+3ms) 
+11:18:30 ✓ Completed in 1.15s.
+
+11:18:30 [build] ✓ Completed in 2.97s.
+11:18:30 [build] 217 page(s) built in 3.24s
+11:18:30 [build] Complete!
+PASS: 217 Astro pages, 14075 local references, accessibility IDs, static catalogs and clean public boundary at /jaxpathways/
+PASS: 22 phase guides preserve lesson coverage, evidence and further-work boundaries.
+PASS: 203 learner-facing maturity labels, contextual contribution entries and book status links.
+PASS: 104 pre-rendered lessons; 212 canonical sitemap URLs reachable within three clicks; structured data, share metadata, revisions and feedback at /jaxpathways/
+TAP version 13
+# Subtest: home retains saved reading position, copies exact tutor text and controls keyboard navigation
+ok 1 - home retains saved reading position, copies exact tutor text and controls keyboard navigation
+  ---
+  duration_ms: 44.028167
+  type: 'test'
+  ...
+# Subtest: catalog retains route, roadmap and browser-history filtering under a project base
+ok 2 - catalog retains route, roadmap and browser-history filtering under a project base
+  ---
+  duration_ms: 107.15475
+  type: 'test'
+  ...
+# Subtest: every authored lesson renders, and checkpoint progress stays separate from exercise evidence
+ok 3 - every authored lesson renders, and checkpoint progress stays separate from exercise evidence
+  ---
+  duration_ms: 6125.2015
+  type: 'test'
+  ...
+# Subtest: all career routes render and a selected route saves the existing plan schema
+ok 4 - all career routes render and a selected route saves the existing plan schema
+  ---
+  duration_ms: 28.181917
+  type: 'test'
+  ...
+# Subtest: all learning paths open with their actual lesson availability
+ok 5 - all learning paths open with their actual lesson availability
+  ---
+  duration_ms: 28.371166
+  type: 'test'
+  ...
+# Subtest: both project workspaces render and stage ticks preserve their storage keys
+ok 6 - both project workspaces render and stage ticks preserve their storage keys
+  ---
+  duration_ms: 48.424292
+  type: 'test'
+  ...
+# Subtest: notebook saves evidence through the real form and planner uses canonical durations
+ok 7 - notebook saves evidence through the real form and planner uses canonical durations
+  ---
+  duration_ms: 50.305
+  type: 'test'
+  ...
+# Subtest: permanent lesson pages retain pathway, section and existing learner evidence when enhanced
+ok 8 - permanent lesson pages retain pathway, section and existing learner evidence when enhanced
+  ---
+  duration_ms: 29.977542
+  type: 'test'
+  ...
+# Subtest: legacy reader boots from navigation data and redirects authored lessons with context
+ok 9 - legacy reader boots from navigation data and redirects authored lessons with context
+  ---
+  duration_ms: 6.699875
+  type: 'test'
+  ...
+# Subtest: legacy reader handles unknown lesson IDs without fetching the full curriculum
+ok 10 - legacy reader handles unknown lesson IDs without fetching the full curriculum
+  ---
+  duration_ms: 5.990167
+  type: 'test'
+  ...
+1..10
+# tests 10
+# suites 0
+# pass 10
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 6477.398417
+OK: 104 offline chapters, EPUB XML/references, project/tutor bundle fidelity, authored project prerequisites.
+OK: standalone HTML has embedded figure assets and course appendices.
+OK: beginner workspace source/package/instruction fidelity.
+OK: course workspace includes tutor prerequisites, authored lesson artifacts and project sources without local learner state.
+OK: TPU workspace has its pinned single-host target, checker and exact base lesson source; coordinated multi-host files remain repository-only.
+OK: 11 synthesis assessments match source, pathway and project.
+11:19:33 [types] Generated 28ms
+11:19:33 [build] output: "static"
+11:19:33 [build] mode: "static"
+11:19:33 [build] directory: /private/tmp/jaxpathways-reader-review-fix/dist/
+11:19:33 [build] Collecting build info...
+11:19:33 [build] ✓ Completed in 57ms.
+11:19:33 [build] Building static entrypoints...
+11:19:34 [vite] ✓ built in 330ms
+11:19:34 [vite] ✓ built in 721ms
+11:19:34 [build] Rearranging server assets...
+
+ generating static routes 
+11:19:34   ├─ /assessments/foundations.html (+26ms) 
+11:19:34   ├─ /assessments/models.html (+7ms) 
+11:19:34   ├─ /assessments/math.html (+5ms) 
+11:19:34   ├─ /assessments/science.html (+7ms) 
+11:19:34   ├─ /assessments/rl.html (+4ms) 
+11:19:34   ├─ /assessments/probability.html (+4ms) 
+11:19:34   ├─ /assessments/internals.html (+5ms) 
+11:19:34   ├─ /assessments/ship.html (+3ms) 
+11:19:34   ├─ /assessments/ops.html (+5ms) 
+11:19:34   ├─ /assessments/scale.html (+4ms) 
+11:19:34   ├─ /assessments/tpu.html (+2ms) 
+11:19:34   ├─ /book.html (+2ms) 
+11:19:34   ├─ /career-guides/training-engineer.html (+2ms) 
+11:19:34   ├─ /career-guides/research-engineer.html (+1ms) 
+11:19:34   ├─ /career-guides/scientific-ml.html (+1ms) 
+11:19:34   ├─ /career-guides/rl-engineer.html (+1ms) 
+11:19:34   ├─ /career-guides/performance-engineer.html (+1ms) 
+11:19:34   ├─ /career-guides/inference-engineer.html (+1ms) 
+11:19:34   ├─ /career-guides/operations-engineer.html (+1ms) 
+11:19:34   ├─ /careers.html (+3ms) 
+11:19:34   ├─ /content-status.html (+12ms) 
+11:19:34   ├─ /course.html (+10ms) 
+11:19:35   ├─ /developer.html (+4ms) 
+11:19:35   ├─ /downloads/jax-foundations.html (+299ms) 
+11:19:35   ├─ /learning-paths/foundations.html (+2ms) 
+11:19:35   ├─ /learning-paths/models.html (+2ms) 
+11:19:35   ├─ /learning-paths/science.html (+13ms) 
+11:19:35   ├─ /learning-paths/probability.html (+1ms) 
+11:19:35   ├─ /learning-paths/rl.html (+1ms) 
+11:19:35   ├─ /learning-paths/scale.html (+1ms) 
+11:19:35   ├─ /learning-paths/internals.html (+1ms) 
+11:19:35   ├─ /learning-paths/tpu.html (+1ms) 
+11:19:35   ├─ /learning-paths/ship.html (+1ms) 
+11:19:35   ├─ /learning-paths/ops.html (+1ms) 
+11:19:35   ├─ /lesson.html (+2ms) 
+11:19:35   ├─ /notebook.html (+2ms) 
+11:19:35   ├─ /organizer.html (+1ms) 
+11:19:35   ├─ /pathways.html (+3ms) 
+11:19:35   ├─ /phase-guides/welcome.html (+2ms) 
+11:19:35   ├─ /phase-guides/arrays.html (+1ms) 
+11:19:35   ├─ /phase-guides/transforms.html (+1ms) 
+11:19:35   ├─ /phase-guides/state.html (+1ms) 
+11:19:35   ├─ /phase-guides/optimization.html (+1ms) 
+11:19:35   ├─ /phase-guides/networks.html (+1ms) 
+11:19:35   ├─ /phase-guides/recovery.html (+1ms) 
+11:19:35   ├─ /phase-guides/transformers.html (+1ms) 
+11:19:35   ├─ /phase-guides/performance.html (+1ms) 
+11:19:35   ├─ /phase-guides/distributed.html (+1ms) 
+11:19:35   ├─ /phase-guides/science.html (+1ms) 
+11:19:35   ├─ /phase-guides/probability.html (+1ms) 
+11:19:35   ├─ /phase-guides/rl.html (+1ms) 
+11:19:35   ├─ /phase-guides/kernels.html (+1ms) 
+11:19:35   ├─ /phase-guides/internals.html (+1ms) 
+11:19:35   ├─ /phase-guides/deployment.html (+1ms) 
+11:19:35   ├─ /phase-guides/operations.html (+1ms) 
+11:19:35   ├─ /phase-guides/pretraining.html (+1ms) 
+11:19:35   ├─ /phase-guides/posttraining.html (+1ms) 
+11:19:35   ├─ /phase-guides/tpu.html (+1ms) 
+11:19:35   ├─ /phase-guides/tpu-workflows.html (+1ms) 
+11:19:35   ├─ /phase-guides/tpu-systems.html (+1ms) 
+11:19:35   ├─ /project.html (+1ms) 
+11:19:35   ├─ /project-guides/text-harness-foundations.html (+2ms) 
+11:19:35   ├─ /project-guides/regression-audit.html (+2ms) 
+11:19:35   ├─ /project-guides/mlp-classifier.html (+1ms) 
+11:19:35   ├─ /project-guides/scientific-inverse.html (+3ms) 
+11:19:35   ├─ /project-guides/policy-evaluation.html (+2ms) 
+11:19:35   ├─ /project-guides/bayesian-regression.html (+2ms) 
+11:19:35   ├─ /project-guides/derivative-audit.html (+1ms) 
+11:19:35   ├─ /project-guides/deployment-audit.html (+1ms) 
+11:19:35   ├─ /project-guides/workload-operations.html (+1ms) 
+11:19:35   ├─ /project-guides/audio-harness.html (+2ms) 
+11:19:35   ├─ /project-guides/cross-modal-harness.html (+1ms) 
+11:19:35   ├─ /project-guides/kernel-audit.html (+1ms) 
+11:19:35   ├─ /project-guides/image-harness.html (+2ms) 
+11:19:35   ├─ /project-guides/foundation-toolkit.html (+1ms) 
+11:19:35   ├─ /project-guides/sharded-training.html (+2ms) 
+11:19:35   ├─ /project-guides/text-harness.html (+3ms) 
+11:19:35   ├─ /project-guides/optimizer-audit.html (+5ms) 
+11:19:35   ├─ /project-guides/engineering-release.html (+2ms) 
+11:19:35   ├─ /project-guides/training-methods.html (+2ms) 
+11:19:35   ├─ /project-guides/weight-conversion.html (+2ms) 
+11:19:35   ├─ /project-guides/welcome-audit.html (+1ms) 
+11:19:35   ├─ /project-guides/arrays-audit.html (+1ms) 
+11:19:35   ├─ /project-guides/transforms-audit.html (+2ms) 
+11:19:35   ├─ /project-guides/recovery-audit.html (+1ms) 
+11:19:35   ├─ /project-guides/performance-audit.html (+1ms) 
+11:19:35   ├─ /project-guides/posttraining-audit.html (+1ms) 
+11:19:35   ├─ /project-guides/tpu-runtime-audit.html (+1ms) 
+11:19:35   ├─ /project-guides/tpu-workflow-audit.html (+1ms) 
+11:19:35   ├─ /project-guides/tpu-systems-audit.html (+1ms) 
+11:19:35   ├─ /project-guides/reproducible-experiments.html (+2ms) 
+11:19:35   ├─ /project-guides/embedding-lineage.html (+1ms) 
+11:19:35   ├─ /project-guides/causal-lineage.html (+2ms) 
+11:19:35   ├─ /project-plans/clip-model.html (+3ms) 
+11:19:35   ├─ /project-plans/siglip-model.html (+2ms) 
+11:19:35   ├─ /project-plans/retrieval-system.html (+2ms) 
+11:19:35   ├─ /project-plans/embedding-model-300m.html (+2ms) 
+11:19:35   ├─ /project-plans/causal-model-300m.html (+2ms) 
+11:19:35   ├─ /project-plans/image-model-300m.html (+1ms) 
+11:19:35   ├─ /project-plans/image-generation-model.html (+3ms) 
+11:19:35   ├─ /project-plans/audio-model-300m.html (+1ms) 
+11:19:35   ├─ /project-plans/audio-generation-model.html (+2ms) 
+11:19:35   ├─ /project-plans/multimodal-model.html (+1ms) 
+11:19:35   ├─ /project-workflow.html (+2ms) 
+11:19:35   ├─ /projects.html (+4ms) 
+11:19:35   ├─ /robots.txt (+2ms) 
+11:19:35   ├─ /sitemap.xml (+3ms) 
+11:19:35   ├─ /tpu-gcp.html (+3ms) 
+11:19:35   ├─ /tpu-performance.html (+5ms) 
+11:19:35   ├─ /tracks/image.html (+2ms) 
+11:19:35   ├─ /tracks/text.html (+1ms) 
+11:19:35   ├─ /tracks/audio.html (+1ms) 
+11:19:35   ├─ /tracks/cross-modal.html (+2ms) 
+11:19:35   ├─ /updates.html (+2ms) 
+11:19:35   ├─ /lesson-welcome-01.html (+3ms) 
+11:19:35   ├─ /lesson-welcome-02.html (+3ms) 
+11:19:35   ├─ /lesson-welcome-cpu.html (+3ms) 
+11:19:35   ├─ /lesson-welcome-03.html (+3ms) 
+11:19:35   ├─ /lesson-arrays-01.html (+3ms) 
+11:19:35   ├─ /lesson-arrays-02.html (+3ms) 
+11:19:35   ├─ /lesson-arrays-03.html (+2ms) 
+11:19:35   ├─ /lesson-arrays-04.html (+3ms) 
+11:19:35   ├─ /lesson-first-gradient.html (+4ms) 
+11:19:35   ├─ /lesson-transforms-02.html (+4ms) 
+11:19:35   ├─ /lesson-transforms-03.html (+4ms) 
+11:19:35   ├─ /lesson-transforms-04.html (+2ms) 
+11:19:35   ├─ /lesson-transforms-05.html (+3ms) 
+11:19:35   ├─ /lesson-state-01.html (+2ms) 
+11:19:35   ├─ /lesson-state-02.html (+3ms) 
+11:19:35   ├─ /lesson-state-03.html (+4ms) 
+11:19:35   ├─ /lesson-state-04.html (+2ms) 
+11:19:35   ├─ /lesson-optimization-05.html (+3ms) 
+11:19:35   ├─ /lesson-optimization-01.html (+4ms) 
+11:19:35   ├─ /lesson-optimization-06.html (+5ms) 
+11:19:35   ├─ /lesson-optimization-07.html (+4ms) 
+11:19:35   ├─ /lesson-optimization-02.html (+3ms) 
+11:19:35   ├─ /lesson-optimization-08.html (+5ms) 
+11:19:35   ├─ /lesson-optimization-03.html (+4ms) 
+11:19:35   ├─ /lesson-optimization-09.html (+4ms) 
+11:19:35   ├─ /lesson-optimization-10.html (+4ms) 
+11:19:35   ├─ /lesson-optimization-11.html (+3ms) 
+11:19:35   ├─ /lesson-optimization-04.html (+3ms) 
+11:19:35   ├─ /lesson-optimization-12.html (+5ms) 
+11:19:35   ├─ /lesson-networks-01.html (+4ms) 
+11:19:35   ├─ /lesson-networks-02.html (+2ms) 
+11:19:35   ├─ /lesson-networks-03.html (+3ms) 
+11:19:35   ├─ /lesson-networks-04.html (+3ms) 
+11:19:35   ├─ /lesson-networks-05.html (+3ms) 
+11:19:35   ├─ /lesson-recovery-01.html (+4ms) 
+11:19:35   ├─ /lesson-recovery-02.html (+3ms) 
+11:19:35   ├─ /lesson-recovery-03.html (+3ms) 
+11:19:35   ├─ /lesson-recovery-04.html (+4ms) 
+11:19:35   ├─ /lesson-recovery-05.html (+3ms) 
+11:19:35   ├─ /lesson-recovery-06.html (+3ms) 
+11:19:35   ├─ /lesson-transformers-01.html (+4ms) 
+11:19:35   ├─ /lesson-transformers-02.html (+3ms) 
+11:19:35   ├─ /lesson-transformers-03.html (+4ms) 
+11:19:35   ├─ /lesson-transformers-04.html (+4ms) 
+11:19:35   ├─ /lesson-performance-01.html (+3ms) 
+11:19:35   ├─ /lesson-performance-02.html (+3ms) 
+11:19:35   ├─ /lesson-performance-03.html (+2ms) 
+11:19:35   ├─ /lesson-performance-04.html (+4ms) 
+11:19:35   ├─ /lesson-performance-05.html (+2ms) 
+11:19:35   ├─ /lesson-distributed-01.html (+3ms) 
+11:19:35   ├─ /lesson-distributed-02.html (+4ms) 
+11:19:35   ├─ /lesson-distributed-03.html (+3ms) 
+11:19:35   ├─ /lesson-distributed-04.html (+5ms) 
+11:19:35   ├─ /lesson-science-01.html (+4ms) 
+11:19:35   ├─ /lesson-science-02.html (+3ms) 
+11:19:35   ├─ /lesson-science-03.html (+4ms) 
+11:19:35   ├─ /lesson-science-04.html (+4ms) 
+11:19:35   ├─ /lesson-probability-01.html (+3ms) 
+11:19:35   ├─ /lesson-probability-02.html (+5ms) 
+11:19:35   ├─ /lesson-probability-03.html (+2ms) 
+11:19:35   ├─ /lesson-probability-04.html (+3ms) 
+11:19:35   ├─ /lesson-rl-01.html (+4ms) 
+11:19:35   ├─ /lesson-rl-02.html (+3ms) 
+11:19:35   ├─ /lesson-rl-03.html (+5ms) 
+11:19:35   ├─ /lesson-rl-04.html (+5ms) 
+11:19:35   ├─ /lesson-rl-05.html (+4ms) 
+11:19:35   ├─ /lesson-kernels-01.html (+3ms) 
+11:19:35   ├─ /lesson-kernels-02.html (+3ms) 
+11:19:35   ├─ /lesson-kernels-03.html (+3ms) 
+11:19:35   ├─ /lesson-kernels-04.html (+4ms) 
+11:19:35   ├─ /lesson-internals-01.html (+3ms) 
+11:19:35   ├─ /lesson-internals-02.html (+4ms) 
+11:19:35   ├─ /lesson-internals-03.html (+3ms) 
+11:19:35   ├─ /lesson-internals-04.html (+4ms) 
+11:19:35   ├─ /lesson-deployment-02.html (+3ms) 
+11:19:35   ├─ /lesson-deployment-01.html (+3ms) 
+11:19:35   ├─ /lesson-deployment-08.html (+5ms) 
+11:19:35   ├─ /lesson-deployment-03.html (+2ms) 
+11:19:35   ├─ /lesson-deployment-05.html (+5ms) 
+11:19:35   ├─ /lesson-deployment-07.html (+3ms) 
+11:19:35   ├─ /lesson-deployment-04.html (+3ms) 
+11:19:35   ├─ /lesson-deployment-06.html (+2ms) 
+11:19:35   ├─ /lesson-operations-01.html (+3ms) 
+11:19:35   ├─ /lesson-operations-02.html (+4ms) 
+11:19:35   ├─ /lesson-operations-03.html (+4ms) 
+11:19:35   ├─ /lesson-operations-04.html (+5ms) 
+11:19:35   ├─ /lesson-operations-05.html (+7ms) 
+11:19:35   ├─ /lesson-operations-06.html (+4ms) 
+11:19:35   ├─ /lesson-operations-07.html (+4ms) 
+11:19:35   ├─ /lesson-operations-08.html (+3ms) 
+11:19:35   ├─ /lesson-pretraining-01.html (+5ms) 
+11:19:35   ├─ /lesson-pretraining-02.html (+4ms) 
+11:19:35   ├─ /lesson-pretraining-03.html (+5ms) 
+11:19:35   ├─ /lesson-posttraining-01.html (+4ms) 
+11:19:35   ├─ /lesson-posttraining-02.html (+5ms) 
+11:19:35   ├─ /lesson-posttraining-03.html (+3ms) 
+11:19:35   ├─ /lesson-posttraining-04.html (+4ms) 
+11:19:35   ├─ /lesson-posttraining-05.html (+6ms) 
+11:19:35   ├─ /lesson-tpu-01.html (+6ms) 
+11:19:35   ├─ /lesson-tpu-04.html (+4ms) 
+11:19:35   ├─ /lesson-tpu-02.html (+7ms) 
+11:19:35   ├─ /lesson-tpu-05.html (+16ms) 
+11:19:35   ├─ /lesson-tpu-03.html (+3ms) 
+11:19:35   ├─ /lesson-tpu-06.html (+3ms) 
+11:19:35   ├─ /index.html (+3ms) 
+11:19:35 ✓ Completed in 1.03s.
+
+11:19:35 [build] ✓ Completed in 2.12s.
+11:19:35 [build] 217 page(s) built in 2.27s
+11:19:35 [build] Complete!

@@ -4,6 +4,8 @@ Phase 06: Data & checkpoint recovery · about 75 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Design an input pipeline](https://www.tahabouhsine.com/jaxpathways/lesson-recovery-01.html).
+
 ## What you will be able to do
 
 - Build a Grain source/sampler/batch pipeline and verify its record order.
@@ -21,14 +23,12 @@ A resumable iterator preserves a position in a particular data sequence. Restori
 
 ## Restore the next batch by identity
 
-Suppose batches are A/B, C/D and E/F. After training completes the C/D update, the next restored batch should be E/F. Returning another two-element array passes a shape check but may repeat or skip data.
+The loader first returns IDs $[8,6,7,9]$. After that batch is consumed, its iterator snapshot describes the next-read position; the uninterrupted next batch is $[0,5,1,2]$. A fresh compatible loader given those opaque bytes returns those same four IDs, features, and labels.
 
-Capture the iterator state at the model's completed-update boundary. Do not substitute a guessed offset unless the pipeline contract makes it sufficient. Shuffling, filtering and prefetching can make requested batch counts differ from completed training work.
-
-Compare exact IDs and values before and after restore. Then change the dataset identity deliberately and require the restore process to detect the incompatible sequence. The same numeric cursor can point to different examples in another dataset.
+Saving before consuming the first batch would repeat it; saving after consuming the second would skip the intended next batch. Compare exact record identities and values, not just array shapes. Repeating the seed restarts the sampler and is not equivalent to restoring the iterator state.
 
 $$
-v_{t+1} = \mu v_t + g_t, \qquad \theta_{t+1} = \theta_t - \eta v_{t+1}
+\operatorname{IDs}\!\left(\operatorname{next}(\operatorname{restore}(I_t;D,c))\right)=\operatorname{IDs}(B_{t+1})
 $$
 
 ### Pause and reason
@@ -43,15 +43,15 @@ Position only has meaning relative to its data sequence and configuration. Recov
 
 ## Map a record key to a testable source
 
-TutorialSource implements len and indexing. A request for key i returns the same $\mathrm{id}=i$, $x=i/10$ and $y=2x-1$. Its repr includes a version and count because the iterator state records its source configuration. No file I/O, decoder or download is hidden in this example.
+In this fixture, key $i$ always returns ID $i$, feature $x=i/10$, and label $2x-1$. The stable relation lets the check detect a transform that keeps IDs but scrambles feature/label alignment. A real source needs a versioned record identity as file paths and row counts can stay constant while content changes.
 
-In a real corpus, a source key must remain associated with the same record revision. A human-readable repr is only a basic compatibility check; preserve a dataset revision or digest separately. Changing the underlying values without changing the source identity can defeat a cursor restore even if record counts match.
+The source repr and sampler configuration are part of Grain's compatibility check. Keep a dataset revision or content digest too; a repr alone is not a cryptographic dataset identity.
 
 ## Follow the sampler-to-batch boundary
 
-IndexSampler chooses record keys over two epochs from a fixed seed. DataLoader reads them and applies `Batch(4)`. The ID vector is the evidence of actual record order after these operations; feature shapes alone would not tell you whether the order changed.
+The sampler chooses keys, then the loader reads records and groups four at a time. For the first batch, those stages yield IDs $[8,6,7,9]$; the next is $[0,5,1,2]$. These vectors show the actual order after sampler and batching, which a feature shape cannot reveal.
 
-We have twelve records, so one epoch contains exactly three full batches. operations order matters: per-example transforms normally precede batching, while a batch transform receives grouped values. Keep an independent relation check on labels to verify that transforms did not break alignment.
+The check also verifies every epoch covers all twelve IDs exactly once. Keep transforms at the intended boundary: a per-record transform sees one record, while a batch transform sees a group. Then check that labels remain attached to the same IDs.
 
 ```text
 IndexSampler → record keys → TutorialSource[key]
@@ -60,15 +60,15 @@ IndexSampler → record keys → TutorialSource[key]
 
 ## Snapshot the iterator after consumption
 
-After `next(iterator)` returns the first batch, get_state captures the next-read boundary. We read the second batch as our expected future. A fresh iterator receives `set_state(snapshot)`, then next returns that same second batch. Saving before the first batch would repeat it; saving after the second would skip it on a restore intended for the first boundary.
+Call `get_state()` after the first `next(iterator)`. In this run, the resulting state occupies 329 bytes, and the next uninterrupted batch is $[0,5,1,2]$. A newly constructed compatible loader restored with `set_state()` returns the same IDs, features, and labels.
 
-The snapshot is opaque bytes. Let Grain interpret it rather than editing its internal fields. The two iterators must use compatible sampler, source and worker configuration. The practical check compares all three fields, not only IDs, so deterministic order cannot hide changed content.
+The state is opaque: let Grain interpret it rather than editing counters yourself. A seed repeats the first batch, while the saved iterator state resumes at the next-read boundary. If sampler settings differ, reject or revalidate the snapshot instead of assuming the cursor has the same meaning.
 
 ## Worker and buffer settings are workload choices
 
-`worker_count=0` runs in the current process and is convenient for debugging or notebook execution. With workers enabled, decoding/transformation can run in child processes and buffer outputs; top-level source and transform classes must be serializable, and a main guard is important in standalone multiprocessing scripts. The code here deliberately does not start workers.
+This run sets `worker_count=0`, so source reads happen serially in the current process and the sequence is easy to inspect. It verifies restoration, not prefetch throughput. With workers, transforms and buffers can move the boundary between requested and consumed records; source classes and transforms also need to work with the multiprocessing start method.
 
-Prefetching can overlap preparation and consumption, but its benefit depends on storage, transform cost, device demand and memory use. Changing workers or buffers is a new configuration to validate and measure. Do not infer that this small in-memory source needs prefetching, or claim a pipeline speedup without a representative synchronized workload.
+Choose worker and buffer settings from a representative workload and measure the full input-to-update path. The small in-memory source has no expensive decoding to hide, so its timing cannot show whether prefetching helps a real training job.
 
 ## Prepare the data and state
 
@@ -198,15 +198,11 @@ Expected: The restored next IDs, features and labels match. One epoch contains t
 
 ### Read the figure
 
-Each group is a slot within a batch, and bar height gives the example ID in that slot. Compare the “next batch” and “restored next” bars beside one another: their heights match at every slot. They are adjacent bars, not overlapping curves.
-
-The first batch contains $(8,6,7,9)$. The uninterrupted next batch contains $(0,5,1,2)$, and the restored iterator produces that same sequence. The zero-height bars in the first slot represent example ID $0$; they are not missing data.
+The horizontal axis lists four within-batch slots; bar height is the example ID in that slot, not a measurement of feature size. The first batch is $[8,6,7,9]$. The next batch is $[0,5,1,2]$, and the restored-next bars have those same four heights slot by slot.
 
 ### Connect it to the computation
 
-The checkpoint captures the iterator after the first batch. Restoring it therefore resumes at the next batch, rather than replaying the first one. Equal IDs in the same slots establish that both membership and ordering agree at this boundary.
-
-IDs are labels, so a taller bar does not indicate a larger input value or a better batch. This comparison verifies the next batch only. To establish a complete training restart, also restore the matching model, optimizer, random state, and dataset configuration, then compare the next update.
+The exact match shows the iterator snapshot was taken after consuming the first batch and resumes at the second. Compare feature and label values along with IDs, then verify epoch coverage and reject a changed sampler configuration. Matching this batch proves the next-read boundary only, not a complete model-training restart.
 
 ```python
 visual_data = {'kind': 'bar', 'labels': ['slot 0', 'slot 1', 'slot 2', 'slot 3'], 'ylabel': 'example ID', 'series': [{'label': 'first batch', 'y': first_batch['id'].tolist()}, {'label': 'next batch', 'y': second_batch['id'].tolist()}, {'label': 'restored next', 'y': replayed_batch['id'].tolist()}]}
@@ -214,7 +210,7 @@ visual_data = {'kind': 'bar', 'labels': ['slot 0', 'slot 1', 'slot 2', 'slot 3']
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:21:30.571519+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:13:49.556223+00:00. JAX 0.9.2.
 
 ```text
 First IDs: [8, 6, 7, 9]
@@ -273,21 +269,29 @@ Consume two batches, snapshot, and replay the third batch with a new compatible 
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Exercise solution
+**Inputs:**
+- A dataset, saved iterator snapshot, and matching loader configuration.
+
+**Outputs:**
+- A restored iterator whose next batches match uninterrupted iteration.
+
+**Invariants to check:**
+- Restore validates the sampler contract before yielding; compare IDs and values across epoch boundaries.
+
+**Hints:**
+- Save iterator state after a known batch, then restore into a fresh compatible iterator.
+- Change one compatibility field to confirm early rejection.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-later = iter(...)  # TODO: compute later
-next(later)
-next(later)
-later_state = later.get_state(...)  # TODO: compute later_state
-expected_third = next(...)  # TODO: compute expected_third
-new_iterator = iter(...)  # TODO: compute new_iterator
-new_iterator.set_state(later_state)
-np.testing.assert_array_equal(next(new_iterator)["id"],expected_third["id"])
+import numpy as np
+import grain.python as grain
+
+def restore_loader(dataset, snapshot, expected_seed):
+    """A restored iterator whose next batches match uninterrupted iteration."""
+    # TODO: Restore a compatible Grain iterator snapshot and compare its next batches with uninterrupted iteration.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -320,24 +324,28 @@ The loader has two epochs; the fourth and fifth batches belong to the next epoch
 
 ### How to write: Replay through an epoch boundary — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Inputs:**
+- Save the iterator after the third batch and compare the next two batches with a fresh restored iterator. Check IDs and values. Explain why reproducing only the last batch of one epoch is not sufficient.
+
+**Outputs:**
+- Two matching subsequent batches across the epoch boundary.
+
+**Invariants to check:**
+- The snapshot includes epoch/order position, not merely the last batch contents.
+
+**Hints:**
+- The loader has two epochs; the fourth and fifth batches belong to the next epoch.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Replay through an epoch boundary (Transfer): An epoch boundary changes the sampling context.
-boundary = iter(...)  # TODO: compute boundary
-for _ in range(3):next(boundary)
-boundary_state = boundary.get_state(...)  # TODO: compute boundary_state
-expected = ...  # TODO: compute expected
-replay = iter(...)  # TODO: compute replay
-replay.set_state(boundary_state)
-for reference in expected:
-    actual = next(...)  # TODO: compute actual
-    for name in ('id','x','y'):np.testing.assert_array_equal(actual[name],reference[name])
-print('Next-epoch IDs replayed:',[b['id'].tolist() for b in expected])
+import numpy as np
+import grain.python as grain
+
+def practice_replay_through_an_epoch_boundary(loader, snapshot):
+    """Implement the replay through an epoch boundary check."""
+    # TODO: Restore the saved iterator at the boundary and compare the next two batch IDs and values with uninterrupted iteration.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -374,23 +382,28 @@ Read the restore diagnostic; changing the seed changes sampler identity.
 
 ### How to write: Reject a changed sampler — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Reject a changed sampler (Challenge)
+**Inputs:**
+- Try restoring the original snapshot into a loader with a different seed. Capture the compatibility error, then rebuild the matching loader.
+
+**Outputs:**
+- Early rejection for the incompatible seed and successful replay with matching configuration.
+
+**Invariants to check:**
+- Compatibility is checked before any batch is consumed.
+
+**Hints:**
+- Read the restore diagnostic; changing the seed changes sampler identity.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Reject a changed sampler (Challenge)
-incompatible = iter(...)  # TODO: compute incompatible
-try:
-    incompatible.set_state(snapshot)
-except ValueError:
-    print("Expected sampler compatibility rejection")
-else:
-    raise AssertionError("Expected changed sampler rejection")
-compatible = iter(...)  # TODO: compute compatible
-compatible.set_state(snapshot)
-np.testing.assert_array_equal(next(compatible)["id"],second_batch["id"])
+import numpy as np
+import grain.python as grain
+
+def practice_reject_a_changed_sampler(loader, snapshot, changed_seed):
+    """Implement the reject a changed sampler check."""
+    # TODO: Restore the original snapshot with a changed seed, capture the contract error, and retry with the matching seed.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -423,9 +436,17 @@ What makes a fresh loader resume at the saved next batch?
 
 <details><summary>Answer and explanation</summary>
 
-Restoring compatible iterator state after rebuilding its source/sampler configuration.
+**1. Only using the original seed.**
+
+A seed restarts an initial sequence; it does not specify the current cursor. Rebuild the compatible pipeline and restore its iterator state.
+
+**2. Restoring compatible iterator state after rebuilding its source/sampler configuration. (correct)**
 
 Seed and source determine order, but iterator state determines where the resumed reader begins.
+
+**3. Calling next once regardless of checkpoint position.**
+
+Consuming one batch moves the cursor and can skip data. Verify the restored next batch against the uninterrupted run before advancing.
 
 </details>
 

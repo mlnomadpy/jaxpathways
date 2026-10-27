@@ -16,6 +16,9 @@ export function getStaticPaths() {
 const { project } = Astro.props;
 const content = projectGuide(project, course);
 const layout = projectFileLayout(project);
+const introMatch = content.body.match(/^\s*<p(?:\s[^>]*)?>([\s\S]*?)<\/p>\s*/i);
+const introHtml = introMatch?.[1] ?? inlineMath(project.rubric[0] || project.setupNote);
+const guideBody = introMatch ? content.body.slice(introMatch[0].length) : content.body;
 ---
 
 <GuideLayout
@@ -32,7 +35,7 @@ const layout = projectFileLayout(project);
     edition={`Project guide · ${project.hardware}`}
   >
     <Fragment slot="title" set:html={content.heading} />
-    <p set:html={inlineMath(project.setupNote)} />
+    <p set:html={introHtml} />
     <div class="assessment-actions">
       <a class="button primary" href={siteUrl(`project.html?id=${project.id}`)}>
         Open stage workspace
@@ -52,7 +55,7 @@ const layout = projectFileLayout(project);
           <strong>
             <code>{layout.workspaceFile}</code>
           </strong>{' '}
-          and write all of your code in <code>{layout.workspaceFile}</code>.
+          and begin your implementation there.
         </Fragment>
       ) : (
         <Fragment>
@@ -63,12 +66,24 @@ const layout = projectFileLayout(project);
           in your editor and implement the functions marked with <code>NotImplementedError</code>.
         </Fragment>
       )}{' '}
-      Run <code>{layout.checkerFile}</code> from the extracted top folder after each of the{' '}
-      {project.stages.length} stages.
+      Follow each stage's edit file and exact verifier command from the extracted top folder.
+      {layout.additionalFiles.length > 0 && (
+        <Fragment>
+          {' '}
+          Later stages also use{' '}
+          {layout.additionalFiles.map((file, index) => (
+            <Fragment>
+              {index > 0 ? ', ' : ''}
+              <code>{file}</code>
+            </Fragment>
+          ))}
+          .
+        </Fragment>
+      )}
     </p>
   </aside>
   <GuideContents sections={content.sections} label="Project guide sections" title="In this guide" />
-  <article set:html={content.body} />
+  <article set:html={guideBody} />
   <a class="button primary" href={siteUrl(`project.html?id=${project.id}`)}>
     Build and check your implementation
   </a>

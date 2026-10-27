@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "pretraining-02",
-  "contentHash": "fbdcf0dec49edee880ebd7e4e743c2c4de16e6fbf31d3b3963a50066b7a492a9",
-  "rendererHash": "a1bd5b648f4731ae5d5f0a24811c2540d1a0a132149ce589d17c4113509cbedf",
+  "contentHash": "73d31dacc666bdee272ddcec4075ddd1d7527840373277ee189f15639d9aa4b3",
+  "rendererHash": "17e3bbad72ee4c43425845aaee76b86b85e84750551278be03d8c16842f4dc63",
   "kind": "executed",
-  "generatedAt": "2026-10-20T22:29:51.359195+00:00",
+  "generatedAt": "2026-10-27T16:10:45.954487+00:00",
   "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",

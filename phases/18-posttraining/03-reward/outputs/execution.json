@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "posttraining-03",
-  "contentHash": "faccee3034727db2448c2c101d73060330d5917072654cfa10738ec9e51853e7",
-  "executedAt": "2026-10-20T22:26:58.074779+00:00",
+  "contentHash": "e9505b0143cc80bb170cc13bb9ab073caf7b540f66216ec246642307df94e65b",
+  "executedAt": "2026-10-27T17:26:59.191516+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -11,7 +11,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Synthetic preference NLL initial/final: 0.6931471824645996 0.08669456839561462 ; rewards: [ 1.9811294  0.327278  -2.3084073]\nSynthetic preference NLL initial/final: 0.6931471824645996 0.08669456839561462 ; rewards: [ 1.9811294  0.327278  -2.3084073]\nForward/reversed preference NLL: 0.08596369624137878 2.94565486907959\nBalanced conflicting labels prefer a zero margin.\nTied baseline and preference directions verified.\nRanking unchanged; confidence and downstream reward scale change.\nIndependent reward gradients agree in both label directions.\nPASS: posttraining-03\n",
+  "stdout": "Frozen held-out reward baseline before fit: {'probabilities': array([0.5, 0.5, 0.5, 0.5]), 'brier_mean': 0.140625, 'unanimous_accuracy': 0.0, 'disagreement_probabilities': array([0.5, 0.5]), 'disagreement_brier': 0.03125}\nSynthetic preference NLL initial/final: 0.6931471824645996 0.08669456839561462 ; rewards: [ 1.9811294  0.327278  -2.3084073]\nSynthetic preference NLL initial/final: 0.6931471824645996 0.08669456839561462 ; rewards: [ 1.9811294  0.327278  -2.3084073]\nForward/reversed preference NLL: 0.08596369624137878 2.94565486907959\nBalanced conflicting labels prefer a zero margin.\nTied baseline and preference directions verified.\nRanking unchanged; confidence and downstream reward scale change.\nIndependent reward gradients agree in both label directions.\nheldout reward baseline: {'probabilities': array([0.5, 0.5, 0.5, 0.5]), 'brier_mean': 0.140625, 'unanimous_accuracy': 0.0, 'disagreement_probabilities': array([0.5, 0.5]), 'disagreement_brier': 0.03125}\nheldout reward after training-pair fit: {'probabilities': array([0.8394109 , 0.93312322, 0.65921421, 0.06687678]), 'brier_mean': 0.022286160720660468, 'unanimous_accuracy': 1.0, 'disagreement_probabilities': array([0.65921421, 0.06687678]), 'disagreement_brier': 0.029441639707967603}\nSynthetic, four-pair evaluation only; no human or language-quality claim.\nPASS: posttraining-03\n",
   "notebookCells": [
     {
       "sourceHash": "04677b1f4c5fa102e5f91b5074bfea13f993e143e5c2eb181d586377e7db49b3",
@@ -20,6 +20,18 @@
     {
       "sourceHash": "f1187a7bef952c2ae336028b9928e92bd3791df163108c970fcc6cc42537fa98",
       "outputs": []
+    },
+    {
+      "sourceHash": "75fb920242fee8be1e2eeba8ac9ffb5fb82f3857e029ebcd76455117bd68d109",
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Frozen held-out reward baseline before fit: {'probabilities': array([0.5, 0.5, 0.5, 0.5]), 'brier_mean': 0.140625, 'unanimous_accuracy': 0.0, 'disagreement_probabilities': array([0.5, 0.5]), 'disagreement_brier': 0.03125}\n"
+          ]
+        }
+      ]
     },
     {
       "sourceHash": "e1efb2870cd0854c19ebc876247e4ee02c080b80944d39a6dac62b2babac624b",
@@ -50,7 +62,7 @@
       "outputs": []
     },
     {
-      "sourceHash": "25df6d662f9d3f0c4e984c6a201f79fa0cfd7a2633dc4b0773dfba6c2dd4ee6c",
+      "sourceHash": "53dc08a479da44f2b1718bf964cd5c4d3e3305811c536df9d501b1833a6e3476",
       "outputs": [
         {
           "output_type": "display_data",
@@ -89,7 +101,7 @@
       ]
     },
     {
-      "sourceHash": "fb05f970df9dc657fcb8b1c38cd65d94a11874ea70347d0a814e5bf7b81914de",
+      "sourceHash": "22d5d8896e54aecd8b70f9aafa0c68cf3475cdb9799648df8d1bbbd8b53d1ac8",
       "outputs": []
     },
     {
@@ -105,7 +117,7 @@
       ]
     },
     {
-      "sourceHash": "1a4f7300e34b5c970b9e937bb591de6e3170a57c6dd5dbf53a3b65c271843d68",
+      "sourceHash": "22d5d8896e54aecd8b70f9aafa0c68cf3475cdb9799648df8d1bbbd8b53d1ac8",
       "outputs": []
     },
     {
@@ -121,7 +133,7 @@
       ]
     },
     {
-      "sourceHash": "158f41a7344eaeea22561c35b96f602a89f19433c72b2a39b761d0cd1937f1b4",
+      "sourceHash": "22d5d8896e54aecd8b70f9aafa0c68cf3475cdb9799648df8d1bbbd8b53d1ac8",
       "outputs": []
     },
     {
@@ -132,6 +144,24 @@
           "name": "stdout",
           "text": [
             "Independent reward gradients agree in both label directions.\n"
+          ]
+        }
+      ]
+    },
+    {
+      "sourceHash": "22d5d8896e54aecd8b70f9aafa0c68cf3475cdb9799648df8d1bbbd8b53d1ac8",
+      "outputs": []
+    },
+    {
+      "sourceHash": "1b978a641b205cab419bcc9eedb164477d8c72a9d6298dd6ea9b7f0d48037dd4",
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "heldout reward baseline: {'probabilities': array([0.5, 0.5, 0.5, 0.5]), 'brier_mean': 0.140625, 'unanimous_accuracy': 0.0, 'disagreement_probabilities': array([0.5, 0.5]), 'disagreement_brier': 0.03125}\n",
+            "heldout reward after training-pair fit: {'probabilities': array([0.8394109 , 0.93312322, 0.65921421, 0.06687678]), 'brier_mean': 0.022286160720660468, 'unanimous_accuracy': 1.0, 'disagreement_probabilities': array([0.65921421, 0.06687678]), 'disagreement_brier': 0.029441639707967603}\n",
+            "Synthetic, four-pair evaluation only; no human or language-quality claim.\n"
           ]
         }
       ]

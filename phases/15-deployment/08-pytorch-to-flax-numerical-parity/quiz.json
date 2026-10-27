@@ -11,7 +11,12 @@
         "Assume successful checkpoint loading proves parity."
       ],
       "correct": 0,
-      "explanation": "The earliest mismatch narrows the investigation. Downstream error is often the propagated effect of that first difference."
+      "explanation": "The earliest mismatch narrows the investigation. Downstream error is often the propagated effect of that first difference.",
+      "optionFeedback": [
+        "The earliest mismatch narrows the investigation. Downstream error is often the propagated effect of that first difference.",
+        "A large early mismatch is diagnostic evidence. Check the normalization definition before changing tolerances.",
+        "Successful loading only verifies a structural path. Compare intermediate activations to locate the first numerical divergence."
+      ]
     }
   ]
 }

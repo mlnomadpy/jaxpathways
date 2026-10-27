@@ -74,3 +74,11 @@ Keep this project separate from the [planned approximately-300M causal model](..
 The first panel follows the 24 pretraining updates; the second follows 16 adaptation updates. Each point is a sampled training minibatch, so a downward trend does not measure held-out quality. Both use nats per selected target token, but adaptation selects only response tokens while pretraining selects every non-padding next token. Their vertical values therefore refer to different target populations. The third panel evaluates all three models on the same 4,954 test targets from held-out chapters. Lower perplexity is better. Adaptation improves over the pretrained model in this run, but the unigram baseline remains better. The repetitive generated sample is another failure signal. These are within-book observations with a small word vocabulary, not broad language-model capability.
 
 The [retained CPU result](outputs/pilot-results.json) includes package versions, source/checkpoint identities, all update histories, evaluation denominators and fresh-process reload checks. Rebuild this plot with `python3 projects/causal-lineage/render_results.py` after producing and retaining a new run; the renderer reads measured values rather than inventing a trajectory.
+
+## Review handoff: explain a changed condition
+
+Held-out perplexity improves while generated instructions remain poor. What has the tiny causal pilot established, and what experiment should follow?
+
+**Keep for review:** Token-weighted held-out NLL against the same tokenizer/baseline, generation examples under a frozen decoding config and separate continuation-versus-SFT experiments. The existing small pilot does not establish production quality or a 300M release.
+
+Write your prediction before opening the reference implementation. Distinguish what the existing checker verifies from your proposed extension; record any extension command, actual output and limitation separately. A reviewer should be able to locate the first failed contract from your saved evidence.

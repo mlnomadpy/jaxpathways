@@ -16,7 +16,7 @@ Classify small images, explain per-class failures and compare a float reference 
 
 ## Figures to explain
 
-Show labeled input thumbnails beside a confusion matrix. Read rows as true classes and columns as predicted classes; inspect the off-diagonal examples before explaining an error. Add training and validation curves with the same loss definition.
+Start with labeled raw/normalized thumbnails to verify channel order and scale. For the confusion matrix, name rows as true classes and columns as predictions and give counts, not just colors. Compare a constant baseline and show actual off-diagonal examples. Plot clean/corrupted accuracy by the same class slices, keeping split and transform identities fixed. Synthetic shapes do not establish real-photo or edge-device quality.
 
 ## 1. Define the data contract
 

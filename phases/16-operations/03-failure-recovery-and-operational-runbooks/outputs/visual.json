@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "operations-03",
-  "contentHash": "24035d2dc3523f8f8236c80c7da144cbf9763694a1da5a5c0181d5758209e058",
-  "rendererHash": "a1bd5b648f4731ae5d5f0a24811c2540d1a0a132149ce589d17c4113509cbedf",
+  "contentHash": "cf93143c51b3cd862e9c8a08884daace5110827b15f628734423949468534926",
+  "rendererHash": "17e3bbad72ee4c43425845aaee76b86b85e84750551278be03d8c16842f4dc63",
   "kind": "executed",
-  "generatedAt": "2026-10-20T22:29:39.130082+00:00",
+  "generatedAt": "2026-10-27T17:01:54.857138+00:00",
   "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",

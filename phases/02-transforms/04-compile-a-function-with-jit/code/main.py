@@ -82,12 +82,26 @@ for name, function in (("eager", loss), ("compiled", compiled)):
 print("backend / shapes / dtype:", jax.default_backend(), x.shape, w.shape, y.shape, x.dtype)
 
 # Reference solution. Try the exercise before reading this.
-# Exercise solution
+# Exercise solution: compare independent arithmetic, not only two JAX paths.
+import numpy as np
 compiled_step = jax.jit(jax.value_and_grad(loss))
 v, g = compiled_step(w, x, y)
-expected_v, expected_g = jax.value_and_grad(loss)(w, x, y)
-assert jnp.allclose(v, expected_v)
-assert jnp.allclose(g, expected_g)
+# Wait for both outputs. Timing only dispatch does not measure completed work.
+jax.block_until_ready((v, g))
+eager_v, eager_g = jax.value_and_grad(loss)(w, x, y)
+host_x, host_w, host_y = np.asarray(x), np.asarray(w), np.asarray(y)
+residual = host_x @ host_w - host_y
+manual_v = float(np.dot(residual, residual) / len(host_y))
+manual_g = (2.0 / len(host_y)) * host_x.T @ residual
+np.testing.assert_allclose(v, manual_v, rtol=1e-5, atol=1e-6)
+np.testing.assert_allclose(g, manual_g, rtol=1e-5, atol=1e-6)
+np.testing.assert_allclose(v, eager_v, rtol=1e-5, atol=1e-6)
+np.testing.assert_allclose(g, eager_g, rtol=1e-5, atol=1e-6)
+np.testing.assert_allclose(manual_v, 0.46, atol=1e-6)
+print('Independent NumPy loss / gradient:', manual_v, manual_g)
+print('Benchmark boundary: warm the same signature first; start the clock, call,')
+print('then jax.block_until_ready((value, gradient)) before stopping it.')
+
 
 # Reference practice: Check that a new value remains runtime data
 # Check that a new value remains runtime data (Practice): The same computation accepts different runtime values.

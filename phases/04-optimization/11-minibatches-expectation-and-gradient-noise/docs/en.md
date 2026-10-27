@@ -4,6 +4,8 @@ Phase 04: Math & optimization · about 75 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Regularization and honest validation](https://www.tahabouhsine.com/jaxpathways/lesson-optimization-10.html).
+
 ## What you will be able to do
 
 - Explain an unbiased minibatch gradient and verify how sampling and reduction affect its variance.
@@ -40,7 +42,7 @@ The usual inverse-size relationship assumes a particular sampling model, often i
 
 ## Define the population before estimating it
 
-Use the per-example loss $\ell(w,y)=\tfrac12(w-y)^2$ with targets $(1,2,3,4)$. At $w=0$, the per-example gradients are $(-1,-2,-3,-4)$. Their mean is $-2.5$, and their population variance is $1.25$: average the squared deviations from the mean, dividing by $4$. This finite training dataset is the population for our sampling experiment, not the population of all future data.
+Use the per-example loss $\ell(w,y)=\tfrac12(w-y)^2$ with targets $(1,2,3,4)$. At $w=0$, the per-example gradients are $g_i=w-y_i=(-1,-2,-3,-4)$. Their mean is $g=-2.5$. The population variance is $\frac14\sum_{i=1}^{4}(g_i-g)^2=\frac{2.25+0.25+0.25+2.25}{4}=1.25$. The mean gradient $-2.5$ gives the average direction; variance $1.25$ measures how individual gradients spread around it. This four-example training set is the finite population for our sampling experiment, not the population of all future data.
 
 $$
 g=\frac1n\sum_{i=1}^n g_i,\qquad \operatorname{Var}(g_i)=\frac1n\sum_{i=1}^n(g_i-g)^2
@@ -49,6 +51,8 @@ $$
 ## Make the independence assumption explicit
 
 Draw $B$ examples independently and uniformly with replacement, where $B$ is the batch size. Repeated examples are allowed. The batch gradient $\hat g$ has expectation $g$ and variance $\operatorname{Var}(g_i)/B$. For $B=2$, enumerate all $16$ ordered pairs. The batch variance is $0.625$. Sampling without replacement follows a different variance formula; correlated samples can reduce the benefit of averaging.
+
+For batch size two there are $4^2=16$, ordered draws with replacement. Independence makes the cross term vanish, so averaging divides variance by two: $1.25/2=0.625$. The batch-three bar is $1.25/3\approx0.4167$. These bars are variances, not standard deviations; standard deviation scales as one over the square root of batch size.
 
 $$
 \mathbb{E}[\hat g]=g,\qquad \operatorname{Var}(\hat g)=\frac{\operatorname{Var}(g_i)}{B}
@@ -176,6 +180,8 @@ Each batch averages independent, uniformly sampled per-example gradients with re
 
 The bar heights are squared gradient units, not loss or gradient magnitude. A shorter bar does not mean a smaller learning rate or a faster overall training run. Sampling without replacement, correlated examples, and changing parameters require a different variance analysis.
 
+Before increasing batch size, predict both quantities separately: mean gradient stays -2.5, while independent-sample variance falls as 1/B.
+
 ```python
 triples = (per[:, None, None] + per[None, :, None] + per[None, None, :]) / 3
 visual_data = {'kind': 'bar', 'labels': ['batch 1', 'batch 2', 'batch 3'], 'ylabel': 'gradient variance', 'series': [{'label': 'exact enumeration', 'y': [float(jnp.var(per)), float(jnp.var(pairs)), float(jnp.var(triples))]}]}
@@ -183,7 +189,7 @@ visual_data = {'kind': 'bar', 'labels': ['batch 1', 'batch 2', 'batch 3'], 'ylab
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:20:46.848107+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:13:32.881282+00:00. JAX 0.9.2.
 
 ```text
 full gradient / single variance / pair variance: -2.5 1.25 0.625
@@ -235,22 +241,29 @@ Enumerate all $64$ ordered batches of size $3$. Check their mean and variance ag
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- A fixed scalar parameter, finite dataset, and ordered minibatch size.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- The exact expected minibatch gradient and its variance.
+
+**Invariants to check:**
+- The sampler distribution is explicit; weighting unequal microbatches uses example counts.
+
+**Hints:**
+- Enumerate the small batch space before relying on a closed-form expectation.
+- Keep the parameter fixed across microbatch gradient accumulation.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Enumerate all 64 ordered batches of size 3.
-triples = ...  # TODO: compute triples
-assert triples.size  # TODO: complete assertion check
-assert jnp.allclose(jnp.mean(triples), full, atol=1e-06)  # TODO: complete assertion check
-assert jnp.allclose(jnp.var(triples), 1.25 / 3, atol=1e-06)  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+
+def batch_gradient_statistics(parameter, dataset, batch_size):
+    """The exact expected minibatch gradient and its variance."""
+    # TODO: Enumerate the small sampler and compute expected gradient and variance at a fixed parameter.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -279,23 +292,28 @@ Do not update parameters between microbatches. Weight each mean by its sample co
 
 ### How to write: Accumulate before updating — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
+**Inputs:**
+- At the same fixed $w$, accumulate gradients from microbatches of sizes $3$ and $1$. Verify that one update matches the full-batch update.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- One accumulated update and a full-batch comparison.
+
+**Invariants to check:**
+- The parameter remains fixed until all microbatch contributions are accumulated.
+
+**Hints:**
+- Do not update parameters between microbatches. Weight each mean by its sample count.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Accumulate before updating (Transfer / diagnosis)
-g1 = jax.grad(...)  # TODO: compute g1
-g2 = jax.grad(...)  # TODO: compute g2
-accumulated = ...  # TODO: compute accumulated
-assert jnp.allclose(w - 0.1 * accumulated, w - 0.1 * full)  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+
+def practice_accumulate_before_updating(parameter, microbatches):
+    """Implement the accumulate before updating check."""
+    # TODO: Differentiate both microbatches at one fixed parameter, sum gradients by example count, then perform one update.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -326,20 +344,28 @@ Use the sampling probabilities as weights. Missing examples cannot be recovered 
 
 ### How to write: Detect a biased sampler — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- A sampler chooses targets $1$ and $4$ with probabilities $0.9$ and $0.1$, never the others. Compute its expected gradient. Does it estimate the uniform dataset gradient?
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- The biased expected gradient and the uniform reference gradient.
+
+**Invariants to check:**
+- The expectation uses the stated sampling probabilities, including zero probability for omitted targets.
+
+**Hints:**
+- Use the sampling probabilities as weights. Missing examples cannot be recovered by naive averaging.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Detect a biased sampler (Transfer / diagnosis)
-biased = ...  # TODO: compute biased
-assert jnp.allclose(biased, -1.3)  # TODO: complete assertion check
-assert not jnp.allclose(biased, full)  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+
+def practice_detect_a_biased_sampler(targets, probabilities):
+    """Implement the detect a biased sampler check."""
+    # TODO: Enumerate the sampler-weighted gradient and compare it to the uniform four-target dataset gradient.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -365,9 +391,17 @@ When does averaging batch means reproduce the dataset mean?
 
 <details><summary>Answer and explanation</summary>
 
-When batch sizes are equal, or the means are weighted by their example counts
+**1. Always**
+
+A small batch and a large batch should not receive equal weight. Compare batches of sizes one and three with different means.
+
+**2. When batch sizes are equal, or the means are weighted by their example counts (correct)**
 
 The dataset mean weights examples equally. Unequal batches need count weighting.
+
+**3. Only with Adam**
+
+The aggregation identity does not depend on Adam. Weight each batch mean by its observation count and divide by the total count.
 
 </details>
 

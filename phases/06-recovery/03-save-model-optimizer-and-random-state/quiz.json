@@ -11,7 +11,12 @@
         "A seed plus the last printed loss."
       ],
       "correct": 1,
-      "explanation": "The update reads all of those inputs; matching predictions before an update cannot replace preserving transition state."
+      "explanation": "The update reads all of those inputs; matching predictions before an update cannot replace preserving transition state.",
+      "optionFeedback": [
+        "Adam moments, its count, random keys and data position affect later updates. Matching current parameters alone is insufficient.",
+        "The update reads all of those inputs; matching predictions before an update cannot replace preserving transition state.",
+        "A seed and loss are not a snapshot of the trajectory. Compare complete state and the next batch, then continue for several steps."
+      ]
     }
   ]
 }

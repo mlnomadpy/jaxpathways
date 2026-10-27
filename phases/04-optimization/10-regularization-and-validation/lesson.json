@@ -27,7 +27,7 @@
       },
       {
         "title": "State the exact objective",
-        "body": "Let \\(n\\) be the training sample count and \\(\\lambda\\ge0\\) the penalty strength. We use mean squared error plus \\(\\lambda\\|w\\|_2^2\\), without a factor of one half. Differentiating gives \\(2X^\\mathsf{T}(Xw-y)/n+2\\lambda w\\). Setting it to zero gives the linear system below. Other conventions change the numerical meaning of the same penalty value, so copy the objective along with a reported hyperparameter.",
+        "body": "Let \\(n\\) be the training sample count and \\(\\lambda\\ge0\\) the penalty strength. We use mean squared error plus \\(\\lambda\\|w\\|_2^2\\), without a factor of one half. Differentiating gives \\(2X^\\mathsf{T}(Xw-y)/n+2\\lambda w\\). Setting it to zero gives the linear system below. Other conventions change the numerical meaning of the same penalty value, so copy the objective along with a reported hyperparameter.\n\nFor this fixture, \\(X=(-1,1)\\) and \\(y=(-3,3)=3X\\), so \\(X^\\mathsf{T}X=2\\) and \\(X^\\mathsf{T}y=6\\). Setting the stated derivative to zero with n=2 gives \\(2(w-3)+2\\lambda w=0\\), hence \\(w=3/(1+\\lambda)\\). The mean and penalty conventions are explicit; changing either changes the numerical meaning of the same lambda.",
         "math": "L_\\lambda(w)=\\frac1n\\|Xw-y\\|_2^2+\\lambda\\|w\\|_2^2,\\qquad (X^\\mathsf{T}X+n\\lambda I)w=X^\\mathsf{T}y"
       },
       {
@@ -90,7 +90,22 @@
         "prompt": "Fit constant targets \\((5,5,5)\\) using inputs \\((-1,0,1)\\) and a bias. Compare penalizing only the slope with penalizing both parameters at \\(\\lambda=1\\).",
         "hint": "Use a diagonal mask \\(\\operatorname{diag}(1,0)\\).",
         "solution": "# Do not accidentally shrink the intercept (Transfer / diagnosis)\nx = jnp.array([-1.0, 0.0, 1.0])\nA = jnp.stack([x, jnp.ones_like(x)], axis=1)\ntarget = jnp.full((3,), 5.0)\nmask = jnp.diag(jnp.array([1.0, 0.0]))\ncorrect = jnp.linalg.solve(A.T @ A + 3 * mask, A.T @ target)\nall_penalized = ridge(A, target, 1.0)\nassert jnp.allclose(correct, jnp.array([0.0, 5.0]))\nassert jnp.allclose(all_penalized, jnp.array([0.0, 2.5]))",
-        "explanation": "The mask expresses a modeling choice: shrink feature effects while preserving the constant target level."
+        "explanation": "The mask expresses a modeling choice: shrink feature effects while preserving the constant target level.",
+        "learnerStarter": {
+          "inputs": [
+            "Fit constant targets \\((5,5,5)\\) using inputs \\((-1,0,1)\\) and a bias. Compare penalizing only the slope with penalizing both parameters at \\(\\lambda=1\\)."
+          ],
+          "outputs": [
+            "Two fitted parameter sets with a prediction comparison."
+          ],
+          "invariants": [
+            "The intercept penalty choice is explicit and the unpenalized fit uses training rows only."
+          ],
+          "hints": [
+            "Use a diagonal mask \\(\\operatorname{diag}(1,0)\\)."
+          ],
+          "code": "import jax.numpy as jnp\n\ndef practice_do_not_accidentally_shrink_the_intercept(features, targets):\n    \"\"\"Implement the do not accidentally shrink the intercept check.\"\"\"\n    # TODO: Fit the constant target data with slope-only and all-parameter penalties and compare both parameter pairs.\n    raise NotImplementedError\n"
+        }
       },
       {
         "title": "Catch preprocessing leakage",
@@ -98,7 +113,22 @@
         "prompt": "Training inputs are \\((0,2)\\) and validation input is \\(100\\). Compare training-only centering with centering all inputs together. Which can be reused for a truly unseen example?",
         "hint": "Fit the mean on training data; do not refit it on validation data.",
         "solution": "# Catch preprocessing leakage (Transfer / diagnosis): Validation data must not influence fitted preprocessing.\ntrain_x = jnp.array([0.0, 2.0])\nval_x = jnp.array([100.0])\ntrain_mean = jnp.mean(train_x)\nleaked_mean = jnp.mean(jnp.concatenate([train_x, val_x]))\nassert jnp.allclose(val_x - train_mean, jnp.array([99.0]))\nassert not jnp.allclose(train_mean, leaked_mean)\nassert jnp.allclose(jnp.mean(train_x - train_mean), 0.0)",
-        "explanation": "Validation data must not influence fitted preprocessing. Reusing training statistics preserves the meaning of held-out evaluation."
+        "explanation": "Validation data must not influence fitted preprocessing. Reusing training statistics preserves the meaning of held-out evaluation.",
+        "learnerStarter": {
+          "inputs": [
+            "Training inputs are \\((0,2)\\) and validation input is \\(100\\). Compare training-only centering with centering all inputs together. Which can be reused for a truly unseen example?"
+          ],
+          "outputs": [
+            "Both centers and the transformed unseen example under the training-only center."
+          ],
+          "invariants": [
+            "Validation data does not influence preprocessing statistics used for fitting."
+          ],
+          "hints": [
+            "Fit the mean on training data; do not refit it on validation data."
+          ],
+          "code": "import jax.numpy as jnp\n\ndef practice_catch_preprocessing_leakage(train_features, validation_features):\n    \"\"\"Implement the catch preprocessing leakage check.\"\"\"\n    # TODO: Compute the center from training inputs alone and compare it with a center that includes the held-out value.\n    raise NotImplementedError\n"
+        }
       }
     ],
     "question": "Which loss should select the penalty in this exercise?",
@@ -129,9 +159,30 @@
       "kind": "executed",
       "prediction": "Does the smallest training error imply the best validation result?",
       "reading": "The horizontal axis varies the ridge penalty \\(\\lambda\\). For each penalty, the model is fitted again. The vertical axis shows mean squared prediction error on training and validation data; it does not include the penalty term.\n\nAt \\(\\lambda=0\\), training error is zero and validation error is \\(4\\). At \\(\\lambda=0.5\\), training error rises to \\(1\\), but validation error falls to zero. Increasing the penalty to \\(2\\) makes both errors \\(4\\). The validation curve therefore has a minimum between the extremes.",
-      "connection": "The fitted weight is \\(w=3/(1+\\lambda)\\). The training targets favor slope \\(3\\), while the validation targets in this constructed example favor slope \\(2\\). Moderate shrinkage moves the model toward the validation relationship; too much shrinkage moves it past that relationship and toward underfitting.\n\nSelect the penalty using the validation minimum, not the intersection of the curves or the smallest training error. Here that choice is \\(0.5\\). A zero validation error is a property of this tiny synthetic example, not a promise that regularization removes all error on real data.",
+      "connection": "The fitted weight is \\(w=3/(1+\\lambda)\\). The training targets favor slope \\(3\\), while the validation targets in this constructed example favor slope \\(2\\). Moderate shrinkage moves the model toward the validation relationship; too much shrinkage moves it past that relationship and toward underfitting.\n\nSelect the penalty using the validation minimum, not the intersection of the curves or the smallest training error. Here that choice is \\(0.5\\). A zero validation error is a property of this tiny synthetic example, not a promise that regularization removes all error on real data.\n\nBefore selecting a penalty, predict how fitted slope 3/(1+lambda) compares with validation slope 2; validation error is smallest when these match.",
       "alt": "Training error and validation error select different penalties. The horizontal axis varies the ridge penalty \\(\\lambda\\). For each penalty, the model is fitted again. The vertical axis shows mean squared prediction error on training and validation data; it does not include the penalty term. At \\(\\lambda=0\\), training error is zero and validation error is \\(4\\). At \\(\\lambda=0.5\\), training error rises to \\(1\\), but validation error falls to zero. Increasing the penalty to \\(2\\) makes both errors \\(4\\). The validation curve therefore has a minimum between the extremes.",
       "code": "grid = jnp.linspace(0.0, 2.0, 41)\nvisual_data = {'kind': 'line', 'x': grid.tolist(), 'xlabel': 'ridge penalty', 'ylabel': 'mean squared prediction error', 'series': [{'label': 'training', 'y': [float(mse(ridge(X, y, float(a)), X, y)) for a in grid]}, {'label': 'validation', 'y': [float(mse(ridge(X, y, float(a)), Xv, yv)) for a in grid]}]}"
+    },
+    "optionFeedback": [
+      "Penalized training losses mix prediction error with a penalty and are not directly comparable evidence of held-out prediction quality.",
+      "Validation compares predictive performance of candidates fitted on training data. A separate final test set is for reporting after selection.",
+      "Repeatedly choosing settings on the test set makes it part of model selection. Use validation data, then evaluate the frozen choice on test data."
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "Training features, targets, and a nonnegative penalty."
+      ],
+      "outputs": [
+        "Fitted coefficients and predictions on supplied rows."
+      ],
+      "invariants": [
+        "Only designated coefficients are penalized; preprocessing statistics come from training data alone."
+      ],
+      "hints": [
+        "Separate the intercept from the penalized slope.",
+        "Compare validation transforms using the training-only statistics."
+      ],
+      "code": "import jax.numpy as jnp\n\ndef ridge_fit(features, targets, penalty):\n    \"\"\"Fitted coefficients and predictions on supplied rows.\"\"\"\n    # TODO: Fit the stated penalized objective while separating intercept penalty and training-only preprocessing.\n    raise NotImplementedError\n"
     }
   }
 }

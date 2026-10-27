@@ -12,7 +12,9 @@ Keep eager and transformed outputs plus a deliberately broken assumption.
 
 ## Study guide: What changes when you differentiate, batch or compile a function?
 
-Build one trustworthy scalar calculation before composing transformations. Differentiation changes the quantity, batching adds an axis, and compilation changes execution. Keeping these roles distinct makes later training failures easier to locate.
+Start with one scalar function whose answer and derivative you can work out. Then ask three different questions: what is its local slope, what happens when we apply it to many examples, and how can we execute the same computation as a compiled program? Differentiation, batching and compilation answer those questions in different ways.
+
+Carry the same values through each transformation so a shape change or a reduction cannot silently change the objective. Read loss and derivative as different plotted quantities. Treat tracing observations and synchronized timing as separate evidence when you reach JIT.
 
 ### Check your starting point
 
@@ -38,11 +40,11 @@ Review: [Losses and value_and_grad](02-losses-and-value-and-grad/docs/en.md).
 
 ### Try a changed condition
 
-One minibatch has two examples and another has six. How should you combine their mean gradients?
+Two batches have sizes 2 and 6 and scalar mean gradients 3 and 1. What is the combined mean gradient? What mistake gives 2?
 
 <details><summary>Compare an approach</summary>
 
-Weight each mean gradient by its example count, add the weighted gradients, then divide by eight. An unweighted average gives examples in the smaller batch too much influence. Verify against a gradient over the concatenated batch.
+The eight-example mean is \((2\cdot3+6\cdot1)/8=1.5\). Averaging the two batch means gives 2 and overweights the smaller batch. Compare with the gradient on concatenated examples, not another copy of the aggregation code.
 
 </details>
 

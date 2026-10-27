@@ -1,0 +1,32 @@
+{
+  "allFinalMembersEqualSourceAndFreshExtract": true,
+  "changedMarkdown": {
+    "projects/posttraining-audit/README.md": {
+      "new": "728021708ccca7a3d5579e266f5b20d7703fd59cf5f7d5af20aa4a0dc88d4e25",
+      "old": "96cb819ad0461396db780fc3bfa499467bb0f6ffb30d9e74f83e5a1330642da9"
+    },
+    "projects/posttraining-audit/transformer_lineage/TEACHING.md": {
+      "new": "4643f08b3409cbc06e3d4c95976b3c97beb63f2db9f1d343cdb0b1ccead97ef5",
+      "old": "82bed3163b3b6e40a97cab622a67057373959cc723a6c5516c7ebbb6087e4c30"
+    },
+    "projects/posttraining-audit/transformer_lineage/teaching/PARENT_RIGHTS.md": {
+      "new": "d4c0c5a14d26350ffc2abcc5edb5675e9c47c6be39c637197f722433211a54fc",
+      "old": "fda29a97666f8da7f849e84320afc1a644fecf335c976c541125c36138b7fdf5"
+    }
+  },
+  "kind": "sol-transformer-lineage-0171-final-zip-reconciliation",
+  "lessonJsonBytesEqualPriorHead": true,
+  "lessonJsonCount": 104,
+  "memberCount": 40,
+  "newZipSha256": "fe1318990ce10144237612ab86e879cb14b7e5b871d536a99936cc98ebfbeb13",
+  "oldZipSha256": "3de18328abfc8499f6c2c785aae39d075a48fe01325e9aa7feff31ed408fcb30",
+  "optimizationClaim": "The old ZIP executable bytes are unchanged. The new ZIP itself has not undergone optimization; only non-run checks can qualify this artifact.",
+  "priorSnapshotCount": 24,
+  "priorSnapshotsDecodedIdentical": true,
+  "snapshotVersions": [
+    "0.17.1",
+    "0.17.0"
+  ],
+  "status": "accepted-byte-reconciliation-pending-nonrun",
+  "unchangedMemberCount": 37
+}

@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "operations-04",
-  "contentHash": "fdfadbb1a3e40ca5fef95c02b2f369ec1a35a94868135fd4c44a92f0c576f90f",
-  "executedAt": "2026-10-20T22:26:09.289097+00:00",
+  "contentHash": "052c5af2aae5ace6b88df4dd6fa9821116636ffcc5214d4bae664a05d6c537d0",
+  "executedAt": "2026-10-27T17:10:51.512226+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -11,46 +11,31 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "first / second content IDs: 810b956e3376228ff3c1f03f469feb3ab26653b488ba51271e82277672590b80 aed1378a7842598237e59c5d189b13d486068b6284d9c1ca3d4e865866ba6990\nfailed gate kept selection: True rollback restored first: True\nfirst / second content IDs: 810b956e3376228ff3c1f03f469feb3ab26653b488ba51271e82277672590b80 aed1378a7842598237e59c5d189b13d486068b6284d9c1ca3d4e865866ba6990\nfailed gate kept selection: True rollback restored first: True\nPASS: operations-04\n",
+  "stdout": "consumer x=1 before B / after B / after rollback: 3.0 3.4 3.0\nA and B IDs: 60b1a27a0bf2091fc537d43ba2ddd2ae0911dc1090bc3631a3ac6559de1b2e62 25ba7e29e933613158e1472cea0a3e1316e8cb697114f8bf44b0f3bc33759aae\nrejected activation unchanged selection and behavior: True\nrollback selected A: True\nPASS: operations-04\n",
   "notebookCells": [
     {
-      "sourceHash": "9aeea8682b2205b1a7883a7b1298120571f501be14e40867d7a2ae06f501e687",
+      "sourceHash": "14cf83a688e667cc82d9985b79c691903eee5dd67dbdc971b83389d05d9d2eaa",
       "outputs": []
     },
     {
-      "sourceHash": "6eb86abf8bb037a0c00eff6d8d53d5b1f2a2612d3034be238dc49292abd4f84c",
+      "sourceHash": "88bdc6100ec9e8195f84fba5a5974785093111c126d29abdf9301cf6f12fec56",
       "outputs": []
     },
     {
-      "sourceHash": "0dca5fe9d1a0cc5a5ec9f0b29644573d52f5ee66036244735d4d2b08ba6e6800",
+      "sourceHash": "3a55046a10909777d1c0fdebdcb9939124fd2ef7f88c4eba121a3aad0ca65bc0",
       "outputs": []
     },
     {
-      "sourceHash": "7128ca6ce074a7bf8ea82f051dcf9b46f0974c04e242fdf8db813a400ad2a239",
-      "outputs": []
-    },
-    {
-      "sourceHash": "e7c4efd9170af885cc19578d7612d6cc4e3ff4d2bf2a177f2a4fcca57179086c",
+      "sourceHash": "eba12fb8696d6e12ef6936a878a187a3a638d9a5e924bf583f84367c89104804",
       "outputs": [
         {
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "first / second content IDs: 810b956e3376228ff3c1f03f469feb3ab26653b488ba51271e82277672590b80 aed1378a7842598237e59c5d189b13d486068b6284d9c1ca3d4e865866ba6990\n",
-            "failed gate kept selection: True rollback restored first: True\n"
-          ]
-        }
-      ]
-    },
-    {
-      "sourceHash": "a2bfa61ac43de0033b9e497f9865dd9ef116e19a08560a86184f8753bc61a408",
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "first / second content IDs: 810b956e3376228ff3c1f03f469feb3ab26653b488ba51271e82277672590b80 aed1378a7842598237e59c5d189b13d486068b6284d9c1ca3d4e865866ba6990\n",
-            "failed gate kept selection: True rollback restored first: True\n"
+            "consumer x=1 before B / after B / after rollback: 3.0 3.4 3.0\n",
+            "A and B IDs: 60b1a27a0bf2091fc537d43ba2ddd2ae0911dc1090bc3631a3ac6559de1b2e62 25ba7e29e933613158e1472cea0a3e1316e8cb697114f8bf44b0f3bc33759aae\n",
+            "rejected activation unchanged selection and behavior: True\n",
+            "rollback selected A: True\n"
           ]
         }
       ]
@@ -60,7 +45,7 @@
       "outputs": []
     },
     {
-      "sourceHash": "25df6d662f9d3f0c4e984c6a201f79fa0cfd7a2633dc4b0773dfba6c2dd4ee6c",
+      "sourceHash": "53dc08a479da44f2b1718bf964cd5c4d3e3305811c536df9d501b1833a6e3476",
       "outputs": [
         {
           "output_type": "display_data",
@@ -87,15 +72,15 @@
       "outputs": []
     },
     {
-      "sourceHash": "440c8ccfe6047238d5642ff0cd87b2db994361af62b9933ec0ba5dfa76de1121",
+      "sourceHash": "22d5d8896e54aecd8b70f9aafa0c68cf3475cdb9799648df8d1bbbd8b53d1ac8",
       "outputs": []
     },
     {
-      "sourceHash": "ca36404a8f05be5218b471af7670741e53e8951b8c16bf221c2c3c3694ecad7e",
+      "sourceHash": "222a8ed5522df2658ca967e0a65d2de4028cc98229321bbdaa15953e44730420",
       "outputs": []
     },
     {
-      "sourceHash": "355ffa17065a538cb5bc444bbce46a8a0bd30e001fed58f53269bc02bbc28e37",
+      "sourceHash": "22d5d8896e54aecd8b70f9aafa0c68cf3475cdb9799648df8d1bbbd8b53d1ac8",
       "outputs": []
     },
     {
@@ -103,7 +88,7 @@
       "outputs": []
     },
     {
-      "sourceHash": "1458095a758da0ef36a9651a5126b6a3d9a4343b542f3b2b1da8e9b9614ab336",
+      "sourceHash": "22d5d8896e54aecd8b70f9aafa0c68cf3475cdb9799648df8d1bbbd8b53d1ac8",
       "outputs": []
     },
     {

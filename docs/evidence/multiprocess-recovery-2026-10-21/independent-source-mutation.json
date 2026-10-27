@@ -1,0 +1,34 @@
+{
+  "approved_worker_hash": "f9838429d447308e54588c82523de0370e0525d92c748367e2a6fdccb94bbb03",
+  "changed_worker_hash": "0ca3cd0f9a7f259d4baba3b374d868b31877a63a8b2df6c86fbf66b144208f25",
+  "expected_error": "approved executable source inventory mismatch",
+  "kill": {
+    "pid": 79531,
+    "rank": 1,
+    "returncode": -9,
+    "signal": "SIGKILL"
+  },
+  "no_candidate_import_or_jax_start": true,
+  "no_rank_info": true,
+  "no_transition_2": true,
+  "old_pointer_sha256": "bca4653aa4858696f69cc949b80013ae723e75452d01b7d96196ace5704236ab",
+  "old_step": 1,
+  "ready": {
+    "pid": 79530,
+    "step": 1
+  },
+  "returncode": 1,
+  "stopped": [
+    {
+      "pid": 79530,
+      "rank": 0,
+      "returncode": -6
+    },
+    {
+      "pid": 79531,
+      "rank": 1,
+      "returncode": -9
+    }
+  ],
+  "unchanged_pointer": true
+}

@@ -76,3 +76,13 @@ Before this plan can change from **planned** to **authored**, provide independen
 
 - [Sigmoid Loss for Language Image Pre-Training](https://arxiv.org/abs/2303.15343): objective, learned bias and experimental reference.
 - [Official big_vision SigLIP trainer](https://github.com/google-research/big_vision/blob/main/big_vision/trainers/proj/image_text/siglip.py): inspect and pin the source revision for loss reduction and state behavior when implementing.
+
+## Recipe decision rehearsal before target-scale training
+
+The sigmoid objective looks better after changing both batch size and the number of negative pairs.
+
+**Decide:** Declare the pair-label matrix, treatment of duplicate positives and exact loss denominator. Compare CLIP and sigmoid objectives under a stated exposure/compute budget; separately test negative sampling and bias initialization. A loss magnitude from one denominator is not directly comparable with the other objective.
+
+**Review packet:** A tiny independently calculated loss/gradient matrix, positive/negative counts and an ablation table with held-out bidirectional retrieval. Reject claims based only on lower training loss.
+
+This is a design exercise for a planned implementation. Record a hypothesis, a controlled pilot, a stopping criterion and the evidence needed to reject the recipe before requesting target-scale compute. Do not mark the capstone implemented or publish a model card with invented metrics.

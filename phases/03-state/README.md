@@ -12,7 +12,9 @@ Record the state before and after a transition and explain every changed leaf.
 
 ## Study guide: Have you saved everything needed to determine the next step?
 
-A program’s state includes random keys, counters and structured values as well as model parameters. Explicit ownership lets you reproduce a transition, run a batch safely, and later recover an interrupted experiment.
+A training step does more than change weights. It also consumes randomness, advances counters and may update running statistics. Writing those values as explicit inputs and outputs lets you ask exactly which transition occurred and which values are needed to repeat the next one.
+
+Follow a key and a carry through one step before studying a whole loop. The key tree explains ownership of random draws; the pytree explains how corresponding state leaves travel together; scan and conditional branches explain how those structures remain compatible across execution paths.
 
 ### Check your starting point
 
@@ -38,11 +40,11 @@ Review: [Random keys without surprises](01-random-keys-without-surprises/docs/en
 
 ### Try a changed condition
 
-Resume a simulation halfway through with the saved position but a newly created key. What must you compare to determine whether it is a true continuation?
+A random walk resumes with the correct position but a reset key. Its final mean is close to the uninterrupted result. Is that enough?
 
 <details><summary>Compare an approach</summary>
 
-Compare the next draw and next state, then the remaining trajectory, against an uninterrupted reference. Restore the original key and counter as well as position. A similar final average is not a continuation check.
+No. A distribution-level agreement can coexist with different next draws. Compare the next random value, carry, step and later trajectory. Save the key at the same boundary as the position; do not claim cross-version bitwise reproducibility from a same-environment pass.
 
 </details>
 

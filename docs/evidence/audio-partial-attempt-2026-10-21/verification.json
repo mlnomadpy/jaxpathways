@@ -1,0 +1,22 @@
+{
+  "scope": "One partial real local CPU attempt; not a complete audio pilot or a quality result. Runtime excluded from 0.15 shipping workflows.",
+  "durable_updates": 2,
+  "durable_stage": "masked_reconstruction",
+  "durable_distinct_fit_ids": 8,
+  "durable_valid_audio_seconds": 23.075000762939453,
+  "final_metrics_present": false,
+  "termination_mechanism": "Unconfirmed; subprocess timeout configured, no raw traceback retained, no active process found at independent inspection. Uncommitted in-flight work cannot be excluded.",
+  "remaining_training_authorization": false,
+  "current_execution_gate": false,
+  "private_artifacts": "Exact34as-run sources and partial checkpoints retained locally; no audio or weights copied into this packet.",
+  "raw_receipt_sha256": {
+    "independent-incident-audit.json": "5f6067004da395e7171d6112662c789a544a133d33e4dbfc3b5a0dcaaa62b699",
+    "worker-incident-manifest.json": "289bce8e302261aef8f94b12bcbbe85235326ee0cf77d854ddfe362eccdbc609",
+    "worker-safety-restore.json": "97c3b456c316b799f1300c3ee67a99096e971fda237e23afacc40ce1fd6ccd64",
+    "as-run-source-retention.json": "caf32636c88d672104499702577d54977f7a3db5c218922cbd8c373c6af41a56",
+    "failed-negative-harness.py.txt": "406e0dc67af843a17801717bbb16450d34f7c95098afb79ee4bd1dbc697e9b1c",
+    "safe-preflight-harness.py.txt": "205a6b89a43d60215a86ffa886bed1f250778c0bce1f78d53251a7764dd624bc",
+    "independent-safety-review.json": "8976189e02e97285d17840f845008080f4c1cbc37bf78b3a29a61064deaf62f6"
+  },
+  "independent_safety_verification": "Gate closed, stale true-lock rejection, exact34as-run source retention, partial state unchanged, and11 hostile argv cases with zero subprocess launches verified."
+}

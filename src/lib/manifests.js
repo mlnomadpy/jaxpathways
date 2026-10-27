@@ -42,6 +42,8 @@ function project(value) {
     value.stages.every(
       (stage) =>
         textFields(stage, ['id', 'title', 'command', 'evidence', 'expected', 'diagnosis']) &&
+        (stage.workspaceFile === undefined ||
+          (typeof stage.workspaceFile === 'string' && stage.workspaceFile.trim().length > 0)) &&
         (stage.codeGuide === undefined || typeof stage.codeGuide === 'string') &&
         (stage.starterSnippet === undefined || typeof stage.starterSnippet === 'string') &&
         (stage.solutionSnippet === undefined || typeof stage.solutionSnippet === 'string'),

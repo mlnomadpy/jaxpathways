@@ -11,7 +11,12 @@
         "A freshly initialized state every time"
       ],
       "correct": 1,
-      "explanation": "State carries momentum or adaptive statistics between steps. Reinitializing it discards that history."
+      "explanation": "State carries momentum or adaptive statistics between steps. Reinitializing it discards that history.",
+      "optionFeedback": [
+        "The scalar loss does not contain the optimizer moments or update count. Keep the returned optimizer state with the parameters.",
+        "State carries momentum or adaptive statistics between steps. Reinitializing it discards that history.",
+        "Reinitialization discards history and changes later updates. Compare two steps with retained state against two first-step updates."
+      ]
     }
   ]
 }

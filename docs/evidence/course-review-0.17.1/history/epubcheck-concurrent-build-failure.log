@@ -1,0 +1,15 @@
+Validating using EPUB version 3.4 rules.
+ERROR(PKG-021): public/downloads/jax-foundations.epub/OEBPS/figures/welcome-01.png(-1,-1): Corrupted image file encountered.
+ERROR(PKG-021): public/downloads/jax-foundations.epub/OEBPS/figures/welcome-01-mechanism.png(-1,-1): Corrupted image file encountered.
+ERROR(PKG-021): public/downloads/jax-foundations.epub/OEBPS/figures/welcome-02.png(-1,-1): Corrupted image file encountered.
+ERROR(PKG-021): public/downloads/jax-foundations.epub/OEBPS/figures/welcome-cpu.png(-1,-1): Corrupted image file encountered.
+ERROR(PKG-021): public/downloads/jax-foundations.epub/OEBPS/figures/welcome-03.png(-1,-1): Corrupted image file encountered.
+ERROR(PKG-021): public/downloads/jax-foundations.epub/OEBPS/figures/arrays-01.png(-1,-1): Corrupted image file encountered.
+ERROR(PKG-021): public/downloads/jax-foundations.epub/OEBPS/figures/arrays-02.png(-1,-1): Corrupted image file encountered.
+ERROR(PKG-021): public/downloads/jax-foundations.epub/OEBPS/figures/arrays-02-mechanism.png(-1,-1): Corrupted image file encountered.
+ERROR(PKG-021): public/downloads/jax-foundations.epub/OEBPS/figures/arrays-03.png(-1,-1): Corrupted image file encountered.
+
+Check finished with errors
+Messages: 0 fatals / 9 errors / 0 warnings / 0 infos
+
+EPUBCheck completed

@@ -53,7 +53,7 @@ function furtherPractice(c) {
   return (c.practice || [])
     .map(
       (p) =>
-        `<section class="lesson-practice"><h2>${inlineMath(p.title)}</h2><p class="edition">${escapeHtml(p.difficulty)}</p>${prose(p.prompt)}${renderExerciseCodeTeacher(p.solution, 'How to write this practice solution')}<details><summary>Show a hint</summary>${prose(p.hint)}</details><details><summary>Reveal reference solution and reasoning</summary>${codePanel(p.solution, p.title + ' · Python solution')}${prose(p.explanation)}</details></section>`,
+        `<section class="lesson-practice"><h2>${inlineMath(p.title)}</h2><p class="edition">${escapeHtml(p.difficulty)}</p>${prose(p.prompt)}${renderExerciseCodeTeacher(p.solution, 'How to write this practice solution', p.learnerStarter)}<details><summary>Show a hint</summary>${prose(p.hint)}</details><details><summary>Reveal reference solution and reasoning</summary>${codePanel(p.solution, p.title + ' · Python solution')}${prose(p.explanation)}</details></section>`,
     )
     .join('');
 }

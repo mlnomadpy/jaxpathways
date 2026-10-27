@@ -115,7 +115,7 @@ Get-ChildItem
 
 Run the lines for your operating system in order, staying in the workspace folder. The venv command creates .venv using the Python version you just selected. It often finishes without printing anything. That is normal; wait until the terminal is ready for another command. If you already have a .venv from another Python version in this folder, use a fresh extracted workspace for this walkthrough.
 
-On macOS/Linux, source loads the activation script into this terminal. You may see (.venv) at the start of the prompt. The important check is sys.executable: it should point inside this workspace’s .venv/bin. On Windows we use .venv\Scripts\python.exe explicitly, so no activation script or execution-policy change is needed.
+On macOS/Linux, source loads the activation script into this terminal. You may see (.venv) at the start of the prompt. The important check is sys.executable: it should point inside this workspace’s .venv/bin. On Windows we use `.venv\Scripts\python.exe` explicitly, so no activation script or execution-policy change is needed.
 
 The pip command is the package installer. `-r` means “read the package list from this file.” It downloads and installs packages into the selected environment. Let it finish. Download messages are normal; a traceback or an ERROR means the step did not succeed. The final import check below is more useful than guessing from the download log. The pins in requirements-beginner.txt describe the minimal tested JAX/NumPy CPU setup; accelerator installation is a later lesson.
 
@@ -146,9 +146,9 @@ py -3.14 -m venv .venv
 
 ## 5. Run your first saved program
 
-Open first_experiment.py in a text/code editor if you want to see its contents. The same Python program is shown below in “Run the example.” Python code belongs in that file; the commands below belong in the terminal. The downloaded file is already saved, so you can run it without copying any code.
+Open first_experiment.py in a text/code editor if you want to see its contents. Python code belongs in that file; the commands below belong in the terminal. The downloaded file is already saved, so you can run it without copying any code.
 
-Run the command for your operating system. The program prints the Python and package versions, the backend, the devices, and a sum. The starter explicitly selects CPU before importing JAX, so the expected backend here is cpu. The device description can vary; the final result should be Sum: $6.0$. The program constructs the numbers $0$, $1$, $2$, $3$; adding them gives $6$. This known result checks that we ran a numerical computation, not only installed a package.
+Run the command for your operating system. The program prints the Python and package versions, the backend, the devices, and a sum. The starter explicitly selects CPU before importing JAX, so the expected backend here is cpu. The recorded run reports one CpuDevice and prints Sum: $6.0$. That value comes from $0+1+2+3=6$; the device receipt and the arithmetic result answer different questions.
 
 If you see a traceback, read the final line and compare it with the troubleshooting section. Do not count a failed command as a completed experiment.
 
@@ -177,11 +177,11 @@ Sum: 6.0
 
 ## 6. Make one change and save your result
 
-In the editor, find `arange(4, ...)` in first_experiment.py and change $4$ to $6$. The array now contains $0$ through $5$. Predict their sum before running. Also change the final assert from `== 6.0` to `== 15.0`, because that assertion is the program’s expected-result check. Save the file with its .py extension; a filename such as first_experiment.py.txt will not match the run command.
+In the editor, find `arange(4, ...)` in first_experiment.py and change $4$ to $6$. The generated values become $0,1,2,3,4,5$, so group them as $0+1+2+3+4+5=15$ before running. Also change the final assert from `== 6.0` to `== 15.0`; it checks the prediction you just made. Save the file with its .py extension; a filename such as first_experiment.py.txt will not match the run command.
 
-Run it again using the Step 5 command. The final line should be Sum: $15.0$. If it still says $6.0$, check that you saved the file and that the terminal is in the same workspace folder you edited.
+Run it again using the Step 5 command. The recorded changed run reports Sum: $15.0$. If it still says $6.0$, check that you saved the file and that the terminal is in the same workspace folder you edited.
 
-After that successful run, the commands below run it once more and save its printed output to my-first-run.txt. Open that text file and check that the versions, CPU information, and sum are present. Add a note in your editor explaining the one change and your prediction. The > symbol saves output to a file and replaces its previous contents; choose another filename when you want to keep multiple runs.
+After that successful run, the commands below run it once more and save its printed output to my-first-run.txt. Open that text file and check that the versions, CPU information, and sum are present. Add a note in your editor explaining the change and prediction. The > symbol saves output to a file and replaces its previous contents; choose another filename when you want to keep multiple runs.
 
 **macOS / Linux — save output**
 
@@ -327,7 +327,7 @@ visual_data = {'kind': 'bar', 'x': list(range(len(x))), 'labels': [f'x[{i}]' for
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:19:52.582445+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:26:22.243010+00:00. JAX 0.9.2.
 
 ```text
 Python: 3.14.3
@@ -353,19 +353,32 @@ Edit the starter as shown in Step 6: change the array length from $4$ to $6$ and
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
+**Inputs:**
+- The saved experiment currently uses a JAX array and prints its total.
+- The changed input contains six values.
+- Save the observed result and explain why it changed.
 
-**Step-by-step implementation plan:**
-1. Exercise solution
+**Outputs:**
+- A modified runnable function and a first-run evidence note.
+
+**Invariants to check:**
+- The saved script is the source that was executed.
+- The note reports an observed result.
+- The command can be rerun from the experiment folder.
+
+**Hints:**
+- Make the requested edit in the starter file.
+- Save terminal output before writing the explanation.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-x = jax.numpy.arange(...)  # TODO: compute x
-print("Changed experiment sum:", float(x.sum()))
-assert float(x.sum())  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def changed_experiment():
+    # TODO: create the changed input and report its total
+    result = ...
+    return result
 ```
 
 <details><summary>Reference solution</summary>
@@ -389,9 +402,17 @@ Which evidence lets another learner reproduce your environment?
 
 <details><summary>Answer and explanation</summary>
 
-Python/package versions, device information, and the script
+**1. A screenshot of the final number only**
+
+A screenshot records the result, but leaves the inputs and computation hidden. Give another learner the script and environment record so they can try to reproduce it.
+
+**2. Python/package versions, device information, and the script (correct)**
 
 The script records what ran; versions and device information record where it ran. CPU success is separate from TPU compatibility.
+
+**3. The name of your editor**
+
+The editor does not determine the numerical backend or package APIs. Record Python, package versions, devices and the runnable script.
 
 </details>
 

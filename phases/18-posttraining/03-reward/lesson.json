@@ -14,7 +14,7 @@
       {
         "id": "guided-reasoning",
         "title": "A preference compares scores rather than calibrating utility",
-        "body": "If chosen and rejected scores are \\(3\\) and \\(1\\), their margin is \\(2\\). Adding \\(10\\) to both scores leaves the margin unchanged and therefore leaves a difference-based preference loss unchanged. The absolute offset is not identified by those comparisons.\n\nConflicting labels can make an intermediate preference probability more appropriate than an extreme one. Inspect disagreement and source quality rather than assuming the model should confidently fit every pair.\n\nThe margin plot shows separation on the fixture. To support downstream policy optimization, evaluate generalization and possible exploitation separately. A reward that ranks a few training pairs correctly can still be unreliable on policy-generated outputs.",
+        "body": "A preference label says which of two responses was favored under a shared prompt and rubric. The model turns the score difference into a preference probability: \\(p=\\sigma(r_+-r_-)\\). That probability describes the label likelihood; each response still receives a scalar reward score, not a calibrated probability of being good. Adding the same constant to both rewards leaves \\(p\\) unchanged.\n\nIn the recorded three-pair synthetic fit, mean pairwise NLL falls from 0.693 nats (a 50/50 tie) to 0.087, and all three training margins become positive. This shows the fitted ranking on those pairs, not human agreement. Before using the scores downstream, inspect held-out pairs and ask whether disagreements and unseen prompts are represented.",
         "check": {
           "prompt": "Why is a raw reward score of 100 not automatically better calibrated than 1?",
           "answer": "A relative training objective can permit score offsets and depends on the model's conventions. Compare under a shared evaluation contract; raw magnitudes alone are not universal utility units."
@@ -30,7 +30,7 @@
       },
       {
         "title": "Fit score differences with a stable likelihood",
-        "body": "The probability of preferring a chosen response is the sigmoid of its reward difference. The negative log likelihood is softplus of the negative margin. A tied pair starts at \\(\\log 2\\). A common offset to all rewards cancels, so comparisons alone do not identify an absolute reward origin.",
+        "body": "For margin \\(m=r_+-r_-\\), the chance assigned to the observed preference is \\(\\sigma(m)\\), while the training loss is \\(\\log(1+e^{-m})\\). At \\(m=0\\), the probability is one half and loss is \\(\\log2\\); at \\(m=\\log3\\), the probability is three quarters. Those are probabilities of the pairwise label under the model, not probabilities that a reward score is correct in general. The scalar score itself remains relative: the shared prompt comparison cancels any common offset.",
         "math": "L_{\\mathrm{RM}}=\\mathbb E\\left[\\operatorname{softplus}\\!\\left(-(r_w(x,y^+)-r_w(x,y^-))\\right)\\right]"
       },
       {
@@ -40,11 +40,11 @@
       },
       {
         "title": "Disagreement changes the optimum",
-        "body": "If the same two responses appear once with each preference direction, the average loss is minimized at a tied score, not at infinite confidence in either label. With unequal vote frequencies, the optimum reflects those frequencies under this likelihood model. Collapsing disputed examples into one apparently certain label discards information.\n\nGroup train and evaluation splits by prompt/source. Report agreement, likelihood and calibration under the labeling protocol, and inspect disagreements. A scalar metric can hide systematic preferences that conflict between raters or domains. The next policy optimizer will amplify the score signal, so keep a separate evaluator for qualities the reward model may have missed."
+        "body": "Conflicting labels provide evidence about uncertainty. If the same pair appears once in each direction, the average likelihood is best at margin zero, which assigns one-half to each direction; forcing a huge positive margin would fit one label and contradict the other. For uneven votes, the fitted probability can reflect their frequency. Preserve the vote fraction and source rather than reducing every pair to an unquestioned majority."
       },
       {
         "title": "Separate ranking from calibration",
-        "body": "Check ordering, held-out pair likelihood and agreement by prompt/source slice. A large positive margin means the model is confident under its likelihood, not that a response is universally good. Separable preferences can drive growing margins; regularization, validation and stopping rules matter even when every training comparison is correct."
+        "body": "On the held-out synthetic set, the pre-fit zero-score model assigns 0.5 to all four comparisons, with mean Brier error 0.1406 and 0/1 accuracy on unanimous cases. After fitting the three training pairs, held-out Brier error is 0.0223 and unanimous accuracy is 1/1. On the two disagreement cases, Brier error changes only from 0.0313 to 0.0294; their probabilities are retained rather than forced into a unanimous label. This is a tiny synthetic check, not human or language-response validation. Use held-out slices to decide whether this reward is ready for the next experiment."
       },
       {
         "title": "Preserve disagreement and data provenance",
@@ -52,27 +52,36 @@
       },
       {
         "title": "Keep the reward model fixed during policy evaluation",
-        "body": "The next lesson freezes the learned reward while optimizing a policy. If reward changes mid-comparison, observed improvement may reflect a moving evaluator. Retain a reference policy, independent task metrics and adversarial examples to detect reward exploitation."
+        "body": "The next lesson freezes this reward model while a policy changes. If scores moved during that comparison, a policy could appear to improve because the evaluator changed. Carry the reward-model identity and its held-out behavior with the run, keep an independent task metric, and inspect outputs the reward may score incorrectly. A rising reward alone is not evidence of better responses."
       },
       {
         "title": "Audit both what scores identify and what they do not",
-        "body": "Adding one common offset leaves every preference margin unchanged, so pair comparisons cannot identify an absolute zero of reward. Positive scaling preserves ranking but changes probabilities and confidence. The scale also changes the reward-versus-KL tradeoff in policy optimization. Save normalization and model identity when handing scores to the next phase.\n\nA perfectly fitted training ranking can coexist with overconfidence or poor held-out ranking. On separable data the model can keep increasing margins without learning a new ordering. Track weight norms, held-out likelihood and error slices; choose regularization and stopping on development data rather than demanding the smallest possible training loss."
+        "body": "Pairwise comparisons identify relative margins, not an absolute zero: adding a common offset changes no training probability. Scaling the weights preserves ordering but changes confidence and the reward scale, which changes how strongly a downstream KL penalty competes with reward. In this recorded fit, the margins are about 1.65, 4.29, and 2.64 for the three ordered pairs. Save model identity and normalization so the next policy run uses a known score scale."
+      },
+      {
+        "id": "heldout-reward-evaluation",
+        "title": "Freeze a baseline before fitting and inspect held-out disagreement cases",
+        "body": "The three comparisons in the fitted example define training only. Add a separate fixed set of held-out feature pairs, including unanimous and split votes, before fitting the reward weights. Compute baseline pairwise probabilities from zero weights first, then score the same cases after the update. Report held-out Brier error and preference accuracy for unanimous cases; for disagreement cases, report predicted probabilities and Brier error against the vote fraction rather than forcing a majority label.\n\nThis small finite fixture can expose a broken pairwise objective or a train/held-out mismatch. Its scores and votes are synthetic. They are not human reward calibration, language-response usefulness, or evidence that a downstream policy should optimize these scores.",
+        "check": {
+          "prompt": "How should a 50/50 disagreement pair enter held-out evaluation?",
+          "answer": "Keep it in a separate disagreement slice and compare the predicted preference probability with the 0.5 vote fraction, for example with Brier error. Do not relabel it as unanimous."
+        }
       }
     ],
-    "code": "# Step 1 — 1. Define chosen-minus-rejected likelihood: The loss sees feature differences.\nimport jax\nimport jax.numpy as jnp\nimport numpy as np\n\ndef preference_loss(w, chosen, rejected):\n    margin = (chosen - rejected) @ w\n    return jnp.mean(jax.nn.softplus(-margin))\n\n# Step 2 — 2. Construct and inspect the three comparisons\nfeatures = jnp.array([[1.0, 0.0], [0.0, 1.0], [-1.0, -1.0]])\nchosen = features[jnp.array([0, 0, 1])]\nrejected = features[jnp.array([1, 2, 2])]\nw = jnp.zeros(2)\nhistory = []\nstep = jax.jit(\n    jax.value_and_grad(lambda w: preference_loss(w, chosen, rejected))\n)\n\n# Step 3 — 3. Fit rewards and check their invariances: The host logaddexp oracle checks stable likelihood values.\nfor _ in range(100):\n    value, g = step(w)\n    history.append(float(value))\n    w = w - 0.1 * g\n\nrewards = features @ w\nassert rewards[0] > rewards[1] > rewards[2]\nnp.testing.assert_allclose(history[0], np.log(2), atol=1e-6)\nassert history[-1] < 0.1\n# Transfer the device result to the host for an independent NumPy comparison.\nmargins = np.asarray((chosen - rejected) @ w, dtype=np.float64)\nnp.testing.assert_allclose(\n    preference_loss(w, chosen, rejected),\n    np.mean(np.logaddexp(0, -margins)),\n    atol=1e-6,\n)\n# Only differences are identified: a common score offset leaves preference probabilities unchanged.\nnp.testing.assert_allclose(\n    jax.nn.sigmoid((chosen @ w + 9) - (rejected @ w + 9)),\n    jax.nn.sigmoid((chosen - rejected) @ w),\n    atol=1e-6,\n)\nprint(\n    'Synthetic preference NLL initial/final:',\n    history[0],\n    history[-1],\n    '; rewards:',\n    np.asarray(rewards),\n)",
+    "code": "# Step 1 \u2014 1. Define chosen-minus-rejected likelihood: The loss sees feature differences.\nimport jax\nimport jax.numpy as jnp\nimport numpy as np\n\ndef preference_loss(w, chosen, rejected):\n    margin = (chosen - rejected) @ w\n    return jnp.mean(jax.nn.softplus(-margin))\n\n# Step 2 \u2014 2. Construct and inspect the three comparisons\nfeatures = jnp.array([[1.0, 0.0], [0.0, 1.0], [-1.0, -1.0]])\nchosen = features[jnp.array([0, 0, 1])]\nrejected = features[jnp.array([1, 2, 2])]\nw = jnp.zeros(2)\nhistory = []\nstep = jax.jit(\n    jax.value_and_grad(lambda w: preference_loss(w, chosen, rejected))\n)\n\n# Step 3 \u2014 3. Fit rewards and check their invariances: The host logaddexp oracle checks stable likelihood values.\nfor _ in range(100):\n    value, g = step(w)\n    history.append(float(value))\n    w = w - 0.1 * g\n\nrewards = features @ w\nassert rewards[0] > rewards[1] > rewards[2]\nnp.testing.assert_allclose(history[0], np.log(2), atol=1e-6)\nassert history[-1] < 0.1\n# Transfer the device result to the host for an independent NumPy comparison.\nmargins = np.asarray((chosen - rejected) @ w, dtype=np.float64)\nnp.testing.assert_allclose(\n    preference_loss(w, chosen, rejected),\n    np.mean(np.logaddexp(0, -margins)),\n    atol=1e-6,\n)\n# Only differences are identified: a common score offset leaves preference probabilities unchanged.\nnp.testing.assert_allclose(\n    jax.nn.sigmoid((chosen @ w + 9) - (rejected @ w + 9)),\n    jax.nn.sigmoid((chosen - rejected) @ w),\n    atol=1e-6,\n)\nprint(\n    'Synthetic preference NLL initial/final:',\n    history[0],\n    history[-1],\n    '; rewards:',\n    np.asarray(rewards),\n)",
     "output": "The model learns all three declared preferences; common reward offsets preserve probabilities.",
     "experiments": [
       {
         "title": "Reverse the comparison",
         "prediction": "How should a positive margin change when chosen and rejected responses swap?",
-        "code": "# Experiment — Reverse the comparison: This checks label direction.\nforward = float(preference_loss(w, chosen, rejected))\nreverse = float(preference_loss(w, rejected, chosen))\nassert reverse > forward\nprint('Forward/reversed preference NLL:', forward, reverse)",
+        "code": "# Experiment \u2014 Reverse the comparison: This checks label direction.\nforward = float(preference_loss(w, chosen, rejected))\nreverse = float(preference_loss(w, rejected, chosen))\nassert reverse > forward\nprint('Forward/reversed preference NLL:', forward, reverse)",
         "output": "The reversed-label loss is larger.",
         "explanation": "This checks label direction. A decreasing incorrectly signed loss can train a consistent but reversed preference model."
       },
       {
         "title": "Fit conflicting labels conceptually",
         "prediction": "If a pair is labeled both ways equally often, should the best margin be positive, negative or zero?",
-        "code": "# Experiment — Fit conflicting labels conceptually\nconflict = lambda margin: 0.5 * (\n    jax.nn.softplus(-margin) + jax.nn.softplus(margin)\n)\nnp.testing.assert_allclose(conflict(0.0), np.log(2), atol=1e-6)\nnp.testing.assert_allclose(jax.grad(conflict)(0.0), 0.0, atol=1e-7)\nassert float(conflict(2.0)) > float(conflict(0.0))\nnp.testing.assert_allclose(conflict(2.0), conflict(-2.0))\nprint('Balanced conflicting labels prefer a zero margin.')",
+        "code": "# Experiment \u2014 Fit conflicting labels conceptually\nconflict = lambda margin: 0.5 * (\n    jax.nn.softplus(-margin) + jax.nn.softplus(margin)\n)\nnp.testing.assert_allclose(conflict(0.0), np.log(2), atol=1e-6)\nnp.testing.assert_allclose(jax.grad(conflict)(0.0), 0.0, atol=1e-7)\nassert float(conflict(2.0)) > float(conflict(0.0))\nnp.testing.assert_allclose(conflict(2.0), conflict(-2.0))\nprint('Balanced conflicting labels prefer a zero margin.')",
         "output": "Zero margin minimizes the balanced contradictory-pair objective.",
         "explanation": "Disagreement is not fixed by flipping labels until training accuracy is high. The likelihood must represent the information actually present."
       }
@@ -85,8 +94,23 @@
         "difficulty": "Transfer",
         "prompt": "Multiply the trained reward weights by two and compare ordering and preference probabilities.",
         "hint": "Positive scaling preserves ordering but sharpens probabilities.",
-        "solution": "# Show that feature scale can change scores without changing ranking (Transfer): A policy’s reward-versus-KL tradeoff depends on reward scale.\nscaled_rewards = features @ (2 * w)\nnp.testing.assert_array_equal(np.argsort(rewards), np.argsort(scaled_rewards))\nassert float(preference_loss(2 * w, chosen, rejected)) < float(\n    preference_loss(w, chosen, rejected)\n)\nprint('Ranking unchanged; confidence and downstream reward scale change.')",
-        "explanation": "A policy’s reward-versus-KL tradeoff depends on reward scale. Rank agreement alone is distinct from an equivalent RL objective."
+        "solution": "# Show that feature scale can change scores without changing ranking (Transfer): A policy\u2019s reward-versus-KL tradeoff depends on reward scale.\nscaled_rewards = features @ (2 * w)\nnp.testing.assert_array_equal(np.argsort(rewards), np.argsort(scaled_rewards))\nassert float(preference_loss(2 * w, chosen, rejected)) < float(\n    preference_loss(w, chosen, rejected)\n)\nprint('Ranking unchanged; confidence and downstream reward scale change.')",
+        "explanation": "A policy\u2019s reward-versus-KL tradeoff depends on reward scale. Rank agreement alone is distinct from an equivalent RL objective.",
+        "learnerStarter": {
+          "inputs": [
+            "Feature pairs, the trained reward weights, and the same weights multiplied by two."
+          ],
+          "outputs": [
+            "Score-order comparisons and preference probabilities before and after scaling."
+          ],
+          "invariants": [
+            "Positive scaling preserves ordering while it changes probability sharpness."
+          ],
+          "hints": [
+            "Compare score order and sigmoid probability as separate quantities."
+          ],
+          "code": "import jax.numpy as jnp\n\ndef compare_reward_scale(features, chosen, rejected, weights):\n    # TODO: compare pair ordering and probabilities at both scales.\n    raise NotImplementedError"
+        }
       },
       {
         "title": "Derive the linear reward gradient",
@@ -94,7 +118,55 @@
         "prompt": "At a fresh weight vector, calculate the mean feature difference weighted by probability-minus-one and compare with autodiff. Repeat after reversing labels.",
         "hint": "Use NumPy sigmoid values for the independent calculation; reversing both feature order and probabilities is necessary.",
         "solution": "# Derive the linear reward gradient (Challenge)\nprobe_w = jnp.array([0.2, -0.4])\nfor positive, negative in [(chosen, rejected), (rejected, chosen)]:\n    # Transfer the device result to the host for an independent NumPy comparison.\n    difference = np.asarray(positive - negative, dtype=np.float64)\n    margin_host = difference @ np.asarray(probe_w)\n    # Reduce along axis=0 to compute `analytic`.\n    analytic = np.mean(\n        (1 / (1 + np.exp(-margin_host)) - 1)[:, None] * difference, axis=0\n    )\n    np.testing.assert_allclose(\n        jax.grad(preference_loss)(probe_w, positive, negative),\n        analytic,\n        atol=1e-6,\n    )\nprint('Independent reward gradients agree in both label directions.')",
-        "explanation": "Checking both directions catches a sign error that a single decreasing training curve might conceal."
+        "explanation": "Checking both directions catches a sign error that a single decreasing training curve might conceal.",
+        "learnerStarter": {
+          "inputs": [
+            "Chosen and rejected feature matrices plus a fresh reward weight vector."
+          ],
+          "outputs": [
+            "Mean feature-difference gradient from the likelihood formula and autodiff, repeated with reversed labels."
+          ],
+          "invariants": [
+            "The gradient is averaged across comparisons and flips consistently when every label is reversed."
+          ],
+          "hints": [
+            "Differentiate the scalar loss with respect to the weight vector.",
+            "Use the same parameter values for both labelings."
+          ],
+          "code": "import jax\nimport jax.numpy as jnp\n\ndef compare_linear_reward_gradient(weights, chosen, rejected):\n    # TODO: derive and check the preference-loss gradient before and after label reversal.\n    raise NotImplementedError"
+        }
+      },
+      {
+        "title": "Evaluate held-out reward pairs and keep disagreement visible",
+        "difficulty": "Transfer",
+        "prompt": "Define held-out feature pairs and their vote fractions before fitting. Calculate zero-weight baseline probabilities first. Fit the existing three training comparisons, then report held-out Brier score, unanimous-case accuracy, and the disagreement slice before and after. Keep the same pairs and labels for both measurements.",
+        "hint": "The probability that the chosen item wins is sigmoid((chosen - rejected) dot w). For a fractional vote v, Brier error is (p - v)^2. A disagreement pair does not have a single hard correctness label.",
+        "solution": "# Fixed synthetic held-out reward pairs. Baseline is calculated at w=0 before fitting.\nheldout_chosen = jnp.array([[1.0, 0.0], [0.0, 1.0], [0.2, 0.2], [-1.0, -1.0]])\nheldout_rejected = jnp.array([[0.0, 1.0], [-1.0, -1.0], [-0.1, 0.0], [0.0, 1.0]])\nheldout_votes = np.array([1.0, 1.0, 0.5, 0.25], dtype=np.float64)\nheldout_slices = np.array([\"unanimous\", \"unanimous\", \"disagreement\", \"disagreement\"])\n\n# Define the baseline before any reward-model optimization.\nw_baseline = jnp.zeros_like(w)\ndef heldout_report(weights):\n    margins = np.asarray((heldout_chosen - heldout_rejected) @ weights, dtype=np.float64)\n    probabilities = 1.0 / (1.0 + np.exp(-margins))\n    brier = (probabilities - heldout_votes) ** 2\n    unanimous = heldout_slices == \"unanimous\"\n    disagreement = ~unanimous\n    return {\n        \"probabilities\": probabilities,\n        \"brier_mean\": float(np.mean(brier)),\n        \"unanimous_accuracy\": float(np.mean((probabilities[unanimous] > 0.5) == (heldout_votes[unanimous] > 0.5))),\n        \"disagreement_probabilities\": probabilities[disagreement],\n        \"disagreement_brier\": float(np.mean(brier[disagreement])),\n    }\n\nbaseline = pretraining_heldout_baseline\nafter = heldout_report(w)\nassert len(baseline[\"disagreement_probabilities\"]) == 2\nassert np.all(np.isfinite(after[\"probabilities\"]))\nprint(\"heldout reward baseline:\", baseline)\nprint(\"heldout reward after training-pair fit:\", after)\nprint(\"Synthetic, four-pair evaluation only; no human or language-quality claim.\")",
+        "explanation": "The baseline is explicitly tied to zero reward weights before fitting. The same held-out examples are scored after training. Unanimous accuracy and disagreement Brier are reported separately; the fractional vote remains a target probability, not a hard label. This is a finite synthetic mechanism check.",
+        "learnerStarter": {
+          "inputs": [
+            "The existing three training feature comparisons and fitted reward weights",
+            "Four fixed held-out chosen/rejected feature pairs and vote fractions",
+            "A declared slice label for unanimous and disagreement examples"
+          ],
+          "outputs": [
+            "Pre-fit baseline probabilities and Brier score",
+            "Post-fit held-out Brier score and unanimous-case accuracy",
+            "Separate disagreement probabilities and Brier score"
+          ],
+          "invariants": [
+            "Hold out the examples before fitting",
+            "Use identical held-out pairs and vote fractions for baseline and post-fit metrics",
+            "Score disagreement against its fractional vote; do not force a hard label",
+            "Describe every score as a synthetic finite-fixture result"
+          ],
+          "hints": [
+            "Use the chosen-minus-rejected feature vector in the sigmoid margin.",
+            "Compute baseline with `w_baseline = zeros_like(w)` before the optimizer update.",
+            "Report unanimity and disagreement slices separately."
+          ],
+          "code": "# Complete the baseline-first held-out report for fixed pair features.\nraise NotImplementedError"
+        }
       }
     ],
     "question": "What do pairwise preferences identify directly?",
@@ -116,37 +188,67 @@
       "kind": "cpu"
     },
     "visual": {
-      "title": "Learn a reward model from pairwise preferences — recorded experiment",
+      "title": "Learn a reward model from pairwise preferences \u2014 recorded experiment",
       "kind": "executed",
       "prediction": "Which final comparison margin should be the largest given the ordering zero above one above two?",
-      "reading": "The vertical axis is pairwise negative log likelihood in nats. It starts near \\(0.693=\\log2\\), then falls to about \\(0.087\\). Each point is before an update on the same three synthetic comparisons; it is not a human agreement rate.\n\nThe second panel reports final chosen-minus-rejected score margins for the three training comparisons. All are positive, so each ordering agrees with its synthetic label. The zero-versus-two comparison spans the other two and has the largest margin. A common reward offset would leave every bar unchanged; multiplying weights by two would double them without changing ordering. Neither operation is visible in a ranking-only accuracy number.",
-      "connection": "The initial zero weights tie all response scores. Training increases the chosen-minus-rejected margins. The offset and scaling exercises explain why reward values must be interpreted relative to their model and downstream objective.",
-      "alt": "Learn a reward model from pairwise preferences — recorded experiment. A measured training curve is accompanied by an audit of preference margins.",
+      "reading": "The first panel uses completed parameter updates on x and pairwise NLL in nats on y; on the same three synthetic training pairs it falls from 0.693 (a tied 50/50 prediction) to 0.087. The second panel gives final chosen-minus-rejected reward margins: about 1.65, 4.29, and 2.64 for 0>1, 0>2, and 1>2. All are positive, and the widest comparison has the largest margin.",
+      "connection": "This confirms the model learned the fixture's three relative orderings, not an absolute or universally calibrated notion of quality. The held-out report is a separate check: Brier error falls from 0.1406 to 0.0223 and unanimous accuracy rises from 0/1 to 1/1, while disagreement Brier changes only from 0.0313 to 0.0294. Because the held-out set has only four synthetic comparisons, use a larger prompt-grouped evaluation before trusting the score in policy optimization.",
+      "alt": "Learn a reward model from pairwise preferences \u2014 recorded experiment. A measured training curve is accompanied by an audit of preference margins.",
       "code": "visual_data={'kind':'line','xlabel':'completed parameter updates before measurement','ylabel':'pairwise preference NLL (nats)','series':[{'label':'recorded CPU training loss','x':list(range(len(history))),'y':history}]}\nfor panel in visual_data.get('panels',[visual_data]):\n    panel['x']=panel['series'][0]['x']\n\n# Transfer the device result to the host for an independent NumPy comparison.\nextra_panel={'kind':'bar','x':[0,1,2],'labels':['0 preferred to 1','0 preferred to 2','1 preferred to 2'],'series':[{'label':'final score difference','y':np.asarray((chosen-rejected)@w).tolist()}],'xlabel':'synthetic comparison','ylabel':'chosen minus rejected reward','title':'Which comparisons the reward model fitted'}\nvisual_data={\"panels\":[*visual_data.get(\"panels\",[visual_data]),extra_panel]}"
     },
     "buildSteps": [
       {
         "title": "1. Define chosen-minus-rejected likelihood",
         "instruction": "Create main.py in your activated course environment. Paste this block, then run python main.py; function definitions alone print nothing.",
-        "code": "# Step 1 — 1. Define chosen-minus-rejected likelihood: The loss sees feature differences.\nimport jax\nimport jax.numpy as jnp\nimport numpy as np\n\ndef preference_loss(w, chosen, rejected):\n    margin = (chosen - rejected) @ w\n    return jnp.mean(jax.nn.softplus(-margin))",
+        "code": "# Step 1 \u2014 1. Define chosen-minus-rejected likelihood: The loss sees feature differences.\nimport jax\nimport jax.numpy as jnp\nimport numpy as np\n\ndef preference_loss(w, chosen, rejected):\n    margin = (chosen - rejected) @ w\n    return jnp.mean(jax.nn.softplus(-margin))",
         "explanation": "The loss sees feature differences. Predict why adding a common score offset later cannot change it."
       },
       {
         "title": "2. Construct and inspect the three comparisons",
         "instruction": "Append this block to main.py and run python main.py again. Keep the earlier blocks above it.",
-        "code": "# Step 2 — 2. Construct and inspect the three comparisons\nfeatures = jnp.array([[1.0, 0.0], [0.0, 1.0], [-1.0, -1.0]])\nchosen = features[jnp.array([0, 0, 1])]\nrejected = features[jnp.array([1, 2, 2])]\nw = jnp.zeros(2)\nhistory = []\nstep = jax.jit(\n    jax.value_and_grad(lambda w: preference_loss(w, chosen, rejected))\n)",
+        "code": "# Step 2 \u2014 2. Construct and inspect the three comparisons\nfeatures = jnp.array([[1.0, 0.0], [0.0, 1.0], [-1.0, -1.0]])\nchosen = features[jnp.array([0, 0, 1])]\nrejected = features[jnp.array([1, 2, 2])]\nw = jnp.zeros(2)\nhistory = []\nstep = jax.jit(\n    jax.value_and_grad(lambda w: preference_loss(w, chosen, rejected))\n)",
         "explanation": "Write the desired order before fitting: response zero above one, and one above two. These labels are synthetic."
+      },
+      {
+        "id": "heldout-baseline",
+        "title": "Freeze held-out reward pairs before fitting",
+        "instruction": "Insert this block after constructing the three training comparisons and before the fit loop. It records the fixed synthetic held-out baseline before reward weights are updated.",
+        "code": "# Held-out examples are fixed before the optimizer loop; they are not used for fitting.\nheldout_chosen = jnp.array([[1.0, 0.0], [0.0, 1.0], [0.2, 0.2], [-1.0, -1.0]])\nheldout_rejected = jnp.array([[0.0, 1.0], [-1.0, -1.0], [-0.1, 0.0], [0.0, 1.0]])\nheldout_votes = np.array([1.0, 1.0, 0.5, 0.25], dtype=np.float64)\nheldout_slices = np.array([\"unanimous\", \"unanimous\", \"disagreement\", \"disagreement\"])\nw_baseline = jnp.zeros_like(w)\ndef heldout_report(weights):\n    margins = np.asarray((heldout_chosen - heldout_rejected) @ weights, dtype=np.float64)\n    probabilities = 1.0 / (1.0 + np.exp(-margins))\n    brier = (probabilities - heldout_votes) ** 2\n    unanimous = heldout_slices == \"unanimous\"\n    disagreement = ~unanimous\n    return {\"probabilities\": probabilities, \"brier_mean\": float(np.mean(brier)),\n            \"unanimous_accuracy\": float(np.mean((probabilities[unanimous] > 0.5) == (heldout_votes[unanimous] > 0.5))),\n            \"disagreement_probabilities\": probabilities[disagreement],\n            \"disagreement_brier\": float(np.mean(brier[disagreement]))}\npretraining_heldout_baseline = heldout_report(w)\nassert np.allclose(pretraining_heldout_baseline[\"probabilities\"], 0.5)\nprint(\"Frozen held-out reward baseline before fit:\", pretraining_heldout_baseline)",
+        "explanation": "This code runs after the training comparisons are defined and before the optimizer loop. The zero-weight probabilities and fractional-vote Brier score are the baseline for this fixed held-out set."
       },
       {
         "title": "3. Fit rewards and check their invariances",
         "instruction": "Append this block to main.py and run python main.py again. Keep the earlier blocks above it.",
-        "code": "# Step 3 — 3. Fit rewards and check their invariances: The host logaddexp oracle checks stable likelihood values.\nfor _ in range(100):\n    value, g = step(w)\n    history.append(float(value))\n    w = w - 0.1 * g\n\nrewards = features @ w\nassert rewards[0] > rewards[1] > rewards[2]\nnp.testing.assert_allclose(history[0], np.log(2), atol=1e-6)\nassert history[-1] < 0.1\n# Transfer the device result to the host for an independent NumPy comparison.\nmargins = np.asarray((chosen - rejected) @ w, dtype=np.float64)\nnp.testing.assert_allclose(\n    preference_loss(w, chosen, rejected),\n    np.mean(np.logaddexp(0, -margins)),\n    atol=1e-6,\n)\n# Only differences are identified: a common score offset leaves preference probabilities unchanged.\nnp.testing.assert_allclose(\n    jax.nn.sigmoid((chosen @ w + 9) - (rejected @ w + 9)),\n    jax.nn.sigmoid((chosen - rejected) @ w),\n    atol=1e-6,\n)\nprint(\n    'Synthetic preference NLL initial/final:',\n    history[0],\n    history[-1],\n    '; rewards:',\n    np.asarray(rewards),\n)",
+        "code": "# Step 3 \u2014 3. Fit rewards and check their invariances: The host logaddexp oracle checks stable likelihood values.\nfor _ in range(100):\n    value, g = step(w)\n    history.append(float(value))\n    w = w - 0.1 * g\n\nrewards = features @ w\nassert rewards[0] > rewards[1] > rewards[2]\nnp.testing.assert_allclose(history[0], np.log(2), atol=1e-6)\nassert history[-1] < 0.1\n# Transfer the device result to the host for an independent NumPy comparison.\nmargins = np.asarray((chosen - rejected) @ w, dtype=np.float64)\nnp.testing.assert_allclose(\n    preference_loss(w, chosen, rejected),\n    np.mean(np.logaddexp(0, -margins)),\n    atol=1e-6,\n)\n# Only differences are identified: a common score offset leaves preference probabilities unchanged.\nnp.testing.assert_allclose(\n    jax.nn.sigmoid((chosen @ w + 9) - (rejected @ w + 9)),\n    jax.nn.sigmoid((chosen - rejected) @ w),\n    atol=1e-6,\n)\nprint(\n    'Synthetic preference NLL initial/final:',\n    history[0],\n    history[-1],\n    '; rewards:',\n    np.asarray(rewards),\n)",
         "explanation": "The host logaddexp oracle checks stable likelihood values. The score-offset test establishes non-identifiability, not calibration."
       }
     ],
     "takeaways": [
       "Pairwise preference loss depends only on score margins \\(r_\\theta(x,y^+)-r_\\theta(x,y^-)\\), starting at \\(\\log 2\\) for tied scores and weighting feature differences by \\(\\sigma(m)-1\\).",
       "Common additive reward offsets cancel in pairwise comparisons while positive weight rescaling sharpens confidence and alters the downstream reward-versus-KL balance."
-    ]
+    ],
+    "optionFeedback": [
+      "A shared additive offset cancels from every pairwise probability.",
+      "Pairwise losses are unchanged by a shared score offset for each compared pair. They do not identify an absolute utility zero.",
+      "Changing reward scale changes its balance with the KL penalty. Compare the terms in the actual policy objective."
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "Chosen and rejected feature pairs plus a zero-initialized reward vector.",
+        "A trained reward vector for the same comparisons."
+      ],
+      "outputs": [
+        "Initial tied-score preference loss and a check of the trained chosen-over-rejected ordering."
+      ],
+      "invariants": [
+        "At equal scores, each binary preference contributes the same finite loss.",
+        "The ordering check compares chosen and rejected scores for each labeled pair."
+      ],
+      "hints": [
+        "Compute the score difference for each pair before applying the softplus loss.",
+        "Keep the initial calculation independent from the trained ordering check."
+      ],
+      "code": "import jax.numpy as jnp\n\ndef audit_initial_and_trained_preferences(chosen, rejected, trained_weights):\n    # TODO: calculate the tied-score loss and audit the trained pair ordering.\n    raise NotImplementedError"
+    }
   }
 }

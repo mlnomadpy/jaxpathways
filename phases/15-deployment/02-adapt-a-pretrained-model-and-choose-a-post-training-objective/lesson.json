@@ -48,7 +48,7 @@
       },
       {
         "title": "Turn task tradeoffs into a release decision",
-        "body": "A lower target loss can be useful while still causing an unacceptable regression on an older task. Decide how much source-task degradation is allowed before inspecting the candidate results. Let \\(L_s\\) denote source evaluation loss and let \\(\\Delta_s=L_s(\\mathrm{candidate})-L_s(\\mathrm{base})\\). Positive \\(\\Delta_s\\) means worse retention. A retention budget is a product decision expressed in the same loss units, not a universal constant.\n\nIn this synthetic exercise the source evaluation reuses the source inputs, so it is only a retention proxy. A real release needs a separate held-out source set as well as a held-out target set. Record every candidate, including candidates rejected by the gate. If none satisfies the predeclared budget, keep the base or change the training recipe; do not quietly relax the budget after seeing the answer.",
+        "body": "A lower target loss can be useful while still causing an unacceptable regression on an older task. Decide how much source-task degradation is allowed before inspecting the candidate results. Let \\(L_s\\) denote source evaluation loss and let \\(\\Delta_s=L_s(\\mathrm{candidate})-L_s(\\mathrm{base})\\). Positive \\(\\Delta_s\\) means worse retention. A retention budget is a product decision expressed in the same loss units, not a universal constant.\n\nIn this synthetic exercise the source evaluation reuses the source inputs, so it is only a retention proxy. A real release needs a separate held-out source set as well as a held-out target set. Record every candidate, including candidates rejected by the gate. If none satisfies the predeclared budget, keep the base or change the training recipe; do not quietly relax the budget after seeing the answer.\n\nIn the recorded run, baseline held target cross-entropy is 0.978 nats and source loss is 0.545. Supervised adaptation reaches 0.555 target loss with source loss 0.790; teacher distillation reaches 0.524 target loss with source loss 1.005. The declared retention gate accepts the supervised increase of 0.245 but rejects the teacher increase of 0.459, so the selected candidate is supervised despite its slightly higher target loss. These are results for this seeded synthetic fixture, not a general ranking.",
         "math": "\\mathrm{accept}(m)=\\left[L_t(m)<L_t(m_0)\\right]\\land\\left[L_s(m)-L_s(m_0)\\leq\\delta\\right]",
         "check": {
           "prompt": "Can the candidate with the lowest target loss fail this gate?",
@@ -91,7 +91,23 @@
         "prompt": "Measure source cross-entropy before and after both adaptation objectives. Explain any forgetting using the different source and target probability rules.",
         "hint": "Report the actual values; target improvement is not a source-retention guarantee.",
         "solution": "# Keep source-task evidence (Transfer / diagnosis)\nretention=[float(objective(w,source_X,source_targets)) for w in (restored,sft,distilled)]\nassert retention[1]>retention[0] and retention[2]>retention[0]\nprint(\"source retention losses:\",retention)",
-        "explanation": "The two tasks prefer different parameters; the measurement exposes that tradeoff."
+        "explanation": "The two tasks prefer different parameters; the measurement exposes that tradeoff.",
+        "learnerStarter": {
+          "inputs": [
+            "Measure source cross-entropy before and after both adaptation objectives. Explain any forgetting using the different source and target probability rules."
+          ],
+          "outputs": [
+            "Source and target metrics for both adaptation branches."
+          ],
+          "invariants": [
+            "Source cross-entropy uses the same source examples before and after adaptation."
+          ],
+          "hints": [
+            "Report the actual values; target improvement is not a source-retention guarantee.",
+            "Measure the base before adapting either candidate."
+          ],
+          "code": "import hashlib\nimport json\nimport tempfile\nfrom pathlib import Path\nimport numpy as np\nimport jax\nimport jax.numpy as jnp\n\ndef practice_keep_source_task_evidence(base_params, candidate_params, source_features, source_labels):\n    \"\"\"Complete the keep source-task evidence check.\"\"\"\n    # TODO: ('Compute source cross-entropy for the base and both adapted candidates using the same source rows.', 'Source metrics for both adaptation objectives alongside the shared target criterion.', 'Every candidate starts from the same base and uses the same source evaluation set.')\n    raise NotImplementedError\n"
+        }
       },
       {
         "title": "Check the loss without autodiff",
@@ -99,7 +115,23 @@
         "prompt": "Compare the soft-target loss with a host float64 logaddexp expression on new weights.",
         "hint": "Use the same logits, reduction and targets; this check does not call the JAX loss as its oracle.",
         "solution": "# Check the loss without autodiff (Transfer / diagnosis)\nprobe=np.array([-.4,.2,.3])\nz=host_X@probe\nexpected=np.mean(np.logaddexp(0,z)-np.asarray(soft_targets)*z)\nnp.testing.assert_allclose(objective(jnp.asarray(probe),adapt_X,soft_targets),expected,rtol=1e-6)",
-        "explanation": "Independent algebra checks normalization and reduction as well as stability."
+        "explanation": "Independent algebra checks normalization and reduction as well as stability.",
+        "learnerStarter": {
+          "inputs": [
+            "Compare the soft-target loss with a host float64 logaddexp expression on new weights."
+          ],
+          "outputs": [
+            "JAX and host-float64 soft-target loss values on changed weights."
+          ],
+          "invariants": [
+            "Both calculations use the same soft labels and logits."
+          ],
+          "hints": [
+            "Use the same logits, reduction and targets; this check does not call the JAX loss as its oracle.",
+            "Use logaddexp in the host reference for numerical stability."
+          ],
+          "code": "import hashlib\nimport json\nimport tempfile\nfrom pathlib import Path\nimport numpy as np\nimport jax\nimport jax.numpy as jnp\n\ndef practice_check_the_loss_without_autodiff(weights, features, soft_targets):\n    \"\"\"Complete the check the loss without autodiff check.\"\"\"\n    # TODO: ('Evaluate the soft-target log loss with JAX and host float64 logaddexp on the changed weights.', 'Two scalar losses with a finite-precision parity check.', 'Both expressions consume identical logits and soft targets.')\n    raise NotImplementedError\n"
+        }
       },
       {
         "title": "Choose under a declared retention constraint",
@@ -107,7 +139,23 @@
         "prompt": "Before running, choose a source-loss increase budget of \\(0.3\\) nats for this fixture. Evaluate both adapted candidates against the same target and source criteria; retain the base if neither qualifies.",
         "hint": "Compare each source loss with the base source loss. Do not compare the two training objectives with each other.",
         "solution": "# Choose under a declared retention constraint (Transfer / diagnosis): The gate separates optimization from acceptance.\nretention_budget = .3\neligible = []\nfor name in ('supervised', 'teacher'):\n    delta = metrics[name]['source_cross_entropy'] - metrics['pretrained']['source_cross_entropy']\n    improved = metrics[name]['held_cross_entropy'] < metrics['pretrained']['held_cross_entropy']\n    accepted_candidate = improved and delta <= retention_budget\n    print(name, 'source loss increase', delta, 'passes declared gate', accepted_candidate)\n    if accepted_candidate: eligible.append(name)\nselected = min(eligible, key=lambda n: metrics[n]['held_cross_entropy']) if eligible else 'pretrained'\nassert selected == 'pretrained' or selected in eligible\nassert all(metrics[n]['source_cross_entropy']-metrics['pretrained']['source_cross_entropy'] <= retention_budget for n in eligible)\nprint('Candidate selected under the declared fixture budget:', selected)",
-        "explanation": "The gate separates optimization from acceptance. Its conclusion applies to these seeded data and this declared budget; selecting a candidate is not evidence of generalization to a natural dataset."
+        "explanation": "The gate separates optimization from acceptance. Its conclusion applies to these seeded data and this declared budget; selecting a candidate is not evidence of generalization to a natural dataset.",
+        "learnerStarter": {
+          "inputs": [
+            "Before running, choose a source-loss increase budget of \\(0.3\\) nats for this fixture. Evaluate both adapted candidates against the same target and source criteria; retain the base if neither qualifies."
+          ],
+          "outputs": [
+            "A candidate decision record or explicit keep-base decision."
+          ],
+          "invariants": [
+            "The source-loss budget is fixed before ranking candidates by the common target criterion."
+          ],
+          "hints": [
+            "Compare each source loss with the base source loss. Do not compare the two training objectives with each other.",
+            "Compute source increase relative to the unadapted base."
+          ],
+          "code": "import numpy as np\n\ndef practice_choose_under_a_declared_retention_constraint(base_metrics, candidate_metrics, retention_budget):\n    \"\"\"Complete the choose under a declared retention constraint check.\"\"\"\n    # TODO: ('Filter candidates by the source-loss increase budget, rank eligible candidates by the common target metric, and retain base if none qualify.', 'Decision table with source increase, target criterion, and selected candidate/base.', 'The 0.3-nat retention budget is fixed before comparing candidates.')\n    raise NotImplementedError\n"
+        }
       }
     ],
     "takeaways": [
@@ -129,8 +177,8 @@
       "title": "Two adaptation objectives evaluated on the same held-out target",
       "kind": "executed",
       "prediction": "Will improving the new task necessarily preserve performance on the source task?",
-      "reading": "The horizontal categories are the reloaded pretrained model, supervised adaptation and teacher distillation. The vertical axis is mean cross-entropy in nats. One series evaluates the same held-out target probabilities for every model; the other evaluates source-task probabilities. Lower is better within each series. The two adapted models improve target-task loss while their source-task loss increases. These bars are evaluations of the resulting weights, not the branches’ incomparable training objectives. In this seeded run the held-out target bars are approximately \\(0.978,0.555,0.524\\), while the source bars are \\(0.545,0.790,1.005\\), in the same model order. Teacher adaptation gives the lowest target loss here but also the largest source-retention loss.",
-      "connection": "The teacher exactly matches the declared synthetic target generator, making this an especially favorable distillation case. The held-out comparison demonstrates an objective tradeoff on this fixture. It neither establishes that a real teacher is correct nor that one adaptation recipe is generally best. The failure experiment makes the teacher wrong and rechecks the target criterion.",
+      "reading": "The horizontal axis lists pretrained, supervised, and teacher candidates; the vertical axis is mean cross-entropy in nats, with lower better. On held-out target data the bars are about 0.978, 0.555, and 0.524; on source data they are 0.545, 0.790, and 1.005. Teacher gives the lowest target loss but largest source regression. Apply the predeclared source-retention gate before choosing: this run accepts supervised and rejects teacher.",
+      "connection": "The teacher exactly matches this synthetic target generator, which makes distillation unusually favorable. Even so, its source loss rises by about 0.459 from baseline, beyond the declared budget; supervised rises by about 0.245 and passes. The plotted metrics share evaluation definitions, while the branches’ training objectives do not. Next vary the teacher quality or target sample and rerun the same fixed gate before generalizing.",
       "code": "names=[\"pretrained\",\"supervised\",\"teacher\"]\nvisual_data={\"kind\":\"bar\",\"x\":[0,1,2],\"labels\":names,\"xlabel\":\"model after training stage\",\"ylabel\":\"mean cross-entropy (nats)\",\"series\":[{\"label\":\"held-out target\",\"y\":[metrics[n][\"held_cross_entropy\"] for n in names]},{\"label\":\"source retention\",\"y\":[metrics[n][\"source_cross_entropy\"] for n in names]}]}",
       "alt": "Two adaptation objectives evaluated on the same held-out target. The horizontal categories are the reloaded pretrained model, supervised adaptation and teacher distillation. The vertical axis is mean cross-entropy in nats. One series evaluates the same held-out target probabilities for every model; the other evaluates source-task probabilities. Lower is better within each series. The two adapted models improve target-task loss while their source-task loss increases. These bars are evaluations of the resulting weights, not the branches’ incomparable training objectives. In this seeded run the held-out target bars are approximately \\(0.978,0.555,0.524\\), while the source bars are \\(0.545,0.790,1.005\\), in the same model order. Teacher adaptation gives the lowest target loss here but also the largest source-retention loss."
     },
@@ -154,6 +202,27 @@
         "code": "# Step 3 — 3. Compare on a held-out criterion shared by both objectives\nw_check=jnp.array([.2,-.3,.1])\n# Transfer the device result to the host for an independent NumPy comparison.\nhost_X=np.asarray(adapt_X,dtype=np.float64)\n# Transfer the device result to the host for an independent NumPy comparison.\nhost_w=np.asarray(w_check,dtype=np.float64)\nhost_p=1/(1+np.exp(-(host_X@host_w)))\nfor targets in (hard_targets,soft_targets):\n    # Transfer the device result to the host for an independent NumPy comparison.\n    expected=host_X.T@(host_p-np.asarray(targets))/len(host_X)\n    np.testing.assert_allclose(jax.grad(objective)(w_check,adapt_X,targets),expected,rtol=1e-5,atol=1e-6)\nmetrics={}\nfor name,weights in [('pretrained',restored),('supervised',sft),('teacher',distilled)]:\n    metrics[name]={'held_cross_entropy':float(objective(weights,held_X,held_prob)),\n                   'held_brier':float(jnp.mean((jax.nn.sigmoid(held_X@weights)-held_prob)**2)),\n                   'source_cross_entropy':float(objective(weights,source_X,source_targets))}\nassert metrics['supervised']['held_cross_entropy']<metrics['pretrained']['held_cross_entropy']\nassert metrics['teacher']['held_cross_entropy']<metrics['pretrained']['held_cross_entropy']\nprint(json.dumps(metrics,indent=2))\nprint('checkpoint source hash:',source_hash)",
         "explanation": "The teacher is the known generating rule in this fixture, so matching it is an especially favorable distillation setting. Report source retention as well as target-task improvement."
       }
-    ]
+    ],
+    "optionFeedback": [
+      "A teacher target defines one branch’s objective; it does not make every branch’s training loss comparable or guarantee zero loss.",
+      "The common held-out task defines the comparison. Different training targets can yield different loss values even when prediction quality is similar; evaluating the final split during model selection would also leak information.",
+      "Using the final test split for iterative selection leaks test information. Compare branches on a separate common validation contract."
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "A reloaded base parameter vector, source and target datasets, and a declared adaptation budget."
+      ],
+      "outputs": [
+        "Two adapted candidates, source/target metrics, and a decision that may retain the base."
+      ],
+      "invariants": [
+        "Both objectives start from the same base state; checkpoint identity is preserved; the decision uses the same held-out criteria."
+      ],
+      "hints": [
+        "Measure source and target losses separately before selecting a candidate.",
+        "Keep the source artifact immutable and compare host float64 arithmetic on changed weights."
+      ],
+      "code": "import hashlib\nimport json\nimport tempfile\nfrom pathlib import Path\nimport numpy as np\nimport jax\nimport jax.numpy as jnp\n\ndef compare_adaptation_candidates(base_params, source_data, target_data, steps, retention_budget):\n    \"\"\"Two adapted candidates, source/target metrics, and a decision that may retain the base.\"\"\"\n    # TODO: Branch from one immutable base, compute target/source evidence for both objectives, and apply the declared retention rule.\n    raise NotImplementedError\n"
+    }
   }
 }

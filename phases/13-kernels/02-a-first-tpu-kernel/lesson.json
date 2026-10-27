@@ -15,7 +15,7 @@
       {
         "id": "guided-reasoning",
         "title": "Separate tile ownership from the local arithmetic",
-        "body": "Take one illustrative row \\([-2,1]\\) and feature bias \\([1,-3]\\). Addition gives \\([-1,-2]\\), and ReLU gives \\([0,0]\\). A bias indexed by row instead of feature can preserve output shape while computing the wrong result.\n\nTrace loads into the tile, the exact broadcast axis, activation and stores. Keep boundary guards visible beside the arithmetic rather than assuming a correct formula guarantees correct indexing.\n\nThe activation plot checks the resulting values. Compare against an independent array implementation on awkward dimensions and negative/positive inputs. CPU interpretation helps test semantics; it does not qualify TPU throughput or prove a particular memory schedule.",
+        "body": "The output can have the right shape and still use the wrong bias axis. For a row `[-2,1]` and feature bias `[1,-3]`, addition gives `[-1,-2]` and ReLU gives `[0,0]`. The kernel's matrix tile uses row and column program IDs \\((i,j)\\), while the bias tile uses \\((0,j)\\): every row block reads the same feature columns. Trace one loaded column through add, ReLU and store, then predict how an erroneous row-indexed bias would change it.",
         "check": {
           "prompt": "What can a value reference detect that an output-shape assertion cannot?",
           "answer": "Wrong broadcast axes, incorrect activation order or indexing errors that retain the expected shape. Use distinguishable values so those errors cannot cancel."
@@ -24,27 +24,27 @@
       },
       {
         "title": "Map each operand according to its meaning",
-        "body": "The activation matrix has shape \\((M,N)\\); the bias has shape \\((N,)\\). We reshape the padded bias to \\((1,N_p)\\) and map its block coordinates to \\((0,j)\\), so changing the row-program index does not change the bias window. The output uses \\((i,j)\\) and is written exactly once per tile. This is intentional broadcasting with an explicit contract, unlike accepting accidentally mismatched matrices."
+        "body": "The matrix has shape \\((M,N)\\) and bias \\((N,)\\), so reshape padded bias to \\((1,N_p)\\). For matrix tile \\((i,j)\\), its window starts at \\((i\\cdot bm,j\\cdot bn)\\); the bias window starts at \\((0,j\\cdot bn)\\), independent of `i`. The output tile belongs to \\((i,j)\\) and each cell is written once. This is explicit feature broadcasting, not an accidental shape-based broadcast."
       },
       {
         "title": "Use a conservative TPU tile contract",
-        "body": "TPU vector-memory layout places restrictions on block dimensions. This wrapper requires block dimensions that are multiples of \\((8,128)\\) for target mode, then pads and crops arbitrary positive logical shapes. The one-row bias window spans its whole first dimension. This is a deliberately narrow supported contract, not a claim that every other block shape is forbidden on every TPU generation. CPU interpretation alone does not enforce or validate all lowering restrictions."
+        "body": "The target wrapper accepts block multiples of \\((8,128)\\) as its supported vector-memory contract, then pads and crops arbitrary positive logical shapes. For the worked \\((9,129)\\) matrix, \\((8,128)\\) blocks create a partial second row tile and a one-column tail. These wrapper rules are intentionally narrow; CPU interpretation does not qualify other tile layouts or guarantee target compilation."
       },
       {
         "title": "State where precision changes",
-        "body": "Both inputs may be float32 or bfloat16, but their dtypes must match. The kernel promotes loaded values to float32 for addition and ReLU, then casts once to the output dtype. An independent reference must start from those same represented inputs and apply the same final cast. Comparing bfloat16 output directly to an unrounded original dataset mixes representation error with kernel correctness."
+        "body": "The contract requires matching float32 or bfloat16 inputs. The kernel promotes each loaded tile to float32 for addition and ReLU, then casts the stored result once. A reference should first use the represented inputs and same output cast; otherwise input rounding is blamed on indexing or arithmetic. The later precision audit compares the represented-input check with the original float32 data separately."
       },
       {
         "title": "Make the execution mode inspectable",
-        "body": "The wrapper accepts only the strings interpret and tpu. The TPU branch checks the actual default backend and the devices holding the inputs, and passes interpret=False. It never catches a target lowering failure and retries on CPU. A target failure should remain a failed result with its environment, not become a fabricated successful accelerator receipt."
+        "body": "The wrapper makes the choice explicit: `interpret` runs CPU semantics; `tpu` checks the backend and input devices, then calls with `interpret=False`. A failed target lowering remains a failure instead of silently switching paths. This separation makes a correct CPU result useful for debugging without dressing it up as TPU evidence."
       },
       {
         "title": "Run the real target path as a separate lab",
-        "body": "On an already configured TPU environment, use `python3 projects/kernel-audit/target_tpu.py --kernel fused --block 8 128`. That runner explicitly places inputs on a TPU, calls the target branch, synchronizes, and prints a JSON evidence record after numerical comparisons. Run it in a fresh TPU process rather than a CPU-forced lesson runner. The command is implemented; no target receipt exists in this authoring environment. CPU interpretation establishes neither target lowering success nor speedup."
+        "body": "The target command is `python3 projects/kernel-audit/target_tpu.py --kernel fused --block 8 128`. It places inputs on a TPU, executes the target branch, synchronizes and records comparisons. The retained lesson execution is CPU interpretation, and no target receipt is present here. Use that command on configured hardware before making a lowering or speed claim."
       },
       {
         "title": "Compare with a strong baseline before optimizing",
-        "body": "The ordinary JAX expression can already be fused by XLA. A hand-written fused kernel is not automatically faster. On the target, compare with a warmed jitted baseline using the same dtype, data, padding boundary and output semantics. The final lesson defines the measurement protocol and distinguishes kernel-only timing from end-to-end wrapper cost."
+        "body": "A simple JAX expression may already fuse under XLA, so the hand-written kernel has no assumed speed advantage. On target hardware compare warmed versions using the same represented inputs, dtype, boundary padding and output cast. Include the wrapper's pad/call/crop cost if that is the user-visible operation. Correctness comes first; this CPU exercise provides no timing comparison."
       }
     ],
     "output": "CPU interpretation agrees with NumPy, including the (9,129) tail. The final value is approximately 2.4. Requesting TPU mode on CPU raises an explicit refusal.",
@@ -73,7 +73,24 @@
         "hint": "A column bias is a vector with exactly one entry per matrix column.",
         "solution": "# Reject hidden bias-axis broadcasting (Practice)\nfor malformed in (jnp.ones((1,129),dtype=jnp.float32),jnp.ones(9,dtype=jnp.float32)):\n    rejected=False\n    try:fused_bias_relu(x,malformed)\n    except ValueError:rejected=True\n    assert rejected\nprint(\"Malformed bias axes rejected\")",
         "explanation": "Explicit validation turns a confusing broadcast result into a local contract error.",
-        "difficulty": "Practice"
+        "difficulty": "Practice",
+        "learnerStarter": {
+          "inputs": [
+            "The lesson wrapper and bias vectors with matrix-shaped and wrong-length variants."
+          ],
+          "outputs": [
+            "Two captured validation failures before launch."
+          ],
+          "invariants": [
+            "Bias rank and length exactly match the column axis.",
+            "No implicit broadcasting is accepted by this kernel interface."
+          ],
+          "hints": [
+            "Test rank first, then the expected column length.",
+            "Assert the launch callback was not reached on invalid inputs."
+          ],
+          "code": "def reject_invalid_bias(wrapper, matrix, bias_matrix, short_bias):\n    # TODO: exercise both malformed cases and confirm validation precedes launch.\n    raise NotImplementedError(\"Check rank and length for the per-column bias\")"
+        }
       },
       {
         "title": "Check a permutation invariant",
@@ -81,7 +98,24 @@
         "hint": "Use a deterministic reversed column order; do not permute the bias independently.",
         "solution": "# Check a permutation invariant (Challenge)\norder=jnp.arange(128,-1,-1)\npermuted=fused_bias_relu(x[:,order],bias[order])\nnp.testing.assert_allclose(permuted[:,order],actual,rtol=1e-6,atol=1e-6)\nprint(\"Column/bias pairing survives a joint permutation\")",
         "explanation": "The kernel is columnwise when the corresponding bias travels with each column. This catches a wrong window map without relying only on one original fixture.",
-        "difficulty": "Challenge"
+        "difficulty": "Challenge",
+        "learnerStarter": {
+          "inputs": [
+            "A matrix, distinct per-column bias, and a nontrivial column permutation."
+          ],
+          "outputs": [
+            "Original output, inverse-permuted output, and equality check."
+          ],
+          "invariants": [
+            "Matrix columns and bias entries move together.",
+            "Undoing the permutation restores the original output."
+          ],
+          "hints": [
+            "Apply the same permutation to columns and bias.",
+            "Invert the permutation only on the output column axis."
+          ],
+          "code": "import numpy as np\n\ndef check_column_permutation(kernel, matrix, bias, permutation):\n    # TODO: compare the original output with the restored permuted output.\n    raise NotImplementedError(\"Test equivariance under joint column and bias permutation\")"
+        }
       }
     ],
     "diagnosis": "If every row has a repeated bias pattern, inspect the bias BlockSpec and its column coordinate. If CPU interpretation passes but TPU lowering fails, preserve the target error and inspect layout/dtype restrictions. If a target command succeeds on a CPU-only environment, its fallback guard is broken and the receipt must not be called TPU validation.",
@@ -97,8 +131,8 @@
       "title": "Bias and ReLU alter the values, not the tile ownership contract",
       "kind": "executed",
       "prediction": "Where will the biased first and last rows cross the zero threshold?",
-      "reading": "The horizontal axis is column index. The vertical axis is output activation after adding that column’s bias and applying ReLU. The two plotted series are the first and last rows from the actual interpreted \\((9,129)\\) kernel result.\n\nThe first row is entirely zero for this fixture because its negative activations remain below zero after bias. The last row stays positive and reaches approximately \\(2.4\\) at column \\(128\\), including the final partial logical tile. These are output values, not timings.",
-      "connection": "The per-column NumPy comparison verifies every element, while the displayed rows make the activation boundary and tail visible. The bias window depends on the column program index and is reused across row blocks.\n\nThis figure is labeled CPU interpretation. It does not prove TPU lowering, vector-memory scheduling or speed. The separate target-only runner refuses to create those claims without real TPU inputs and completed execution.",
+      "reading": "The x-axis is logical column index 0–128; the y-axis is output activation after feature-bias addition and ReLU. The two series are first and last rows from the interpreted \\((9,129)\\) result. The first row is zero throughout this fixture; the last row remains positive and reaches about 2.4 at column 128, including the tail. Compare those rows to predict which side of ReLU their pre-activation values occupy; these are values, not runtimes.",
+      "connection": "The per-column NumPy check reports maximum interpretation error 0.0 across the full output, while the plotted rows expose the all-zero first row and final logical column. The bias tile is indexed by \\((0,j)\\), so it is shared across row tiles; the last point checks the partial column tail. The plot and CPU check establish this fixture's semantics only. They do not establish TPU lowering, schedule or speed.",
       "alt": "The interpreted first output row remains zero while the final row is positive and reaches 2.4 at the last column.",
       "code": "# Transfer the device result to the host for an independent NumPy comparison.\nvisual_data={'kind':'line','x':list(range(129)),'xlabel':'logical column','ylabel':'output activation','series':[{'label':'first row, CPU interpretation','y':np.asarray(actual)[0].tolist()},{'label':'last row, CPU interpretation','y':np.asarray(actual)[-1].tolist()}]}"
     },
@@ -148,6 +182,28 @@
       "Make the execution mode inspectable",
       "Run the real target path as a separate lab",
       "Compare with a strong baseline before optimizing"
-    ]
+    ],
+    "optionFeedback": [
+      "Interpret mode executes a semantic reference and cannot establish TPU throughput. Time a supported compiled kernel on the target.",
+      "Interpretation is useful correctness evidence. It does not execute the target compiler or hardware, so those claims require a separate guarded target run.",
+      "The tested grid and shapes do not cover every generation or block choice. Extend cases and qualify each claimed target explicitly."
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "A frozen-seed random matrix shaped (17,257), distinct per-column bias values, and two target-compatible tile choices."
+      ],
+      "outputs": [
+        "Interpreted outputs, exact shapes, and NumPy agreement for each tile."
+      ],
+      "invariants": [
+        "Both candidates consume identical inputs and bias values.",
+        "The final partial tiles do not change output shape or values."
+      ],
+      "hints": [
+        "Generate the fixture once from a local seeded generator.",
+        "Compare block choices with the same reference and tolerance."
+      ],
+      "code": "import numpy as np\n\ndef compare_activation_tiles(interpreter, seed, block_choices):\n    # TODO: build one seeded (17,257) fixture with distinct column biases.\n    raise NotImplementedError(\"Compare target-compatible tiles on fixed inputs\")"
+    }
   }
 }

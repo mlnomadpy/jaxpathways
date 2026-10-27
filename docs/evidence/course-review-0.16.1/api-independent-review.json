@@ -1,0 +1,21 @@
+{
+  "baseCommit": "f858816ead940aeb969e23fbc32df232da51196f",
+  "checks": [
+    "11 focused Node tests passed",
+    "independent mixed np.reshape/array.reshape/jnp.reshape/jax.numpy.reshape yields one correct card per call in source order",
+    "previous 10-test API contract and real lesson case review retained"
+  ],
+  "decision": "accepted-bounded-explanatory-source",
+  "filesSha256": {
+    "src/lib/code-teaching.js": "21f63ed37e23f838fc5551ce8235712950405cde09342483e01d74545899cb12",
+    "tests/code-teaching-api.test.mjs": "5cf3147cfb077350782c4ef048780506b2dcda5bda8368fd7da5d12deabae268"
+  },
+  "kind": "sol-api-teaching-independent-review",
+  "limits": [
+    "No numeric lesson or project implementation change",
+    "Conservative extractor does not parse arbitrary aliases or code inside f-string expressions",
+    "No full site build, PDF, native reader or hosted qualification by this reviewer"
+  ],
+  "schemaVersion": 1,
+  "supersedesReceiptSha256": "c12fb5ed77babcd2647799da3aa7b67fc17e708e4d387e501590cb705e2a16f8"
+}

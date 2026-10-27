@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "deployment-07",
-  "contentHash": "091a84105423934a262810668e533ec296cfced9f4f3f1632011574c820aab84",
-  "executedAt": "2026-10-20T22:24:47.574303+00:00",
+  "contentHash": "0e02697da92e459ae248d0e47ff891a5cecc8da922ea821b7e4ce336aeb50249",
+  "executedAt": "2026-10-27T17:09:45.435139+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -11,7 +11,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Fresh-process valid requests: 2 rejected boundaries: 3\nThis companion tests the process/artifact contract. Run the Docker lab for container evidence.\nFresh-process valid requests: 2 rejected boundaries: 3\nThis companion tests the process/artifact contract. Run the Docker lab for container evidence.\nIndependent three-input predictions: 0.5, 2.5, 5.0\nMatching digest did not bypass model validation.\nChanged artifact requires a new recorded digest.\nNonfinite input rejected before output.\nNew artifact loads, but the old behavioral expectation no longer passes.\nPASS: deployment-07\n",
+  "stdout": "Fresh-process valid requests: 2 rejected boundaries: 3\nThis companion tests the process/artifact contract. Run the Docker lab for container evidence.\nFresh-process valid requests: 2 rejected boundaries: 3\nThis companion tests the process/artifact contract. Run the Docker lab for container evidence.\nIndependent three-input predictions: 0.5, 2.5, 5.0\nMatching digest did not bypass model validation.\nChanged artifact reached fresh-process loader: rejected before prediction; no output.\nNonfinite input rejected before output.\nNew artifact loads, but the old behavioral expectation no longer passes.\nPASS: deployment-07\n",
   "notebookCells": [
     {
       "sourceHash": "6ea075edc4df071aae23d8d4c130f7681d9e468ab96c82e2bc448328a7057113",
@@ -52,7 +52,7 @@
       "outputs": []
     },
     {
-      "sourceHash": "25df6d662f9d3f0c4e984c6a201f79fa0cfd7a2633dc4b0773dfba6c2dd4ee6c",
+      "sourceHash": "53dc08a479da44f2b1718bf964cd5c4d3e3305811c536df9d501b1833a6e3476",
       "outputs": [
         {
           "output_type": "display_data",
@@ -91,23 +91,23 @@
       ]
     },
     {
-      "sourceHash": "261af179aee94d99513d70889d175294b5ab9cba70a06163e8c82ebcbe42990c",
+      "sourceHash": "22d5d8896e54aecd8b70f9aafa0c68cf3475cdb9799648df8d1bbbd8b53d1ac8",
       "outputs": []
     },
     {
-      "sourceHash": "5e8bac50d168d2ae8446db04c0ce6e548a53aefe1992daf3e77828d00bd8fd82",
+      "sourceHash": "d42e041d130adb90fccb7f202f6a15f319eabf1420929606e4bcb49e7e16d280",
       "outputs": [
         {
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "Changed artifact requires a new recorded digest.\n"
+            "Changed artifact reached fresh-process loader: rejected before prediction; no output.\n"
           ]
         }
       ]
     },
     {
-      "sourceHash": "0c39e6094eff926ee7eb309b1a9fc1bb989a971cef970a649ffae1fb33b3b8b4",
+      "sourceHash": "22d5d8896e54aecd8b70f9aafa0c68cf3475cdb9799648df8d1bbbd8b53d1ac8",
       "outputs": []
     },
     {
@@ -123,7 +123,7 @@
       ]
     },
     {
-      "sourceHash": "84056e017ad9129d32e512ce1c59f1d397f395f7994e2ce88e20cb158c535473",
+      "sourceHash": "22d5d8896e54aecd8b70f9aafa0c68cf3475cdb9799648df8d1bbbd8b53d1ac8",
       "outputs": []
     },
     {

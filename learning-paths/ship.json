@@ -49,7 +49,7 @@
     "audio",
     "cross-modal"
   ],
-  "studyAdvice": "Begin with one saved model and a fixed set of parity inputs. Trace preprocessing, parameter layout and output semantics across each framework boundary. Separate training precision, exported precision and the target runtime before benchmarking. Use the precision and edge lessons to build a validation checklist; measure a real target device before claiming device latency or memory savings.",
+  "studyAdvice": "Begin with one saved model and a fixed set of parity inputs. Trace preprocessing, parameter layout and output semantics across each framework boundary. Separate training precision, exported precision and the target runtime before benchmarking. Use the precision and edge lessons to build a validation checklist; measure a real target device before claiming device latency or memory savings. For review, trace one raw input through preprocessing, source inference, export and target inference. Show numerical/quality gates before discussing compression or speed, and label any unmeasured device path.",
   "engineeringLessonIds": [
     "recovery-06",
     "deployment-07",

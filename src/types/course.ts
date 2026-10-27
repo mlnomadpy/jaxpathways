@@ -5,6 +5,13 @@ export interface Command {
   expected: string;
   shell?: string;
 }
+export interface LearnerStarterContract {
+  inputs: string[];
+  outputs: string[];
+  invariants: string[];
+  hints: string[];
+  code: string;
+}
 export interface LessonContent {
   runtime?: { kind: string };
   execution?: { kind: string };
@@ -56,6 +63,7 @@ export interface LessonContent {
   }[];
   exercise: string;
   solution: string;
+  learnerStarter?: LearnerStarterContract;
   practice?: {
     title: string;
     difficulty: string;
@@ -63,11 +71,13 @@ export interface LessonContent {
     hint: string;
     solution: string;
     explanation: string;
+    learnerStarter?: LearnerStarterContract;
   }[];
   question: string;
   options: string[];
   answer: number;
   explanation: string;
+  optionFeedback: string[];
   diagnosis?: string;
   takeaways?: string[];
   references?: { title: string; url: string }[];
@@ -87,6 +97,11 @@ export interface Lesson {
     markdown: string;
     scriptSource: string;
     notebookSource: string;
+    /** Generated separately from worked reference downloads. */
+    learnerScript?: string;
+    learnerNotebook?: string;
+    learnerScriptSource?: string;
+    learnerNotebookSource?: string;
     quizSource: string;
     evidenceSource: string;
     evidence: string;

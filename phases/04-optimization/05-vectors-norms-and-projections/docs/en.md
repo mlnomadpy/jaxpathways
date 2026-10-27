@@ -50,6 +50,8 @@ $$
 
 Points on the line through $a$ have the form $ca$, where $c$ is a scalar. Choose the point nearest $u$. Its coefficient is $c=(a^\mathsf{T}u)/(a^\mathsf{T}a)$. For our axis direction, $c=3$, so the projection is $p=(3,0)$ and the leftover is $r=u-p=(0,4)$. Notice that the coefficient depends on how long we draw $a$; the projected point does not.
 
+With the rescaled direction $a=(2,0)$, the numerator $a^\mathsf{T}u=6$ and the denominator $a^\mathsf{T}a=4$, so the coefficient is $1.5$. The projected vector remains $(3,0)$. Changing the length used to describe a line must not change the closest point on that line.
+
 $$
 p=\frac{a^\mathsf{T}u}{a^\mathsf{T}a}a,\qquad r=u-p,\qquad a^\mathsf{T}r=0
 $$
@@ -156,13 +158,15 @@ We projected onto the horizontal direction. The residual is perpendicular to tha
 
 The lengths form a familiar check: $\lVert p\rVert=3$, $\lVert r\rVert=4$, and $\lVert u\rVert=5$, with $3^2+4^2=5^2$. Projection separates the part represented by the chosen direction from the part that direction cannot represent.
 
+Before changing the direction vector length, predict whether the projected endpoint should move; a correct projection onto the same line leaves it fixed.
+
 ```python
 visual_data = {'kind': 'vectors', 'arrows': [{'label': 'input u', 'start': [0, 0], 'end': u.tolist()}, {'label': 'projection p', 'start': [0, 0], 'end': p.tolist()}, {'label': 'residual r', 'start': p.tolist(), 'end': u.tolist()}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:20:20.732527+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:13:14.231176+00:00. JAX 0.9.2.
 
 ```text
 projection / residual: [3. 0.] [0. 4.]
@@ -208,23 +212,28 @@ Project $u=(2,-1,2)$ onto $a=(1,0,1)$. Check the residual by hand first.
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- Two same-shaped vectors and a nonzero projection direction.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- The projection and orthogonal residual.
+
+**Invariants to check:**
+- The residual is orthogonal to the direction; a zero direction is rejected.
+
+**Hints:**
+- Compute the scalar coefficient from a dot product and squared norm.
+- Use an inner-product check on the residual instead of checking only its length.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Project u=(2,-1,2) onto a=(1,0,1).
-u3 = jnp.array(...)  # TODO: compute u3
-a3 = jnp.array(...)  # TODO: compute a3
-p3 = project(...)  # TODO: compute p3
-assert jnp.allclose(p3, jnp.array([2.0, 0.0, 2.0]))  # TODO: complete assertion check
-assert jnp.allclose(jnp.dot(a3, u3 - p3), 0.0)  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def project_onto(vector, direction):
+    """The projection and orthogonal residual."""
+    # TODO: Guard against a zero direction, compute the projection coefficient, and verify the residual dot product.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -254,20 +263,27 @@ Use a try/except block; a silent successful result should fail the check.
 
 ### How to write: Handle an undefined direction — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Inputs:**
+- Show that a zero direction produces a clear input error instead of a misleading projection.
+
+**Outputs:**
+- A clear rejection for zero direction and a finite projection for a nonzero direction.
+
+**Invariants to check:**
+- A projection is returned only when its direction has nonzero squared norm.
+
+**Hints:**
+- Use a try/except block; a silent successful result should fail the check.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Handle an undefined direction (Transfer / diagnosis): Rejecting an undefined input is part of the function contract.
-try:
-    project(u, jnp.zeros_like(a))
-except ValueError as exc:
-    assert 'nonzero'  # TODO: complete assertion check
-else:
-    raise AssertionError('Zero direction was accepted')
+import jax.numpy as jnp
+
+def practice_handle_an_undefined_direction(vector, direction):
+    """Implement the handle an undefined direction check."""
+    # TODO: Check the direction norm before dividing and raise a clear ValueError for the zero vector.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -300,22 +316,27 @@ Check the directions have zero dot product. Nonorthogonal directions can count t
 
 ### How to write: Use two perpendicular directions — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- Reconstruct $u$ from projections onto $(1,1)$ and $(1,-1)$. Would adding independent projections still work for arbitrary nonorthogonal directions?
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- Reconstructed vector and residual norm for the perpendicular basis.
+
+**Invariants to check:**
+- The sum is interpreted as a reconstruction only for the stated orthogonal directions.
+
+**Hints:**
+- Check the directions have zero dot product. Nonorthogonal directions can count the same component twice.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Use two perpendicular directions (Transfer / diagnosis)
-a1 = jnp.array(...)  # TODO: compute a1
-a2 = jnp.array(...)  # TODO: compute a2
-assert jnp.allclose(project(u, a1) + project(u, a2), u)  # TODO: complete assertion check
-assert not jnp.allclose(project(u, a) + project(u, a1), u)  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def practice_use_two_perpendicular_directions(vector, first_direction, second_direction):
+    """Implement the use two perpendicular directions check."""
+    # TODO: Compute each orthogonal projection, add the two components, and measure the reconstruction residual.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -342,9 +363,17 @@ Does doubling a nonzero direction double the projection onto its line?
 
 <details><summary>Answer and explanation</summary>
 
-No; the coefficient and direction rescale in opposite ways
+**1. Yes, because the dot product doubles**
+
+Doubling the direction also quadruples its squared norm. Work out the coefficient and the reconstructed vector separately.
+
+**2. No; the coefficient and direction rescale in opposite ways (correct)**
 
 The line is unchanged, so its closest point is unchanged. The coefficient absorbs the rescaling.
+
+**3. Only when the vectors are perpendicular**
+
+Orthogonality is not required. Substitute a general nonzero direction into the projection formula and cancel the scale factor.
 
 </details>
 

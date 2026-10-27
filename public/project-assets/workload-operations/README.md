@@ -110,3 +110,11 @@ Use `backend="tpu"` for an appropriately configured TPU environment. The worker 
 ## Limitations
 
 The example captures bounded logs in memory, has one writer, supervises one child, uses one local filesystem and saves small JSON states. Local atomic replacement plus file fsync does not by itself prove power-loss durability or remote-store semantics. Real systems also need bounded streaming logs, trusted release gates, process-tree cancellation, concurrency control and target-specific performance measurements. All of these are explicit transfer requirements, not silently simulated capabilities.
+
+## Review handoff: explain a changed condition
+
+Inject an interrupted save and then request resume. Decide which checkpoint remains accepted before starting any new updates.
+
+**Keep for review:** The failed candidate, the last accepted identity, explicit exit status and a comparison with uninterrupted next batches/state. A directory or a started event is insufficient recovery evidence.
+
+Write your prediction before opening the reference implementation. Distinguish what the existing checker verifies from your proposed extension; record any extension command, actual output and limitation separately. A reviewer should be able to locate the first failed contract from your saved evidence.

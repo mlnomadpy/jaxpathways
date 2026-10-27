@@ -11,7 +11,12 @@
         "Using the evaluation split during every update guarantees fairness"
       ],
       "correct": 1,
-      "explanation": "The common held-out task defines the comparison. Different training targets can yield different loss values even when prediction quality is similar; evaluating the final split during model selection would also leak information."
+      "explanation": "The common held-out task defines the comparison. Different training targets can yield different loss values even when prediction quality is similar; evaluating the final split during model selection would also leak information.",
+      "optionFeedback": [
+        "A teacher target defines one branch’s objective; it does not make every branch’s training loss comparable or guarantee zero loss.",
+        "The common held-out task defines the comparison. Different training targets can yield different loss values even when prediction quality is similar; evaluating the final split during model selection would also leak information.",
+        "Using the final test split for iterative selection leaks test information. Compare branches on a separate common validation contract."
+      ]
     }
   ]
 }

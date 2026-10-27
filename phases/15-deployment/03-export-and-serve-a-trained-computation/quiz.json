@@ -11,7 +11,12 @@
         "An HTTP service now exists."
       ],
       "correct": 0,
-      "explanation": "A successful round trip verifies the tested artifact and local runtime. Other consumers, device kernels and request systems require separate checks."
+      "explanation": "A successful round trip verifies the tested artifact and local runtime. Other consumers, device kernels and request systems require separate checks.",
+      "optionFeedback": [
+        "A successful round trip verifies the tested artifact and local runtime. Other consumers, device kernels and request systems require separate checks.",
+        "Other targets may lack operators or lower them differently. Preserve the tested CPU scope until the actual target runner is exercised.",
+        "An exported function is an artifact, not a running service. Loading, request validation and serving behavior need their own tests."
+      ]
     }
   ]
 }

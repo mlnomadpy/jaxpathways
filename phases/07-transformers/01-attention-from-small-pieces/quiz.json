@@ -11,7 +11,12 @@
         "The value feature dimension"
       ],
       "correct": 1,
-      "explanation": "One query needs a probability distribution across keys; each row must sum to one."
+      "explanation": "One query needs a probability distribution across keys; each row must sum to one.",
+      "optionFeedback": [
+        "Normalizing over queries changes which probabilities sum to one. For each query, sum its weights over the available keys.",
+        "One query needs a probability distribution across keys; each row must sum to one.",
+        "The value-feature axis belongs to the weighted output representation. Attention probabilities normalize over candidate key positions."
+      ]
     }
   ]
 }

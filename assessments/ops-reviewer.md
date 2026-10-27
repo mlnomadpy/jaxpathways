@@ -37,3 +37,11 @@ Review the runbook as a sequence of evidence-driven actions. Require the observe
 ## Engineering extension review
 
 Require real retrieved MLflow records and model reload, not a mock dashboard or a printed dictionary. Confirm comparable metric boundaries and frozen data identity. Recalculate slice metrics and inspect the case that an aggregate hides. Prompt replay verifies the evaluator, not live-model quality. Inspect the actual container receipt when available; check its source/image/model identity and do not infer cloud rollout or load capacity. Changed/expired approval must preserve the active pointer, and rollback must revalidate compatibility and approval. Ask how identity, access control, concurrent promotion and retention would be enforced outside the single-writer fixture.
+
+## Discussion-case review notes
+
+The deployment log says success after a timeout, but the candidate’s required slice gate failed and the active pointer changed.
+
+Require a process exit record, gate decision and active-artifact identity before and after failure. This violates release-state safety even if the model metric is strong. Keep the last accepted version and retain the rejected candidate evidence.
+
+Record the learner’s original explanation, the requested evidence and the revised claim. This discussion is qualitative review; it adds no automatic score and is not an independent teaching-review receipt.

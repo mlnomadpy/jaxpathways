@@ -3,7 +3,7 @@
   "id": "deployment-06",
   "minutes": 110,
   "content": {
-    "problem": "A model works on your computer, and now you want it to run near the user—perhaps on a phone or an embedded board. Let’s trace the whole request, from raw input to usable output. We’ll check conversion, measure a batch-one CPU request, and write down what still needs to be measured on the real device.",
+    "problem": "A model works on your computer, and now you want it to run near the user\u2014perhaps on a phone or an embedded board. Let\u2019s trace the whole request, from raw input to usable output. We\u2019ll check conversion, measure a batch-one CPU request, and write down what still needs to be measured on the real device.",
     "idea": "An edge deployment includes input decoding, preprocessing, transfers, inference and output handling under device constraints. Choose a target and an explicit request contract before claiming that an exported model is ready for that device.",
     "objectives": [
       "Trace source model through conversion, runtime and device execution.",
@@ -27,12 +27,12 @@
       },
       {
         "title": "Follow one concrete TensorFlow-to-LiteRT route",
-        "body": "The optional labs/tensorflow_litert.py companion builds the known dense model in TensorFlow, converts float32 and fully integer variants, inspects input/output scale and zero point, quantizes requests and dequantizes outputs, then checks held-out predictions. Representative calibration inputs are preprocessed floats in the exact source-model input domain. Setting integer-only supported ops and int8 input/output requests a strict integer graph; unsupported conversion should fail rather than silently satisfy the contract with float fallback. The lab uses TensorFlow’s interpreter interface as a desktop compatibility check; it is not a device delegate test. Desktop conversion was verified with Python 3.12.13, TensorFlow 2.21.0 and Keras 3.15.1 on macOS arm64. The optional requirements file pins these tested top-level dependencies; other platforms still need a compatible installation.",
+        "body": "The optional labs/tensorflow_litert.py companion builds the known dense model in TensorFlow, converts float32 and fully integer variants, inspects input/output scale and zero point, quantizes requests and dequantizes outputs, then checks held-out predictions. Representative calibration inputs are preprocessed floats in the exact source-model input domain. Setting integer-only supported ops and int8 input/output requests a strict integer graph; unsupported conversion should fail rather than silently satisfy the contract with float fallback. The lab uses TensorFlow\u2019s interpreter interface as a desktop compatibility check; it is not a device delegate test. Desktop conversion was verified with Python 3.12.13, TensorFlow 2.21.0 and Keras 3.15.1 on macOS arm64. The optional requirements file pins these tested top-level dependencies; other platforms still need a compatible installation.",
         "commands": [
           {
-            "label": "Optional TensorFlow environment — macOS/Linux, from the workspace root",
+            "label": "Optional TensorFlow environment \u2014 macOS/Linux, from the workspace root",
             "shell": "sh",
-            "code": "# Run optional tensorflow environment — macos/linux, from the workspace root using the course Python environment\npython3.12 -m venv .venv-tensorflow\n.venv-tensorflow/bin/python -m pip install -r phases/15-deployment/06-edge-ai-conversion-and-device-validation/labs/requirements-tensorflow.txt\n.venv-tensorflow/bin/python phases/15-deployment/06-edge-ai-conversion-and-device-validation/labs/tensorflow_litert.py --output edge-artifacts\n.venv-tensorflow/bin/python -m pip freeze > edge-artifacts/requirements-tested.txt",
+            "code": "# Run optional tensorflow environment \u2014 macos/linux, from the workspace root using the course Python environment\npython3.12 -m venv .venv-tensorflow\n.venv-tensorflow/bin/python -m pip install -r phases/15-deployment/06-edge-ai-conversion-and-device-validation/labs/requirements-tensorflow.txt\n.venv-tensorflow/bin/python phases/15-deployment/06-edge-ai-conversion-and-device-validation/labs/tensorflow_litert.py --output edge-artifacts\n.venv-tensorflow/bin/python -m pip freeze > edge-artifacts/requirements-tested.txt",
             "expected": "A compatible TensorFlow installation writes two .tflite files and report.json after numerical checks. Desktop float32 and INT8 conversion passed separately from the core CPU receipt; device validation remains unperformed. On Windows use .venv-tensorflow\\Scripts\\python.exe in place of .venv-tensorflow/bin/python. If no compatible TensorFlow wheel exists, choose a supported Python/platform combination from the official installation guide."
           }
         ]
@@ -43,7 +43,7 @@
       },
       {
         "title": "Budget more than weights",
-        "body": "Peak memory includes activations, tensors held by the runtime, workspace, preprocessing buffers and, for autoregressive models, KV cache. A compressed file may expand on load. Batch one often minimizes interaction latency but may reduce throughput. Include cold process startup, model load and runtime initialization in a separate device cold-start measurement; our first-request timing starts after imports and model setup, so it does not cover them. Measure power or energy with an actual target-device tool and record thermal state."
+        "body": "Peak memory includes activations, tensors held by the runtime, workspace, preprocessing buffers and, for autoregressive models, KV cache. A compressed file may expand on load. Batch one often minimizes interaction latency but may reduce throughput. Include cold process startup, model load and runtime initialization in a separate device cold-start measurement; our first-request timing starts after imports and model setup, so it does not cover them. Measure power or energy with an actual target-device tool and record thermal state.\n\nThe local proxy records thirty warm requests and reports their sample p50 and p95. Its request timer includes JSON decode, normalization, transfer, inference, waiting and response encoding, but starts after imports and model setup. Read the exact values from that capture's trace; the numerical ordering can change when the script is rerun. The metadata explicitly marks `edge_device_validated=false`, so these durations describe the desktop request boundary rather than phone latency."
       },
       {
         "title": "Measure the request the user experiences",
@@ -69,14 +69,14 @@
       {
         "title": "A normalization mismatch survives conversion",
         "prediction": "Will raw sensor values and normalized values produce the same scores?",
-        "code": "# Experiment — A normalization mismatch survives conversion\nraw = np.array([[255., 128., 0.]], np.float32)\n# Transfer the device result to the host for an independent NumPy comparison.\nwrong = np.asarray(infer(raw))\n# Transfer the device result to the host for an independent NumPy comparison.\nright = np.asarray(infer(raw / 255.))\nassert not np.allclose(wrong, right)\nprint(\"Preprocessing mismatch max error\", float(np.max(np.abs(wrong-right))))",
+        "code": "# Experiment \u2014 A normalization mismatch survives conversion\nraw = np.array([[255., 128., 0.]], np.float32)\n# Transfer the device result to the host for an independent NumPy comparison.\nwrong = np.asarray(infer(raw))\n# Transfer the device result to the host for an independent NumPy comparison.\nright = np.asarray(infer(raw / 255.))\nassert not np.allclose(wrong, right)\nprint(\"Preprocessing mismatch max error\", float(np.max(np.abs(wrong-right))))",
         "output": "The mismatch is large despite identical weights.",
         "explanation": "Conversion checks must start at the raw input boundary when preprocessing is part of the product."
       },
       {
         "title": "Reject raw inputs before normalization hides their meaning",
         "prediction": "Would an array cast distinguish a numeric string, a boolean and a legitimate sensor reading?",
-        "code": "# Experiment — Reject raw inputs before normalization hides their meaning\ninvalid_payloads=[{'features':[['255',128,0]]},{'features':[[True,128,0]]},{'features':[[256,128,0]]},{'features':[[-1,128,0]]},{'features':[[0,1]]},{'features':[[0,1,float('nan')]]},{'features':[[0,1,2]],'extra':1}]\nfor invalid in invalid_payloads:\n    try:\n        request(json.dumps(invalid))\n    except ValueError:\n        pass\n    else:\n        raise AssertionError('invalid sensor payload accepted')\n# Transfer the device result to the host for an independent NumPy comparison.\nnp.testing.assert_allclose(json.loads(request(json.dumps({'features':[[0,0,0]]})))['scores'],np.asarray(bias)[None,:],atol=1e-6)\nprint('Seven malformed or out-of-domain requests rejected; zero input returns the bias.')",
+        "code": "# Experiment \u2014 Reject raw inputs before normalization hides their meaning\ninvalid_payloads=[{'features':[['255',128,0]]},{'features':[[True,128,0]]},{'features':[[256,128,0]]},{'features':[[-1,128,0]]},{'features':[[0,1]]},{'features':[[0,1,float('nan')]]},{'features':[[0,1,2]],'extra':1}]\nfor invalid in invalid_payloads:\n    try:\n        request(json.dumps(invalid))\n    except ValueError:\n        pass\n    else:\n        raise AssertionError('invalid sensor payload accepted')\n# Transfer the device result to the host for an independent NumPy comparison.\nnp.testing.assert_allclose(json.loads(request(json.dumps({'features':[[0,0,0]]})))['scores'],np.asarray(bias)[None,:],atol=1e-6)\nprint('Seven malformed or out-of-domain requests rejected; zero input returns the bias.')",
         "output": "All seven invalid payloads fail. A valid zero-valued row produces the two bias scores.",
         "explanation": "The zero-input oracle checks that preprocessing does not add a hidden offset. Rejection tests check input meaning before the model sees an apparently valid float array."
       }
@@ -90,7 +90,23 @@
         "prompt": "Create a device report template with required hardware and measurement fields. Reject it as ready while those fields are missing.",
         "hint": "List the hardware, runtime, delegate and measurement fields before testing completeness. A missing value is different from a measured zero or an explicitly unsupported capability.",
         "solution": "# Make incomplete deployment evidence explicit (Transfer): Empty evidence stays empty.\ndevice_report = {\"device\": None, \"runtime_version\": None, \"delegate\": None,\n                 \"quality_metric\": None, \"p95_ms\": None, \"peak_memory_bytes\": None,\n                 \"cold_start_ms\": None, \"fallback_operators\": None}\nmissing = [key for key, value in device_report.items() if value is None]\nassert missing and \"device\" in missing\nprint(\"Not device-validated; missing:\", \", \".join(missing))",
-        "explanation": "Empty evidence stays empty. Desktop conversion and simulation cannot populate measurements for hardware that was never used."
+        "explanation": "Empty evidence stays empty. Desktop conversion and simulation cannot populate measurements for hardware that was never used.",
+        "learnerStarter": {
+          "inputs": [
+            "Create a device report template with required hardware and measurement fields. Reject it as ready while those fields are missing."
+          ],
+          "outputs": [
+            "A report-validation result with missing target fields listed."
+          ],
+          "invariants": [
+            "Absent device measurements remain pending rather than receiving synthetic pass values."
+          ],
+          "hints": [
+            "List the hardware, runtime, delegate and measurement fields before testing completeness. A missing value is different from a measured zero or an explicitly unsupported capability.",
+            "Validate required fields before considering readiness."
+          ],
+          "code": "import json\nimport time\nimport numpy as np\nimport jax\nimport jax.numpy as jnp\n\ndef practice_make_incomplete_deployment_evidence_explicit(report, required_fields):\n    \"\"\"Complete the make incomplete deployment evidence explicit check.\"\"\"\n    # TODO: ('Validate that required target model/runtime/device/measurement fields are present and keep the report pending if any are absent.', 'A report schema and explicit not-ready result for missing device fields.', 'Missing target-device evidence never becomes a measured pass through default values.')\n    raise NotImplementedError\n"
+        }
       },
       {
         "title": "Decide whether a model speedup meets the request budget",
@@ -98,7 +114,23 @@
         "prompt": "Use the illustrative serial times above. A \\(19\\)-millisecond deadline is declared before optimization. Does halving model time meet it? What is the best possible total if model time tends to zero?",
         "hint": "Keep the fixed work unchanged. Compare the total request with the deadline, not the model-only duration.",
         "solution": "# Decide whether a model speedup meets the request budget (Transfer / diagnosis)\nfixed_ms=12.+4.\nmodel_ms=8.\ndeadline_ms=19.\nbefore_ms=fixed_ms+model_ms\nafter_ms=fixed_ms+model_ms/2\nnp.testing.assert_allclose([before_ms,after_ms,before_ms/after_ms],[24.,20.,1.2])\nassert after_ms>deadline_ms and fixed_ms==16.\nprint('Illustrative request before/after/lower-bound (ms):',before_ms,after_ms,fixed_ms)",
-        "explanation": "Halving model time leaves a \\(20\\)-millisecond request, so it misses the stated deadline. The serial fixed work gives a \\(16\\)-millisecond lower bound even with zero model time. Replace these illustrative values with measurements before making a device decision."
+        "explanation": "Halving model time leaves a \\(20\\)-millisecond request, so it misses the stated deadline. The serial fixed work gives a \\(16\\)-millisecond lower bound even with zero model time. Replace these illustrative values with measurements before making a device decision.",
+        "learnerStarter": {
+          "inputs": [
+            "Use the illustrative serial times above. A \\(19\\)-millisecond deadline is declared before optimization. Does halving model time meet it? What is the best possible total if model time tends to zero?"
+          ],
+          "outputs": [
+            "A deadline decision and fixed-overhead lower bound."
+          ],
+          "invariants": [
+            "Only the model component changes while fixed overhead remains constant."
+          ],
+          "hints": [
+            "Keep the fixed work unchanged. Compare the total request with the deadline, not the model-only duration.",
+            "Take the model-time-to-zero limit to find the best possible total."
+          ],
+          "code": "import json\nimport time\nimport numpy as np\nimport jax\nimport jax.numpy as jnp\n\ndef practice_decide_whether_a_model_speedup_meets_the_request_budget(fixed_overhead_ms, model_ms, deadline_ms):\n    \"\"\"Complete the decide whether a model speedup meets the request budget check.\"\"\"\n    # TODO: ('Compute fixed overhead plus halved model time against the predeclared 19 ms deadline, then take the zero-model-time lower bound.', 'Deadline decision and irreducible total-latency floor.', 'Only model time changes; other serial costs remain fixed.')\n    raise NotImplementedError\n"
+        }
       }
     ],
     "question": "A LiteRT file converts successfully. What must happen before claiming NPU latency?",
@@ -147,8 +179,8 @@
       "title": "An end-to-end boundary includes more than inference",
       "kind": "executed",
       "prediction": "Which parts of a request are included in these samples?",
-      "reading": "The horizontal axis counts warm requests, and the vertical axis measures end-to-end latency in milliseconds. The solid line joins the measured request times. The dashed horizontal line is the empirical \\(95\\)th percentile of those same \\(30\\) samples; it is a summary threshold, not a second implementation.\n\nRead a solid point above the dashed line as a request slower than that percentile threshold. The line is not the maximum, so a few points can lie above it. The first cold request is reported separately and is not the first point of this warm-only plot.",
-      "connection": "Each duration includes JSON decoding, normalization, transfer, inference, waiting for completion, and encoding the response. That boundary explains why the chart should not be read as pure model execution time. An early high warm point or later spike shows variation in the whole request; this plot alone cannot identify its cause.\n\nThe percentile is computed from a small sample, with interpolation between ordered values. It does not guarantee that future requests will meet the threshold. Compare the sample distribution, median, and tail across repeated runs on the target device. These are local CPU proxy measurements, not evidence of mobile or edge-device latency.",
+      "reading": "The horizontal axis counts thirty warm requests; the vertical axis is complete request time in milliseconds. Follow the solid local-CPU trace and compare each point with the dashed empirical p95 from those same thirty samples. A point above p95 is a slow member of this sample, not an automatic breach of a separately defined service objective.\n\nInspect the early requests and the later cluster. A warmed model can still show request-wrapper and scheduling variation. The timer begins after imports and model setup, so the early points do not include a true cold process start. The p95 line is a descriptive sample threshold and can move when the experiment is rerun.",
+      "connection": "Each dot includes JSON decode, normalization, transfer, inference completion and response encoding. It therefore answers a different question from an isolated kernel timer. Use the same raw golden request when moving to a target device, then compare both its prediction and its actual runtime placement before interpreting a latency difference.\n\nAsk which unmeasured costs a user would still see: process startup, model load, device-runtime initialization or sustained thermal effects. The receipt says `edge_device_validated=false`; those device questions remain for a named-hardware run. Thirty desktop samples explain the protocol, not a production tail guarantee.",
       "alt": "An end-to-end boundary includes more than inference. The horizontal axis counts warm requests, and the vertical axis measures end-to-end latency in milliseconds. The solid line joins the measured request times. The dashed horizontal line is the empirical \\(95\\)th percentile of those same \\(30\\) samples; it is a summary threshold, not a second implementation. Read a solid point above the dashed line as a request slower than that percentile threshold. The line is not the maximum, so a few points can lie above it. The first cold request is reported separately and is not the first point of this warm-only plot.",
       "code": "visual_data = {'kind': 'line', 'x': list(range(1, len(samples) + 1)), 'xlabel': 'warm request number', 'ylabel': 'end-to-end milliseconds', 'series': [{'label': 'local CPU request', 'y': samples}, {'label': 'recorded p95', 'y': [report['p95_ms']] * len(samples)}]}"
     },
@@ -199,27 +231,48 @@
       {
         "title": "Keep a known inference function",
         "instruction": "Create main.py in your lesson workspace and run it with the active course Python environment. Define the fixed dense model and check the parameter shapes without invoking the compiled function.",
-        "code": "# Step 1 — Keep a known inference function: A row has three sensor features and the result has two scores.\nimport json\nimport time\nimport numpy as np\nimport jax\nimport jax.numpy as jnp\nweights = jnp.array([[1., -2.], [.5, 1.], [-1., .25]], jnp.float32)\nbias = jnp.array([.1, -.2], jnp.float32)\n# Define and JIT-compile `infer(features)` so XLA traces and fuses the operations:\n@jax.jit\ndef infer(features):\n    return features @ weights + bias\n\n# Check tensor shape invariant: `weights.shape == (3, 2) and bias.shape == (2,)`\nassert weights.shape == (3, 2) and bias.shape == (2,)",
+        "code": "# Step 1 \u2014 Keep a known inference function: A row has three sensor features and the result has two scores.\nimport json\nimport time\nimport numpy as np\nimport jax\nimport jax.numpy as jnp\nweights = jnp.array([[1., -2.], [.5, 1.], [-1., .25]], jnp.float32)\nbias = jnp.array([.1, -.2], jnp.float32)\n# Define and JIT-compile `infer(features)` so XLA traces and fuses the operations:\n@jax.jit\ndef infer(features):\n    return features @ weights + bias\n\n# Check tensor shape invariant: `weights.shape == (3, 2) and bias.shape == (2,)`\nassert weights.shape == (3, 2) and bias.shape == (2,)",
         "explanation": "A row has three sensor features and the result has two scores. Leave the compiled function uncalled so the later first-request measurement can include initialization."
       },
       {
         "title": "Build the raw-request boundary",
         "instruction": "Append this block to the same main.py and rerun the whole file. Validate the raw JSON protocol, normalize once, wait for inference, and encode the result.",
-        "code": "# Step 2 — Build the raw-request boundary: This probe checks decoding and raw values without running inference.\npayload = json.dumps({\"features\": [[255., 128., 0.]]})\ndef validate_sensor_payload(payload):\n    document = json.loads(payload)\n    if not isinstance(document, dict) or set(document) != {'features'}:\n        raise ValueError('expected features object')\n    rows = document['features']\n    if not isinstance(rows, list) or len(rows) != 1 or not isinstance(rows[0], list) or len(rows[0]) != 3:\n        raise ValueError('expected one row of three sensor values')\n    if any(type(value) not in (int, float) or not 0 <= value <= 255 or not np.isfinite(value) for value in rows[0]):\n        raise ValueError('expected numeric sensor values in the range 0 through 255')\n    return np.asarray(rows, dtype=np.float32)\ndef request(payload):\n    decoded = validate_sensor_payload(payload)\n    features = decoded / 255.\n    # Wait for device work to finish before timing it or comparing its result on the host.\n    output = np.asarray(infer(jnp.asarray(features)).block_until_ready())\n    return json.dumps({\"scores\": output.tolist()})\n\nnp.testing.assert_array_equal(validate_sensor_payload(payload), [[255., 128., 0.]])",
+        "code": "# Step 2 \u2014 Build the raw-request boundary: This probe checks decoding and raw values without running inference.\npayload = json.dumps({\"features\": [[255., 128., 0.]]})\ndef validate_sensor_payload(payload):\n    document = json.loads(payload)\n    if not isinstance(document, dict) or set(document) != {'features'}:\n        raise ValueError('expected features object')\n    rows = document['features']\n    if not isinstance(rows, list) or len(rows) != 1 or not isinstance(rows[0], list) or len(rows[0]) != 3:\n        raise ValueError('expected one row of three sensor values')\n    if any(type(value) not in (int, float) or not 0 <= value <= 255 or not np.isfinite(value) for value in rows[0]):\n        raise ValueError('expected numeric sensor values in the range 0 through 255')\n    return np.asarray(rows, dtype=np.float32)\ndef request(payload):\n    decoded = validate_sensor_payload(payload)\n    features = decoded / 255.\n    # Wait for device work to finish before timing it or comparing its result on the host.\n    output = np.asarray(infer(jnp.asarray(features)).block_until_ready())\n    return json.dumps({\"scores\": output.tolist()})\n\nnp.testing.assert_array_equal(validate_sensor_payload(payload), [[255., 128., 0.]])",
         "explanation": "This probe checks decoding and raw values without running inference. Keep normalization inside request so it happens exactly once."
       },
       {
         "title": "Measure cold and warm requests separately",
         "instruction": "Append this block to the same main.py and rerun the whole file. Time the first request, then retain every warm observation.",
-        "code": "# Step 3 — Measure cold and warm requests separately: The first request can include compilation and initialization.\nstart = time.perf_counter()\nfirst_response = request(payload)\nfirst_ms = (time.perf_counter() - start) * 1000\nsamples = []\nfor _ in range(30):\n    start = time.perf_counter()\n    response = request(payload)\n    samples.append((time.perf_counter() - start) * 1000)",
+        "code": "# Step 3 \u2014 Measure cold and warm requests separately: The first request can include compilation and initialization.\nstart = time.perf_counter()\nfirst_response = request(payload)\nfirst_ms = (time.perf_counter() - start) * 1000\nsamples = []\nfor _ in range(30):\n    start = time.perf_counter()\n    response = request(payload)\n    samples.append((time.perf_counter() - start) * 1000)",
         "explanation": "The first request can include compilation and initialization. The line plot contains only the subsequent warm requests; do not describe its first point as the cold request."
       },
       {
         "title": "Validate outputs and describe measurement scope",
         "instruction": "Append this block to the same main.py and rerun the whole file. Compare the response with independent NumPy arithmetic and write an honest measurement report.",
-        "code": "# Step 4 — Validate outputs and describe measurement scope\nexpected = (np.array([[255., 128., 0.]], np.float32) / 255.) @ np.asarray(weights) + np.asarray(bias)\nnp.testing.assert_allclose(json.loads(response)[\"scores\"], expected, atol=1e-6)\nreport = {\"runtime\": \"JAX CPU instructional proxy\", \"jax\": jax.__version__,\n          \"first_request_ms\": first_ms, \"warm_samples_ms\": samples,\n          \"p50_ms\": float(np.percentile(samples, 50)), \"p95_ms\": float(np.percentile(samples, 95)),\n          \"boundary\": \"JSON decode + normalize + transfer + infer + wait + encode\",\n          \"edge_device_validated\": False}\nassert len(samples) == 30 and all(t >= 0 for t in samples)\nprint(json.dumps(report, indent=2))\n\n# Transfer the device result to the host for an independent NumPy comparison.\nnp.testing.assert_allclose(json.loads(request(json.dumps({'features':[[0,0,0]]})))['scores'], np.asarray(bias)[None,:], atol=1e-6)",
+        "code": "# Step 4 \u2014 Validate outputs and describe measurement scope\nexpected = (np.array([[255., 128., 0.]], np.float32) / 255.) @ np.asarray(weights) + np.asarray(bias)\nnp.testing.assert_allclose(json.loads(response)[\"scores\"], expected, atol=1e-6)\nreport = {\"runtime\": \"JAX CPU instructional proxy\", \"jax\": jax.__version__,\n          \"first_request_ms\": first_ms, \"warm_samples_ms\": samples,\n          \"p50_ms\": float(np.percentile(samples, 50)), \"p95_ms\": float(np.percentile(samples, 95)),\n          \"boundary\": \"JSON decode + normalize + transfer + infer + wait + encode\",\n          \"edge_device_validated\": False}\nassert len(samples) == 30 and all(t >= 0 for t in samples)\nprint(json.dumps(report, indent=2))\n\n# Transfer the device result to the host for an independent NumPy comparison.\nnp.testing.assert_allclose(json.loads(request(json.dumps({'features':[[0,0,0]]})))['scores'], np.asarray(bias)[None,:], atol=1e-6)",
         "explanation": "The report records local CPU timings and explicitly leaves edge-device qualification false. Carry the same protocol to a named device before replacing that field."
       }
-    ]
+    ],
+    "optionFeedback": [
+      "Conversion proves a converter accepted the graph. Device execution, fallback behavior and end-to-end latency require direct measurement.",
+      "CPU timing and compression ratio cannot establish NPU placement or latency. Inspect delegated operations on the actual device.",
+      "Conversion can leave unsupported operations on CPU. Confirm partitioning and measure the whole prediction boundary."
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "The edge request pipeline and the second raw input [0, 255, 128]."
+      ],
+      "outputs": [
+        "The normalized request, pipeline result, and an independent NumPy result for that raw input."
+      ],
+      "invariants": [
+        "Normalization follows the request contract and the pipeline output matches the independent normalized calculation."
+      ],
+      "hints": [
+        "Apply the same normalization used by the request path before calculating the host reference.",
+        "Keep target-device readiness evidence separate from this numerical request check."
+      ],
+      "code": "import numpy as np\n\ndef check_second_edge_request(request_pipeline, raw_input):\n    # TODO: Send the second raw vector through the full request and compare with independent normalized arithmetic.\n    raise NotImplementedError\n"
+    }
   }
 }

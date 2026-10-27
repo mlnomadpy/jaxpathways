@@ -28,6 +28,8 @@ Then connect each primitive to the corresponding part of the original expression
 
 The intermediate-value heatmap is a numerical aid. Pair it with the typed dependency graph to explain how those values were produced. Lowering and compilation can change representation later; a primitive count alone does not predict executed kernel count or runtime.
 
+The executed trace makes the shape change visible: `add` and `mul` each return `f32[3]`, then `reduce_sum[axes=(0,)]` returns `f32[]`. For the recorded input, the scalar is 29 and `grad` returns `[4, 6, 8]`. When inspecting a trace, check the output shape at each equation before interpreting its value; this catches a mistaken reduction axis immediately.
+
 $$
 f(x) \;\xrightarrow{\text{trace}}\; \texttt{ClosedJaxpr}(\text{invars}, \text{eqns}, \text{outvars})
 $$
@@ -191,15 +193,11 @@ Expected: Forward operations include add, mul and reduce_sum, with output shapes
 
 ### Read the figure
 
-Columns track the three array coordinates, while rows track stages of a computation. The first row is input $(1,2,3)$. Adding $1$ produces $(2,3,4)$, and multiplying those values by themselves produces $(4,9,16)$.
-
-Follow one column downward: the final coordinate changes from $3$ to $4$ to $16$. Its darker bottom cell reflects a larger intermediate value, not a more expensive operation or longer runtime.
+Read columns as coordinates 0–2 and rows as the input, add-one result, and elementwise square; the cell unit is the intermediate numeric value. The rows are $ [1,2,3] $, $ [2,3,4] $, and $ [4,9,16] $. Coordinate 2 grows from 3 to 4 to 16, while coordinate 0 grows from 1 to 2 to 4. Shading encodes value magnitude, not cost. Predict the next operation: summing the last row removes the coordinate axis and yields scalar 29.
 
 ### Connect it to the computation
 
-The final reduction adds the bottom row to obtain $4+9+16=29$. That scalar is not another row in the heatmap because it no longer has three separate coordinates. This change of shape connects the elementwise operations to the reduction in the jaxpr.
-
-A jaxpr describes operations and abstract values. The figure supplies concrete intermediate values for this one input, making that program easier to trace by hand. Changing the input changes these numbers without necessarily changing the jaxpr’s structure.
+The trace confirms the same path: add and multiply produce shape $ (3,) $, and reduce-sum produces $ () $ with value 29. Differentiating this scalar gives $2(x+1)=[4,6,8]$, as recorded by the execution output. Use the heatmap to check the primal intermediates and the derivative output to check the transformed program; neither equation count nor color predicts runtime.
 
 ```python
 visual_data = {'kind': 'heatmap', 'values': jnp.stack([x, x + 1, (x + 1) ** 2]).tolist(), 'rows': ['input', 'add 1', 'multiply by self'], 'columns': ['coordinate 0', 'coordinate 1', 'coordinate 2'], 'unit': 'intermediate value'}
@@ -207,7 +205,7 @@ visual_data = {'kind': 'heatmap', 'values': jnp.stack([x, x + 1, (x + 1) ** 2]).
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:24:05.836158+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:08:44.132480+00:00. JAX 0.9.2.
 
 ```text
 Forward program:
@@ -349,26 +347,31 @@ Change the scalar offset from $1$ to $2$. Draw the new value flow for $[1, 2, 3]
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
+**Inputs:**
+- Initial vector [1,2,3] and the original scalar offset 1.
+- Changed scalar offset 2 and the original/modified functions to compare.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- Hand-derived changed function value and input gradient.
+- jaxprs for both the original and changed-offset functions.
+
+**Invariants to check:**
+- Changing the offset changes constants/values while preserving the relevant traced operation structure.
+- The gradient is with respect to the input vector, not the scalar offset.
+
+**Hints:**
+- Trace both offset values at the same input shape.
+- Differentiate the changed function and compare its value flow with the original.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Change the scalar offset from 1 to 2.
-def shifted_two(z):
-    shifted = ...  # TODO: compute shifted
-    return ...  # TODO: return computed result
-print(jax.make_jaxpr(shifted_two)(x))
-assert jnp.allclose(shifted_two(x), 50.)  # TODO: complete assertion check
-assert jnp.allclose(jax.grad(shifted_two)(x), jnp.array([6., 8., 10.]))  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+
+def inspect_offset_function(values, original_offset=1.0, changed_offset=2.0):
+    # TODO: compare hand-derived value flow, input gradient, and both jaxprs.
+    raise NotImplementedError("Compare the original and changed scalar-offset traces")
 ```
 
 <details><summary>Reference solution</summary>
@@ -399,32 +402,29 @@ The exact four-step result is $1.875$; scan carries a scalar.
 
 ### How to write: Compare unrolled and scanned recurrences — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.lax.scan(step_fn, init_carry, xs, length=...)` — Compiles a sequential loop where `step_fn(carry, x)` returns `(next_carry, y)`, returning `(final_carry, stacked_ys)`.
+**Inputs:**
+- Initial scalar state 0 and an affine recurrence applied four times.
 
-**Step-by-step implementation plan:**
-1. Define `scanned(z)` to carry state across steps with `jax.lax.scan`:
+**Outputs:**
+- Unrolled and lax.scan representations and equal final states.
+
+**Invariants to check:**
+- Both implementations use the same number of recurrence steps.
+- The final value agrees with an independent scalar calculation.
+
+**Hints:**
+- Keep the unrolled Python loop static.
+- Return scan carry explicitly and inspect the jaxpr structures.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Compare unrolled and scanned recurrences (Transfer / diagnosis): The outer scan equation has a nested body.
-def unrolled(z):
-    for _ in range(4):
-        z = ...  # TODO: compute z
-    return ...  # TODO: return computed result
-# Define `scanned(z)` to carry state across steps with `jax.lax.scan`:
-def scanned(z):
-    def step(carry, _):
-        new = ...  # TODO: compute new
-        return ...  # TODO: return computed result
-    return jax.lax.scan(step, z, None, length = ...  # TODO: compute return jax.lax.scan(step, z, None, length
-print("Unrolled:", jax.make_jaxpr(unrolled)(jnp.array(0.)))
-print("Scanned:", jax.make_jaxpr(scanned)(jnp.array(0.)))
-assert jnp.allclose(unrolled(jnp.array(0.)), 1.875)  # TODO: complete assertion check
-assert jnp.allclose(scanned(jnp.array(0.)), 1.875)  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+
+def compare_recurrences(initial):
+    # TODO: express the same four updates with a static loop and lax.scan.
+    raise NotImplementedError("Compare unrolled and scanned recurrence representations")
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -465,34 +465,29 @@ Both cond branches must return matching scalar types.
 
 ### How to write: Reproduce and repair a traced boolean failure — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.jit(fn) / @jax.jit` — Traces `fn` for its input signatures and compiles an executable. Changed shapes, dtypes or static arguments can trigger another compilation.
+**Inputs:**
+- A traced vector with positive and negative first elements.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- Captured-boolean tracing failure and a lax.cond implementation for both signs.
+
+**Invariants to check:**
+- The condition is a scalar traced predicate.
+- Both branches return compatible scalar shapes.
+
+**Hints:**
+- First reproduce Python if on a traced boolean.
+- Replace it with lax.cond without converting the predicate to Python.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Reproduce and repair a traced boolean failure (Transfer / diagnosis)
-def bad_branch(z):
-    if z[0] > 0:
-        return ...  # TODO: return computed result
-    return ...  # TODO: return computed result
-try:
-    jax.make_jaxpr(bad_branch)(x)
-except jax.errors.TracerBoolConversionError:
-    print("Expected failure: traced boolean used by Python if")
-else:
-    raise AssertionError("expected tracing failure")
-def repaired(z):
-    return ...  # TODO: return computed result
-print("Repaired:", jax.make_jaxpr(repaired)(x))
-assert jnp.allclose(jax.jit(repaired)(x), 6.)  # TODO: complete assertion check
-assert jnp.allclose(jax.jit(repaired)(-x), 6.)  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+
+def repair_traced_branch(vector):
+    # TODO: demonstrate the Python-branch trace error, then use lax.cond.
+    raise NotImplementedError("Replace data-dependent Python control flow with lax.cond")
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -530,9 +525,17 @@ A jaxpr has more equations after grad. What can you conclude from that observati
 
 <details><summary>Answer and explanation</summary>
 
-The traced derivative has a different computation structure; runtime needs separate measurement.
+**1. The derivative must run slower on every device.**
+
+Equation counts omit fusion, scheduling and memory effects. Measure the workload before ranking runtime cost.
+
+**2. The traced derivative has a different computation structure; runtime needs separate measurement. (correct)**
 
 A jaxpr describes traced primitives. Compiler transformations and hardware execution determine kernel boundaries and timing.
+
+**3. Every equation corresponds to one hardware kernel.**
+
+One jaxpr equation need not become one hardware kernel. Inspect lowered/compiler artifacts and device traces.
 
 </details>
 

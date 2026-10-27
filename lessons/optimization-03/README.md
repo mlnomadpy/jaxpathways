@@ -4,6 +4,8 @@ Phase 04: Math & optimization · about 80 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Curvature, Hessians, and learning rates](https://www.tahabouhsine.com/jaxpathways/lesson-optimization-08.html).
+
 ## What you will be able to do
 
 - Derive one update before writing the loop
@@ -44,6 +46,8 @@ Starting at $w=0$, our gradient is $-4$. Subtracting $0.1$ times $-4$ gives $w=0
 
 Define the error $e=w-2$. The next error is $(1-2\eta)e$. This recurrence explains the whole trajectory for this quadratic. An optimizer update must follow the negative gradient; adding it moves away from the minimum. The subscript $k$ counts updates. The symbol $\eta$ is the learning rate, and $e_k=w_k-2$ is the remaining error. Focus on the multiplier $1-2\eta$: its magnitude tells us whether this particular error shrinks.
 
+The update is current weight minus eta times 2 times (weight minus 2), so the error from the minimizer is multiplied by $1-2\eta$. Starting at weight $0$ means the initial error is $-2$. At $\eta=0.1$, the next error is $-1.6$, hence weight $0.4$ and loss $1.6^2=2.56$. Loss is squared distance to the minimizer, while the derivative is signed local slope; the update uses that slope with a minus sign.
+
 $$
 \begin{aligned}w_{k+1}&=w_k-\eta\,2(w_k-2)\\0&\longrightarrow0.4\longrightarrow0.72\quad(\eta=0.1)\\e_k&=(1-2\eta)^k e_0\end{aligned}
 $$
@@ -53,6 +57,8 @@ $$
 Rates between $0$ and $0.5$ approach the optimum without crossing it. A rate of $0.5$ reaches it in one ideal step. Rates between $0.5$ and $1$ alternate around the optimum with shrinking error. A rate of $1$ alternates forever; values above $1$ grow in magnitude. These statements follow from the error multiplier for this specific loss.
 
 For $L=a(w-c)^2$ with positive a, the stable interval is $0<\eta<\frac{1}{a}$. Scaling a loss changes the curvature and the safe update scale. There is no universal threshold such as $0.1$ for neural networks.
+
+For L=a(w-c)^2, the derivative is 2a(w-c), so the error multiplier is 1-2a eta. Requiring its magnitude below one gives $0<\eta<1/a$. That bound belongs to this one-dimensional quadratic and follows from its curvature 2a, not from an optimizer default.
 
 ## Make the trajectory part of the state contract
 
@@ -160,6 +166,8 @@ Here the loss is $(w-2)^2$. One update multiplies the weight error $w-2$ by $1-2
 
 The large rate crosses the optimum and lands farther away on each step. The loss plot shows the growing distance, while the sign change follows from the update equation; loss alone does not reveal which side the weight is on. The one-step success of rate $0.5$ depends on this simple quadratic’s curvature and is not a universal best learning rate.
 
+Before running another rate, compute 1-2 eta: its sign predicts crossing, and its magnitude predicts whether this quadratic error shrinks.
+
 ```python
 rates = [0.1, 0.5, 1.1]
 series = []
@@ -175,7 +183,7 @@ visual_data = {'kind': 'line', 'x': list(range(12)), 'xlabel': 'completed update
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:20:35.780899+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:13:27.750021+00:00. JAX 0.9.2.
 
 ```text
 Final weight: 1.9999969005584717
@@ -243,17 +251,30 @@ Run ten steps with learning rate $1.1$. Predict whether the error contracts befo
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Inputs:**
+- An initial scalar parameter, step size, and fixed number of updates.
+
+**Outputs:**
+- The parameter/loss history for the requested update schedule.
+
+**Invariants to check:**
+- Each update uses the gradient evaluated at the current parameter; report divergence rather than clipping it away.
+
+**Hints:**
+- Use value_and_grad to measure the loss and gradient at one point.
+- Check whether the update changes the loss in the direction predicted by curvature.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Run ten steps with learning rate 1.1.
-unstable, unstable_history = train(...)  # TODO: compute unstable, unstable_history
-assert unstable_history[-1]  # TODO: complete assertion check
-assert abs(1 - 2 * 1.1)  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+import optax
+
+def gradient_descent(initial, rate, steps):
+    """The parameter/loss history for the requested update schedule."""
+    # TODO: Record parameter and loss after each explicit gradient-descent transition, including the high-rate case.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -281,28 +302,27 @@ The error multiplier is $1-8\eta$; use $\eta=0.1$.
 
 ### How to write: Transfer the stability analysis — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
-- `jax.lax.scan(step_fn, init_carry, xs, length=...)` — Compiles a sequential loop where `step_fn(carry, x)` returns `(next_carry, y)`, returning `(final_carry, stacked_ys)`.
+**Inputs:**
+- For $4(w-3)^2$, derive a stable rate and verify convergence from zero.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- A finite loss history that contracts under the derived rate.
+
+**Invariants to check:**
+- The rate is checked against the new curvature rather than copied from the earlier example.
+
+**Hints:**
+- The error multiplier is $1-8\eta$; use $\eta=0.1$.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Transfer the stability analysis (Transfer / diagnosis)
-def scaled_loss(w):
-    return ...  # TODO: return computed result
-def scaled_step(w, _):
-    new = ...  # TODO: compute new
-    return ...  # TODO: return computed result
-scaled_w, scaled_history = jax.lax.scan(...)  # TODO: compute scaled_w, scaled_history
-assert jnp.allclose(scaled_w, 3., atol=1e-5)  # TODO: complete assertion check
-assert jnp.all(jnp.diff(scaled_history)  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def practice_transfer_the_stability_analysis(rate):
+    """Implement the transfer the stability analysis check."""
+    # TODO: Derive the update multiplier for the changed quadratic, select a stable rate, and retain loss history from zero.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -337,23 +357,28 @@ The derivative at zero is $-4$.
 
 ### How to write: Reproduce an uphill update and repair it — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
+**Inputs:**
+- Show how adding the gradient increases loss, then verify subtraction at the same starting point.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- Both candidate losses and an explicit direction check.
+
+**Invariants to check:**
+- The candidates share the same starting point and learning rate.
+
+**Hints:**
+- The derivative at zero is $-4$.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Reproduce an uphill update and repair it (Transfer / diagnosis)
-uphill = ...  # TODO: compute uphill
-downhill = ...  # TODO: compute downhill
-assert loss(uphill)  # TODO: complete assertion check
-assert loss(downhill)  # TODO: complete assertion check
-assert jnp.allclose(downhill, 0.4)  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+
+def practice_reproduce_an_uphill_update_and_repair_it(initial, rate):
+    """Implement the reproduce an uphill update and repair it check."""
+    # TODO: Apply a plus-gradient step and a minus-gradient step from the same initial value, then compare their losses.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -381,9 +406,17 @@ What makes rate $1.1$ unstable for this particular quadratic?
 
 <details><summary>Answer and explanation</summary>
 
-The error multiplier has magnitude greater than one
+**1. The error multiplier has magnitude greater than one (correct)**
 
 The recurrence multiplies the error by $-1.2$, so its magnitude grows while its sign alternates.
+
+**2. scan cannot differentiate scalar weights**
+
+scan repeats the update you give it. Derive the one-step error factor; the instability is already present in that recurrence.
+
+**3. All learning rates above $0.01$ are unstable**
+
+A safe learning rate depends on curvature. For this quadratic, use the magnitude of the error multiplier rather than a universal threshold.
 
 </details>
 

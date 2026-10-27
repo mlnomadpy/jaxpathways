@@ -4,6 +4,8 @@ Phase 05: Neural network training · about 80 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Build a tiny multilayer perceptron](https://www.tahabouhsine.com/jaxpathways/lesson-networks-01.html).
+
 ## What you will be able to do
 
 - Move the explicit equations into a module
@@ -21,15 +23,23 @@ A model has a computation structure and state values. Some state is trainable; o
 
 ## Distinguish shared structure from changing values
 
-Imagine two attributes referring to the same layer object. They share one parameter set. Drawing two independent weight boxes would misrepresent the computation, even if the printed values initially match.
+Think of `nnx.split(model)` as separating the model's wiring from the arrays currently attached to it. The unfiltered split returns exactly two objects, a `GraphDef` and complete `State`. Here that state has 13 `Param` scalars plus the `calls` variable. Filtering state for `Param` and `Not(Param)` inspects those groups; it does not change the two-result unfiltered call.
 
-Separating graph structure and state lets us transform the numerical state while preserving the intended relationships. Compare paths and values before and after splitting, merging or cloning; copying a Python reference does not create independent model state.
-
-The existing merge figure is a map of these roles. Use the actual NNX operations in the lesson to test the map, especially when a model has state beyond parameters. Evaluation should follow its declared state rules rather than silently repeating training updates.
+The identity variant in the diagram gives `left` and `right` the same hidden layer object. Replacing its bias through one reference is visible through the other because both names reach the same variable. To get an independent snapshot, copy state leaves before merging; equal initial values alone do not imply separate mutable state. The tested run confirms the distinction: the cloned counter advances to 2 while the original stays at 1.
 
 $$
-(\mathcal{G}, \Theta, \mathcal{S}) = \operatorname{split}(M), \qquad M' = \operatorname{merge}(\mathcal{G}, \Theta', \mathcal{S}')
+(\mathcal G,S)=\operatorname{nnx.split}(M),\qquad M^{\prime}=\operatorname{nnx.merge}(\mathcal G,S^{\prime})
 $$
+
+### NNX GraphDef and State with shared and copied module identity
+
+**Predict:** If `left` and `right` point to the same hidden module, what changes when only one reference is assigned a new bias?
+
+![NNX GraphDef and State with shared and copied module identity](../../phases/05-networks/02-model-and-state-with-flax-nnx/outputs/mechanism.svg)
+
+*Architecture and dataflow mechanism diagram.*
+
+Read the upper `GraphDef` node as the module wiring and named edges; the side node states the alias relation `left is right`. The middle `State` node lists `hidden.kernel`, `hidden.bias`, `out.kernel`, `out.bias`, and `calls`. Arrows from both inputs to `nnx.merge(GraphDef, State)` show that structure and current values are needed to rebuild the model. The two lower arrows contrast reusing mutable Variable objects with copying state leaves first. Test the distinction by changing a bias through one alias and by incrementing a cloned counter; the retained run gives source/clone counters 1 and 2.
 
 ### Pause and reason
 
@@ -43,11 +53,15 @@ One shared parameter identity with two uses. Show independent copies only after 
 
 ## Move the explicit equations into a module
 
-A module groups the same equations from the previous lesson with the arrays that they use. `nnx.Linear` owns a kernel and bias; `hidden( x )` computes $xW+b$. A second Linear consumes tanh of the hidden values. The constructor must know the feature dimensions, so an input feature mismatch is a contract error rather than a request to infer a new model. Our width-three example has $6+3+3+1=13$ trainable scalars. A batch dimension can vary without adding parameters. Class-based organization has not changed the mathematics.
+`nnx.Linear(2, 3)` stores a $2\times3$ kernel and a length-three bias; the output layer stores $3\times1$ weights and one bias. The parameter total is $6+3+3+1=13$, matching the printed count. A batch of one or five rows changes the leading batch dimension, not these stored arrays.
+
+The forward pass remains the earlier computation: affine map, tanh, then affine map. Extract the named kernels and biases and compute those operations in NumPy to check that the module wiring matches the explicit equations. An input with the wrong feature count violates the constructor's fixed input contract.
 
 ## Separate parameter state from diagnostic state
 
-The calls counter is an ordinary `nnx.Variable`, not `nnx.Param.` Calling the model with `record=True` increments it as a deliberate teaching example. It is not a learned weight and should not enter optimizer updates. `nnx.state(model, nnx.Param)` selects trainable variables; `nnx.state(model, nnx.Not(nnx.Param))` selects the remaining state. A real model may have batch-normalization statistics or dropout RNG counts in this second category. Excluding a variable from gradients does not make it immutable. You still need to specify when forward passes may change it.
+The `calls` variable is incremented only when this example is called with `record=True`. It is ordinary mutable state, not a learned weight, so `nnx.Optimizer(..., wrt=nnx.Param)` excludes it from parameter updates. Exclusion from gradients does not freeze a value that the forward method changes.
+
+Real models add other non-parameter state. BatchNorm stores running statistics, and Dropout uses RNG state; later evaluation must specify whether those collections are allowed to change. For this toy module, inspect `Param` and its complement and check the counter before and after each call.
 
 ```text
 model
@@ -58,18 +72,22 @@ model
 
 ## Reconstruct an independent graph from a snapshot
 
-`nnx.split` separates the graph definition from dynamic state; `nnx.merge` reconstructs a module from those pieces. In the tested Flax version, merging the original State can reuse Variable objects; map a copying function over state leaves to reconstruct independent typed state first. Think of graph definition as the wiring and state as the current array contents. This is an in-memory demonstration, not a durable checkpoint format. The copied-state clone starts with identical values and independent mutable variables, which we verify below. Incrementing its counter must not increment the original. Copying an attribute reference, in contrast, may share a module. Explicitly test independence rather than assuming any assignment or shallow copy creates a training snapshot.
+`GraphDef` carries module structure and `State` carries current variable values. Merging them reconstructs the same graph shape, but in the tested Flax version a merge with the original `State` may reuse its mutable Variable objects. Copy the state leaves before merging when you need an isolated clone, then test identity through behavior: call the clone with `record=True` and confirm its counter changes while the source counter remains $1$.
+
+The chart counts the four named parameter paths: 6 values in `hidden.kernel`, 3 in `hidden.bias`, 3 in `out.kernel`, and 1 in `out.bias`. It omits `calls`, which is the single non-Param value. The diagram's `left`/`right` alias case illustrates a reference-identity variant, not extra layers in that 13-parameter count. This is an in-memory ownership check, not a durable checkpoint format.
 
 ## Check a library forward pass independently
 
-Reading model.hidden.kernel[...] retrieves its array contents in the tested Flax API. Compute the affine maps and tanh with NumPy using those arrays and compare the logits on several observations. This verifies the wiring, activation placement, and squeeze axis; it does not independently validate the initializer. Then change one output bias and predict the exact added logit shift. Keep this algebraic test separate from classification accuracy. A library refactor can preserve predictions but change state ownership, so both numerical and ownership checks are necessary.
+Read `hidden.kernel`, `hidden.bias`, `out.kernel`, and `out.bias` from the model, then apply the affine, tanh, and affine operations in NumPy to several inputs. Matching logits checks the computation and the final squeeze. It does not test whether initialization is good or whether a classifier generalizes.
+
+A useful algebraic follow-up is to add one to the output bias: every logit should rise by exactly one, while hidden activations stay fixed. The script's clone check separately shows that the copied state can change without changing the original parameter values.
 
 ## 1. Define typed state and the model
 
 Create `main.py`. From the repository root, run `python3 -m pip install -r requirements-cpu.txt` in your activated environment; the course pins Flax `0.12.6`. Copy the model before adding any optimizer.
 
 ```python
-# Step 1 — 1. Define typed state and the model: nnx.Rngs manages initializer keys.
+# Step 1 : 1. Define typed state and the model: nnx.Rngs manages initializer keys.
 from flax import nnx
 import jax
 import jax.numpy as jnp
@@ -95,7 +113,7 @@ batch=jnp.array([[1.,2.],[-1.,.5],[0.,0.]])
 Append an independent NumPy computation. Count only `nnx.Param` leaves, not the counter.
 
 ```python
-# Step 2 — 2. Verify equations and inspect the filters: The matching forward pass verifies the network wiring.
+# Step 2 : 2. Verify equations and inspect the filters: The matching forward pass verifies the network wiring.
 scores=model(batch,record=True)
 # Transfer the device result to the host for an independent NumPy comparison.
 h=np.tanh(np.asarray(batch)@np.asarray(model.hidden.kernel[...])+np.asarray(model.hidden.bias[...]))
@@ -116,7 +134,7 @@ The matching forward pass verifies the network wiring. The filters identify $13$
 Append the clone test. Predict which counter changes when the clone executes.
 
 ```python
-# Step 3 — 3. Split, merge, and test independence: nnx.grad differentiates Param variables by default.
+# Step 3 : 3. Split, merge, and test independence: nnx.grad differentiates Param variables by default.
 graphdef,state=nnx.split(model)
 clone=nnx.merge(graphdef,jax.tree.map(lambda a:jnp.array(a,copy=True),state))
 np.testing.assert_allclose(clone(batch),model(batch),rtol=1e-6)
@@ -133,7 +151,7 @@ print('Trainable scalars: 13; other state: 1; clone counters:',int(model.calls[.
 ## Run the example
 
 ```python
-# Step 1 — 1. Define typed state and the model: nnx.Rngs manages initializer keys.
+# Step 1 : 1. Define typed state and the model: nnx.Rngs manages initializer keys.
 from flax import nnx
 import jax
 import jax.numpy as jnp
@@ -151,7 +169,7 @@ class TinyMLP(nnx.Module):
 model=TinyMLP()
 batch=jnp.array([[1.,2.],[-1.,.5],[0.,0.]])
 
-# Step 2 — 2. Verify equations and inspect the filters: The matching forward pass verifies the network wiring.
+# Step 2 : 2. Verify equations and inspect the filters: The matching forward pass verifies the network wiring.
 scores=model(batch,record=True)
 # Transfer the device result to the host for an independent NumPy comparison.
 h=np.tanh(np.asarray(batch)@np.asarray(model.hidden.kernel[...])+np.asarray(model.hidden.bias[...]))
@@ -164,7 +182,7 @@ assert sum(a.size for a in jax.tree.leaves(param_state))==13
 assert sum(a.size for a in jax.tree.leaves(other_state))==1
 assert int(model.calls[...])==1
 
-# Step 3 — 3. Split, merge, and test independence: nnx.grad differentiates Param variables by default.
+# Step 3 : 3. Split, merge, and test independence: nnx.grad differentiates Param variables by default.
 graphdef,state=nnx.split(model)
 clone=nnx.merge(graphdef,jax.tree.map(lambda a:jnp.array(a,copy=True),state))
 np.testing.assert_allclose(clone(batch),model(batch),rtol=1e-6)
@@ -178,31 +196,30 @@ print('Trainable scalars: 13; other state: 1; clone counters:',int(model.calls[.
 
 Expected: Trainable scalars: $13$; other state: $1$; original and cloned counters are $1$ and $2$.
 
-## Layer parameter counts across the NNX module tree
+## Trainable values at named NNX paths
 
-**Predict:** Predict how many trainable parameters live in the kernel versus the bias of the NNX module.
+**Predict:** Which path contributes six kernel values, and which contributes the diagnostic counter?
 
-![Layer parameter counts across the NNX module tree](../../phases/05-networks/02-model-and-state-with-flax-nnx/outputs/figure.svg)
+![Trainable values at named NNX paths](../../phases/05-networks/02-model-and-state-with-flax-nnx/outputs/figure.svg)
 
 **Recorded CPU computation**
 
 ### Read the figure
 
-Each bar shows the exact element count of a parameter leaf extracted by `nnx.state(model, nnx.Param)`.
+The horizontal axis lists four named NNX parameter paths; bar height is the number of scalar parameter elements at that path. The observed counts are 6 for `hidden.kernel`, 3 for `hidden.bias`, 3 for `out.kernel`, and 1 for `out.bias`, summing to the printed 13 trainable scalars. The separate `calls` variable is not a parameter and is absent.
 
 ### Connect it to the computation
 
-Splitting an NNX module into its graph definition and state PyTree makes every parameter leaf inspectable and transformable by standard JAX functions.
+Use the named counts to reconcile the module with its forward pass: the hidden kernel has shape $2\times3$, and the output kernel has shape $3\times1$. Then inspect the graph/state diagram to find the counter, and check that a copied-state clone can advance its counter without changing the source.
 
 ```python
-# Count parameters in each leaf of the extracted NNX `param_state`:
-leaves_vis = jax.tree.leaves(param_state)
-visual_data = {'kind': 'bar', 'x': list(range(len(leaves_vis))), 'labels': [f'leaf {i}' for i in range(len(leaves_vis))], 'xlabel': 'NNX state parameter leaf index', 'ylabel': 'element count', 'series': [{'label': 'parameter elements', 'y': [float(a.size) for a in leaves_vis]}]}
+visual_data = {'kind': 'bar', 'x': [0, 1, 2, 3], 'labels': ['hidden.kernel', 'hidden.bias', 'out.kernel', 'out.bias'], 'xlabel': 'NNX module path', 'ylabel': 'parameter elements', 'series': [{'label': 'trainable values', 'y': [int(model.hidden.kernel.size), int(model.hidden.bias.size), int(model.out.kernel.size), int(model.out.bias.size)]}]}
+assert visual_data['series'][0]['y'] == [6, 3, 3, 1]
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:21:06.702568+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:26:30.847038+00:00. JAX 0.9.2.
 
 ```text
 Trainable scalars: 13; other state: 1; clone counters: 1 2
@@ -217,7 +234,7 @@ PASS: networks-02
 **Predict before running:** Adding $0.25$ to the output bias should do what to each logit?
 
 ```python
-# Experiment — Bias shifts every score equally
+# Experiment : Bias shifts every score equally
 before=np.asarray(model(batch))
 saved=model.out.bias[...]
 model.out.bias[...] = saved+.25
@@ -234,7 +251,7 @@ An affine output bias changes the decision threshold uniformly; the hidden repre
 **Predict before running:** Will two modules initialized with the same seed produce equal parameters?
 
 ```python
-# Experiment — Repeated construction reproduces state: Replay is checked in one pinned environment.
+# Experiment : Repeated construction reproduces state: Replay is checked in one pinned environment.
 replay=TinyMLP(0)
 for a,b in zip(jax.tree.leaves(nnx.state(replay,nnx.Param)),jax.tree.leaves(param_state)):
     np.testing.assert_array_equal(a,b)
@@ -252,24 +269,29 @@ Apply the model to one new row and to five rows. Verify the scalar parameter cou
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `nnx.Module / nnx.Linear / nnx.Optimizer` — Flax NNX stateful module and optimizer containers with explicit RNG streams (`nnx.Rngs`) and traced graph updates.
+**Inputs:**
+- The lesson’s Flax NNX model and one input row plus a five-row batch.
 
-**Step-by-step implementation plan:**
-1. Check tensor shape invariant: `model(single).shape==(1,)`
-2. Check tensor shape invariant: `model(jnp.repeat(single,5,axis=0)).shape==(5,)`
+**Outputs:**
+- Predictions whose leading dimensions match the input batch sizes, and the trainable scalar count.
+
+**Invariants to check:**
+- Applying the same model to one row and five rows preserves the leading batch axis; the parameter count remains unchanged.
+
+**Hints:**
+- Use inputs shaped (1, 2) and (5, 2), then inspect output shapes.
+- Count only nnx.Param leaves, not the non-parameter call counter.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Apply the model to one new row and to five rows.
-single = jnp.array(...)  # TODO: compute single
-# Check tensor shape invariant: `model(single).shape==(1,)`
-assert model(single).shape  # TODO: complete assertion check
-# Check tensor shape invariant: `model(jnp.repeat(single,5,axis=0)).shape==(5,)`
-assert model(jnp.repeat(single,5,axis=0)).shape  # TODO: complete assertion check
-assert sum(a.size for a  # TODO: complete assertion check
+from flax import nnx
+import jax
+import jax.numpy as jnp
+
+def check_model_batch_contract(model, single_row, five_rows):
+    # TODO: Apply the model to both batches and verify output shapes and trainable scalar count.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -300,25 +322,28 @@ Snapshot the original parameters before editing clone.out.bias.
 
 ### How to write: Change a clone without changing its source — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `nnx.Module / nnx.Linear / nnx.Optimizer` — Flax NNX stateful module and optimizer containers with explicit RNG streams (`nnx.Rngs`) and traced graph updates.
+**Inputs:**
+- Increase only the cloned model’s output bias by one. Predict the change in every logit and verify the original model’s parameter leaves remain unchanged.
 
-**Step-by-step implementation plan:**
-1. Transfer the device result to the host for an independent NumPy comparison.
+**Outputs:**
+- Logit shift on the clone and an unchanged source snapshot.
+
+**Invariants to check:**
+- The clone owns independent variable state rather than aliasing the original module.
+
+**Hints:**
+- Snapshot the original parameters before editing clone.out.bias.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Change a clone without changing its source (Transfer)
-original_leaves = ...  # TODO: compute original_leaves
-# Transfer the device result to the host for an independent NumPy comparison.
-old_clone = np.asarray(...)  # TODO: compute old_clone
-clone.out.bias[...] = ...  # TODO: compute clone.out.bias[...]
-np.testing.assert_allclose(clone(batch),old_clone+1.,rtol=1e-5,atol=1e-6)
-for before,after in zip(original_leaves,jax.tree.leaves(nnx.state(model,nnx.Param))):
-    np.testing.assert_array_equal(before,after)
-print('Clone logits shifted by one; original parameters unchanged.')
+from flax import nnx
+import jax.numpy as jnp
+
+def practice_change_a_clone_without_changing_its_source(model, cloned_model):
+    """Implement the change a clone without changing its source check."""
+    # TODO: Clone model state, increment only the clone output bias, and compare all source parameter leaves before and after.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -353,26 +378,27 @@ Assignment changes which name refers to the same object.
 
 ### How to write: Diagnose a shared module reference — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jax.tree.map(lambda p, g: ..., params, grads)` — Applies a function leaf-by-leaf across matching PyTrees (such as updating every parameter tensor with its gradient).
+**Inputs:**
+- Assign `shared = model`, increment its counter, and demonstrate why this is not a snapshot. Then reconstruct an independent module.
 
-**Step-by-step implementation plan:**
-1. Diagnose a shared module reference (Intermediate)
+**Outputs:**
+- The shared-reference mutation and an isolated copy check.
+
+**Invariants to check:**
+- Assignment preserves object identity; a snapshot must preserve values without shared mutable state.
+
+**Hints:**
+- Assignment changes which name refers to the same object.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Diagnose a shared module reference (Intermediate)
-saved_count = int(...)  # TODO: compute saved_count
-shared = ...  # TODO: compute shared
-shared(batch,record = ...  # TODO: compute shared(batch,record
-assert int(model.calls[...])  # TODO: complete assertion check
-graph,state = nnx.split(...)  # TODO: compute graph,state
-independent = nnx.merge(...)  # TODO: compute independent
-independent(batch,record = ...  # TODO: compute independent(batch,record
-assert int(model.calls[...])  # TODO: complete assertion check
-assert int(independent.calls[...])  # TODO: complete assertion check
+from flax import nnx
+
+def practice_diagnose_a_shared_module_reference(model):
+    """Implement the diagnose a shared module reference check."""
+    # TODO: Assign an alias, mutate its counter, compare the original object, and then construct an independent copy.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -404,9 +430,17 @@ What does excluding the counter from `nnx.Param` guarantee?
 
 <details><summary>Answer and explanation</summary>
 
-It is excluded from parameter gradients, but may still change in a forward pass
+**1. It is excluded from parameter gradients, but may still change in a forward pass (correct)**
 
 Trainability and mutability are different properties. Filtering controls differentiation; the forward function still controls state updates.
+
+**2. It can never change**
+
+Excluding a value from nnx.Param does not freeze it. State such as a counter can still change in the forward computation.
+
+**3. It is automatically saved to disk**
+
+State classification does not persist anything to disk. Saving and restoring requires an explicit checkpoint contract.
 
 </details>
 

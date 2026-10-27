@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "performance-05",
-  "contentHash": "953d2c8f82fb8e3666fe64c389103aaf9cbc0fa319805797bd0fd47319a649a6",
-  "executedAt": "2026-10-20T22:22:18.455961+00:00",
+  "contentHash": "905773d92652ed3591463f88a8f14e625d98a83e068d92de3b84f712f252998e",
+  "executedAt": "2026-10-27T17:06:00.920916+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -11,7 +11,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Saved residual descriptions:\nplain \nf32[16,16] from a constant\nf32[16] output of tanh from <string>:15:20 (layer)\nf32[16] output of sub from <string>:15:20 (layer)\nf32[16] output of tanh from <string>:15:20 (layer)\nf32[16] output of sub from <string>:15:20 (layer)\nf32[16] output of tanh from <string>:15:20 (layer)\nf32[16] output of sub from <string>:15:20 (layer)\nf32[16] output of tanh from <string>:15:20 (layer)\nf32[16] output of sub from <string>:15:20 (layer)\nremat \nf32[16,16] from a constant\nf32[16] from the argument v\nf32[16] output of tanh from <string>:15:20 (layer)\nf32[16] output of tanh from <string>:15:20 (layer)\nf32[16] output of tanh from <string>:15:20 (layer)\nf32[16] output of tanh from <string>:15:20 (layer)\nCompiler memory estimates: [{'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}, {'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}]\nSynchronized gradient samples: [[5.7625118643045425e-05, 4.0416140109300613e-05, 4.675006493926048e-05, 4.9625057727098465e-05, 1.833401620388031e-05], [2.370774745941162e-05, 1.233397051692009e-05, 9.917188435792923e-06, 9.125098586082458e-06, 8.66735354065895e-06]]\nIndependent reverse recurrence agrees with both gradients.\nplain \nf32[16,16] from a constant\nf32[16] output of tanh from <string>:15:20 (layer)\nf32[16] output of sub from <string>:15:20 (layer)\nf32[16] output of tanh from <string>:15:20 (layer)\nf32[16] output of sub from <string>:15:20 (layer)\nf32[16] output of tanh from <string>:15:20 (layer)\nf32[16] output of sub from <string>:15:20 (layer)\nf32[16] output of tanh from <string>:15:20 (layer)\nf32[16] output of sub from <string>:15:20 (layer)\nremat \nf32[16,16] from a constant\nf32[16] from the argument v\nf32[16] output of tanh from <string>:15:20 (layer)\nf32[16] output of tanh from <string>:15:20 (layer)\nf32[16] output of tanh from <string>:15:20 (layer)\nf32[16] output of tanh from <string>:15:20 (layer)\nCompiler memory estimates: [{'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}, {'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}]\nSynchronized gradient samples: [[5.7625118643045425e-05, 4.0416140109300613e-05, 4.675006493926048e-05, 4.9625057727098465e-05, 1.833401620388031e-05], [2.370774745941162e-05, 1.233397051692009e-05, 9.917188435792923e-06, 9.125098586082458e-06, 8.66735354065895e-06]]\nSaved residual descriptions:\nplain \nf32[16,16] from a constant\nf32[16] output of tanh from <string>:81:20 (layer)\nf32[16] output of sub from <string>:81:20 (layer)\nf32[16] output of tanh from <string>:81:20 (layer)\nf32[16] output of sub from <string>:81:20 (layer)\nf32[16] output of tanh from <string>:81:20 (layer)\nf32[16] output of sub from <string>:81:20 (layer)\nf32[16] output of tanh from <string>:81:20 (layer)\nf32[16] output of sub from <string>:81:20 (layer)\nremat \nf32[16,16] from a constant\nf32[16] from the argument v\nf32[16] output of tanh from <string>:81:20 (layer)\nf32[16] output of tanh from <string>:81:20 (layer)\nf32[16] output of tanh from <string>:81:20 (layer)\nf32[16] output of tanh from <string>:81:20 (layer)\nCompiler memory estimates: [{'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}, {'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}]\nSynchronized gradient samples: [[2.5208108127117157e-05, 1.4833174645900726e-05, 1.1416152119636536e-05, 1.1333264410495758e-05, 9.832903742790222e-06], [2.3250002413988113e-05, 4.2708124965429306e-05, 5.6167133152484894e-05, 6.591575220227242e-05, 4.27919439971447e-05]]\nIndependent reverse recurrence agrees with both gradients.\nWhole-objective residuals: ['f32[16,16] from a constant', 'f32[16] from the argument v']\nWhole-objective memory estimate: CompiledMemoryStats(generated_code_size_in_bytes=0, argument_size_in_bytes=64, output_size_in_bytes=64, alias_size_in_bytes=0, temp_size_in_bytes=256, host_generated_code_size_in_bytes=0, host_argument_size_in_bytes=0, host_output_size_in_bytes=0, host_alias_size_in_bytes=0, host_temp_size_in_bytes=0)\nDirectional derivative finite/automatic: 0.007404538337141275 0.00740453926846385 epsilon 0.001\nHigher-order directional derivatives agree.\nPASS: performance-05\n",
+  "stdout": "Saved residual descriptions:\nplain \nf32[16,16] from a constant\nf32[16] output of tanh from <string>:15:20 (layer)\nf32[16] output of sub from <string>:15:20 (layer)\nf32[16] output of tanh from <string>:15:20 (layer)\nf32[16] output of sub from <string>:15:20 (layer)\nf32[16] output of tanh from <string>:15:20 (layer)\nf32[16] output of sub from <string>:15:20 (layer)\nf32[16] output of tanh from <string>:15:20 (layer)\nf32[16] output of sub from <string>:15:20 (layer)\nremat \nf32[16,16] from a constant\nf32[16] from the argument v\nf32[16] output of tanh from <string>:15:20 (layer)\nf32[16] output of tanh from <string>:15:20 (layer)\nf32[16] output of tanh from <string>:15:20 (layer)\nf32[16] output of tanh from <string>:15:20 (layer)\nCompiler memory estimates: [{'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}, {'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}]\nSynchronized gradient samples: [[6.245775148272514e-05, 5.400041118264198e-05, 4.358310252428055e-05, 3.929203376173973e-05, 3.899959847331047e-05], [4.158308729529381e-05, 4.2833853513002396e-05, 6.041722372174263e-05, 5.133310332894325e-05, 3.700004890561104e-05]]\nIndependent reverse recurrence agrees with both gradients.\nplain \nf32[16,16] from a constant\nf32[16] output of tanh from <string>:15:20 (layer)\nf32[16] output of sub from <string>:15:20 (layer)\nf32[16] output of tanh from <string>:15:20 (layer)\nf32[16] output of sub from <string>:15:20 (layer)\nf32[16] output of tanh from <string>:15:20 (layer)\nf32[16] output of sub from <string>:15:20 (layer)\nf32[16] output of tanh from <string>:15:20 (layer)\nf32[16] output of sub from <string>:15:20 (layer)\nremat \nf32[16,16] from a constant\nf32[16] from the argument v\nf32[16] output of tanh from <string>:15:20 (layer)\nf32[16] output of tanh from <string>:15:20 (layer)\nf32[16] output of tanh from <string>:15:20 (layer)\nf32[16] output of tanh from <string>:15:20 (layer)\nCompiler memory estimates: [{'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}, {'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}]\nSynchronized gradient samples: [[6.245775148272514e-05, 5.400041118264198e-05, 4.358310252428055e-05, 3.929203376173973e-05, 3.899959847331047e-05], [4.158308729529381e-05, 4.2833853513002396e-05, 6.041722372174263e-05, 5.133310332894325e-05, 3.700004890561104e-05]]\nSaved residual descriptions:\nplain \nf32[16,16] from a constant\nf32[16] output of tanh from <string>:81:20 (layer)\nf32[16] output of sub from <string>:81:20 (layer)\nf32[16] output of tanh from <string>:81:20 (layer)\nf32[16] output of sub from <string>:81:20 (layer)\nf32[16] output of tanh from <string>:81:20 (layer)\nf32[16] output of sub from <string>:81:20 (layer)\nf32[16] output of tanh from <string>:81:20 (layer)\nf32[16] output of sub from <string>:81:20 (layer)\nremat \nf32[16,16] from a constant\nf32[16] from the argument v\nf32[16] output of tanh from <string>:81:20 (layer)\nf32[16] output of tanh from <string>:81:20 (layer)\nf32[16] output of tanh from <string>:81:20 (layer)\nf32[16] output of tanh from <string>:81:20 (layer)\nCompiler memory estimates: [{'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}, {'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}]\nSynchronized gradient samples: [[6.358325481414795e-05, 3.262516111135483e-05, 3.1750183552503586e-05, 2.270890399813652e-05, 9.291805326938629e-06], [1.237494871020317e-05, 8.792150765657425e-06, 7.83335417509079e-06, 1.7334241420030594e-05, 1.2707896530628204e-05]]\nIndependent reverse recurrence agrees with both gradients.\nWhole-objective residuals: ['f32[16,16] from a constant', 'f32[16] from the argument v']\nWhole-objective memory estimate: CompiledMemoryStats(generated_code_size_in_bytes=0, argument_size_in_bytes=64, output_size_in_bytes=64, alias_size_in_bytes=0, temp_size_in_bytes=256, host_generated_code_size_in_bytes=0, host_argument_size_in_bytes=0, host_output_size_in_bytes=0, host_alias_size_in_bytes=0, host_temp_size_in_bytes=0)\nDirectional derivative finite/automatic: 0.007404538337141275 0.00740453926846385 epsilon 0.001\nHigher-order directional derivatives agree.\nPASS: performance-05\n",
   "notebookCells": [
     {
       "sourceHash": "74f38a131297bed5100292a4a0212b7c95555aca685d27457cbb9fa102554696",
@@ -27,23 +27,23 @@
             "Saved residual descriptions:\n",
             "plain \n",
             "f32[16,16] from a constant\n",
-            "f32[16] output of tanh from /Users/tahabsn/Documents/ChatGPT/jaxpathways/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-1:12:20 (layer)\n",
-            "f32[16] output of sub from /Users/tahabsn/Documents/ChatGPT/jaxpathways/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-1:12:20 (layer)\n",
-            "f32[16] output of tanh from /Users/tahabsn/Documents/ChatGPT/jaxpathways/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-1:12:20 (layer)\n",
-            "f32[16] output of sub from /Users/tahabsn/Documents/ChatGPT/jaxpathways/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-1:12:20 (layer)\n",
-            "f32[16] output of tanh from /Users/tahabsn/Documents/ChatGPT/jaxpathways/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-1:12:20 (layer)\n",
-            "f32[16] output of sub from /Users/tahabsn/Documents/ChatGPT/jaxpathways/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-1:12:20 (layer)\n",
-            "f32[16] output of tanh from /Users/tahabsn/Documents/ChatGPT/jaxpathways/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-1:12:20 (layer)\n",
-            "f32[16] output of sub from /Users/tahabsn/Documents/ChatGPT/jaxpathways/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-1:12:20 (layer)\n",
+            "f32[16] output of tanh from /private/tmp/jaxpathways-content-repairs-review/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-1:12:20 (layer)\n",
+            "f32[16] output of sub from /private/tmp/jaxpathways-content-repairs-review/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-1:12:20 (layer)\n",
+            "f32[16] output of tanh from /private/tmp/jaxpathways-content-repairs-review/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-1:12:20 (layer)\n",
+            "f32[16] output of sub from /private/tmp/jaxpathways-content-repairs-review/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-1:12:20 (layer)\n",
+            "f32[16] output of tanh from /private/tmp/jaxpathways-content-repairs-review/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-1:12:20 (layer)\n",
+            "f32[16] output of sub from /private/tmp/jaxpathways-content-repairs-review/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-1:12:20 (layer)\n",
+            "f32[16] output of tanh from /private/tmp/jaxpathways-content-repairs-review/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-1:12:20 (layer)\n",
+            "f32[16] output of sub from /private/tmp/jaxpathways-content-repairs-review/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-1:12:20 (layer)\n",
             "remat \n",
             "f32[16,16] from a constant\n",
             "f32[16] from the argument v\n",
-            "f32[16] output of tanh from /Users/tahabsn/Documents/ChatGPT/jaxpathways/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-1:12:20 (layer)\n",
-            "f32[16] output of tanh from /Users/tahabsn/Documents/ChatGPT/jaxpathways/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-1:12:20 (layer)\n",
-            "f32[16] output of tanh from /Users/tahabsn/Documents/ChatGPT/jaxpathways/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-1:12:20 (layer)\n",
-            "f32[16] output of tanh from /Users/tahabsn/Documents/ChatGPT/jaxpathways/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-1:12:20 (layer)\n",
+            "f32[16] output of tanh from /private/tmp/jaxpathways-content-repairs-review/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-1:12:20 (layer)\n",
+            "f32[16] output of tanh from /private/tmp/jaxpathways-content-repairs-review/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-1:12:20 (layer)\n",
+            "f32[16] output of tanh from /private/tmp/jaxpathways-content-repairs-review/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-1:12:20 (layer)\n",
+            "f32[16] output of tanh from /private/tmp/jaxpathways-content-repairs-review/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-1:12:20 (layer)\n",
             "Compiler memory estimates: [{'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}, {'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}]\n",
-            "Synchronized gradient samples: [[2.7582980692386627e-05, 2.587493509054184e-05, 3.1999778002500534e-05, 3.3250078558921814e-05, 1.587485894560814e-05], [3.262516111135483e-05, 2.4999957531690598e-05, 2.4791806936264038e-05, 2.7167145162820816e-05, 3.2667070627212524e-05]]\n",
+            "Synchronized gradient samples: [[5.3416937589645386e-05, 6.779097020626068e-05, 4.716683179140091e-05, 4.700012505054474e-05, 5.529215559363365e-05], [5.8833975344896317e-05, 7.904181256890297e-05, 5.174987018108368e-05, 4.28343191742897e-05, 2.0042061805725098e-05]]\n",
             "Independent reverse recurrence agrees with both gradients.\n"
           ]
         }
@@ -58,23 +58,23 @@
           "text": [
             "plain \n",
             "f32[16,16] from a constant\n",
-            "f32[16] output of tanh from /Users/tahabsn/Documents/ChatGPT/jaxpathways/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-1:12:20 (layer)\n",
-            "f32[16] output of sub from /Users/tahabsn/Documents/ChatGPT/jaxpathways/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-1:12:20 (layer)\n",
-            "f32[16] output of tanh from /Users/tahabsn/Documents/ChatGPT/jaxpathways/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-1:12:20 (layer)\n",
-            "f32[16] output of sub from /Users/tahabsn/Documents/ChatGPT/jaxpathways/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-1:12:20 (layer)\n",
-            "f32[16] output of tanh from /Users/tahabsn/Documents/ChatGPT/jaxpathways/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-1:12:20 (layer)\n",
-            "f32[16] output of sub from /Users/tahabsn/Documents/ChatGPT/jaxpathways/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-1:12:20 (layer)\n",
-            "f32[16] output of tanh from /Users/tahabsn/Documents/ChatGPT/jaxpathways/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-1:12:20 (layer)\n",
-            "f32[16] output of sub from /Users/tahabsn/Documents/ChatGPT/jaxpathways/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-1:12:20 (layer)\n",
+            "f32[16] output of tanh from /private/tmp/jaxpathways-content-repairs-review/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-1:12:20 (layer)\n",
+            "f32[16] output of sub from /private/tmp/jaxpathways-content-repairs-review/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-1:12:20 (layer)\n",
+            "f32[16] output of tanh from /private/tmp/jaxpathways-content-repairs-review/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-1:12:20 (layer)\n",
+            "f32[16] output of sub from /private/tmp/jaxpathways-content-repairs-review/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-1:12:20 (layer)\n",
+            "f32[16] output of tanh from /private/tmp/jaxpathways-content-repairs-review/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-1:12:20 (layer)\n",
+            "f32[16] output of sub from /private/tmp/jaxpathways-content-repairs-review/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-1:12:20 (layer)\n",
+            "f32[16] output of tanh from /private/tmp/jaxpathways-content-repairs-review/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-1:12:20 (layer)\n",
+            "f32[16] output of sub from /private/tmp/jaxpathways-content-repairs-review/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-1:12:20 (layer)\n",
             "remat \n",
             "f32[16,16] from a constant\n",
             "f32[16] from the argument v\n",
-            "f32[16] output of tanh from /Users/tahabsn/Documents/ChatGPT/jaxpathways/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-1:12:20 (layer)\n",
-            "f32[16] output of tanh from /Users/tahabsn/Documents/ChatGPT/jaxpathways/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-1:12:20 (layer)\n",
-            "f32[16] output of tanh from /Users/tahabsn/Documents/ChatGPT/jaxpathways/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-1:12:20 (layer)\n",
-            "f32[16] output of tanh from /Users/tahabsn/Documents/ChatGPT/jaxpathways/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-1:12:20 (layer)\n",
+            "f32[16] output of tanh from /private/tmp/jaxpathways-content-repairs-review/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-1:12:20 (layer)\n",
+            "f32[16] output of tanh from /private/tmp/jaxpathways-content-repairs-review/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-1:12:20 (layer)\n",
+            "f32[16] output of tanh from /private/tmp/jaxpathways-content-repairs-review/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-1:12:20 (layer)\n",
+            "f32[16] output of tanh from /private/tmp/jaxpathways-content-repairs-review/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-1:12:20 (layer)\n",
             "Compiler memory estimates: [{'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}, {'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}]\n",
-            "Synchronized gradient samples: [[2.7582980692386627e-05, 2.587493509054184e-05, 3.1999778002500534e-05, 3.3250078558921814e-05, 1.587485894560814e-05], [3.262516111135483e-05, 2.4999957531690598e-05, 2.4791806936264038e-05, 2.7167145162820816e-05, 3.2667070627212524e-05]]\n"
+            "Synchronized gradient samples: [[5.3416937589645386e-05, 6.779097020626068e-05, 4.716683179140091e-05, 4.700012505054474e-05, 5.529215559363365e-05], [5.8833975344896317e-05, 7.904181256890297e-05, 5.174987018108368e-05, 4.28343191742897e-05, 2.0042061805725098e-05]]\n"
           ]
         }
       ]
@@ -89,23 +89,23 @@
             "Saved residual descriptions:\n",
             "plain \n",
             "f32[16,16] from a constant\n",
-            "f32[16] output of tanh from /Users/tahabsn/Documents/ChatGPT/jaxpathways/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-4:12:20 (layer)\n",
-            "f32[16] output of sub from /Users/tahabsn/Documents/ChatGPT/jaxpathways/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-4:12:20 (layer)\n",
-            "f32[16] output of tanh from /Users/tahabsn/Documents/ChatGPT/jaxpathways/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-4:12:20 (layer)\n",
-            "f32[16] output of sub from /Users/tahabsn/Documents/ChatGPT/jaxpathways/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-4:12:20 (layer)\n",
-            "f32[16] output of tanh from /Users/tahabsn/Documents/ChatGPT/jaxpathways/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-4:12:20 (layer)\n",
-            "f32[16] output of sub from /Users/tahabsn/Documents/ChatGPT/jaxpathways/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-4:12:20 (layer)\n",
-            "f32[16] output of tanh from /Users/tahabsn/Documents/ChatGPT/jaxpathways/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-4:12:20 (layer)\n",
-            "f32[16] output of sub from /Users/tahabsn/Documents/ChatGPT/jaxpathways/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-4:12:20 (layer)\n",
+            "f32[16] output of tanh from /private/tmp/jaxpathways-content-repairs-review/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-4:12:20 (layer)\n",
+            "f32[16] output of sub from /private/tmp/jaxpathways-content-repairs-review/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-4:12:20 (layer)\n",
+            "f32[16] output of tanh from /private/tmp/jaxpathways-content-repairs-review/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-4:12:20 (layer)\n",
+            "f32[16] output of sub from /private/tmp/jaxpathways-content-repairs-review/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-4:12:20 (layer)\n",
+            "f32[16] output of tanh from /private/tmp/jaxpathways-content-repairs-review/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-4:12:20 (layer)\n",
+            "f32[16] output of sub from /private/tmp/jaxpathways-content-repairs-review/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-4:12:20 (layer)\n",
+            "f32[16] output of tanh from /private/tmp/jaxpathways-content-repairs-review/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-4:12:20 (layer)\n",
+            "f32[16] output of sub from /private/tmp/jaxpathways-content-repairs-review/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-4:12:20 (layer)\n",
             "remat \n",
             "f32[16,16] from a constant\n",
             "f32[16] from the argument v\n",
-            "f32[16] output of tanh from /Users/tahabsn/Documents/ChatGPT/jaxpathways/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-4:12:20 (layer)\n",
-            "f32[16] output of tanh from /Users/tahabsn/Documents/ChatGPT/jaxpathways/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-4:12:20 (layer)\n",
-            "f32[16] output of tanh from /Users/tahabsn/Documents/ChatGPT/jaxpathways/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-4:12:20 (layer)\n",
-            "f32[16] output of tanh from /Users/tahabsn/Documents/ChatGPT/jaxpathways/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-4:12:20 (layer)\n",
+            "f32[16] output of tanh from /private/tmp/jaxpathways-content-repairs-review/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-4:12:20 (layer)\n",
+            "f32[16] output of tanh from /private/tmp/jaxpathways-content-repairs-review/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-4:12:20 (layer)\n",
+            "f32[16] output of tanh from /private/tmp/jaxpathways-content-repairs-review/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-4:12:20 (layer)\n",
+            "f32[16] output of tanh from /private/tmp/jaxpathways-content-repairs-review/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-4:12:20 (layer)\n",
             "Compiler memory estimates: [{'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}, {'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}]\n",
-            "Synchronized gradient samples: [[4.983367398381233e-05, 1.7290934920310974e-05, 9.374693036079407e-06, 1.00000761449337e-05, 9.167008101940155e-06], [4.0207989513874054e-05, 2.5666318833827972e-05, 1.1957716196775436e-05, 1.1208932846784592e-05, 1.0542105883359909e-05]]\n",
+            "Synchronized gradient samples: [[5.995761603116989e-05, 7.087504491209984e-05, 6.683403626084328e-05, 6.625009700655937e-05, 5.791662260890007e-05], [5.9540849179029465e-05, 5.224999040365219e-05, 4.379218444228172e-05, 2.5541987270116806e-05, 2.037500962615013e-05]]\n",
             "Independent reverse recurrence agrees with both gradients.\n"
           ]
         }
@@ -116,7 +116,7 @@
       "outputs": []
     },
     {
-      "sourceHash": "25df6d662f9d3f0c4e984c6a201f79fa0cfd7a2633dc4b0773dfba6c2dd4ee6c",
+      "sourceHash": "53dc08a479da44f2b1718bf964cd5c4d3e3305811c536df9d501b1833a6e3476",
       "outputs": [
         {
           "output_type": "display_data",
@@ -144,7 +144,7 @@
       ]
     },
     {
-      "sourceHash": "01fad85ff32b295042d712e8a2b5dc5846abc9d9b50f4fb154fa04505ef23c83",
+      "sourceHash": "22d5d8896e54aecd8b70f9aafa0c68cf3475cdb9799648df8d1bbbd8b53d1ac8",
       "outputs": []
     },
     {
@@ -160,7 +160,7 @@
       ]
     },
     {
-      "sourceHash": "a73fd21960be1cb66541b2e8a5f6feae152641c000365dec156a0e041cbff6d3",
+      "sourceHash": "22d5d8896e54aecd8b70f9aafa0c68cf3475cdb9799648df8d1bbbd8b53d1ac8",
       "outputs": []
     },
     {

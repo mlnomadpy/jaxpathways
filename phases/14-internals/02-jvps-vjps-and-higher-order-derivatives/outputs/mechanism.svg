@@ -21,20 +21,20 @@
  </defs>
  <g id="figure_1">
   <g id="patch_1">
-   <path d="M 0 252 
-L 576 252 
-L 576 0 
-L 0 0 
+   <path d="M 0 252
+L 576 252
+L 576 0
+L 0 0
 z
 " style="fill: #ffffff"/>
   </g>
   <g id="axes_1">
    <g id="table_1">
     <g id="patch_2">
-     <path d="M 3.00024 105.462007 
-L 145.50012 105.462007 
-L 145.50012 64.38602 
-L 3.00024 64.38602 
+     <path d="M 3.00024 105.462007
+L 145.50012 105.462007
+L 145.50012 64.38602
+L 3.00024 64.38602
 z
 " style="fill: #e9e4f5; stroke: #ccd3df; stroke-linejoin: miter"/>
     </g>
@@ -42,10 +42,10 @@ z
      <text style="font-weight: 700; font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="74.25018" y="88.235263" transform="rotate(-0 74.25018 88.235263)">Mode</text>
     </g>
     <g id="patch_3">
-     <path d="M 145.50012 105.462007 
-L 288 105.462007 
-L 288 64.38602 
-L 145.50012 64.38602 
+     <path d="M 145.50012 105.462007
+L 288 105.462007
+L 288 64.38602
+L 145.50012 64.38602
 z
 " style="fill: #e9e4f5; stroke: #ccd3df; stroke-linejoin: miter"/>
     </g>
@@ -53,10 +53,10 @@ z
      <text style="font-weight: 700; font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="216.75006" y="88.235263" transform="rotate(-0 216.75006 88.235263)">Input</text>
     </g>
     <g id="patch_4">
-     <path d="M 288 105.462007 
-L 430.49988 105.462007 
-L 430.49988 64.38602 
-L 288 64.38602 
+     <path d="M 288 105.462007
+L 430.49988 105.462007
+L 430.49988 64.38602
+L 288 64.38602
 z
 " style="fill: #e9e4f5; stroke: #ccd3df; stroke-linejoin: miter"/>
     </g>
@@ -64,10 +64,10 @@ z
      <text style="font-weight: 700; font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="359.24994" y="88.235263" transform="rotate(-0 359.24994 88.235263)">Linear map</text>
     </g>
     <g id="patch_5">
-     <path d="M 430.49988 105.462007 
-L 572.99976 105.462007 
-L 572.99976 64.38602 
-L 430.49988 64.38602 
+     <path d="M 430.49988 105.462007
+L 572.99976 105.462007
+L 572.99976 64.38602
+L 430.49988 64.38602
 z
 " style="fill: #e9e4f5; stroke: #ccd3df; stroke-linejoin: miter"/>
     </g>
@@ -75,10 +75,10 @@ z
      <text style="font-weight: 700; font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="501.74982" y="88.235263" transform="rotate(-0 501.74982 88.235263)">Result</text>
     </g>
     <g id="patch_6">
-     <path d="M 3.00024 146.537993 
-L 145.50012 146.537993 
-L 145.50012 105.462007 
-L 3.00024 105.462007 
+     <path d="M 3.00024 146.537993
+L 145.50012 146.537993
+L 145.50012 105.462007
+L 3.00024 105.462007
 z
 " style="fill: #f4f7fb; stroke: #ccd3df; stroke-linejoin: miter"/>
     </g>
@@ -86,10 +86,10 @@ z
      <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="74.25018" y="129.31125" transform="rotate(-0 74.25018 129.31125)">JVP</text>
     </g>
     <g id="patch_7">
-     <path d="M 145.50012 146.537993 
-L 288 146.537993 
-L 288 105.462007 
-L 145.50012 105.462007 
+     <path d="M 145.50012 146.537993
+L 288 146.537993
+L 288 105.462007
+L 145.50012 105.462007
 z
 " style="fill: #f4f7fb; stroke: #ccd3df; stroke-linejoin: miter"/>
     </g>
@@ -97,10 +97,10 @@ z
      <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="216.75006" y="129.31125" transform="rotate(-0 216.75006 129.31125)">direction: (3,)</text>
     </g>
     <g id="patch_8">
-     <path d="M 288 146.537993 
-L 430.49988 146.537993 
-L 430.49988 105.462007 
-L 288 105.462007 
+     <path d="M 288 146.537993
+L 430.49988 146.537993
+L 430.49988 105.462007
+L 288 105.462007
 z
 " style="fill: #f4f7fb; stroke: #ccd3df; stroke-linejoin: miter"/>
     </g>
@@ -108,10 +108,10 @@ z
      <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="359.24994" y="129.31125" transform="rotate(-0 359.24994 129.31125)">J: (2, 3)</text>
     </g>
     <g id="patch_9">
-     <path d="M 430.49988 146.537993 
-L 572.99976 146.537993 
-L 572.99976 105.462007 
-L 430.49988 105.462007 
+     <path d="M 430.49988 146.537993
+L 572.99976 146.537993
+L 572.99976 105.462007
+L 430.49988 105.462007
 z
 " style="fill: #f4f7fb; stroke: #ccd3df; stroke-linejoin: miter"/>
     </g>
@@ -119,10 +119,10 @@ z
      <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="501.74982" y="129.31125" transform="rotate(-0 501.74982 129.31125)">Jv: (2,)</text>
     </g>
     <g id="patch_10">
-     <path d="M 3.00024 187.61398 
-L 145.50012 187.61398 
-L 145.50012 146.537993 
-L 3.00024 146.537993 
+     <path d="M 3.00024 187.61398
+L 145.50012 187.61398
+L 145.50012 146.537993
+L 3.00024 146.537993
 z
 " style="fill: #ffffff; stroke: #ccd3df; stroke-linejoin: miter"/>
     </g>
@@ -130,10 +130,10 @@ z
      <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="74.25018" y="170.387237" transform="rotate(-0 74.25018 170.387237)">VJP</text>
     </g>
     <g id="patch_11">
-     <path d="M 145.50012 187.61398 
-L 288 187.61398 
-L 288 146.537993 
-L 145.50012 146.537993 
+     <path d="M 145.50012 187.61398
+L 288 187.61398
+L 288 146.537993
+L 145.50012 146.537993
 z
 " style="fill: #ffffff; stroke: #ccd3df; stroke-linejoin: miter"/>
     </g>
@@ -141,10 +141,10 @@ z
      <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="216.75006" y="170.387237" transform="rotate(-0 216.75006 170.387237)">sensitivity: (2,)</text>
     </g>
     <g id="patch_12">
-     <path d="M 288 187.61398 
-L 430.49988 187.61398 
-L 430.49988 146.537993 
-L 288 146.537993 
+     <path d="M 288 187.61398
+L 430.49988 187.61398
+L 430.49988 146.537993
+L 288 146.537993
 z
 " style="fill: #ffffff; stroke: #ccd3df; stroke-linejoin: miter"/>
     </g>
@@ -152,10 +152,10 @@ z
      <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="359.24994" y="170.387237" transform="rotate(-0 359.24994 170.387237)">Jᵀ: (3, 2)</text>
     </g>
     <g id="patch_13">
-     <path d="M 430.49988 187.61398 
-L 572.99976 187.61398 
-L 572.99976 146.537993 
-L 430.49988 146.537993 
+     <path d="M 430.49988 187.61398
+L 572.99976 187.61398
+L 572.99976 146.537993
+L 430.49988 146.537993
 z
 " style="fill: #ffffff; stroke: #ccd3df; stroke-linejoin: miter"/>
     </g>

@@ -4,6 +4,8 @@ Phase 07: Transformers & language models · about 120 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [A Transformer block and mixed precision](https://www.tahabouhsine.com/jaxpathways/lesson-transformers-03.html).
+
 ## What you will be able to do
 
 - Assemble the token-to-logit contract
@@ -22,11 +24,9 @@ Training provides known shifted targets. Generation predicts a next-token distri
 
 ## Separate teacher-forced targets from generated context
 
-For probabilities $0.6,0.3,0.1$, greedy decoding selects the first token. Sampling may select another nonzero-probability token. That different choice changes the context and therefore the distribution at the following step.
+Training evaluates the next-token distribution at known prefixes; generation feeds a chosen token back as new context. For a row with probabilities $0.6,0.3,0.1$, greedy decoding chooses the first token, while sampling can choose either other token and thereby change the next prefix.
 
-Read each row of the probability figure before interpreting the generated string. Confidence on the fixture's target shows behavior on this small task; it is separate from broad language ability.
-
-Keep tokenizer identity, context limit and termination rules with the checkpoint. Correct weights with a changed token-to-ID mapping define a different system. The text harness adds explicit cache behavior later; do not infer that this lesson's simple generation loop already implements it.
+Read a probability row for the relevant context before interpreting a generated string. The checkpoint must travel with its token-to-ID mapping, context limit and stopping rule; changing any of these changes the system being evaluated.
 
 $$
 \mathcal{L}_{\text{CE}} = -\frac{1}{\sum_{t} m_t} \sum_{t=1}^{T} m_t \log P_\theta(y_t \mid y_{<t})
@@ -44,9 +44,9 @@ They can choose different earlier tokens, giving the model different later conte
 
 ## Assemble the token-to-logit contract
 
-Each token ID indexes one row of a $(3, 8)$ embedding table. Add a position row, apply the single-head causal block, normalize and project to three vocabulary logits. vmap applies this per-sequence function over the batch. The loss averages token cross entropy over both example and position axes.
+Each token ID selects one row of the $3\times8$ embedding table, a position row is added, and the single-head causal block produces hidden states that normalization and a projection turn into three vocabulary logits. `vmap` applies the sequence function to each batch row; cross entropy is averaged over examples and positions.
 
-For a uniform three-class prediction, negative log probability is `log(3)`, about $1.0986$, regardless of the target class. Zeroing the head provides a known check of that objective. This reduction assumes all positions are valid; padding and packing would require the masks and eligible-token reduction taught in the preceding lesson.
+With three equally likely classes, every target contributes $\log 3\approx1.0986$. Zeroing the prediction head gives this known check. The fixture has no padding, so every position is counted; padding or packed examples require the preceding lesson's masks and valid-token reduction.
 
 ```text
 IDs (B, T) → embeddings (B, T, 8)
@@ -56,27 +56,33 @@ shifted targets (B, T) → mean cross entropy → scalar
 
 ## Separate a learning experiment from a benchmark
 
-The training string repeats abc; the held-out string begins with bca. Splitting strings makes the evaluation call distinct, but repeated periodic contexts mean that the split is separate from unseen-context generalization. The expected greedy sequence follows a known cycle, so it is a correctness fixture.
+The training string repeats `abc`, while held-out text begins at a shifted phase. This checks that the training call, held-out call and next-token alignment work, but the periodic pattern is not broad unseen-context generalization; a simpler model could learn it.
 
-Record initial loss, final held-out loss and accuracy, and inspect target alignment by hand. A model could learn this rule with a simpler architecture. This exercise demonstrates the Transformer training plumbing; it does not demonstrate that attention is necessary for the task or that the model understands language.
+The recorded run starts at loss about $0.9808$, then reports held-out loss about $0.00179$ and held-out accuracy $1.0$ on this tiny fixture. Treat that as successful plumbing on the declared data, then ask what new split or pattern would be needed to test a broader claim.
 
 ## Checkpoint the continuation state and its schema
 
-Adam carries count and moment estimates. Saving only parameters loses those values; even an equal initial loss after restart cannot prove that the next update will match. Save parameter and optimizer leaves, step, vocabulary and context. Recreate the expected tree structure from the same model and optimizer schema when loading, and reject mismatched leaf counts, shapes or dtypes.
+An optimizer such as Adam carries a step count and moment estimates, so saving parameters alone does not preserve the next update. Save parameter and optimizer leaves, step, vocabulary and context, then rebuild the expected tree from the same model and optimizer schema before loading. Reject different leaf counts, shapes or dtypes.
 
-The example writes numeric NPZ arrays with pickle disabled and a JSON manifest in a temporary directory, then checks the next transition against the uninterrupted state. The files are deliberately cleaned up after this smoke exercise. To keep learner evidence, change the directory to a persistent experiment folder. This two-file format is not atomic crash recovery; the data/recovery phase teaches stronger failure boundaries.
+The example writes numeric NPZ arrays with pickle disabled plus a JSON manifest, then compares the next update with uninterrupted training. It deletes the temporary files after the smoke check; point it at a persistent experiment directory to retain evidence. The two-file format is not atomic crash recovery.
 
 ## Generate with an explicit decoding policy
 
-For greedy generation, take the last token’s logits, choose argmax, append that token and repeat. Keep at most four tokens as the next context. There is no sampling key because this decoding policy is deterministic. Ties follow the argmax implementation; temperature and stochastic sampling would change the policy.
+Greedy generation takes the final context position's logits, chooses argmax, appends that token, and repeats while retaining at most four tokens. This policy is deterministic and needs no sampling key. Temperature sampling would be a different policy and require explicit randomness; ties follow the argmax implementation.
 
-Recomputing the whole window is simple but inefficient for a large model. This lesson does not implement a key/value cache or serving scheduler. Unknown characters and empty prompts must fail clearly instead of silently becoming another vocabulary ID.
+The recorded run generates `abcabcabcabc`. It recomputes the full window each step, which keeps the example simple but does not implement a key/value cache or serving scheduler. Fail clearly on unknown characters or an empty prompt instead of silently changing the input.
 
 ## Use failures to test the experiment boundary
 
-Zero logits should give `log(3)`; a future-token perturbation should not affect earlier logits; a mismatched checkpoint vocabulary should be rejected; and an empty prompt should fail. These cases test different contracts, so passing one is verified separately from the others.
+These checks probe different contracts: zero logits should yield $\log 3$, perturbing a future token should leave earlier logits unchanged, a mismatched checkpoint vocabulary should be rejected, and an empty prompt should fail. Run each check independently so one passing case does not stand in for the others.
 
-Keep the corpus, vocabulary, context, model seed, optimizer settings, package versions and numeric outputs with your work. The deterministic fixture has no shuffled data position or dropout key after initialization; a production resume must preserve those additional states when present.
+Keep corpus, vocabulary, context, seed, optimizer settings, package versions and numeric outputs with the run. This fixture has no shuffled data position or dropout key after initialization; a production resume must preserve those states when they exist.
+
+## Optional natural-text decoder foundations
+
+Keep the periodic character exercise as a small, self-contained baseline. The optional text extension trains a configurable two-layer FP32 CPU decoder on a small pilot from the locally retained Alice source. Its report records train/dev/test membership and token/byte counts, train-only tokenizer and unigram identities, dev measurements, and the final test score after the recipe is fixed.
+
+It also compares cached decoding with full recomputation after nonzero offsets, checks a corrupted second-layer cache, restores the next samples and Adam/dropout update in a fresh process, then reloads a parameter/tokenizer package in another process. Read the project README for rights and metric denominators. This pilot makes no language-quality, accelerator, production or 300M-training claim.
 
 ## 1. Prepare packages and the vocabulary
 
@@ -466,15 +472,11 @@ Expected: Held-out loss below $0.05$ and accuracy above $0.99$ for the periodic 
 
 ### Read the figure
 
-Each row is a position in the held-out context, and columns are the possible next tokens: a, b, and c. The cells contain next-token probabilities, with darker purple indicating larger probability. Each row sums to approximately $1$; displayed numbers are rounded.
-
-Read the darkest column in each row: c, a, b, then c. Their probabilities are all above $0.99$ in this run, while the other entries are close to zero. For the context b, c, a, b, these choices continue the learned repeating sequence.
+Rows are positions in the held-out context; columns are next-token choices $a,b,c$. Each cell is a probability and each row sums to about 1. For the four displayed contexts $b,c,a,b$, the largest probabilities select $c,a,b,c$, each above $0.99$ in the recorded run; the remaining choices are near zero.
 
 ### Connect it to the computation
 
-Greedy decoding takes the largest-probability token from the relevant row. The final context position therefore chooses c as the next token. The earlier rows show predictions for earlier prefixes; they are not four independently generated continuations from the final position.
-
-These probabilities describe the trained model’s output on this tiny task. High probability and success on a repeating pattern are separate from general language ability or calibrated confidence. Check the row labels and the context before interpreting a bright cell as a correct prediction.
+Greedy decoding takes the largest value in the final row, so context ending in $b$ predicts $c$. Earlier rows describe next-token predictions at earlier prefixes, not four independent continuations. The plotted probabilities come from this small repeating-pattern task: use the row and its prefix to check the prediction, then test a different pattern before making any broader claim.
 
 ```python
 probs = jax.nn.softmax(held_logits[0], axis=-1)
@@ -483,7 +485,7 @@ visual_data = {'kind': 'heatmap', 'values': probs.tolist(), 'rows': ['position '
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:22:09.981543+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:05:49.769016+00:00. JAX 0.9.2.
 
 ```text
 Initial / held loss / held accuracy: 0.9807573556900024 0.0017881905660033226 1.0
@@ -530,15 +532,27 @@ Generate twelve new tokens from prompt bcab. Derive the expected cycle first; ve
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Inputs:**
+- The trained toy language-model parameters, prompt "bcab", and the periodic character vocabulary.
+
+**Outputs:**
+- The twelve generated characters, an independently derived expected cycle, and a comparison result.
+
+**Invariants to check:**
+- Generation follows the known periodic pattern for this fixture; this result does not establish natural-language performance.
+
+**Hints:**
+- Derive the next character from the repeating "abc" training pattern before invoking generation.
+- Keep the prompt and token count aligned with the requested continuation.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Generate twelve new tokens from prompt bcab.
-assert generate(params,"bcab",12)  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def check_periodic_generation(params, prompt, count, vocabulary):
+    # TODO: Generate the requested continuation and compare it with the independently derived cycle.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -564,51 +578,30 @@ Change one vocabulary mapping rather than numeric leaves.
 
 ### How to write: Reject an incompatible checkpoint — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- Save a fresh snapshot, edit only the vocabulary metadata, and prove the loader rejects it. Restore the metadata and verify recovery. Then forge `step=101` while retaining the 100-step optimizer state and verify that this mismatch is also rejected.
 
-**Step-by-step implementation plan:**
-1. Keep this run’s database and artifacts in a scratch directory removed on exit.
-2. Write the serialized artifact payload to disk.
-3. Write the serialized artifact payload to disk.
-4. Write the serialized artifact payload to disk.
+**Outputs:**
+- Two compatibility rejections and a valid restore after restoring metadata.
+
+**Invariants to check:**
+- Vocabulary and optimizer-step metadata must agree with the checkpoint payload.
+
+**Hints:**
+- Change one vocabulary mapping rather than numeric leaves.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Reject an incompatible checkpoint (Transfer / diagnosis)
-# Keep this run’s database and artifacts in a scratch directory removed on exit.
-with TemporaryDirectory() as directory:
-    folder = Path(...)  # TODO: compute folder
-    save_snapshot(folder,params,state,100)
-    metadata_path = ...  # TODO: compute metadata_path
-    correct = metadata_path.read_text(...)  # TODO: compute correct
-    metadata = json.loads(...)  # TODO: compute metadata
-    metadata["vocabulary"] = ...  # TODO: compute metadata["vocabulary"]
-    # Write the serialized artifact payload to disk.
-    metadata_path.write_text(json.dumps(metadata))
-    try:
-        load_snapshot(folder)
-    except ValueError:
-        pass
-    else:
-        raise AssertionError("wrong vocabulary accepted")
-    forged_step = json.loads(...)  # TODO: compute forged_step
-    forged_step["step"] = ...  # TODO: compute forged_step["step"]
-    # Write the serialized artifact payload to disk.
-    metadata_path.write_text(json.dumps(forged_step))
-    try:
-        load_snapshot(folder)
-    except ValueError:
-        pass
-    else:
-        raise AssertionError("wrong step accepted")
-    # Write the serialized artifact payload to disk.
-    metadata_path.write_text(correct)
-    recovered, _, recovered_step = load_snapshot(...)  # TODO: compute recovered, _, recovered_step
-    assert recovered_step  # TODO: complete assertion check
-    assert jnp.allclose(logits(recovered,jnp.array([0,1,2,0])),logits(params,jnp.array([0,1,2,0])))  # TODO: complete assertion check
+import jax.numpy as jnp
+import json
+from pathlib import Path
+from tempfile import TemporaryDirectory
+
+def practice_reject_an_incompatible_checkpoint(checkpoint, vocabulary):
+    """Implement the reject an incompatible checkpoint check."""
+    # TODO: Edit only vocabulary metadata in a disposable checkpoint and separately forge the step; require each restore to reject.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -666,27 +659,27 @@ The vocabulary mapping intentionally accepts only a, b and c.
 
 ### How to write: Make prompt failures explicit — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Inputs:**
+- Verify empty prompt rejection and unknown-character rejection. Record the difference between a ValueError for missing context and a KeyError for an unknown token.
+
+**Outputs:**
+- A ValueError for missing context and a KeyError for an unknown token.
+
+**Invariants to check:**
+- Prompt validation runs before sampling and does not conflate missing and out-of-vocabulary input.
+
+**Hints:**
+- The vocabulary mapping intentionally accepts only a, b and c.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Make prompt failures explicit (Transfer / diagnosis)
-try:
-    generate(params,"",1)
-except ValueError:
-    pass
-else:
-    raise AssertionError("empty prompt accepted")
-try:
-    generate(params,"x",1)
-except KeyError:
-    pass
-else:
-    raise AssertionError("unknown token accepted")
-assert generate(params,"abca",0)  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def practice_make_prompt_failures_explicit(prompt, vocabulary):
+    """Implement the make prompt failures explicit check."""
+    # TODO: Call generation with an empty prompt and an unknown character, and assert their distinct exception types.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -722,9 +715,17 @@ Why is saving only parameters insufficient to replay the next Adam update?
 
 <details><summary>Answer and explanation</summary>
 
-Adam uses optimizer count and moment history as well as parameters
+**1. Adam uses optimizer count and moment history as well as parameters (correct)**
 
 Adam’s update depends on its explicit state. Compare the actual next transition after restoring both parameter and optimizer values.
+
+**2. The vocabulary alone stores all optimizer state**
+
+Vocabulary settings belong to the model/data contract, but do not replace Adam moments and its update count.
+
+**3. A matching current loss proves every future update matches**
+
+Equal current losses can hide different optimizer histories. Compare the next update with full state restored.
 
 </details>
 

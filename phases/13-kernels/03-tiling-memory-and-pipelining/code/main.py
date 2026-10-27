@@ -196,8 +196,7 @@ for bm,bn in configurations:
 print("programs, padded elements, modeled data-buffer bytes:",metadata)
 
 # Figure data experiment
-labels=['8 x 128','16 x 128','16 x 256']
-visual_data={'panels':[{'kind':'bar','labels':labels,'ylabel':'program count (configuration-derived)','series':[{'label':'grid programs','y':[row[0] for row in metadata]}]},{'kind':'bar','labels':labels,'ylabel':'modeled data buffers (KiB)','series':[{'label':'double-buffered inputs and output','y':[row[2]/1024 for row in metadata]}]}]}
+visual_data = {'kind': 'flow', 'layout': 'sequence', 'nodes': ['prologue: load first tile', 'steady state: load next while compute consumes live refs', 'drain: finish compute and store before reuse']}
 
 # Experiment: Change input buffer count without changing the result
 # Experiment — Change input buffer count without changing the result

@@ -11,7 +11,12 @@
         "The discrete update is implemented correctly; its time-step error still needs assessment."
       ],
       "correct": 2,
-      "explanation": "The geometric sequence is an oracle for the discrete method. The exponential is a separate oracle for the differential equation. They answer different questions."
+      "explanation": "The geometric sequence is an oracle for the discrete method. The exponential is a separate oracle for the differential equation. They answer different questions.",
+      "optionFeedback": [
+        "The geometric sequence is the exact solution of the chosen discrete update. Its difference from the continuous exponential is discretization error.",
+        "An optimizer learning rate does not explain a forward solver discrepancy. Compare the discrete recurrence before differentiating it.",
+        "The geometric sequence is an oracle for the discrete method. The exponential is a separate oracle for the differential equation. They answer different questions."
+      ]
     }
   ]
 }

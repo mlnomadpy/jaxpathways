@@ -1,0 +1,9 @@
+PASS operations-06: script + notebook code
+PASS operations-07: script + notebook code
+PASS operations-08: script + notebook code
+PASS pretraining-01: script + notebook code
+PASS pretraining-02: script + notebook code
+PASS pretraining-03: script + notebook code
+PASS tpu-01: script + notebook code
+PASS tpu-04: script + notebook code
+OK: 8 executed (104 total CPU lessons); 16 executions

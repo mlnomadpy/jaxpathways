@@ -13,18 +13,45 @@ test('rerunning execution receipts preserves a release while canonical source ch
     writeFileSync(path.join(directory, 'release.mjs'), readFileSync('scripts/release.mjs'));
     writeFileSync(path.join(directory, 'portable-path.mjs'), readFileSync('scripts/portable-path.mjs'));
     write('package.json', { version: '1.0.0' });
-    write('curriculum/releases.json', [{ version: '1.0.0', date: '2026-10-13', title: 'Fixture' }]);
+    write('curriculum/releases.json', [{ version: '1.0.0', date: '2026-10-13', title: 'Fixture',
+      editionKey: 'jaxpathways-release-receipts-fixture', modifiedAt: '2026-10-13T12:00:00Z' }]);
     write('curriculum/course.json', { phases: [] });
     write('curriculum/projects.json', ['projects/fixture/project.json']);
     mkdirSync(path.join(directory, 'projects/fixture'));
     write('projects/fixture/project.json', {id:'fixture'});
     writeFileSync(path.join(directory, 'projects/fixture/model.py'), 'value = 1\n');
+    mkdirSync(path.join(directory, 'projects/fixture/foundations/reference/corrupt-package'), {recursive:true});
+    writeFileSync(path.join(directory, 'projects/fixture/foundations/reference/corrupt-package/tokenizer.json'), '{"intentional":"invalid"}corrupt');
+    mkdirSync(path.join(directory, 'projects/fixture/foundations/data'));
+    write('projects/fixture/foundations/data/manifest.json', {split:'train'});
+    write('curriculum/project-plans.json', [{id:'planned', source:'projects/planned/README.md'}]);
+    mkdirSync(path.join(directory, 'projects/planned'));
+    mkdirSync(path.join(directory, 'assessments'));
+    writeFileSync(path.join(directory, 'projects/planned/README.md'), 'Original planned recipe\n');
+    writeFileSync(path.join(directory, 'projects/planned/task.yaml'), 'task: frozen-task\n');
+    writeFileSync(path.join(directory, 'assessments/fixture.md'), 'Original assessment\n');
     write('curriculum/project-validation.json', { executedAt: 'first run', projects: [] });
     const run = (...args) => spawnSync(process.execPath, ['release.mjs', ...args], { cwd: directory, encoding: 'utf8' });
     assert.equal(run('--prepare').status, 0);
     write('curriculum/project-validation.json', { executedAt: 'later run', projects: [{ status: 'passed' }] });
     write('curriculum/validation.json', { executedAt: 'later lesson run' });
     assert.equal(run().status, 0, 'Execution timestamps are not canonical course revisions');
+    writeFileSync(path.join(directory, 'projects/fixture/foundations/reference/corrupt-package/tokenizer.json'), 'another deliberately invalid corruption fixture');
+    assert.equal(run().status, 0, 'Nested retained failure fixtures are evidence, not canonical JSON');
+    write('projects/fixture/foundations/data/manifest.json', {split:'changed'});
+    assert.match(run().stderr, /Course sources changed/, 'Canonical nested data recipes still invalidate the snapshot');
+    write('projects/fixture/foundations/data/manifest.json', {split:'train'});
+    assert.equal(run().status, 0);
+    for (const source of ['projects/planned/README.md', 'projects/planned/task.yaml', 'assessments/fixture.md']) {
+      const filename=path.join(directory, source);
+      const original=readFileSync(filename,'utf8');
+      writeFileSync(filename,original+'A revised teaching contract\n');
+      const revision=run();
+      assert.notEqual(revision.status,0,source+' must invalidate the release snapshot');
+      assert.match(revision.stderr,/Course sources changed/);
+      writeFileSync(filename,original);
+      assert.equal(run().status,0);
+    }
     writeFileSync(path.join(directory, 'projects/fixture/model.py'), 'value = 2\n');
     const changed = run();
     assert.notEqual(changed.status, 0);

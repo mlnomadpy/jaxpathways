@@ -11,7 +11,12 @@
         "No additional evidence: linearity guarantees the coefficient is correct."
       ],
       "correct": 0,
-      "explanation": "Linearity is necessary, but a wrong constant multiple of the true derivative is also linear and finite. Independent comparisons establish the missing mathematical agreement."
+      "explanation": "Linearity is necessary, but a wrong constant multiple of the true derivative is also linear and finite. Independent comparisons establish the missing mathematical agreement.",
+      "optionFeedback": [
+        "Linearity is necessary, but a wrong constant multiple of the true derivative is also linear and finite. Independent comparisons establish the missing mathematical agreement.",
+        "A bigger batch does not supply an independent derivative reference. Compare the custom rule against the intended primal function.",
+        "Many wrong derivative rules are linear and finite. Test against an analytic derivative or a carefully chosen finite difference."
+      ]
     }
   ]
 }

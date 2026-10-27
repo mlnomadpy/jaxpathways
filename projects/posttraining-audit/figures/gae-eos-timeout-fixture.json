@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "scope": "Illustrative reward-unit GAE calculation. No KL shaping, fitted reward model, training result or measured performance is represented.",
+  "gamma": 0.9,
+  "lambda": 0.8,
+  "sequences": [
+    {
+      "name": "EOS termination",
+      "stop": "eos",
+      "rewards": [0.0, 2.0],
+      "values": [0.4, 0.6],
+      "nextValues": [0.6, 0.7],
+      "expectedDeltas": [0.14, 1.4],
+      "expectedAdvantages": [1.148, 1.4],
+      "expectedBootstrap": 0.0
+    },
+    {
+      "name": "Time-limit truncation",
+      "stop": "timeout",
+      "rewards": [0.0, 0.0, 1.0],
+      "values": [0.2, 0.3, 0.5],
+      "nextValues": [0.3, 0.5, 0.8],
+      "expectedDeltas": [0.07, 0.15, 1.22],
+      "expectedAdvantages": [0.810448, 1.0284, 1.22],
+      "expectedBootstrap": 0.8
+    }
+  ]
+}

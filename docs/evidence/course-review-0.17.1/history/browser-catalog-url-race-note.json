@@ -1,0 +1,6 @@
+{
+  "failure": "Final-lesson browser test required bare course.html after navigation, while the catalog serialized its opened first phase as phase=welcome.",
+  "retained": "Original failing browser stdout log.",
+  "artifactLimitation": "The Playwright screenshot/trace paths in that log were overwritten by a later focused launch attempt before archival. They are not claimed as retained evidence.",
+  "repairScope": "Test assertions check the intended canonical first-visible phase and actual map content; application behavior is unchanged."
+}

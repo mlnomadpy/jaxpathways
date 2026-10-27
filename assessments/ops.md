@@ -99,3 +99,9 @@ Construct a slice regression where the aggregate still passes. Retain the indepe
 Bind approval to model, evaluation, target and image identity. Demonstrate that changed evaluation evidence, expiration and target mismatch cannot change the active release. Revalidate the previous bundle before rollback. Identify which component authenticates the reviewer in a deployed system; a reviewer string in this fixture does not.
 
 When Docker is available, retain the actual image identity, model digest, non-root user, internal readiness/prediction results and bad-digest rejection. If it is unavailable, mark that part unexecuted rather than substituting a process check. Write a short ownership/retirement plan and identify which monitoring signals lead to investigation, rollback or retraining.
+
+## Reviewer discussion: distinguish evidence from a plausible claim
+
+The deployment log says success after a timeout, but the candidate’s required slice gate failed and the active pointer changed.
+
+Before opening the reviewer notes, name the first unsupported claim and the smallest additional artifact that would resolve it. Keep correct partial reasoning even when the overall submission needs repair.

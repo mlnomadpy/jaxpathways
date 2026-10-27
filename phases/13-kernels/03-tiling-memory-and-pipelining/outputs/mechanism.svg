@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="576pt" height="396pt" viewBox="0 0 576 396" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:description>Prologue loads tile 0 into input slot A. During steady state, compute consumes x[k], y[k] from one slot while the next tile loads into the other; out[k] is stored after compute. Drain finishes the last compute and store before any slot is reused.</dc:description>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.10.8, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 396
+L 576 396
+L 576 0
+L 0 0
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="table_1">
+    <g id="patch_2">
+     <path d="M 3.00024 156.559673
+L 99.900158 156.559673
+L 99.900158 115.119346
+L 3.00024 115.119346
+z
+" style="fill: #e9e4f5; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_1">
+     <text style="font-weight: 700; font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="51.450199" y="139.15076" transform="rotate(-0 51.450199 139.15076)">phase</text>
+    </g>
+    <g id="patch_3">
+     <path d="M 99.900158 156.559673
+L 253.800029 156.559673
+L 253.800029 115.119346
+L 99.900158 115.119346
+z
+" style="fill: #e9e4f5; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_2">
+     <text style="font-weight: 700; font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="176.850094" y="138.983885" transform="rotate(-0 176.850094 138.983885)">load x_hbm / y_hbm</text>
+    </g>
+    <g id="patch_4">
+     <path d="M 253.800029 156.559673
+L 407.699899 156.559673
+L 407.699899 115.119346
+L 253.800029 115.119346
+z
+" style="fill: #e9e4f5; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_3">
+     <text style="font-weight: 700; font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="330.749964" y="138.983885" transform="rotate(-0 330.749964 138.983885)">compute axpy_body</text>
+    </g>
+    <g id="patch_5">
+     <path d="M 407.699899 156.559673
+L 572.99976 156.559673
+L 572.99976 115.119346
+L 407.699899 115.119346
+z
+" style="fill: #e9e4f5; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_4">
+     <text style="font-weight: 700; font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="490.34983" y="138.983885" transform="rotate(-0 490.34983 138.983885)">store out_hbm / reuse</text>
+    </g>
+    <g id="patch_6">
+     <path d="M 3.00024 198
+L 99.900158 198
+L 99.900158 156.559673
+L 3.00024 156.559673
+z
+" style="fill: #f4f7fb; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_5">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="51.450199" y="180.591087" transform="rotate(-0 51.450199 180.591087)">Prologue</text>
+    </g>
+    <g id="patch_7">
+     <path d="M 99.900158 198
+L 253.800029 198
+L 253.800029 156.559673
+L 99.900158 156.559673
+z
+" style="fill: #f4f7fb; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_6">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="176.850094" y="180.591087" transform="rotate(-0 176.850094 180.591087)">tile 0 into A</text>
+    </g>
+    <g id="patch_8">
+     <path d="M 253.800029 198
+L 407.699899 198
+L 407.699899 156.559673
+L 253.800029 156.559673
+z
+" style="fill: #f4f7fb; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_7">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="330.749964" y="180.591087" transform="rotate(-0 330.749964 180.591087)">wait for inputs</text>
+    </g>
+    <g id="patch_9">
+     <path d="M 407.699899 198
+L 572.99976 198
+L 572.99976 156.559673
+L 407.699899 156.559673
+z
+" style="fill: #f4f7fb; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_8">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="490.34983" y="180.591087" transform="rotate(-0 490.34983 180.591087)">idle</text>
+    </g>
+    <g id="patch_10">
+     <path d="M 3.00024 239.440327
+L 99.900158 239.440327
+L 99.900158 198
+L 3.00024 198
+z
+" style="fill: #ffffff; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_9">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="51.450199" y="222.031413" transform="rotate(-0 51.450199 222.031413)">Steady</text>
+    </g>
+    <g id="patch_11">
+     <path d="M 99.900158 239.440327
+L 253.800029 239.440327
+L 253.800029 198
+L 99.900158 198
+z
+" style="fill: #ffffff; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_10">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="176.850094" y="222.031413" transform="rotate(-0 176.850094 222.031413)">tile k+1 into B</text>
+    </g>
+    <g id="patch_12">
+     <path d="M 253.800029 239.440327
+L 407.699899 239.440327
+L 407.699899 198
+L 253.800029 198
+z
+" style="fill: #ffffff; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_11">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="330.749964" y="222.031413" transform="rotate(-0 330.749964 222.031413)">tile k reads A</text>
+    </g>
+    <g id="patch_13">
+     <path d="M 407.699899 239.440327
+L 572.99976 239.440327
+L 572.99976 198
+L 407.699899 198
+z
+" style="fill: #ffffff; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_12">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="490.34983" y="222.031413" transform="rotate(-0 490.34983 222.031413)">out[k]; release after store</text>
+    </g>
+    <g id="patch_14">
+     <path d="M 3.00024 280.880654
+L 99.900158 280.880654
+L 99.900158 239.440327
+L 3.00024 239.440327
+z
+" style="fill: #f4f7fb; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_13">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="51.450199" y="263.47174" transform="rotate(-0 51.450199 263.47174)">Drain</text>
+    </g>
+    <g id="patch_15">
+     <path d="M 99.900158 280.880654
+L 253.800029 280.880654
+L 253.800029 239.440327
+L 99.900158 239.440327
+z
+" style="fill: #f4f7fb; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_14">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="176.850094" y="263.47174" transform="rotate(-0 176.850094 263.47174)">no next tile</text>
+    </g>
+    <g id="patch_16">
+     <path d="M 253.800029 280.880654
+L 407.699899 280.880654
+L 407.699899 239.440327
+L 253.800029 239.440327
+z
+" style="fill: #f4f7fb; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_15">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="330.749964" y="263.47174" transform="rotate(-0 330.749964 263.47174)">finish final tile</text>
+    </g>
+    <g id="patch_17">
+     <path d="M 407.699899 280.880654
+L 572.99976 280.880654
+L 572.99976 239.440327
+L 407.699899 239.440327
+z
+" style="fill: #f4f7fb; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_16">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="490.34983" y="263.47174" transform="rotate(-0 490.34983 263.47174)">finish store; then reuse</text>
+    </g>
+   </g>
+  </g>
+ </g>
+</svg>

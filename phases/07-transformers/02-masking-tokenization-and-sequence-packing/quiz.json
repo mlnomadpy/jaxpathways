@@ -11,7 +11,12 @@
         "Equal token IDs"
       ],
       "correct": 1,
-      "explanation": "Packing combines positions in storage, not their semantic context. Segment and validity constraints retain example boundaries."
+      "explanation": "Packing combines positions in storage, not their semantic context. Segment and validity constraints retain example boundaries.",
+      "optionFeedback": [
+        "A causal mask still allows earlier tokens from another packed example. Require the same segment as well as a valid causal position.",
+        "Packing combines positions in storage, not their semantic context. Segment and validity constraints retain example boundaries.",
+        "Equal token IDs do not imply the same example or a valid attention edge. Use segment IDs, positions and padding validity."
+      ]
     }
   ]
 }

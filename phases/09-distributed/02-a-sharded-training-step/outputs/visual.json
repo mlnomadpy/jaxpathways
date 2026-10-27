@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "distributed-02",
-  "contentHash": "a2329b55b454ea74f41e5958428f664d866e8720b7073cc88a5ab5c48ce35c6e",
-  "rendererHash": "a1bd5b648f4731ae5d5f0a24811c2540d1a0a132149ce589d17c4113509cbedf",
+  "contentHash": "35bcba7f38e9a52006eee4d48d28312ae00635c476c08f05d85dd9a1e765983b",
+  "rendererHash": "17e3bbad72ee4c43425845aaee76b86b85e84750551278be03d8c16842f4dc63",
   "kind": "executed",
-  "generatedAt": "2026-10-20T22:28:37.319727+00:00",
+  "generatedAt": "2026-10-27T16:10:37.767811+00:00",
   "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",
@@ -13,29 +13,101 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Initial loss: 4.875\nGradient: [-5.25 -0.75] updated weights: [0.52500004 0.075     ]\nUpdated loss: 2.6784372329711914\n",
+  "stdout": "Initial loss: 4.875\nGradient: [-5.25 -0.75] updated weights: [0.52500004 0.075     ]\nUpdated loss: 2.6784372329711914\nvalid=5; naive equal mean of nonempty shard means=0.068350 (wrong); weighted global loss=0.048550\nvalid=5; device valid counts=[4, 4, 1, 1]; loss=0.048550\nvalid=3; empty data shard contributes zero sum and zero count\nvalid=3; device valid counts=[3, 3, 0, 0]; loss=0.037083\nbatch features per device (device id, local shape, bytes): [(0, (4, 4), 64), (1, (4, 4), 64), (2, (4, 4), 64), (3, (4, 4), 64)]\ntargets per device (device id, local shape, bytes): [(0, (4, 2), 32), (1, (4, 2), 32), (2, (4, 2), 32), (3, (4, 2), 32)]\nparameters per device (device id, local shape, bytes): [(0, (4, 2), 32), (1, (4, 2), 32), (2, (4, 2), 32), (3, (4, 2), 32)]\nmomentum state per device (device id, local shape, bytes): [(0, (4, 2), 32), (1, (4, 2), 32), (2, (4, 2), 32), (3, (4, 2), 32)]\nparameter gradient per device (device id, local shape, bytes): [(0, (4, 2), 32), (1, (4, 2), 32), (2, (4, 2), 32), (3, (4, 2), 32)]\nupdated parameters per device (device id, local shape, bytes): [(0, (4, 2), 32), (1, (4, 2), 32), (2, (4, 2), 32), (3, (4, 2), 32)]\nupdated momentum per device (device id, local shape, bytes): [(0, (4, 2), 32), (1, (4, 2), 32), (2, (4, 2), 32), (3, (4, 2), 32)]\n2D parameter-sharded forward/backward/update matches the unsharded NumPy oracle\n",
   "data": {
-    "kind": "bar",
-    "labels": [
-      "weight 0",
-      "weight 1"
+    "kind": "table",
+    "headers": [
+      "Array",
+      "Global shape/spec",
+      "Each device",
+      "Bytes/device"
     ],
-    "ylabel": "gradient coordinate",
-    "series": [
-      {
-        "label": "sharded JAX",
-        "y": [
-          -5.25,
-          -0.75
-        ]
-      },
-      {
-        "label": "NumPy reference",
-        "y": [
-          -5.25,
-          -0.75
-        ]
-      }
+    "rows": [
+      [
+        "batch X",
+        "(8, 4)\nP(data,None)",
+        "(4, 4)",
+        64
+      ],
+      [
+        "target Y",
+        "(8, 4)\nP(data,model)",
+        "(4, 2)",
+        32
+      ],
+      [
+        "weights W",
+        "(4, 4)\nP(None,model)",
+        "(4, 2)",
+        32
+      ],
+      [
+        "momentum",
+        "(4, 4)\nP(None,model)",
+        "(4, 2)",
+        32
+      ],
+      [
+        "gradient dW",
+        "(4, 4)\nP(None,model)",
+        "(4, 2)",
+        32
+      ]
+    ],
+    "widths": [
+      0.17,
+      0.4,
+      0.23,
+      0.2
     ]
+  },
+  "diagram": {
+    "title": "Data and parameter ownership on the 2x2 mesh",
+    "prediction": "Which devices share each input batch slice, and which devices own the two-column parameter slices?",
+    "reading": "Device labels are mesh coordinates (data,model). Feature rows are split by data and copied across model coordinates. Weight columns are split by model and copied across data coordinates. Momentum matches the weight ownership, allowing each update to pair a parameter shard with its optimizer-state shard. These shapes and byte counts are checked by the executable exercise.",
+    "alt": "A 2x2 logical CPU mesh. Each device owns a (4,4) feature shard of 64 bytes, a (4,2) target shard of 32 bytes, and (4,2) weight, momentum and gradient shards of 32 bytes each.",
+    "scope": "Observed logical-CPU shapes and float32 ownership for this lesson fixture; not hardware capacity or communication measurements.",
+    "height": 3.8,
+    "panel": {
+      "kind": "table",
+      "headers": [
+        "Array",
+        "PartitionSpec",
+        "Local shape",
+        "Bytes/device"
+      ],
+      "rows": [
+        [
+          "X batch",
+          "P(data,None)",
+          "(4,4)",
+          "64"
+        ],
+        [
+          "Y target",
+          "P(data,model)",
+          "(4,2)",
+          "32"
+        ],
+        [
+          "W parameter",
+          "P(None,model)",
+          "(4,2)",
+          "32"
+        ],
+        [
+          "momentum",
+          "P(None,model)",
+          "(4,2)",
+          "32"
+        ],
+        [
+          "dW gradient",
+          "P(None,model)",
+          "(4,2)",
+          "32"
+        ]
+      ]
+    }
   }
 }

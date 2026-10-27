@@ -4,7 +4,7 @@
   "description": "Train a CPU image classifier, preserve its complete state through interruption, inspect held-out errors and verify its exported inference. Language modeling and TPU work are optional branches.",
   "prerequisites": "Shared foundations",
   "outcome": "A recoverable image classifier with verified exported inference",
-  "libraries": "Flax \u00b7 Optax \u00b7 Orbax",
+  "libraries": "Flax · Optax · Orbax",
   "source": "https://flax.readthedocs.io/",
   "phaseIds": [
     "welcome",
@@ -49,7 +49,7 @@
     "image",
     "text"
   ],
-  "studyAdvice": "Build the classifier first, freeze its evaluation split and add optimizer, random and data-position state before rehearsing interruption. Continue through CPU performance and deployment to the image harness. Use the reproducible-experiments workshop to compare changes. The optional language branch starts at Transformers after recovery; add pretraining and supervised adaptation next. Complete the RL phase before learned-reward PPO. These branches are separate from the classifier evidence.",
+  "studyAdvice": "Build the classifier first, freeze its evaluation split and add optimizer, random and data-position state before rehearsing interruption. Continue through CPU performance and deployment to the image harness. Use the reproducible-experiments workshop to compare changes. The optional language branch starts at Transformers after recovery; add pretraining and supervised adaptation next. Complete the RL phase before learned-reward PPO. These branches are separate from the classifier evidence. For review, bring a class-count baseline and one error example per failing class. Explain which preprocessing was fitted on training data and which threshold was selected on validation data before showing the final held-out result.",
   "engineeringLessonIds": [
     "recovery-06",
     "deployment-07",
@@ -69,7 +69,7 @@
     {
       "title": "Optional language-model branch",
       "url": "course.html#phase-transformers",
-      "scope": "After recovery: Transformers \u2192 self-supervised pretraining \u2192 supervised adaptation. The learned-reward PPO lesson additionally requires the four RL lessons. Keep text-harness evidence separate from the image capstone."
+      "scope": "After recovery: Transformers → self-supervised pretraining → supervised adaptation. The learned-reward PPO lesson additionally requires the four RL lessons. Keep text-harness evidence separate from the image capstone."
     },
     {
       "title": "Optional staged embedding-model pilot",

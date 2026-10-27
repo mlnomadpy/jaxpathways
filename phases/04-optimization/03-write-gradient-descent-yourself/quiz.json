@@ -11,7 +11,12 @@
         "All learning rates above \\(0.01\\) are unstable"
       ],
       "correct": 0,
-      "explanation": "The recurrence multiplies the error by \\(-1.2\\), so its magnitude grows while its sign alternates."
+      "explanation": "The recurrence multiplies the error by \\(-1.2\\), so its magnitude grows while its sign alternates.",
+      "optionFeedback": [
+        "The recurrence multiplies the error by \\(-1.2\\), so its magnitude grows while its sign alternates.",
+        "scan repeats the update you give it. Derive the one-step error factor; the instability is already present in that recurrence.",
+        "A safe learning rate depends on curvature. For this quadratic, use the magnitude of the error multiplier rather than a universal threshold."
+      ]
     }
   ]
 }

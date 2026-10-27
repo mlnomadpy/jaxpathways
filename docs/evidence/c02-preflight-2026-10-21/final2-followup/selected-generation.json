@@ -1,0 +1,86 @@
+{
+  "scope": "One preselected first final QA record per branch: fresh checkpoint reload, full 32-token cached replay, independent NumPy full-prefix first-four-token oracle. Does not replay all 768 records or reconstruct corpus NLL.",
+  "selection": "First serialized question in each branch, selected before this replay.",
+  "cases": [
+    {
+      "branch": "base",
+      "question_id": "5730aeba069b531400832243",
+      "checkpoint_sha256": "ec0f551dfcfda9c137c720976967bb1cfb9cf771a3fa54b36aed9f0d3ca8ca2b",
+      "full_cached_replay_tokens": 32,
+      "independent_prefix_tokens": [
+        224,
+        224,
+        224,
+        224
+      ]
+    },
+    {
+      "branch": "continuation_mixture",
+      "question_id": "5730aeba069b531400832243",
+      "checkpoint_sha256": "ead2c93f1b55c5b4d17de77b1d7d52289a99c5f3dc6b78d03c37e3eed6fffd9e",
+      "full_cached_replay_tokens": 32,
+      "independent_prefix_tokens": [
+        224,
+        224,
+        224,
+        224
+      ]
+    },
+    {
+      "branch": "continuation_general_control",
+      "question_id": "5730aeba069b531400832243",
+      "checkpoint_sha256": "d2bf158c2493e13e27198f402804fc05f158f7122fc71380564128b4655f32c4",
+      "full_cached_replay_tokens": 32,
+      "independent_prefix_tokens": [
+        224,
+        224,
+        224,
+        224
+      ]
+    },
+    {
+      "branch": "sft_full_from_domain",
+      "question_id": "5730aeba069b531400832243",
+      "checkpoint_sha256": "8c7c7e1db0d9a64e4cf3eb975d131ab8a44062aa92f173e0dd715bac74565cf3",
+      "full_cached_replay_tokens": 32,
+      "independent_prefix_tokens": [
+        224,
+        224,
+        224,
+        224
+      ]
+    },
+    {
+      "branch": "sft_lora_from_domain",
+      "question_id": "5730aeba069b531400832243",
+      "checkpoint_sha256": "dbc57536aecd4b28d28a091601055c68898e9594f46383b3d349fb9e52ac2e4f",
+      "full_cached_replay_tokens": 32,
+      "independent_prefix_tokens": [
+        224,
+        224,
+        224,
+        224
+      ]
+    },
+    {
+      "branch": "sft_full_from_general",
+      "question_id": "5730aeba069b531400832243",
+      "checkpoint_sha256": "c8cf6ea183c799c311803aa174fc18a3b5d2c6dd95ccaeb4bdb9e5ed20b4a8a6",
+      "full_cached_replay_tokens": 32,
+      "independent_prefix_tokens": [
+        224,
+        224,
+        224,
+        224
+      ]
+    }
+  ],
+  "status": "pass",
+  "source_sha256": {
+    "model.py": "efec0774f84e19f870368f7965e3e779641935f4670140065226ec8a27e71932",
+    "config.py": "53e0990fcf6d8fb08486398097919a9430f768cda54540740b3a453a21ed1db9",
+    "training.py": "87cd3754268552ed5ce4f3d95774591c57c3546afc352768324e459a86e5caf7",
+    "reference_math.py": "873a10984041978ff423f59989468befa8e73cb998fea94a5f7e14f026ca694b",
+    "check_selected_generation.py": "86443019dde6182d87ef83285455fa3673a994ff74ed0e0aac69989c0dcf1a80"
+  }
+}

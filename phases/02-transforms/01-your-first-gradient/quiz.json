@@ -11,7 +11,12 @@
         "JAX has stopped differentiating because the output is zero."
       ],
       "correct": 1,
-      "explanation": "The cubic is stationary at zero but takes smaller values to the left. A zero first derivative alone does not prove a minimum."
+      "explanation": "The cubic is stationary at zero but takes smaller values to the left. A zero first derivative alone does not prove a minimum.",
+      "optionFeedback": [
+        "A zero first derivative is compatible with a maximum, minimum or stationary inflection. Compare nearby values on both sides of zero.",
+        "The cubic is stationary at zero but takes smaller values to the left. A zero first derivative alone does not prove a minimum.",
+        "The derivative is zero because the function is locally flat to first order at this input. Differentiate at a nonzero input to check the rule."
+      ]
     }
   ]
 }

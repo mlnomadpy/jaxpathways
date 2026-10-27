@@ -21,11 +21,9 @@ A random sampler in JAX receives an explicit key. Reusing the same key with the 
 
 ## A key is an input, not a moving cursor
 
-Imagine a training step that needs dropout randomness and a key for the next step. Split the incoming key, use one child for dropout, and return the other as the continuation key. The drawing should branch once; it should not show a sampler secretly advancing the parent key.
+Reproducible randomness begins with ownership: a function receives a key, uses it for one draw, and returns or derives the key for later work. Splitting makes this flow visible instead of relying on a hidden generator that mutates itself.
 
-If two augmentation calls receive the same key and otherwise identical inputs, they can produce the same augmentation. Different variable names do not make the underlying key values different. This is a data-flow bug that ordinary shape checks will miss.
-
-For recovery, save the continuation key at the same boundary as model and data position. Reconstructing an initial seed and restarting the random stream is not equivalent to restoring the next key after many training steps.
+The diagram should be read as a branch: one child continues the stream and one child belongs to the immediate sample. If dropout and augmentation both need randomness, give them distinct child keys. Passing the same key to two identical draws intentionally replays the same result, even if the variables have different names.
 
 $$
 S_{t+1} = \operatorname{update}(S_t, X_t), \qquad \text{pure transition } (S_t, X_t) \mapsto (S_{t+1}, Y_t)
@@ -43,9 +41,9 @@ No. The key is an explicit value. Your program must choose new child keys and ca
 
 ## Treat a key as an explicit input
 
-A JAX random operation is deterministic given its key and other arguments. The key is not a mutable generator that automatically advances after a call. Calling normal twice with the same key, shape and dtype reproduces the draw. That property is useful for replay and dangerous when accidental reuse makes samples correlated.
+A JAX random operation is deterministic from its key and arguments. The plotted horizontal coordinate is the position in a length-three draw; the vertical value is the sampled number. The first-draw and same-key replay curves overlap exactly at approximately $(0.606,0.799,-0.909)$; the split-key draw is approximately $(-0.211,-1.363,-0.045)$. The connected lines help compare coordinates, but this is neither time nor a probability-density plot.
 
-A seed is only the initial description of an experiment. Splitting describes where subsequent random choices come from. Write down which function owns the continuation key and which subkey is consumed by a draw. Do not pass one subkey to two independent components.
+The execution output confirms replay equality and a different split-key draw for this seed. Unequal samples in one example do not establish statistical independence. Use the same key for deliberate replay, and split before requesting a distinct stochastic operation.
 
 ```text
 seed → root key
@@ -55,21 +53,21 @@ sample key --normal(shape=(3,))--> one sample
 
 ## Carry the continuation key explicitly
 
-In the worked program, `key, sample_key = split(key)` replaces the variable key with a continuation value. The old key was not mutated; Python rebound a name. sample_key belongs to the immediate draw. The next split uses the retained continuation, not sample_key.
+In the code, `key, sample_key = split(key)` rebinds the name `key` to the continuation value; it does not mutate the old key. `sample_key` is passed to the immediate sampler, and the continuation is what the next step splits.
 
-This convention gives each training or simulation step a small state transition: receive key → split → sample → return next key. Later, checkpoints need to store that next key alongside model and optimizer state. Storing parameters alone cannot reproduce the next random batch.
+That makes the random stream part of the transition state: receive a key, derive the next sample, return the continuation. A checkpoint that stores parameters but omits this continuation cannot reproduce the next stochastic step. Save the key at the same boundary as the rest of the simulation state.
 
 ## Separate replay from a statistical claim
 
-For this fixed seed, fresh subkeys produce visibly different draws. That observation is not proof of statistical independence, and different random draws can theoretically coincide. Equality of a single pair is therefore not a general test of randomness quality.
+A replay test asks whether the same program and initial key reproduce the same result. It says nothing by itself about distribution quality or independence. In the recorded run, identical-key draws compare equal and a split-key draw differs; a coincidence between distinct draws would still be possible.
 
-The reliable replay test is to reconstruct the same program from the same seed and compare its results. A change to key allocation can alter all later samples. Do not promise identical streams across arbitrary JAX versions, PRNG implementations, shapes or devices.
+For reproducible work, record the seed, key derivation and PRNG implementation as well as the program. Changes to key allocation can change later draws. Avoid promising bitwise-identical streams across versions or implementations unless that specific boundary has been established.
 
 ## Allocate randomness by sample identity
 
-Splitting a root into four keys is useful for one fixed batch. If the batch membership changes, assignment by position may associate a different draw with a particular sample. fold_in lets you combine a stable integer identity with a base key, which can make per-example randomness stable under reordering.
+Splitting a root key into a fixed batch of child keys assigns randomness by position. If the batch is reordered, the same sample identity may receive another key. `fold_in` can instead derive a key from a base key and stable integer identity.
 
-Keep identifiers unique where distinct randomness is intended. Reusing an identifier repeats its derived key. This is deterministic bookkeeping, not a security primitive or a substitute for recording the PRNG implementation.
+Use distinct identifiers when distinct per-example randomness is intended; reusing an identifier derives the same key under the same base. Check the result by reordering rows and matching draws by identifier. This is deterministic allocation, not a claim that samples are statistically independent or that the construction is a security mechanism.
 
 ## Prepare the inputs
 
@@ -157,15 +155,11 @@ Expected: Replay equal: True; Fresh draw equal: False.
 
 ### Read the figure
 
-The horizontal axis selects a coordinate within a three-element random draw; the vertical axis gives its sampled value. The solid first-draw line and dashed same-key replay line lie on top of each other. The dash-dot line comes from a new split key.
-
-The replay repeats approximately $(0.606,0.799,-0.909)$, while the split-key draw is approximately $(-0.211,-1.363,-0.045)$. Two curves are hard to distinguish precisely because their coordinates are equal.
+The horizontal axis indexes the three entries in one draw; the vertical axis is sampled value. The solid first draw and dashed same-key replay overlap at approximately $(0.606,0.799,-0.909)$. The dash-dot split-key draw is approximately $(-0.211,-1.363,-0.045)$. The connected lines only make coordinate-by-coordinate equality visible; they do not show time or a distribution.
 
 ### Connect it to the computation
 
-A JAX random function is deterministic given the same key and arguments. Calling it again with that key replays the result; it does not silently advance a hidden random state. Splitting produces a new key for a new draw.
-
-The lines only connect coordinates to make equality visible. This is not a time series or a probability density, and three different values is distinct from statistical independence. The practical check is reproducibility: reuse for deliberate replay, split for the next stochastic operation.
+The overlapping curves demonstrate deterministic replay for this key and sampler. A split key produces the displayed different draw, but one pair of different values does not establish statistical independence. Use the plot to check key ownership: reuse for replay, split when the next operation needs its own random input.
 
 ```python
 visual_data = {'kind': 'line', 'x': [0, 1, 2], 'xlabel': 'sample coordinate', 'ylabel': 'normal draw', 'series': [{'label': 'first draw', 'y': a.tolist()}, {'label': 'same key replay', 'y': repeated.tolist()}, {'label': 'split next draw', 'y': b.tolist()}]}
@@ -173,7 +167,7 @@ visual_data = {'kind': 'line', 'x': [0, 1, 2], 'xlabel': 'sample coordinate', 'y
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:20:14.269894+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:03:04.619098+00:00. JAX 0.9.2.
 
 ```text
 Replay equal: True
@@ -234,26 +228,30 @@ Split a fresh seed into four keys, then use vmap to draw two normal values from 
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jax.vmap(fn, in_axes=..., out_axes=...)` — Vectorizes a single-example function across a batch axis without writing a Python loop.
-- `jax.random.PRNGKey(seed) & jax.random.split(key)` — Uses explicit PRNG keys. Split a key when you need independent random draws; reusing a key repeats its random stream.
+**Inputs:**
+- An integer seed and a batch-shaped input array x.
 
-**Step-by-step implementation plan:**
-1. Exercise solution
-2. Create or split explicit PRNG key(s) (`keys`) for reproducible randomness.
-3. Check tensor shape invariant: `draw(7).shape == (4, 2)`
+**Outputs:**
+- A noisy prediction batch that can be replayed exactly from the same seed.
+
+**Invariants to check:**
+- Randomness is derived from an explicit JAX PRNG key.
+- Changing x while holding the seed fixed changes the deterministic prediction by the corresponding 2x+1 input difference.
+
+**Hints:**
+- Create a root key from the seed and draw one noise value for every element of x.
+- Do not reuse a consumed subkey for another independent draw.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-def draw(seed):
-    # Create or split explicit PRNG key(s) (`keys`) for reproducible randomness.
-    keys = jax.random.split(...)  # TODO: compute keys
-    return ...  # TODO: return computed result
-# Check tensor shape invariant: `draw(7).shape == (4, 2)`
-assert draw(7).shape  # TODO: complete assertion check
-assert jnp.array_equal(draw(7), draw(7))  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+
+def noisy_prediction(seed: int, x: jax.Array) -> jax.Array:
+    """Return 2*x+1 plus reproducible elementwise Gaussian noise."""
+    # TODO: derive a key from seed, sample noise with x.shape, and form the prediction.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -285,25 +283,30 @@ Reuse the random construction for a controlled comparison, not accidentally acro
 
 ### How to write: Replay a noisy prediction — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.random.PRNGKey(seed) & jax.random.split(key)` — Uses explicit PRNG keys. Split a key when you need independent random draws; reusing a key repeats its random stream.
+**Inputs:**
+- A seed and a one-dimensional input array x.
 
-**Step-by-step implementation plan:**
-1. Create or split explicit PRNG key(s) (`eps`) for reproducible randomness.
+**Outputs:**
+- A reproducible batch of noisy predictions.
+
+**Invariants to check:**
+- The same seed and x produce identical results.
+- Holding the seed fixed while shifting every x by one shifts each prediction by two.
+
+**Hints:**
+- Use one normal draw per input element.
+- Reconstruct the key from the seed on every call to make replay explicit.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Replay a noisy prediction (Practice): Holding noise fixed isolates the changed numerical input.
-def noisy_prediction(seed,x):
-    # Create or split explicit PRNG key(s) (`eps`) for reproducible randomness.
-    eps = jax.random.normal(...)  # TODO: compute eps
-    return ...  # TODO: return computed result
-inputs = jnp.array(...)  # TODO: compute inputs
-assert jnp.array_equal(noisy_prediction(4,inputs),noisy_prediction(4,inputs))  # TODO: complete assertion check
-assert jnp.allclose(noisy_prediction(4,inputs+1)-noisy_prediction(4,inputs),2.,atol=1e-6)  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+
+def noisy_prediction(seed: int, x: jax.Array) -> jax.Array:
+    """Add replayable, elementwise noise to the prediction 2*x+1."""
+    # TODO: sample noise from a key made from seed and preserve x.shape.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -337,32 +340,30 @@ The draw function does not mutate the key.
 
 ### How to write: Diagnose key reuse in a loop — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jax.random.PRNGKey(seed) & jax.random.split(key)` — Uses explicit PRNG keys. Split a key when you need independent random draws; reusing a key repeats its random stream.
+**Inputs:**
+- A root PRNG key and a requested number of two-value draws.
 
-**Step-by-step implementation plan:**
-1. Create or split explicit PRNG key(s) (`root`) for reproducible randomness.
-2. Sample deterministic random values into `broken` using an explicit PRNG key.
-3. Check tensor shape invariant: `fixed.shape==(3,2)`
+**Outputs:**
+- A broken batch showing repeated draws and a repaired batch of independent subkey draws.
+
+**Invariants to check:**
+- Reusing a key reproduces the same row.
+- Each repaired draw consumes a new key and has shape (2,).
+
+**Hints:**
+- Keep the broken case as a diagnostic demonstration.
+- Thread the continuation key through the loop; collect only the sample subkeys.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Diagnose key reuse in a loop (Challenge): The repeated-row symptom comes from key allocation.
-# Create or split explicit PRNG key(s) (`root`) for reproducible randomness.
-root = jax.random.key(...)  # TODO: compute root
-# Sample deterministic random values into `broken` using an explicit PRNG key.
-broken = jnp.stack(...)  # TODO: compute broken
-assert jnp.array_equal(broken[0],broken[1])  # TODO: complete assertion check
-current = ...  # TODO: compute current
-rows = ...  # TODO: compute rows
-for _ in range(3):
-    current,noise = noise_step(...)  # TODO: compute current,noise
-    rows.append(noise)
-fixed = jnp.stack(...)  # TODO: compute fixed
-# Check tensor shape invariant: `fixed.shape==(3,2)`
-assert fixed.shape  # TODO: complete assertion check
-assert not jnp.array_equal(fixed[0],fixed[1])  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+
+def compare_key_use(root: jax.Array, count: int = 3) -> tuple[jax.Array, jax.Array]:
+    """Return repeated-key draws and draws made from distinct subkeys."""
+    # TODO: build both batches and return arrays with shape (count, 2).
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -399,9 +400,17 @@ What happens if the same key is used twice for the same random operation?
 
 <details><summary>Answer and explanation</summary>
 
-The same sample is reproduced
+**1. The generator automatically advances**
+
+A JAX key is an explicit value, not an advancing generator. Split it and pass a distinct key for each intended random draw.
+
+**2. The same sample is reproduced (correct)**
 
 Keys are explicit immutable inputs. Identical inputs reproduce the draw; split keys to describe independent randomness.
+
+**3. JAX guarantees an exception**
+
+Key reuse need not raise an exception. Compare the actual samples; reproducibility requires managing keys even when execution succeeds.
 
 </details>
 

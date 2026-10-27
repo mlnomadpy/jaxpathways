@@ -3,132 +3,162 @@
   "id": "tpu-01",
   "minutes": 25,
   "content": {
-    "problem": "Before you run a Transformer, sharded step, Pallas kernel, or distributed workload on a TPU, you need a working TPU runtime and a repeatable receipt that proves JAX actually discovered TPU chips—and you need a teardown habit so an idle Cloud TPU VM never keeps billing.",
-    "idea": "Getting a TPU running separates into four explicit boundaries: choosing an access route (free Colab/Kaggle TPU vs single-host Google Cloud TPU VM via on-demand or Flex-start), creating the TPU VM in a supported zone, installing `jax[tpu]` inside an isolated `.venv` on the TPU VM host, and recording a machine-checkable runtime receipt before deleting the VM.",
+    "problem": "Before you run a Transformer, sharded step, Pallas kernel, or distributed workload on a TPU, you need a working TPU runtime and a repeatable receipt that proves JAX actually discovered TPU chips\u2014and you need a teardown habit so an idle Cloud TPU VM never keeps billing.",
+    "idea": "Getting a TPU running separates into four explicit boundaries: choosing an access route (free Colab/Kaggle TPU vs single-host Google Cloud TPU VM via on-demand or Flex-start), creating the TPU VM in a supported zone, installing the reviewed pinned environment inside an isolated `.venv` on the TPU VM host, and recording a machine-checkable runtime receipt before deleting the VM.",
     "objectives": [
       "Choose between a free notebook TPU (Colab/Kaggle) and a single-host Google Cloud TPU VM (`v5litepod-4` or `v6e-4`).",
       "Provision a Cloud TPU VM using `gcloud compute tpus tpu-vm create` or a Flex-start instance group, then connect over SSH.",
-      "Create an isolated `.venv` on the TPU VM, install `jax[tpu]`, and validate `jax.default_backend()`, `jax.device_count()`, and a synchronized `jax.pmap` computation.",
-      "Delete the Cloud TPU VM and confirm with `gcloud compute tpus tpu-vm list` that zero active TPU nodes remain."
+      "Create an isolated `.venv` from the reviewed dependency lock, then require the expected TPU backend, exact requested device count, and synchronized arithmetic before marking the requested target ready.",
+      "Delete the named TPU VM or owning queued resource and verify those named resources are absent; unrelated resources may remain."
     ],
     "sections": [
       {
         "id": "guided-reasoning",
         "title": "Why a TPU VM is a host computer attached to accelerator chips",
-        "body": "When you create a Cloud TPU VM, Google Cloud allocates a Linux host machine directly attached over PCIe/ICI to the TPU chips on that board—for example, a `v5litepod-4` VM is one Linux host attached to \\(4\\) TPU v5e chips (`16` GiB HBM each). Your SSH session lands on that Linux host, not inside a chip.\n\nBecause your commands run on the TPU VM's Linux host, standard Linux environment rules still apply: you create a Python virtual environment (`.venv`), install `jax[tpu]` from the libtpu wheel index, and run Python scripts there. When Python imports `jax`, `libtpu` initializes the attached TPU chips and `jax.default_backend()` reports `'tpu'`.\n\nEvery Cloud TPU VM bills while it exists (`READY` or `STOPPED`), even if no Python process is running. Therefore, a complete TPU workflow always pairs creation (`tpu-vm create`) and verification with artifact retrieval (`tpu-vm scp`) and verified deletion (`tpu-vm delete` followed by `tpu-vm list`).",
+        "body": "A Cloud TPU VM gives you a Linux host attached to accelerator chips; SSH and Python run on the host. For the selected Cloud TPU API route, `v5litepod-4` requests one host with four physical v5e chips, each with 16 GiB HBM. That resource description is the hardware request, while `jax.device_count()` is the runtime's logical device count. Keep both in the receipt because the mapping depends on generation and API; for example, the TPU7x transfer case in this lesson maps two JAX devices to each chip.\n\nUse the requested topology to plan work, then verify the observed process and device counts on the host. The recorded rehearsal requested four chips but ran on CPU: it observed one process, one CPU device and `arithmetic_ok: true`, while `requested_target_ready` was false. That is a useful arithmetic check, not a TPU receipt.",
         "check": {
           "prompt": "Why does creating a Cloud TPU VM and seeing `STATUS: READY` in `gcloud` not prove that your JAX experiment can run on TPU?",
           "answer": "`STATUS: READY` only confirms that the Linux VM and attached TPU hardware were allocated. You still must verify inside Python on that VM that `libtpu` loads, `jax.default_backend() == 'tpu'`, `jax.device_count()` matches the topology, and a synchronized computation completes."
         },
-        "math": "N_{\\text{chips}} = \\text{device\\_count}(\\texttt{'tpu'}), \\qquad \\text{HBM}_{\\text{total}} = N_{\\text{chips}} \\times \\text{HBM}_{\\text{chip}}"
+        "math": "N_{\\text{JAX devices}} = \\texttt{jax.device\\_count()}, \\qquad N_{\\text{physical chips}} = f(\\text{generation},\\text{machine type},\\text{API topology})"
       },
       {
         "title": "1. Choose how to get a TPU: Colab/Kaggle vs Google Cloud TPU VM",
-        "body": "You can complete every TPU verification in this course using either a hosted notebook TPU or a Google Cloud TPU VM:\n\n- **Route 1 — Hosted Notebook TPU (Google Colab or Kaggle)**: Fastest zero-CLI start. In Google Colab, open **Runtime → Change runtime type → Hardware accelerator → TPU** (such as TPU v5e-1 or TPU v2-8). Skip `gcloud` provisioning and run the Python runtime-receipt verifier directly inside a notebook cell.\n- **Route 2A — Direct Cloud TPU VM (`gcloud compute tpus tpu-vm create`)**: Best when you want direct SSH and `scp` access to a single-host `v5litepod-4` (`4` chips) or `v6e-4` (`4` chips) VM in your own GCP project.\n- **Route 2B — Flex-start Queued Provisioning (`gcloud beta compute instance-groups managed create`)**: Recommended when on-demand TPU capacity in a zone is busy or you want a bounded `--max-run-duration` that automatically terminates the instance when the lease expires."
+        "body": "Choose access by the work you need to verify. A hosted notebook can check a single-process backend when TPU access is available, but this course's commands and multi-host workflow use Cloud TPU VMs. Availability, quota and supported zones must be checked before a request.\n\nThis exercise uses the Cloud TPU API's direct VM or bounded Flex-start queued-resource route for v5e. Keep creation, status, SSH and cleanup in the same route. A direct request is ready only when its named VM reports `READY`; Flex-start first needs the named request to become `ACTIVE`, then its VM must report `READY`. A queued request alone does not mean chips are allocated. The separate Compute Engine Flex-start workflow has different resource commands, so do not mix its lifecycle with this example."
       },
       {
         "title": "2. Authenticate `gcloud`, enable the TPU API, and check quota",
-        "body": "On your local workstation (or inside Google Cloud Shell), set your project ID, zone, and TPU name, enable `tpu.googleapis.com`, and inspect the available accelerator types in your chosen zone before requesting hardware. Using a single-host slice such as `v5litepod-4` (`4` chips on `1` host) avoids multi-host coordination while still letting you run real `jax.pmap` and mesh sharding across \\(4\\) TPU devices.",
+        "body": "Set the project, zone and resource name on your workstation, enable the TPU API, and list accelerator types in that zone before creating anything. For this selected API route, `v5litepod-4` means one host and four physical chips; the expected four JAX devices are a separate runtime check. One host keeps this exercise out of multi-host coordination while still letting a TPU program use its local devices.\n\nThe fixture's `v5litepod-4` has 64 GiB aggregate HBM, but each of its four chips has 16 GiB. For a 48 GiB state, replication would require 48 GiB on every chip and cannot fit. Ideal even sharding gives \\(48/4=12\\) GiB per chip; adding the exercise's 1 GiB activation allowance gives 13 GiB, above the 12.8 GiB usable budget at 80% of 16 GiB. So even the ideal shard is short by 0.2 GiB under these assumptions. Treat this as a sizing screen, then inspect actual placement and peak memory before choosing a slice. Check current quota, supported zones and pricing before a real request; the example zone is not a capacity promise.",
         "commands": [
           {
             "label": "Configure project, zone, and enable the Cloud TPU API",
             "shell": "bash",
-            "code": "# Configure project, zone, and enable the Cloud TPU API\nexport PROJECT_ID=\"your-gcp-project-id\"\nexport ZONE=\"us-west1-c\"\nexport TPU_NAME=\"jax-tpu-course\"\nexport ACCELERATOR_TYPE=\"v5litepod-4\"\nexport RUNTIME_VERSION=\"v2-alpha-tpuv5-lite\"\n\ngcloud auth login\ngcloud config set project \"$PROJECT_ID\"\ngcloud services enable tpu.googleapis.com\ngcloud compute tpus accelerator-types list --zone=\"$ZONE\"",
-            "expected": "Lists the TPU accelerator types supported in $ZONE, including v5litepod-1, v5litepod-4, and v5litepod-8."
+            "code": "# Configure project, zone, and enable the Cloud TPU API\nexport PROJECT_ID=\"your-gcp-project-id\"\nexport ZONE=\"us-west4-a\"\nexport TPU_NAME=\"jax-tpu-course\"\nexport ACCELERATOR_TYPE=\"v5litepod-4\"\nexport RUNTIME_VERSION=\"v2-alpha-tpuv5-lite\"\n\ngcloud auth login\ngcloud config set project \"$PROJECT_ID\"\ngcloud services enable tpu.googleapis.com\ngcloud compute tpus accelerator-types list --zone=\"$ZONE\"",
+            "expected": "Lists the accelerator types supported in the selected zone. Confirm the requested type is listed; quota and free capacity are separate checks."
           }
         ]
       },
       {
-        "title": "3. Create the Cloud TPU VM (Direct or Flex-start) and verify READY state",
-        "body": "Run either the direct `tpu-vm create` command (add `--spot` if you are using Spot quota) or the Flex-start template + managed instance group commands below. Wait until `describe` reports `state: READY`.",
+        "title": "3. Select one Cloud TPU API provisioning route",
+        "body": "Choose one provisioning route and track its named resource through readiness. For direct creation, describe the named VM and proceed only when it is `READY` with the requested accelerator type. For Flex-start, describe the named queued resource until it is `ACTIVE`, then check that its named VM is `READY` and has the expected type. If the queue fails or expires, inspect and remove that request rather than assuming a VM exists.\n\nAfter the run, preserve the receipt and delete the resource that owns this route: delete the direct VM, or delete the Flex-start queued resource. Verify those names are absent. This checks cleanup of the resources created for the exercise; unrelated project resources do not determine this run's cleanup result.",
         "commands": [
           {
             "label": "Route 2A: Create a single-host Cloud TPU v5e-4 VM directly",
             "shell": "bash",
-            "code": "# Route 2A: Create a single-host Cloud TPU v5e-4 VM directly\ngcloud compute tpus tpu-vm create \"$TPU_NAME\" \\\n  --zone=\"$ZONE\" \\\n  --accelerator-type=\"$ACCELERATOR_TYPE\" \\\n  --version=\"$RUNTIME_VERSION\"\n\ngcloud compute tpus tpu-vm describe \"$TPU_NAME\" \\\n  --zone=\"$ZONE\" \\\n  --format=\"value(state,acceleratorType,networkEndpoints[0].ipAddress)\"",
-            "expected": "Outputs READY, v5litepod-4, and the internal IP address of the newly provisioned TPU VM."
+            "code": "# Route 2A: direct Cloud TPU VM create\ngcloud compute tpus tpu-vm create \"$TPU_NAME\" --project=\"$PROJECT_ID\" --zone=\"$ZONE\" --accelerator-type=\"$ACCELERATOR_TYPE\" --version=\"$RUNTIME_VERSION\"\ngcloud compute tpus tpu-vm describe \"$TPU_NAME\" --project=\"$PROJECT_ID\" --zone=\"$ZONE\" --format=\"value(state,acceleratorType,networkEndpoints[0].ipAddress)\"",
+            "expected": "Continue only when the named VM is READY and its accelerator type matches the requested v5litepod-4 resource."
           },
           {
-            "label": "Route 2B: Alternative Flex-start queued provisioning with automatic 4-hour termination",
+            "label": "Route 2B: Bounded Cloud TPU API Flex-start request for v5e",
             "shell": "bash",
-            "code": "# Route 2B: Alternative Flex-start queued provisioning with automatic 4-hour termination\ngcloud beta compute instance-templates create tpu-course-flex-tmpl \\\n  --machine-type=ct5lp-hightpu-4t \\\n  --provisioning-model=FLEX_START \\\n  --max-run-duration=4h \\\n  --instance-termination-action=DELETE \\\n  --reservation-affinity=none\n\ngcloud beta compute instance-groups managed create tpu-course-mig \\\n  --zone=\"$ZONE\" --template=tpu-course-flex-tmpl --size=0\n\ngcloud beta compute instance-groups managed resize-requests create tpu-course-mig \\\n  --zone=\"$ZONE\" --resize-request=req-tpu-1 --resize-by=1",
-            "expected": "Creates a Flex-start request for a 4-chip TPU v5e instance that automatically deletes after 4 hours."
+            "code": "export QUEUED_RESOURCE_ID=\"$TPU_NAME-request\"\ngcloud alpha compute tpus queued-resources create \"$QUEUED_RESOURCE_ID\" --project=\"$PROJECT_ID\" --zone=\"$ZONE\" --node-id=\"$TPU_NAME\" --accelerator-type=\"$ACCELERATOR_TYPE\" --runtime-version=\"$RUNTIME_VERSION\" --provisioning-model=flex-start --max-run-duration=1h --valid-until-duration=30m\ngcloud alpha compute tpus queued-resources describe \"$QUEUED_RESOURCE_ID\" --project=\"$PROJECT_ID\" --zone=\"$ZONE\" --format=\"value(state.state)\"\n# Continue only after ACTIVE and READY.\ngcloud compute tpus tpu-vm describe \"$TPU_NAME\" --project=\"$PROJECT_ID\" --zone=\"$ZONE\" --format=\"value(state,acceleratorType)\"",
+            "expected": "The queue may wait or fail. Proceed only after ACTIVE and READY; verify the named accelerator type and API route. No capacity or cost-free execution is promised."
           }
         ]
       },
       {
-        "title": "4. SSH into the TPU VM, create `.venv`, and install `jax[tpu]`",
-        "body": "Once the TPU VM is `READY`, bootstrap a clean virtual environment on the remote host and install `jax[tpu]` from the official `libtpu` wheel index. Keeping this `.venv` at `~/jax-tpu-lab/.venv` gives every subsequent lesson in the course a known interpreter path.",
+        "title": "4. SSH into the TPU VM and install the pinned runtime",
+        "body": "Wait for the named VM to reach `READY`, then create the isolated `.venv` on that Linux host and install the reviewed requirements plus the matching pinned `jax[tpu]` extra. Record the environment identity with the run. An installed package proves only that Python can import it; it does not show which backend JAX selected or whether the requested devices can execute work. Those checks belong in the synchronized runtime receipt.",
         "commands": [
           {
-            "label": "Bootstrap ~/jax-tpu-lab/.venv with jax[tpu] on the TPU VM",
+            "label": "Bootstrap the pinned runtime on the TPU VM",
             "shell": "bash",
-            "code": "# Bootstrap ~/jax-tpu-lab/.venv with jax[tpu] on the TPU VM\ngcloud compute tpus tpu-vm ssh \"$TPU_NAME\" --zone=\"$ZONE\" --command=\"\n  set -euo pipefail\n  mkdir -p ~/jax-tpu-lab\n  python3 -m venv ~/jax-tpu-lab/.venv\n  source ~/jax-tpu-lab/.venv/bin/activate\n  pip install -U pip\n  pip install 'jax[tpu]' -f https://storage.googleapis.com/jax-releases/libtpu_releases.html\n  pip install flax optax orbax-checkpoint numpy matplotlib\n  python -c 'import jax; print(\\\"BACKEND:\\\", jax.default_backend(), \\\"COUNT:\\\", jax.device_count(), \\\"DEVICES:\\\", jax.devices())'\n\"",
-            "expected": "Prints BACKEND: tpu COUNT: 4 and lists 4 TpuDevice objects (for v5litepod-4)."
+            "code": "gcloud compute tpus tpu-vm ssh \"$TPU_NAME\" --zone=\"$ZONE\" --command=\"mkdir -p ~/jax-tpu-lab\"\ngcloud compute tpus tpu-vm scp projects/reproducible-experiments/requirements.txt \"$TPU_NAME\":~/jax-tpu-lab/ --zone=\"$ZONE\"\ngcloud compute tpus tpu-vm ssh \"$TPU_NAME\" --zone=\"$ZONE\" --command='set -euo pipefail; mkdir -p ~/jax-tpu-lab; python3 -m venv ~/jax-tpu-lab/.venv; ~/jax-tpu-lab/.venv/bin/python -m pip install -r ~/jax-tpu-lab/requirements.txt; ~/jax-tpu-lab/.venv/bin/python -m pip install \"jax[tpu]==0.9.2\" -f https://storage.googleapis.com/jax-releases/libtpu_releases.html'",
+            "expected": "Installs pinned JAX ecosystem packages and the matching jax[tpu]==0.9.2 extra. Record this dependency identity with source and runtime receipts."
           }
         ]
       },
       {
-        "title": "5. Run the runtime contract check and always delete the TPU VM when finished",
-        "body": "Before claiming a TPU runtime is ready—or before starting a long run—execute a script that checks both the requested backend/device count and a synchronized computation across all local devices, writes a JSON receipt, copies the receipt back to your laptop, and deletes the TPU VM when your session is finished.",
+        "title": "5. Run the requested-target preflight, retrieve its receipt, and clean up route-owned resources",
+        "body": "Run the saved verifier on the requested VM, copy its JSONL receipt back before cleanup, and read its fields separately: arithmetic, observed backend, observed JAX device count, process count, and requested API topology. Here the selected resource contract requests one host, four physical chips and four JAX devices. On the recorded CPU rehearsal, the sum of squares is correct, but the observed backend is `cpu`, the device count is 1, and requested-target readiness is false. Continue on CPU for learning; launch a TPU workload only after the requested backend and device-count checks pass on the named target.\n\nAfter retrieving the receipt, delete the direct VM or its owning Flex-start request, then check that the same named resource is absent. Do not use a project-wide empty list as the success condition.",
         "commands": [
           {
-            "label": "Copy back any receipts and delete the Cloud TPU VM to stop billing",
+            "label": "Run the target verifier and copy its receipt to the workstation",
             "shell": "bash",
-            "code": "# Copy back any receipts and delete the Cloud TPU VM to stop billing\ngcloud compute tpus tpu-vm delete \"$TPU_NAME\" --zone=\"$ZONE\" --quiet\ngcloud compute tpus tpu-vm list --zone=\"$ZONE\"",
-            "expected": "Deletes the TPU VM and confirms Listed 0 items so no idle TPU resource remains."
+            "code": "gcloud compute tpus tpu-vm ssh \"$TPU_NAME\" --zone=\"$ZONE\" --command=\"mkdir -p ~/jax-tpu-lab\"\ngcloud compute tpus tpu-vm scp public/exercises/tpu-01.py \"$TPU_NAME\":~/jax-tpu-lab/ --zone=\"$ZONE\"\ngcloud compute tpus tpu-vm ssh \"$TPU_NAME\" --zone=\"$ZONE\" --command='set -euo pipefail; TPU_REQUIRE_TARGET=1 JAX_PLATFORMS=tpu ~/jax-tpu-lab/.venv/bin/python ~/jax-tpu-lab/tpu-01.py | tee ~/jax-tpu-lab/tpu-01-receipt.jsonl'\ngcloud compute tpus tpu-vm scp \"$TPU_NAME\":~/jax-tpu-lab/tpu-01-receipt.jsonl ./ --zone=\"$ZONE\"",
+            "expected": "The copied receipt identifies source and environment, requested and observed backend/device count, arithmetic status and target readiness. On CPU, arithmetic can pass while TPU readiness is false."
+          },
+          {
+            "label": "Delete the named direct VM or owning Flex-start request and verify absence",
+            "shell": "bash",
+            "code": "if [ -n \"$QUEUED_RESOURCE_ID\" ]; then\n  gcloud alpha compute tpus queued-resources delete \"$QUEUED_RESOURCE_ID\" --project=\"$PROJECT_ID\" --zone=\"$ZONE\" --force --quiet\nelse\n  gcloud compute tpus tpu-vm delete \"$TPU_NAME\" --project=\"$PROJECT_ID\" --zone=\"$ZONE\" --quiet\nfi\nremaining_vm=$(gcloud compute tpus tpu-vm list --project=\"$PROJECT_ID\" --zone=\"$ZONE\" --filter=\"name=$TPU_NAME\" --format=\"value(name)\")\n[ -z \"$remaining_vm\" ] || { echo \"Named TPU VM still exists: $remaining_vm\"; exit 1; }\nif [ -n \"$QUEUED_RESOURCE_ID\" ]; then\n  remaining_request=$(gcloud alpha compute tpus queued-resources list --project=\"$PROJECT_ID\" --zone=\"$ZONE\" --filter=\"name=$QUEUED_RESOURCE_ID\" --format=\"value(name)\")\n  [ -z \"$remaining_request\" ] || { echo \"Owning queued resource still exists: $remaining_request\"; exit 1; }\nfi\nprintf \"Named route resources are absent; unrelated resources may remain.\\n\"",
+            "expected": "The named VM and, if used, its owning queued request are absent. Other resources may remain."
           }
         ]
       }
     ],
-    "code": "# Step 1 — Write the runtime contract and synchronized pmap verifier\nimport hashlib\nimport json\nimport os\nimport platform\nimport jax\nimport jax.numpy as jnp\nimport numpy as np\n\n\ndef verify_runtime_contract(expected_backend=None, min_devices=1):\n    # Record the backend selected by this JAX process.\n    backend = jax.default_backend()\n    devices = jax.devices()\n    local_devices = jax.local_devices()\n    target = expected_backend or backend\n    # Build one eight-value row for each local device.\n    x = jnp.arange(len(local_devices) * 8, dtype=jnp.float32).reshape(len(local_devices), 8)\n    # Each device reduces its eight values to one local sum of squares.\n    per_device = jax.pmap(lambda row: jnp.sum(row * row))(x)\n    # Wait for device work to finish before timing it or comparing its result on the host.\n    total = float(jax.block_until_ready(jnp.sum(per_device)))\n    expected_total = float(np.sum(np.arange(len(local_devices) * 8, dtype=np.float64) ** 2))\n    contract_ok = (\n        backend == target\n        and len(devices) >= min_devices\n        and np.isclose(total, expected_total)\n    )\n    receipt = {\n        \"python\": platform.python_version(),\n        \"jax\": jax.__version__,\n        \"expected_backend\": target,\n        \"observed_backend\": backend,\n        \"device_count\": len(devices),\n        \"local_device_count\": len(local_devices),\n        \"device_kinds\": [str(d.device_kind) for d in devices],\n        \"pmap_sum_of_squares\": total,\n        \"expected_sum_of_squares\": expected_total,\n        \"contract_ok\": bool(contract_ok),\n    }\n    receipt[\"receipt_sha256\"] = hashlib.sha256(\n        json.dumps(receipt, sort_keys=True, separators=(\",\", \":\")).encode()\n    ).hexdigest()[:16]\n    return receipt\n\n\n# Step 2 — Compare single-host TPU slice topologies and emit the receipt\ntopologies = [\n    {\"slice\": \"v5litepod-1\", \"hosts\": 1, \"chips_per_host\": 1, \"hbm_gib_per_chip\": 16},\n    {\"slice\": \"v5litepod-4\", \"hosts\": 1, \"chips_per_host\": 4, \"hbm_gib_per_chip\": 16},\n    {\"slice\": \"v5litepod-8\", \"hosts\": 1, \"chips_per_host\": 8, \"hbm_gib_per_chip\": 16},\n    {\"slice\": \"v6e-4\", \"hosts\": 1, \"chips_per_host\": 4, \"hbm_gib_per_chip\": 32},\n]\nfor spec in topologies:\n    spec[\"total_chips\"] = spec[\"hosts\"] * spec[\"chips_per_host\"]\n    spec[\"total_hbm_gib\"] = spec[\"total_chips\"] * spec[\"hbm_gib_per_chip\"]\n\n# Record the backend selected by this JAX process in the receipt.\nreceipt = verify_runtime_contract(expected_backend=jax.default_backend(), min_devices=1)\n# Assert invariant `receipt[\"contract_ok\"] is True` holds\nassert receipt[\"contract_ok\"] is True\nprint(\"Verified runtime receipt:\", json.dumps(receipt, sort_keys=True))\nprint(\"Single-host TPU slice HBM totals (GiB):\", {t[\"slice\"]: t[\"total_hbm_gib\"] for t in topologies})",
+    "code": "# Step 1 \u2014 Write the runtime contract and synchronized pmap verifier\nimport hashlib\nimport json\nimport os\nimport platform\nfrom pathlib import Path\nimport jax\nimport jax.numpy as jnp\nimport numpy as np\n\n\ndef verify_runtime_contract(expected_backend=\"tpu\", expected_device_count=4):\n    backend = jax.default_backend()\n    devices = jax.devices()\n    local_devices = jax.local_devices()\n    x = jnp.arange(len(local_devices) * 8, dtype=jnp.float32).reshape(len(local_devices), 8)\n    per_device = jax.pmap(lambda row: jnp.sum(row * row))(x)\n    total = float(jax.block_until_ready(jnp.sum(per_device)))\n    expected_total = float(np.sum(np.arange(len(local_devices) * 8, dtype=np.float64) ** 2))\n    arithmetic_ok = bool(np.isclose(total, expected_total))\n    expected_backend_ok = backend == expected_backend\n    expected_topology_ok = len(devices) == expected_device_count\n    source_value = globals().get(\"__file__\")\n    source_path = Path(source_value) if isinstance(source_value, str) and source_value else None\n    source_sha256 = hashlib.sha256(source_path.read_bytes()).hexdigest() if source_path is not None and source_path.is_file() else None\n    source_identity = str(source_path.resolve()) if source_sha256 is not None else \"unavailable: interactive execution has no readable __file__\"\n    receipt = {\n        \"source_sha256\": source_sha256,\n        \"source_identity\": source_identity,\n        \"environment_lock\": \"projects/reproducible-experiments/requirements.txt; jax[tpu]==0.9.2\",\n        \"python\": platform.python_version(), \"jax\": jax.__version__,\n        \"expected_backend\": expected_backend, \"observed_backend\": backend,\n        \"expected_device_count\": expected_device_count, \"device_count\": len(devices),\n        \"process_count\": jax.process_count(),\n        \"target_topology\": {\"api\": \"Cloud TPU API direct VM/Flex-start\", \"machine_type\": \"v5litepod-4\", \"physical_chips_expected\": 4, \"hosts_expected\": 1, \"topology_source\": \"requested Cloud TPU resource contract; physical chips are not inferred from JAX devices\"},\n        \"local_device_count\": len(local_devices), \"device_kinds\": [str(d.device_kind) for d in devices],\n        \"pmap_sum_of_squares\": total, \"expected_sum_of_squares\": expected_total,\n        \"arithmetic_ok\": arithmetic_ok, \"expected_backend_ok\": expected_backend_ok,\n        \"expected_topology_ok\": expected_topology_ok,\n        \"requested_target_ready\": bool(arithmetic_ok and expected_backend_ok and expected_topology_ok),\n    }\n    receipt[\"receipt_sha256\"] = hashlib.sha256(json.dumps(receipt, sort_keys=True, separators=(\",\", \":\")).encode()).hexdigest()\n    return receipt\n\n\n# Step 2 \u2014 Compare single-host TPU slice topologies and emit the receipt\ntopologies = [\n    {\"slice\": \"v5litepod-1\", \"api\": \"Cloud TPU API direct VM/Flex-start\", \"hosts\": 1, \"chips_per_host\": 1, \"jax_devices_per_chip_expected\": 1, \"hbm_gib_per_chip\": 16},\n    {\"slice\": \"v5litepod-4\", \"api\": \"Cloud TPU API direct VM/Flex-start\", \"hosts\": 1, \"chips_per_host\": 4, \"jax_devices_per_chip_expected\": 1, \"hbm_gib_per_chip\": 16},\n    {\"slice\": \"v5litepod-8\", \"api\": \"Cloud TPU API direct VM/Flex-start\", \"hosts\": 1, \"chips_per_host\": 8, \"jax_devices_per_chip_expected\": 1, \"hbm_gib_per_chip\": 16},\n    {\"slice\": \"v6e-4\", \"api\": \"Compute Engine Cloud TPU VM\", \"hosts\": 1, \"chips_per_host\": 4, \"jax_devices_per_chip_expected\": 1, \"hbm_gib_per_chip\": 32},\n]\nfor spec in topologies:\n    spec[\"total_chips\"] = spec[\"hosts\"] * spec[\"chips_per_host\"]\n    spec[\"expected_jax_devices\"] = spec[\"total_chips\"] * spec[\"jax_devices_per_chip_expected\"]\n    spec[\"processes\"] = spec[\"hosts\"]\n    spec[\"total_hbm_gib\"] = spec[\"total_chips\"] * spec[\"hbm_gib_per_chip\"]\n\n# Record the backend selected by this JAX process in the receipt.\nreceipt = verify_runtime_contract(expected_backend=\"tpu\", expected_device_count=4)\n# The CPU rehearsal must complete arithmetic while clearly reporting the TPU target as not ready.\nassert receipt[\"arithmetic_ok\"] is True\nif receipt[\"observed_backend\"] == \"cpu\":\n    assert receipt[\"requested_target_ready\"] is False\n# Actual TPU launch/preflight commands set TPU_REQUIRE_TARGET=1 and require an exact backend/count match.\nif os.environ.get(\"TPU_REQUIRE_TARGET\") == \"1\":\n    if receipt[\"source_sha256\"] is None:\n        raise SystemExit(\"TPU_REQUIRE_TARGET=1 requires a saved verifier script with a readable source identity\")\n    if not receipt[\"requested_target_ready\"]:\n        raise SystemExit(\"Requested TPU target is not ready: expected TPU backend and exactly 4 JAX devices\")\nprint(\"Verified runtime receipt:\", json.dumps(receipt, sort_keys=True))\nprint(\"Single-host TPU slice HBM totals (GiB):\", {t[\"slice\"]: t[\"total_hbm_gib\"] for t in topologies})",
     "buildSteps": [
       {
         "title": "Write the runtime contract and synchronized pmap verifier",
         "instruction": "Create main.py with verify_runtime_contract so the same function validates CPU locally and TPU on your Cloud TPU VM.",
-        "code": "# Step 1 — Write the runtime contract and synchronized pmap verifier\nimport hashlib\nimport json\nimport os\nimport platform\nimport jax\nimport jax.numpy as jnp\nimport numpy as np\n\n\ndef verify_runtime_contract(expected_backend=None, min_devices=1):\n    # Check which hardware backend (`cpu`, `gpu`, or `tpu`) JAX selected for `backend`.\n    backend = jax.default_backend()\n    devices = jax.devices()\n    local_devices = jax.local_devices()\n    target = expected_backend or backend\n    x = jnp.arange(len(local_devices) * 8, dtype=jnp.float32).reshape(len(local_devices), 8)\n    # Reduce across the target axis to summarize `per_device`.\n    per_device = jax.pmap(lambda row: jnp.sum(row * row))(x)\n    # Wait for device work to finish before timing it or comparing its result on the host.\n    total = float(jax.block_until_ready(jnp.sum(per_device)))\n    expected_total = float(np.sum(np.arange(len(local_devices) * 8, dtype=np.float64) ** 2))\n    contract_ok = (\n        backend == target\n        and len(devices) >= min_devices\n        and np.isclose(total, expected_total)\n    )\n    receipt = {\n        \"python\": platform.python_version(),\n        \"jax\": jax.__version__,\n        \"expected_backend\": target,\n        \"observed_backend\": backend,\n        \"device_count\": len(devices),\n        \"local_device_count\": len(local_devices),\n        \"device_kinds\": [str(d.device_kind) for d in devices],\n        \"pmap_sum_of_squares\": total,\n        \"expected_sum_of_squares\": expected_total,\n        \"contract_ok\": bool(contract_ok),\n    }\n    receipt[\"receipt_sha256\"] = hashlib.sha256(\n        json.dumps(receipt, sort_keys=True, separators=(\",\", \":\")).encode()\n    ).hexdigest()[:16]\n    return receipt",
+        "code": "# Step 1 \u2014 Write the runtime contract and synchronized pmap verifier\nimport hashlib\nimport json\nimport os\nimport platform\nfrom pathlib import Path\nimport jax\nimport jax.numpy as jnp\nimport numpy as np\n\n\ndef verify_runtime_contract(expected_backend=\"tpu\", expected_device_count=4):\n    backend = jax.default_backend()\n    devices = jax.devices()\n    local_devices = jax.local_devices()\n    x = jnp.arange(len(local_devices) * 8, dtype=jnp.float32).reshape(len(local_devices), 8)\n    per_device = jax.pmap(lambda row: jnp.sum(row * row))(x)\n    total = float(jax.block_until_ready(jnp.sum(per_device)))\n    expected_total = float(np.sum(np.arange(len(local_devices) * 8, dtype=np.float64) ** 2))\n    arithmetic_ok = bool(np.isclose(total, expected_total))\n    expected_backend_ok = backend == expected_backend\n    expected_topology_ok = len(devices) == expected_device_count\n    source_value = globals().get(\"__file__\")\n    source_path = Path(source_value) if isinstance(source_value, str) and source_value else None\n    source_sha256 = hashlib.sha256(source_path.read_bytes()).hexdigest() if source_path is not None and source_path.is_file() else None\n    source_identity = str(source_path.resolve()) if source_sha256 is not None else \"unavailable: interactive execution has no readable __file__\"\n    receipt = {\n        \"source_sha256\": source_sha256,\n        \"source_identity\": source_identity,\n        \"environment_lock\": \"projects/reproducible-experiments/requirements.txt; jax[tpu]==0.9.2\",\n        \"python\": platform.python_version(), \"jax\": jax.__version__,\n        \"expected_backend\": expected_backend, \"observed_backend\": backend,\n        \"expected_device_count\": expected_device_count, \"device_count\": len(devices),\n        \"process_count\": jax.process_count(),\n        \"target_topology\": {\"api\": \"Cloud TPU API direct VM/Flex-start\", \"machine_type\": \"v5litepod-4\", \"physical_chips_expected\": 4, \"hosts_expected\": 1, \"topology_source\": \"requested Cloud TPU resource contract; physical chips are not inferred from JAX devices\"},\n        \"local_device_count\": len(local_devices), \"device_kinds\": [str(d.device_kind) for d in devices],\n        \"pmap_sum_of_squares\": total, \"expected_sum_of_squares\": expected_total,\n        \"arithmetic_ok\": arithmetic_ok, \"expected_backend_ok\": expected_backend_ok,\n        \"expected_topology_ok\": expected_topology_ok,\n        \"requested_target_ready\": bool(arithmetic_ok and expected_backend_ok and expected_topology_ok),\n    }\n    receipt[\"receipt_sha256\"] = hashlib.sha256(json.dumps(receipt, sort_keys=True, separators=(\",\", \":\")).encode()).hexdigest()\n    return receipt",
         "explanation": "The verifier checks both device discovery and a synchronized pmap reduction across all local devices, then hashes the receipt."
       },
       {
         "title": "Compare single-host TPU slice topologies and emit the receipt",
         "instruction": "Append the slice topology table and runtime receipt check to main.py.",
-        "code": "# Step 2 — Compare single-host TPU slice topologies and emit the receipt\ntopologies = [\n    {\"slice\": \"v5litepod-1\", \"hosts\": 1, \"chips_per_host\": 1, \"hbm_gib_per_chip\": 16},\n    {\"slice\": \"v5litepod-4\", \"hosts\": 1, \"chips_per_host\": 4, \"hbm_gib_per_chip\": 16},\n    {\"slice\": \"v5litepod-8\", \"hosts\": 1, \"chips_per_host\": 8, \"hbm_gib_per_chip\": 16},\n    {\"slice\": \"v6e-4\", \"hosts\": 1, \"chips_per_host\": 4, \"hbm_gib_per_chip\": 32},\n]\nfor spec in topologies:\n    spec[\"total_chips\"] = spec[\"hosts\"] * spec[\"chips_per_host\"]\n    spec[\"total_hbm_gib\"] = spec[\"total_chips\"] * spec[\"hbm_gib_per_chip\"]\n\n# Check which hardware backend (`cpu`, `gpu`, or `tpu`) JAX selected for `receipt`.\nreceipt = verify_runtime_contract(expected_backend=jax.default_backend(), min_devices=1)\n# Assert invariant `receipt[\"contract_ok\"] is True` holds\nassert receipt[\"contract_ok\"] is True\nprint(\"Verified runtime receipt:\", json.dumps(receipt, sort_keys=True))\nprint(\"Single-host TPU slice HBM totals (GiB):\", {t[\"slice\"]: t[\"total_hbm_gib\"] for t in topologies})",
+        "code": "# Step 2 \u2014 Compare single-host TPU slice topologies and emit the receipt\ntopologies = [\n    {\"slice\": \"v5litepod-1\", \"api\": \"Cloud TPU API direct VM/Flex-start\", \"hosts\": 1, \"chips_per_host\": 1, \"jax_devices_per_chip_expected\": 1, \"hbm_gib_per_chip\": 16},\n    {\"slice\": \"v5litepod-4\", \"api\": \"Cloud TPU API direct VM/Flex-start\", \"hosts\": 1, \"chips_per_host\": 4, \"jax_devices_per_chip_expected\": 1, \"hbm_gib_per_chip\": 16},\n    {\"slice\": \"v5litepod-8\", \"api\": \"Cloud TPU API direct VM/Flex-start\", \"hosts\": 1, \"chips_per_host\": 8, \"jax_devices_per_chip_expected\": 1, \"hbm_gib_per_chip\": 16},\n    {\"slice\": \"v6e-4\", \"api\": \"Compute Engine Cloud TPU VM\", \"hosts\": 1, \"chips_per_host\": 4, \"jax_devices_per_chip_expected\": 1, \"hbm_gib_per_chip\": 32},\n]\nfor spec in topologies:\n    spec[\"total_chips\"] = spec[\"hosts\"] * spec[\"chips_per_host\"]\n    spec[\"expected_jax_devices\"] = spec[\"total_chips\"] * spec[\"jax_devices_per_chip_expected\"]\n    spec[\"processes\"] = spec[\"hosts\"]\n    spec[\"total_hbm_gib\"] = spec[\"total_chips\"] * spec[\"hbm_gib_per_chip\"]\n\n# Check which hardware backend (`cpu`, `gpu`, or `tpu`) JAX selected for `receipt`.\nreceipt = verify_runtime_contract(expected_backend=\"tpu\", expected_device_count=4)\n# The CPU rehearsal must complete arithmetic while clearly reporting the TPU target as not ready.\nassert receipt[\"arithmetic_ok\"] is True\nif receipt[\"observed_backend\"] == \"cpu\":\n    assert receipt[\"requested_target_ready\"] is False\n# Actual TPU launch/preflight commands set TPU_REQUIRE_TARGET=1 and require an exact backend/count match.\nif os.environ.get(\"TPU_REQUIRE_TARGET\") == \"1\":\n    if receipt[\"source_sha256\"] is None:\n        raise SystemExit(\"TPU_REQUIRE_TARGET=1 requires a saved verifier script with a readable source identity\")\n    if not receipt[\"requested_target_ready\"]:\n        raise SystemExit(\"Requested TPU target is not ready: expected TPU backend and exactly 4 JAX devices\")\nprint(\"Verified runtime receipt:\", json.dumps(receipt, sort_keys=True))\nprint(\"Single-host TPU slice HBM totals (GiB):\", {t[\"slice\"]: t[\"total_hbm_gib\"] for t in topologies})",
         "explanation": "Calculating total chips and HBM per slice makes the hardware capacity concrete before you provision a Cloud TPU VM."
       },
       {
         "title": "Step 3: Verify invariants on the completed state",
         "instruction": "Run the final shape and numerical assertions to confirm the state built in Steps 1 and 2.",
-        "code": "receipt = verify_runtime_contract(expected_backend=jax.default_backend(), min_devices=1)\nassert receipt[\"contract_ok\"] is True",
+        "code": "receipt = verify_runtime_contract(expected_backend=\"tpu\", expected_device_count=4)\nassert receipt[\"arithmetic_ok\"] is True",
         "explanation": "Checking these invariants confirms the computation is ready for the full worked experiment."
       }
     ],
-    "output": "Prints a JSON runtime receipt with contract_ok: true, observed_backend, device_count, pmap_sum_of_squares: 140.0 (on 1 local device), and the single-host TPU slice HBM totals.",
+    "output": "The topology catalog distinguishes VM hosts, expected one-process-per-host ownership, expected JAX device count for the listed v5e/v6e APIs, physical chips, and HBM GiB. These are planning expectations; compare the selected API resource description and live JAX devices before interpreting a target receipt. TPU7x can expose two JAX devices per physical chip.",
     "experiments": [
+      {
+        "title": "Reject backend mismatch and insufficient topology before launch",
+        "prediction": "On CPU, what fails when the requested target is TPU/4 devices, and what fails if CPU/4 devices is requested?",
+        "code": "# Backend mismatch: CPU runtime, TPU requested.\nbackend_mismatch = verify_runtime_contract(expected_backend=\"tpu\", expected_device_count=4)\n# Isolate topology mismatch: CPU backend matches, but only one CPU device is available.\ntopology_mismatch = verify_runtime_contract(expected_backend=\"cpu\", expected_device_count=4)\nprint(backend_mismatch[\"expected_backend_ok\"], backend_mismatch[\"expected_topology_ok\"], topology_mismatch[\"expected_backend_ok\"], topology_mismatch[\"expected_topology_ok\"])\nassert backend_mismatch[\"expected_backend_ok\"] is False\nassert topology_mismatch[\"expected_backend_ok\"] is True and topology_mismatch[\"expected_topology_ok\"] is False\nassert backend_mismatch[\"requested_target_ready\"] is False and topology_mismatch[\"requested_target_ready\"] is False",
+        "output": "A CPU process fails the TPU backend check. A CPU/4 request matches its backend but fails the exact device-count check. Both are rejected before a training launch.",
+        "explanation": "The checks isolate backend selection from topology. Arithmetic success alone does not qualify either requested target."
+      },
       {
         "title": "Reject a mismatched backend or missing TPU devices immediately",
         "prediction": "What should verify_runtime_contract return if you require 4 TPU devices on a single-CPU host?",
-        "code": "# Experiment — Reject a mismatched backend or missing TPU devices immediately\nmismatch = verify_runtime_contract(expected_backend=\"tpu\", min_devices=4)\nprint(\"Mismatch contract_ok:\", mismatch[\"contract_ok\"], \"observed:\", mismatch[\"observed_backend\"], \"devices:\", mismatch[\"device_count\"])\nassert mismatch[\"contract_ok\"] == (jax.default_backend() == \"tpu\" and jax.device_count() >= 4)",
-        "output": "On CPU, mismatch['contract_ok'] is False while still recording the observed backend and device count.",
+        "code": "# Experiment \u2014 Reject a mismatched backend or missing TPU devices immediately\nmismatch = verify_runtime_contract(expected_backend=\"tpu\", expected_device_count=4)\nprint(\"Mismatch requested_target_ready:\", mismatch[\"requested_target_ready\"], \"observed:\", mismatch[\"observed_backend\"], \"devices:\", mismatch[\"device_count\"])\nassert mismatch[\"requested_target_ready\"] == (jax.default_backend() == \"tpu\" and jax.device_count() == 4)",
+        "output": "On CPU, mismatch['requested_target_ready'] is False while still recording the observed backend and device count.",
         "explanation": "Failing the contract check explicitly prevents a script from silently running on CPU when you intended to benchmark or train on a TPU VM."
       },
       {
         "title": "Verify single-host vs multi-host process counts",
         "prediction": "Why does v5litepod-4 need only one SSH command while v5litepod-16 requires --worker=all?",
-        "code": "# Experiment — Verify single-host vs multi-host process counts\nslice_hosts = {\"v5litepod-1\": 1, \"v5litepod-4\": 1, \"v5litepod-8\": 1, \"v5litepod-16\": 4}\nneeds_multi_host = {k: (v > 1) for k, v in slice_hosts.items()}\nprint(\"Requires --worker=all and jax.distributed.initialize():\", needs_multi_host)\nassert needs_multi_host[\"v5litepod-4\"] is False and needs_multi_host[\"v5litepod-16\"] is True",
+        "code": "# Experiment \u2014 Verify single-host vs multi-host process counts\nslice_hosts = {\"v5litepod-1\": 1, \"v5litepod-4\": 1, \"v5litepod-8\": 1, \"v5litepod-16\": 4}\nneeds_multi_host = {k: (v > 1) for k, v in slice_hosts.items()}\nprint(\"Requires --worker=all and jax.distributed.initialize():\", needs_multi_host)\nassert needs_multi_host[\"v5litepod-4\"] is False and needs_multi_host[\"v5litepod-16\"] is True",
         "output": "v5litepod-1, v5litepod-4, and v5litepod-8 run on 1 host (False); v5litepod-16 spans 4 hosts (True).",
         "explanation": "Single-host TPU VMs attach all chips to one Linux VM; multi-host slices attach chips across multiple Linux VMs that must all launch the Python process."
       }
     ],
-    "exercise": "Call `verify_runtime_contract` for the active backend with `min_devices=1`, then compute how many `v5litepod-4` chips and total GiB of HBM are available on that single-host slice and assert both values.",
-    "solution": "# Exercise solution\nchecked = verify_runtime_contract(expected_backend=jax.default_backend(), min_devices=1)\nv5e4 = next(t for t in topologies if t[\"slice\"] == \"v5litepod-4\")\nprint(\"Checked receipt sha256:\", checked[\"receipt_sha256\"], \"v5litepod-4 chips:\", v5e4[\"total_chips\"], \"HBM GiB:\", v5e4[\"total_hbm_gib\"])\nassert checked[\"contract_ok\"] is True and v5e4[\"total_chips\"] == 4 and v5e4[\"total_hbm_gib\"] == 64",
+    "exercise": "Use the Foundations ledger for a 48 GiB state on four 16 GiB v5e chips. Report replicated and ideal-sharded state per chip, the 12.8 GiB usable budget, and the result with a 1 GiB activation allowance. Then inspect the selected v5litepod-4 receipt: report observed process count and JAX device count separately from the requested physical chip count, plus the API and machine type. On CPU, arithmetic should pass while requested_target_ready remains false.",
+    "solution": "# Exercise solution\n\ndef inspect_runtime_and_slice(verify_runtime_contract, expected_backend, expected_device_count, topologies):\n    receipt = verify_runtime_contract(expected_backend=expected_backend, expected_device_count=expected_device_count)\n    if not receipt[\"arithmetic_ok\"]:\n        raise AssertionError(\"Synchronized arithmetic rehearsal failed\")\n    chips = 4\n    total_state_gib = 48.0\n    usable_per_chip_gib = 16.0 * 0.8\n    replicated_per_chip_gib = total_state_gib\n    ideal_shard_per_chip_gib = total_state_gib / chips\n    activation_per_chip_gib = 1.0\n    print(\"48 GiB state/device replicated:\", replicated_per_chip_gib)\n    print(\"48 GiB state/device ideal even shard:\", ideal_shard_per_chip_gib)\n    print(\"Usable HBM/device:\", usable_per_chip_gib)\n    print(\"Ideal shard plus assumed activation:\", ideal_shard_per_chip_gib + activation_per_chip_gib)\n    assert replicated_per_chip_gib > usable_per_chip_gib\n    assert ideal_shard_per_chip_gib <= usable_per_chip_gib\n    assert ideal_shard_per_chip_gib + activation_per_chip_gib > usable_per_chip_gib\n    target = next(row for row in topologies if row[\"slice\"] == \"v5litepod-4\")\n    selected = {\n        \"api\": target[\"api\"], \"machine_type\": target[\"slice\"],\n        \"requested_processes\": target[\"processes\"],\n        \"observed_process_count\": receipt[\"process_count\"],\n        \"requested_physical_chips\": target[\"total_chips\"],\n        \"observed_jax_device_count\": receipt[\"device_count\"],\n        \"observed_backend\": receipt[\"observed_backend\"],\n        \"requested_target_ready\": receipt[\"requested_target_ready\"],\n    }\n    print(\"Selected target and runtime receipt:\", selected)\n    assert selected[\"requested_physical_chips\"] == 4\n    assert selected[\"requested_processes\"] == 1\n    assert selected[\"api\"] == \"Cloud TPU API direct VM/Flex-start\"\n    if expected_backend == \"tpu\" and receipt[\"observed_backend\"] == \"cpu\":\n        assert selected[\"requested_target_ready\"] is False\n    return {\"receipt\": receipt, \"selected_target\": selected}\n\nresult = inspect_runtime_and_slice(verify_runtime_contract, \"tpu\", 4, topologies)\nassert result[\"receipt\"][\"arithmetic_ok\"] is True\n",
     "practice": [
       {
-        "title": "Check whether a model state fits on a single-host TPU slice",
+        "title": "Compare replicated and ideally sharded per-device HBM",
         "difficulty": "Foundations",
-        "prompt": "Given a training state requiring \\(48\\) GiB of HBM, determine which slices in `topologies` have at least \\(48\\) GiB of total HBM.",
-        "hint": "Filter `topologies` by `t['total_hbm_gib'] >= 48`.",
-        "solution": "# Check whether a model state fits on a single-host TPU slice (Foundations)\nfitting_slices = [t[\"slice\"] for t in topologies if t[\"total_hbm_gib\"] >= 48]\nprint(\"Slices fitting 48 GiB:\", fitting_slices)\n# Assert invariant `fitting_slices == [\"v5litepod-4\"` holds\nassert fitting_slices == [\"v5litepod-4\", \"v5litepod-8\", \"v6e-4\"]",
-        "explanation": "A single v5litepod-1 chip has 16 GiB HBM, whereas v5litepod-4 (64 GiB), v5litepod-8 (128 GiB), and v6e-4 (128 GiB) fit a 48 GiB sharded state on a single host."
+        "prompt": "A 48 GiB training state runs on four v5e chips, each with 16 GiB HBM. At an 80% usable-HBM budget, calculate per-device state for replication and ideal even sharding. Which placement meets the state-only limit? How does an added 1 GiB/device of activations change the result? Repeat for a 52 GiB state.",
+        "hint": "Replication stores the whole state on every device. Ideal even sharding divides by four. The 80% state budget is 12.8 GiB/device; separately subtract assumed activations.",
+        "solution": "total_state_gib = 48.0\nchips = 4\nusable_per_chip = 16.0 * 0.8\nreplicated_per_device = total_state_gib\nsharded_per_device = total_state_gib / chips\nactivation_gib_per_device = 1.0\nprint(\"48 GiB state per-device, replicated/sharded:\", replicated_per_device, sharded_per_device)\nprint(\"Usable HBM/device:\", usable_per_chip, \"sharded plus activation:\", sharded_per_device + activation_gib_per_device)\nassert replicated_per_device > usable_per_chip\nassert sharded_per_device <= usable_per_chip\nassert sharded_per_device + activation_gib_per_device > usable_per_chip\nchanged_state_gib = 52.0\nchanged_shard = changed_state_gib / chips\nprint(\"Changed 52 GiB ideal shard/device:\", changed_shard)\nassert changed_shard > usable_per_chip",
+        "explanation": "The 48 GiB total is not a placement claim. Replication needs 48 GiB on each 16 GiB chip and cannot fit. Ideal even sharding needs 12 GiB/device, leaving only 0.8 GiB below the 12.8 GiB state budget, so an assumed 1 GiB activation exceeds it. At 52 GiB, even the ideal shard is 13 GiB/device and fails the 80% budget. Real fit additionally requires verifying actual state sharding and peak live memory.",
+        "learnerStarter": {
+          "inputs": [
+            "A 48 GiB state, four physical v5e chips with 16 GiB HBM each, 80% usable-HBM fraction and 1 GiB/device activation allowance."
+          ],
+          "outputs": [
+            "Per-device replicated and ideal-sharded state requirements, plus fit decisions before and after activation allowance.",
+            "A 52 GiB changed-input result that shows the ideal shard exceeds the usable budget."
+          ],
+          "invariants": [
+            "Replication stores the whole state on each chip; ideal even sharding divides by chip count; report this as an assumption, not a measured placement."
+          ],
+          "hints": [
+            "Compute the per-chip usable budget first.",
+            "Repeat with 52 GiB to see the changed input cross the ideal-shard capacity limit."
+          ],
+          "code": "def placement_hbm_screen(total_state_gib, chips, chip_hbm_gib, usable_fraction, activation_gib_per_chip):\n    # TODO: return per-chip state for replication and ideal even sharding,\n    # the usable budget after activation allowance, and fit flags.\n    raise NotImplementedError"
+        }
       },
       {
         "title": "Verify the pmap sum-of-squares formula for 4 TPU devices",
@@ -136,22 +166,38 @@
         "prompt": "Compute the exact sum of squares that `verify_runtime_contract` expects when `len(local_devices) == 4` (`32` elements `0..31`).",
         "hint": "Sum `np.arange(32, dtype=np.float64) ** 2`.",
         "solution": "# Verify the pmap sum-of-squares formula for 4 TPU devices (Transfer / diagnosis)\nfour_device_expected = float(np.sum(np.arange(4 * 8, dtype=np.float64) ** 2))\nprint(\"Expected 4-device pmap sum of squares:\", four_device_expected)\n# Assert invariant `four_device_expected == 10416.0` holds\nassert four_device_expected == 10416.0",
-        "explanation": "On a 4-chip TPU VM (`v5litepod-4` or `v6e-4`), `x` has shape `(4, 8)` and the synchronized sum of squares across the 4 chips is `10416.0`."
+        "explanation": "On a 4-chip TPU VM (`v5litepod-4` or `v6e-4`), `x` has shape `(4, 8)` and the synchronized sum of squares across the 4 chips is `10416.0`.",
+        "learnerStarter": {
+          "inputs": [
+            "Four local TPU devices and the mapped range of 32 integers from zero through 31."
+          ],
+          "outputs": [
+            "Expected exact sum of squares for the four-device pmap fixture."
+          ],
+          "invariants": [
+            "The expected value sums each integer exactly once; it is an oracle for the four-device test only."
+          ],
+          "hints": [
+            "Use the closed-form sum-of-squares identity or an integer reference sum.",
+            "Run the pmap assertion on a real four-chip TPU to qualify runtime behavior."
+          ],
+          "code": "import jax.numpy as jnp\nimport numpy as np\n\ndef expected_four_chip_sum():\n    # TODO: compute the integer oracle for the range consumed by the four-device pmap.\n    raise NotImplementedError"
+        }
       }
     ],
-    "question": "Which command sequence proves that your Cloud TPU VM is both usable by JAX and no longer billing when you finish?",
+    "question": "Which workflow records a small synchronized TPU computation and checks that the lab\u2019s cloud resources were removed?",
     "options": [
       "Running `gcloud compute tpus tpu-vm create` and closing your laptop lid when done",
-      "Running a Python check on the TPU VM that verifies `jax.default_backend() == 'tpu'` and a synchronized computation, copying receipts back, running `gcloud compute tpus tpu-vm delete`, and confirming `list` is empty",
+      "Assert the remote TPU backend, run and synchronize the verifier, retrieve evidence, delete the VM and any owning request, then check their absence",
       "Checking `pip list` on your local laptop"
     ],
     "answer": 1,
-    "explanation": "Only an in-process JAX check on the TPU VM confirms TPU device discovery and execution, and only `tpu-vm delete` verified by `tpu-vm list` stops Cloud TPU VM billing.",
+    "explanation": "The computation receipt identifies a bounded tested runtime. The separate cleanup checks cover the named VM and request. Neither a small arithmetic pass nor an empty resource listing proves all workload behavior or a final bill.",
     "diagnosis": "If `gcloud compute tpus tpu-vm create` fails with `RESOURCE_EXHAUSTED`, switch zones or use Flex-start (`Route 2B`). If `jax.default_backend()` prints `cpu` on the TPU VM, confirm that `jax[tpu]` was installed from `libtpu_releases.html` inside the active `.venv` and that no other process holds `/dev/accel*` or `/dev/vfio/*`.",
     "takeaways": [
       "A Cloud TPU VM is a Linux host directly attached to TPU chips; you SSH into the host and run Python inside a `.venv` with `jax[tpu]`.",
       "Single-host slices (`v5litepod-1`, `v5litepod-4`, `v5litepod-8`, `v6e-4`) let you run 1 to 8 TPU chips from a single SSH command without multi-host coordination.",
-      "Always pair `tpu-vm create` with a saved runtime receipt and `tpu-vm delete` verified by `tpu-vm list`."
+      "Pair the selected provisioning route with a saved receipt, then delete only its named TPU VM or owning queued resource and verify those names are absent."
     ],
     "references": [
       {
@@ -165,23 +211,59 @@
       {
         "title": "JAX installation for Cloud TPU",
         "url": "https://docs.jax.dev/en/latest/installation.html"
+      },
+      {
+        "title": "Cloud TPU API Flex-start requests (checked 2026-10-21)",
+        "url": "https://docs.cloud.google.com/tpu/docs/request-using-flex-start"
+      },
+      {
+        "title": "Compute Engine TPU Flex-start and MIG limitations",
+        "url": "https://docs.cloud.google.com/tpu/docs/create-flex-start-compute"
+      },
+      {
+        "title": "Cloud TPU pricing and READY-state charges",
+        "url": "https://cloud.google.com/tpu/pricing"
+      },
+      {
+        "title": "JAX TPU hardware reference",
+        "url": "https://docs.jax.dev/en/latest/pallas/tpu/hardware.html"
+      },
+      {
+        "title": "TPU v5e architecture and supported configurations",
+        "url": "https://docs.cloud.google.com/tpu/docs/v5e"
+      },
+      {
+        "title": "TPU machine types and physical chips per VM",
+        "url": "https://docs.cloud.google.com/compute/docs/tpus/tpu-machines"
+      },
+      {
+        "title": "JAX TPU hardware reference",
+        "url": "https://docs.jax.dev/en/latest/pallas/tpu/hardware.html"
+      },
+      {
+        "title": "TPU v5e topology and supported configurations",
+        "url": "https://docs.cloud.google.com/tpu/docs/v5e"
+      },
+      {
+        "title": "Compute Engine TPU machine types",
+        "url": "https://docs.cloud.google.com/compute/docs/tpus/tpu-machines"
       }
     ],
     "visual": {
-      "title": "Single-host Cloud TPU slice chip counts and total HBM capacity",
-      "kind": "executed",
-      "prediction": "How does total HBM scale across `v5litepod-1`, `v5litepod-4`, `v5litepod-8`, and `v6e-4` single-host TPU VMs?",
-      "reading": "The horizontal axis lists four single-host Cloud TPU VM slice types. The two bars per slice show the number of attached TPU chips on that single Linux host and the total High Bandwidth Memory (HBM in GiB) across those chips.",
-      "connection": "Moving from `v5litepod-1` (`16` GiB) to `v5litepod-4` (`64` GiB) or `v6e-4` (`128` GiB) multiplies HBM capacity while keeping a single VM host, so you can test `jax.pmap` and `NamedSharding` across `4` or `8` chips from one SSH command.",
-      "alt": "Single-host Cloud TPU slice chip counts and total HBM capacity. Bar chart comparing chips per host and total HBM in GiB across v5litepod-1, v5litepod-4, v5litepod-8, and v6e-4.",
-      "code": "visual_data = {\n    'kind': 'bar',\n    'labels': [t['slice'] for t in topologies],\n    'xlabel': 'single-host Cloud TPU slice',\n    'ylabel': 'count / capacity',\n    'series': [\n        {'label': 'TPU chips on host', 'y': [float(t['total_chips']) for t in topologies]},\n        {'label': 'total HBM (GiB)', 'y': [float(t['total_hbm_gib']) for t in topologies]},\n    ],\n}"
+      "title": "Cloud TPU chip counts and HBM capacity in separate unit panels",
+      "kind": "analytic",
+      "prediction": "How do physical chips and total HBM change across the listed single-host slice requests, and which values use different units?",
+      "reading": "The figure has separate panels with their own units: the first uses physical chip count and shows `v5litepod-1/4/8` as 1/4/8 chips and `v6e-4` as 4; the second uses aggregate HBM in GiB and shows 16/64/128/128. Read values within a panel, not across the two axes. For example, the four-chip `v5litepod-4` totals 64 GiB, but its 16 GiB per-chip limit still governs whether one device's state fits. These are requested API catalog calculations, not device measurements. The next check is the named resource description plus the JAX receipt.",
+      "connection": "Chip-count bars are hosts times chips per host; HBM bars multiply chips by the fixture's per-chip capacity. The actual rehearsal receipt instead reports the requested `v5litepod-4` topology alongside one CPU process and one CPU device, with arithmetic passing and target readiness false. Keep catalog expectation and observed receipt side by side, then confirm backend and device count on the requested TPU before a training launch.",
+      "alt": "Two separate bar-chart panels: physical TPU chips per listed single-host topology, and total HBM capacity in GiB for those topologies. Count and capacity use separate axes.",
+      "code": "visual_data = {\n    'kind': 'bar',\n    'panels': [\n        {'kind': 'bar', 'labels': [t['slice'] for t in topologies],\n         'xlabel': 'selected Cloud TPU API topology', 'ylabel': 'physical chips (count)',\n         'series': [{'label': 'physical TPU chips', 'y': [float(t['total_chips']) for t in topologies]}]},\n        {'kind': 'bar', 'labels': [t['slice'] for t in topologies],\n         'xlabel': 'selected Cloud TPU API topology', 'ylabel': 'total HBM (GiB)',\n         'series': [{'label': 'HBM capacity', 'y': [float(t['total_hbm_gib']) for t in topologies]}]},\n    ],\n}\nassert [t['total_chips'] for t in topologies] == [1, 4, 8, 4]\nassert [t['total_hbm_gib'] for t in topologies] == [16, 64, 128, 128]\nassert all(t['expected_jax_devices'] == t['total_chips'] for t in topologies)"
     },
     "diagram": {
-      "title": "End-to-end Cloud TPU VM lifecycle from create to verified teardown",
-      "prediction": "Where does Python execute when you SSH into a Cloud TPU VM, and when does billing stop?",
-      "reading": "Read top to bottom: your workstation runs `gcloud` to allocate the Cloud TPU VM, SSH starts Python inside `~/jax-tpu-lab/.venv` on the TPU VM host, `libtpu` dispatches XLA programs to the attached TPU chips, `scp` retrieves the runtime receipt, and `tpu-vm delete` releases the resource.",
-      "alt": "Read top to bottom: workstation gcloud create allocates the TPU VM, SSH launches Python inside .venv on the TPU VM host, libtpu runs XLA on attached TPU chips, scp copies the receipt back, and tpu-vm delete stops billing.",
-      "scope": "Architecture and dataflow mechanism diagram.",
+      "title": "Process, JAX-device and physical-chip ownership for a selected Cloud TPU topology",
+      "prediction": "Which counts come from the host launcher, which from JAX, and which from the resource topology?",
+      "reading": "Follow the arrows from the selected API and machine type to the Linux host, then from its JAX process to the device inventory and the generation/API mapping to physical chips. In this one-host `v5litepod-4` example, the resource request names four physical v5e chips, while the CPU rehearsal observed one process and one CPU device. The mapping in the final node is topology-specific, not a rule for all TPUs. Use the resource description for requested chips and the synchronized receipt for observed JAX devices; use per-chip HBM, not aggregate slice HBM, for a fit decision.",
+      "alt": "Workstation requests a TPU topology. One Linux VM host owns one JAX process; that process sees JAX devices; an explicit generation and API topology maps those JAX devices to physical chips and per-chip HBM. Device count and chip count are separate labels.",
+      "scope": "Topology schematic for the named Cloud TPU API routes; check the selected resource and runtime receipt.",
       "height": 6,
       "panel": {
         "kind": "graph",
@@ -189,38 +271,47 @@
           {
             "id": "0",
             "x": 5,
-            "y": 1,
-            "label": "Workstation: gcloud compute tpus tpu-vm create / Flex-start",
+            "y": 0.8,
+            "label": "Cloud control plane: API + machine type + topology determine hosts and chips",
             "tone": "data",
-            "w": 8.4,
-            "h": 1.05
+            "w": 10,
+            "h": 0.95
           },
           {
             "id": "1",
             "x": 5,
-            "y": 2.7,
-            "label": "TPU VM Linux host: ~/jax-tpu-lab/.venv + jax[tpu] + libtpu",
+            "y": 2.1,
+            "label": "Linux VM host 0 runs JAX process 0 (one process in this single-host example)",
             "tone": "state",
-            "w": 8.4,
-            "h": 1.05
+            "w": 10,
+            "h": 0.95
           },
           {
             "id": "2",
             "x": 5,
-            "y": 4.4,
-            "label": "Attached TPU chips: jax.devices() + synchronized pmap receipt",
+            "y": 3.4,
+            "label": "Process 0 records jax.devices() and jax.local_devices() (JAX device counts)",
             "tone": "result",
-            "w": 8.4,
-            "h": 1.05
+            "w": 10,
+            "h": 0.95
           },
           {
             "id": "3",
             "x": 5,
-            "y": 6.1,
-            "label": "scp receipt back + tpu-vm delete + tpu-vm list (0 active)",
+            "y": 4.7,
+            "label": "Generation/API topology maps devices to physical chips; per-chip HBM is separate",
             "tone": "warning",
-            "w": 8.4,
-            "h": 1.05
+            "w": 10,
+            "h": 0.95
+          },
+          {
+            "id": "4",
+            "x": 5,
+            "y": 6,
+            "label": "Example: v5e/v6e mapping 1:1 here; TPU7x example 2 JAX devices per chip",
+            "tone": "result",
+            "w": 10,
+            "h": 0.95
           }
         ],
         "edges": [
@@ -235,14 +326,43 @@
           {
             "from": "2",
             "to": "3"
+          },
+          {
+            "from": "3",
+            "to": "4"
           }
         ],
         "height": 7,
-        "width": 10
+        "width": 12
       }
     },
     "runtime": {
       "kind": "cpu"
+    },
+    "optionFeedback": [
+      "Closing a laptop does not stop a remote job or release capacity. Retrieve the receipt, then inspect both the VM and any owning request.",
+      "The computation receipt identifies a bounded tested runtime. The separate cleanup checks cover the named VM and request. Neither a small arithmetic pass nor an empty resource listing proves all workload behavior or a final bill.",
+      "Local packages describe the workstation, not the remote backend. Execute and synchronize the verifier on the TPU host."
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "The runtime verifier with expected_backend and expected_device_count, plus the named topology catalog.",
+        "A 48 GiB state, four 16 GiB chips, 80% usable capacity and a 1 GiB per-chip activation assumption."
+      ],
+      "outputs": [
+        "Replicated/ideal-sharded per-device memory decisions with and without activation overhead.",
+        "Separate requested API/machine/chip/process values and observed JAX backend/process/device values."
+      ],
+      "invariants": [
+        "Aggregate HBM alone does not establish per-device fit.",
+        "CPU arithmetic may pass while requested TPU readiness is false.",
+        "Observed JAX device count does not by itself establish a physical chip count."
+      ],
+      "hints": [
+        "Compute 48/4 and compare 12 plus the activation allowance with 16 times 0.8.",
+        "Use expected_device_count, not the obsolete minimum-device argument."
+      ],
+      "code": "def inspect_runtime_and_slice(verify_runtime_contract, expected_backend, expected_device_count, topologies):\n    # TODO: check arithmetic, requested readiness, per-device fit and separately identified topology.\n    raise NotImplementedError\n"
     }
   }
 }

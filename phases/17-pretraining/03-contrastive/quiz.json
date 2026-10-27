@@ -11,7 +11,12 @@
         "Diagonal-only supervision automatically merges duplicate semantic examples into a single positive target."
       ],
       "correct": 0,
-      "explanation": "It is separate from downstream task quality or robustness to a new data distribution."
+      "explanation": "Training-pair retrieval shows that this objective and implementation can fit the observed pairs. It does not establish held-out semantic retrieval, robustness, or the absence of duplicate-positive problems. Keep the evaluation candidate pool and split identities separate.",
+      "optionFeedback": [
+        "Training-pair retrieval shows that this objective and implementation can fit the observed pairs. It does not establish held-out semantic retrieval, robustness, or the absence of duplicate-positive problems. Keep the evaluation candidate pool and split identities separate.",
+        "Temperature rescales logits but does not change a fixed embedding’s cosine ranking. Training effects require a separate comparison.",
+        "A diagonal label still penalizes duplicate positives in other columns. Use a multi-positive objective or data policy when the task requires it."
+      ]
     }
   ]
 }

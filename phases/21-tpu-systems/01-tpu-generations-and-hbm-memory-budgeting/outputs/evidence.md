@@ -4,7 +4,7 @@ Copy this template into your own portfolio and fill it after running your modifi
 
 ## Evidence required
 
-Keep the TPU ridge-point table, 7B and 1.5B training/KV-cache HBM budgets, and minimum chip count calculation at an 80% HBM ceiling.
+Keep aggregate and per-device state ledgers, replication/sharding/headroom assumptions, invalid aggregate-fit counterexamples and separate training-versus-inference capacity decisions.
 
 - Command: `python3 phases/21-tpu-systems/01-tpu-generations-and-hbm-memory-budgeting/code/main.py`
 - Working directory: Repository root

@@ -11,7 +11,12 @@
         "Forty-one independent devices."
       ],
       "correct": 0,
-      "explanation": "vmap contributes the leading independent-experiment axis. The scalar solve contributes its forty-one saved states; no device placement is specified."
+      "explanation": "vmap contributes the leading independent-experiment axis. The scalar solve contributes its forty-one saved states; no device placement is specified.",
+      "optionFeedback": [
+        "vmap contributes the leading independent-experiment axis. The scalar solve contributes its forty-one saved states; no device placement is specified.",
+        "The first axis indexes initial conditions, not times. The second includes the initial value and forty subsequent states.",
+        "A batch dimension does not imply device placement. Inspect array sharding separately from its logical shape."
+      ]
     }
   ]
 }

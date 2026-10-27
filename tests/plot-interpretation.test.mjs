@@ -56,7 +56,7 @@ test('attention explanations preserve row normalization, tied keys, and token-sp
 });
 
 test('recovery and deployment comparisons mean equal adjacent bars; p95 comes from the plotted samples', () => {
-  for(const [id,a,b] of [['recovery-02',1,2],['distributed-02',0,1],['deployment-03',0,1]]){
+  for(const [id,a,b] of [['recovery-02',1,2],['deployment-03',0,1]]){
     const d=data(id);assert.equal(d.kind,'bar');d.series[a].y.forEach((v,i)=>near(v,d.series[b].y[i]));
   }
   const d=data('deployment-06');const sorted=[...d.series[0].y].sort((a,b)=>a-b);
@@ -66,6 +66,23 @@ test('recovery and deployment comparisons mean equal adjacent bars; p95 comes fr
   assert.equal(d.ylabel,'end-to-end milliseconds');
   const timing=data('performance-01').panels;
   assert(timing[0].series[0].y[0]>Math.max(...timing[1].series[0].y));
+});
+
+test('2D ownership table reports the independently expected local float32 bytes', () => {
+  const d = data('distributed-02');
+  assert.equal(d.kind, 'table');
+  const expected = new Map([
+    ['batch X', [[4, 4], 64]], ['target Y', [[4, 2], 32]],
+    ['weights W', [[4, 2], 32]], ['momentum', [[4, 2], 32]],
+    ['gradient dW', [[4, 2], 32]],
+  ]);
+  assert.equal(d.rows.length, expected.size);
+  for (const [name, , shape, bytes] of d.rows) {
+    const [dimensions, expectedBytes] = expected.get(name);
+    assert.deepEqual(shape.match(/\d+/g).map(Number), dimensions);
+    assert.equal(bytes, expectedBytes);
+    assert.equal(bytes, dimensions.reduce((a, b) => a * b, 4));
+  }
 });
 
 test('interactive interpretations change with the selected point and attention boundary, with typeset math', async () => {

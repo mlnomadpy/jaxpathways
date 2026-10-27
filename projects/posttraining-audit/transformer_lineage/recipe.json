@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "scope": "One synthetic CPU sequence-PPO mechanics pilot using the frozen 10,880-parameter decoder package; not human preference evidence or language-model quality qualification.",
+  "parent": {
+    "packagePath": "projects/text-harness/foundations/reference/run/inference-package",
+    "packageFilesSha256": {
+      "package.json": "02b92a9f56325e5a38be2c40bf263d2ca91db6122ba84dd4df266339457bf278",
+      "params.npz": "271cb6457de5da3f727c343c64b7bd350c00e503ea7ac847eecf51fbd5558802",
+      "tokenizer.json": "c92b534443cc6a1eacd5e78406b2c42e59553df704a07102a03c639d3694f586"
+    },
+    "foundationSourceSha256": {
+      "config.py": "5c05801a7ec1a15b3978c87c77ac4e64d1b056c60487cbcff3cdf72475c8bb64",
+      "data.py": "ff8ff698090866d46bc1f2b3540393b9a16db2121ad824110bd2ba53db645bd8",
+      "model.py": "94a88ae7fd6a251b5b190b4631496e04bb71a31c1bfe418511fdd37ffef034c9",
+      "train.py": "ee9f3bc73505ce8e00fe9680589d97805593e5c8c035cba4709b5f334eb27a2b"
+    },
+    "parameterCount": 10880,
+    "optimizerBoundary": "Copy the exact verified parent parameter tree to the trainable actor. The frozen reference is the verified parent tree. Initialize fresh Adam state for actor and critic at the PPO objective boundary; do not import the parent's language-model optimizer moments or schedule."
+  },
+  "processor": {
+    "sha256": "c92b534443cc6a1eacd5e78406b2c42e59553df704a07102a03c639d3694f586",
+    "tokenizerPath": "projects/text-harness/foundations/reference/run/inference-package/tokenizer.json"
+  },
+  "fixture": {
+    "path": "fixture.json",
+    "sha256": "6a47dbe54012ed3013753ca8089fbcd51e57b3d0cbd61ffdb50a6877e0a534ff"
+  },
+  "actions": {
+    "restrictedVocabularyIds": [383, 381, 4, 2],
+    "singleTokenSpellings": {"up": {"text": " up", "id": 383}, "down": {"text": " down", "id": 381}, "punctuation": {"text": "!", "id": 4}, "eos": {"text": "[EOS]", "id": 2}},
+    "minimumNonEosActions": 2,
+    "maximumResponseActions": 4,
+    "paddingTokenId": 0,
+    "eosCanBeSampled": true,
+    "eosEligibleOnlyAfterMinimumNonEosActions": true,
+    "preEosProbability": 0.0,
+    "paddingFollowsSampledEos": true
+  },
+  "fixtureUsage": "Prompt instances, token IDs and synthetic preference pair labels are defined only in the checksum-pinned fixture.json.",
+  "training": {
+    "platform": "cpu",
+    "seed": 20261022,
+    "rewardFitUpdates": 120,
+    "rewardLearningRate": 0.1,
+    "updates": 8,
+    "innerEpochs": 2,
+    "batchSize": 3,
+    "actorLearningRate": 0.0001,
+    "criticLearningRate": 0.01,
+    "gamma": 0.9,
+    "gaeLambda": 0.8,
+    "policyClip": 0.2,
+    "valueClip": 0.2,
+    "klCoefficient": 0.03,
+    "gradientClipGlobalNorm": 1.0,
+    "dropout": 0.0
+  },
+  "resumeVerification": {
+    "lanes": [
+      {"id": "primary-uninterrupted", "updates": 8, "qualityScored": true},
+      {"id": "replay-split-restore", "updatesBeforeFreshProcessRestore": 4, "updatesAfterRestore": 4, "qualityScored": false}
+    ],
+    "totalActorUpdateExecutions": 16,
+    "rewardHeadFits": 1,
+    "protocol": "The replay lane starts from a fresh copy of the same parent actor, frozen reference and once-fitted reward head. Save full actor/critic/Adam/RNG/cursor/update/epoch state after update 4. A new process restores it and executes updates 4 through 7. Compare replay versus the primary lane at split and final clocks for exact next prompt IDs, PRNG key, parameters, optimizer moments, old/reference logps, update metrics and child evaluation. The replay lane is diagnostic only and cannot select checkpoints, change the recipe, or enter quality floors."
+  },
+  "objectives": {
+    "actorAndKlScope": "Categorical distributions are normalized only over the four listed action IDs. No metric is described as full-vocabulary or full-sequence KL.",
+    "sampledKlShaping": "For each valid action t, reward includes -beta * (log pi_old(a_t|s_t) - log pi_parent(a_t|s_t)); old and parent selected log probabilities are saved separately.",
+    "terminalReward": "The learned pairwise reward head scores the observed response. Place the frozen sequence score only on its final valid generated action, including the last action for a max-length partial response.",
+    "eos": "A sampled EOS is a valid response action. It gets the terminal reward and has zero value bootstrap. It ends the lambda trace; later array positions are zero padding.",
+    "timeout": "A response that reaches maxResponseActions without EOS is truncated. It gets the terminal score at its final valid action and bootstraps from the critic head on the post-action full Transformer prefix. It ends the lambda trace.",
+    "ppo": "Freeze old action log probabilities, old values, advantages and value targets for every inner epoch. Use the signed clipped minimum policy surrogate and valid-action denominator. Use the separately clipped critic loss with the same valid-action denominator.",
+    "criticFeatures": "A learned linear value head consumes stop-gradient restricted parent logits at the current complete prefix. These are Transformer-conditioned context features over four allowed actions, not hidden-state vectors or an unrestricted vocabulary representation.",
+    "rewardFeatures": "A learned pairwise head consumes the outer product of the frozen restricted parent logits at the prompt's initial context and response action-count features. Its prompt-by-action interaction prevents prompt-only additive terms from cancelling in chosen-minus-rejected margins. It is fit only on the four synthetic training preference pairs, then frozen for all rollouts and heldout evaluation."
+  },
+  "evaluationFloors": {
+    "heldoutMeanRewardMustExceedParent": true,
+    "maximumExactRestrictedCategoricalKlPerValidAction": 0.8,
+    "reportHeldoutPairwisePreferenceDiagnostic": true,
+    "evaluationPreferencePairsUse": "The exact rows in fixture.json are diagnostic only, never reward-fit/PPO/checkpoint-selection data.",
+    "matchedPromptIdsFromFixture": true,
+    "matchedSamplingSeeds": [20261023, 20261024],
+    "reportKlAs": "exact conditional KL at sampled visited contexts, averaged per valid action",
+    "failureHandling": "Report every failed floor and raw metric; never change this recipe after observing heldout results."
+  },
+  "evidence": {
+    "schemaVersion": 1,
+    "path": "reference/evidence/sequence-ppo-lineage.json",
+    "requiredArrays": ["prompt_ids", "prefix_token_ids", "actions", "target_role_mask", "input_role_mask", "padding_mask", "terminated", "truncated", "old_logps", "parent_logps", "new_logps_per_epoch", "sampled_kl", "terminal_reward", "shaped_rewards", "old_values", "post_action_values", "advantages", "value_targets", "policy_loss_by_epoch", "critic_loss_by_epoch"],
+    "checkpointState": ["actor_parameters", "critic_parameters", "actor_adam_moments", "critic_adam_moments", "rng_key", "training_prompt_cursor", "update_clock", "inner_epoch_clock", "recipe_sha256", "fixture_sha256", "approval_sha256", "parent_package_sha256", "processor_sha256", "candidate_source_sha256"],
+    "resumeEquality": ["split_clock_actor_critic_parameters", "split_clock_both_adam_moment_trees", "split_clock_rng_key_and_prompt_cursor", "final_clock_actor_critic_parameters", "final_clock_both_adam_moment_trees", "final_clock_rng_key_and_prompt_cursor", "next_prompt_ids", "old_and_parent_logps", "epoch_losses_and_metrics", "fresh_process_child_hashes"]
+  }
+}

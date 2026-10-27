@@ -25,3 +25,11 @@ Stage 2 includes the extreme row and masks the middle row. Predict count 2, mean
 Stage 3 writes count, mean and variance as JSON under `runs/arrays-audit/`. Without `--evidence-dir`, the file is temporary. Stage 4 reruns all three contracts. Passing output begins `PASS arrays-audit stage N`.
 
 This verifies a small CPU reduction with synthetic values. It does not qualify a data pipeline or establish behavior on a TPU. The reference command is `python3 projects/arrays-audit/tests/check.py --implementation solution --stage 4`.
+
+## Review handoff: explain a changed condition
+
+Use rows (1, 3), (5, 7), (100, 200) with mask (true, true, false), then change it to select only the first row.
+
+**Keep for review:** Means (3, 5), variances (4, 4), count two; then means (1, 3), zero variances, count one. Explain why padding values must not enter either numerator or denominator.
+
+Write your prediction before opening the reference implementation. Distinguish what the existing checker verifies from your proposed extension; record any extension command, actual output and limitation separately. A reviewer should be able to locate the first failed contract from your saved evidence.

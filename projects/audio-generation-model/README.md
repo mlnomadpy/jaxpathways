@@ -45,3 +45,13 @@ Service tests cover duration limits, chunk continuity, cancellation, concurrent 
 Do not promote until real waveform source/license, speaker or recording groups, sample rate, resampling, codec/decoder revisions and train/validation/test membership are recorded. Keep codec, generator and decoder checkpoints linked through full-state resumes; synthetic waveforms only verify tensor and codec boundaries.
 
 Before this plan can change from **planned** to **authored**, provide independently checkable dataset/recipe manifests, staged parent-to-child checkpoint records with full resume state, real held-out evaluation outputs, and runnable plan-specific starter/reference/checks. Keep small CPU fixtures labeled as correctness evidence; they do not establish target-scale training, quality or production readiness.
+
+## Recipe decision rehearsal before target-scale training
+
+Generated audio matches short prompts but develops artifacts on longer outputs.
+
+**Decide:** Hold text/audio conditioning and decoding settings fixed. Test duration-dependent stability, intelligibility/semantic consistency and signal artifacts separately. Specify the codec/vocoder or waveform representation and sample-rate contract, and compare streaming chunk boundaries only if streaming is implemented.
+
+**Review packet:** Length-stratified actual audio examples, waveform/spectral inspections, declared automatic/listening protocols and processor/decoder cold-load tests. Do not claim human preference or listening quality without a consented evaluation.
+
+This is a design exercise for a planned implementation. Record a hypothesis, a controlled pilot, a stopping criterion and the evidence needed to reject the recipe before requesting target-scale compute. Do not mark the capstone implemented or publish a model card with invented metrics.

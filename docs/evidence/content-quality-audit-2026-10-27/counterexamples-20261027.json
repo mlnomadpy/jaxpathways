@@ -1,0 +1,74 @@
+{
+  "source": "15bf7aa4fbd4460501cc4d6d7802324673a89f6f",
+  "attention": {
+    "zero_query_output": [
+      [
+        2.0,
+        2.0
+      ],
+      [
+        2.0,
+        2.0
+      ]
+    ],
+    "value_only_permutation_output": [
+      [
+        2.0,
+        2.0
+      ],
+      [
+        2.0,
+        2.0
+      ]
+    ],
+    "required_change_occurs": false,
+    "nonzero_query_changes_under_value_only_permutation": true
+  },
+  "rl_discount": {
+    "two_step_rewards": [
+      1,
+      1
+    ],
+    "gamma": 0.9,
+    "undiscounted_V": [
+      2,
+      1,
+      0
+    ],
+    "TD_with_undiscounted_V": [
+      -0.1,
+      0
+    ],
+    "correct_discounted_V": [
+      1.9,
+      1,
+      0
+    ],
+    "TD_with_correct_discounted_V": [
+      0,
+      0
+    ]
+  },
+  "precision_bytes": {
+    "shape": [
+      256,
+      64
+    ],
+    "reported_weight_bytes_all_rows": 16384,
+    "BF16_operand_weight_bytes": 32768,
+    "INT8_weight_bytes": 16384,
+    "INT8_FP32_scale_bytes": 256
+  },
+  "trace_recurrence": {
+    "matrix_width": 256,
+    "element_log2_by_completed_dot": [
+      8,
+      24,
+      56,
+      120,
+      248
+    ],
+    "BF16_finite_exponent_limit_about": 128,
+    "first_overflow_step": 5
+  }
+}

@@ -12,7 +12,9 @@ Preserve checkpoint, data and calibration provenance. Compare held-out inputs be
 
 ## Study guide: Does the exported service preserve the model’s complete contract?
 
-A deployment includes preprocessing, parameter layout, numeric policy and runtime behavior. Verify the same raw examples across each boundary before comparing memory or speed.
+A deployed model begins with a raw request and ends with a response, not with a weight file alone. Preprocessing, parameter layout, precision, serialization and runtime execution must preserve the meaning of that request across each boundary.
+
+Carry the same examples through adaptation, framework conversion, export and inference so the first changed result is easy to locate. Then ask what storage savings, queue calculations or edge budgets actually imply for this runtime. Keep numerical fidelity, held-out task behavior and measured service work as separate parts of a deployment decision.
 
 ### Check your starting point
 
@@ -42,11 +44,11 @@ Review: [Move models between JAX, Keras, TensorFlow and PyTorch](01-keras-and-py
 
 ### Try a changed condition
 
-An INT8 model matches typical inputs but fails after a sensor’s range changes. How do you locate the regression?
+Frozen calibration maps [-1, 1] to signed integers. New inputs include 3. Explain why a small weight-file size says little about prediction quality or speed.
 
 <details><summary>Compare an approach</summary>
 
-Verify raw preprocessing first; count values outside the frozen calibration range, inspect clipped channels and compare float-converted versus quantized outputs. Do not recalibrate on final test labels. Re-evaluate a revised policy on a separate held-out set.
+The out-of-range activation must follow the declared clipping or fallback policy. Track saturation by channel and compare the same preprocessed input with the float reference. Storage savings do not show native integer execution. Measure actual runtime placement and latency after numerical and quality gates pass.
 
 </details>
 
@@ -56,7 +58,7 @@ Verify raw preprocessing first; count values outside the frozen calibration rang
 
 ### Decide what is ready
 
-Use deployment-audit and engineering-release to assemble one release dossier: candidate selection and retention criteria; a named feature and parameter mapping; source/export and layerwise parity; full precision policy and calibration identity; raw-request validation; artifact and process receipts; measured request samples; and a queue/deadline analysis. Mark container and target-device evidence unmeasured unless you actually ran those environments. Another learner should be able to reproduce each claimed check from the recorded inputs and command.
+Use deployment-audit and engineering-release to assemble one release dossier: candidate selection and retention criteria; a named feature and parameter mapping; source/export and layerwise parity; full precision policy and calibration identity; raw-request validation; artifact and process receipts; measured request samples; and a queue/deadline analysis. Mark container and target-device evidence unmeasured unless you actually ran those environments. Another learner should be able to reproduce each claimed check from the recorded inputs and command. For framework transfer, run the optional bounded saved-decoder parity lab: map QKV/head layouts, masks, positions and tied embeddings, locate both deliberate attention failures, and compare a nonuniform VJP after fresh-process reload.
 
 ### Further work
 
@@ -94,9 +96,9 @@ Status: authored lesson with CPU exercise.
 
 Status: authored lesson with CPU exercise.
 
-**Intended outcome:** Convert a real PyTorch state dictionary to Flax NNX and validate intermediate outputs, gradients and reloaded artifacts with explicit numerical tolerances.
+**Intended outcome:** Map actual PyTorch parameters to Flax NNX and localize the first layer or gradient mismatch, then transfer to the optional small saved decoder.
 
-**Evidence:** Keep source checkpoint and architecture identity, complete parameter mapping, per-layer max-absolute/relative-L2 errors, elementwise tolerances, input-gradient comparisons, wrong-epsilon diagnosis and a fresh-process converted-artifact receipt.
+**Evidence:** Keep MLP normalization/activation parity, first-divergence evidence, the optional QKV/head layout and mask canaries, nonuniform VJP, processor/position identity and fresh-process reload results.
 
 **Checkpoint:** The first linear layer agrees, but LayerNorm is the first mismatch. What should you inspect next?
 

@@ -12,7 +12,9 @@ Compare against a single-device reference; measure real accelerator performance 
 
 ## Study guide: Is the distributed update still optimizing the same objective?
 
-Start with the global mathematical operation, then specify ownership and communication. Logical CPU devices help expose placement and reduction mistakes before you spend accelerator time.
+Distribution changes where arrays and computations live; it should preserve the intended global objective. Begin by drawing which rows and parameter columns each device owns. Then derive how distinct contributions and valid counts combine into one loss and update.
+
+Use logical CPU devices to make ownership and unequal partitions inspectable. The unsharded calculation gives you a numerical reference; shard indices and local byte counts give you a placement reference. Communication and recovery add separate questions about coordinated work, which require their own receipts.
 
 ### Check your starting point
 
@@ -32,17 +34,17 @@ Review: [A sharded training step](02-a-sharded-training-step/docs/en.md).
 
    Lessons: [Arrays, meshes, and sharding](01-arrays-meshes-and-sharding/docs/en.md) · [A sharded training step](02-a-sharded-training-step/docs/en.md).
 
-2. **Connect communication and recovery.** Inspect collectives without inferring network speed from payload size. Restore data position and optimizer state before comparing subsequent global steps.
+2. **Connect communication and recovery.** Inspect collectives without inferring network speed from payload size. Restore data position and optimizer state before comparing subsequent global steps. Continue to the 2x2 data/model mesh: predict parameter and momentum slices and per-device bytes, then compare one forward/backward/update with an unsharded NumPy oracle under uneven and empty valid counts.
 
    Lessons: [Communication-efficient algorithms](03-communication-efficient-algorithms/docs/en.md) · [Resilient distributed training](04-resilient-distributed-training/docs/en.md).
 
 ### Try a changed condition
 
-A final batch leaves one partition empty. Should it contribute a zero mean, be omitted, or fail?
+Three shards have valid counts 2, 6 and 0 and local gradient sums 6, 6 and 0. Predict the global mean and the empty-shard contribution.
 
 <details><summary>Compare an approach</summary>
 
-Do not compute an undefined local mean. Accumulate a zero numerator and zero valid count for the empty partition, reduce globally and reject a globally empty batch. Compare the result with the valid unpartitioned examples.
+Reduce sums and counts separately: the global mean is \((6+6+0)/(2+6+0)=1.5\). The empty shard contributes a zero numerator and zero count; it must not compute \(0/0\). Reject a globally empty batch. Compare with an independent unsharded calculation.
 
 </details>
 
@@ -78,9 +80,9 @@ Status: authored lesson with CPU exercise.
 
 Status: authored lesson with CPU exercise.
 
-**Intended outcome:** Run a training step with explicit data and parameter placement.
+**Intended outcome:** Compute global count-weighted gradients and verify a 2x2 data/model mesh forward, backward and momentum update against an unsharded oracle.
 
-**Evidence:** Each local gradient already divides by its local count. Summing four equal local means omits division by four. For unequal counts, an unweighted mean also misrepresents examples; sum count-weighted local means and divide by total count.
+**Evidence:** Keep 1D and 2D shard ownership, per-device parameter/momentum bytes, asymmetric-input forward/backward/update comparisons, unequal and empty valid-count cases and the wrong local-mean control.
 
 **Checkpoint:** Four equal-size shards compute local mean gradients. Which aggregation gives the global mean gradient?
 

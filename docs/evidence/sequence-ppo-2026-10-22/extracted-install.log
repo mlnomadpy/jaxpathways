@@ -1,0 +1,4 @@
+Requirement already satisfied: jax==0.9.2 in /private/tmp/jaxpathways-sequence-ppo-clean-env/lib/python3.14/site-packages (from -r projects/posttraining-audit/requirements.txt (line 1)) (0.9.2)
+Requirement already satisfied: numpy==2.4.4 in /private/tmp/jaxpathways-sequence-ppo-clean-env/lib/python3.14/site-packages (from -r projects/posttraining-audit/requirements.txt (line 2)) (2.4.4)
+Requirement already satisfied: optax==0.2.8 in /private/tmp/jaxpathways-sequence-ppo-clean-env/lib/python3.14/site-packages (from -r projects/posttraining-audit/requirements.txt (line 3)) (0.2.8)
+Requirement already satisfied: matplotlib==3.10.8 in /private/tmp/jaxpathways-sequence-ppo-clean-env/lib/python3.14/site-packages (from -r projects/posttraining-audit/requirements.txt (line 4)) (3.10.8)

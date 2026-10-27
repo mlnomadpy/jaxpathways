@@ -4,7 +4,7 @@ Copy this template into your own portfolio and fill it after running your modifi
 
 ## Evidence required
 
-Keep both MLflow run IDs, source/data hashes, complete loss histories, the selection metric and predictions independently recomputed from the downloaded artifact.
+Keep retrieved metric histories and data tags, all three model artifacts, actual train/validation predictions after reload, and the different training-only versus held-out selections. Explain the memorizer's zero training MSE and validation MSE of 6.
 
 - Command: `python3 phases/06-recovery/06-track-experiments-and-lineage-with-mlflow/code/main.py`
 - Working directory: Repository root

@@ -1,0 +1,103 @@
+
+> jaxpathways@0.18.1 test:browser
+> playwright test
+
+
+Running 58 tests using 9 workers
+
+(node:38161) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:38160) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:38165) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:38169) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:38166) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:38164) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:38162) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:38167) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:38168) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 [desktop-chromium] › browser-tests/c01-visual-layout.spec.ts:13:1 › C01 project plan wraps its evidence path and keeps tables inside the mobile page (3.6s)
+  ✓   3 [desktop-chromium] › browser-tests/posttraining-lineage.spec.ts:29:1 › catalog and parent guide expose the optional appendix without changing Stage 5 (4.6s)
+  ✓   2 [desktop-chromium] › browser-tests/project-figures.spec.ts:33:3 › /project-guides/text-harness-foundations.html: Measured text-harness foundations pilot opens the actual full-size figure with the keyboard (4.5s)
+  ✓   6 [desktop-chromium] › browser-tests/multiprocess-recovery.spec.ts:3:1 › the optional local recovery guide presents the observed restart boundary and readable figure (4.7s)
+  ✓   8 [desktop-chromium] › browser-tests/posttraining-lineage.spec.ts:52:1 › appendix status, accessible figure, bounded layout, and approval downloads are explicit (5.4s)
+  ✓   4 [desktop-chromium] › browser-tests/c01-visual-layout.spec.ts:35:1 › C01 local figure reserves its decoded geometry on narrow and desktop viewports (5.4s)
+  ✓   7 [desktop-chromium] › browser-tests/posttraining-sequence.spec.ts:3:1 › sequence PPO stages name their edit file and explain an accessible GAE figure (5.7s)
+  ✓  10 [desktop-chromium] › browser-tests/project-figures.spec.ts:33:3 › /project-guides/scientific-inverse.html: Adaptive solver log-rate sensitivities opens the actual full-size figure with the keyboard (3.4s)
+  ✓  11 [desktop-chromium] › browser-tests/project-figures.spec.ts:33:3 › /project-plans/causal-model-300m.html: Bits per normalized held-out byte for six pilot branches, Pythia-14M and a train-only unigram control opens the actual full-size figure with the keyboard (3.1s)
+  ✓  12 [desktop-chromium] › browser-tests/project-figures.spec.ts:33:3 › /project-plans/causal-model-300m.html: Training losses decrease overall, while all six pilot branches remain below both held-out QA floors opens the actual full-size figure with the keyboard (3.8s)
+  ✓   5 [desktop-chromium] › browser-tests/image-pilot.spec.ts:3:1 › the image pilot guide is discoverable and its seven figures fit desktop and mobile (9.6s)
+  ✓  17 [desktop-chromium] › browser-tests/responsive-smoke.spec.ts:13:3 › / renders without horizontal overflow and exposes a main landmark (2.8s)
+  ✓  18 [desktop-chromium] › browser-tests/responsive-smoke.spec.ts:13:3 › /course.html renders without horizontal overflow and exposes a main landmark (2.1s)
+  ✓  19 [desktop-chromium] › browser-tests/responsive-smoke.spec.ts:13:3 › /lesson-welcome-01.html renders without horizontal overflow and exposes a main landmark (1.6s)
+  ✓  16 [desktop-chromium] › browser-tests/reader-stage-dock.spec.ts:85:1 › the final lesson sends its last activity to the course map (4.8s)
+  ✓  20 [desktop-chromium] › browser-tests/responsive-smoke.spec.ts:13:3 › /project.html?id=regression-audit renders without horizontal overflow and exposes a main landmark (2.3s)
+  ✓  15 [desktop-chromium] › browser-tests/reader-stage-dock.spec.ts:40:3 › one stage dock keeps keyboard navigation usable at 390×620 (6.7s)
+  ✓  14 [desktop-chromium] › browser-tests/reader-stage-dock.spec.ts:40:3 › one stage dock keeps keyboard navigation usable at 1280×620 (7.0s)
+  ✓  21 [desktop-chromium] › browser-tests/responsive-smoke.spec.ts:13:3 › /careers.html renders without horizontal overflow and exposes a main landmark (2.7s)
+  ✓  22 [desktop-chromium] › browser-tests/responsive-smoke.spec.ts:13:3 › /notebook.html renders without horizontal overflow and exposes a main landmark (3.0s)
+  ✓  25 [desktop-chromium] › browser-tests/responsive-smoke.spec.ts:55:1 › project details remain usable at a narrow viewport (2.7s)
+  ✓  26 [desktop-chromium] › browser-tests/responsive-smoke.spec.ts:65:1 › project catalog links have real targets at a narrow viewport (2.8s)
+  ✓  23 [desktop-chromium] › browser-tests/responsive-smoke.spec.ts:26:1 › catalog filters are keyboard reachable and have accessible names (4.9s)
+  ✓  24 [desktop-chromium] › browser-tests/responsive-smoke.spec.ts:40:1 › catalog search opens and closes with keyboard focus restored (4.5s)
+  ✓  29 [desktop-chromium] › browser-tests/responsive-smoke.spec.ts:126:1 › legacy lesson URLs redirect to the canonical page and preserve route, search, and section (2.6s)
+  ✓  28 [desktop-chromium] › browser-tests/responsive-smoke.spec.ts:116:1 › a failed navigation manifest leaves server-rendered lesson content readable (3.1s)
+  ✓  27 [desktop-chromium] › browser-tests/responsive-smoke.spec.ts:83:1 › mobile reader places its outline before the article and stage jumps clear the sticky bar (3.4s)
+(node:38556) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:38559) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:38560) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:38569) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:38624) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  30 [mobile-chromium] › browser-tests/c01-visual-layout.spec.ts:13:1 › C01 project plan wraps its evidence path and keeps tables inside the mobile page (2.9s)
+(node:38619) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:38620) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   9 [desktop-chromium] › browser-tests/posttraining-lineage.spec.ts:96:1 › standalone book keeps the appendix figure grouped, embedded, and within the viewport (22.0s)
+  ✓  32 [mobile-chromium] › browser-tests/multiprocess-recovery.spec.ts:3:1 › the optional local recovery guide presents the observed restart boundary and readable figure (4.2s)
+  ✓  13 [desktop-chromium] › browser-tests/reader-print.spec.ts:3:1 › standalone reader print lifecycle opens reasoning and restores every details state (17.7s)
+  ✓  35 [mobile-chromium] › browser-tests/posttraining-sequence.spec.ts:3:1 › sequence PPO stages name their edit file and explain an accessible GAE figure (4.0s)
+(node:38738) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:38742) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  33 [mobile-chromium] › browser-tests/c01-visual-layout.spec.ts:35:1 › C01 local figure reserves its decoded geometry on narrow and desktop viewports (5.1s)
+  ✓  38 [mobile-chromium] › browser-tests/project-figures.spec.ts:33:3 › /project-guides/scientific-inverse.html: Adaptive solver log-rate sensitivities opens the actual full-size figure with the keyboard (2.6s)
+  ✓  31 [mobile-chromium] › browser-tests/image-pilot.spec.ts:3:1 › the image pilot guide is discoverable and its seven figures fit desktop and mobile (7.9s)
+  ✓  37 [mobile-chromium] › browser-tests/posttraining-lineage.spec.ts:29:1 › catalog and parent guide expose the optional appendix without changing Stage 5 (3.6s)
+  ✓  34 [mobile-chromium] › browser-tests/posttraining-lineage.spec.ts:52:1 › appendix status, accessible figure, bounded layout, and approval downloads are explicit (4.0s)
+  ✓  39 [mobile-chromium] › browser-tests/project-figures.spec.ts:33:3 › /project-plans/causal-model-300m.html: Bits per normalized held-out byte for six pilot branches, Pythia-14M and a train-only unigram control opens the actual full-size figure with the keyboard (3.3s)
+  ✓  46 [mobile-chromium] › browser-tests/responsive-smoke.spec.ts:13:3 › / renders without horizontal overflow and exposes a main landmark (1.8s)
+  ✓  41 [mobile-chromium] › browser-tests/project-figures.spec.ts:33:3 › /project-guides/text-harness-foundations.html: Measured text-harness foundations pilot opens the actual full-size figure with the keyboard (3.3s)
+  ✓  45 [mobile-chromium] › browser-tests/reader-stage-dock.spec.ts:85:1 › the final lesson sends its last activity to the course map (3.5s)
+  ✓  47 [mobile-chromium] › browser-tests/responsive-smoke.spec.ts:13:3 › /course.html renders without horizontal overflow and exposes a main landmark (2.5s)
+  ✓  42 [mobile-chromium] › browser-tests/project-figures.spec.ts:33:3 › /project-plans/causal-model-300m.html: Training losses decrease overall, while all six pilot branches remain below both held-out QA floors opens the actual full-size figure with the keyboard (3.9s)
+  ✓  48 [mobile-chromium] › browser-tests/responsive-smoke.spec.ts:13:3 › /lesson-welcome-01.html renders without horizontal overflow and exposes a main landmark (2.3s)
+  ✓  43 [mobile-chromium] › browser-tests/reader-stage-dock.spec.ts:40:3 › one stage dock keeps keyboard navigation usable at 1280×620 (6.1s)
+  ✓  44 [mobile-chromium] › browser-tests/reader-stage-dock.spec.ts:40:3 › one stage dock keeps keyboard navigation usable at 390×620 (5.3s)
+  ✓  50 [mobile-chromium] › browser-tests/responsive-smoke.spec.ts:13:3 › /careers.html renders without horizontal overflow and exposes a main landmark (2.0s)
+  ✓  49 [mobile-chromium] › browser-tests/responsive-smoke.spec.ts:13:3 › /project.html?id=regression-audit renders without horizontal overflow and exposes a main landmark (2.4s)
+  ✓  51 [mobile-chromium] › browser-tests/responsive-smoke.spec.ts:13:3 › /notebook.html renders without horizontal overflow and exposes a main landmark (2.2s)
+  ✓  55 [mobile-chromium] › browser-tests/responsive-smoke.spec.ts:65:1 › project catalog links have real targets at a narrow viewport (2.7s)
+  ✓  54 [mobile-chromium] › browser-tests/responsive-smoke.spec.ts:55:1 › project details remain usable at a narrow viewport (3.0s)
+  ✓  52 [mobile-chromium] › browser-tests/responsive-smoke.spec.ts:26:1 › catalog filters are keyboard reachable and have accessible names (4.1s)
+  ✓  53 [mobile-chromium] › browser-tests/responsive-smoke.spec.ts:40:1 › catalog search opens and closes with keyboard focus restored (3.8s)
+  ✓  57 [mobile-chromium] › browser-tests/responsive-smoke.spec.ts:116:1 › a failed navigation manifest leaves server-rendered lesson content readable (2.7s)
+  ✓  56 [mobile-chromium] › browser-tests/responsive-smoke.spec.ts:83:1 › mobile reader places its outline before the article and stage jumps clear the sticky bar (3.2s)
+  ✓  58 [mobile-chromium] › browser-tests/responsive-smoke.spec.ts:126:1 › legacy lesson URLs redirect to the canonical page and preserve route, search, and section (2.7s)
+  ✓  36 [mobile-chromium] › browser-tests/posttraining-lineage.spec.ts:96:1 › standalone book keeps the appendix figure grouped, embedded, and within the viewport (18.0s)
+  ✓  40 [mobile-chromium] › browser-tests/reader-print.spec.ts:3:1 › standalone reader print lifecycle opens reasoning and restores every details state (15.6s)
+
+  58 passed (43.7s)

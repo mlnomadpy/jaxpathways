@@ -4,11 +4,14 @@ Phase 15: Deployment, interoperability & edge AI · about 130 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Move models between JAX, Keras, TensorFlow and PyTorch](https://www.tahabouhsine.com/jaxpathways/lesson-deployment-01.html).
+
 ## What you will be able to do
 
 - Map named PyTorch tensors into Flax NNX parameters with complete key, shape and dtype checks.
 - Locate the first mismatching operation using absolute and relative errors.
 - Verify input gradients and reload the converted artifact independently.
+- Convert one saved, bounded decoder fixture with fused QKV, explicit head layout, positions, padding-mask semantics, processor identity and tied embeddings.
 
 ## The problem
 
@@ -26,6 +29,8 @@ Record absolute error and an appropriate relative measure. Near-zero references 
 
 The layer-error plot identifies a location to investigate, not a universal threshold for all architectures. Use several inputs, including boundary cases, and compare the full preprocessing-to-output contract. Matching one fixture is separate from arbitrary checkpoint compatibility.
 
+In the matched fixture, maximum absolute errors stay between $1.19\times10^{-7}$ and $3.58\times10^{-7}$ across hidden, normalization, activation and output. With only epsilon changed, hidden error remains $2.38\times10^{-7}$, then normalization jumps to 0.0465; activation reaches 0.0514 and output later falls to 0.0120. The first bad layer identifies the likely cause more reliably than the largest final error.
+
 ### Small errors need a scale-aware budget
 
 **Predict:** Why can a larger absolute difference pass at a larger reference value?
@@ -34,7 +39,7 @@ The layer-error plot identifies a location to investigate, not a universal thres
 
 *Architecture and dataflow mechanism diagram.*
 
-Read each row as one elementwise decision using absolute tolerance $2\times10^{-6}$ and relative tolerance $2\times10^{-5}$. Near zero the absolute term determines the allowance. At reference $100$, the relative term increases it. These are hand-worked tolerance examples, not measured conversion errors; the executed bar plot below reports the model comparison.
+Each table row is one elementwise tolerance check: allowed difference is $2\times10^{-6}+2\times10^{-5}|y|$. Near zero, a difference of $10^{-6}$ passes and $3\times10^{-6}$ fails; at reference 100, the budget is 0.002002, so 0.001 passes. These are hand-worked tolerance examples. The executed plot separately shows the epsilon fault’s first mismatch at normalization.
 
 ### Pause and reason
 
@@ -103,6 +108,31 @@ Keep the source in evaluation mode, use the same input and cotangent, and reset 
 $$
 J(x)^{\mathsf T}v=\nabla_x\left(\sum_i v_i f_i(x)\right)
 $$
+
+## Convert one bounded decoder checkpoint
+
+The optional companion `labs/transformer_bridge.py` creates and saves a tiny local PyTorch decoder state_dict, reloads it, converts it into Flax NNX, and checks each intermediate in execution order. Its architecture matches the course block: pre-normalized causal self-attention, residual addition, pre-normalized GELU MLP, second residual, and tied token/output embeddings. The fixture uses width 8, two heads, MLP width 16, one block, and a seven-token vocabulary. The fixture is generated locally; no production checkpoint is downloaded.
+
+The source key `qkv.weight` has shape `[3D,D]`, with contiguous `[Q_all,K_all,V_all]` rows. The NNX `qkv.kernel` has shape `[D,3D]`, so conversion transposes once; the reshape then interprets `[B,T,3,H,D/H]`. The other Linear weights map `[out,in]` to `[in,out]`; biases and embedding tables keep their axes. The output projection reads the exact token embedding table, so it is tied rather than copied into a second parameter. The fixture records a processor identity that binds the token-to-ID vocabulary.
+
+Inputs use asymmetric token rows, nonsequential `position_ids`, and a padding key. The mask contract is `True means this key is valid`, combined with a lower-triangular causal mask. The companion prints absolute and relative-L2 errors per boundary. It checks the elementwise budget `3e-6 + 3e-5*abs(reference)`: float32 CPU kernels differ by a few ULPs, while a meaningful layout or semantic error is orders of magnitude larger. A nonuniform mixed-sign cotangent checks an input VJP. Same-shape QKV/head reinterpretation and inverted mask faults must fail. Finally, a separate Python process reloads the converted artifact and reproduces logits. This supports only the declared fixture contract, not arbitrary PyTorch or Hugging Face checkpoint families.
+
+**Optional framework environment — macOS/Linux, workspace root**
+
+```sh
+python3 -m venv .venv-transformer-parity
+.venv-transformer-parity/bin/python -m pip install "jax==0.9.2" "flax==0.12.6" "torch==2.11.0" "numpy==2.4.4"
+```
+
+**Expected:** An isolated CPU-capable environment for the optional PyTorch/NNX fixture. The lesson core remains usable without installing these frameworks.
+
+**Optional saved Transformer fixture — workspace root after activating the environment**
+
+```sh
+JAX_PLATFORMS=cpu .venv-transformer-parity/bin/python phases/15-deployment/08-pytorch-to-flax-numerical-parity/labs/transformer_bridge.py
+```
+
+**Expected:** PASS for ordered activations, nonuniform VJP, deliberate same-shape QKV/head and mask faults, tied embeddings, processor identity, and fresh-process save/reload. The fixture is generated locally; no model download is required.
 
 ## Make the source boundaries inspectable
 
@@ -439,11 +469,11 @@ Expected: Correct FP32 conversion passes layerwise and input-gradient tolerances
 
 ### Read the figure
 
-The horizontal categories follow execution order: hidden linear, normalization, activation and output. Bars show maximum absolute difference in that layer’s output units. The correct mapping remains near floating-point rounding error; the changed-epsilon model first diverges at normalization. The earlier matching hidden output narrows the cause. These are numerical errors, not accuracy or latency.
+The x-axis follows hidden linear, normalization, activation and output; the y-axis is maximum absolute output error in each layer’s units. Matched mapping errors remain at roughly $1.19\times10^{-7}$–$3.58\times10^{-7}$. Wrong epsilon leaves hidden error at $2.38\times10^{-7}$, then raises normalization to 0.0465, activation to 0.0514, and output to 0.0120. The earliest jump points to normalization; do not debug the later output projection first.
 
 ### Connect it to the computation
 
-All weights are identical between the correct and wrong-epsilon target models. A parameter-file comparison alone would miss the changed operation. Later error may grow or shrink through nonlinearities and the output projection, so the largest bar is not necessarily the location of the original bug. The per-element tolerance and gradient checks are reported separately from this plot.
+All weights are held fixed, so the wrong-epsilon bars isolate an operation mismatch. The hidden layer still matches within rounding error, while normalization is the first large error (0.0465); later activation grows it to 0.0514 and output reduces it to 0.0120. The per-element budget and nonuniform-cotangent gradient check are separate evidence. Next inspect epsilon and axes, then rerun varied inputs.
 
 ```python
 visual_data={'kind':'bar','labels':list(errors),'xlabel':'operation in execution order','ylabel':'maximum absolute output error','series':[{'label':'matched architecture (max across inputs)','y':[max(v) for v in errors.values()]},{'label':'wrong epsilon (last input batch)','y':[wrong_reports[k]['max_abs'] for k in errors]}]}
@@ -451,7 +481,7 @@ visual_data={'kind':'bar','labels':list(errors),'xlabel':'operation in execution
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:24:38.522273+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:09:33.686179+00:00. JAX 0.9.2.
 
 ```text
 Maximum absolute error per layer: {'hidden': 2.384185791015625e-07, 'norm': 3.5762786865234375e-07, 'activation': 3.5762786865234375e-07, 'output': 1.1920928955078125e-07}
@@ -505,17 +535,27 @@ Compare a near-zero reference against two candidate errors. Verify that the abso
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Inputs:**
+- A near-zero reference value, the two candidate values, and the declared absolute/relative tolerances.
+
+**Outputs:**
+- Whether rounding noise is accepted and whether the meaningful discrepancy is rejected.
+
+**Invariants to check:**
+- The absolute tolerance handles the near-zero rounding case; the larger discrepancy remains outside tolerance.
+
+**Hints:**
+- Evaluate each candidate against the same near-zero reference.
+- Include the absolute and relative tolerance terms in the comparison rule.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Compare a near-zero reference against two candidate errors.
-assert error_report([0.,1.],[1e-7,1.000001])['passed']  # TODO: complete assertion check
-assert not error_report([0.,1.],[1e-3,1.])['passed']  # TODO: complete assertion check
-print('Near-zero acceptance and rejection verified.')
+import numpy as np
+
+def check_near_zero_tolerance(reference, candidates, atol, rtol):
+    # TODO: Apply the declared tolerance to both candidate errors and report each acceptance result.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -543,19 +583,32 @@ The first weight is rectangular, so validate its source shape before applying th
 
 ### How to write: Reject a plausible but wrong tensor layout — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Inputs:**
+- Transpose the first PyTorch weight before conversion and prove the boundary rejects it instead of transposing it a second time.
+
+**Outputs:**
+- A rejection for the transposed source tensor and parity for the correct mapping.
+
+**Invariants to check:**
+- The converter performs one documented layout transform.
+
+**Hints:**
+- The first weight is rectangular, so validate its source shape before applying the mapping.
+- Compare asymmetric matrix dimensions so a mistaken second transpose is visible.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Reject a plausible but wrong tensor layout (Transfer)
-bad_state = dict(...)  # TODO: compute bad_state
-bad_state['hidden.weight'] = ...  # TODO: compute bad_state['hidden.weight']
-try:convert(bad_state)
-except ValueError:print('Wrong source layout rejected')
-else:raise AssertionError('layout mismatch accepted')
+import numpy as np
+import jax
+import jax.numpy as jnp
+import torch
+from flax import nnx
+
+def practice_reject_a_plausible_but_wrong_tensor_layout(source_weight, converted_weight, tolerance):
+    """Complete the reject a plausible but wrong tensor layout check."""
+    # TODO: ('Transpose the source first-layer weight before mapping and check that the parity boundary rejects it without a second transpose.', 'A failed wrong-layout parity check and an accepted correctly mapped matrix.', 'Each framework layout conversion is applied exactly once.')
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -587,27 +640,32 @@ Form the same scalar weighted output in each framework. Create a fresh PyTorch i
 
 ### How to write: Check a nonuniform output sensitivity — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
+**Inputs:**
+- Compare the source and converted input gradients for an output cotangent that contains unequal positive and negative entries. Explain what this tests beyond summing the outputs.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- Source and converted input-gradient vectors.
+
+**Invariants to check:**
+- Both paths receive the same mixed-sign output cotangent.
+
+**Hints:**
+- Form the same scalar weighted output in each framework. Create a fresh PyTorch input so earlier gradients do not accumulate.
+- Compare gradient entries with declared numerical tolerances.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Check a nonuniform output sensitivity (Transfer / diagnosis): This checks J^{\mathsf T}v for a second, nonuniform direction.
-probe_inputs = np.array(...)  # TODO: compute probe_inputs
-cotangent = np.array(...)  # TODO: compute cotangent
-probe_torch = torch.tensor(...)  # TODO: compute probe_torch
-weighted_source = ...  # TODO: compute weighted_source
-weighted_source.backward()
-weighted_target = jax.grad(...)  # TODO: compute weighted_target
-vjp_report = error_report(...)  # TODO: compute vjp_report
-assert vjp_report['passed'], vjp_report  # TODO: complete assertion check
-print('Nonuniform cotangent input-gradient parity:', vjp_report)
+import numpy as np
+import jax
+import jax.numpy as jnp
+import torch
+from flax import nnx
+
+def practice_check_a_nonuniform_output_sensitivity(source_fn, converted_fn, inputs, cotangent):
+    """Complete the check a nonuniform output sensitivity check."""
+    # TODO: ('Use a mixed-sign output cotangent to compare source and converted input gradients.', 'Two input-gradient vectors with tolerance-based parity.', 'The same nonuniform cotangent is applied to both implementations.')
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -639,9 +697,17 @@ The first linear layer agrees, but LayerNorm is the first mismatch. What should 
 
 <details><summary>Answer and explanation</summary>
 
-Normalization axes, variance calculation, epsilon and affine parameters.
+**1. Normalization axes, variance calculation, epsilon and affine parameters. (correct)**
 
 The earliest mismatch narrows the investigation. Downstream error is often the propagated effect of that first difference.
+
+**2. Relax every tolerance until the final outputs pass.**
+
+A large early mismatch is diagnostic evidence. Check the normalization definition before changing tolerances.
+
+**3. Assume successful checkpoint loading proves parity.**
+
+Successful loading only verifies a structural path. Compare intermediate activations to locate the first numerical divergence.
 
 </details>
 
@@ -651,7 +717,7 @@ Reject missing, extra, malformed or nonfinite weights before assignment. If the 
 
 ## Keep your evidence
 
-Keep source checkpoint and architecture identity, complete parameter mapping, per-layer max-absolute/relative-L2 errors, elementwise tolerances, input-gradient comparisons, wrong-epsilon diagnosis and a fresh-process converted-artifact receipt.
+Keep MLP normalization/activation parity, first-divergence evidence, the optional QKV/head layout and mask canaries, nonuniform VJP, processor/position identity and fresh-process reload results.
 
 Save your predictions, modified code, terminal outputs, and reasoning in your engineering portfolio.
 

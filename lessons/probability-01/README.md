@@ -21,11 +21,9 @@ A distribution describes variability in outcomes. Averaging independent observat
 
 ## A precise mean does not make individual outcomes predictable
 
-Suppose observations have standard deviation $2$. For $100$ independent observations from the same distribution, the sample mean's standard deviation is $2/\sqrt{100}=0.2$. A new individual observation still has standard deviation $2$.
+For independent readings with standard deviation $3$, the sample mean of $100$ readings has standard deviation $3/\sqrt{100}=0.3$, while a new reading still has standard deviation $3$. The first quantity describes variation in an average across repeated samples; the second describes the data-generating spread of individual values.
 
-The standard-error curve is calculated under its sampling assumptions; it is not itself a collection of measured repeated experiments. Correlated observations can reduce the amount of independent information in a batch.
-
-When interpreting a narrow interval, ask what random quantity the interval describes: a mean, a latent parameter or a new observation. More data can make an estimated average precise while the underlying process remains noisy.
+The displayed standard-error curve is calculated from the independence assumption, not estimated from repeated experimental batches. Positive correlation would make $2/\sqrt{N}$ too optimistic because the effective amount of independent information is smaller. Before using a narrow band, identify whether its random quantity is a mean, parameter or future observation.
 
 ### Pause and reason
 
@@ -51,7 +49,9 @@ A single future reading has standard deviation $3$. An average of $N$ independen
 
 ## Logarithms preserve ratios that densities lose
 
-A normal log-density is a negative quadratic plus normalization terms. Summing log-densities for independent observations avoids multiplying many small values. A mixture is different: it adds weighted densities, so we use log-sum-exp rather than summing component log-densities. For equal components with log-densities $-1000$ and $-1001$, subtracting the maximum before exponentiation preserves their relative contribution. The ordinary density may still be too small to represent, but its log remains finite.
+A probability density is not the probability of observing one exact real-valued reading. Density has inverse-reading units, and probability comes from integrating it over an interval or region. For example, the normal density at its peak can exceed one for a sufficiently small standard deviation without violating probability rules.
+
+A normal log-density is a negative quadratic plus normalization terms. Summing log-densities for independent observations avoids multiplying many small values. A mixture instead adds weighted densities, so use log-sum-exp: for component log-densities $-1000$ and $-1001$, subtracting the maximum before exponentiation preserves their relative contribution. The executed stable mixture log density is about $-1000.380$; direct exponentiation underflows at this scale even though the log result remains finite.
 
 $$
 \log\!\left(\frac{e^a+e^b}{2}\right)=m+\log(e^{a-m}+e^{b-m})-\log 2,\quad m=\max(a,b)
@@ -169,11 +169,11 @@ Expected: The sample mean is close to $2$, the variance is close to $9$, and the
 
 ### Read the figure
 
-The horizontal axis is the number of independent observations on a logarithmic scale: equal spacing represents equal ratios of sample sizes. The vertical axis is the standard deviation in sensor-reading units. The flat curve stays at $3$: it describes one reading. The decreasing curve is $3/\sqrt{N}$: it describes the average of $N$ readings. At $N=100$, the average has standard deviation $0.3$, ten times smaller than an individual reading. These curves are analytic quantities evaluated by the executed example, not measured coverage intervals.
+The horizontal axis is independent sample count $N$ on a logarithmic scale, so equal horizontal steps multiply sample size by the same ratio. The vertical axis is standard deviation in sensor-reading units. The individual-reading curve stays at 3; the sample-mean curve is $3/\sqrt{N}$, reaching 0.3 at $N=100$. These are analytic standard deviations under independence, not observed confidence-interval coverage.
 
 ### Connect it to the computation
 
-The two curves explain the mean test in our code. A large simulation can estimate the distribution mean accurately while predictions for new sensor values remain noisy. Correlated draws, such as the Markov chains later in this phase, do not satisfy the same independent-sample calculation unchanged.
+At $N=100$, averaging reduces uncertainty about the mean by a factor of ten but does not shrink the spread of the next reading. The seeded sample check reports mean 2.0067 and variance 9.0353, close to the model values 2 and 9 for this finite draw. Correlated draws would not follow the same standard-error curve without accounting for dependence.
 
 ```python
 # Transfer the device result to the host for an independent NumPy comparison.
@@ -183,7 +183,7 @@ visual_data = {"kind":"line","x":sizes.tolist(),"xlabel":"independent observatio
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:23:00.935725+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:13:56.914419+00:00. JAX 0.9.2.
 
 ```text
 sample mean, variance: 2.0067408084869385 9.035282135009766
@@ -235,22 +235,28 @@ Change the sensor to mean $-1$, standard deviation $0.5$, and draw $30000$ readi
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jax.random.PRNGKey(seed) & jax.random.split(key)` — Uses explicit PRNG keys. Split a key when you need independent random draws; reusing a key repeats its random stream.
+**Inputs:**
+- A seed for a fresh observation key; mean and standard deviation of the sensor.
 
-**Step-by-step implementation plan:**
-1. Exercise solution
-2. Create or split explicit PRNG key(s) (`changed`) for reproducible randomness.
+**Outputs:**
+- One reading vector, its sample variance, and the standard error of its sample mean.
+
+**Invariants to check:**
+- The input key is not reused for another random draw.
+- The reported standard error uses the number of readings, not the variance alone.
+
+**Hints:**
+- Split a key before sampling.
+- For independent readings, standard error scales as standard deviation divided by the square root of the sample count.
+- Compare empirical moments with finite-sample tolerances rather than exact equality.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-# Create or split explicit PRNG key(s) (`changed`) for reproducible randomness.
-changed = ...  # TODO: compute changed
-assert abs(float(changed.mean())+1.)  # TODO: complete assertion check
-assert abs(float(changed.var())-.25)  # TODO: complete assertion check
+def compare_sample_moments(key, mean, scale, count):
+    """Return readings, sample variance, and standard error of the mean."""
+    # TODO: split the key, draw readings, and compute both summaries.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -279,20 +285,27 @@ The residual is zero for both; retain $-\log\sigma$.
 
 ### How to write: Detect a missing normalization — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- The shared mean and two normal scales, 1 and 2.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- The two log densities at the common mean and the change in the normalized density across scales.
+
+**Invariants to check:**
+- The residual-only term is identical at the shared mean, while the full log densities differ because scale changes the normalizer.
+
+**Hints:**
+- Evaluate both normalized log densities at the same zero-residual point.
+- Compare the full expression with the residual-only term.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Detect a missing normalization (Transfer / diagnosis): Scale changes density even with identical zero residuals.
-scores = normal_logpdf(...)  # TODO: compute scores
-assert jnp.allclose(scores[0]-scores[1],jnp.log(2.))  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def compare_normal_scales_at_common_mean(normal_logpdf):
+    # TODO: Evaluate scales one and two at their common mean and expose the residual-only tie.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -321,26 +334,25 @@ Split before use; compare arrays with the same shape.
 
 ### How to write: Demonstrate key ownership — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jax.random.PRNGKey(seed) & jax.random.split(key)` — Uses explicit PRNG keys. Split a key when you need independent random draws; reusing a key repeats its random stream.
+**Inputs:**
+- An explicit JAX key, two child-work labels, and a changed seed.
 
-**Step-by-step implementation plan:**
-1. Create or split explicit PRNG key(s) (`(left, right)`) for reproducible randomness.
-2. Sample deterministic random values into `first` using an explicit PRNG key.
-3. Sample deterministic random values into `second` using an explicit PRNG key.
+**Outputs:**
+- Two reproducible but independent random arrays.
+
+**Invariants to check:**
+- Reusing a key replays its random values; splitting creates independent child streams.
+
+**Hints:**
+- Split once for each random operation. Verify replay and changed-seed behavior separately.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Demonstrate key ownership (Transfer / diagnosis)
-# Create or split explicit PRNG key(s) (`(left, right)`) for reproducible randomness.
-left,right = jax.random.split(...)  # TODO: compute left,right
-# Sample deterministic random values into `first` using an explicit PRNG key.
-first = jax.random.normal(...)  # TODO: compute first
-# Sample deterministic random values into `second` using an explicit PRNG key.
-second = jax.random.normal(...)  # TODO: compute second
-assert jnp.array_equal(first,jax.random.normal(left,(32,)))  # TODO: complete assertion check
-assert not jnp.array_equal(first,second)  # TODO: complete assertion check
+def check_key_ownership(key, seed):
+    """Return two draws and a replay/changed-seed comparison."""
+    # TODO: allocate child keys and record the random-stream checks.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -371,7 +383,15 @@ Which statement explains why a large Monte Carlo sample can have a precise mean 
 
 <details><summary>Answer and explanation</summary>
 
-The standard error of the average decreases, while the distribution of an individual reading stays the same
+**1. Every sample becomes equal to the mean as sample size increases**
+
+The mean becomes more precisely estimated while individual draws remain variable. Compare the sampling distribution with the distribution of sample means.
+
+**2. The variance of each reading is divided by the sample size**
+
+Dividing variance by sample count describes uncertainty in the mean estimator, not the variability of one future reading.
+
+**3. The standard error of the average decreases, while the distribution of an individual reading stays the same (correct)**
 
 For independent draws the average has variance $\sigma^2/N$; a new reading still has variance $\sigma^2$. These are different random variables.
 

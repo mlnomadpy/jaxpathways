@@ -75,3 +75,11 @@ python3 projects/deployment-audit/tests/check.py --implementation solution --sta
 ~~~
 
 The public reference prints measured local request times and clearly labels missing network/device measurements. Passing reference checks is verified separately from independent learner work or professional readiness. Complete the ship synthesis assessment to review the complete release decision.
+
+## Review handoff: explain a changed condition
+
+Keep the exported artifact fixed and supply inputs outside its calibration distribution. Locate whether the first disagreement occurs in preprocessing, representation or model computation.
+
+**Keep for review:** Matched raw/preprocessed inputs, saturation counts, layer/output error metrics and target runtime identity. Smaller files or successful loading do not establish integer acceleration.
+
+Write your prediction before opening the reference implementation. Distinguish what the existing checker verifies from your proposed extension; record any extension command, actual output and limitation separately. A reviewer should be able to locate the first failed contract from your saved evidence.

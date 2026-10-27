@@ -12,7 +12,9 @@ Keep workload shapes, warm-up policy and synchronized timings with your device r
 
 ## Study guide: What measured evidence identifies the bottleneck?
 
-Optimize a verified computation and a named timing boundary. Trace events, compiler estimates and wall-clock samples answer different questions; connect them before proposing a change.
+Before changing an implementation, decide which part of the user's wait you are trying to reduce. Compilation, dispatch, transfer, device execution and synchronization can occupy different portions of a run. A fast return from a Python call may measure submission rather than completed work.
+
+First establish numerical equivalence, then choose a repeatable timing boundary. Read a retained trace by its named events and nesting, and use roofline or rematerialization calculations as hypotheses about a tradeoff. Connect a proposed change to the operation's share of the complete workload before expecting a large end-to-end gain.
 
 ### Check your starting point
 
@@ -42,11 +44,11 @@ Review: [Benchmark asynchronous work correctly](01-benchmark-asynchronous-work-c
 
 ### Try a changed condition
 
-A kernel becomes twice as fast but the full step barely changes. What does the result suggest?
+A step takes 100 ms, of which one kernel takes 10 ms. That kernel becomes twice as fast while everything else stays fixed. Predict the new step time.
 
 <details><summary>Compare an approach</summary>
 
-First measure the kernel’s original share of the step. Even eliminating a small component has limited total benefit. Also inspect copies, synchronization and changed compilation; a local kernel timer cannot explain the complete pipeline alone.
+The estimate is \(90+5=95\) ms, a speedup of about 1.053. A 2x kernel improvement is compatible with a small end-to-end gain. If the observed time differs, inspect the timing boundary, changed transfers, compilation and overlap rather than forcing the trace to fit the estimate.
 
 </details>
 

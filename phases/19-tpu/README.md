@@ -12,7 +12,9 @@ Complete this short 2-lesson setup course right after 00: Setup & first steps, t
 
 ## Study guide: Can you provision a Cloud TPU VM, verify that JAX actually executes on its chips, and prove clean teardown?
 
-Every accelerator experiment starts with knowing how many hosts and GiB of HBM your slice provides, verifying that libtpu is active inside an isolated .venv, and deleting billable VMs when finished.
+Choosing an accelerator begins with a workload and a per-device capacity calculation. Aggregate HBM can look sufficient while a replicated parameter or optimizer array still exceeds the memory available to one device. Work through the placement and headroom assumptions before creating a resource.
+
+Then compare the requested runtime with the observed backend and topology. A numerical check answers whether the tested arithmetic agrees; the receipt answers which environment ran it. Keep the named creation route and its matching cleanup steps together so the experiment has a clear beginning and end.
 
 ### Check your starting point
 
@@ -28,31 +30,31 @@ Review: [Select a TPU slice and provision your Cloud TPU VM](01-get-a-tpu-runnin
 
 ### Build in stages
 
-1. **Select a single-host TPU topology and provision the VM.** Compare v5litepod-1, v5litepod-4, v5litepod-8, and v6e-4 HBM totals, distinguish single-host VMs from multi-host Pod slices, and run gcloud create/describe/delete.
+1. **Select a single-host TPU topology and provision the VM.** Identify the requested API and machine type independently from observed JAX devices/processes. Calculate the 48 GiB replicated and ideal-sharded state ledger on four 16 GiB chips, include the 80% budget and assumed activation cost, and explain why aggregate capacity is insufficient. Keep the named resource create/describe/cleanup log.
 
    Lessons: [Select a TPU slice and provision your Cloud TPU VM](01-get-a-tpu-running-and-verify-the-runtime/docs/en.md).
 
-2. **Bootstrap .venv and verify the runtime contract receipt.** Install jax[tpu] in ~/jax-tpu-lab/.venv, run verify_runtime_contract with a synchronized pmap sum of squares, and copy back the SHA-256 receipt.
+2. **Bootstrap .venv and verify the runtime contract receipt.** Install the pinned runtime, run build_runtime_receipt(), compare arithmetic_ok with the local closed-form oracle, and inspect expected backend/count flags and requested_target_ready. Calculate separate 4-/8-device expectations. The target-only TPU_REQUIRE_TARGET path must reject CPU, wrong count or missing saved-source identity. Retrieve the receipt and identify its digest as an integrity field, not a signature.
 
    Lessons: [Bootstrap .venv and verify a TPU runtime receipt](02-bootstrap-venv-and-verify-tpu-runtime-receipt/docs/en.md).
 
 ### Try a changed condition
 
-A script runs on a Cloud TPU VM without raising an error, but throughput is identical to a laptop CPU. What should your receipt check first?
+Your runtime receipt reports four local devices. Is that always four physical chips, and does it establish a production-model run?
 
 <details><summary>Compare an approach</summary>
 
-Inspect observed_backend and device_count in the JSON receipt; if libtpu was missing or JAX_PLATFORMS=tpu was not set, JAX silently fell back to CPU.
+No. The mapping depends on generation and topology; TPU7x exposes chiplets as devices. Record machine type and device kinds with a synchronized numerical check. A small runtime receipt qualifies only its tested work, and the named control-plane resources still need explicit cleanup.
 
 </details>
 
 **Symptom:** You closed your SSH terminal after finishing a run, assuming the Cloud TPU VM stopped billing.
 
-**Check next:** Run gcloud compute tpus tpu-vm delete and confirm gcloud compute tpus tpu-vm list returns 0 items.
+**Check next:** Use the cleanup command for the route that created the named resource. A queued resource must be deleted through its owning route. Confirm those exact resource names are absent; leave unrelated project resources alone.
 
 ### Decide what is ready
 
-Retain the slice HBM table from tpu-01, the verified JSON runtime receipt from tpu-04, and the empty gcloud compute tpus tpu-vm list confirmation.
+Keep the per-device ledger, requested-versus-observed runtime/source/environment identity, synchronized arithmetic and fail-closed target checks. Record absence of the exact named owned VM and queued resource after route-specific cleanup; a project-wide empty list is not required.
 
 ### Further work
 
@@ -66,9 +68,9 @@ Continue immediately to Phase 20 (TPU Workflows: Launching Jobs & Checkpointed E
 
 Status: authored lesson with CPU exercise.
 
-**Intended outcome:** Choose a single-host TPU topology, create a Cloud TPU VM with gcloud (or connect to a Colab TPU), verify SSH access, and rehearse clean VM deletion.
+**Intended outcome:** Choose and identify a named single-host TPU topology, distinguish physical chips from JAX devices, compare per-device memory-fit assumptions and verify a requested-target receipt before a route-owned teardown.
 
-**Evidence:** Keep the slice HBM capacity table, single-host vs Pod classification, and gcloud create/describe/delete command log.
+**Evidence:** Keep the 48 GiB replicated versus ideal-sharded ledger with headroom/activation assumptions, requested API/machine/chip/process identity, observed process/device/backend receipt and source/environment identity where available. Retain absence checks only for the named owned VM or queued resource.
 
 **Checkpoint:** Which command sequence proves that your Cloud TPU VM is READY when you start and no longer billing when you finish?
 
@@ -78,11 +80,11 @@ Status: authored lesson with CPU exercise.
 
 Status: authored lesson with CPU exercise.
 
-**Intended outcome:** Create ~/jax-tpu-lab/.venv on the TPU VM, install jax[tpu], run a synchronized pmap runtime contract check, and download the signed JSON receipt before deleting the VM.
+**Intended outcome:** Use the pinned TPU runtime, compare synchronized arithmetic with its oracle and distinguish requested backend/device readiness from a CPU rehearsal; retrieve the receipt and clean up only named owned resources.
 
-**Evidence:** Keep the JSON runtime receipt (observed_backend, device_count, pmap_sum_of_squares, receipt_sha256) and the 1-chip vs 4-chip vs 8-chip pmap reference values.
+**Evidence:** Keep arithmetic_ok, expected_backend_ok, expected_topology_ok, requested_target_ready, expected/observed backend and counts, source identity or its explicit absence, observed/expected reduction and receipt digest. Separate calculated 4-/8-device expectations from observed execution and require the gated target preflight to fail closed.
 
-**Checkpoint:** Why must verify_runtime_contract check both jax.default_backend() and a synchronized pmap reduction rather than only checking that import jax succeeds?
+**Checkpoint:** Why does build_runtime_receipt() synchronize the pmap reduction and compare observed_total with closed_form_sum_of_squares(local_device_count, 8)?
 
 ## Phase project
 

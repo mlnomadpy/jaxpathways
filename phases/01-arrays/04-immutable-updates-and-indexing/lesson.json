@@ -27,16 +27,16 @@
       {
         "id": "guided-reasoning",
         "title": "Separate a new value from a new physical buffer",
-        "body": "Start with \\([2,4,6]\\). Setting the middle entry to \\(10\\) produces \\([2,10,6]\\). Adding \\(10\\) at that position produces \\([2,14,6]\\). Both operations begin from the same original values; the second is not automatically applied to the result of the first.\n\nDraw two arrows from the original array, one labeled set and one labeled add. If you want sequential updates, explicitly feed the first result into the second operation. This is the same state-flow idea we will use in optimization and recurrent loops.\n\nDo not infer allocation cost from that drawing. A compiler may reuse storage when it can preserve the program's semantics. First verify old/new values and duplicate-index behavior for the operation you use, then measure memory behavior separately.",
+        "body": "Start from the displayed original array \\([1,2,3,4]\\). The set operation replaces index \\(1\\) with \\(20\\), producing \\([1,20,3,4]\\). The add operation contributes \\(5\\) at indices \\(0\\) and \\(2\\), producing \\([6,2,8,4]\\). Both outputs branch from the same original, so the add result still has \\(2\\) at index \\(1\\); it did not inherit the set result.\n\nDraw two arrows from the original, labeled set and add. If you want both effects in sequence, pass the first returned array into the second operation; the final values would then be \\([6,20,8,4]\\). These are value semantics. The drawing does not establish whether the compiler allocated a distinct physical buffer.",
         "check": {
           "prompt": "You call an indexed update but keep using the original variable. Why might later predictions be unchanged?",
           "answer": "The returned updated value was discarded. Assign or pass that result into the next computation; do not expect the original array value to mutate."
         },
-        "math": "C_{i,k} = \\sum_{j=1}^{N} A_{i,j} B_{j,k} = \\text{einsum}(\\texttt{'ij,jk->ik'}, A, B)"
+        "math": "x^{\\mathrm{set}}_i=\\begin{cases}10&i=1\\\\x_i&i\\ne1\\end{cases},\\qquad x^{\\mathrm{add}}_i=x_i+10\\,\\mathbf{1}_{i=1}"
       },
       {
         "title": "A Python name and an array value are different",
-        "body": "After `y = x.at[1].set(20)`, \\(x\\) still denotes the original array and \\(y\\) denotes the updated value. After `x = x.at[1].set(20)`, the Python name \\(x\\) is rebound to the new value. That spelling does not retroactively change another name holding the original value.\n\nKeep `original = x` before an update when you want a reference for tests. Comparing original and updated makes the semantics visible. Repeatedly inspecting only the newly rebound name can make a functional update look like mutation even though the old value still exists."
+        "body": "After `y = x.at[1].set(20)`, the name `x` still refers to \\([1,2,3,4]\\) and `y` refers to \\([1,20,3,4]\\). If instead you write `x = x.at[1].set(20)`, Python rebinds the name `x`; it does not alter an earlier value held through `original = x`.\n\nThe execution receipt prints the original, set result, and add result side by side, and the heatmap uses those as three rows. Keeping a second name for the original makes the distinction observable. Before running a changed index, predict which positions should differ and check the untouched positions too."
       },
       {
         "title": "Set replaces; add accumulates",
@@ -78,7 +78,25 @@
         "prompt": "Create a \\((3, 3)\\) matrix containing \\(0\\) through \\(8\\). Set its final column to \\(-1\\) in a returned value. Verify the whole result and original matrix.",
         "hint": "The slice [:, \\(-1\\)] selects every row and the last column. A scalar replacement broadcasts across that slice.",
         "solution": "# Replace a region of a matrix (Practice)\nmatrix = jnp.arange(9, dtype=jnp.float32).reshape(3, 3)\nupdated_matrix = matrix.at[:, -1].set(-1.)\nassert jnp.allclose(updated_matrix, jnp.array([[0., 1., -1.], [3., 4., -1.], [6., 7., -1.]]))\nassert jnp.allclose(matrix, jnp.arange(9).reshape(3, 3))",
-        "explanation": "Checking the entire matrix verifies both changed and unchanged positions; preserving the original checks the update contract."
+        "explanation": "Checking the entire matrix verifies both changed and unchanged positions; preserving the original checks the update contract.",
+        "learnerStarter": {
+          "inputs": [
+            "A three-by-three matrix of consecutive values."
+          ],
+          "outputs": [
+            "A new matrix with its final column replaced."
+          ],
+          "invariants": [
+            "Nonselected entries match the input.",
+            "The original matrix is unchanged.",
+            "The returned shape remains `(3, 3)`."
+          ],
+          "hints": [
+            "Select the last column in every row.",
+            "Check the entire result and original."
+          ],
+          "code": "import jax.numpy as jnp\n\ndef replace_final_column(matrix):\n    # TODO: update the selected region in a returned array\n    raise NotImplementedError\n"
+        }
       },
       {
         "title": "Keep shape while masking values",
@@ -86,7 +104,24 @@
         "prompt": "Keep only values greater than \\(2\\) from \\(x\\), replacing other positions with zero. Compare with compact selection and explain the shape difference.",
         "hint": "Use where for the fixed-shape result. Boolean indexing produces selected values, not a shape-preserving mask.",
         "solution": "# Keep shape while masking values (Challenge)\nfixed_shape = jnp.where(x > 2., x, 0.)\nselected = x[x > 2.]\n# Check tensor shape invariant: `fixed_shape.shape == (4,)`\nassert fixed_shape.shape == (4,)\n# Check tensor shape invariant: `selected.shape == (2,)`\nassert selected.shape == (2,)\nassert jnp.allclose(fixed_shape, jnp.array([0., 0., 3., 4.]))\nassert jnp.allclose(selected, jnp.array([3., 4.]))",
-        "explanation": "Both are useful representations, but they are not interchangeable. The expected downstream shape determines which is appropriate."
+        "explanation": "Both are useful representations, but they are not interchangeable. The expected downstream shape determines which is appropriate.",
+        "learnerStarter": {
+          "inputs": [
+            "A one-dimensional input `x` and threshold two."
+          ],
+          "outputs": [
+            "A fixed-shape masked value and a compact selected value."
+          ],
+          "invariants": [
+            "The masked result keeps input shape.",
+            "The compact result contains only selected entries."
+          ],
+          "hints": [
+            "Use elementwise selection for fixed shape.",
+            "Inspect both output shapes."
+          ],
+          "code": "import jax.numpy as jnp\n\ndef compare_mask_and_selection(x, threshold=2.):\n    # TODO: construct both fixed-shape mask and compact selection\n    raise NotImplementedError\n"
+        }
       }
     ],
     "diagnosis": "If nothing changes, check whether the returned update was discarded. If old values seem changed, distinguish name rebinding from mutation and inspect mutable containers around the array. If duplicate replacements are surprising, do not assume last-write-wins order; use an explicit unique-index policy. If a mask later fails under jit, inspect whether its output length depends on runtime values.",
@@ -134,6 +169,30 @@
         "code": "assert jnp.allclose(x, jnp.array([1.,2.,3.,4.]))\nassert jnp.allclose(y, jnp.array([1.,20.,3.,4.]))\nassert jnp.allclose(z, jnp.array([6.,2.,8.,4.]))",
         "explanation": "Checking x itself makes the immutability behavior observable; the other checks verify the selected indices and values."
       }
-    ]
+    ],
+    "optionFeedback": [
+      "The update expression creates a new array value. Compare x with the returned value; assignment to a new name does not mutate x.",
+      "The expression returns the updated value. Assign it to a name to keep it; \\(x\\) retains its original value.",
+      "The .at update preserves array semantics. Inspect the returned shape and dtype rather than expecting a Python list."
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "A one-dimensional four-value array `x`.",
+        "A request to replace its final two positions in a new value."
+      ],
+      "outputs": [
+        "A changed array and the unchanged original input."
+      ],
+      "invariants": [
+        "The source array remains unchanged.",
+        "Output shape matches input shape.",
+        "Only requested positions change."
+      ],
+      "hints": [
+        "Use a functional indexed update and keep its returned array.",
+        "Compare the input after the update."
+      ],
+      "code": "import jax.numpy as jnp\n\ndef replace_suffix(x):\n    # TODO: make the requested functional indexed update\n    raise NotImplementedError\n"
+    }
   }
 }

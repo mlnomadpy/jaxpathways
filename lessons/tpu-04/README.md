@@ -4,12 +4,14 @@ Phase 19: TPU Setup: Provisioning & Runtime Verification · about 20 minutes · 
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. A separate runtime receipt collector is implemented in the target instructions. Bounded hardware receipts cover v5e1 launch, resume and precision checks; four single-device Pallas cases; and a four-device v5e collective fixture. Each receipt applies only to its recorded source, environment, cases and hardware. Other lessons and TPU configurations require separate qualification.
 
+**Before this lesson:** [Select a TPU slice and provision your Cloud TPU VM](https://www.tahabouhsine.com/jaxpathways/lesson-tpu-01.html).
+
 ## What you will be able to do
 
 - Bootstrap `~/jax-tpu-lab/.venv` on a Cloud TPU VM and install `jax[tpu]` from the official `libtpu` wheel index.
 - Verify `jax.default_backend()`, `jax.device_count()`, and a synchronized `jax.pmap` reduction across 1, 4, or 8 chips.
 - Copy the JSON runtime receipt back to your workstation with `gcloud compute tpus tpu-vm scp`.
-- Delete the Cloud TPU VM and confirm with `gcloud compute tpus tpu-vm list` that zero billable TPU nodes remain.
+- Delete the named TPU VM or its owning queued resource and verify those named resources are absent; unrelated TPU resources may remain.
 
 ## The problem
 
@@ -21,18 +23,10 @@ Bootstrap an isolated `~/jax-tpu-lab/.venv` on the TPU VM Linux host with `jax[t
 
 ## Why a synchronized `pmap` receipt is stronger than `import jax`
 
-Importing `jax` on a Cloud TPU VM only proves that the Python package is installed on the Linux host. To prove that `libtpu` can initialize the attached TPU chips, allocate High Bandwidth Memory (HBM), compile an XLA HLO computation, and synchronize results back to the host, you should run a small `jax.pmap` reduction across `jax.local_devices()` and call `jax.block_until_ready`.
-
-If each device $d \in \{0, \dots, D-1\}$ receives a slice of $8$ consecutive integers starting at $8d$, then across $D$ devices the global vector contains $0, 1, \dots, 8D - 1$, and the exact sum of squares is:
-$$
-
-S(D) = \sum_{k=0}^{8D - 1} k^2 = \frac{(8D - 1)(8D)(16D - 1)}{6}
+Importing `jax` confirms only that the package is available on the host. A mapped sum followed by `jax.block_until_ready` checks that the selected backend can finish device work and return the result. For $D$ devices, the fixture gives each device 8 consecutive integers and checks $S(D)=\sum_{k=0}^{8D-1}k^2$. One CPU device produces 140; the requested four-device run should produce 10,416. The recorded rehearsal produced 140 on one CPU device, so its arithmetic check passed while backend and topology checks failed. A NumPy plot of the four-row calculation is an oracle, not evidence that four TPU devices ran. Read the receipt's backend, count and synchronized total together.
 
 $$
-The formula gives an expected value for a chosen device count. Only a receipt that records `observed_backend`, `device_count`, and the synchronized result can support a runtime claim. The four-row figure below is a NumPy calculation, not evidence that four TPU devices ran.
-
-$$
-M_{\text{state}} = N_{\text{params}} \times (\text{bytes}_{\text{param}} + \text{bytes}_{\text{grad}} + 2 \cdot \text{bytes}_{\text{moment}})
+S(D) = \sum_{k=0}^{8D-1} k^2 = \frac{(8D-1)(8D)(16D-1)}{6}, \quad D=\text{observed devices}
 $$
 
 ### Pause and reason
@@ -47,50 +41,57 @@ The Cloud TPU VM stays allocated in the `READY` state and continues billing ever
 
 ## 1. Bootstrap `~/jax-tpu-lab/.venv` and install `jax[tpu]` over SSH
 
-Use `gcloud compute tpus tpu-vm ssh` to create a dedicated virtual environment on the TPU VM host and install `jax[tpu]` plus the course libraries (`flax`, `optax`, `orbax-checkpoint`, `numpy`, `matplotlib`).
+Create the virtual environment on the named TPU VM after it reaches `READY`, then install the reviewed requirements and the matching pinned TPU extra. Keep this environment identity with the receipt so a future run can be compared to the same package set. Do not interpret a successful install or import as device readiness; the next section checks actual synchronized execution.
 
 **Create ~/jax-tpu-lab/.venv and install jax[tpu] on the Cloud TPU VM**
 
 ```bash
-# Create ~/jax-tpu-lab/.venv and install jax[tpu] on the Cloud TPU VM
-gcloud compute tpus tpu-vm ssh "$TPU_NAME" --zone="$ZONE" --command="
-  set -euo pipefail
-  mkdir -p ~/jax-tpu-lab
-  python3 -m venv ~/jax-tpu-lab/.venv
-  source ~/jax-tpu-lab/.venv/bin/activate
-  pip install -U pip
-  pip install 'jax[tpu]' -f https://storage.googleapis.com/jax-releases/libtpu_releases.html
-  pip install flax optax orbax-checkpoint numpy matplotlib
-"
+# Install the pinned environment on the Cloud TPU VM
+gcloud compute tpus tpu-vm ssh "$TPU_NAME" --zone="$ZONE" --command="mkdir -p ~/jax-tpu-lab"
+gcloud compute tpus tpu-vm scp projects/reproducible-experiments/requirements.txt "$TPU_NAME":~/jax-tpu-lab/ --zone="$ZONE"
+gcloud compute tpus tpu-vm ssh "$TPU_NAME" --zone="$ZONE" --command='set -euo pipefail; mkdir -p ~/jax-tpu-lab; python3 -m venv ~/jax-tpu-lab/.venv; ~/jax-tpu-lab/.venv/bin/python -m pip install -r ~/jax-tpu-lab/requirements.txt; ~/jax-tpu-lab/.venv/bin/python -m pip install \"jax[tpu]==0.9.2\" -f https://storage.googleapis.com/jax-releases/libtpu_releases.html'
 ```
 
-**Expected:** Installs jax[tpu], libtpu, and the course dependencies inside ~/jax-tpu-lab/.venv on the TPU VM.
+**Expected:** Uses the pinned requirements file and jax[tpu]==0.9.2; record both source and environment identity.
 
 ## 2. Run the runtime receipt script, copy the JSON receipt back, and delete the TPU VM
 
-Stage `public/exercises/tpu-04.py` to the TPU VM, run it inside `~/jax-tpu-lab/.venv`, copy the saved receipt back to your workstation, and delete the TPU VM when finished.
+Run the saved script on the requested target, copy the receipt to your workstation, and check the three gates separately. `arithmetic_ok` compares the synchronized result with the sum-of-squares oracle; `expected_backend_ok` checks TPU rather than CPU; `expected_topology_ok` checks exactly four JAX devices. `requested_target_ready` is true only when all three pass. In the recorded CPU run, the observed total 140 matches the one-device oracle, but the requested four-device total is 10,416 and readiness is false.
+
+Keep that receipt as evidence, then clean up the resource selected during provisioning. Delete the direct VM if that was the route, or delete its owning queued resource for Flex-start; verify the named resource is absent before considering the setup complete.
 
 **Run the runtime receipt verifier on the TPU VM and copy the receipt home**
 
 ```bash
 # Run the runtime receipt verifier on the TPU VM and copy the receipt home
+gcloud compute tpus tpu-vm ssh "$TPU_NAME" --zone="$ZONE" --command="mkdir -p ~/jax-tpu-lab"
 gcloud compute tpus tpu-vm scp public/exercises/tpu-04.py "$TPU_NAME":~/jax-tpu-lab/ --zone="$ZONE"
 gcloud compute tpus tpu-vm ssh "$TPU_NAME" --zone="$ZONE" \
-  --command="JAX_PLATFORMS=tpu ~/jax-tpu-lab/.venv/bin/python ~/jax-tpu-lab/tpu-04.py | tee ~/jax-tpu-lab/tpu-receipt.txt"
+  --command="set -euo pipefail; TPU_REQUIRE_TARGET=1 JAX_PLATFORMS=tpu ~/jax-tpu-lab/.venv/bin/python ~/jax-tpu-lab/tpu-04.py | tee ~/jax-tpu-lab/tpu-receipt.txt"
 gcloud compute tpus tpu-vm scp "$TPU_NAME":~/jax-tpu-lab/tpu-receipt.txt ./ --zone="$ZONE"
 ```
 
-**Expected:** Runs tpu-04.py on the TPU VM, writes tpu-receipt.txt, and downloads it to your current directory.
+**Expected:** The receipt records source SHA256, pinned environment identity, expected and observed backend, expected and observed device count, arithmetic_ok, expected_backend_ok, expected_topology_ok, and requested_target_ready. On CPU, arithmetic may pass but target readiness must be false.
 
-**Delete the Cloud TPU VM and verify zero active TPU resources remain**
+**Delete this route’s TPU resources and verify their named absence**
 
 ```bash
-# Delete the Cloud TPU VM and verify zero active TPU resources remain
-gcloud compute tpus tpu-vm delete "$TPU_NAME" --zone="$ZONE" --quiet
-gcloud compute tpus tpu-vm list --zone="$ZONE"
+# Flex-start: deleting the owning request with --force deletes its allocated VM too.
+if [ -n "${QUEUED_RESOURCE_ID:-}" ]; then
+  gcloud alpha compute tpus queued-resources delete "$QUEUED_RESOURCE_ID" --project="$PROJECT_ID" --zone="$ZONE" --force --quiet
+else
+  gcloud compute tpus tpu-vm delete "$TPU_NAME" --project="$PROJECT_ID" --zone="$ZONE" --quiet
+fi
+remaining_vm=$(gcloud compute tpus tpu-vm list --project="$PROJECT_ID" --zone="$ZONE" --filter="name=$TPU_NAME" --format="value(name)")
+[ -z "$remaining_vm" ] || { echo "Named TPU VM still exists: $remaining_vm"; exit 1; }
+if [ -n "${QUEUED_RESOURCE_ID:-}" ]; then
+  remaining_request=$(gcloud alpha compute tpus queued-resources list --project="$PROJECT_ID" --zone="$ZONE" --filter="name=$QUEUED_RESOURCE_ID" --format="value(name)")
+  [ -z "$remaining_request" ] || { echo "Owning queued resource still exists: $remaining_request"; exit 1; }
+fi
+printf "Named route resources are absent; unrelated resources may remain.\n"
 ```
 
-**Expected:** Deletes the TPU VM and prints Listed 0 items.
+**Expected:** The named VM and, when used, its owning queued resource are absent. The filtered checks allow unrelated resources to remain.
 
 ## Define the closed-form sum-of-squares oracle and pmap receipt builder
 
@@ -101,6 +102,7 @@ Create main.py with closed_form_sum_of_squares and build_runtime_receipt.
 import hashlib
 import json
 import platform
+from pathlib import Path
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -111,7 +113,7 @@ def closed_form_sum_of_squares(num_devices, width=8):
     return float((n - 1) * n * (2 * n - 1) // 6)
 
 
-def build_runtime_receipt():
+def build_runtime_receipt(expected_backend="tpu", expected_device_count=4):
     devices = jax.local_devices()
     n_dev = len(devices)
     x = jnp.arange(n_dev * 8, dtype=jnp.float32).reshape(n_dev, 8)
@@ -120,16 +122,27 @@ def build_runtime_receipt():
     # Wait for device work to finish before timing it or comparing its result on the host.
     observed_total = float(jax.block_until_ready(jnp.sum(per_device)))
     expected_total = closed_form_sum_of_squares(n_dev, 8)
-    # Check which hardware backend (`cpu`, `gpu`, or `tpu`) JAX selected for `payload`.
+    backend = jax.default_backend()
+    arithmetic_ok = bool(np.isclose(observed_total, expected_total))
+    expected_backend_ok = backend == expected_backend
+    expected_topology_ok = jax.device_count() == expected_device_count
+    source_value = globals().get("__file__")
+    source_path = Path(source_value) if isinstance(source_value, str) and source_value else None
+    source_sha256 = hashlib.sha256(source_path.read_bytes()).hexdigest() if source_path is not None and source_path.is_file() else None
+    source_identity = str(source_path.resolve()) if source_sha256 is not None else "unavailable: interactive execution has no readable __file__"
     payload = {
-        "python": platform.python_version(),
-        "jax": jax.__version__,
-        "backend": jax.default_backend(),
-        "local_device_count": n_dev,
-        "per_device_sums": [float(v) for v in np.asarray(per_device)],
-        "observed_total": observed_total,
-        "expected_total": expected_total,
-        "verified": bool(np.isclose(observed_total, expected_total)),
+        "source_sha256": source_sha256,
+        "source_identity": source_identity,
+        "environment_lock": "projects/reproducible-experiments/requirements.txt; jax[tpu]==0.9.2",
+        "python": platform.python_version(), "jax": jax.__version__,
+        "expected_backend": expected_backend, "observed_backend": backend,
+        "expected_device_count": expected_device_count, "device_count": jax.device_count(),
+        "process_count": jax.process_count(),
+        "local_device_count": n_dev, "per_device_sums": [float(v) for v in np.asarray(per_device)],
+        "observed_total": observed_total, "expected_total": expected_total,
+        "arithmetic_ok": arithmetic_ok, "expected_backend_ok": expected_backend_ok,
+        "expected_topology_ok": expected_topology_ok,
+        "requested_target_ready": bool(arithmetic_ok and expected_backend_ok and expected_topology_ok),
     }
     payload["receipt_sha256"] = hashlib.sha256(
         json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()
@@ -144,15 +157,23 @@ Each local device computes the sum of squares of its 8-element row via jax.pmap,
 Append slice_expectations and the receipt verification assertions to main.py.
 
 ```python
-# Step 2 — Verify the active runtime receipt and tabulate multi-chip expectations
+# Step 2 — Verify the active runtime receipt and tabulate device-count expectations
 slice_expectations = [
     {"slice": "1-device (CPU / v5e-1)", "devices": 1, "expected_sum": closed_form_sum_of_squares(1)},
     {"slice": "4-device (v5litepod-4 / v6e-4)", "devices": 4, "expected_sum": closed_form_sum_of_squares(4)},
     {"slice": "8-device (v5litepod-8 / v6e-8)", "devices": 8, "expected_sum": closed_form_sum_of_squares(8)},
 ]
-receipt = build_runtime_receipt()
-# Assert invariant `receipt["verified"] is True` holds
-assert receipt["verified"] is True
+receipt = build_runtime_receipt(expected_backend="tpu", expected_device_count=4)
+# CPU rehearsal validates arithmetic while explicitly showing the TPU target is not ready.
+assert receipt["arithmetic_ok"] is True
+if receipt["observed_backend"] == "cpu":
+    assert receipt["requested_target_ready"] is False
+# Actual TPU launch/preflight commands set TPU_REQUIRE_TARGET=1 and require exact backend/count.
+if __import__("os").environ.get("TPU_REQUIRE_TARGET") == "1":
+    if receipt["source_sha256"] is None:
+        raise SystemExit("TPU_REQUIRE_TARGET=1 requires a saved verifier script with a readable source identity")
+    if not receipt["requested_target_ready"]:
+        raise SystemExit("Requested TPU target is not ready: expected TPU backend and exactly 4 JAX devices")
 print("Runtime receipt:", json.dumps(receipt, sort_keys=True))
 print("Expected pmap sums by slice:", {s["slice"]: s["expected_sum"] for s in slice_expectations})
 ```
@@ -164,8 +185,8 @@ Knowing the exact expected sum for 1, 4, and 8 devices lets you immediately spot
 Run the final shape and numerical assertions to confirm the state built in Steps 1 and 2.
 
 ```python
-receipt = build_runtime_receipt()
-assert receipt["verified"] is True
+receipt = build_runtime_receipt(expected_backend="tpu", expected_device_count=4)
+assert receipt["arithmetic_ok"] is True
 ```
 
 Checking these invariants confirms the computation is ready for the full worked experiment.
@@ -177,6 +198,7 @@ Checking these invariants confirms the computation is ready for the full worked 
 import hashlib
 import json
 import platform
+from pathlib import Path
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -187,7 +209,7 @@ def closed_form_sum_of_squares(num_devices, width=8):
     return float((n - 1) * n * (2 * n - 1) // 6)
 
 
-def build_runtime_receipt():
+def build_runtime_receipt(expected_backend="tpu", expected_device_count=4):
     devices = jax.local_devices()
     n_dev = len(devices)
     x = jnp.arange(n_dev * 8, dtype=jnp.float32).reshape(n_dev, 8)
@@ -196,16 +218,27 @@ def build_runtime_receipt():
     # Wait for device work to finish before timing it or comparing its result on the host.
     observed_total = float(jax.block_until_ready(jnp.sum(per_device)))
     expected_total = closed_form_sum_of_squares(n_dev, 8)
-    # Record the backend selected by this JAX process in the payload.
+    backend = jax.default_backend()
+    arithmetic_ok = bool(np.isclose(observed_total, expected_total))
+    expected_backend_ok = backend == expected_backend
+    expected_topology_ok = jax.device_count() == expected_device_count
+    source_value = globals().get("__file__")
+    source_path = Path(source_value) if isinstance(source_value, str) and source_value else None
+    source_sha256 = hashlib.sha256(source_path.read_bytes()).hexdigest() if source_path is not None and source_path.is_file() else None
+    source_identity = str(source_path.resolve()) if source_sha256 is not None else "unavailable: interactive execution has no readable __file__"
     payload = {
-        "python": platform.python_version(),
-        "jax": jax.__version__,
-        "backend": jax.default_backend(),
-        "local_device_count": n_dev,
-        "per_device_sums": [float(v) for v in np.asarray(per_device)],
-        "observed_total": observed_total,
-        "expected_total": expected_total,
-        "verified": bool(np.isclose(observed_total, expected_total)),
+        "source_sha256": source_sha256,
+        "source_identity": source_identity,
+        "environment_lock": "projects/reproducible-experiments/requirements.txt; jax[tpu]==0.9.2",
+        "python": platform.python_version(), "jax": jax.__version__,
+        "expected_backend": expected_backend, "observed_backend": backend,
+        "expected_device_count": expected_device_count, "device_count": jax.device_count(),
+        "process_count": jax.process_count(),
+        "local_device_count": n_dev, "per_device_sums": [float(v) for v in np.asarray(per_device)],
+        "observed_total": observed_total, "expected_total": expected_total,
+        "arithmetic_ok": arithmetic_ok, "expected_backend_ok": expected_backend_ok,
+        "expected_topology_ok": expected_topology_ok,
+        "requested_target_ready": bool(arithmetic_ok and expected_backend_ok and expected_topology_ok),
     }
     payload["receipt_sha256"] = hashlib.sha256(
         json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()
@@ -213,20 +246,28 @@ def build_runtime_receipt():
     return payload
 
 
-# Step 2 — Verify the active runtime receipt and tabulate multi-chip expectations
+# Step 2 — Verify the active runtime receipt and tabulate device-count expectations
 slice_expectations = [
     {"slice": "1-device (CPU / v5e-1)", "devices": 1, "expected_sum": closed_form_sum_of_squares(1)},
     {"slice": "4-device (v5litepod-4 / v6e-4)", "devices": 4, "expected_sum": closed_form_sum_of_squares(4)},
     {"slice": "8-device (v5litepod-8 / v6e-8)", "devices": 8, "expected_sum": closed_form_sum_of_squares(8)},
 ]
-receipt = build_runtime_receipt()
-# Assert invariant `receipt["verified"] is True` holds
-assert receipt["verified"] is True
+receipt = build_runtime_receipt(expected_backend="tpu", expected_device_count=4)
+# CPU rehearsal validates arithmetic while explicitly showing the TPU target is not ready.
+assert receipt["arithmetic_ok"] is True
+if receipt["observed_backend"] == "cpu":
+    assert receipt["requested_target_ready"] is False
+# Actual TPU launch/preflight commands set TPU_REQUIRE_TARGET=1 and require exact backend/count.
+if __import__("os").environ.get("TPU_REQUIRE_TARGET") == "1":
+    if receipt["source_sha256"] is None:
+        raise SystemExit("TPU_REQUIRE_TARGET=1 requires a saved verifier script with a readable source identity")
+    if not receipt["requested_target_ready"]:
+        raise SystemExit("Requested TPU target is not ready: expected TPU backend and exactly 4 JAX devices")
 print("Runtime receipt:", json.dumps(receipt, sort_keys=True))
 print("Expected pmap sums by slice:", {s["slice"]: s["expected_sum"] for s in slice_expectations})
 ```
 
-Expected: Prints the verified JSON runtime receipt (observed_total: 140.0 on 1 device) and the expected pmap sums for 1-device (140.0), 4-device (10416.0), and 8-device (85344.0) slices.
+Expected: Prints the expected sum table and a receipt with separate arithmetic and requested-target status. The CPU rehearsal can verify the arithmetic but is not TPU readiness.
 
 ## Calculated expectation for four devices (not an observed runtime receipt)
 
@@ -238,11 +279,11 @@ Expected: Prints the verified JSON runtime receipt (observed_total: 140.0 on 1 d
 
 ### Read the figure
 
-This analytic illustration computes four eight-value row sums with NumPy. It does not read a TPU execution receipt and does not show observed device participation.
+The horizontal axis lists four row shards assigned to the selected four-chip fixture: values 0–7, 8–15, 16–23 and 24–31. The vertical axis is sum of squares. The per-shard bars are 140, 1,100, 3,084 and 6,092; the cumulative series ends at 10,416, the four-shard oracle. This is a NumPy calculation, not a recorded device result or receipt. The recorded CPU receipt instead has one device and total 140, matching only the first row. Next, require all four target devices and the TPU backend in the saved receipt.
 
 ### Connect it to the computation
 
-The calculated total is 10416. A runtime claim must instead use the device count and per-device values in a saved receipt; the current local receipt records one CPU device.
+The total 10,416 is the oracle for the requested four-device fixture. The current local receipt instead records backend `cpu`, count 1 and total 140; its arithmetic is correct for what ran, while `requested_target_ready` is false. Do not promote the calculated four-device bar into a TPU claim. Retrieve the saved target receipt and verify its source and environment identity, backend, device count and synchronized result.
 
 ```python
 per_chip = [float(np.sum(np.arange(i * 8, (i + 1) * 8, dtype=np.float64) ** 2)) for i in range(4)]
@@ -261,17 +302,18 @@ visual_data = {
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:27:07.386964+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:21:16.802052+00:00. JAX 0.9.2.
 
 ```text
-Runtime receipt: {"backend": "cpu", "expected_total": 140.0, "jax": "0.9.2", "local_device_count": 1, "observed_total": 140.0, "per_device_sums": [140.0], "python": "3.14.3", "receipt_sha256": "8c6bd0cbe29edc78", "verified": true}
+Runtime receipt: {"arithmetic_ok": true, "device_count": 1, "environment_lock": "projects/reproducible-experiments/requirements.txt; jax[tpu]==0.9.2", "expected_backend": "tpu", "expected_backend_ok": false, "expected_device_count": 4, "expected_topology_ok": false, "expected_total": 140.0, "jax": "0.9.2", "local_device_count": 1, "observed_backend": "cpu", "observed_total": 140.0, "per_device_sums": [140.0], "process_count": 1, "python": "3.14.3", "receipt_sha256": "64561213664a634b", "requested_target_ready": false, "source_identity": "unavailable: interactive execution has no readable __file__", "source_sha256": null}
 Expected pmap sums by slice: {'1-device (CPU / v5e-1)': 140.0, '4-device (v5litepod-4 / v6e-4)': 10416.0, '8-device (v5litepod-8 / v6e-8)': 85344.0}
-Runtime receipt: {"backend": "cpu", "expected_total": 140.0, "jax": "0.9.2", "local_device_count": 1, "observed_total": 140.0, "per_device_sums": [140.0], "python": "3.14.3", "receipt_sha256": "8c6bd0cbe29edc78", "verified": true}
+Runtime receipt: {"arithmetic_ok": true, "device_count": 1, "environment_lock": "projects/reproducible-experiments/requirements.txt; jax[tpu]==0.9.2", "expected_backend": "tpu", "expected_backend_ok": false, "expected_device_count": 4, "expected_topology_ok": false, "expected_total": 140.0, "jax": "0.9.2", "local_device_count": 1, "observed_backend": "cpu", "observed_total": 140.0, "per_device_sums": [140.0], "process_count": 1, "python": "3.14.3", "receipt_sha256": "64561213664a634b", "requested_target_ready": false, "source_identity": "unavailable: interactive execution has no readable __file__", "source_sha256": null}
 Expected pmap sums by slice: {'1-device (CPU / v5e-1)': 140.0, '4-device (v5litepod-4 / v6e-4)': 10416.0, '8-device (v5litepod-8 / v6e-8)': 85344.0}
 Per-chip sums on a 4-chip slice: [140.0, 1100.0, 3084.0, 6092.0] Total: 10416.0
-Teardown verifier passed for empty and non-empty gcloud list outputs.
-4-chip expected sum: 10416.0 8-chip expected sum: 85344.0 receipt hash: 8c6bd0cbe29edc78
-Simulated 4-chip TPU check: True Local CPU check: False
+Named-resource cleanup checks passed; unrelated nodes may remain.
+4-device expected sum: 10416.0 8-device expected sum: 85344.0 receipt hash: 64561213664a634b
+Requested four-device TPU readiness: False ; simulated wrong-count contract rejected: True
+Real runtime receipt qualifies as four-device TPU: False
 Overnight idle cost avoided (USD): 74.4
 PASS: tpu-04
 
@@ -294,46 +336,55 @@ assert row_sums_4 == [140.0, 1100.0, 3084.0, 6092.0] and sum(row_sums_4) == 1041
 
 Inspecting `per_device_sums` confirms that distinct shards of `x` were placed and squared on each of the 4 chips.
 
-## Verify teardown confirmation logic
+## Verify absence of named route-owned resources
 
-**Predict before running:** How can a helper script check that `gcloud compute tpus tpu-vm list` returned zero active VMs?
+**Predict before running:** Can unrelated TPU nodes remain while this lesson’s route-owned VM and queued request have both been removed?
 
 ```python
-# Experiment — Verify teardown confirmation logic
-def is_tpu_zone_clean(gcloud_list_json):
-    items = json.loads(gcloud_list_json)
-    return len(items) == 0
+import json
+def named_resources_absent(gcloud_nodes_json, target_vm_name, queued_requests_json="[]", queued_resource_id=None):
+    nodes = json.loads(gcloud_nodes_json)
+    requests = json.loads(queued_requests_json)
+    vm_absent = all(row.get("name") != target_vm_name for row in nodes)
+    request_absent = queued_resource_id is None or all(row.get("name") != queued_resource_id for row in requests)
+    return vm_absent and request_absent
 
-# Assert invariant `is_tpu_zone_clean("[]") is True` holds
-assert is_tpu_zone_clean("[]") is True
-# Assert invariant `is_tpu_zone_clean('[{"name": "jax-tpu-course"` holds
-assert is_tpu_zone_clean('[{"name": "jax-tpu-course", "state": "READY"}]') is False
-print("Teardown verifier passed for empty and non-empty gcloud list outputs.")
+# An unrelated VM can remain; the named VM and owning request are absent.
+assert named_resources_absent('[{"name":"other-course-vm","state":"READY"}]', "jax-tpu-course", "[]", "jax-tpu-course-request") is True
+assert named_resources_absent('[{"name":"jax-tpu-course","state":"READY"}]', "jax-tpu-course") is False
+print("Named-resource cleanup checks passed; unrelated nodes may remain.")
 ```
 
-**Expected:** Returns True only when the JSON array from `gcloud compute tpus tpu-vm list --format=json` is empty (`[]`).
+**Expected:** The cleanup verifier accepts remaining unrelated TPU VMs, rejects a still-present target VM, and checks the owning queued request when one was used.
 
-Checking `gcloud compute tpus tpu-vm list --zone=$ZONE --format=json` makes teardown verification machine-checkable.
+Cleanup must prove absence of the resources created by this route. Requiring an empty zone could encourage deleting unrelated user resources.
 
 ## Make it yours
 
-Compute `closed_form_sum_of_squares(4)` and `closed_form_sum_of_squares(8)`, verify that `closed_form_sum_of_squares(4) == 10416.0`, and assert that `receipt['verified']` is `True`.
+Compute the 4-device and 8-device oracle values. On the available runtime, assert arithmetic_ok; assert requested_target_ready only when observed_backend is tpu and device_count is exactly 4.
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Exercise solution
-2. Assert invariant `s4 == 10416.0 and s8 == 85344.0 and receipt["verified"] is True` holds
+**Inputs:**
+- The closed-form sum helper and the active CPU/TPU receipt with expected and observed backend/device counts.
+
+**Outputs:**
+- Calculated four-/eight-device oracle values, actual arithmetic result and requested-target readiness.
+
+**Invariants to check:**
+- arithmetic_ok is separate from expected_backend_ok and expected_topology_ok.
+- requested_target_ready requires the requested TPU backend and exact expected count; a CPU rehearsal does not qualify TPU hardware.
+
+**Hints:**
+- Use observed_backend and device_count from the actual receipt.
+- Test a schema-only wrong-count control separately from real hardware observations.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-s4 = closed_form_sum_of_squares(...)  # TODO: compute s4
-s8 = closed_form_sum_of_squares(...)  # TODO: compute s8
-print("4-chip expected sum:", s4, "8-chip expected sum:", s8, "receipt hash:", receipt["receipt_sha256"])
-# Assert invariant `s4 == 10416.0 and s8 == 85344.0 and receipt["verified"] is True` holds
-assert s4  # TODO: complete assertion check
+def audit_runtime_sum_receipt(receipt, closed_form_sum_of_squares):
+    # TODO: compare both theoretical totals and assert readiness matches the requested backend/count contract.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -342,9 +393,24 @@ assert s4  # TODO: complete assertion check
 # Exercise solution
 s4 = closed_form_sum_of_squares(4)
 s8 = closed_form_sum_of_squares(8)
-print("4-chip expected sum:", s4, "8-chip expected sum:", s8, "receipt hash:", receipt["receipt_sha256"])
-# Assert invariant `s4 == 10416.0 and s8 == 85344.0 and receipt["verified"] is True` holds
-assert s4 == 10416.0 and s8 == 85344.0 and receipt["verified"] is True
+print("4-device expected sum:", s4, "8-device expected sum:", s8, "receipt hash:", receipt["receipt_sha256"])
+# Assert invariant `s4 == 10416.0 and s8 == 85344.0 and receipt["arithmetic_ok"] is True` holds
+assert s4 == 10416.0 and s8 == 85344.0 and receipt["arithmetic_ok"] is True
+if receipt["observed_backend"] == "cpu":
+    assert receipt["requested_target_ready"] is False
+
+# Readiness is a requested contract, not a synonym for successful arithmetic.
+expected_ready = bool(receipt['arithmetic_ok'] and receipt['observed_backend'] == 'tpu'
+                      and receipt['device_count'] == 4)
+assert receipt['requested_target_ready'] is expected_ready
+# A schema-only negative control is not hardware evidence.
+wrong_count = dict(receipt, observed_backend='tpu', device_count=8)
+wrong_count_ready = bool(wrong_count['arithmetic_ok'] and wrong_count['observed_backend'] == 'tpu'
+                         and wrong_count['device_count'] == 4)
+assert wrong_count_ready is False
+print('Requested four-device TPU readiness:', expected_ready,
+      '; simulated wrong-count contract rejected:', not wrong_count_ready)
+
 ```
 
 </details>
@@ -353,31 +419,46 @@ assert s4 == 10416.0 and s8 == 85344.0 and receipt["verified"] is True
 
 **Foundations**
 
-Write a check `is_four_chip_tpu_receipt(r)` that returns `True` only when `r['backend'] == 'tpu'`, `r['local_device_count'] == 4`, and `r['observed_total'] == 10416.0`.
+Write `is_four_chip_tpu_receipt(r)` using the real receipt schema: return True only when `r['observed_backend'] == 'tpu'`, `r['local_device_count'] == 4`, `r['device_count'] == 4`, and `r['observed_total']` is 10416.0. Missing keys should return False.
 
 <details><summary>Hint</summary>
 
-Check all three fields in the receipt dictionary.
+Read backend from `observed_backend`, not `backend`; test the local count, global JAX device count, and synchronized sum independently. Handle missing fields as a failed check.
 
 </details>
 
 ### How to write: Detect a silent fallback from 4 TPU chips to 1 CPU device — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Detect a silent fallback from 4 TPU chips to 1 CPU device (Foundations)
-2. Assert invariant `is_four_chip_tpu_receipt(simulated_tpu) is True` holds
+**Inputs:**
+- A candidate runtime receipt mapping with backend, local device count, and observed total fields.
+
+**Outputs:**
+- A Boolean predicate for the exact four-chip TPU receipt contract.
+
+**Invariants to check:**
+- Use observed_backend from the emitted receipt.
+- Missing keys, CPU backend, wrong local/global device count, or wrong synchronized total return False.
+
+**Hints:**
+- Validate backend, count, and total independently.
+- Use a tolerance only for the floating representation of the exact integer total.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Detect a silent fallback from 4 TPU chips to 1 CPU device (Foundations)
-def is_four_chip_tpu_receipt(r):
-    return bool(r["backend"] = ...  # TODO: compute return bool(r["backend"]
+import numpy as np
 
-simulated_tpu = ...  # TODO: compute simulated_tpu
-print("Simulated 4-chip TPU check:", is_four_chip_tpu_receipt(simulated_tpu), "Local CPU check:", is_four_chip_tpu_receipt(receipt))
-# Assert invariant `is_four_chip_tpu_receipt(simulated_tpu) is True` holds
-assert is_four_chip_tpu_receipt(simulated_tpu) is True  # TODO: complete assertion check
+def is_four_chip_tpu_receipt(receipt):
+    try:
+        # Use the schema returned by build_runtime_receipt.
+        return bool(
+            receipt["observed_backend"] == "tpu"
+            and receipt["local_device_count"] == 4
+            and receipt["device_count"] == 4
+            and np.isclose(receipt["observed_total"], 10416.0)
+        )
+    except (KeyError, TypeError):
+        return False
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -385,15 +466,23 @@ assert is_four_chip_tpu_receipt(simulated_tpu) is True  # TODO: complete asserti
 ```python
 # Detect a silent fallback from 4 TPU chips to 1 CPU device (Foundations)
 def is_four_chip_tpu_receipt(r):
-    return bool(r["backend"] == "tpu" and r["local_device_count"] == 4 and np.isclose(r["observed_total"], 10416.0))
+    try:
+        return bool(
+            r["observed_backend"] == "tpu"
+            and r["local_device_count"] == 4
+            and r["device_count"] == 4
+            and np.isclose(r["observed_total"], 10416.0)
+        )
+    except (KeyError, TypeError):
+        return False
 
-simulated_tpu = {"backend": "tpu", "local_device_count": 4, "observed_total": 10416.0}
-print("Simulated 4-chip TPU check:", is_four_chip_tpu_receipt(simulated_tpu), "Local CPU check:", is_four_chip_tpu_receipt(receipt))
-# Assert invariant `is_four_chip_tpu_receipt(simulated_tpu) is True` holds
-assert is_four_chip_tpu_receipt(simulated_tpu) is True
+cpu_result = is_four_chip_tpu_receipt(receipt)
+print("Real runtime receipt qualifies as four-device TPU:", cpu_result)
+assert cpu_result is (receipt["observed_backend"] == "tpu" and receipt["device_count"] == 4)
+
 ```
 
-Requiring `backend == 'tpu'`, `local_device_count == 4`, and the 4-chip `pmap` total prevents a misconfigured environment from passing as a 4-chip TPU run.
+The predicate uses fields actually emitted by build_runtime_receipt. It rejects missing fields, CPU fallback, and either local or global device-count mismatch.
 
 </details>
 
@@ -401,7 +490,7 @@ Requiring `backend == 'tpu'`, `local_device_count == 4`, and the 4-chip `pmap` t
 
 **Transfer / diagnosis**
 
-If a 4-chip TPU slice costs $4.80$ USD/hour and your verification + experiment takes $0.5$ hours, compute how many USD you save by deleting the VM immediately instead of leaving it idle overnight for $16$ hours.
+If a 4-chip TPU slice costs $4.80$ USD/hour and verification plus experiment takes $0.5$ hours, compute how much you save by deleting the VM immediately instead of keeping it running for $16$ total hours, including the active time.
 
 <details><summary>Hint</summary>
 
@@ -411,18 +500,25 @@ Compare `16.0 * 4.80` against `0.5 * 4.80`.
 
 ### How to write: Estimate hourly billing savings from immediate teardown — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Assert invariant `saved_usd == 74.4` holds
+**Inputs:**
+- Hourly slice cost, active verification duration of 0.5 hours, and total elapsed VM time of 16 hours.
+
+**Outputs:**
+- Avoided idle duration and the corresponding teardown savings.
+
+**Invariants to check:**
+- Total elapsed time includes the active work, so idle time is total time minus active time; immediate teardown and the overnight choice share the active-time cost.
+
+**Hints:**
+- Subtract active hours from total hours to get avoidable idle hours.
+- Multiply only those idle hours by the hourly rate; 16 idle hours would be $76.80, while 16 total hours including 0.5 active hour yields $74.40.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Estimate hourly billing savings from immediate teardown (Transfer / diagnosis)
-hourly_rate = ...  # TODO: compute hourly_rate
-saved_usd = round(...)  # TODO: compute saved_usd
-print("Overnight idle cost avoided (USD):", saved_usd)
-# Assert invariant `saved_usd == 74.4` holds
-assert saved_usd  # TODO: complete assertion check
+def idle_teardown_savings(hourly_cost, active_hours, total_hours):
+    # TODO: compute avoidable idle hours and savings when total_hours includes active work.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -445,14 +541,22 @@ Deleting the Cloud TPU VM immediately after copying artifacts back avoids paying
 Why does `build_runtime_receipt()` run `jax.pmap` across `jax.local_devices()` and call `jax.block_until_ready` instead of only checking `jax.default_backend()`?
 
 1. Because `jax.default_backend()` deletes the virtual environment
-2. Because `jax.pmap` + `jax.block_until_ready` proves that `libtpu` compiled and executed a multi-device XLA computation across every local chip and returned the expected numerical result
+2. To exercise and synchronize a small computation on the visible local devices, beyond merely enumerating them
 3. Because `jax.pmap` automatically deletes the Cloud TPU VM
 
 <details><summary>Answer and explanation</summary>
 
-Because `jax.pmap` + `jax.block_until_ready` proves that `libtpu` compiled and executed a multi-device XLA computation across every local chip and returned the expected numerical result
+**1. Because `jax.default_backend()` deletes the virtual environment**
 
-A synchronized `pmap` reduction tests compilation, HBM allocation, and execution across all local devices rather than just querying a string.
+Backend discovery does not alter the environment. The extra computation tests a small operation on the visible local devices.
+
+**2. To exercise and synchronize a small computation on the visible local devices, beyond merely enumerating them (correct)**
+
+With the backend explicitly checked, mapped arithmetic and an independent expected sum exercise this small local-device contract. This does not qualify all chips on other hosts, the full model, precision paths or performance.
+
+**3. Because `jax.pmap` automatically deletes the Cloud TPU VM**
+
+pmap executes a mapped function; it does not manage cloud resources. Cleanup is a separate control-plane operation.
 
 </details>
 
@@ -468,7 +572,7 @@ If `pip install 'jax[tpu]'` fails to find `libtpu`, verify that `-f https://stor
 
 ## Keep your evidence
 
-Keep the JSON runtime receipt (observed_backend, device_count, pmap_sum_of_squares, receipt_sha256) and the 1-chip vs 4-chip vs 8-chip pmap reference values.
+Keep arithmetic_ok, expected_backend_ok, expected_topology_ok, requested_target_ready, expected/observed backend and counts, source identity or its explicit absence, observed/expected reduction and receipt digest. Separate calculated 4-/8-device expectations from observed execution and require the gated target preflight to fail closed.
 
 Save your predictions, modified code, terminal outputs, and reasoning in your engineering portfolio.
 

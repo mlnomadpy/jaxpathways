@@ -1,0 +1,14 @@
+{
+  "purpose": "Owned constant-MLM-head negative control incorrectly accepted by the complete frozen C01 checker",
+  "observed_exit_code": 0,
+  "checker_status": "pass",
+  "checker_sha256": "6f8f2b360f0a306508b6c658256cbac91195e4e665ad29741bafbcd7bc618aeb",
+  "reference_sha256": "0d50093ea497730be48007265b3db25b9044fa13b88a4485cfce7e4c45266f90",
+  "candidate_sha256": "27646676c933653aba0555e443e9bd47d5de9b0b4f3f0c0515ec50cf235040b4",
+  "raw_result_sha256": "9f771037479d1285c236362b722563e6f2a3f7603404b7e61ac8f0622a5b294d",
+  "raw_result_path": "/private/tmp/jaxpathways-c01-root-zero-mlm-full/independent-check.json",
+  "run_receipt_path": "/private/tmp/jaxpathways-c01-root-zero-mlm-full/full-run/sourcebound-receipt.json",
+  "run_receipt_sha256": "8437978c6b20ee6de7d4567de1b1beb4049d2a5e87a8849664cbe1313e7e3a90",
+  "historical_reference_evidence_modified": false,
+  "trained_arrays_included": false
+}

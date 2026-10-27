@@ -4,6 +4,8 @@ Phase 04: Math & optimization · about 80 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Least squares, rank, and conditioning](https://www.tahabouhsine.com/jaxpathways/lesson-optimization-06.html).
+
 ## What you will be able to do
 
 - Compute a small Jacobian by hand and connect forward sensitivities to reverse-mode gradients.
@@ -50,6 +52,8 @@ $$
 
 Choose $v=(1,-1)$. A small move $\varepsilon v$ in the input changes the output by approximately $\varepsilon Jv$. Here $Jv=(3,1)$: the first output moves three times as fast as the second along this direction. `jax.jvp` returns both the ordinary output and this directional sensitivity. It can compute the product without storing the full Jacobian.
 
+For a small step $h=0.01$, the linear prediction is $f(x+hv)$ approximately f(x)+h(3,1)=$(7.03,6.01)$. The first output changes by about 0.03, the second by about 0.01. The omitted terms are second order in h, so shrinking h should improve the approximation until floating-point rounding matters.
+
 $$
 f(x+\varepsilon v)\approx f(x)+\varepsilon Jv
 $$
@@ -57,6 +61,8 @@ $$
 ## Pull output sensitivity backward
 
 Suppose the scalar loss is $L(x)=\tfrac12\|f(x)\|_2^2$. Its derivative with respect to the outputs is $c=f(x)=(7,6)$. The chain rule gives $\nabla_x L=J^\mathsf{T}c=(46,19)$. `jax.vjp` returns the output and a pullback function. Passing $c$ into that function returns input sensitivities. The pullback result is a tuple because a function can have several inputs.
+
+Here $c=f(x)=(7,6)$ is the sensitivity of half the squared output norm to its two outputs. The pullback is $(4\cdot7+3\cdot6,\,1\cdot7+2\cdot6)=(46,19)$. Both components are positive, so increasing either input slightly increases this loss at $(2,3)$.
 
 $$
 \nabla_x L=J^\mathsf{T}\nabla_f L
@@ -170,13 +176,15 @@ For a joint input change in direction $v=(1,-1)$, multiply the whole matrix by t
 
 These are local sensitivities, not model weights, probabilities, or final output values. The entries can change at another input. To check the interpretation, take a small step $\epsilon v$ and compare the output change with $\epsilon Jv$.
 
+Before a small finite move along v, predict output change hJv; halve h and check whether the nonlinear discrepancy shrinks.
+
 ```python
 visual_data = {'kind': 'heatmap', 'values': jax.jacfwd(f)(x).tolist(), 'rows': ['output 0', 'output 1'], 'columns': ['input 0', 'input 1'], 'unit': 'partial derivative'}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:20:27.311584+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:13:24.196759+00:00. JAX 0.9.2.
 
 ```text
 Jv / loss gradient: [3. 1.] [46. 19.]
@@ -222,22 +230,29 @@ Replace the scalar loss by $L(x)=f_0(x)+2f_1(x)$. Predict its gradient at $(2,3)
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
+**Inputs:**
+- A vector input, a vector-valued function, and output weights.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- The gradient of the weighted scalar output.
+
+**Invariants to check:**
+- The VJP maps output sensitivities back to the input dimension.
+
+**Hints:**
+- Form the scalar objective explicitly before differentiating.
+- Use an independent matrix product to check the changed output dimension.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Replace the scalar loss by L(x)=f_0(x)+2f_1(x).
-def weighted_loss(x):
-    return ...  # TODO: return computed result
-assert jnp.allclose(jax.grad(weighted_loss)(x), jnp.array([10.0, 5.0]))  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+
+def weighted_output_gradient(point, weights):
+    """The gradient of the weighted scalar output."""
+    # TODO: Form the weighted scalar output and check its gradient/VJP against the requested input and output shapes.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -265,26 +280,28 @@ Compare the derivative of the sum of outputs with $J^\mathsf{T}(1,1)$.
 
 ### How to write: Find the broken derivative path — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
+**Inputs:**
+- A colleague wraps the first input in `jax.lax.stop_gradient`. The forward outputs are unchanged. Show why the gradient no longer matches the intended mathematical function.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- Forward-output parity and the two derivative results.
+
+**Invariants to check:**
+- Stopping a gradient does not change the forward value but changes the derivative path.
+
+**Hints:**
+- Compare the derivative of the sum of outputs with $J^\mathsf{T}(1,1)$.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Find the broken derivative path (Transfer / diagnosis)
-def detached(x):
-    a = jax.lax.stop_gradient(...)  # TODO: compute a
-    return ...  # TODO: return computed result
-assert jnp.allclose(detached(x), f(x))  # TODO: complete assertion check
-assert jnp.allclose(jax.grad(lambda z: jnp.sum(detached(z)))(x), jnp.array([0.0, 3.0]))  # TODO: complete assertion check
-assert jnp.allclose(jax.grad(lambda z: jnp.sum(f(z)))(x), jnp.array([7.0, 3.0]))  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+
+def practice_find_the_broken_derivative_path(point):
+    """Implement the find the broken derivative path check."""
+    # TODO: Differentiate the intended composition and a version with stop_gradient on the first input; compare both with an independent derivative.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -317,24 +334,28 @@ The reference is $A^\mathsf{T}c$, not $Ac$.
 
 ### How to write: Transfer to unequal dimensions — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.jvp / jax.vjp / jax.jacfwd / jax.hessian` — Computes JVPs, VJPs, Jacobians or Hessians by differentiating the implemented operations. Results still have floating-point error.
+**Inputs:**
+- For a matrix $A\in\mathbb{R}^{3\times2}$, check that the VJP of $Ax$ maps an output sensitivity of length $3$ into a vector of length $2$.
 
-**Step-by-step implementation plan:**
-1. Check tensor shape invariant: `back(c3)[0].shape == (2,)`
+**Outputs:**
+- A length-two input cotangent checked against the matrix transpose product.
+
+**Invariants to check:**
+- The cotangent shape follows the output, and the VJP result follows the input.
+
+**Hints:**
+- The reference is $A^\mathsf{T}c$, not $Ac$.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Transfer to unequal dimensions (Transfer / diagnosis)
-A = jnp.array(...)  # TODO: compute A
-c3 = jnp.array(...)  # TODO: compute c3
-_, back = jax.vjp(...)  # TODO: compute _, back
-# Check tensor shape invariant: `back(c3)[0].shape == (2,)`
-assert back(c3)[0].shape  # TODO: complete assertion check
-assert jnp.allclose(back(c3)[0], jnp.array([3.0, 0.0]))  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+
+def practice_transfer_to_unequal_dimensions(matrix, input, output_sensitivity):
+    """Implement the transfer to unequal dimensions check."""
+    # TODO: Build a 3-by-2 matrix product and apply a VJP to a length-three cotangent.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -363,9 +384,17 @@ Which object does a reverse-mode pullback map to input sensitivity?
 
 <details><summary>Answer and explanation</summary>
 
-An output sensitivity vector
+**1. An output sensitivity vector (correct)**
 
 A VJP multiplies an output sensitivity by the transposed Jacobian. A JVP instead propagates an input direction forward.
+
+**2. An arbitrary input direction**
+
+An input direction belongs to a JVP. A VJP takes an output cotangent and maps it back into the input space.
+
+**3. Only a scalar learning rate**
+
+A learning rate belongs to the optimizer. The VJP is a derivative operation and exists before any update rule is chosen.
 
 </details>
 

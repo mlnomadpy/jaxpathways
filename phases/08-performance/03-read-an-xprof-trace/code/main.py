@@ -115,7 +115,27 @@ print(json.dumps({'input_wait_us':input_us,'model_and_wait_us':model_us,'step_us
 print('Four named steps verified; host annotations are not isolated device kernels.')
 
 # Figure data experiment
-visual_data={'kind':'line','x':[0,1,2,3],'xlabel':'captured step','ylabel':'host annotation duration (microseconds)','series':[{'label':'injected input wait','y':input_us},{'label':'model call and completion wait','y':model_us}]}
+from pathlib import Path
+import json
+retained_events = [{'condition': '2 ms injected wait', 'name': 'learner_step', 'start_us': 122, 'duration_us': 2665, 'end_us': 2787, 'pid': 701, 'tid': 164376313}, {'condition': '2 ms injected wait', 'name': 'input_wait', 'start_us': 125, 'duration_us': 2520, 'end_us': 2645, 'pid': 701, 'tid': 164376313}, {'condition': '2 ms injected wait', 'name': 'model_and_wait', 'start_us': 2668, 'duration_us': 119, 'end_us': 2787, 'pid': 701, 'tid': 164376313}, {'condition': '0.5 ms injected wait', 'name': 'learner_step', 'start_us': 2796, 'duration_us': 732, 'end_us': 3528, 'pid': 701, 'tid': 164376313}, {'condition': '0.5 ms injected wait', 'name': 'input_wait', 'start_us': 2798, 'duration_us': 642, 'end_us': 3440, 'pid': 701, 'tid': 164376313}, {'condition': '0.5 ms injected wait', 'name': 'model_and_wait', 'start_us': 3448, 'duration_us': 79, 'end_us': 3527, 'pid': 701, 'tid': 164376313}]
+# Use embedded measured rows for downloaded standalone lesson scripts. When the
+# workspace excerpt is present, verify that its event records match exactly.
+excerpt_path = Path('phases/08-performance/03-read-an-xprof-trace/data/retained_cpu_timeline_p2_81.json')
+if excerpt_path.exists():
+    excerpt = json.loads(excerpt_path.read_text())
+    assert excerpt['events'] == retained_events
+conditions = ['2 ms injected wait', '0.5 ms injected wait']
+lookup = {(e['condition'], e['name']): e['duration_us'] for e in retained_events}
+visual_data = {
+    'kind': 'line',
+    'x': [2.0, 0.5],
+    'xlabel': 'requested injected sleep (milliseconds)',
+    'ylabel': 'actual host annotation duration (microseconds)',
+    'series': [
+        {'label': 'input_wait', 'y': [lookup[(condition, 'input_wait')] for condition in conditions]},
+        {'label': 'model_and_wait', 'y': [lookup[(condition, 'model_and_wait')] for condition in conditions]},
+    ],
+}
 
 # Experiment: Account for the enclosing step
 # Experiment — Account for the enclosing step: Outer and child intervals describe nested boundaries.
@@ -127,6 +147,16 @@ assert np.all(wrong>=np.asarray(step_us))
 print('Unattributed outer time, microseconds:',overhead.tolist())
 print('Wrong double-counted totals:',wrong.tolist())
 
+# Experiment: Predict and check a changed input wait
+baseline_wait_us=2520
+changed_wait_us=642
+baseline_model_us=119
+changed_model_us=79
+measured_wait_drop_us=baseline_wait_us-changed_wait_us
+assert measured_wait_drop_us==1878
+assert abs(baseline_model_us-changed_model_us)<100
+print({'input_wait_drop_us':measured_wait_drop_us,'model_before_us':baseline_model_us,'model_after_us':changed_model_us})
+
 # Reference solution. Try the exercise before reading this.
 # Exercise solution
 model_ms=np.asarray(model_us)/1000
@@ -135,19 +165,14 @@ assert summary['minimum_ms']<=summary['median_ms']<=summary['maximum_ms']
 np.testing.assert_allclose(model_ms*1000,model_us)
 print(summary)
 
-# Reference practice: Compute a union instead of summing overlap
-def union_duration(intervals):
-    total=0
-    left=right=None
-    for start,end in sorted(intervals):
-        if end<start:raise ValueError('negative interval')
-        if right is None:left,right=start,end
-        elif start<=right:right=max(right,end)
-        else:
-            total+=right-left
-            left,right=start,end
-    return total+(0 if right is None else right-left)
-assert union_duration([(0,10),(2,7),(8,12)])==12
-assert sum(b-a for a,b in [(0,10),(2,7),(8,12)])==19
-print('Hypothetical union: 12 microseconds; summed duration: 19.')
+# Reference practice: Account for the actual nested timeline
+intervals=[('learner_step',122,2787),('input_wait',125,2645),('model_and_wait',2668,2787)]
+children=[(125,2645),(2668,2787)]
+child_union=(2645-125)+(2787-2668)
+outer=2787-122
+remainder=outer-child_union
+negative_control=outer+(2645-125)+(2787-2668)
+assert (outer,child_union,remainder,negative_control)==(2665,2639,26,5304)
+assert max(children[0][1]-children[0][0],children[1][1]-children[1][0])==2520
+print({'outer_us':outer,'children_union_us':child_union,'remainder_us':remainder,'wrong_parent_plus_children_us':negative_control})
 print("PASS: performance-03")

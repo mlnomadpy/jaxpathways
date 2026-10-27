@@ -1,0 +1,25 @@
+{
+  "amendment": {
+    "acceptance_boundary": "The unchanged reference passes the full current checker. Four owned head/gradient negatives fail focused checks; the same earlier constant-zero head now fails the full command before optimization. Representation quality floors remain failed; target, benchmark, human and release qualification remain open.",
+    "change": "Independent float64 complete encoder/tied MLM head and selected-token loss oracle; nondegenerate finite differences through both encoder blocks and head; finite-difference-aware derivative tolerances.",
+    "current_checker_sha256": "a3867129f43df1a1b6d8bf671d449488987e1339f7abfcae0caf35fc88c6d952",
+    "focused_review": {
+      "path": "docs/evidence/c01-mlm-repair-2026-10-21/independent-focused-review.json",
+      "sha256": "9fe6e1b1e9436c5b6377bb370fe5f38f43178ecb237b9ebbe10ddd73b0123330"
+    },
+    "full_checker_rerun_for_amended_hash": true,
+    "full_checker_verification": {
+      "path": "reference/evidence/mlm-gradient-full-verification.json",
+      "sha256": "b203140daf7c944e6a3094c257c81b96ac52444190ffeb561bf37ba14332fa06"
+    },
+    "historical_final8_unchanged": true,
+    "model_and_training_sources_unchanged": true,
+    "negative_verification": {
+      "path": "reference/evidence/mlm-gradient-negative-verification.json",
+      "sha256": "72e8705976d3daf6780ccb57fdc3db056a2a3d24ed3185c6758a3eec87e70d6e"
+    },
+    "previous_checker_sha256": "6f8f2b360f0a306508b6c658256cbac91195e4e665ad29741bafbcd7bc618aeb"
+  },
+  "purpose": "Record independent masked-token forward and gradient grading repairs, preserving all historical training evidence.",
+  "schema": "jaxpathways.embedding-c01.mlm-gradient-checker-amendment.v1"
+}

@@ -1,0 +1,64 @@
+TAP version 13
+# Subtest: tpu-02 validates checkpoint integrity, compatibility, missing and completed resume
+ok 1 - tpu-02 validates checkpoint integrity, compatibility, missing and completed resume
+  ---
+  duration_ms: 1696.925458
+  type: 'test'
+  ...
+# Subtest: tpu-03 memory ledger matches explicit bytes per parameter
+ok 2 - tpu-03 memory ledger matches explicit bytes per parameter
+  ---
+  duration_ms: 1160.902708
+  type: 'test'
+  ...
+# Subtest: v5e Flex-start instructions keep a bounded queue and explicit owner cleanup
+ok 3 - v5e Flex-start instructions keep a bounded queue and explicit owner cleanup
+  ---
+  duration_ms: 0.512
+  type: 'test'
+  ...
+# Subtest: tpu-04 labels the four-device result as calculated expectation
+ok 4 - tpu-04 labels the four-device result as calculated expectation
+  ---
+  duration_ms: 0.243916
+  type: 'test'
+  ...
+# Subtest: Phase 19 registry tasks use the lesson exercises and receipt fields
+ok 5 - Phase 19 registry tasks use the lesson exercises and receipt fields
+  ---
+  duration_ms: 627.019916
+  type: 'test'
+  ...
+# Subtest: tpu-05 routes the CPU-only lesson away from TPU and includes a collective update program
+ok 6 - tpu-05 routes the CPU-only lesson away from TPU and includes a collective update program
+  ---
+  duration_ms: 447.618584
+  type: 'test'
+  ...
+# Subtest: tpu-06 retains an inspectable CPU trace from the measured workload
+ok 7 - tpu-06 retains an inspectable CPU trace from the measured workload
+  ---
+  duration_ms: 1340.505167
+  type: 'test'
+  ...
+# Subtest: tpu-06 precision probe retains raw outputs and independently checks dtype and error summaries
+ok 8 - tpu-06 precision probe retains raw outputs and independently checks dtype and error summaries
+  ---
+  duration_ms: 1493.159333
+  type: 'test'
+  ...
+# Subtest: analytic figures render to isolated artifacts with non-device provenance
+ok 9 - analytic figures render to isolated artifacts with non-device provenance
+  ---
+  duration_ms: 2795.830084
+  type: 'test'
+  ...
+1..9
+# tests 9
+# suites 0
+# pass 9
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 9570.791167

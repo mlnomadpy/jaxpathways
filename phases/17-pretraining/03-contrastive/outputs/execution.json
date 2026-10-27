@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "pretraining-03",
-  "contentHash": "89a798a25c2ff1ea24131280c7f2d7d37a29c9b5d6dc7e4d1e7c0fa0daeb9692",
-  "executedAt": "2026-10-20T22:26:48.912284+00:00",
+  "contentHash": "5dcce4f6455df71b3ecad1ac169d075c5fd970d4ff27ae46a0a14e89860eecd1",
+  "executedAt": "2026-10-27T16:11:43.633161+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -11,7 +11,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Paired contrastive initial/final: 0.564157247543335 0.013556718826293945 ; all four nearest pairs correct\nPaired contrastive initial/final: 0.564157247543335 0.013556718826293945 ; all four nearest pairs correct\nCollapsed baseline: 1.3862943649291992\nTemperature/loss: 0.2 0.006715348921716213\nTemperature/loss: 1.0 0.31326162815093994\nTemperature/loss: 2.0 0.4740769863128662\nIncorrect pair mapping loss: 7.493563652038574\nDuplicated diagonal-only penalty: 0.6931472215801477\nStep / finite difference / autodiff: 0.001 -1.3803242444992065 -1.3803226947784424\nStep / finite difference / autodiff: 0.0005 -1.3802646398544312 -1.3803226947784424\nPASS: pretraining-03\n",
+  "stdout": "Paired contrastive initial/final: 0.564157247543335 0.013556718826293945 ; all four nearest pairs correct\nHeld-out multi-positive loss / Recall@1 / mAP; matrix path = ID-set oracle: 0.016225090250372887 1.0 1.0 1.0 1.0\nArtifact path: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jaxpathways-contrastive-transfer-h185trru/encoder.npz\nIdentity sidecar: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jaxpathways-contrastive-transfer-h185trru/identity.json\nSaved identity: contrastive-linear-encoder-v1 lesson-three-float-view-v1 synthetic-class-groups-v1:g0-g3/g4-g9\nPaired contrastive initial/final: 0.564157247543335 0.013556718826293945 ; all four nearest pairs correct\nCollapsed baseline: 1.3862943649291992\nTemperature/loss: 0.2 0.006715348921716213\nTemperature/loss: 1.0 0.31326162815093994\nTemperature/loss: 2.0 0.4740769863128662\nHeld-out multi-positive loss / Recall@1 / mAP; matrix path = ID-set oracle: 0.016225090250372887 1.0 1.0 1.0 1.0\nArtifact path: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jaxpathways-contrastive-transfer-kqtkb2kd/encoder.npz\nIdentity sidecar: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jaxpathways-contrastive-transfer-kqtkb2kd/identity.json\nSaved identity: contrastive-linear-encoder-v1 lesson-three-float-view-v1 synthetic-class-groups-v1:g0-g3/g4-g9\nIncorrect pair mapping loss: 7.493563652038574\nDuplicated diagonal-only penalty: 0.6931472215801477\nStep / finite difference / autodiff: 0.001 -1.3803242444992065 -1.3803226947784424\nStep / finite difference / autodiff: 0.0005 -1.3802646398544312 -1.3803226947784424\nPASS: pretraining-03\n",
   "notebookCells": [
     {
       "sourceHash": "b905b07c177ffe4b807fdab434f77219cea083a9b31dbb60d9a2a91278a96ee5",
@@ -34,6 +34,21 @@
       ]
     },
     {
+      "sourceHash": "0f960a21fb77fc2e75d0cd6849ed39204e89b9a8c7d377c770884c4b7ce0c91c",
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Held-out multi-positive loss / Recall@1 / mAP; matrix path = ID-set oracle: 0.016225090250372887 1.0 1.0 1.0 1.0\n",
+            "Artifact path: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jaxpathways-contrastive-transfer-xo3pvguq/encoder.npz\n",
+            "Identity sidecar: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jaxpathways-contrastive-transfer-xo3pvguq/identity.json\n",
+            "Saved identity: contrastive-linear-encoder-v1 lesson-three-float-view-v1 synthetic-class-groups-v1:g0-g3/g4-g9\n"
+          ]
+        }
+      ]
+    },
+    {
       "sourceHash": "958e214cd54077f1684158d505b63732a67d0c93a523216adb7a9715e2f29b73",
       "outputs": [
         {
@@ -50,7 +65,7 @@
       "outputs": []
     },
     {
-      "sourceHash": "25df6d662f9d3f0c4e984c6a201f79fa0cfd7a2633dc4b0773dfba6c2dd4ee6c",
+      "sourceHash": "53dc08a479da44f2b1718bf964cd5c4d3e3305811c536df9d501b1833a6e3476",
       "outputs": [
         {
           "output_type": "display_data",
@@ -91,7 +106,22 @@
       ]
     },
     {
-      "sourceHash": "90bdc2447720fc0675eda3c3f04d242e1908d9e55b8e45f2444fd138c07a70f7",
+      "sourceHash": "0f960a21fb77fc2e75d0cd6849ed39204e89b9a8c7d377c770884c4b7ce0c91c",
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Held-out multi-positive loss / Recall@1 / mAP; matrix path = ID-set oracle: 0.016225090250372887 1.0 1.0 1.0 1.0\n",
+            "Artifact path: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jaxpathways-contrastive-transfer-7lq_bt4p/encoder.npz\n",
+            "Identity sidecar: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jaxpathways-contrastive-transfer-7lq_bt4p/identity.json\n",
+            "Saved identity: contrastive-linear-encoder-v1 lesson-three-float-view-v1 synthetic-class-groups-v1:g0-g3/g4-g9\n"
+          ]
+        }
+      ]
+    },
+    {
+      "sourceHash": "22d5d8896e54aecd8b70f9aafa0c68cf3475cdb9799648df8d1bbbd8b53d1ac8",
       "outputs": []
     },
     {
@@ -107,7 +137,7 @@
       ]
     },
     {
-      "sourceHash": "a4b571595b581390db522855e16d237bb5f0ded6ec8c77a0ab23e9464d08580f",
+      "sourceHash": "22d5d8896e54aecd8b70f9aafa0c68cf3475cdb9799648df8d1bbbd8b53d1ac8",
       "outputs": []
     },
     {
@@ -123,7 +153,7 @@
       ]
     },
     {
-      "sourceHash": "a9934353ad007c51da074d035faaa09f4c656ee04fa2dbc3e676fe3271e55cd2",
+      "sourceHash": "22d5d8896e54aecd8b70f9aafa0c68cf3475cdb9799648df8d1bbbd8b53d1ac8",
       "outputs": []
     },
     {

@@ -25,3 +25,11 @@ Stage 2 changes the values and adds a fifth element. The new output must equal \
 Stage 3 saves the JAXPR as `runs/transforms-audit/transforms-audit.jaxpr.txt`. Read the `sin`, multiply and addition operations to connect the traced program to the formula. Without `--evidence-dir`, the artifact is temporary. Stage 4 integrates all checks. Passing output begins `PASS transforms-audit stage N`.
 
 The JAXPR and comparisons are local CPU evidence. The example makes no timing or TPU compilation claim. Reference: `python3 projects/transforms-audit/tests/check.py --implementation solution --stage 4`.
+
+## Review handoff: explain a changed condition
+
+Duplicate every example and compare the sum-loss gradient with the mean-loss gradient before applying any optimizer.
+
+**Keep for review:** An independent per-example gradient sum and the two reductions. The sum doubles, while the mean remains unchanged for exact duplicated examples.
+
+Write your prediction before opening the reference implementation. Distinguish what the existing checker verifies from your proposed extension; record any extension command, actual output and limitation separately. A reviewer should be able to locate the first failed contract from your saved evidence.

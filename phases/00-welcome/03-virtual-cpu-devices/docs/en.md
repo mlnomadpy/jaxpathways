@@ -4,6 +4,8 @@ Phase 00: Setup & first steps · about 60 minutes · 4 logical CPU devices
 
 This reference configures logical CPU devices to practice placement and sharding. Logical devices do not measure TPU performance. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Meet your arrays and devices](https://www.tahabouhsine.com/jaxpathways/lesson-welcome-02.html).
+
 ## What you will be able to do
 
 - Start four virtual CPU devices in a fresh process.
@@ -18,6 +20,22 @@ You can explore how JAX splits an array across devices using just your laptop. W
 ## The idea
 
 Logical CPU devices let us practice how a global array is divided and addressed. They share a physical host. Treat them as a way to make placement visible, then use a real accelerator run to investigate accelerator memory, communication and speed.
+
+## Choose the beginner CPU route or the optional placement branch
+
+If array shapes and transformed functions are new to you, continue from the first array lesson to [Arrays & pure functions](https://www.tahabouhsine.com/jaxpathways/phase-guides/arrays.html). Ordinary CPU lessons do not require virtual devices or cloud setup. Return here after JAX transformations and the first distributed-placement lesson. This branch assumes you can name the axis split across devices, explain what a replica contains and distinguish a JIT specialization from a new array value.
+
+For a minimal placement prediction, imagine four logical devices and an array with eight rows. A row partition gives each device two rows; replication gives each device all eight. Inspect the reported shard indices to distinguish those cases. Four logical CPU devices do not create four physical accelerators. A physical TPU target additionally needs a reviewed source, pinned environment, expected backend and expected topology.
+
+### Pause and reason
+
+An eight-row array appears on four devices. Does that prove each device holds two rows?
+
+<details><summary>Compare your reasoning</summary>
+
+No. It might be replicated. Inspect shard indices and local shapes: row partitioning owns two rows per device; replication stores all eight on each device.
+
+</details>
 
 ## Distinguish ownership from extra computing power
 
@@ -55,9 +73,9 @@ This exercise has one controller process and four addressable devices. Multi-hos
 
 ## A global array contains local pieces
 
-The host array has shape $(4,2)$: four examples with two values each. Mesh assigns the four devices the named axis data. `P("data",None)` maps the first array dimension to that mesh axis and leaves the feature dimension unpartitioned. Each local shard therefore has shape $(1,2)$.
+The input `x` has global shape $(4,2)$: four rows, two features each. The mesh names the four logical devices along `data`, and `P("data",None)` assigns the first array axis across them while keeping both features of a row together. The recorded shard report makes this concrete: device 0 owns row 0 with values $[0,1]$, device 1 owns $[2,3]$, through device 3 owning $[6,7]$. Each local shape is $(1,2)$, while `x.shape` remains $(4,2)$.
 
-Use shard.index to identify its slice in the global array and shard.data to inspect its values. The global x.shape stays $(4,2)$; it does not become $(1,2)$ just because each device holds one row. Conversion with `np.asarray(x)` gathers the fully addressable global array to the host in this small single-process exercise.
+Use `shard.index` to map a local piece back to global positions and `shard.data` to inspect its values. In this single-process exercise, `np.asarray(x)` gathers the fully addressable global array to the host. Predict the local shape again for twelve rows: four-way row partitioning should give $(3,2)$ on each device. Five rows cannot be divided evenly; replication keeps all five rows on every device instead of dropping one.
 
 ```text
 Global rows [0,1] [2,3] [4,5] [6,7]
@@ -68,9 +86,9 @@ local shape (1,2) on every device; global shape (4,2)
 
 ## Check arithmetic separately from placement
 
-The function $2x+1$ is elementwise: a row does not need a value from a different row. For the first row $[0,1]$, predict $[1,3]$; for the final row $[6,7]$, predict $[13,15]$. The jit contract declares input and output placement explicitly. The NumPy check verifies all values, and shard inspections verify the intended partition. Neither alone verifies both.
+The arithmetic `2*x + 1` is elementwise, so each output depends only on the matching input cell. For row $[0,1]$, hand-calculate $[1,3]$; for row $[6,7]$, calculate $[13,15]$. The recorded global result contains those rows at its beginning and end, and the NumPy comparison checks all entries. The shard report checks placement, so neither check can stand in for the other.
 
-block_until_ready waits for the result before reporting. It is useful when observing execution and essential for a future synchronized timing experiment, but no timings are claimed here. Four-way row partitioning requires a row count divisible by four. Try five rows deliberately, read the shape error, and choose a repair that preserves what your experiment means.
+`block_until_ready` waits for the result before reporting. Here it provides completion ordering; no timing claim follows from it. Now predict the local shape for five rows before running: a four-way row split cannot give equal integer row counts, so the recorded error is expected. Choose replication when all five rows must remain available on each logical device, and inspect the local shapes to confirm the repair.
 
 ## Start a fresh CPU runtime
 
@@ -203,7 +221,7 @@ visual_data = {'kind': 'heatmap', 'values': owners.tolist(), 'unit': 'logical CP
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:19:55.084524+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:02:31.513460+00:00. JAX 0.9.2.
 
 ```text
 JAX version: 0.9.2
@@ -275,45 +293,32 @@ Predict and verify the per-device shapes for twelve rows, then demonstrate how r
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `array.reshape(new_shape)` — Reorganizes tensor axes without changing the total element count (`array.size`).
-- `jax.jit(fn) / @jax.jit` — Traces `fn` for its input signatures and compiles an executable. Changed shapes, dtypes or static arguments can trigger another compilation.
-- `Mesh + PartitionSpec + NamedSharding` — Maps logical tensor axes onto physical device mesh axes for SPMD data, tensor, or pipeline parallelism.
+**Inputs:**
+- Four virtual CPU devices and the row-sharded placement from the lesson.
+- Twelve rows with two features, plus a five-row placement case.
 
-**Step-by-step implementation plan:**
-1. Exercise solution
-2. Place `z` explicitly onto the target JAX device.
-3. Wrap with `jax.jit` (`z2`) so XLA traces and compiles the function.
-4. Check tensor shape invariant: `all(s.data.shape == (3,2) for s in z2.addressable_shards)`
-5. Transfer the device result to the host for an independent NumPy comparison.
+**Outputs:**
+- Observed shard shapes and slices for twelve rows.
+- A captured uneven-placement failure and a replicated placement retaining all five rows.
+
+**Invariants to check:**
+- Every source row appears in the reference comparison.
+- Replication preserves data but does not prove uneven partition support.
+- Label logical CPU devices accurately.
+
+**Hints:**
+- Use shard indices to select matching reference rows.
+- Keep partition failure and replicated repair as separate observations.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-twelve = np.arange(...)  # TODO: compute twelve
-# Place `z` explicitly onto the target JAX device.
-z = jax.device_put(...)  # TODO: compute z
-# Wrap with `jax.jit` (`z2`) so XLA traces and compiles the function.
-z2 = jax.jit(...)  # TODO: compute z2
-# Check tensor shape invariant: `all(s.data.shape == (3,2) for s in z2.addressable_shards)`
-assert all(s.data.shape  # TODO: complete assertion check
-for shard in z2.addressable_shards:
-    # Transfer the device result to the host for an independent NumPy comparison.
-    np.testing.assert_array_equal(np.asarray(shard.data), (twelve*twelve)[shard.index])
+import jax
+import numpy as np
 
-uneven = np.arange(...)  # TODO: compute uneven
-try:
-    jax.device_put(uneven, rows)
-except ValueError:
-    print("Expected indivisible row dimension")
-else:
-    raise AssertionError("Expected divisibility failure")
-# Place `fixed` explicitly onto the target JAX device.
-fixed = jax.device_put(...)  # TODO: compute fixed
-# Transfer the device result to the host for an independent NumPy comparison.
-np.testing.assert_array_equal(np.asarray(fixed), uneven)
-assert fixed.is_fully_replicated  # TODO: complete assertion check
+def audit_row_placements(row_sharding, devices):
+    # TODO: place the requested arrays and inspect shard metadata
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -361,31 +366,30 @@ Use each shard index to select the corresponding NumPy reference slice.
 
 ### How to write: Move from four rows to twelve — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `array.reshape(new_shape)` — Reorganizes tensor axes without changing the total element count (`array.size`).
-- `jax.jit(fn) / @jax.jit` — Traces `fn` for its input signatures and compiles an executable. Changed shapes, dtypes or static arguments can trigger another compilation.
-- `Mesh + PartitionSpec + NamedSharding` — Maps logical tensor axes onto physical device mesh axes for SPMD data, tensor, or pipeline parallelism.
+**Inputs:**
+- Four row-sharded devices and twelve two-feature rows.
+- The squared output for each row.
 
-**Step-by-step implementation plan:**
-1. Place `z` explicitly onto the target JAX device.
-2. Wrap with `jax.jit` (`z2`) so XLA traces and compiles the function.
-3. Check tensor shape invariant: `all(s.data.shape == (3,2) for s in z2.addressable_shards)`
-4. Transfer the device result to the host for an independent NumPy comparison.
+**Outputs:**
+- Every output shard and its matching NumPy slice.
+
+**Invariants to check:**
+- Each shard index selects matching global rows.
+- Local shape matches an even partition.
+
+**Hints:**
+- Build the full reference before selecting slices.
+- Compare the complete shard payload.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Move from four rows to twelve (Challenge): The twelve rows split into four groups of three.
-twelve = np.arange(...)  # TODO: compute twelve
-# Place `z` explicitly onto the target JAX device.
-z = jax.device_put(...)  # TODO: compute z
-# Wrap with `jax.jit` (`z2`) so XLA traces and compiles the function.
-z2 = jax.jit(...)  # TODO: compute z2
-# Check tensor shape invariant: `all(s.data.shape == (3,2) for s in z2.addressable_shards)`
-assert all(s.data.shape  # TODO: complete assertion check
-for shard in z2.addressable_shards:
-    # Transfer the device result to the host for an independent NumPy comparison.
-    np.testing.assert_array_equal(np.asarray(shard.data), (twelve*twelve)[shard.index])
+import jax
+import numpy as np
+
+def verify_twelve_rows(row_sharding):
+    # TODO: square the sharded data and compare every indexed slice
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -422,30 +426,29 @@ Do not drop a row to hide the error.
 
 ### How to write: Repair a batch that does not divide evenly — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `array.reshape(new_shape)` — Reorganizes tensor axes without changing the total element count (`array.size`).
-- `Mesh + PartitionSpec + NamedSharding` — Maps logical tensor axes onto physical device mesh axes for SPMD data, tensor, or pipeline parallelism.
+**Inputs:**
+- The same four-way row sharding and a five-by-two input.
 
-**Step-by-step implementation plan:**
-1. Place `fixed` explicitly onto the target JAX device.
-2. Transfer the device result to the host for an independent NumPy comparison.
+**Outputs:**
+- A captured partitioning failure and a replicated placement with all rows.
+
+**Invariants to check:**
+- No row is dropped to force divisibility.
+- Replication is not described as uneven partition support.
+
+**Hints:**
+- Capture the expected placement error.
+- Inspect the replicated values and state the evidence limit.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Repair a batch that does not divide evenly (Challenge): Five rows cannot be evenly split across the four-way data axis.
-uneven = np.arange(...)  # TODO: compute uneven
-try:
-    jax.device_put(uneven, rows)
-except ValueError:
-    print("Expected indivisible row dimension")
-else:
-    raise AssertionError("Expected divisibility failure")
-# Place `fixed` explicitly onto the target JAX device.
-fixed = jax.device_put(...)  # TODO: compute fixed
-# Transfer the device result to the host for an independent NumPy comparison.
-np.testing.assert_array_equal(np.asarray(fixed), uneven)
-assert fixed.is_fully_replicated  # TODO: complete assertion check
+import jax
+import numpy as np
+
+def diagnose_uneven_rows(row_sharding):
+    # TODO: capture the partition attempt, then test replicated placement
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -480,9 +483,17 @@ What does a $(12,2)$ global array sharded with `P("data",None)` over four device
 
 <details><summary>Answer and explanation</summary>
 
-Each device holds a $(3,2)$ slice and the global array remains $(12,2)$.
+**1. Each device holds a $(3,2)$ slice and the global array remains $(12,2)$. (correct)**
 
 Partitioning divides the mapped dimension; it does not change the global shape or create accelerator hardware.
+
+**2. Each device holds the complete array.**
+
+P(data, None) partitions the first axis. Divide twelve rows among four devices and inspect addressable_shards rather than assuming replication.
+
+**3. Each device represents a separate TPU chip.**
+
+These are logical CPU devices. They let you test partitioning semantics, but provide no evidence about TPU chips, interconnects or throughput.
 
 </details>
 
