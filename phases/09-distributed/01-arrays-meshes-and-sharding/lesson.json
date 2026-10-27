@@ -9,12 +9,12 @@
       {
         "id": "guided-reasoning",
         "title": "Compare the global array with each local piece",
-        "body": "A four-by-four array on two devices can be split into two-by-four row shards or four-by-two column shards. Both layouts contain the same global values. Their local operations and communication requirements differ.\n\nReplication gives each participant the full value instead of a disjoint portion. Use explicit labels so duplicated ownership cannot be mistaken for partitioning.\n\nConnect each PartitionSpec entry to its array axis and named mesh axis. Inspect actual addressable shards and compare reconstructed values with a global reference. Logical CPU devices validate this placement exercise without reproducing a multi-host network.",
+        "body": "A four-by-four array on two devices can be split into two-by-four row shards or four-by-two column shards. Both layouts contain the same global values. Their local operations and communication requirements differ.\n\nReplication gives each participant the full value instead of a disjoint portion. Use explicit labels so duplicated ownership cannot be mistaken for partitioning.\n\nConnect each PartitionSpec entry to its array axis and named mesh axis. Inspect actual addressable shards and compare reconstructed values with a global reference. Logical CPU devices validate this placement exercise without reproducing a multi-host network.\n\nThe notation \\(P_d\\) and \\(P_m\\) names the data and model mesh dimensions. For a matrix placed with \\(P(\\texttt{data},\\texttt{model})\\) on a \\(2\\times2\\) mesh, each device owns a \\(B/2\\times H/2\\) tile. The next lesson applies that rule selectively: it shards batch rows on data, parameter output columns on model, and predictions on both axes, then runs a complete parameter-sharded update.",
         "check": {
           "prompt": "Must changing row sharding to column sharding change the answer?",
-          "answer": "No. A correct compatible computation preserves the intended global result. Storage and communication can change even when the result agrees."
+          "answer": "No. A correct compatible computation preserves the intended global result. Storage and communication can change even when the result agrees. In the following lesson, the batch uses the data axis and parameter output columns use the model axis, so a local parameter shard has shape \\((4,2)\\)."
         },
-        "math": "\\text{Mesh}(D, (\\texttt{'data'}, \\texttt{'model'})) \\implies \\operatorname{shard}(X) \\in \\mathbb{R}^{(B/P_d) \\times (H/P_m)}"
+        "math": "\\text{Mesh}((P_d,P_m), (\\texttt{'data'},\\texttt{'model'}));\\quad P(\\texttt{data},\\texttt{model}):Y\\mapsto\\mathbb{R}^{(B/P_d)\\times(H/P_m)}"
       },
       {
         "title": "Read the mapping from left to right",

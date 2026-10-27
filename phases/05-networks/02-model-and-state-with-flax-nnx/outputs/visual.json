@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "networks-02",
-  "contentHash": "80aa62bb3122f62e9eb19efa07cd2b01d37eb8e4103fde5e1ce1196db551dacd",
-  "rendererHash": "a1bd5b648f4731ae5d5f0a24811c2540d1a0a132149ce589d17c4113509cbedf",
+  "contentHash": "b9af5c6791d5532820de50680f6a5d9f3b5b96db12422abcecb5fec7c275d7b1",
+  "rendererHash": "17e3bbad72ee4c43425845aaee76b86b85e84750551278be03d8c16842f4dc63",
   "kind": "executed",
-  "generatedAt": "2026-10-21T16:03:57.213981+00:00",
+  "generatedAt": "2026-10-27T15:28:30.985953+00:00",
   "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",
@@ -23,23 +23,121 @@
       3
     ],
     "labels": [
-      "leaf 0",
-      "leaf 1",
-      "leaf 2",
-      "leaf 3"
+      "hidden.kernel",
+      "hidden.bias",
+      "out.kernel",
+      "out.bias"
     ],
-    "xlabel": "NNX state parameter leaf index",
-    "ylabel": "element count",
+    "xlabel": "NNX module path",
+    "ylabel": "parameter elements",
     "series": [
       {
-        "label": "parameter elements",
+        "label": "trainable values",
         "y": [
-          3.0,
-          6.0,
-          1.0,
-          3.0
+          6,
+          3,
+          3,
+          1
         ]
       }
     ]
+  },
+  "diagram": {
+    "title": "NNX GraphDef and State with shared and copied module identity",
+    "prediction": "If `left` and `right` point to the same hidden module, what changes when only one reference is assigned a new bias?",
+    "reading": "Read the top row as structure: `GraphDef` records module types, named edges and the shared-reference relation `left is right`. The middle row is the `State` snapshot, with arrays at paths such as `hidden.kernel`, `hidden.bias`, `out.kernel`, `out.bias`, and `calls`. `nnx.merge(GraphDef, State)` rebuilds the object graph. The lower row distinguishes two cases. Reusing the same State variable objects can preserve identity; copying each state leaf before merge gives equal starting values with independent mutable variables. In this lesson the ordinary model has named paths `hidden`, `out`, and `calls`; `left`/`right` are a labelled identity variant of that graph, not extra layers in its parameter-count fixture.",
+    "alt": "GraphDef contains module wiring and shared-reference identity, while State contains named arrays for hidden.kernel, hidden.bias, out.kernel, out.bias, and calls. GraphDef plus State enters nnx.merge to reconstruct the model. A shared state reference retains variable identity; copied state leaves reconstruct equal values with independent mutable identity.",
+    "scope": "Architecture and dataflow mechanism diagram.",
+    "height": 6.6,
+    "panel": {
+      "kind": "graph",
+      "width": 12,
+      "height": 7,
+      "nodes": [
+        {
+          "id": "g",
+          "x": 3,
+          "y": 1,
+          "label": "GraphDef: TinyMLP\nhidden \u2192 out \u00b7 calls counter",
+          "tone": "data",
+          "w": 4.2,
+          "h": 0.9,
+          "fontSize": 11
+        },
+        {
+          "id": "alias",
+          "x": 9,
+          "y": 1,
+          "label": "Identity variant\nleft.hidden \u2500\u2510\nright.hidden \u2500\u2534 same object",
+          "tone": "warning",
+          "w": 4.2,
+          "h": 0.9,
+          "fontSize": 10
+        },
+        {
+          "id": "s",
+          "x": 3,
+          "y": 2.8,
+          "label": "State paths\nhidden.kernel [Param]\nhidden.bias [Param]\nout.kernel [Param] \u00b7 out.bias [Param]\ncalls [Variable]",
+          "tone": "state",
+          "w": 5.8,
+          "h": 1.8,
+          "fontSize": 10
+        },
+        {
+          "id": "merge",
+          "x": 6,
+          "y": 4.5,
+          "label": "nnx.merge(GraphDef, State)",
+          "tone": "result",
+          "w": 4.4,
+          "h": 0.9
+        },
+        {
+          "id": "shared",
+          "x": 3,
+          "y": 6.2,
+          "label": "Reuse Variable objects\nequal starting values\nmutable identity may be shared",
+          "tone": "warning",
+          "w": 5,
+          "h": 1.2,
+          "fontSize": 10
+        },
+        {
+          "id": "copied",
+          "x": 9,
+          "y": 6.2,
+          "label": "Copy State leaves, then merge\nequal starting values\nmutable identity is independent",
+          "tone": "result",
+          "w": 5,
+          "h": 1.2,
+          "fontSize": 10
+        }
+      ],
+      "edges": [
+        {
+          "from": "g",
+          "to": "merge"
+        },
+        {
+          "from": "alias",
+          "to": "g"
+        },
+        {
+          "from": "s",
+          "to": "merge"
+        },
+        {
+          "from": "merge",
+          "to": "shared",
+          "label": "state objects reused"
+        },
+        {
+          "from": "merge",
+          "to": "copied",
+          "label": "state leaves copied"
+        }
+      ]
+    }
   }
 }

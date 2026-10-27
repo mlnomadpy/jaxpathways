@@ -1,4 +1,4 @@
-"""Learn a reward model from pairwise preferences · learner-only exercises (3/3 contracts ready)"""
+"""Learn a reward model from pairwise preferences · learner-only exercises (4/4 contracts ready)"""
 
 # Exercise: Calculate the initial loss for tied reward scores independently and verify the trained ordering.
 
@@ -70,3 +70,32 @@ import jax.numpy as jnp
 def compare_linear_reward_gradient(weights, chosen, rejected):
     # TODO: derive and check the preference-loss gradient before and after label reversal.
     raise NotImplementedError
+
+
+
+# Evaluate held-out reward pairs and keep disagreement visible (Transfer):
+# Define held-out feature pairs and their vote fractions before fitting. Calculate zero-weight baseline probabilities first. Fit the existing three training comparisons, then report held-out Brier score, unanimous-case accuracy, and the disagreement slice before and after. Keep the same pairs and labels for both measurements.
+
+# Inputs:
+# - The existing three training feature comparisons and fitted reward weights
+# - Four fixed held-out chosen/rejected feature pairs and vote fractions
+# - A declared slice label for unanimous and disagreement examples
+
+# Outputs:
+# - Pre-fit baseline probabilities and Brier score
+# - Post-fit held-out Brier score and unanimous-case accuracy
+# - Separate disagreement probabilities and Brier score
+
+# Invariants to check:
+# - Hold out the examples before fitting
+# - Use identical held-out pairs and vote fractions for baseline and post-fit metrics
+# - Score disagreement against its fractional vote; do not force a hard label
+# - Describe every score as a synthetic finite-fixture result
+
+# Hints:
+# - Use the chosen-minus-rejected feature vector in the sigmoid margin.
+# - Compute baseline with `w_baseline = zeros_like(w)` before the optimizer update.
+# - Report unanimity and disagreement slices separately.
+
+# Complete the baseline-first held-out report for fixed pair features.
+raise NotImplementedError

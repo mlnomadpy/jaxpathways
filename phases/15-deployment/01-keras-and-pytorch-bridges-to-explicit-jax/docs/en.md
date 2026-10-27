@@ -4,11 +4,14 @@ Phase 15: Deployment, interoperability & edge AI · about 110 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Adapt a pretrained model and choose a post-training objective](https://www.tahabouhsine.com/jaxpathways/lesson-deployment-02.html).
+
 ## What you will be able to do
 
 - Map Dense and Linear weight axes and verify a known output.
 - Separate architecture, weights, non-trainable state, optimizer state and preprocessing.
 - Run a backend-neutral Keras model and explain the boundaries of tensor exchange and export.
+- Carry an explicit attention tensor layout and processor contract into a bounded Transformer conversion rather than assuming a dense transpose is sufficient.
 
 ## The problem
 
@@ -106,6 +109,22 @@ No. Both changes restore each feature–coefficient pairing. Swapping only the v
 Keep the dense example as a test you can reason through by hand. Then add one operation at a time: a nonlinearity, normalization, and a second layer. Record an intermediate tensor at each boundary. For a convolution, declare both image layout and kernel layout; for attention, declare token order, head order, masks, and how query, key and value weights are packed.
 
 The optional Keras lab runs real backends in separate processes. The default companion below uses NumPy and JAX to expose the mapping arithmetic, so its success alone is verified separately from TensorFlow, PyTorch, or a complete pretrained checkpoint. Carry a table of source names, target names, shapes, axis permutations and test inputs into the model-specific conversion lesson.
+
+## Attention requires a model-family contract
+
+The dense transpose rule does not describe an attention checkpoint. Query, key and value may be separate or fused; fused rows can be stored as Q-then-K-then-V or interleaved by head. Declare the source key, target key, source shape, target shape, axis transform and reshape order. Also bind tokenization or preprocessing identity, position IDs, mask meaning, normalization epsilon, and whether the language-model head shares the embedding table.
+
+The deployment-08 optional lab gives one saved PyTorch-to-NNX example for the course's single pre-normalized decoder block. It is a bounded fixture with an explicit map, asymmetric probes, intermediate comparisons, semantic negative controls, VJP and process reload. It does not imply that arbitrary saved checkpoints can be converted by applying a general transpose rule.
+
+### Pause and reason
+
+Why can a fused-QKV tensor pass shape checks even when its head interpretation is wrong?
+
+<details><summary>Compare your reasoning</summary>
+
+Different reshapes and permutations can preserve the same total dimensions. A numerical probe must exercise asymmetric heads and compare intermediate attention values.
+
+</details>
 
 ## Write the source function and its known input
 
@@ -209,7 +228,7 @@ visual_data = {'kind': 'panels', 'panels': [{'kind': 'heatmap', 'title': 'Input 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:09:10.357549+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T12:35:33.282891+00:00. JAX 0.9.2.
 
 ```text
 Matched dense outputs: [[ 3.1  -0.45]

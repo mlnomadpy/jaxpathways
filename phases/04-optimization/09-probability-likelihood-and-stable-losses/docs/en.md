@@ -4,6 +4,8 @@ Phase 04: Math & optimization · about 80 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Write gradient descent yourself](https://www.tahabouhsine.com/jaxpathways/lesson-optimization-03.html).
+
 ## What you will be able to do
 
 - Derive binary cross-entropy from a probability model and compute it safely from logits.
@@ -177,7 +179,7 @@ visual_data = {'kind': 'line', 'x': grid.tolist(), 'xlabel': 'logit', 'ylabel': 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:04:29.794133+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T12:29:10.676395+00:00. JAX 0.9.2.
 
 ```text
 uncertain loss / confident-wrong loss: 0.6931472 100.0

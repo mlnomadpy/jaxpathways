@@ -4,6 +4,8 @@ Phase 01: Arrays & pure functions · about 50 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [From NumPy to jax.numpy](https://www.tahabouhsine.com/jaxpathways/lesson-arrays-01.html).
+
 ## What you will be able to do
 
 - Apply the trailing-dimension broadcasting rule before execution.
@@ -168,7 +170,7 @@ visual_data = {'kind': 'heatmap', 'values': (y - batch).tolist(), 'rows': ['obse
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:03:24.201996+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T12:28:20.072023+00:00. JAX 0.9.2.
 
 ```text
 [[11. 22. 33.]

@@ -1,5 +1,22 @@
 [
   {
+    "version": "0.18.0",
+    "date": "2026-10-27",
+    "editionKey": "jaxpathways-2026-review-edition",
+    "modifiedAt": "2026-10-27T12:18:26Z",
+    "title": "Connect the lessons to inspectable model and engineering workflows",
+    "summary": "Repair content correctness and add guided saved-model, sharding, profiling and operations exercises for author review.",
+    "changes": [
+      "Correct the equations and worked explanations across the course, supply solvable attention inputs, align discounted critic targets with GAE and enforce requested TPU readiness separately from CPU arithmetic rehearsal.",
+      "Report policy-specific precision storage and runtime bytes, prove per-device memory-fit assumptions and explain actual retained CPU trace events using a stable profiling workload.",
+      "Add real multilayer debugging, stateful train/eval checks, an oracle-checked 2x2 parameter-sharded update and an optional saved-decoder PyTorch-to-NNX conversion lab with semantic fault controls.",
+      "Connect masked and contrastive objectives to saved small encoders and held-out probes; add bounded saved-decoder SFT and sequence preference tasks, enforce LoRA base identity and report ambiguous preferences separately.",
+      "Complete MLflow artifact-selection and altered-artifact exercises. Derive operations gates from reloaded predictions, trace a local retrieval workflow, and demonstrate model behavior across activation, rollback and identity-bound retirement.",
+      "Stage long recovery and operations examples around short learner transitions, add mechanism figures and expose the PPO prerequisite branch in both the reader and book without requiring it for SFT, LoRA or DPO.",
+      "Retain earlier failed model-quality outcomes, the existing maturity levels and all ten Planned full capstones. The corrections include independent AI review and bounded CPU checks; expert/novice acceptance, native-reader/assistive review and new physical-target qualification remain separate. No merge or deployment is included."
+    ]
+  },
+  {
     "version": "0.17.1",
     "date": "2026-10-22",
     "editionKey": "jaxpathways-2026-review-edition",
@@ -209,7 +226,7 @@
     "title": "Distinct assessment summaries for search and sharing",
     "summary": "Give all eleven synthesis assessments accurate, individual descriptions across search metadata, social previews and page schema.",
     "changes": [
-      "Replaced the shared generic assessment description with a summary of each assessment\u2019s actual tasks in the canonical registry.",
+      "Replaced the shared generic assessment description with a summary of each assessment’s actual tasks in the canonical registry.",
       "Added site-wide duplicate-description checks and verified that search, Open Graph, Twitter and WebPage schema descriptions agree."
     ]
   },

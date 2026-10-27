@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "operations-02",
-  "contentHash": "c01b5b5f9367b19dd7ea77cff0ef8c450d4c2e351e62271ec1c03b990f769065",
-  "rendererHash": "a1bd5b648f4731ae5d5f0a24811c2540d1a0a132149ce589d17c4113509cbedf",
+  "contentHash": "3b8bddf6291ecba628854fef5739ea0470a5b32095d6f4b09ede74a87f620fe2",
+  "rendererHash": "17e3bbad72ee4c43425845aaee76b86b85e84750551278be03d8c16842f4dc63",
   "kind": "executed",
-  "generatedAt": "2026-10-21T16:05:59.031042+00:00",
+  "generatedAt": "2026-10-27T12:19:29.194126+00:00",
   "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",
@@ -13,7 +13,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "healthy: {'status': 'completed', 'updates': 12, 'examples': 96, 'last_step': 12, 'checkpoint_step': 12, 'uncheckpointed_updates': 0, 'update_s': 0.001276248600333929, 'update_examples_per_s': 75220.45467856474, 'job_examples_per_s': 109.81683897855906, 'update_duty_fraction': 0.0014599331983279425}\nincident: {'status': 'failed', 'updates': 5, 'examples': 40, 'last_step': 5, 'checkpoint_step': 4, 'uncheckpointed_updates': 1, 'update_s': 0.00026562390848994255, 'update_examples_per_s': 150588.85409599543, 'job_examples_per_s': 54.83957223020385, 'update_duty_fraction': 0.00036416753789258153}\n",
+  "stdout": "healthy: {'status': 'completed', 'updates': 12, 'examples': 96, 'last_step': 12, 'checkpoint_step': 12, 'uncheckpointed_updates': 0, 'uncheckpointed_examples': 0, 'update_s': 0.0007414594292640686, 'update_examples_per_s': 129474.38013605715, 'job_examples_per_s': 153.7881648725102, 'update_duty_fraction': 0.001187788384936874}\nincident: {'status': 'failed', 'updates': 5, 'examples': 40, 'last_step': 5, 'checkpoint_step': 4, 'uncheckpointed_updates': 1, 'uncheckpointed_examples': 8, 'update_s': 0.00026004062965512276, 'update_examples_per_s': 153822.11638638834, 'job_examples_per_s': 62.536699672283504, 'update_duty_fraction': 0.00040655206898334775}\n",
   "data": {
     "kind": "line",
     "x": [

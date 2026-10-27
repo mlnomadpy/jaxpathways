@@ -1,7 +1,7 @@
 """Model and state with Flax NNX: worked experiments and reference solutions. CPU checks."""
 
 # 1. Define typed state and the model
-# Step 1 — 1. Define typed state and the model: nnx.Rngs manages initializer keys.
+# Step 1 : 1. Define typed state and the model: nnx.Rngs manages initializer keys.
 from flax import nnx
 import jax
 import jax.numpy as jnp
@@ -20,7 +20,7 @@ model=TinyMLP()
 batch=jnp.array([[1.,2.],[-1.,.5],[0.,0.]])
 
 # 2. Verify equations and inspect the filters
-# Step 2 — 2. Verify equations and inspect the filters: The matching forward pass verifies the network wiring.
+# Step 2 : 2. Verify equations and inspect the filters: The matching forward pass verifies the network wiring.
 scores=model(batch,record=True)
 # Transfer the device result to the host for an independent NumPy comparison.
 h=np.tanh(np.asarray(batch)@np.asarray(model.hidden.kernel[...])+np.asarray(model.hidden.bias[...]))
@@ -34,7 +34,7 @@ assert sum(a.size for a in jax.tree.leaves(other_state))==1
 assert int(model.calls[...])==1
 
 # 3. Split, merge, and test independence
-# Step 3 — 3. Split, merge, and test independence: nnx.grad differentiates Param variables by default.
+# Step 3 : 3. Split, merge, and test independence: nnx.grad differentiates Param variables by default.
 graphdef,state=nnx.split(model)
 clone=nnx.merge(graphdef,jax.tree.map(lambda a:jnp.array(a,copy=True),state))
 np.testing.assert_allclose(clone(batch),model(batch),rtol=1e-6)
@@ -45,7 +45,7 @@ assert sum(a.size for a in jax.tree.leaves(grads))==13
 assert 'calls' not in grads
 print('Trainable scalars: 13; other state: 1; clone counters:',int(model.calls[...]),int(clone.calls[...]))
 
-# Step 1 — 1. Define typed state and the model: nnx.Rngs manages initializer keys.
+# Step 1 : 1. Define typed state and the model: nnx.Rngs manages initializer keys.
 from flax import nnx
 import jax
 import jax.numpy as jnp
@@ -63,7 +63,7 @@ class TinyMLP(nnx.Module):
 model=TinyMLP()
 batch=jnp.array([[1.,2.],[-1.,.5],[0.,0.]])
 
-# Step 2 — 2. Verify equations and inspect the filters: The matching forward pass verifies the network wiring.
+# Step 2 : 2. Verify equations and inspect the filters: The matching forward pass verifies the network wiring.
 scores=model(batch,record=True)
 # Transfer the device result to the host for an independent NumPy comparison.
 h=np.tanh(np.asarray(batch)@np.asarray(model.hidden.kernel[...])+np.asarray(model.hidden.bias[...]))
@@ -76,7 +76,7 @@ assert sum(a.size for a in jax.tree.leaves(param_state))==13
 assert sum(a.size for a in jax.tree.leaves(other_state))==1
 assert int(model.calls[...])==1
 
-# Step 3 — 3. Split, merge, and test independence: nnx.grad differentiates Param variables by default.
+# Step 3 : 3. Split, merge, and test independence: nnx.grad differentiates Param variables by default.
 graphdef,state=nnx.split(model)
 clone=nnx.merge(graphdef,jax.tree.map(lambda a:jnp.array(a,copy=True),state))
 np.testing.assert_allclose(clone(batch),model(batch),rtol=1e-6)
@@ -88,12 +88,11 @@ assert 'calls' not in grads
 print('Trainable scalars: 13; other state: 1; clone counters:',int(model.calls[...]),int(clone.calls[...]))
 
 # Figure data experiment
-# Count parameters in each leaf of the extracted NNX `param_state`:
-leaves_vis = jax.tree.leaves(param_state)
-visual_data = {'kind': 'bar', 'x': list(range(len(leaves_vis))), 'labels': [f'leaf {i}' for i in range(len(leaves_vis))], 'xlabel': 'NNX state parameter leaf index', 'ylabel': 'element count', 'series': [{'label': 'parameter elements', 'y': [float(a.size) for a in leaves_vis]}]}
+visual_data = {'kind': 'bar', 'x': [0, 1, 2, 3], 'labels': ['hidden.kernel', 'hidden.bias', 'out.kernel', 'out.bias'], 'xlabel': 'NNX module path', 'ylabel': 'parameter elements', 'series': [{'label': 'trainable values', 'y': [int(model.hidden.kernel.size), int(model.hidden.bias.size), int(model.out.kernel.size), int(model.out.bias.size)]}]}
+assert visual_data['series'][0]['y'] == [6, 3, 3, 1]
 
 # Experiment: Bias shifts every score equally
-# Experiment — Bias shifts every score equally
+# Experiment : Bias shifts every score equally
 before=np.asarray(model(batch))
 saved=model.out.bias[...]
 model.out.bias[...] = saved+.25
@@ -101,7 +100,7 @@ np.testing.assert_allclose(model(batch),before+.25,atol=1e-6)
 model.out.bias[...] = saved
 
 # Experiment: Repeated construction reproduces state
-# Experiment — Repeated construction reproduces state: Replay is checked in one pinned environment.
+# Experiment : Repeated construction reproduces state: Replay is checked in one pinned environment.
 replay=TinyMLP(0)
 for a,b in zip(jax.tree.leaves(nnx.state(replay,nnx.Param)),jax.tree.leaves(param_state)):
     np.testing.assert_array_equal(a,b)

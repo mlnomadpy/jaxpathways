@@ -4,6 +4,8 @@ Phase 11: Probabilistic modeling · about 140 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Build a Bayesian regression](https://www.tahabouhsine.com/jaxpathways/lesson-probability-02.html).
+
 ## What you will be able to do
 
 - Implement leapfrog with the correct half-step boundaries
@@ -243,7 +245,7 @@ visual_data={"kind":"line","x":indices.tolist(),"xlabel":"retained transition (a
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:07:46.758595+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T12:32:00.078341+00:00. JAX 0.9.2.
 
 ```text
 mean: [ 0.98358583 -1.0185838 ] covariance: [[0.98042357 0.7727629 ]

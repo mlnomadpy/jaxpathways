@@ -155,7 +155,7 @@ visual_data = {'kind': 'line', 'x': [0, 1, 2], 'xlabel': 'observation index', 'y
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:03:22.361171+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T12:28:18.162254+00:00. JAX 0.9.2.
 
 ```text
 Mean: [ 3. 14.]

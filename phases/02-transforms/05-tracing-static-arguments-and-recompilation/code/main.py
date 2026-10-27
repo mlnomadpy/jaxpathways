@@ -37,10 +37,7 @@ assert jnp.allclose(compiled(x, mode="sum"), 6.)
 assert jnp.allclose(compiled(x, mode="mean"), 2.)
 
 # Figure data experiment
-# Compare compiled execution in 'sum' mode and 'mean' mode:
-out_sum = float(compiled(x, 'sum'))
-out_mean = float(compiled(x, 'mean'))
-visual_data = {'kind': 'bar', 'x': [0, 1], 'labels': ['sum', 'mean'], 'xlabel': 'static mode argument', 'ylabel': 'compiled(x, mode) output', 'series': [{'label': 'compiled(x, mode)', 'y': [out_sum, out_mean]}]}
+visual_data = {'kind': 'flow', 'layout': 'sequence', 'nodes': ['values change; shape/dtype/mode fixed', 'same signature reused in this call ledger', 'shape or static mode changes specialization']}
 
 # Experiment: Look at the staged numerical work
 # Experiment — Look at the staged numerical work: The second call supplies new values with the same shape/dtype.

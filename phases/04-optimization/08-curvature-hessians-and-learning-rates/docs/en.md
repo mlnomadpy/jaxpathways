@@ -4,6 +4,8 @@ Phase 04: Math & optimization · about 75 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Gradient checking and numerical accuracy](https://www.tahabouhsine.com/jaxpathways/lesson-optimization-02.html).
+
 ## What you will be able to do
 
 - Use curvature to explain learning-rate stability, slow directions and why a zero gradient need not be a minimum.
@@ -178,7 +180,7 @@ visual_data = {'kind': 'line', 'x': list(range(21)), 'xlabel': 'completed update
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:04:20.854556+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T12:29:03.434660+00:00. JAX 0.9.2.
 
 ```text
 final weights / loss: [ 0.12157664 -0.        ] 0.0073904395

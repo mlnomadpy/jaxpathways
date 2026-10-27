@@ -151,7 +151,7 @@ test('print CSS groups tall visuals and mechanism prompts and numbers every PDF 
         title: 'MECHANISM HEADING',
         prediction: 'What stays shared in the mechanism?',
         alt: 'Tall mechanism fixture',
-        scope: 'Architecture and dataflow mechanism diagram.',
+        scope: 'Measured fixture ownership and lifetime diagram.',
         reading: 'Mechanism reading follows its figure.',
       },
     },
@@ -231,6 +231,9 @@ test('print CSS groups tall visuals and mechanism prompts and numbers every PDF 
   const activeInspection = inspectPdf(activePath, {
     expectedVisuals: 1,
     expectedMechanismTitles: ['MECHANISM HEADING'],
+    expectedMechanismCaptions: {
+      'MECHANISM HEADING': 'Measured fixture ownership and lifetime diagram.',
+    },
   });
   const activePageCount = Number(
     execFileSync('pdfinfo', [activePath], { encoding: 'utf8' }).match(/^Pages:\s+(\d+)$/m)?.[1],
@@ -251,7 +254,7 @@ test('print CSS groups tall visuals and mechanism prompts and numbers every PDF 
   assert.equal(activeInspection.numberedPages.length, activePageCount);
   assert.equal(
     pageContaining(activePages, 'MECHANISM HEADING'),
-    pageContaining(activePages, 'Architecture and dataflow mechanism diagram.'),
+    pageContaining(activePages, 'Measured fixture ownership and lifetime diagram.'),
     'the mechanism heading and prompt stay with its diagram caption',
   );
   activePages.forEach((pageText, index) => {
@@ -274,6 +277,9 @@ test('print CSS groups tall visuals and mechanism prompts and numbers every PDF 
       inspectPdf(splitPath, {
         expectedVisuals: 1,
         expectedMechanismTitles: ['MECHANISM HEADING'],
+        expectedMechanismCaptions: {
+          'MECHANISM HEADING': 'Measured fixture ownership and lifetime diagram.',
+        },
       }),
     /Visual print intro is split|Mechanism print intro is split/,
     'the PDF qualifier rejects a tall figure split from its heading and prediction',

@@ -27,8 +27,10 @@ Padding requires a validity mask so an artificial slot does not become another o
 
 Read the existing sample-ID plot as an ordering check. The height of an ID is not a physical measurement. Compare membership and multiplicities, then inspect exact order where continuation requires it.
 
+The permutation $\pi$ changes order while preserving example membership; the validity mask $m_i\in\{0,1\}$ excludes padding and requires a positive denominator. For valid losses $[2,4,6]$ padded with zero to length four, the unmasked mean is $3$, while the valid-example mean is $4$. Input coverage alone does not prove replay. Later recovery lessons also save iterator state, optimizer state, keys and data/configuration identity at the same completed-update boundary.
+
 $$
-\mathcal{C}_t = (\Theta_t,\; M_t,\; k_t,\; t), \qquad \text{restore}(\mathcal{C}_t) \implies \Theta_{t+k}^{\text{resumed}} = \Theta_{t+k}^{\text{uninterrupted}}
+\operatorname{multiset}(\pi(0),\ldots,\pi(N-1))=\operatorname{multiset}(0,\ldots,N-1),\qquad \bar\ell=\frac{\sum_i m_i\ell_i}{\sum_i m_i}
 $$
 
 ### Pause and reason
@@ -224,16 +226,16 @@ visual_data = {'kind': 'line', 'x': list(range(len(seen))), 'xlabel': 'position 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:05:18.574146+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T12:29:56.191894+00:00. JAX 0.9.2.
 
 ```text
 Batch sizes: [4, 4, 3]
 Example order: [9, 10, 4, 1, 0, 7, 6, 8, 2, 5, 3]
-Preparation seconds (local observation only): 0.01423758314922452
+Preparation seconds (local observation only): 0.010146625339984894
 Dataset SHA256: 1a81451a8fb32a1bf0ad6307ea19198153ab1603b37174c76c4d498e343e6892
 Batch sizes: [4, 4, 3]
 Example order: [9, 10, 4, 1, 0, 7, 6, 8, 2, 5, 3]
-Preparation seconds (local observation only): 2.0207837224006653e-05
+Preparation seconds (local observation only): 2.320762723684311e-05
 Dataset SHA256: 1a81451a8fb32a1bf0ad6307ea19198153ab1603b37174c76c4d498e343e6892
 Epoch one order: [4, 0, 5, 10, 6, 2, 1, 9, 7, 3, 8]
 Omitted IDs: [2, 3, 5]

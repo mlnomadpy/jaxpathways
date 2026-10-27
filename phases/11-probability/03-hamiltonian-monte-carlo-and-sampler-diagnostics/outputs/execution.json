@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "lessonId": "probability-03",
   "contentHash": "4281e8b1c0c7a9e27242557230d9769b6c05315f43c024743289f026bf8437b6",
-  "executedAt": "2026-10-21T16:07:46.758595+00:00",
+  "executedAt": "2026-10-27T12:32:00.078341+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -54,7 +54,7 @@
       "outputs": []
     },
     {
-      "sourceHash": "25df6d662f9d3f0c4e984c6a201f79fa0cfd7a2633dc4b0773dfba6c2dd4ee6c",
+      "sourceHash": "53dc08a479da44f2b1718bf964cd5c4d3e3305811c536df9d501b1833a6e3476",
       "outputs": [
         {
           "output_type": "display_data",

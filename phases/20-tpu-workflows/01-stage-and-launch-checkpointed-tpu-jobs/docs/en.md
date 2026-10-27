@@ -8,7 +8,7 @@ This worked reference is validated on CPU. Accelerator compatibility requires a 
 
 - Stage the TPU launcher (`resources/tpu-gcp/launch.py`) to a Cloud TPU VM with `gcloud compute tpus tpu-vm scp`.
 - Separate XLA compile warmup time from steady-state step time in structured `events.jsonl` logs.
-- Write atomic checkpoints using `temp` + `os.fsync` + `os.replace` so preemption never corrupts the latest checkpoint.
+- Write atomic checkpoints using `temp` + `os.fsync` + `os.replace` so preemption does not expose a partially replaced destination under the tested single-writer local-filesystem model the latest checkpoint.
 - Interrupt, resume from an atomic checkpoint, and verify zero drift against an uninterrupted control run.
 
 ## The problem
@@ -21,14 +21,14 @@ The launcher records warmup and synchronized updates separately, then checkpoint
 
 ## Why launching a TPU experiment is different from running a notebook cell
 
-When you launch a JAX script on a TPU VM, the first call to a `@jax.jit` step traces Python and compiles an XLA HLO program for the attached TPU chips. If you time step $1$ together with steps $2\dots N$, your step-time measurement is dominated by XLA compilation rather than TPU execution.
+When you launch a JAX script on a TPU VM, the first call to a `@jax.jit` step traces Python and compiles an XLA HLO program for the attached TPU chips. The runner records one separate warmup duration, then logs each synchronized update interval. Compute the steady-state mean or median from those logged intervals and their actual count; do not subtract compilation from the timed-update total because compilation was already outside that set.
 
 A production-grade TPU launcher runs one synchronized warmup call before the training loop and logs `compile_warmup_s` in a dedicated `warmup` event. Subsequent `step` events measure synchronized steady-state updates (`jax.block_until_ready`).
 
-Whenever a checkpoint step arrives, writing directly to `checkpoint-latest.json` risks leaving a half-written file if a Spot TPU VM is preempted mid-write. Writing to a temporary sibling file (`checkpoint-latest.json.tmp`), flushing with `os.fsync`, and atomically renaming with `os.replace` makes the visible checkpoint path switch atomically on supported local filesystems. This does not by itself promise survival across power loss or distributed publication. A checkpoint hash detects changed serialized state; a separately hashed configuration binds data identity, seed, learning rate, batch schedule, and optimizer rule.
+Whenever a checkpoint step arrives, writing directly to `checkpoint-latest.json` risks leaving a half-written file if a Spot TPU VM is preempted mid-write. Writing a temporary sibling file, flushing it, and replacing the destination gives atomic name replacement on supported local filesystems for this tested single-writer model. It does not guarantee durability after power loss, serialize concurrent writers, or qualify distributed publication. After interruption, parse the latest path and validate its checksum, schema and run identity before resuming. If the prior checkpoint is still at the destination because replacement did not happen, it remains the candidate to validate. Never load the `.tmp` file. This example does not retain an additional backup, so if the latest file is missing or invalid, restart from the initial state unless you separately saved a validated checkpoint. A checkpoint hash detects changed serialized state; a separately hashed configuration binds data identity, seed, learning rate, batch schedule, and optimizer rule.
 
 $$
-T_{\text{step}} = \frac{T_{\text{total}}(S) - T_{\text{compile}}(1)}{S - 1}
+\bar{T}_{\text{step}} = \frac{\sum_{i=1}^{N_{\text{updates}}} \Delta t_i}{N_{\text{updates}}}, \quad \Delta t_i = t^{\text{end}}_i - t^{\text{start}}_i
 $$
 
 ### Checkpointed TPU job launcher lifecycle from warmup to zero-drift resume
@@ -465,14 +465,14 @@ visual_data = {
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:11:47.309797+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T14:09:29.793538+00:00. JAX 0.9.2.
 
 ```text
 Resumed state_hash matches uninterrupted control: ecba6a13e41beb0003af0371f8422efa3b08538c4420efb07a9bc61b0a10cdc1
 Losses across 6 steps: [3.6712, 3.78913, 1.91372, 2.09553, 1.81174, 1.16636]
 Resumed state_hash matches uninterrupted control: ecba6a13e41beb0003af0371f8422efa3b08538c4420efb07a9bc61b0a10cdc1
 Losses across 6 steps: [3.6712, 3.78913, 1.91372, 2.09553, 1.81174, 1.16636]
-Warmup ms: 85.62 Median steady step ms: 0.0419
+Warmup ms: 196.898 Median steady step ms: 1.0181
 Resume rejection: checkpoint state hash mismatch
 Step 8 resumed vs control hash: eba1c0bcfb80184d9f5108c1d6539369e21f95276e5d6806234237f41eccbed9 eba1c0bcfb80184d9f5108c1d6539369e21f95276e5d6806234237f41eccbed9
 Recorded event sequence: ['started', 'warmup', 'step', 'step', 'checkpoint', 'completed', 'restored', 'warmup', 'step', 'step', 'checkpoint', 'completed']

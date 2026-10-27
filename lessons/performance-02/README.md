@@ -4,6 +4,8 @@ Phase 08: Performance diagnosis · about 80 minutes · CPU
 
 This reference explicitly selects CPU. Uploading the same file or setting JAX_PLATFORMS does not adapt it to TPU. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Benchmark asynchronous work correctly](https://www.tahabouhsine.com/jaxpathways/lesson-performance-01.html).
+
 ## What you will be able to do
 
 - Record shapes, dtypes and dynamic/static choices beside observed tracing.
@@ -27,8 +29,10 @@ Inspect host reads and logging next. Converting device results into Python value
 
 Trace counts describe observed Python tracing. They are not a universal count of compiler work or a guarantee of cache reuse after restart. Combine the ledger with a trace of completed work before deciding which change improves the actual workload.
 
+The tuple $\sigma_r$ is the controlled signature ledger for call $r$; $n_r$ is the number of observed Python tracing events after that call. Value-only changes can leave $\Delta n_r=0$; a changed relevant shape or static option can increase it. This observation does not count every compiler stage. Hold the function and process fixed, change one factor, and read the actual trace records before assigning a cause.
+
 $$
-\text{Arithmetic Intensity (AI)} = \frac{W_{\text{FLOPs}}}{Q_{\text{bytes}}}, \qquad \text{Perf} \le \min(\pi_{\text{peak}},\; \beta_{\text{BW}} \cdot \text{AI})
+\sigma_r=(\operatorname{shape}(x_r),\operatorname{dtype}(x_r),c_{r,\rm static}),\qquad \Delta n_r=n_r-n_{r-1}
 $$
 
 ### Pause and reason
@@ -240,7 +244,7 @@ visual_data = {'kind': 'bar', 'labels': ['initial', 'new values', 'new gain', 'n
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:06:24.392180+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T12:30:57.914142+00:00. JAX 0.9.2.
 
 ```text
 {
@@ -356,8 +360,8 @@ CPU run: 2026-10-21T16:06:24.392180+00:00. JAX 0.9.2.
   ]
 }
 Static branch trace observations: [{'shape': [8], 'square': True}, {'shape': [8], 'square': False}]
-Per-step host reads seconds: 0.0001482083462178707
-Final-only wait seconds: 2.8458423912525177e-05
+Per-step host reads seconds: 0.00010195793583989143
+Final-only wait seconds: 2.7750153094530106e-05
 Added ledger row: {'label': 'new length sixteen', 'shape': [16], 'dtype': 'float32', 'observed_trace_delta': 1, 'result': 1240.0}
 Masked versus unmasked padded objective: 55.0 58.0
 Observed runtime-Python-branch tracing failure

@@ -4,6 +4,8 @@ Phase 10: Scientific computing · about 115 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Differentiate through a solver](https://www.tahabouhsine.com/jaxpathways/lesson-science-03.html).
+
 ## What you will be able to do
 
 - Fit a constrained physical parameter through an executed simulator.
@@ -282,7 +284,7 @@ visual_data={'panels':[{'kind':'line','x':indices,'xlabel':'completed updates','
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T17:45:35.092070+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T12:31:45.878322+00:00. JAX 0.9.2.
 
 ```text
 Initial/fitted rate: 1.4 0.7000000090128304
@@ -294,7 +296,7 @@ Initial/final loss: 0.11676630453561089 1.9484774169068916e-32
 Held-out RMSE: 4.572895313141112e-16 finer-grid RMSE: 7.282689372293896e-09
 Initial-time-only gradient: 0.0
 True rate: 0.7 perfect coarse Euler rate: 0.5906238205625731
-batch, median milliseconds, milliseconds per trajectory: [(1, 0.007791910320520401, 0.007791910320520401), (16, 0.02200016751885414, 0.0013750104699283838), (256, 0.05720788612961769, 0.0002234683051938191)]
+batch, median milliseconds, milliseconds per trajectory: [(1, 0.006416812539100647, 0.006416812539100647), (16, 0.005582813173532486, 0.00034892582334578037), (256, 0.03045797348022461, 0.00011897645890712738)]
 Changed true/recovered rate: 0.4 0.40000000054230433
 Recovered initial amplitude: 2.8000000000000003
 Noisy grid-search estimate: 0.7 residual MSE: 2.6000611439697964e-05

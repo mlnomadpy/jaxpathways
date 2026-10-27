@@ -4,6 +4,8 @@ Phase 14: Autodiff & JAX internals · about 130 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Custom derivative rules](https://www.tahabouhsine.com/jaxpathways/lesson-internals-03.html).
+
 ## What you will be able to do
 
 - Interpret literals, captured constants and variables in a supported flat jaxpr.
@@ -329,7 +331,7 @@ visual_data={'kind':'line','x':alphas.tolist(),'xlabel':'base-point displacement
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:09:01.722702+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T12:35:26.799908+00:00. JAX 0.9.2.
 
 ```text
 Supported primitives: ['sin', 'mul', 'add', 'reduce_sum']

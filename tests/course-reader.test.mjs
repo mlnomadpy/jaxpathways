@@ -206,8 +206,8 @@ test('downloaded reader renders every learner contract and provides a complete p
       }
     }
     assert.equal(lessons.length, 104, 'the printed reader covers all authored lessons');
-    assert.equal(contractCount, 305, 'all exercise and practice contracts are accounted for');
-    assert.equal(renderedContractCount, 305, 'all authored task contracts are rendered');
+    assert.equal(contractCount, 310, 'all exercise and practice contracts are accounted for');
+    assert.equal(renderedContractCount, 310, 'all authored task contracts are rendered');
     assert.equal(
       window.document.querySelectorAll('main img:not([src^="data:image/"])').length,
       0,

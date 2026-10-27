@@ -4,6 +4,8 @@ Phase 01: Arrays & pure functions · about 45 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Pure functions and explicit inputs](https://www.tahabouhsine.com/jaxpathways/lesson-arrays-03.html).
+
 ## What you will be able to do
 
 - Predict the values returned by functional indexed set and add.
@@ -27,8 +29,10 @@ Draw two arrows from the original array, one labeled set and one labeled add. If
 
 Do not infer allocation cost from that drawing. A compiler may reuse storage when it can preserve the program's semantics. First verify old/new values and duplicate-index behavior for the operation you use, then measure memory behavior separately.
 
+The index $i$ is zero-based. On $x=[2,4,6]$, the two expressions produce $[2,10,6]$ and $[2,14,6]$ from the same original value. The indicator $\mathbf{1}_{i=1}$ is $1$ only at the middle entry and $0$ elsewhere. This equation describes returned values, not whether the compiler allocates a new physical buffer.
+
 $$
-C_{i,k} = \sum_{j=1}^{N} A_{i,j} B_{j,k} = \text{einsum}(\texttt{'ij,jk->ik'}, A, B)
+x^{\mathrm{set}}_i=\begin{cases}10&i=1\\x_i&i\ne1\end{cases},\qquad x^{\mathrm{add}}_i=x_i+10\,\mathbf{1}_{i=1}
 $$
 
 ### Pause and reason
@@ -149,7 +153,7 @@ visual_data = {'kind': 'heatmap', 'values': jnp.stack([x, y, z]).tolist(), 'rows
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:03:28.331968+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T12:28:23.834497+00:00. JAX 0.9.2.
 
 ```text
 Original: [1. 2. 3. 4.]

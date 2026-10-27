@@ -83,6 +83,104 @@ print(
     held_loss,
 )
 
+# 4. Save the encoder, change one condition, and probe it
+# Changed mask schedule + learned saved encoder + frozen-probe transfer (synthetic)
+import hashlib, json, tempfile
+from pathlib import Path
+
+# Eight source-group images vary amplitude; class labels are reserved for the probe.
+transfer_amp = jnp.array([0.10,0.60,0.20,0.65,0.35,0.80,0.40,0.90])
+transfer_images = transfer_amp[:,None,None,None] + base_image[None]
+transfer_patches = patchify(transfer_images)
+train_ids, held_ids = ['g0','g1','g2','g3'], ['g4','g5','g6','g7']
+train_idx, held_idx = np.arange(4), np.arange(4,8)
+assert set(train_ids).isdisjoint(held_ids)
+# Each fit image gets one of two masks; across epochs the mask pattern alternates.
+mask_a = jnp.array([False,True,True,False])
+mask_b = jnp.array([True,False,False,True])
+mask_schedule = [mask_a, mask_b]
+key_e, key_d = jax.random.split(jax.random.key(19))
+enc = jax.random.normal(key_e,(8,4))*0.1
+# Decoder sees latent plus target patch position, never hidden pixels.
+dec = jax.random.normal(key_d,(8,16))*0.1
+
+def mae_loss_for(image_patches, enc, dec, mask):
+    visible = (~mask).astype(jnp.float32)
+    batch = len(image_patches)
+    pooled = jnp.sum(image_patches * visible[None,:,None],axis=1) / visible.sum()
+    encoder_input = jnp.concatenate([pooled, jnp.broadcast_to(visible,(batch,4))],axis=1)
+    z = jnp.tanh(encoder_input @ enc)
+    positions = jnp.eye(4)
+    # Position-specific decoder: latent features plus one-hot patch index -> 4 pixels.
+    pos_features = jnp.concatenate([jnp.broadcast_to(z[:,None,:],(batch,4,4)),
+                                    jnp.broadcast_to(positions[None,:,:],(batch,4,4))],axis=-1)
+    pred = pos_features @ dec
+    per_patch = jnp.mean((pred-image_patches)**2,axis=-1)
+    return jnp.sum(jnp.where(mask[None,:],per_patch,0.0))/ (batch*mask.sum())
+
+def mae_loss(enc, dec, mask):
+    return mae_loss_for(transfer_patches[train_idx],enc,dec,mask)
+
+# [4 latent + 4 positional] x 4 target pixels.
+dec = jax.random.normal(key_d,(8,4))*0.1
+for epoch in range(120):
+    mask = mask_schedule[epoch % 2]
+    value, (ge,gd) = jax.value_and_grad(mae_loss,argnums=(0,1))(enc,dec,mask)
+    enc, dec = enc - 0.08*ge, dec - 0.08*gd
+
+# Recompute both masks without updating and compare with a visible-mean decoder baseline.
+changed_mask_losses=[]
+held_visible_baselines=[]
+for mask in mask_schedule:
+    changed_mask_losses.append(float(mae_loss_for(transfer_patches[held_idx],enc,dec,mask)))
+    transfer_visible_mask=(~mask).astype(jnp.float32)
+    transfer_visible_mean=jnp.sum(transfer_patches[held_idx]*transfer_visible_mask[None,:,None],axis=1)/transfer_visible_mask.sum()
+    baseline=jnp.broadcast_to(transfer_visible_mean[:,None,:],transfer_patches[held_idx].shape)
+    held_visible_baselines.append(float(masked_mse(baseline,transfer_patches[held_idx],jnp.broadcast_to(mask,(len(held_idx),4)))))
+assert all(np.isfinite(changed_mask_losses))
+
+def frozen_encode(images_patches, mask):
+    visible=(~mask).astype(jnp.float32)
+    pooled=jnp.sum(images_patches*visible[None,:,None],axis=1)/visible.sum()
+    x=jnp.concatenate([pooled,jnp.broadcast_to(visible,(len(images_patches),4))],axis=1)
+    return jnp.tanh(x @ enc)
+
+# Save/reload exact encoder and decoder identity, then freeze encoder for probe fitting.
+processor_id='gray-4x4-range-raw-patchify-2-v1'
+source_split_id='synthetic-amplitude-v2:g0-g3/g4-g7'
+parameter_hash=hashlib.sha256(np.ascontiguousarray(enc).tobytes()+np.ascontiguousarray(dec).tobytes()).hexdigest()
+manifest={'model_id':'tiny-mask-aware-patch-encoder-v1','processor_id':processor_id,
+          'source_split_id':source_split_id,'objective':'hidden-patch-MSE',
+          'mask_schedule':'alternate center-pair and corner-pair; 50% hidden',
+          'fit_group_ids':train_ids,'heldout_group_ids':held_ids,'seed':19,'parameter_sha256':parameter_hash}
+output_dir = Path(tempfile.mkdtemp(prefix='jaxpathways-mim-encoder-'))
+artifact = output_dir / 'encoder.npz'
+np.savez(artifact,encoder=np.asarray(enc),decoder=np.asarray(dec),
+         manifest=np.array(json.dumps(manifest,sort_keys=True)))
+with np.load(artifact,allow_pickle=False) as saved:
+    loaded_enc=saved['encoder'].copy(); loaded_dec=saved['decoder'].copy()
+    loaded_manifest=json.loads(str(saved['manifest']))
+rehash=hashlib.sha256(np.ascontiguousarray(loaded_enc).tobytes()+np.ascontiguousarray(loaded_dec).tobytes()).hexdigest()
+assert loaded_manifest==manifest and rehash==parameter_hash
+checkpoint_hash=hashlib.sha256(artifact.read_bytes()).hexdigest()
+identity_path=output_dir/'identity.json'
+identity={**manifest,'checkpoint_sha256':checkpoint_hash}
+identity_path.write_text(json.dumps(identity,sort_keys=True))
+assert hashlib.sha256(artifact.read_bytes()).hexdigest()==identity['checkpoint_sha256']
+frozen_before=loaded_enc.copy()
+z=np.asarray(frozen_encode(transfer_patches,mask_a))
+labels=(np.asarray(transfer_amp)>=0.5).astype(int)
+design=np.c_[z[train_idx],np.ones(len(train_idx))]
+probe=np.linalg.solve(design.T@design+1e-3*np.eye(design.shape[1]),design.T@labels[train_idx])
+pred=(np.c_[z[held_idx],np.ones(len(held_idx))]@probe>=0.5).astype(int)
+frozen_probe_accuracy=float(np.mean(pred==labels[held_idx]))
+np.testing.assert_array_equal(loaded_enc,frozen_before)
+print('MIM held-out alternating-mask losses / visible-mean baseline / frozen held-out probe accuracy:',
+      changed_mask_losses, held_visible_baselines, frozen_probe_accuracy)
+print('Artifact path:', artifact)
+print('Identity sidecar:', identity_path)
+print('Saved identity:',manifest['model_id'],manifest['processor_id'],manifest['source_split_id'])
+
 # Step 1 — 1. Define patch layout and masked error: Trace the transpose against the numbered top-left patch.
 import jax
 import jax.numpy as jnp
@@ -198,6 +296,104 @@ np.testing.assert_allclose(
 )
 np.testing.assert_allclose(jax.grad(ambiguity_loss)(1.0), 0.0, atol=1e-7)
 print('Ambiguous target MSE at predictions 0, 1, 2: 2, 1, 2')
+
+# Experiment: Move the hidden patches, save the recipe identity, and probe frozen visible inputs
+# Changed mask schedule + learned saved encoder + frozen-probe transfer (synthetic)
+import hashlib, json, tempfile
+from pathlib import Path
+
+# Eight source-group images vary amplitude; class labels are reserved for the probe.
+transfer_amp = jnp.array([0.10,0.60,0.20,0.65,0.35,0.80,0.40,0.90])
+transfer_images = transfer_amp[:,None,None,None] + base_image[None]
+transfer_patches = patchify(transfer_images)
+train_ids, held_ids = ['g0','g1','g2','g3'], ['g4','g5','g6','g7']
+train_idx, held_idx = np.arange(4), np.arange(4,8)
+assert set(train_ids).isdisjoint(held_ids)
+# Each fit image gets one of two masks; across epochs the mask pattern alternates.
+mask_a = jnp.array([False,True,True,False])
+mask_b = jnp.array([True,False,False,True])
+mask_schedule = [mask_a, mask_b]
+key_e, key_d = jax.random.split(jax.random.key(19))
+enc = jax.random.normal(key_e,(8,4))*0.1
+# Decoder sees latent plus target patch position, never hidden pixels.
+dec = jax.random.normal(key_d,(8,16))*0.1
+
+def mae_loss_for(image_patches, enc, dec, mask):
+    visible = (~mask).astype(jnp.float32)
+    batch = len(image_patches)
+    pooled = jnp.sum(image_patches * visible[None,:,None],axis=1) / visible.sum()
+    encoder_input = jnp.concatenate([pooled, jnp.broadcast_to(visible,(batch,4))],axis=1)
+    z = jnp.tanh(encoder_input @ enc)
+    positions = jnp.eye(4)
+    # Position-specific decoder: latent features plus one-hot patch index -> 4 pixels.
+    pos_features = jnp.concatenate([jnp.broadcast_to(z[:,None,:],(batch,4,4)),
+                                    jnp.broadcast_to(positions[None,:,:],(batch,4,4))],axis=-1)
+    pred = pos_features @ dec
+    per_patch = jnp.mean((pred-image_patches)**2,axis=-1)
+    return jnp.sum(jnp.where(mask[None,:],per_patch,0.0))/ (batch*mask.sum())
+
+def mae_loss(enc, dec, mask):
+    return mae_loss_for(transfer_patches[train_idx],enc,dec,mask)
+
+# [4 latent + 4 positional] x 4 target pixels.
+dec = jax.random.normal(key_d,(8,4))*0.1
+for epoch in range(120):
+    mask = mask_schedule[epoch % 2]
+    value, (ge,gd) = jax.value_and_grad(mae_loss,argnums=(0,1))(enc,dec,mask)
+    enc, dec = enc - 0.08*ge, dec - 0.08*gd
+
+# Recompute both masks without updating and compare with a visible-mean decoder baseline.
+changed_mask_losses=[]
+held_visible_baselines=[]
+for mask in mask_schedule:
+    changed_mask_losses.append(float(mae_loss_for(transfer_patches[held_idx],enc,dec,mask)))
+    transfer_visible_mask=(~mask).astype(jnp.float32)
+    transfer_visible_mean=jnp.sum(transfer_patches[held_idx]*transfer_visible_mask[None,:,None],axis=1)/transfer_visible_mask.sum()
+    baseline=jnp.broadcast_to(transfer_visible_mean[:,None,:],transfer_patches[held_idx].shape)
+    held_visible_baselines.append(float(masked_mse(baseline,transfer_patches[held_idx],jnp.broadcast_to(mask,(len(held_idx),4)))))
+assert all(np.isfinite(changed_mask_losses))
+
+def frozen_encode(images_patches, mask):
+    visible=(~mask).astype(jnp.float32)
+    pooled=jnp.sum(images_patches*visible[None,:,None],axis=1)/visible.sum()
+    x=jnp.concatenate([pooled,jnp.broadcast_to(visible,(len(images_patches),4))],axis=1)
+    return jnp.tanh(x @ enc)
+
+# Save/reload exact encoder and decoder identity, then freeze encoder for probe fitting.
+processor_id='gray-4x4-range-raw-patchify-2-v1'
+source_split_id='synthetic-amplitude-v2:g0-g3/g4-g7'
+parameter_hash=hashlib.sha256(np.ascontiguousarray(enc).tobytes()+np.ascontiguousarray(dec).tobytes()).hexdigest()
+manifest={'model_id':'tiny-mask-aware-patch-encoder-v1','processor_id':processor_id,
+          'source_split_id':source_split_id,'objective':'hidden-patch-MSE',
+          'mask_schedule':'alternate center-pair and corner-pair; 50% hidden',
+          'fit_group_ids':train_ids,'heldout_group_ids':held_ids,'seed':19,'parameter_sha256':parameter_hash}
+output_dir = Path(tempfile.mkdtemp(prefix='jaxpathways-mim-encoder-'))
+artifact = output_dir / 'encoder.npz'
+np.savez(artifact,encoder=np.asarray(enc),decoder=np.asarray(dec),
+         manifest=np.array(json.dumps(manifest,sort_keys=True)))
+with np.load(artifact,allow_pickle=False) as saved:
+    loaded_enc=saved['encoder'].copy(); loaded_dec=saved['decoder'].copy()
+    loaded_manifest=json.loads(str(saved['manifest']))
+rehash=hashlib.sha256(np.ascontiguousarray(loaded_enc).tobytes()+np.ascontiguousarray(loaded_dec).tobytes()).hexdigest()
+assert loaded_manifest==manifest and rehash==parameter_hash
+checkpoint_hash=hashlib.sha256(artifact.read_bytes()).hexdigest()
+identity_path=output_dir/'identity.json'
+identity={**manifest,'checkpoint_sha256':checkpoint_hash}
+identity_path.write_text(json.dumps(identity,sort_keys=True))
+assert hashlib.sha256(artifact.read_bytes()).hexdigest()==identity['checkpoint_sha256']
+frozen_before=loaded_enc.copy()
+z=np.asarray(frozen_encode(transfer_patches,mask_a))
+labels=(np.asarray(transfer_amp)>=0.5).astype(int)
+design=np.c_[z[train_idx],np.ones(len(train_idx))]
+probe=np.linalg.solve(design.T@design+1e-3*np.eye(design.shape[1]),design.T@labels[train_idx])
+pred=(np.c_[z[held_idx],np.ones(len(held_idx))]@probe>=0.5).astype(int)
+frozen_probe_accuracy=float(np.mean(pred==labels[held_idx]))
+np.testing.assert_array_equal(loaded_enc,frozen_before)
+print('MIM held-out alternating-mask losses / visible-mean baseline / frozen held-out probe accuracy:',
+      changed_mask_losses, held_visible_baselines, frozen_probe_accuracy)
+print('Artifact path:', artifact)
+print('Identity sidecar:', identity_path)
+print('Saved identity:',manifest['model_id'],manifest['processor_id'],manifest['source_split_id'])
 
 # Reference solution. Try the exercise before reading this.
 # Exercise solution

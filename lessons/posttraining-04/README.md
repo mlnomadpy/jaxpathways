@@ -4,6 +4,8 @@ Phase 18: Post-training: SFT, LoRA, reward models and RLHF · about 105 minutes 
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Learn a reward model from pairwise preferences](https://www.tahabouhsine.com/jaxpathways/lesson-posttraining-03.html); [rl-01](https://www.tahabouhsine.com/jaxpathways/lesson-rl-01.html); [rl-02](https://www.tahabouhsine.com/jaxpathways/lesson-rl-02.html); [rl-03](https://www.tahabouhsine.com/jaxpathways/lesson-rl-03.html); [rl-04](https://www.tahabouhsine.com/jaxpathways/lesson-rl-04.html).
+
 ## What you will be able to do
 
 - Keep three identities separate
@@ -328,7 +330,7 @@ visual_data={"panels":[*visual_data.get("panels",[visual_data]),extra_panel]}
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:11:38.424626+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T14:08:59.633448+00:00. JAX 0.9.2.
 
 ```text
 Reward initial/final and final KL: 0.28191882371902466 1.9185447692871094 0.7824773192405701

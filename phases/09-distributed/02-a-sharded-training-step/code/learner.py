@@ -1,4 +1,4 @@
-"""A sharded training step · learner-only exercises (3/3 contracts ready)"""
+"""A sharded training step · learner-only exercises (4/4 contracts ready)"""
 
 # Exercise: Run a changed target/initial-state update, then diagnose the factor-of-four local-mean bug and repair uneven-batch aggregation.
 
@@ -83,3 +83,35 @@ def compare_local_mean_gradients(feature_shards, label_shards, weights):
     # TODO: calculate each local mean gradient and both aggregations.
     # Also return an example-count-weighted aggregation.
     raise NotImplementedError("Diagnose local-mean scaling and size-weight the shards")
+
+
+
+# Change the mesh-sized regression fixture (Transfer):
+# Change the padded batch to twelve rows and use a 2x2 mesh. Choose seven valid rows. State the valid counts on each data shard, preserve the parameter-column and momentum placement, then compare loss, gradient and one update with the independent unsharded formula. Report local shapes and bytes.
+
+# Inputs:
+# - A 2x2 logical CPU mesh, padded eight-row feature and target arrays, a valid-row mask, a (4,4) weight matrix and matching momentum.
+# - Two mask cases: five valid examples (counts 4/1) and three valid examples (counts 3/0).
+
+# Outputs:
+# - Per-device local shapes and float32 bytes for batch, target, parameter, momentum and gradient shards.
+# - Masked loss, gradient, updated weights and updated momentum checked against an independent unsharded calculation.
+
+# Invariants to check:
+# - X uses P("data",None); W and momentum use P(None,"model"); prediction and target use P("data","model").
+# - The loss divides by valid-example count times output width.
+# - An empty local shard contributes zero numerator and zero valid count.
+
+# Hints:
+# - Use jax.value_and_grad for the global masked objective and an explicitly sharded jax.jit call.
+# - For 4/1 counts, compare equal averaging of local means with the correctly weighted global mean.
+
+import jax
+import jax.numpy as jnp
+import numpy as np
+
+def parameter_sharded_update(mesh, features, targets, weights, momentum, valid_rows):
+    # TODO: make NamedSharding objects for data, model, targets, and parameters.
+    # Place inputs, differentiate the masked global mean, and apply one momentum step.
+    # Return loss, gradient, new weights, new momentum, and a per-device byte ledger.
+    raise NotImplementedError("Complete and verify the 2x2 parameter-sharded update")

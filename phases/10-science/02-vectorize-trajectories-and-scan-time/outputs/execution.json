@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "lessonId": "science-02",
   "contentHash": "df1990f04e64d18a8b09b9ab313123c2dd67bf06ed82b7fe207394913f3ed406",
-  "executedAt": "2026-10-21T16:06:56.419136+00:00",
+  "executedAt": "2026-10-27T12:31:16.519322+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -59,7 +59,7 @@
       "outputs": []
     },
     {
-      "sourceHash": "25df6d662f9d3f0c4e984c6a201f79fa0cfd7a2633dc4b0773dfba6c2dd4ee6c",
+      "sourceHash": "53dc08a479da44f2b1718bf964cd5c4d3e3305811c536df9d501b1833a6e3476",
       "outputs": [
         {
           "output_type": "display_data",

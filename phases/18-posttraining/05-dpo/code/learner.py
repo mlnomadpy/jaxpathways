@@ -1,4 +1,4 @@
-"""Direct preference optimization and reference-corrected margins · learner-only exercises (3/3 contracts ready)"""
+"""Direct preference optimization and reference-corrected margins · learner-only exercises (4/4 contracts ready)"""
 
 # Exercise: Swap chosen and rejected IDs after training and verify that the loss rises.
 
@@ -71,3 +71,40 @@ import numpy as np
 def derive_one_pair_logit_gradient(logits, reference_logps, chosen, rejected, beta):
     # TODO: derive the corrected pair margin and compare the three logit derivatives.
     raise NotImplementedError
+
+
+
+# Full-workspace transfer: score saved sequences and run one preference update (Transfer):
+# Load the retained foundations inference package after verifying its pinned parameter and tokenizer hashes. Implement summed response log probabilities with shifted targets, a prompt-excluding response mask, EOS included, and right-padding excluded. Compare one pair by hand and against NumPy. Use two synthetic training pairs for one small DPO gradient step. Record held-out preference and disagreement-slice baselines plus a source-retention baseline before updating; report their changes afterward. This is a bounded teaching fixture, not quality evidence. This advanced practice needs the full repository checkout and the package/source files listed in the required handoff section; the regular lesson baseline is still self-contained.
+
+# Inputs:
+# - The retained foundation inference package and its package manifest
+# - Pinned tokenizer bytes and model configuration
+# - Two synthetic training preference pairs with exact prompt, chosen and rejected strings
+# - Held-out unanimous and disagreement pairs plus a source-retention prompt/response, all fixed before the update
+
+# Outputs:
+# - Summed chosen/rejected response-plus-EOS log probabilities from shifted logits
+# - Independent NumPy aggregation for an unequal-length pair
+# - Pre-update and post-update held-out preference, disagreement-slice and retention results
+# - A no-update replay of the saved PPO held-out record at reward scales 0.5, 1 and 2, retaining the failed strict reward floor and response-match count.
+# - An ambiguous-slice metric that does not assign a 50/50 vote to either hard label.
+
+# Invariants to check:
+# - Verify both pinned params and tokenizer hashes before loading
+# - Keep the saved model and tokenizer identity matched
+# - Mask target positions only, beginning at the first response token and including EOS
+# - Exclude prompt targets and PAD targets; sum rather than average response log probabilities
+# - Use the identical frozen reference for all reference scores
+# - Capture evaluation baselines before the single training update
+# - For a 0.5 vote, mark the pair ambiguous and omit hard accuracy; report probability or expected agreement against the vote fraction.
+
+# Hints:
+# - Use model.logits on right-padded full prompt-plus-response token IDs with PAD=0 as invalid positions.
+# - Shift target IDs to tokens[:, 1:] and logits to logits[:, :-1].
+# - Compute the response mask over target positions, not token input positions.
+# - Implement one fixed DPO update and print held-out, disagreement and retention deltas separately.
+
+# Follow the runnable reference solution above, then change only one declared choice: beta or step size.
+# Keep the same package hashes, fixed pair split, masks, and before-update baselines.
+raise NotImplementedError

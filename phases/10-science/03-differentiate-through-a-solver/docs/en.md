@@ -4,6 +4,8 @@ Phase 10: Scientific computing · about 105 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Vectorize trajectories and scan time](https://www.tahabouhsine.com/jaxpathways/lesson-science-02.html).
+
 ## What you will be able to do
 
 - Derive an independent discrete solver sensitivity.
@@ -239,7 +241,7 @@ visual_data={'kind':'line','x':counts,'xlabel':'RK4 steps over two seconds','yla
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T17:45:06.397716+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T12:31:22.132969+00:00. JAX 0.9.2.
 
 ```text
 Autodiff: -0.9863878096749447 discrete oracle: -0.9863878096749429 continuous oracle: -0.9863878557664257

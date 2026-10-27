@@ -4,6 +4,8 @@ Phase 04: Math & optimization · about 90 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Optimize with Optax](https://www.tahabouhsine.com/jaxpathways/lesson-optimization-04.html).
+
 ## What you will be able to do
 
 - Explain Adam’s moments, inspect clipping and schedule order, and compare optimizers with a controlled update budget.
@@ -207,7 +209,7 @@ visual_data = {'kind': 'line', 'x': list(range(51)), 'xlabel': 'completed update
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:04:46.687346+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T12:29:25.075396+00:00. JAX 0.9.2.
 
 ```text
 step / update: 1 [-0.09999993  0.09999993]

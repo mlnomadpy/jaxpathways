@@ -68,7 +68,7 @@ Status: authored lesson with CPU exercise.
 
 **Intended outcome:** Implement scaled dot-product attention and test its output shape.
 
-**Evidence:** Save the Q/K/V axis diagram, uniform hand calculation, NumPy nonuniform reference, paired permutation check, and wrong-axis repair.
+**Evidence:** Keep the Q/K/V axis diagram, zero-query hand mean, independent nonuniform fixture and NumPy output, paired permutation invariance and one value-only permutation result. Explain the zero-query exception and repair a wrong softmax axis.
 
 **Checkpoint:** Which dimension should softmax normalize for one query to combine all key/value pairs?
 

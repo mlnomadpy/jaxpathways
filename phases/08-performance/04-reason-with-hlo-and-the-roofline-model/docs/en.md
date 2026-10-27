@@ -4,6 +4,8 @@ Phase 08: Performance diagnosis · about 95 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Read an XProf trace](https://www.tahabouhsine.com/jaxpathways/lesson-performance-03.html).
+
 ## What you will be able to do
 
 - Locate matrix multiplication and activation in StableHLO.
@@ -250,17 +252,17 @@ visual_data={'kind':'line','x':plot_intensity.tolist(),'xlabel':'minimum-traffic
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:06:28.152905+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T12:31:00.658855+00:00. JAX 0.9.2.
 
 ```text
 StableHLO operations present: dot_general and tanh
-Compiler estimates (backend-specific): {'bytes accessedout{}': 2048.0, 'utilization1{}': 1.0, 'utilization0{}': 2.0, 'transcendentals': 256.0, 'flops': 8192.0, 'bytes accessed1{}': 512.0, 'bytes accessed': 5632.0, 'bytes accessed0{}': 3072.0}
-Local CPU samples seconds: [1.9958242774009705e-05, 1.5458092093467712e-05, 1.0792165994644165e-05, 8.750241249799728e-06, 8.20821151137352e-06]
+Compiler estimates (backend-specific): {'bytes accessedout{}': 2048.0, 'utilization0{}': 2.0, 'bytes accessed': 5632.0, 'transcendentals': 256.0, 'bytes accessed1{}': 512.0, 'bytes accessed0{}': 3072.0, 'utilization1{}': 1.0, 'flops': 8192.0}
+Local CPU samples seconds: [2.3042317479848862e-05, 1.933285966515541e-05, 1.2417323887348175e-05, 1.1750031262636185e-05, 9.499955922365189e-06]
 Matmul-only accounting: {'flops': 8192, 'minimum_bytes': 3584, 'flops_per_byte': 2.2857142857142856}
 Hypothetical ceilings GFLOP/s: [26.666666666666664, 53.33333333333333, 100.0, 100.0, 100.0]
 StableHLO operations present: dot_general and tanh
-Compiler estimates (backend-specific): {'bytes accessed0{}': 3072.0, 'utilization1{}': 1.0, 'bytes accessedout{}': 2048.0, 'utilization0{}': 2.0, 'transcendentals': 256.0, 'flops': 8192.0, 'bytes accessed1{}': 512.0, 'bytes accessed': 5632.0}
-Local CPU samples seconds: [5.254102870821953e-05, 4.5332591980695724e-05, 4.333304241299629e-05, 4.616566002368927e-05, 4.270905628800392e-05]
+Compiler estimates (backend-specific): {'utilization1{}': 1.0, 'utilization0{}': 2.0, 'bytes accessed0{}': 3072.0, 'bytes accessed1{}': 512.0, 'bytes accessedout{}': 2048.0, 'bytes accessed': 5632.0, 'transcendentals': 256.0, 'flops': 8192.0}
+Local CPU samples seconds: [2.4166889488697052e-05, 1.9958708435297012e-05, 3.516674041748047e-05, 9.366683661937714e-05, 0.0002747909165918827]
 Matmul-only accounting: {'flops': 8192, 'minimum_bytes': 3584, 'flops_per_byte': 2.2857142857142856}
 Hypothetical ceilings GFLOP/s: [26.666666666666664, 53.33333333333333, 100.0, 100.0, 100.0]
 Ceilings with twice minimum traffic GFLOP/s: [13.333333333333332, 26.666666666666664, 53.33333333333333, 100.0, 100.0]

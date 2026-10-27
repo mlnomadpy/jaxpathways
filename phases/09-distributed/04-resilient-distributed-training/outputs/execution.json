@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "lessonId": "distributed-04",
   "contentHash": "a07b5c3037b8b35a11e45e2f62ac33eedc89bf9f1870c68640a83767e9f6f079",
-  "executedAt": "2026-10-21T16:06:46.320262+00:00",
+  "executedAt": "2026-10-27T12:31:11.498270+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 4,
@@ -11,7 +11,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Recorded backend/processes/devices: cpu 1 4\nRestored step/cursor: 1 8\nNext sample IDs across epoch boundary: [[12, 5, 4, 1, 8, 13, 2, 11], [9, 0, 7, 15, 11, 13, 8, 14], [1, 6, 5, 4, 3, 12, 2, 10]]\nUninterrupted losses: [0.5069587826728821, 0.19637340307235718, 0.1798383891582489]\nRestored losses: [0.5069587826728821, 0.19637340307235718, 0.1798383891582489]\nCheckpoint: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-distributed-recovery-z_x8a3i8/step-one\nRecorded backend/processes/devices: cpu 1 4\nRestored step/cursor: 1 8\nNext sample IDs across epoch boundary: [[12, 5, 4, 1, 8, 13, 2, 11], [9, 0, 7, 15, 11, 13, 8, 14], [1, 6, 5, 4, 3, 12, 2, 10]]\nUninterrupted losses: [0.5069587826728821, 0.19637340307235718, 0.1798383891582489]\nRestored losses: [0.5069587826728821, 0.19637340307235718, 0.1798383891582489]\nCheckpoint: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-distributed-recovery-6pawiuyy/step-one\nSame next sample IDs, different weights after missing momentum: 0.0195157527923584\nFive resumed transitions and all addressable parameter replicas agree.\nCurrent-epoch batch matches; next-epoch batch exposes the wrong key.\nPASS: distributed-04\n",
+  "stdout": "Recorded backend/processes/devices: cpu 1 4\nRestored step/cursor: 1 8\nNext sample IDs across epoch boundary: [[12, 5, 4, 1, 8, 13, 2, 11], [9, 0, 7, 15, 11, 13, 8, 14], [1, 6, 5, 4, 3, 12, 2, 10]]\nUninterrupted losses: [0.5069587826728821, 0.19637340307235718, 0.1798383891582489]\nRestored losses: [0.5069587826728821, 0.19637340307235718, 0.1798383891582489]\nCheckpoint: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-distributed-recovery-f7mayvve/step-one\nRecorded backend/processes/devices: cpu 1 4\nRestored step/cursor: 1 8\nNext sample IDs across epoch boundary: [[12, 5, 4, 1, 8, 13, 2, 11], [9, 0, 7, 15, 11, 13, 8, 14], [1, 6, 5, 4, 3, 12, 2, 10]]\nUninterrupted losses: [0.5069587826728821, 0.19637340307235718, 0.1798383891582489]\nRestored losses: [0.5069587826728821, 0.19637340307235718, 0.1798383891582489]\nCheckpoint: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-distributed-recovery-1e5n23eg/step-one\nSame next sample IDs, different weights after missing momentum: 0.0195157527923584\nFive resumed transitions and all addressable parameter replicas agree.\nCurrent-epoch batch matches; next-epoch batch exposes the wrong key.\nPASS: distributed-04\n",
   "notebookCells": [
     {
       "sourceHash": "4f6fa5239a95ecd7382f10e5a87a369476f98e28794d7dc947f03a07a5f03103",
@@ -49,7 +49,7 @@
             "Next sample IDs across epoch boundary: [[12, 5, 4, 1, 8, 13, 2, 11], [9, 0, 7, 15, 11, 13, 8, 14], [1, 6, 5, 4, 3, 12, 2, 10]]\n",
             "Uninterrupted losses: [0.5069587826728821, 0.19637340307235718, 0.1798383891582489]\n",
             "Restored losses: [0.5069587826728821, 0.19637340307235718, 0.1798383891582489]\n",
-            "Checkpoint: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-distributed-recovery-kadqytl0/step-one\n"
+            "Checkpoint: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-distributed-recovery-9rq4m352/step-one\n"
           ]
         }
       ]
@@ -66,7 +66,7 @@
             "Next sample IDs across epoch boundary: [[12, 5, 4, 1, 8, 13, 2, 11], [9, 0, 7, 15, 11, 13, 8, 14], [1, 6, 5, 4, 3, 12, 2, 10]]\n",
             "Uninterrupted losses: [0.5069587826728821, 0.19637340307235718, 0.1798383891582489]\n",
             "Restored losses: [0.5069587826728821, 0.19637340307235718, 0.1798383891582489]\n",
-            "Checkpoint: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-distributed-recovery-u20jll6c/step-one\n"
+            "Checkpoint: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-distributed-recovery-6wq84v3z/step-one\n"
           ]
         }
       ]
@@ -76,7 +76,7 @@
       "outputs": []
     },
     {
-      "sourceHash": "25df6d662f9d3f0c4e984c6a201f79fa0cfd7a2633dc4b0773dfba6c2dd4ee6c",
+      "sourceHash": "53dc08a479da44f2b1718bf964cd5c4d3e3305811c536df9d501b1833a6e3476",
       "outputs": [
         {
           "output_type": "display_data",

@@ -55,3 +55,6 @@ projects/posttraining-audit/transformer_lineage/check.py
 projects/posttraining-audit/transformer_lineage/solution.py
 projects/posttraining-audit/transformer_lineage/starter.py
 tests/test_posttraining_appendix_distribution.py
+tests/test_content_math_contracts.py
+tests/test_figure_tables.py
+phases/15-deployment/08-pytorch-to-flax-numerical-parity/labs/transformer_bridge.py

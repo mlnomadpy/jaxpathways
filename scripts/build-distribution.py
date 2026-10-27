@@ -399,6 +399,12 @@ book_guides = json.loads(subprocess.check_output(["node", "scripts/render-book-g
 solutions=[]
 def chapter(lesson):
     body = f'<h1>{esc(lesson["title"])}</h1><p>{esc(lesson["objective"])}</p>'
+    if lesson.get('prerequisites'):
+        preparation = []
+        for dependency in lesson['prerequisites']:
+            target = next(item for item in lessons if item['id'] == dependency)
+            preparation.append('<a href="chapter-'+str(lessons.index(target))+'.xhtml">'+esc(target['title'])+'</a>')
+        body += '<nav aria-label="Chapter preparation"><strong>Before this chapter:</strong> '+'; '.join(preparation)+'</nav>'
     body += maturity('lessons', lesson['id'])
     c = lesson['content']
     if c.get('setupBundle'):
@@ -604,6 +610,9 @@ for manifest in json.loads((ROOT/'curriculum/projects.json').read_text()):
 workspace_files.update(c01_public_paths)
 workspace_files.update(c02_files)
 workspace_files.update(c03_files)
+# The lesson-level saved-decoder handoffs require the exact already-public parent
+# package, including binary weights excluded by the text-file traversal above.
+workspace_files.update(posttraining_parent_files(ROOT).values())
 for directory in ('public/figures','public/executions','public/guides'):
     workspace_files.update(path for path in (ROOT/directory).glob('*') if path.is_file())
 start_guide = '''# Start JAX Pathways with your agent

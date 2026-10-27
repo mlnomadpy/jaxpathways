@@ -196,7 +196,7 @@ visual_data = {'kind':'line','x':times.tolist(),'xlabel':'time (seconds)','ylabe
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:06:51.212821+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T12:31:13.891802+00:00. JAX 0.9.2.
 
 ```text
 Euler final: 0.3570125000000001 analytic final: 0.493193927883213

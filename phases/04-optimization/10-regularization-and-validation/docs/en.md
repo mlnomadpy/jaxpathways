@@ -4,6 +4,8 @@ Phase 04: Math & optimization · about 75 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Probability, likelihood, and stable losses](https://www.tahabouhsine.com/jaxpathways/lesson-optimization-09.html).
+
 ## What you will be able to do
 
 - Derive a ridge solution, distinguish data loss from penalized loss, and select a penalty using held-out data.
@@ -171,7 +173,7 @@ visual_data = {'kind': 'line', 'x': grid.tolist(), 'xlabel': 'ridge penalty', 'y
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:04:33.960271+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T12:29:14.298981+00:00. JAX 0.9.2.
 
 ```text
 train / validation / objective: 1.0 0.0 3.0

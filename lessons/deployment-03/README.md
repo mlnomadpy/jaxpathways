@@ -4,6 +4,8 @@ Phase 15: Deployment, interoperability & edge AI · about 110 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Convert PyTorch weights to Flax and locate numerical errors](https://www.tahabouhsine.com/jaxpathways/lesson-deployment-08.html).
+
 ## What you will be able to do
 
 - Serialize and reload a fixed-shape JAX inference computation.
@@ -197,7 +199,7 @@ visual_data = {'kind': 'bar', 'labels': ['score 0', 'score 1'], 'ylabel': 'outpu
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:09:29.454436+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T12:40:32.213147+00:00. JAX 0.9.2.
 
 ```text
 Verified serialized bytes: 1172

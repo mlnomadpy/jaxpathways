@@ -4,6 +4,8 @@ Phase 04: Math & optimization · about 80 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Vectors, norms, and projections](https://www.tahabouhsine.com/jaxpathways/lesson-optimization-05.html).
+
 ## What you will be able to do
 
 - Map one row to one prediction
@@ -181,7 +183,7 @@ visual_data = {'kind': 'bar', 'labels': ['observation 0', 'observation 1', 'obse
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:04:00.462972+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T12:28:50.457332+00:00. JAX 0.9.2.
 
 ```text
 Predictions: [3. 0. 2.]

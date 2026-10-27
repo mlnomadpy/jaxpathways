@@ -1,0 +1,10 @@
+file:///private/tmp/jaxpathways-content-repairs-review/scripts/qualify-book-print.mjs:157
+        throw new Error(
+              ^
+
+Error: Mechanism print intro is split across pages: The specialization key separates changing data from program choices must share a page with its Predict label and diagram caption
+    at inspectPdf (file:///private/tmp/jaxpathways-content-repairs-review/scripts/qualify-book-print.mjs:157:15)
+    at qualifyBookPrint (file:///private/tmp/jaxpathways-content-repairs-review/scripts/qualify-book-print.mjs:430:25)
+    at async file:///private/tmp/jaxpathways-content-repairs-review/scripts/qualify-book-print.mjs:513:3
+
+Node.js v22.22.3

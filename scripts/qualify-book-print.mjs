@@ -55,7 +55,12 @@ export function parseQualificationOptions(argv) {
 /** @param {string} pdfPath */
 export function inspectPdf(
   pdfPath,
-  { expectedVisuals = 0, expectedMechanismTitles = [], expectedAppendixFigure = false } = {},
+  {
+    expectedVisuals = 0,
+    expectedMechanismTitles = [],
+    expectedMechanismCaptions = {},
+    expectedAppendixFigure = false,
+  } = {},
 ) {
   const info = execFileSync('pdfinfo', [pdfPath], { encoding: 'utf8' });
   const pageCount = Number(info.match(/^Pages:\s+(\d+)$/m)?.[1]);
@@ -150,7 +155,9 @@ export function inspectPdf(
       const titleIndex = pageText.indexOf(normalizedTitle);
       const predictionIndex = pageText.indexOf('Predict:', titleIndex + normalizedTitle.length);
       const captionIndex = pageText.indexOf(
-        'Architecture and dataflow mechanism diagram.',
+        (expectedMechanismCaptions[title] || 'Architecture and dataflow mechanism diagram.')
+          .replace(/\s+/g, ' ')
+          .trim(),
         predictionIndex + 'Predict:'.length,
       );
       if (predictionIndex < 0 || captionIndex < 0) {
@@ -292,6 +299,15 @@ export async function qualifyBookPrint(argv = process.argv.slice(2)) {
             article.querySelectorAll('.lesson-mechanism > .print-visual-intro h3'),
             (heading) => heading.textContent.trim(),
           ),
+          mechanismCaptions: Object.fromEntries(
+            Array.from(
+              article.querySelectorAll('.lesson-mechanism > .print-visual-intro'),
+              (figure) => [
+                figure.querySelector('h3').textContent.trim(),
+                figure.querySelector('figcaption').textContent.trim(),
+              ],
+            ),
+          ),
           printedAppendix: article.querySelector('.print-solutions')?.id || null,
         }));
         const appendixSection = all
@@ -348,6 +364,10 @@ export async function qualifyBookPrint(argv = process.argv.slice(2)) {
           documentArticleCount: articles.length,
           visualIntroCount: metadata.reduce((sum, article) => sum + article.visualIntros, 0),
           mechanismTitles: metadata.flatMap((article) => article.mechanismTitles),
+          mechanismCaptions: Object.assign(
+            {},
+            ...metadata.map((article) => article.mechanismCaptions),
+          ),
           appendixFigure,
         };
       },
@@ -430,6 +450,7 @@ export async function qualifyBookPrint(argv = process.argv.slice(2)) {
       const inspected = inspectPdf(pdfPath, {
         expectedVisuals: selection.visualIntroCount,
         expectedMechanismTitles: selection.mechanismTitles,
+        expectedMechanismCaptions: selection.mechanismCaptions,
         expectedAppendixFigure: Boolean(selection.appendixFigure),
       });
       records.push({

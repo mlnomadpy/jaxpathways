@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "operations-01",
-  "contentHash": "4b14ce303c7f7fb80ccee0f1de2e032091f78b701fae25fcdfb4ce49c932288f",
-  "rendererHash": "a1bd5b648f4731ae5d5f0a24811c2540d1a0a132149ce589d17c4113509cbedf",
+  "contentHash": "63e9efaf97ed596f6a450ca6707ed04ad1c8d576a10b8514a79b21f15d044865",
+  "rendererHash": "17e3bbad72ee4c43425845aaee76b86b85e84750551278be03d8c16842f4dc63",
   "kind": "executed",
-  "generatedAt": "2026-10-21T16:05:56.508302+00:00",
+  "generatedAt": "2026-10-27T12:19:27.241796+00:00",
   "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",
@@ -27,9 +27,9 @@
       {
         "label": "actual local process",
         "y": [
-          0.7070699166506529,
-          0.5631282920949161,
-          6.012425750028342
+          0.6014182916842401,
+          0.4091038750484586,
+          6.009296500124037
         ]
       }
     ]

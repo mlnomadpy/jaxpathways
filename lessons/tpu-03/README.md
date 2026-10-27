@@ -9,7 +9,7 @@ This worked reference is validated on CPU. Accelerator compatibility requires a 
 - Compare Google Cloud TPU generations (`v5e`, `v5p`, `v6e` Trillium, and Ironwood) by HBM capacity, HBM bandwidth, and MXU BF16 throughput.
 - Calculate the Roofline ridge point (`bf16_tflops / bw_gbs`) in FLOPs per byte for each TPU generation.
 - Compute training-state and KV-cache HBM from explicit tensor byte counts, including master weights, compute weights, gradients, and Adam moments.
-- Select the minimum single-host or Pod TPU slice that fits a given model's training state with activation headroom.
+- Make per-device training-state sizing decisions for replicated or explicitly sharded placement, then size inference KV cache separately with headroom.
 
 ## The problem
 
@@ -25,19 +25,21 @@ The ridge point is peak BF16 FLOP/s divided by HBM bandwidth. It is a theoretica
 
 For this lesson, the full-FP32 training-state ledger is 4 bytes/parameter for weights + 4 for gradients + 4 each for Adam first and second moments = 16 bytes/parameter. The mixed-BF16 ledger assumes an FP32 master weight (4), a BF16 compute copy (2), an FP32 gradient buffer (4), and two FP32 moments (8), totaling 18 bytes/parameter. This deliberately conservative case includes the compute copy and does not include activations, communication buffers, allocator overhead, or temporary copies. If gradients are kept in BF16, subtract 2 bytes/parameter and state that assumption.
 
+Use this ledger per physical chip: compare the placement-derived state bytes plus the assumed activation allowance with the usable HBM budget. Ideal even sharding is a lower-bound scenario, not proof that the model is actually sharded that way. The code examples calculate these memory quantities; they do not calculate tokens/s.
+
 $$
-\text{Throughput}_{\text{tok/s}} = \frac{B_{\text{global}} \times L_{\text{seq}}}{T_{\text{step}}}
+B_{\text{state/device}} = \begin{cases} B_{\text{state}}, & \text{replicated} \\ B_{\text{state}}/N_{\text{chips}}, & \text{ideal even sharding} \end{cases}; \quad B_{\text{usable/device}} = f_{\text{usable}} B_{\text{HBM/chip}} - B_{\text{activation/device}}
 $$
 
-### TPU HBM-to-MXU dataflow and mixed-precision state budget
+### TPU state placement, HBM budget and compute path
 
-**Predict:** Which tensors stay in `float32` in HBM and which operands stream as `bfloat16` into the MXU?
+**Predict:** What remains on each physical chip under replication versus explicit sharding, and where do BF16 operands enter?
 
-![TPU HBM-to-MXU dataflow and mixed-precision state budget](../../phases/21-tpu-systems/01-tpu-generations-and-hbm-memory-budgeting/outputs/mechanism.svg)
+![TPU state placement, HBM budget and compute path](../../phases/21-tpu-systems/01-tpu-generations-and-hbm-memory-budgeting/outputs/mechanism.svg)
 
 *Architecture and dataflow mechanism diagram.*
 
-Follow the assumed mixed-precision ledger from HBM to compute: FP32 master weights and moments coexist with BF16 compute weights. A dot can request BF16 inputs and FP32 accumulation. A quantized path additionally needs its own scale and accumulation contract. The diagram names memory/compute boundaries; it does not show an observed kernel placement or prove an INT8 speedup.
+Training state may be replicated or sharded; this diagram treats placement as an explicit choice rather than assuming aggregate HBM is enough. The 48 GiB, four-v5e-chip case needs 48 GiB/device if replicated or 12 GiB/device under ideal even sharding, before activations and temporaries. Verify actual NamedSharding and live memory before claiming the latter placement. Inference KV cache is a separate scenario.
 
 ### Pause and reason
 
@@ -72,6 +74,8 @@ gcloud compute tpus tpu-vm ssh "$TPU_NAME" --zone="$ZONE" \
 ## Use chip specifications without confusing them with a runtime contract
 
 Specifications checked on 2026-10-21 give v6e HBM bandwidth as 1638 GB/s. The comparison lesson uses the published cross-generation GiB capacity table. TPU7x is documented for both Compute Engine and GKE, with 192 GiB and 7380 GB/s per chip; its two chiplets are exposed as two JAX devices per chip. Therefore device count cannot universally be treated as chip count. Record machine type, topology, API and observed device kinds separately. Peak low-precision throughput is a hardware capability, not proof that a particular JAX expression or exported model uses that native path.
+
+Physical TPU chips, TensorCores, JAX devices, and host processes are different counts. The selected Compute Engine v6e machine type has 1, 4 or 8 physical chips per VM depending on machine type; v5e topologies and host layouts differ across Cloud TPU API and GKE configurations. TPU7x/Ironwood has two TensorCores per physical chip and exposes two JAX devices per chip in its documented programming model. Do not convert jax.device_count() to chip count without the matching machine type, generation and API mapping. Where supported, inspect per-TensorCore hardware with jax.experimental.pallas.tpu.get_tpu_info(); this TPU-only API reports per-TensorCore fields.
 
 ## Define TPU generation specs and compute Roofline ridge points
 
@@ -113,6 +117,24 @@ def estimate_memory_gib(params_billions, kv_tokens, layers=32, kv_heads=8, head_
     }
 
 
+def per_device_hbm_ledger(total_state_gib, chips, chip_hbm_gib, placement, usable_fraction=0.8, activation_gib_per_chip=0.0):
+    if chips < 1 or not 0 < usable_fraction <= 1 or activation_gib_per_chip < 0:
+        raise ValueError("chips and utilization must be positive; activation allowance cannot be negative")
+    if placement == "replicated":
+        state_per_chip = float(total_state_gib)
+    elif placement == "evenly_sharded_ideal":
+        state_per_chip = float(total_state_gib) / chips
+    else:
+        raise ValueError("placement must be replicated or evenly_sharded_ideal")
+    usable_hbm_per_chip = float(chip_hbm_gib) * usable_fraction
+    available_for_state = usable_hbm_per_chip - activation_gib_per_chip
+    return {"placement_assumption": placement, "chips": chips, "state_per_chip_gib": state_per_chip,
+            "activation_allowance_per_chip_gib": activation_gib_per_chip,
+            "usable_hbm_per_chip_gib": usable_hbm_per_chip,
+            "fits_under_assumptions": state_per_chip <= available_for_state,
+            "remaining_after_state_before_activation_gib": usable_hbm_per_chip - state_per_chip}
+
+
 
 budget_7b = estimate_memory_gib(params_billions=7.0, kv_tokens=8192)
 budget_1p5b = estimate_memory_gib(params_billions=1.5, kv_tokens=4096)
@@ -136,6 +158,40 @@ assert budget_1p5b["mixed_bf16_train_state_gib"] < 64.0
 ```
 
 Checking these invariants confirms the computation is ready for the full worked experiment.
+
+## Compare replicated and sharded state per device
+
+Add per_device_hbm_ledger and calculate 48 GiB on four 16 GiB chips with a 1 GiB/device activation allowance. Change the total to 52 GiB and recompute.
+
+```python
+
+
+def per_device_hbm_ledger(total_state_gib, chips, chip_hbm_gib, placement, usable_fraction=0.8, activation_gib_per_chip=0.0):
+    if chips < 1 or not 0 < usable_fraction <= 1 or activation_gib_per_chip < 0:
+        raise ValueError("chips and utilization must be positive; activation allowance cannot be negative")
+    if placement == "replicated":
+        state_per_chip = float(total_state_gib)
+    elif placement == "evenly_sharded_ideal":
+        state_per_chip = float(total_state_gib) / chips
+    else:
+        raise ValueError("placement must be replicated or evenly_sharded_ideal")
+    usable_hbm_per_chip = float(chip_hbm_gib) * usable_fraction
+    available_for_state = usable_hbm_per_chip - activation_gib_per_chip
+    return {"placement_assumption": placement, "chips": chips, "state_per_chip_gib": state_per_chip,
+            "activation_allowance_per_chip_gib": activation_gib_per_chip,
+            "usable_hbm_per_chip_gib": usable_hbm_per_chip,
+            "fits_under_assumptions": state_per_chip <= available_for_state,
+            "remaining_after_state_before_activation_gib": usable_hbm_per_chip - state_per_chip}
+
+rep = per_device_hbm_ledger(48, 4, 16, "replicated", activation_gib_per_chip=1)
+shard = per_device_hbm_ledger(48, 4, 16, "evenly_sharded_ideal", activation_gib_per_chip=1)
+changed = per_device_hbm_ledger(52, 4, 16, "evenly_sharded_ideal", activation_gib_per_chip=1)
+print("state/device, replicated/sharded/changed:", rep["state_per_chip_gib"], shard["state_per_chip_gib"], changed["state_per_chip_gib"])
+assert rep["fits_under_assumptions"] is False and shard["fits_under_assumptions"] is False and changed["fits_under_assumptions"] is False
+assert round(shard["remaining_after_state_before_activation_gib"], 1) == 0.8 and changed["state_per_chip_gib"] == 13.0
+```
+
+A 48 GiB state needs 48 GiB/device if replicated or 12 GiB/device under ideal even sharding. At 80% HBM the per-device budget is 12.8 GiB; allowing 1 GiB for activations makes the ideal shard fail. A changed total of 52 GiB needs 13 GiB/device before activations.
 
 ## Run the example
 
@@ -168,6 +224,24 @@ def estimate_memory_gib(params_billions, kv_tokens, layers=32, kv_heads=8, head_
     }
 
 
+def per_device_hbm_ledger(total_state_gib, chips, chip_hbm_gib, placement, usable_fraction=0.8, activation_gib_per_chip=0.0):
+    if chips < 1 or not 0 < usable_fraction <= 1 or activation_gib_per_chip < 0:
+        raise ValueError("chips and utilization must be positive; activation allowance cannot be negative")
+    if placement == "replicated":
+        state_per_chip = float(total_state_gib)
+    elif placement == "evenly_sharded_ideal":
+        state_per_chip = float(total_state_gib) / chips
+    else:
+        raise ValueError("placement must be replicated or evenly_sharded_ideal")
+    usable_hbm_per_chip = float(chip_hbm_gib) * usable_fraction
+    available_for_state = usable_hbm_per_chip - activation_gib_per_chip
+    return {"placement_assumption": placement, "chips": chips, "state_per_chip_gib": state_per_chip,
+            "activation_allowance_per_chip_gib": activation_gib_per_chip,
+            "usable_hbm_per_chip_gib": usable_hbm_per_chip,
+            "fits_under_assumptions": state_per_chip <= available_for_state,
+            "remaining_after_state_before_activation_gib": usable_hbm_per_chip - state_per_chip}
+
+
 
 budget_7b = estimate_memory_gib(params_billions=7.0, kv_tokens=8192)
 budget_1p5b = estimate_memory_gib(params_billions=1.5, kv_tokens=4096)
@@ -179,23 +253,23 @@ print("7B memory budget (GiB):", budget_7b)
 print("1.5B memory budget (GiB):", budget_1p5b)
 ```
 
-Expected: Prints the ridge-point FLOP/byte ratios for v5e (240.5), v5p (166.0), and v6e (560.4) along with the 7B and 1.5B memory budgets in GiB.
+Expected: Prints the ridge-point FLOP/byte ratios for v5e (240.5), v5p (166.0), and v6e (560.4) along with the 7B and 1.5B memory budgets in GiB. Placement-aware sizing reports per-chip state for replication and ideal even sharding, then subtracts explicit activation allowance from the 80% usable-HBM budget. These are planning bounds; runtime array shardings and peak memory must be checked on the selected target.
 
-## Calculated TPU memory capacity and theoretical ridge point
+## TPU capacity, ridge point and per-device placement bounds
 
 **Predict:** How do per-chip HBM capacity (GiB) and the compute-to-memory ridge point (FLOP/byte) change across TPU `v5e`, `v5p`, and `v6e`?
 
-![Calculated TPU memory capacity and theoretical ridge point](../../phases/21-tpu-systems/01-tpu-generations-and-hbm-memory-budgeting/outputs/figure.svg)
+![TPU capacity, ridge point and per-device placement bounds](../../phases/21-tpu-systems/01-tpu-generations-and-hbm-memory-budgeting/outputs/figure.svg)
 
 **Analytic calculation; no device result recorded**
 
 ### Read the figure
 
-The left panel shows per-chip HBM: v5e 16, v5p 95 and v6e 32 GiB. The right panel shows calculated BF16 ridge points: about 240.5, 166.0 and 560.4 FLOP/byte. v5p has more memory than v6e but a lower ridge point. A taller ridge bar means more arithmetic per HBM byte is needed to reach the compute ceiling, not automatically a faster workload. The panels use different units; compare values within each panel.
+The left panel shows per-chip HBM: v5e 16, v5p 95 and v6e 32 GiB. The right panel shows calculated BF16 ridge points: about 240.5, 166.0 and 560.4 FLOP/byte. v5p has more memory than v6e but a lower ridge point. A taller ridge bar means more arithmetic per HBM byte is needed to reach the compute ceiling, not automatically a faster workload. The panels use different units; compare values within each panel. The third panel compares per-device state and usable HBM for a 48 GiB state on four v5e chips: replication is 48 GiB/device, ideal sharding is 12 GiB/device, and the 80% budget is 12.8 GiB/device.
 
 ### Connect it to the computation
 
-These bars are calculations from published specifications and stated tensor byte assumptions. They are not device measurements or a workload profile.
+These bars are calculations from published specifications and stated tensor byte assumptions. They are not device measurements or a workload profile. The placement panel is a calculation from a named state/topology, not proof that a training implementation actually shards optimizer state.
 
 ```python
 visual_data = {
@@ -205,27 +279,37 @@ visual_data = {
          'series': [{'label': 'HBM capacity', 'y': [float(s['hbm_gib']) for s in TPU_SPECS]}]},
         {'kind': 'bar', 'labels': [s['gen'] for s in TPU_SPECS], 'xlabel': 'Cloud TPU generation', 'ylabel': 'theoretical BF16 ridge point (FLOP/byte)',
          'series': [{'label': 'peak BF16 FLOP/s ÷ HBM bytes/s', 'y': [float(s['ridge_flops_per_byte']) for s in TPU_SPECS]}]},
+        {'kind': 'bar', 'labels': ['replicated', 'ideal even shard', '80% usable HBM'],
+         'xlabel': '48 GiB state on four v5e chips', 'ylabel': 'GiB per device',
+         'series': [{'label': 'per-device requirement or budget', 'y': [48.0, 12.0, 12.8]}]},
     ],
 }
+assert 48.0 / 4 == 12.0 and 16.0 * 0.8 == 12.8
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:11:49.428825+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T14:09:33.489463+00:00. JAX 0.9.2.
 
 ```text
 TPU ridge points (FLOP/byte): {'v5e': 240.5, 'v5p': 166.0, 'v6e': 560.4}
 7B memory budget (GiB): {'fp32_train_state_gib': 104.308, 'mixed_bf16_train_state_gib': 117.347, 'kv_fp32_gib': 2.0, 'kv_bf16_gib': 1.0, 'kv_int8_gib': 0.5}
 1.5B memory budget (GiB): {'fp32_train_state_gib': 22.352, 'mixed_bf16_train_state_gib': 25.146, 'kv_fp32_gib': 1.0, 'kv_bf16_gib': 0.5, 'kv_int8_gib': 0.25}
+state/device, replicated/sharded/changed: 48.0 12.0 13.0
 TPU ridge points (FLOP/byte): {'v5e': 240.5, 'v5p': 166.0, 'v6e': 560.4}
 7B memory budget (GiB): {'fp32_train_state_gib': 104.308, 'mixed_bf16_train_state_gib': 117.347, 'kv_fp32_gib': 2.0, 'kv_bf16_gib': 1.0, 'kv_int8_gib': 0.5}
 1.5B memory budget (GiB): {'fp32_train_state_gib': 22.352, 'mixed_bf16_train_state_gib': 25.146, 'kv_fp32_gib': 1.0, 'kv_bf16_gib': 0.5, 'kv_int8_gib': 0.25}
 KV cache GiB (FP32 / BF16 / INT8): 2.0 1.0 0.5
-7B mixed train state GiB: 117.347 Minimum chips at 80% usable HBM: 10
-Assumed training state (GiB): 25.146
-Separate inference BF16 KV cache (GiB): 0.5
+Ideal-sharding arithmetic minimum: 10
+At 16 chips, state/device GiB: 7.3341875 remaining before activations: 5.465812500000001
+Per-chip ledgers: {'placement_assumption': 'replicated', 'chips': 4, 'state_per_chip_gib': 48.0, 'activation_allowance_per_chip_gib': 1, 'usable_hbm_per_chip_gib': 12.8, 'fits_under_assumptions': False, 'remaining_after_state_before_activation_gib': -35.2} {'placement_assumption': 'evenly_sharded_ideal', 'chips': 4, 'state_per_chip_gib': 12.0, 'activation_allowance_per_chip_gib': 1, 'usable_hbm_per_chip_gib': 12.8, 'fits_under_assumptions': False, 'remaining_after_state_before_activation_gib': 0.8000000000000007} {'placement_assumption': 'evenly_sharded_ideal', 'chips': 4, 'state_per_chip_gib': 13.0, 'activation_allowance_per_chip_gib': 1, 'usable_hbm_per_chip_gib': 12.8, 'fits_under_assumptions': False, 'remaining_after_state_before_activation_gib': -0.1999999999999993}
+v6e chips: 4 state/device GiB: 29.33675 usable GiB: 25.6 fits with assumed activation: False
+v6e chips: 8 state/device GiB: 14.668375 usable GiB: 25.6 fits with assumed activation: True
+Separate inference BF16 KV cache GiB: 1.0
 Arithmetic intensity: 341.3333333333333 FLOPs/byte
-v6e-4 80% usable GiB: 102.4 Fits 7B state estimate: False
+4 chips: {'placement_assumption': 'evenly_sharded_ideal', 'chips': 4, 'state_per_chip_gib': 29.33675, 'activation_allowance_per_chip_gib': 8.0, 'usable_hbm_per_chip_gib': 25.6, 'fits_under_assumptions': False, 'remaining_after_state_before_activation_gib': -3.736749999999997}
+8 chips: {'placement_assumption': 'evenly_sharded_ideal', 'chips': 8, 'state_per_chip_gib': 14.668375, 'activation_allowance_per_chip_gib': 8.0, 'usable_hbm_per_chip_gib': 25.6, 'fits_under_assumptions': True, 'remaining_after_state_before_activation_gib': 10.931625000000002}
+Separate inference KV GiB: 1.0
 PASS: tpu-03
 
 ```
@@ -245,26 +329,48 @@ print("KV cache GiB (FP32 / BF16 / INT8):", budget_7b["kv_fp32_gib"], budget_7b[
 
 This tensor-element ledger halves storage at each step. A real INT8 cache also needs scales and supported kernels; actual decode traffic and latency depend on reuse and the implementation. This does not measure quantized inference.
 
-## Verify how many v5e chips are needed to hold a 7B mixed-precision training state
+## Estimate minimum v5e chips under ideal even sharding
 
-**Predict before running:** How many v5e chips are needed for the 7B mixed-precision training-state estimate if only 80% of HBM is available for that state?
+**Predict before running:** Under even state sharding and an 80% per-chip HBM budget, what is the arithmetic minimum number of 16 GiB v5e chips? What would a supported 16-chip request leave per chip before activations?
 
 ```python
-v5e_chip_gib = 16.0
-usable_fraction = 0.8
-min_v5e_chips = int(np.ceil(budget_7b["mixed_bf16_train_state_gib"] / (v5e_chip_gib * usable_fraction)))
-print("7B mixed train state GiB:", budget_7b["mixed_bf16_train_state_gib"], "Minimum chips at 80% usable HBM:", min_v5e_chips)
-assert min_v5e_chips == 10
-assert min_v5e_chips > 8 and min_v5e_chips <= 16
+state_gib = budget_7b["mixed_bf16_train_state_gib"]
+usable_gib_per_chip = 16.0 * 0.8
+minimum_ideal_chips = int(np.ceil(state_gib / usable_gib_per_chip))
+state_per_chip_on_16 = state_gib / 16
+remaining_before_activations = usable_gib_per_chip - state_per_chip_on_16
+print("Ideal-sharding arithmetic minimum:", minimum_ideal_chips)
+print("At 16 chips, state/device GiB:", state_per_chip_on_16, "remaining before activations:", remaining_before_activations)
+assert minimum_ideal_chips == 10
+assert state_per_chip_on_16 < usable_gib_per_chip
+assert remaining_before_activations > 0
 ```
 
-**Expected:** The 18-byte-per-parameter ledger estimates 117.347 GiB. At 16 GiB per chip and 80% usable HBM, at least 10 chips are needed; the listed 16-chip v5litepod-16 is the first listed topology large enough.
+**Expected:** The arithmetic lower bound is 10 chips if the entire 117.347 GiB state is evenly sharded. The illustrative 16-chip v5e layout needs about 7.33 GiB/device, leaving about 5.47 GiB/device below the 80% budget for all activations and temporary buffers.
 
-The estimate includes 2-byte BF16 weights, 4-byte FP32 master weights, 4-byte gradients and two 4-byte FP32 Adam moments, for 18 bytes per parameter. This is a named-tensor ledger, not a complete fit guarantee: activations, communication buffers, temporary copies and allocator overhead need additional headroom.
+This is only a capacity bound under ideal even sharding, not a proof of a 10-chip supported slice or of actual placement. The selected Cloud TPU API/GKE topology determines which slice shapes exist. Verify parameter and optimizer-state shardings, plus peak activations and temporary memory, before launch.
+
+## Decide between replicated and sharded placement with headroom
+
+**Predict before running:** Does a 48 GiB state fit per 16 GiB v5e chip when replicated, ideally sharded over four chips, and when each chip also needs 1 GiB for activations? What changes at 52 GiB?
+
+```python
+replicated = per_device_hbm_ledger(48, 4, 16, "replicated", activation_gib_per_chip=1)
+ideal_shard = per_device_hbm_ledger(48, 4, 16, "evenly_sharded_ideal", activation_gib_per_chip=1)
+changed = per_device_hbm_ledger(52, 4, 16, "evenly_sharded_ideal", activation_gib_per_chip=1)
+print("Per-chip ledgers:", replicated, ideal_shard, changed)
+assert replicated["state_per_chip_gib"] == 48.0 and not replicated["fits_under_assumptions"]
+assert ideal_shard["state_per_chip_gib"] == 12.0 and not ideal_shard["fits_under_assumptions"]
+assert changed["state_per_chip_gib"] == 13.0 and not changed["fits_under_assumptions"]
+```
+
+**Expected:** Replication requires 48 GiB/device and fails. Ideal sharding requires 12 GiB/device, but with a 1 GiB activation allowance it exceeds the 12.8 GiB usable budget; 52 GiB sharded requires 13 GiB/device and fails before activations.
+
+This is conditional on placement. Confirm array shardings and optimizer-state placement before treating the ideal-sharded estimate as a fit.
 
 ## Make it yours
 
-Compute estimate_memory_gib for a 1.5B parameter model with 4096 KV tokens. Check that the assumed mixed-precision training state is below 30 GiB and below 80% of a four-chip v5e slice. Separately report the BF16 KV-cache estimate for an inference scenario. Do not assume training normally retains an inference KV cache, or that aggregate HBM guarantees per-device fit.
+For a 7B mixed-BF16 training state, compare ideal evenly sharded v6e-4 and v6e-8 plans at 80% HBM per chip. Report per-chip state and remaining HBM before activations, then decide whether each can fit under an additional 8 GiB/device activation-and-temporary allowance. Separately report the BF16 inference KV cache at 8192 tokens. State the placement assumption and do not add inference KV cache to training state.
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
@@ -295,15 +401,13 @@ def audit_training_and_inference_memory(estimate_memory_gib):
 <details><summary>Reference solution</summary>
 
 ```python
-budget_check = estimate_memory_gib(params_billions=1.5, kv_tokens=4096)
-usable_hbm_gib = 4 * 16.0 * 0.8
-training_state_gib = budget_check["mixed_bf16_train_state_gib"]
-inference_kv_gib = budget_check["kv_bf16_gib"]
-print("Assumed training state (GiB):", training_state_gib)
-print("Separate inference BF16 KV cache (GiB):", inference_kv_gib)
-assert training_state_gib < 30.0
-assert training_state_gib < usable_hbm_gib
-assert np.isclose(inference_kv_gib, 0.5)
+state = budget_7b["mixed_bf16_train_state_gib"]
+for chips in (4, 8):
+    ledger = per_device_hbm_ledger(state, chips, 32.0, "evenly_sharded_ideal", activation_gib_per_chip=8.0)
+    print("v6e chips:", chips, "state/device GiB:", ledger["state_per_chip_gib"], "usable GiB:", ledger["usable_hbm_per_chip_gib"], "fits with assumed activation:", ledger["fits_under_assumptions"])
+    assert ledger["fits_under_assumptions"] is (chips == 8)
+print("Separate inference BF16 KV cache GiB:", budget_7b["kv_bf16_gib"])
+assert np.isclose(budget_7b["kv_bf16_gib"], 1.0)
 ```
 
 </details>
@@ -360,54 +464,56 @@ The idealized operation has about 341.3 FLOP/byte. It is above v5e’s 240.5 rid
 
 </details>
 
-## Size a Trillium v6e-4 slice for a 7B training state
+## Compare v6e-4 and v6e-8 per-device training placement
 
 **Transfer / diagnosis**
 
-Compute the total HBM (in GiB) of a 4-chip `v6e-4` slice (`32` GiB/chip) and check whether `budget_7b['mixed_bf16_train_state_gib']` fits inside `80%` of that slice's HBM.
+Using the ledger helper, compare a 7B mixed-BF16 state under ideal sharding on v6e-4 and v6e-8, with an assumed 8 GiB/device activation and temporary allowance. Keep the 8192-token inference KV cache separate.
 
 <details><summary>Hint</summary>
 
-Compare `budget_7b['mixed_bf16_train_state_gib']` with `4 * 32.0 * 0.8`.
+Use 32 GiB physical HBM per v6e chip and the 80% usable fraction. Divide state only under the explicit ideal-sharding assumption.
 
 </details>
 
-### How to write: Size a Trillium v6e-4 slice for a 7B training state — Step-by-step recipe & starter scaffold
+### How to write: Compare v6e-4 and v6e-8 per-device training placement — Step-by-step recipe & starter scaffold
 
 **Inputs:**
-- Four v6e chips at 32 GiB each and the 7B mixed-BF16 training estimate.
+- 7B mixed-BF16 training-state estimate, 4 or 8 v6e chips at 32 GiB/chip, 80% usable-HBM fraction, and 8 GiB/device activations plus temporary allowance.
 
 **Outputs:**
-- Aggregate HBM and a check against 80 percent of the slice capacity.
+- Per-device state and remaining capacity for v6e-4 and v6e-8 under ideal even sharding, plus separate BF16 inference KV bytes.
 
 **Invariants to check:**
-- The calculation is a catalog budget screen and does not guarantee per-device placement or runtime success.
+- Divide training state by chip count only under explicit ideal-sharding assumption. Do not add inference KV cache to training state.
 
 **Hints:**
-- Multiply chips by HBM per chip.
-- Compare the estimate with the reserved-capacity threshold.
+- Use the per-device ledger helper and report state/device separately from usable HBM/device.
+- Try a 48 GiB versus 52 GiB state in the helper to observe an input change.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-import jax.numpy as jnp
-import numpy as np
-
-def check_v6e4_budget(training_state_gib, chips, hbm_per_chip_gib):
-    # TODO: compare the training estimate with the specified fraction of aggregate HBM.
+def compare_v6e_placement(training_state_gib, kv_cache_gib, chips_options, activation_gib_per_chip):
+    # TODO: return explicit ideal-sharding per-device ledgers for each topology
+    # and keep inference KV cache in a separate result.
     raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-v6e4_usable_gib = 4 * 32.0 * 0.8
-fits_v6e4 = budget_7b["mixed_bf16_train_state_gib"] <= v6e4_usable_gib
-print("v6e-4 80% usable GiB:", v6e4_usable_gib, "Fits 7B state estimate:", fits_v6e4)
-assert fits_v6e4 is False
+state = budget_7b["mixed_bf16_train_state_gib"]
+ledgers = {chips: per_device_hbm_ledger(state, chips, 32.0, "evenly_sharded_ideal", activation_gib_per_chip=8.0) for chips in (4, 8)}
+for chips, row in ledgers.items():
+    print(chips, "chips:", row)
+assert ledgers[4]["fits_under_assumptions"] is False
+assert ledgers[8]["fits_under_assumptions"] is True
+print("Separate inference KV GiB:", budget_7b["kv_bf16_gib"])
+assert np.isclose(budget_7b["kv_bf16_gib"], 1.0)
 ```
 
-A 4-chip v6e slice has 128 GiB total HBM and 102.4 GiB at an 80% budget. The 117.347 GiB named-tensor estimate exceeds that budget, before activations and other excluded allocations.
+The 117 GiB state needs about 29.3 GiB/device on four chips, exceeding 25.6 GiB usable HBM before activations. Eight-chip ideal sharding needs about 14.7 GiB/device; after the assumed 8 GiB activation/temporary allowance it remains below 25.6 GiB. Inference KV is separate.
 
 </details>
 
@@ -446,7 +552,7 @@ If your TPU job fails with `RESOURCE_EXHAUSTED: Out of memory while trying to al
 
 ## Keep your evidence
 
-Keep the TPU ridge-point table, 7B and 1.5B training/KV-cache HBM budgets, and minimum chip count calculation at an 80% HBM ceiling.
+Keep aggregate and per-device state ledgers, replication/sharding/headroom assumptions, invalid aggregate-fit counterexamples and separate training-versus-inference capacity decisions.
 
 Save your predictions, modified code, terminal outputs, and reasoning in your engineering portfolio.
 
@@ -455,4 +561,8 @@ Save your predictions, modified code, terminal outputs, and reasoning in your en
 - [Cloud TPU v5e, v5p, and v6e (Trillium) specifications](https://cloud.google.com/tpu/docs/v6e)
 - [Cloud TPU performance guide](https://cloud.google.com/tpu/docs/performance-guide)
 - [TPU7x cross-generation specifications and chiplet exposure (checked 2026-10-21)](https://docs.cloud.google.com/tpu/docs/tpu7x)
+- [JAX TPU hardware reference](https://docs.jax.dev/en/latest/pallas/tpu/hardware.html)
+- [JAX TPU info API](https://docs.jax.dev/en/latest/_autosummary/jax.experimental.pallas.tpu.TpuInfo.html)
+- [Cloud TPU machine types and physical chips per VM](https://docs.cloud.google.com/compute/docs/tpus/tpu-machines)
+- [Cloud TPU v5e topologies](https://docs.cloud.google.com/tpu/docs/v5e)
 

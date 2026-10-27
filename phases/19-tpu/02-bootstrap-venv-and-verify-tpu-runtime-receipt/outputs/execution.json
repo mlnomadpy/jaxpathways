@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "tpu-04",
-  "contentHash": "4dca7c86ff29ae6765918316b0c56afeb88a5e77227a28de0daadbddf2b20bf2",
-  "executedAt": "2026-10-21T16:11:43.731071+00:00",
+  "contentHash": "18388c56f81540f7cd8e18e7c69db0bec836600bc2f1bee5c744a1ab40010d44",
+  "executedAt": "2026-10-27T15:46:40.950880+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -11,37 +11,37 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Runtime receipt: {\"backend\": \"cpu\", \"expected_total\": 140.0, \"jax\": \"0.9.2\", \"local_device_count\": 1, \"observed_total\": 140.0, \"per_device_sums\": [140.0], \"python\": \"3.14.3\", \"receipt_sha256\": \"8c6bd0cbe29edc78\", \"verified\": true}\nExpected pmap sums by slice: {'1-device (CPU / v5e-1)': 140.0, '4-device (v5litepod-4 / v6e-4)': 10416.0, '8-device (v5litepod-8 / v6e-8)': 85344.0}\nRuntime receipt: {\"backend\": \"cpu\", \"expected_total\": 140.0, \"jax\": \"0.9.2\", \"local_device_count\": 1, \"observed_total\": 140.0, \"per_device_sums\": [140.0], \"python\": \"3.14.3\", \"receipt_sha256\": \"8c6bd0cbe29edc78\", \"verified\": true}\nExpected pmap sums by slice: {'1-device (CPU / v5e-1)': 140.0, '4-device (v5litepod-4 / v6e-4)': 10416.0, '8-device (v5litepod-8 / v6e-8)': 85344.0}\nPer-chip sums on a 4-chip slice: [140.0, 1100.0, 3084.0, 6092.0] Total: 10416.0\nTeardown verifier passed for empty and non-empty gcloud list outputs.\n4-chip expected sum: 10416.0 8-chip expected sum: 85344.0 receipt hash: 8c6bd0cbe29edc78\nSimulated 4-chip TPU check: True Local CPU check: False\nOvernight idle cost avoided (USD): 74.4\nPASS: tpu-04\n",
+  "stdout": "Runtime receipt: {\"arithmetic_ok\": true, \"device_count\": 1, \"environment_lock\": \"projects/reproducible-experiments/requirements.txt; jax[tpu]==0.9.2\", \"expected_backend\": \"tpu\", \"expected_backend_ok\": false, \"expected_device_count\": 4, \"expected_topology_ok\": false, \"expected_total\": 140.0, \"jax\": \"0.9.2\", \"local_device_count\": 1, \"observed_backend\": \"cpu\", \"observed_total\": 140.0, \"per_device_sums\": [140.0], \"process_count\": 1, \"python\": \"3.14.3\", \"receipt_sha256\": \"64561213664a634b\", \"requested_target_ready\": false, \"source_identity\": \"unavailable: interactive execution has no readable __file__\", \"source_sha256\": null}\nExpected pmap sums by slice: {'1-device (CPU / v5e-1)': 140.0, '4-device (v5litepod-4 / v6e-4)': 10416.0, '8-device (v5litepod-8 / v6e-8)': 85344.0}\nRuntime receipt: {\"arithmetic_ok\": true, \"device_count\": 1, \"environment_lock\": \"projects/reproducible-experiments/requirements.txt; jax[tpu]==0.9.2\", \"expected_backend\": \"tpu\", \"expected_backend_ok\": false, \"expected_device_count\": 4, \"expected_topology_ok\": false, \"expected_total\": 140.0, \"jax\": \"0.9.2\", \"local_device_count\": 1, \"observed_backend\": \"cpu\", \"observed_total\": 140.0, \"per_device_sums\": [140.0], \"process_count\": 1, \"python\": \"3.14.3\", \"receipt_sha256\": \"64561213664a634b\", \"requested_target_ready\": false, \"source_identity\": \"unavailable: interactive execution has no readable __file__\", \"source_sha256\": null}\nExpected pmap sums by slice: {'1-device (CPU / v5e-1)': 140.0, '4-device (v5litepod-4 / v6e-4)': 10416.0, '8-device (v5litepod-8 / v6e-8)': 85344.0}\nPer-chip sums on a 4-chip slice: [140.0, 1100.0, 3084.0, 6092.0] Total: 10416.0\nNamed-resource cleanup checks passed; unrelated nodes may remain.\n4-device expected sum: 10416.0 8-device expected sum: 85344.0 receipt hash: 64561213664a634b\nRequested four-device TPU readiness: False ; simulated wrong-count contract rejected: True\nReal runtime receipt qualifies as four-device TPU: False\nOvernight idle cost avoided (USD): 74.4\nPASS: tpu-04\n",
   "notebookCells": [
     {
-      "sourceHash": "89ee51c44116de417daffd5301ec5be78e1c351eafaaf8e63ba223bc2764a102",
+      "sourceHash": "1ba88e14397d62261b088757cd2df2aafa46b34b3d249097a7370a26d7ef3c81",
       "outputs": []
     },
     {
-      "sourceHash": "3417358dfef9c7ecb002d401ca87fdda60d34c579becf5161b7ced701f063c3c",
+      "sourceHash": "0f1a934852c2ed35c79347f0a7af1c9446289523cc1c6fd81b9324c64767e9c1",
       "outputs": [
         {
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "Runtime receipt: {\"backend\": \"cpu\", \"expected_total\": 140.0, \"jax\": \"0.9.2\", \"local_device_count\": 1, \"observed_total\": 140.0, \"per_device_sums\": [140.0], \"python\": \"3.14.3\", \"receipt_sha256\": \"8c6bd0cbe29edc78\", \"verified\": true}\n",
+            "Runtime receipt: {\"arithmetic_ok\": true, \"device_count\": 1, \"environment_lock\": \"projects/reproducible-experiments/requirements.txt; jax[tpu]==0.9.2\", \"expected_backend\": \"tpu\", \"expected_backend_ok\": false, \"expected_device_count\": 4, \"expected_topology_ok\": false, \"expected_total\": 140.0, \"jax\": \"0.9.2\", \"local_device_count\": 1, \"observed_backend\": \"cpu\", \"observed_total\": 140.0, \"per_device_sums\": [140.0], \"process_count\": 1, \"python\": \"3.14.3\", \"receipt_sha256\": \"64561213664a634b\", \"requested_target_ready\": false, \"source_identity\": \"unavailable: interactive execution has no readable __file__\", \"source_sha256\": null}\n",
             "Expected pmap sums by slice: {'1-device (CPU / v5e-1)': 140.0, '4-device (v5litepod-4 / v6e-4)': 10416.0, '8-device (v5litepod-8 / v6e-8)': 85344.0}\n"
           ]
         }
       ]
     },
     {
-      "sourceHash": "e39fea213cc9360fde902be2ad59a5e36980dad93ac38516e5fa9c13b3213eda",
+      "sourceHash": "a60176a9815ea7c63de6b73581ea5cfc06a32bc3d4898209e592b58ae05664fd",
       "outputs": []
     },
     {
-      "sourceHash": "dd8819a634c0280b1185c1209fee5d29fb5e382119dad09eee93532c54726de4",
+      "sourceHash": "ebe9f22a8cf1e46b4dbe44fb4430130a0efb2dd08d7373b92212f87a0939f0b0",
       "outputs": [
         {
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "Runtime receipt: {\"backend\": \"cpu\", \"expected_total\": 140.0, \"jax\": \"0.9.2\", \"local_device_count\": 1, \"observed_total\": 140.0, \"per_device_sums\": [140.0], \"python\": \"3.14.3\", \"receipt_sha256\": \"8c6bd0cbe29edc78\", \"verified\": true}\n",
+            "Runtime receipt: {\"arithmetic_ok\": true, \"device_count\": 1, \"environment_lock\": \"projects/reproducible-experiments/requirements.txt; jax[tpu]==0.9.2\", \"expected_backend\": \"tpu\", \"expected_backend_ok\": false, \"expected_device_count\": 4, \"expected_topology_ok\": false, \"expected_total\": 140.0, \"jax\": \"0.9.2\", \"local_device_count\": 1, \"observed_backend\": \"cpu\", \"observed_total\": 140.0, \"per_device_sums\": [140.0], \"process_count\": 1, \"python\": \"3.14.3\", \"receipt_sha256\": \"64561213664a634b\", \"requested_target_ready\": false, \"source_identity\": \"unavailable: interactive execution has no readable __file__\", \"source_sha256\": null}\n",
             "Expected pmap sums by slice: {'1-device (CPU / v5e-1)': 140.0, '4-device (v5litepod-4 / v6e-4)': 10416.0, '8-device (v5litepod-8 / v6e-8)': 85344.0}\n"
           ]
         }
@@ -52,7 +52,7 @@
       "outputs": []
     },
     {
-      "sourceHash": "25df6d662f9d3f0c4e984c6a201f79fa0cfd7a2633dc4b0773dfba6c2dd4ee6c",
+      "sourceHash": "53dc08a479da44f2b1718bf964cd5c4d3e3305811c536df9d501b1833a6e3476",
       "outputs": [
         {
           "output_type": "display_data",
@@ -79,13 +79,13 @@
       ]
     },
     {
-      "sourceHash": "354e44ed882d8a0a6bc14d76b5e18099af7bf49baf0553b1d4365ba805af0c9d",
+      "sourceHash": "390381178bdc43bfde4f9e9fd6b09eac0ce0d3b9cd711c757b72652ec7ec392c",
       "outputs": [
         {
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "Teardown verifier passed for empty and non-empty gcloud list outputs.\n"
+            "Named-resource cleanup checks passed; unrelated nodes may remain.\n"
           ]
         }
       ]
@@ -95,13 +95,14 @@
       "outputs": []
     },
     {
-      "sourceHash": "a3dcfa9a619158ca7c5a3603cb146e96a9c5c876d8ece2add549613d33ade551",
+      "sourceHash": "9c7f892781ab2fe19068f49150473c0b7ac0bf78401e7486306307150a380207",
       "outputs": [
         {
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "4-chip expected sum: 10416.0 8-chip expected sum: 85344.0 receipt hash: 8c6bd0cbe29edc78\n"
+            "4-device expected sum: 10416.0 8-device expected sum: 85344.0 receipt hash: 64561213664a634b\n",
+            "Requested four-device TPU readiness: False ; simulated wrong-count contract rejected: True\n"
           ]
         }
       ]
@@ -111,13 +112,13 @@
       "outputs": []
     },
     {
-      "sourceHash": "518c99621ebb1edc2779f33cb9dc0e0e4770dab3f5534677bda730071be67a34",
+      "sourceHash": "c408f674c8b91feab3937108fae144f7c11e2dee3f581daa4f256b5ba4c3da36",
       "outputs": [
         {
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "Simulated 4-chip TPU check: True Local CPU check: False\n"
+            "Real runtime receipt qualifies as four-device TPU: False\n"
           ]
         }
       ]

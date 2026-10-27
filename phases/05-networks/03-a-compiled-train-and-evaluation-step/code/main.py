@@ -1,7 +1,7 @@
 """A compiled train and evaluation step: worked experiments and reference solutions. CPU checks."""
 
 # 1. Construct data, model, and optimizer
-# Step 1 — 1. Construct data, model, and optimizer
+# Step 1 : 1. Construct data, model, and optimizer
 from flax import nnx
 import jax
 import jax.numpy as jnp
@@ -27,7 +27,7 @@ def initialize():
 model,optimizer=initialize()
 
 # 2. Define the two compiled functions
-# Step 2 — 2. Define the two compiled functions: The 80-update counter is an optimizer invariant.
+# Step 2 : 2. Define the two compiled functions: The 80-update counter is an optimizer invariant.
 # Define and JIT-compile `train_step(m, o, x, y)` so XLA traces and fuses the operations:
 @nnx.jit
 def train_step(m,o,x,y):
@@ -46,7 +46,7 @@ for _ in range(80):train_step(model,optimizer,train_x,train_y)
 assert int(optimizer.step[...])==80
 
 # 3. Verify held-out metrics and state isolation
-# Step 3 — 3. Verify held-out metrics and state isolation: The synthetic fixture normally exceeds 0.85 held-out accuracy.
+# Step 3 : 3. Verify held-out metrics and state isolation: The synthetic fixture normally exceeds 0.85 held-out accuracy.
 frozen=snapshot(model)
 step_count=int(optimizer.step[...])
 test_loss,test_accuracy=evaluate(model,test_x,test_y)
@@ -61,7 +61,7 @@ np.testing.assert_allclose(test_accuracy,np.mean((scores>0)==labels),atol=1e-6)
 assert float(test_accuracy)>.85 and float(objective(model,train_x,train_y))<before_loss*.3
 print('Updates:',step_count,'held-out loss:',float(test_loss),'accuracy:',float(test_accuracy))
 
-# Step 1 — 1. Construct data, model, and optimizer
+# Step 1 : 1. Construct data, model, and optimizer
 from flax import nnx
 import jax
 import jax.numpy as jnp
@@ -86,7 +86,7 @@ def initialize():
     return m,nnx.Optimizer(m,optax.adam(.03),wrt=nnx.Param)
 model,optimizer=initialize()
 
-# Step 2 — 2. Define the two compiled functions: The 80-update counter is an optimizer invariant.
+# Step 2 : 2. Define the two compiled functions: The 80-update counter is an optimizer invariant.
 # Define and JIT-compile `train_step(m, o, x, y)` so XLA traces and fuses the operations:
 @nnx.jit
 def train_step(m,o,x,y):
@@ -104,7 +104,7 @@ before_loss=float(objective(model,train_x,train_y))
 for _ in range(80):train_step(model,optimizer,train_x,train_y)
 assert int(optimizer.step[...])==80
 
-# Step 3 — 3. Verify held-out metrics and state isolation: The synthetic fixture normally exceeds 0.85 held-out accuracy.
+# Step 3 : 3. Verify held-out metrics and state isolation: The synthetic fixture normally exceeds 0.85 held-out accuracy.
 frozen=snapshot(model)
 step_count=int(optimizer.step[...])
 test_loss,test_accuracy=evaluate(model,test_x,test_y)
@@ -128,16 +128,75 @@ prob = jax.nn.sigmoid(model(grid)).reshape(gx.shape)
 visual_data = {'kind': 'field', 'values': prob.tolist(), 'extent': [-3.0, 3.0, -3.0, 3.0], 'xlabel': 'feature 0', 'ylabel': 'feature 1', 'unit': 'P(label 1)', 'points': test_x.tolist(), 'labels': test_y.tolist()}
 
 # Experiment: Replay the complete update sequence
-# Experiment — Replay the complete update sequence: Replay reconstructs optimizer state from the start.
+# Experiment : Replay the complete update sequence: Replay reconstructs optimizer state from the start.
 replay,replay_optimizer=initialize()
 for _ in range(80):train_step(replay,replay_optimizer,train_x,train_y)
 for a,b in zip(snapshot(model),snapshot(replay)):np.testing.assert_allclose(a,b,rtol=1e-6,atol=1e-6)
 np.testing.assert_allclose(evaluate(replay,test_x,test_y),evaluate(model,test_x,test_y),rtol=1e-6)
 
 # Experiment: Duplicating evaluation data
-# Experiment — Duplicating evaluation data: Means normalize the observation count.
+# Experiment : Duplicating evaluation data: Means normalize the observation count.
 doubled=evaluate(model,jnp.concatenate([test_x,test_x]),jnp.concatenate([test_y,test_y]))
 np.testing.assert_allclose(doubled,evaluate(model,test_x,test_y),rtol=1e-5,atol=1e-6)
+
+# Experiment: Stateful evaluation: running statistics and dropout keys
+# Experiment : Stateful evaluation: BatchNorm statistics and dropout RNG are state, distinct from parameters.
+from flax import nnx as state_nnx
+import jax as state_jax
+import jax.numpy as state_jnp
+import numpy as state_np
+import optax as state_optax
+class StatefulProbe(state_nnx.Module):
+    def __init__(self, seed=4):
+        rngs = state_nnx.Rngs(params=seed, dropout=seed+1)
+        self.hidden = state_nnx.Linear(2, 4, rngs=rngs)
+        self.norm = state_nnx.BatchNorm(num_features=4, rngs=rngs)
+        self.dropout = state_nnx.Dropout(rate=0.5, rngs=rngs)
+        self.out = state_nnx.Linear(4, 1, rngs=rngs)
+    def __call__(self, x, *, training):
+        x = self.norm(self.hidden(x), use_running_average=not training)
+        x = self.dropout(state_nnx.relu(x), deterministic=not training)
+        return self.out(x).squeeze(-1)
+def stateful_loss(model, x, y):
+    return state_jnp.mean(state_optax.sigmoid_binary_cross_entropy(model(x, training=True), y))
+@state_nnx.jit
+def stateful_train_step(model, optimizer, x, y):
+    loss, grads = state_nnx.value_and_grad(stateful_loss)(model, x, y)
+    optimizer.update(model, grads)
+    return loss
+def copy_state(state):
+    return state_jax.tree.map(lambda value: state_jnp.array(value, copy=True), state)
+def same_state(left, right):
+    def comparable(value):
+        if state_jax.dtypes.issubdtype(value.dtype, state_jax.dtypes.prng_key):
+            return state_jax.random.key_data(value)
+        return value
+    return all(bool(state_np.array_equal(comparable(a), comparable(b))) for a, b in zip(state_jax.tree.leaves(left), state_jax.tree.leaves(right)))
+state_x = state_jnp.asarray([[0., 1.], [1., 2.], [-1., 1.], [2., -1.], [1., -2.], [-2., 0.], [0., -1.], [2., 2.]])
+state_y = state_jnp.asarray([1., 1., 0., 1., 0., 0., 0., 1.])
+state_model = StatefulProbe()
+state_optimizer = state_nnx.Optimizer(state_model, state_optax.sgd(0.02), wrt=state_nnx.Param)
+for _ in range(3):
+    stateful_train_step(state_model, state_optimizer, state_x, state_y)
+params_before = copy_state(state_nnx.state(state_model, state_nnx.Param))
+stats_before = copy_state(state_nnx.state(state_model, state_nnx.BatchStat))
+rng_before = copy_state(state_nnx.state(state_model, state_nnx.RngState))
+eval_a = state_model(state_x, training=False)
+eval_b = state_model(state_x, training=False)
+state_np.testing.assert_array_equal(eval_a, eval_b)
+assert same_state(params_before, state_nnx.state(state_model, state_nnx.Param))
+assert same_state(stats_before, state_nnx.state(state_model, state_nnx.BatchStat))
+assert same_state(rng_before, state_nnx.state(state_model, state_nnx.RngState))
+# Negative control: training mode on an independent clone must change BatchStat and consume a dropout key.
+graphdef, state_snapshot = state_nnx.split(state_model)
+bad_mode_model = state_nnx.merge(graphdef, copy_state(state_snapshot))
+bad_stats = copy_state(state_nnx.state(bad_mode_model, state_nnx.BatchStat))
+bad_rng = copy_state(state_nnx.state(bad_mode_model, state_nnx.RngState))
+_ = bad_mode_model(state_x, training=True)
+assert not same_state(bad_stats, state_nnx.state(bad_mode_model, state_nnx.BatchStat))
+assert not same_state(bad_rng, state_nnx.state(bad_mode_model, state_nnx.RngState))
+assert same_state(params_before, state_nnx.state(state_model, state_nnx.Param))
+print('Deterministic evaluation repeated exactly; Param, BatchStat, and RngState unchanged. Negative control changed BatchStat and RngState; parameters stayed separate.')
 
 # Reference solution. Try the exercise before reading this.
 # Exercise solution

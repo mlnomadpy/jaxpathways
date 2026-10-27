@@ -1,0 +1,49 @@
+Browser tab: 1547147108, Title: "Rich Results Test - Google Search Console", URL: "https://search.google.com/test/rich-results/result?id=T3OpWxNuZY42Vgdj-3_IHA".
+0 AXWebArea Rich Results Test - Google Search Console, URL: search.google.com/test/rich-results/result?id=T3OpWxNuZY42Vgdj-3_IHA
+	1 container
+		3 container yDmH0d
+			4 container gb
+				5 container
+					35 button Go back
+						36 image
+					6 heading Rich Results Test, Value: 1
+						37 text Rich Results Test
+					8 pop up button (collapsed) Secondary Actions: Expand
+					9 button (collapsed) Description: Google apps, Secondary Actions: Expand
+					10 button (collapsed) Description: Google Account: Taha Bouhsine ([redacted account]), Google membership, Secondary Actions: Expand
+			38 container
+				39 container
+					40 text Code input
+					41 container
+						42 button Open search dialog
+						43 button Copy editor content
+						44 text entry area
+						45 container
+							46 container
+								47 text <!doctype html> < html >< head >< script type = "application/ld+json" > { "@context" : "https://schema.org" , "@graph" :[{ "@type" : "Person" , "@id" : "https://www.tahabouhsine.com/jaxpathways/#author" , "name" : "Taha Bouhsine" , "url" : "https://www.tahabouhsine.com/" },{ "@type" : "Organization" , "@id" : "https://www.tahabouhsine.com/jaxpathways/#project" , "name" : "JAX Pathways" , "url" : "https://www.tahabouhsine.com/jaxpathways/" , "sameAs" : "https://github.com/mlnomadpy/jaxpathways" , "founder" :{ "@id" : "https://www.tahabouhsine.com/jaxpathways/#author" }},{ "@type" : "WebSite" , "@id" : "https://www.tahabouhsine.com/jaxpathways/#website" , "name" : "JAX Pathways" , "url" : "https://www.tahabouhsine.com/jaxpathways/" , "inLanguage" : "en" , "publisher" :{ "@id" : "https://www.tahabouhsine.com/jaxpathways/#project" }},{ "@type" : "WebPage" , "@id" : "https://www.tahabouhsine.com/jaxpathways/book.html#webpage" , "url" : "https://www.tahabouhsine.com/jaxpathways/book.html" , "name" : "Free JAX & Flax book: illustrated course reader | JAX Pathways" , "description" : "A free JAX and Flax book with worked math, illustrated Python experiments, projects, and lessons on training, evaluation, deployment and Cloud TPUs." , "inLanguage" : "en" , "isPartOf" :{ "@id" : "https://www.tahabouhsine.com/jaxpathways/#website" }, "author" :{ "@id" : "https://www.tahabouhsine.com/jaxpathways/#author" }, "breadcrumb" :{ "@id" : "https://www.tahabouhsine.com/jaxpathways/book.html#breadcrumbs" }, "mainEntity" :{ "@id" : "https://www.tahabouhsine.com/jaxpathways/book.html#book" }},{ "@type" : "BreadcrumbList" , "@id" : "https://www.tahabouhsine.com/jaxpathways/book.html#breadcrumbs" , "itemListElement" :[{ "@type" : "ListItem" , "position" : 1 , "name" : "JAX Pathways" , "item" : "https://www.tahabouhsine.com/jaxpathways/" },{ "@type" : "ListItem" , "position" : 2 , "name" : "Free JAX & Flax book: illustrated course reader" , "item" : "https://www.tahabouhsine.com/jaxpathways/book.html" }]},{ "@type" : "Book" , "@id" : "https://www.tahabouhsine.com/jaxpathways/book.html#book" , "url" : "https://www.tahabouhsine.com/jaxpathways/book.html" , "name" : "JAX Pathways: illustrated course reader" , "description" : "A free JAX and Flax book with worked math, illustrated Python experiments, projects, and lessons on training, evaluation, deployment and Cloud TPUs." , "author" :{ "@id" : "https://www.tahabouhsine.com/jaxpathways/#author" }, "publisher" :{ "@id" : "https://www.tahabouhsine.com/jaxpathways/#project" }, "inLanguage" : "en" , "isAccessibleForFree" : true , "bookEdition" : "0.18.0" , "dateModified" : "2026-10-27" , "bookFormat" : "https://schema.org/EBook" , "encoding" :[{ "@type" : "MediaObject" , "contentUrl" : "https://www.tahabouhsine.com/jaxpathways/downloads/jax-foundations.epub" , "encodingFormat" : "application/epub+zip" , "name" : "Download the EPUB book" },{ "@type" : "MediaObject" , "contentUrl" : "https://www.tahabouhsine.com/jaxpathways/downloads/jax-foundations.html" , "encodingFormat" : "text/html" , "name" : "Read the illustrated HTML book" }], "about" :[ "JAX" , "Flax" , "Machine learning" , "Automatic differentiation" , "Cloud TPU" ]}]} </ script ></ head >< body ></ body ></ html >
+				48 container
+					49 container Breadcrumbs
+						50 heading Test results, Value: 1
+							51 text Test results
+					52 button SHARE
+						53 text SHARE
+					54 container
+						55 container
+							56 text 1 valid item detected Valid items are eligible for Google Search's rich results. 
+							57 link Description: Learn more, Value: support.google.com/webmasters/answer/9012289#enhancements
+						58 button View tested page
+							59 text VIEW TESTED PAGE
+						60 button (disabled) See preview of your URL on Google Search
+							61 text PREVIEW RESULTS
+						62 text Detected structured data
+						63 link Description: Breadcrumbs 1 valid item detected, Value: search.google.com/test/rich-results/result/r%2Fbreadcrumbs?id=T3OpWxNuZY42Vgdj-3_IHA
+						64 text Additional resources
+						65 link Description: Monitor Rich Results for your entire site GO TO SEARCH CONSOLE, Value: search.google.com/search-console/welcome
+						66 link Description: Privacy, Value: myaccount.google.com/privacypolicy?hl=en
+						67 link Description: Terms, Value: myaccount.google.com/termsofservice?hl=en
+		31 container reCAPTCHA
+			32 AXWebArea reCAPTCHA, URL: google.com/recaptcha/api2/anchor?ar=1&k=6LeKMsIjAAAAAGP5PskdMId0tLXc7dL3LiO07Avf&co=aHR0cHM6Ly9zZWFyY2guZ29vZ2xlLmNvbTo0NDM.&hl=en&v=NhfdZHzre16wrc2m6BxEdu7J&size=invisible&anchor-ms=20000&execute-ms=30000&cb=a7v35zdjphs2
+				33 text protected by 
+				34 text reCAPTCHA
+
+The focused UI element is 0 AXWebArea Rich Results Test - Google Search Console, URL: search.google.com/test/rich-results/result?id=T3OpWxNuZY42Vgdj-3_IHA

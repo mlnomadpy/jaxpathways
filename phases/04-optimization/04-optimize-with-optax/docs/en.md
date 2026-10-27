@@ -4,6 +4,8 @@ Phase 04: Math & optimization · about 80 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Minibatches, expectation, and gradient noise](https://www.tahabouhsine.com/jaxpathways/lesson-optimization-11.html).
+
 ## What you will be able to do
 
 - Distinguish gradients, updates, and parameters
@@ -182,7 +184,7 @@ visual_data = {'kind': 'line', 'x': x.tolist(), 'xlabel': 'input', 'ylabel': 'pr
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:04:41.499420+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T12:29:20.950459+00:00. JAX 0.9.2.
 
 ```text
 Parameters: {'bias': Array(1., dtype=float32), 'weight': Array(1.9999996, dtype=float32)}

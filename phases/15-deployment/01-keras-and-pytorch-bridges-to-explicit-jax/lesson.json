@@ -8,7 +8,8 @@
     "objectives": [
       "Map Dense and Linear weight axes and verify a known output.",
       "Separate architecture, weights, non-trainable state, optimizer state and preprocessing.",
-      "Run a backend-neutral Keras model and explain the boundaries of tensor exchange and export."
+      "Run a backend-neutral Keras model and explain the boundaries of tensor exchange and export.",
+      "Carry an explicit attention tensor layout and processor contract into a bounded Transformer conversion rather than assuming a dense transpose is sufficient."
     ],
     "sections": [
       {
@@ -70,6 +71,14 @@
       {
         "title": "Use a small bridge before a complete model",
         "body": "Keep the dense example as a test you can reason through by hand. Then add one operation at a time: a nonlinearity, normalization, and a second layer. Record an intermediate tensor at each boundary. For a convolution, declare both image layout and kernel layout; for attention, declare token order, head order, masks, and how query, key and value weights are packed.\n\nThe optional Keras lab runs real backends in separate processes. The default companion below uses NumPy and JAX to expose the mapping arithmetic, so its success alone is verified separately from TensorFlow, PyTorch, or a complete pretrained checkpoint. Carry a table of source names, target names, shapes, axis permutations and test inputs into the model-specific conversion lesson."
+      },
+      {
+        "title": "Attention requires a model-family contract",
+        "body": "The dense transpose rule does not describe an attention checkpoint. Query, key and value may be separate or fused; fused rows can be stored as Q-then-K-then-V or interleaved by head. Declare the source key, target key, source shape, target shape, axis transform and reshape order. Also bind tokenization or preprocessing identity, position IDs, mask meaning, normalization epsilon, and whether the language-model head shares the embedding table.\n\nThe deployment-08 optional lab gives one saved PyTorch-to-NNX example for the course's single pre-normalized decoder block. It is a bounded fixture with an explicit map, asymmetric probes, intermediate comparisons, semantic negative controls, VJP and process reload. It does not imply that arbitrary saved checkpoints can be converted by applying a general transpose rule.",
+        "check": {
+          "prompt": "Why can a fused-QKV tensor pass shape checks even when its head interpretation is wrong?",
+          "answer": "Different reshapes and permutations can preserve the same total dimensions. A numerical probe must exercise asymmetric heads and compare intermediate attention values."
+        }
       }
     ],
     "code": "# Move models between JAX, Keras, TensorFlow and PyTorch\nimport numpy as np\nimport jax\nimport jax.numpy as jnp\n# Same dense layer, different parameter layouts.\nx = np.array([[1., 2., -1.], [-2., 0., 3.]], np.float32)\nkeras_kernel = np.array([[1., -2.], [.5, 1.], [-1., .25]], np.float32)\nbias = np.array([.1, -.2], np.float32)\ntorch_weight = keras_kernel.T.copy()  # torch Linear: output, input\nparams = {\"kernel\": jnp.asarray(torch_weight.T), \"bias\": jnp.asarray(bias)}\ndef predict(params, inputs):\n    return inputs @ params[\"kernel\"] + params[\"bias\"]\n# Wrap with `jax.jit` (`actual`) so XLA traces and compiles the function.\nactual = np.asarray(jax.jit(predict)(params, jnp.asarray(x)))\n# A hand-computed first row detects a shared layout mistake.\nnp.testing.assert_allclose(actual[0], [3.1, -.45], atol=1e-6)\nnp.testing.assert_allclose(actual, x @ keras_kernel + bias, atol=1e-6)\nprint(\"Matched dense outputs:\", actual)",

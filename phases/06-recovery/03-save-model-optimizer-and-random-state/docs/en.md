@@ -4,6 +4,8 @@ Phase 06: Data & checkpoint recovery · about 100 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Load, batch, and checkpoint order with Grain](https://www.tahabouhsine.com/jaxpathways/lesson-recovery-02.html).
+
 ## What you will be able to do
 
 - Checkpoint complete training state with Orbax and replay the next update.
@@ -19,6 +21,20 @@ A saved file is useful only if it contains what you need to continue. We’ll tr
 
 A training checkpoint needs enough state to reproduce the next update. Weights alone do not capture optimizer memory or random-state ownership. Think of the checkpoint as the complete input to a future state transition.
 
+## Start with the next update, then inspect the support harness
+
+The teaching target is one transition. The full standalone program later adds setup, serialization and compatibility helpers around it. Those helpers are reviewed support code; the learner-authored mechanism is the state read, update and returned continuation state below. The helper names are deliberately omitted from this small excerpt so the state dependencies stay visible.
+
+### Pause and reason
+
+Trace the observed checkpoint and next transition. The restore log says step 3 and Adam count 3. What should the next state report, and why does resetting Adam produce count 1?
+
+<details><summary>Compare your reasoning</summary>
+
+The full-state transition advances both the step and Adam count to 4. Reinitializing Adam creates fresh moments and a fresh count, so its next update reports count 1 and differs even with the same parameters, batch and random key. The recorded negative control confirms that the parameter update differs.
+
+</details>
+
 ## Save the inputs to the next update
 
 Two runs with identical weights but different Adam moments can receive the same gradient and take different next steps. Different random keys can change augmentation or dropout before the gradient is computed.
@@ -27,8 +43,10 @@ The existing diagram merges state components into one snapshot. Its arrows mean 
 
 Loading bytes successfully checks serialization. Test continuation by restoring into a fresh process and comparing the next transition with an uninterrupted run. Add iterator state through the data-recovery procedure that follows this lesson.
 
+The relation $\simeq$ means the same tree structure, shapes and dtypes, exact integer/key values and floating-point leaves within the declared tolerances. The digest $h_f$ answers a different question: whether a particular artifact file has the expected bytes. An Orbax checkpoint can contain many files, so any integrity manifest must identify those files explicitly. Equal decoded arrays need not have byte-identical serializations. The lesson checks full training state and the next update on the same fixed batch; data-iterator continuation is added in the next lesson.
+
 $$
-\text{sha256}(\text{serialize}(\mathcal{C}_t)) = \text{sha256}(\text{deserialize}(\text{path}))
+\operatorname{restore}(\operatorname{save}(C_t))\simeq C_t,\qquad h_f=\operatorname{SHA256}(\operatorname{bytes}(f))
 $$
 
 ### Pause and reason
@@ -70,127 +88,35 @@ The payload includes schema version, package versions, learning rate, optimizer 
 
 The strongest local recovery check is the next loss and full updated state against an uninterrupted transition at the same boundary. We use float32 and allclose with `rtol=1e-6`, `atol=1e-7` for numerical leaves. Keys and counters are integer state whose expected values should remain identical. Changing hardware, reductions or library versions needs new validation; this lesson establishes only the tested CPU environment.
 
-## Prepare the data and state
+## Learner transition: update parameters, optimizer memory, random key, and step
 
-Create main.py in your course workspace. Use the tested course environment and add this block first.
+Run this small transition first. Predict which state fields change after one update. The complete Orbax reference program below includes the reviewed setup and serialization support.
 
 ```python
-# Step 1 — Prepare the data and state: This setup makes the dataset and software assumptions explicit.
 import jax
-# Select the CPU backend and virtual device count before initializing JAX.
-jax.config.update("jax_platforms","cpu")
 import jax.numpy as jnp
-import numpy as np
 import optax
-import orbax.checkpoint as ocp
-import tempfile
-import json
-import hashlib
-from pathlib import Path
 tx = optax.adam(0.05)
-def initial_state():
-    params = {"weight":jnp.array(0.,jnp.float32),"bias":jnp.array(0.,jnp.float32)}
-    return {"params":params,"optimizer":tx.init(params),
-            "key_data":jax.random.key_data(jax.random.key(7,impl="threefry2x32")),
-            "step":jnp.array(0,jnp.int32)}
-def pack_bytes(raw,capacity=4096):
-    if len(raw)>capacity:
-        raise ValueError("Snapshot exceeds tutorial fixed-byte capacity")
-    buffer = np.zeros(capacity,dtype=np.uint8)
-    buffer[:len(raw)] = np.frombuffer(raw,dtype=np.uint8)
-    return {"buffer":buffer,"length":np.array(len(raw),dtype=np.int32)}
-def unpack_bytes(packed):
-    length = int(packed["length"])
-    if not 0 <= length <= len(packed["buffer"]):
-        raise ValueError("Invalid snapshot length")
-    return np.asarray(packed["buffer"],dtype=np.uint8)[:length].tobytes()
-def same_tree(left,right):
-    assert jax.tree.structure(left)==jax.tree.structure(right)
-    for a,b in zip(jax.tree.leaves(left),jax.tree.leaves(right)):
-        # Transfer the device result to the host for an independent NumPy comparison.
-        host_a,host_b = np.asarray(a),np.asarray(b)
-        # Check tensor shape invariant: `host_a.shape==host_b.shape and host_a.dtype==host_b.dtype`
-        assert host_a.shape==host_b.shape and host_a.dtype==host_b.dtype
-        if np.issubdtype(host_a.dtype,np.integer):
-            np.testing.assert_array_equal(host_a,host_b)
-        else:
-            np.testing.assert_allclose(host_a,host_b,rtol=1e-6,atol=1e-7)
-def step(state,x,y):
-    # Sample deterministic random values into `key` using an explicit PRNG key.
-    key = jax.random.wrap_key_data(state["key_data"],impl="threefry2x32")
-    # Create or split explicit PRNG key(s) (`(next_key, sample_key)`) for reproducible randomness.
-    next_key,sample_key = jax.random.split(key)
-    # Sample deterministic random values into `target_noise` using an explicit PRNG key.
-    target_noise = 0.01*jax.random.normal(sample_key,y.shape)
-    def objective(params):
-        residual = params["weight"]*x+params["bias"]-(y+target_noise)
-        return jnp.mean(residual**2)
-    value,gradient = jax.value_and_grad(objective)(state["params"])
-    updates,opt_state = tx.update(gradient,state["optimizer"],state["params"])
-    next_state = {"params":optax.apply_updates(state["params"],updates),
-                  "optimizer":opt_state,"key_data":jax.random.key_data(next_key),
-                  "step":state["step"]+1}
-    return next_state,value
-def package_versions():
-    import importlib.metadata
-    return {name:importlib.metadata.version(name) for name in ("jax","numpy","optax","orbax-checkpoint")}
-def encode_contract(contract):
-    return pack_bytes(json.dumps(contract,sort_keys=True).encode())
-def validate_contract(saved,expected):
-    actual = json.loads(unpack_bytes(saved))
-    if actual != expected:
-        raise ValueError("Checkpoint contract differs: verify dataset, optimizer configuration, key implementation and package versions")
-workspace = tempfile.TemporaryDirectory()
-root = Path(workspace.name)
+def learner_state():
+    params = {"weight": jnp.array(0.), "bias": jnp.array(0.)}
+    return {"params": params, "optimizer": tx.init(params),
+            "key": jax.random.key(7), "step": 0}
+def learner_transition(state, x, y):
+    next_key, sample_key = jax.random.split(state["key"])
+    noise = 0.01 * jax.random.normal(sample_key, y.shape)
+    def loss_fn(params):
+        return jnp.mean((params["weight"] * x + params["bias"] - (y + noise)) ** 2)
+    loss, gradient = jax.value_and_grad(loss_fn)(state["params"])
+    updates, optimizer = tx.update(gradient, state["optimizer"], state["params"])
+    return {"params": optax.apply_updates(state["params"], updates),
+            "optimizer": optimizer, "key": next_key, "step": state["step"] + 1}, loss
+small = learner_state()
+small, small_loss = learner_transition(small, jnp.array([0., 0.5, 1.]), jnp.array([-1., 0., 1.]))
+assert small["step"] == 1 and int(small["optimizer"][0].count) == 1
+print("Learner transition step:", small["step"], "Adam count:", int(small["optimizer"][0].count))
 ```
 
-This setup makes the dataset and software assumptions explicit. No external dataset or accelerator is required.
-
-## Build the pipeline or state transition
-
-Append this block to the same file; follow the named state objects through each function.
-
-```python
-# Step 2 — Build the pipeline or state transition
-x = jnp.array([0.,0.5,1.],dtype=jnp.float32)
-y = 2*x-1
-# Transfer the device result to the host for an independent NumPy comparison.
-contract = {"schema":1,"learning_rate":0.05,"optimizer":"adam",
-            "key_impl":"threefry2x32","versions":package_versions(),
-            "data_sha256":hashlib.sha256(np.asarray(x).tobytes()+np.asarray(y).tobytes()).hexdigest()}
-state = initial_state()
-for _ in range(3):
-    state,_ = step(state,x,y)
-checkpoint_path = root/"step_3"
-payload = {"training":state,"contract":encode_contract(contract)}
-with ocp.StandardCheckpointer() as checkpointer:
-    checkpointer.save(checkpoint_path,payload)
-    checkpointer.wait_until_finished()
-    restored = checkpointer.restore(checkpoint_path,target={"training":initial_state(),"contract":encode_contract(contract)})
-validate_contract(restored["contract"],contract)
-```
-
-The function boundaries expose which inputs determine the next output and which state must be preserved.
-
-## Run the comparison
-
-Append the checks, save main.py and run python main.py. Predict what should agree before running.
-
-```python
-# Step 3 — Run the comparison
-same_tree(state,restored["training"])
-expected_next,expected_loss = step(state,x,y)
-restored_next,restored_loss = step(restored["training"],x,y)
-same_tree(expected_next,restored_next)
-# Transfer the device result to the host for an independent NumPy comparison.
-np.testing.assert_allclose(np.asarray(expected_loss),np.asarray(restored_loss),rtol=1e-6)
-assert int(restored_next["step"])==4
-print("Restored step:",int(restored["training"]["step"]))
-print("Optimizer count:",int(restored["training"]["optimizer"][0].count))
-print("Next update and loss agree; checkpoint exists:",checkpoint_path.exists())
-```
-
-The comparison checks the next behavior, not merely whether a save call succeeded.
+One completed update returns a new parameter tree, Adam memory, continuation key, and step. The full reference program later checks that restoring all of them reproduces the next update.
 
 ## Run the example
 
@@ -321,12 +247,10 @@ visual_data = {'kind': 'bar', 'x': list(range(len(saved_norms))), 'labels': [f'l
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:05:33.314450+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T12:30:10.531457+00:00. JAX 0.9.2.
 
 ```text
-Restored step: 3
-Optimizer count: 3
-Next update and loss agree; checkpoint exists: True
+Learner transition step: 1 Adam count: 1
 Restored step: 3
 Optimizer count: 3
 Next update and loss agree; checkpoint exists: True
@@ -435,7 +359,7 @@ assert int(right["step"])==6
 
 **Transfer**
 
-Keep the restored parameters but reset Adam’s memory. Compare the next update with the full-state restore. Keep data and random state identical so the optimizer memory is the only changed factor.
+Keep the restored parameters but reset Adam’s memory. Before running the check, predict the next optimizer count and whether the parameter update can match. Then compare the next update with the full-state restore while holding the batch and random key fixed; interpret the printed counter and parameter mismatch.
 
 <details><summary>Hint</summary>
 
@@ -488,7 +412,7 @@ assert any(not np.allclose(a,b,rtol=1e-6,atol=1e-7) for a,b in zip(jax.tree.leav
 print('Full restore Adam count: 4; reset memory count: 1; next parameters differ.')
 ```
 
-A checkpoint can return plausible predictions yet fail to resume the original training trajectory. Adam’s moments and count affect the next update even when the weights and batch match.
+The full restore advances Adam from count 3 to 4. Resetting its state makes the next count 1 and discards first/second moments, so a plausible model file does not continue the same trajectory.
 
 </details>
 

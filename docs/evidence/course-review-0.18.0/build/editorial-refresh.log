@@ -1,0 +1,26 @@
+PASS networks-05
+PASS distributed-02
+PASS tpu-06
+PASS pretraining-01
+PASS pretraining-02
+PASS pretraining-03
+PASS posttraining-01
+PASS posttraining-02
+PASS posttraining-05
+PASS operations-06
+PASS operations-07
+PASS operations-08
+PASS networks-05: script + notebook code
+PASS distributed-02: script + notebook code
+PASS operations-06: script + notebook code
+PASS operations-07: script + notebook code
+PASS operations-08: script + notebook code
+PASS pretraining-01: script + notebook code
+PASS pretraining-02: script + notebook code
+PASS pretraining-03: script + notebook code
+PASS posttraining-01: script + notebook code
+PASS posttraining-02: script + notebook code
+PASS posttraining-05: script + notebook code
+PASS tpu-06: script + notebook code
+OK: 12 executed (104 total CPU lessons); 24 executions
+Release 0.18.0: 104 lessons and 22 phases match the recorded source snapshot.

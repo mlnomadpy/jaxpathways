@@ -28,7 +28,7 @@ Review: [TPU generations and HBM memory budgeting](01-tpu-generations-and-hbm-me
 
 ### Build in stages
 
-1. **Compare TPU generations and budget HBM capacity.** Compute TPU v5e, v5p, and v6e ridge points, calculate FP32 vs mixed-BF16 training state and KV-cache GiB, and determine the minimum chip count at an 80% HBM budget.
+1. **Compare TPU generations and budget HBM capacity.** Compute the v5e/v5p/v6e ideal ridge points and separate training-state from inference KV-cache bytes. Compare replicated and explicitly sharded per-device ledgers under headroom and temporary/activation assumptions before deriving any conditional minimum chip count.
 
    Lessons: [TPU generations and HBM memory budgeting](01-tpu-generations-and-hbm-memory-budgeting/docs/en.md).
 
@@ -66,9 +66,9 @@ Use the reviewed execution matrix before staging code on a TPU. CPU-only lesson 
 
 Status: authored lesson with CPU exercise.
 
-**Intended outcome:** Compare TPU v5e, v5p, and v6e specifications and roofline ridge points, budget FP32 vs mixed-BF16 training state and KV-cache HBM, and size the minimum chip count for a model.
+**Intended outcome:** Compare TPU generation tradeoffs, prove per-device replicated versus sharded memory fit, and budget training state separately from inference KV cache.
 
-**Evidence:** Keep the TPU ridge-point table, 7B and 1.5B training/KV-cache HBM budgets, and minimum chip count calculation at an 80% HBM ceiling.
+**Evidence:** Keep aggregate and per-device state ledgers, replication/sharding/headroom assumptions, invalid aggregate-fit counterexamples and separate training-versus-inference capacity decisions.
 
 **Checkpoint:** Under this lesson's ledger, why does mixed-BF16 Adam training require 18 bytes per parameter before activations and temporary buffers are counted?
 

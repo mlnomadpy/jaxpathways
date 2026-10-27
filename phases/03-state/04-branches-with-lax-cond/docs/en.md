@@ -4,6 +4,8 @@ Phase 03: State, randomness & control flow · about 60 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Compiled loops with lax.scan](https://www.tahabouhsine.com/jaxpathways/lesson-state-03.html).
+
 ## What you will be able to do
 
 - Locate the decision boundary
@@ -27,8 +29,10 @@ The plot of magnitudes shows what the branch computes, not the tracing process. 
 
 After batching or other transformations, the implementation of control flow can change; for example, batching a conditional can turn it into selection. Keep claims about execution scope tied to the actual transformed program.
 
+The predicate is a scalar Boolean; both branches accept and return the same scalar shape and dtype. Substituting $-3$ selects the second expression and gives $3$; substituting $2$ selects the first and gives $2$. At zero both values agree, but a mathematical derivative of absolute value is not uniquely defined. Python tracing of both branch functions is separate from selecting a numerical result.
+
 $$
-\mathcal{T} = (\text{Leaves}(\mathcal{T}),\; \text{TreeDef}(\mathcal{T})), \qquad \operatorname{map}(g, \mathcal{T})_k = g(\mathcal{T}_k)
+\operatorname{magnitude}(x)=\begin{cases}x&x\ge0\\-x&x<0\end{cases}
 $$
 
 ### Pause and reason
@@ -158,7 +162,7 @@ visual_data = {'kind': 'line', 'x': grid.tolist(), 'xlabel': 'input', 'ylabel': 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:03:54.491914+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T12:28:45.761966+00:00. JAX 0.9.2.
 
 ```text
 3.0

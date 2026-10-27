@@ -27,8 +27,10 @@ Replication gives each participant the full value instead of a disjoint portion.
 
 Connect each PartitionSpec entry to its array axis and named mesh axis. Inspect actual addressable shards and compare reconstructed values with a global reference. Logical CPU devices validate this placement exercise without reproducing a multi-host network.
 
+The notation $P_d$ and $P_m$ names the data and model mesh dimensions. For a matrix placed with $P(\texttt{data},\texttt{model})$ on a $2\times2$ mesh, each device owns a $B/2\times H/2$ tile. The next lesson applies that rule selectively: it shards batch rows on data, parameter output columns on model, and predictions on both axes, then runs a complete parameter-sharded update.
+
 $$
-\text{Mesh}(D, (\texttt{'data'}, \texttt{'model'})) \implies \operatorname{shard}(X) \in \mathbb{R}^{(B/P_d) \times (H/P_m)}
+\text{Mesh}((P_d,P_m), (\texttt{'data'},\texttt{'model'}));\quad P(\texttt{data},\texttt{model}):Y\mapsto\mathbb{R}^{(B/P_d)\times(H/P_m)}
 $$
 
 ### Pause and reason
@@ -37,7 +39,7 @@ Must changing row sharding to column sharding change the answer?
 
 <details><summary>Compare your reasoning</summary>
 
-No. A correct compatible computation preserves the intended global result. Storage and communication can change even when the result agrees.
+No. A correct compatible computation preserves the intended global result. Storage and communication can change even when the result agrees. In the following lesson, the batch uses the data axis and parameter output columns use the model axis, so a local parameter shard has shape $(4,2)$.
 
 </details>
 
@@ -239,7 +241,7 @@ visual_data = {'kind': 'panels', 'panels': panels}
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:06:34.009406+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T12:31:04.760575+00:00. JAX 0.9.2.
 
 ```text
 Row-shard shapes: [(2, 4), (2, 4), (2, 4), (2, 4)]

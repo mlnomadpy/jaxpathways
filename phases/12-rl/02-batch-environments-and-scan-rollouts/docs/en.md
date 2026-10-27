@@ -4,6 +4,8 @@ Phase 12: Reinforcement learning · about 85 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Write a functional environment](https://www.tahabouhsine.com/jaxpathways/lesson-rl-01.html).
+
 ## What you will be able to do
 
 - Build a scan over vmapped transitions with explicit key ownership.
@@ -300,7 +302,7 @@ visual_data = {'kind':'line','x':list(range(1,9)),'xlabel':'transition index','y
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:07:57.228603+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T12:32:11.785934+00:00. JAX 0.9.2.
 
 ```text
 return mean: 0.5848437547683716

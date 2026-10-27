@@ -195,9 +195,15 @@ test('onboarding uses bounded, reviewed TPU targets instead of arbitrary lesson 
   assert.match(commands, /precision_profile\.py --platform tpu/);
   assert.match(commands, /queued-resources delete/);
   assert.doesNotMatch(commands, /JAX_PLATFORMS=tpu .*exercises\//);
-  assert.match(authored.content.sections[4].body, /CPU reference/);
+  const cpuReference = authored.content.sections.find(section => section.title === 'Establish the CPU reference first');
+  assert(cpuReference, 'the optional setup branch retains its explicit CPU reference');
+  assert.match(cpuReference.body, /COURSE_EXPECT_PLATFORM is cpu/);
+  assert.match(cpuReference.body, /waits for the compiled prediction to finish/);
+  assert.match(cpuReference.body, /NumPy independently calculates/);
+  const executionScope = authored.content.sections.find(section => section.title === 'Keep CPU lessons separate from reviewed TPU targets');
+  assert(executionScope, 'source review remains explicit after the beginner continuation section');
   assert.match(
-    authored.content.sections[5].body,
+    executionScope.body,
     /source, dependencies, backend assertion, topology, and input ownership/,
   );
 });

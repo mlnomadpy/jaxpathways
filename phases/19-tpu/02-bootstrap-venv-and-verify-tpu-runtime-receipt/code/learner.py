@@ -1,28 +1,30 @@
 """Bootstrap .venv and verify a TPU runtime receipt · learner-only exercises (3/3 contracts ready)"""
 
-# Exercise: Compute `closed_form_sum_of_squares(4)` and `closed_form_sum_of_squares(8)`, verify that `closed_form_sum_of_squares(4) == 10416.0`, and assert that `receipt['verified']` is `True`.
+# Exercise: Compute the 4-device and 8-device oracle values. On the available runtime, assert arithmetic_ok; assert requested_target_ready only when observed_backend is tpu and device_count is exactly 4.
 
 # Inputs:
-# - The closed-form sum helper and a runtime receipt produced by the active CPU or TPU backend.
+# - The closed-form sum helper and the active CPU/TPU receipt with expected and observed backend/device counts.
 
 # Outputs:
-# - Theoretical sums for the requested four- and eight-chip mappings, plus the receipt verification flag, observed backend, and actual device counts.
+# - Calculated four-/eight-device oracle values, actual arithmetic result and requested-target readiness.
 
 # Invariants to check:
-# - The four-chip theoretical total matches the exercise value and the active receipt reports its actual backend and counts. A CPU receipt may pass this local exercise but does not qualify as physical TPU evidence.
+# - arithmetic_ok is separate from expected_backend_ok and expected_topology_ok.
+# - requested_target_ready requires the requested TPU backend and exact expected count; a CPU rehearsal does not qualify TPU hardware.
 
 # Hints:
-# - Evaluate the helper for both requested chip counts.
-# - Keep theoretical chip-mapping totals separate from observed device arithmetic; read verified status, backend, and device counts from the receipt.
+# - Use observed_backend and device_count from the actual receipt.
+# - Test a schema-only wrong-count control separately from real hardware observations.
 
 def audit_runtime_sum_receipt(receipt, closed_form_sum_of_squares):
-    # TODO: check both theoretical totals and report the active receipt fields as observed.
+    # TODO: compare both theoretical totals and assert readiness matches the requested backend/count contract.
     raise NotImplementedError
 
 
 
+
 # Detect a silent fallback from 4 TPU chips to 1 CPU device (Foundations):
-# Write a check `is_four_chip_tpu_receipt(r)` that returns `True` only when `r['backend'] == 'tpu'`, `r['local_device_count'] == 4`, and `r['observed_total'] == 10416.0`.
+# Write `is_four_chip_tpu_receipt(r)` using the real receipt schema: return True only when `r['observed_backend'] == 'tpu'`, `r['local_device_count'] == 4`, `r['device_count'] == 4`, and `r['observed_total']` is 10416.0. Missing keys should return False.
 
 # Inputs:
 # - A candidate runtime receipt mapping with backend, local device count, and observed total fields.
@@ -31,18 +33,26 @@ def audit_runtime_sum_receipt(receipt, closed_form_sum_of_squares):
 # - A Boolean predicate for the exact four-chip TPU receipt contract.
 
 # Invariants to check:
-# - All required fields must match; missing fields or CPU backend return false.
+# - Use observed_backend from the emitted receipt.
+# - Missing keys, CPU backend, wrong local/global device count, or wrong synchronized total return False.
 
 # Hints:
 # - Validate backend, count, and total independently.
 # - Use a tolerance only for the floating representation of the exact integer total.
 
-import jax.numpy as jnp
 import numpy as np
 
 def is_four_chip_tpu_receipt(receipt):
-    # TODO: return whether all required four-chip TPU receipt fields are valid.
-    raise NotImplementedError
+    try:
+        # Use the schema returned by build_runtime_receipt.
+        return bool(
+            receipt["observed_backend"] == "tpu"
+            and receipt["local_device_count"] == 4
+            and receipt["device_count"] == 4
+            and np.isclose(receipt["observed_total"], 10416.0)
+        )
+    except (KeyError, TypeError):
+        return False
 
 
 

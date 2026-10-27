@@ -1,0 +1,112 @@
+PASS welcome-01: script + notebook code
+PASS welcome-02: script + notebook code
+PASS welcome-cpu: script + notebook code
+PASS welcome-03: script + notebook code
+PASS arrays-01: script + notebook code
+PASS arrays-02: script + notebook code
+PASS arrays-03: script + notebook code
+PASS arrays-04: script + notebook code
+PASS first-gradient: script + notebook code
+PASS transforms-02: script + notebook code
+PASS transforms-03: script + notebook code
+PASS transforms-04: script + notebook code
+PASS transforms-05: script + notebook code
+PASS state-01: script + notebook code
+PASS state-02: script + notebook code
+PASS state-03: script + notebook code
+PASS state-04: script + notebook code
+PASS optimization-05: script + notebook code
+PASS optimization-01: script + notebook code
+PASS optimization-06: script + notebook code
+PASS optimization-07: script + notebook code
+PASS optimization-02: script + notebook code
+PASS optimization-08: script + notebook code
+PASS optimization-03: script + notebook code
+PASS optimization-09: script + notebook code
+PASS optimization-10: script + notebook code
+PASS optimization-11: script + notebook code
+PASS optimization-04: script + notebook code
+PASS optimization-12: script + notebook code
+PASS networks-01: script + notebook code
+PASS networks-02: script + notebook code
+PASS networks-03: script + notebook code
+PASS networks-04: script + notebook code
+PASS networks-05: script + notebook code
+PASS recovery-01: script + notebook code
+PASS recovery-02: script + notebook code
+PASS recovery-03: script + notebook code
+PASS recovery-04: script + notebook code
+PASS recovery-05: script + notebook code
+PASS recovery-06: script + notebook code
+PASS transformers-01: script + notebook code
+PASS transformers-02: script + notebook code
+PASS transformers-03: script + notebook code
+PASS transformers-04: script + notebook code
+PASS performance-01: script + notebook code
+PASS performance-02: script + notebook code
+PASS performance-03: script + notebook code
+PASS performance-04: script + notebook code
+PASS performance-05: script + notebook code
+PASS distributed-01: script + notebook code
+PASS distributed-02: script + notebook code
+PASS distributed-03: script + notebook code
+PASS distributed-04: script + notebook code
+PASS science-01: script + notebook code
+PASS science-02: script + notebook code
+PASS science-03: script + notebook code
+PASS science-04: script + notebook code
+PASS probability-01: script + notebook code
+PASS probability-02: script + notebook code
+PASS probability-03: script + notebook code
+PASS probability-04: script + notebook code
+PASS rl-01: script + notebook code
+PASS rl-02: script + notebook code
+PASS rl-03: script + notebook code
+PASS rl-04: script + notebook code
+FAIL rl-05 (script)
+initial / final masked value MSE: 0.3257838487625122 0.13587723672389984
+fitted V(position 0..3): [0.1953 0.4592 0.8403 0.    ]
+initial / final masked value MSE: 0.3257838487625122 0.13587723672389984
+fitted V(position 0..3): [0.1953 0.4592 0.8403 0.    ]
+GAE shape: (8, 512) all finite: True
+initial / final masked value MSE: 0.3257838487625122 0.13587723672389984
+fitted V(position 0..3): [0.1953 0.4592 0.8403 0.    ]
+initial / final masked value MSE: 0.3257838487625122 0.13587723672389984
+fitted V(position 0..3): [0.1953 0.4592 0.8403 0.    ]
+GAE shape: (8, 512) all finite: True
+undiscounted / matched / terminal / continuing-cutoff: [np.float64(-0.10000000000000009), np.float64(0.0), np.float64(0.0), 4.6]
+cutoff residual: 3.0
+initial / final MSE: 0.3257838487625122 0.13587723672389984
+V table: [0.19529999792575836, 0.459199994802475, 0.8403000235557556, 0.0]
+seed 313 initial/final MSE: 0.3257838487625122 0.13587723672389984
+seed 313 fitted table: [0.19529999792575836, 0.459199994802475, 0.8403000235557556, 0.0]
+seed 314 initial/final MSE: 0.33639785647392273 0.13899469375610352
+seed 314 fitted table: [0.20389999449253082, 0.45910000801086426, 0.8177000284194946, 0.0]
+continuing cutoff GAE: [1.75, 3.0, 0.0]
+finite-horizon GAE: [1.25, 1.0, 0.0]
+cutoff / reset / terminal residual: 3.0 1.25 1.0
+
+Traceback (most recent call last):
+  File "<string>", line 418, in <module>
+    np.testing.assert_allclose(np.asarray(finite_horizon_advantage[:, 0]), [1.25, 1., -.5], atol=1e-6)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/tahabsn/.pixi/envs/python/lib/python3.14/site-packages/numpy/testing/_private/utils.py", line 1768, in assert_allclose
+    assert_array_compare(compare, actual, desired, err_msg=str(err_msg),
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                         verbose=verbose, header=header, equal_nan=equal_nan,
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                         strict=strict)
+                         ^^^^^^^^^^^^^^
+  File "/Users/tahabsn/.pixi/envs/python/lib/python3.14/site-packages/numpy/testing/_private/utils.py", line 983, in assert_array_compare
+    raise AssertionError(msg)
+AssertionError: 
+Not equal to tolerance rtol=1e-07, atol=1e-06
+
+Mismatched elements: 1 / 3 (33.3%)
+Mismatch at index:
+ [2]: 0.0 (ACTUAL), -0.5 (DESIRED)
+Max absolute difference among violations: 0.5
+Max relative difference among violations: 1.
+ ACTUAL: array([1.25, 1.  , 0.  ], dtype=float32)
+ DESIRED: array([ 1.25,  1.  , -0.5 ])
+

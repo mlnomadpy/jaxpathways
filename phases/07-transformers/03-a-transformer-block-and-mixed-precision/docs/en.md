@@ -4,6 +4,8 @@ Phase 07: Transformers & language models · about 90 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Masking, tokenization, and sequence packing](https://www.tahabouhsine.com/jaxpathways/lesson-transformers-02.html).
+
 ## What you will be able to do
 
 - Follow the two residual paths
@@ -27,8 +29,10 @@ The feed-forward branch expands eight features to sixteen, applies GELU and retu
 
 The saved output-minus-input heatmap shows the combined correction. Its equal rows arise from this fixture's constant-offset input and normalization behavior. They are not a universal property of attention. Use the architecture to identify which input change would test that explanation.
 
+The actual `layer_norm` standardizes the last feature axis without learned scale or bias. General affine LayerNorm adds $\gamma_i N(x)_i+\beta_i$; those parameters are deliberately absent from this minimal block. On the asymmetric row $[1,3]$, the mean is $2$, variance is $1$, and the normalized values are approximately $[-1,1]$. A row-constant offset disappears in this operation, helping explain the repeated corrections in the current heatmap; a feature-specific perturbation need not disappear.
+
 $$
-\operatorname{LN}(x)_i = \gamma_i \frac{x_i - \mu}{\sqrt{\sigma^2 + \epsilon}} + \beta_i, \qquad h^{(\ell+1)} = h^{(\ell)} + f_\ell(\operatorname{LN}(h^{(\ell)}))
+N(x)_i=\frac{x_i-\mu(x)}{\sqrt{\operatorname{var}(x)+\epsilon}},\qquad h^{\prime}=h+f(N(h)),\quad\epsilon=10^{-5}
 $$
 
 ### The actual single-head pre-LN block
@@ -231,7 +235,7 @@ visual_data = {'kind': 'heatmap', 'values': (output - x).tolist(), 'rows': ['tok
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T17:44:47.808602+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T12:30:42.576023+00:00. JAX 0.9.2.
 
 ```text
 Block shape: (4, 8)

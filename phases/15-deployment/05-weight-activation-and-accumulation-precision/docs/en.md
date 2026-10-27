@@ -4,6 +4,8 @@ Phase 15: Deployment, interoperability & edge AI · about 110 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Export a computation and verify its serving contract](https://www.tahabouhsine.com/jaxpathways/lesson-deployment-03.html).
+
 ## What you will be able to do
 
 - Compare FP32, FP16 and BF16 rounding without confusing storage with accumulation.
@@ -313,7 +315,7 @@ visual_data = {'panels': [first_panel, {'kind': 'bar', 'labels': ['output 0', 'o
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:09:31.198039+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T12:40:34.674784+00:00. JAX 0.9.2.
 
 ```text
 <class 'jax.numpy.float32'> max absolute error 0.0

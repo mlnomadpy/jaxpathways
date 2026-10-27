@@ -21,6 +21,27 @@ step = jax.jit(
     jax.value_and_grad(lambda w: preference_loss(w, chosen, rejected))
 )
 
+# Freeze held-out reward pairs before fitting
+# Held-out examples are fixed before the optimizer loop; they are not used for fitting.
+heldout_chosen = jnp.array([[1.0, 0.0], [0.0, 1.0], [0.2, 0.2], [-1.0, -1.0]])
+heldout_rejected = jnp.array([[0.0, 1.0], [-1.0, -1.0], [-0.1, 0.0], [0.0, 1.0]])
+heldout_votes = np.array([1.0, 1.0, 0.5, 0.25], dtype=np.float64)
+heldout_slices = np.array(["unanimous", "unanimous", "disagreement", "disagreement"])
+w_baseline = jnp.zeros_like(w)
+def heldout_report(weights):
+    margins = np.asarray((heldout_chosen - heldout_rejected) @ weights, dtype=np.float64)
+    probabilities = 1.0 / (1.0 + np.exp(-margins))
+    brier = (probabilities - heldout_votes) ** 2
+    unanimous = heldout_slices == "unanimous"
+    disagreement = ~unanimous
+    return {"probabilities": probabilities, "brier_mean": float(np.mean(brier)),
+            "unanimous_accuracy": float(np.mean((probabilities[unanimous] > 0.5) == (heldout_votes[unanimous] > 0.5))),
+            "disagreement_probabilities": probabilities[disagreement],
+            "disagreement_brier": float(np.mean(brier[disagreement]))}
+pretraining_heldout_baseline = heldout_report(w)
+assert np.allclose(pretraining_heldout_baseline["probabilities"], 0.5)
+print("Frozen held-out reward baseline before fit:", pretraining_heldout_baseline)
+
 # 3. Fit rewards and check their invariances
 # Step 3 — 3. Fit rewards and check their invariances: The host logaddexp oracle checks stable likelihood values.
 for _ in range(100):
@@ -164,4 +185,35 @@ for positive, negative in [(chosen, rejected), (rejected, chosen)]:
         atol=1e-6,
     )
 print('Independent reward gradients agree in both label directions.')
+
+# Reference practice: Evaluate held-out reward pairs and keep disagreement visible
+# Fixed synthetic held-out reward pairs. Baseline is calculated at w=0 before fitting.
+heldout_chosen = jnp.array([[1.0, 0.0], [0.0, 1.0], [0.2, 0.2], [-1.0, -1.0]])
+heldout_rejected = jnp.array([[0.0, 1.0], [-1.0, -1.0], [-0.1, 0.0], [0.0, 1.0]])
+heldout_votes = np.array([1.0, 1.0, 0.5, 0.25], dtype=np.float64)
+heldout_slices = np.array(["unanimous", "unanimous", "disagreement", "disagreement"])
+
+# Define the baseline before any reward-model optimization.
+w_baseline = jnp.zeros_like(w)
+def heldout_report(weights):
+    margins = np.asarray((heldout_chosen - heldout_rejected) @ weights, dtype=np.float64)
+    probabilities = 1.0 / (1.0 + np.exp(-margins))
+    brier = (probabilities - heldout_votes) ** 2
+    unanimous = heldout_slices == "unanimous"
+    disagreement = ~unanimous
+    return {
+        "probabilities": probabilities,
+        "brier_mean": float(np.mean(brier)),
+        "unanimous_accuracy": float(np.mean((probabilities[unanimous] > 0.5) == (heldout_votes[unanimous] > 0.5))),
+        "disagreement_probabilities": probabilities[disagreement],
+        "disagreement_brier": float(np.mean(brier[disagreement])),
+    }
+
+baseline = pretraining_heldout_baseline
+after = heldout_report(w)
+assert len(baseline["disagreement_probabilities"]) == 2
+assert np.all(np.isfinite(after["probabilities"]))
+print("heldout reward baseline:", baseline)
+print("heldout reward after training-pair fit:", after)
+print("Synthetic, four-pair evaluation only; no human or language-quality claim.")
 print("PASS: posttraining-03")

@@ -139,7 +139,7 @@
     {
       "id": "networks",
       "level": "available-draft",
-      "strength": "MLP, NNX and CNN examples test gradients, evaluation isolation and synthetic image errors.",
+      "strength": "Tiny MLP, NNX and CNN references now include real multilayer failure localization, named state identity and BatchNorm/Dropout evaluation isolation.",
       "contribution": "Add a licensed natural-image pilot with frozen source-group splits, a simple baseline and per-class error slices."
     },
     {
@@ -163,7 +163,7 @@
     {
       "id": "distributed",
       "level": "in-development",
-      "strength": "Logical CPU sharding is checked; separate v5e collectives and same-process multi-host restore receipts exist.",
+      "strength": "Logical CPU references include an oracle-checked 2x2 parameter/momentum-sharded update with unequal and empty valid counts; physical target evidence remains separately scoped.",
       "contribution": "Qualify fresh-process multi-host restart and worker-loss recovery with explicit data ownership; do not infer scaling results from logical CPU devices."
     },
     {
@@ -199,25 +199,25 @@
     {
       "id": "deployment",
       "level": "in-development",
-      "strength": "Dense framework conversion, exports, precision contracts and process boundaries are checked.",
+      "strength": "Dense and small saved-decoder PyTorch-to-NNX parity, shifted/masked sequence semantics, fresh-process artifacts and quantization contracts have bounded CPU checks.",
       "contribution": "Execute and document a real container service, concurrent request workload and named edge-device/delegate report; dense parity is not full architecture portability."
     },
     {
       "id": "operations",
       "level": "in-development",
-      "strength": "Local job incidents, checksummed recovery and release/rollback drills are runnable.",
+      "strength": "Local job incidents, reloaded-prediction slice gates, executed local retrieval traces, behavioral rollback and identity-bound retirement drills are runnable teaching fixtures.",
       "contribution": "Add authenticated approvals, multi-writer release control, load-driven SLO incidents and application-specific LLM evaluation beyond deterministic fixtures."
     },
     {
       "id": "pretraining",
       "level": "in-development",
-      "strength": "Small masked-token, masked-image and contrastive objective labs run on CPU.",
-      "contribution": "Integrate the objectives with saved encoder architectures, licensed data recipes and downstream probes; the larger modality capstones are still plans."
+      "strength": "Masked-token, masked-image and contrastive mechanics now connect to saved small encoders, held-out masks/groups and frozen probes with explicit failed-baseline limitations.",
+      "contribution": "Extend saved-encoder teaching fixtures to licensed data recipes and larger architectures with independent representation evaluation; the full modality capstones remain planned."
     },
     {
       "id": "posttraining",
       "level": "in-development",
-      "strength": "Response masks, dense LoRA, learned rewards, PPO-bandit and DPO mechanics are implemented, with a registered Stage 5 table-policy exercise and a separate saved-decoder sequence-PPO extension whose local mechanics and replay passed review.",
+      "strength": "Response masks, base-bound LoRA artifacts, held-out synthetic reward checks and bounded saved-decoder SFT/DPO handoffs accompany the separately recorded failed-quality PPO extension.",
       "contribution": "The saved-decoder extension failed its strict heldout reward quality floor. Human preference quality, retained behavior and target-quality evaluation remain open and need separately reviewed evidence."
     },
     {
@@ -235,8 +235,8 @@
     {
       "id": "tpu-systems",
       "level": "in-development",
-      "strength": "Memory/precision models and retained profiling paths connect to narrow v5e targets.",
-      "contribution": "Teach target trace interpretation and native low-bit kernel/storage evidence; distinguish per-chip capacity, sharded state and dequantized reference arithmetic."
+      "strength": "Per-device training/inference memory ledgers and policy-specific precision bytes connect to stable warmed profiling and an actual CPU trace-reading example; physical targets remain narrowly qualified.",
+      "contribution": "Add retained target-specific trace interpretation and native low-bit kernel/peak-HBM measurements. CPU event accounting and dequantized references do not qualify those target claims."
     }
   ],
   "projects": [
@@ -428,9 +428,17 @@
     }
   ],
   "revisionFollowUp": {
-    "date": "2026-10-21",
-    "baseCommit": "7554817ed19a26dabfb1e183220cf84308382906",
-    "guide": "docs/review-guide-0.11.md",
-    "scope": "Authored learner workspaces across the lessons, deeper bounded RL and optional NumPyro implementations, MathML conformance repairs and an author review packet. Preserve original audit provenance, developing-phase and planned-capstone labels; no human acceptance or new physical hardware qualification is asserted."
-  }
+    "date": "2026-10-27",
+    "baseCommit": "15bf7aa4fbd4460501cc4d6d7802324673a89f6f",
+    "guide": "docs/review-guide-0.18.0.md",
+    "scope": "Repairs for content issues #74 through #91 with independent AI review, bounded CPU teaching checks and regenerated book companions. Existing maturity levels, failed model-quality results and human/native-reader/target qualification limits remain unchanged."
+  },
+  "revisionFollowUpHistory": [
+    {
+      "date": "2026-10-21",
+      "baseCommit": "7554817ed19a26dabfb1e183220cf84308382906",
+      "guide": "docs/review-guide-0.11.md",
+      "scope": "Authored learner workspaces across the lessons, deeper bounded RL and optional NumPyro implementations, MathML conformance repairs and an author review packet. Preserve original audit provenance, developing-phase and planned-capstone labels; no human acceptance or new physical hardware qualification is asserted."
+    }
+  ]
 }

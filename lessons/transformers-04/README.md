@@ -4,6 +4,8 @@ Phase 07: Transformers & language models · about 120 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [A Transformer block and mixed precision](https://www.tahabouhsine.com/jaxpathways/lesson-transformers-03.html).
+
 ## What you will be able to do
 
 - Assemble the token-to-logit contract
@@ -487,7 +489,7 @@ visual_data = {'kind': 'heatmap', 'values': probs.tolist(), 'rows': ['position '
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T17:44:59.521718+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T12:30:54.507576+00:00. JAX 0.9.2.
 
 ```text
 Initial / held loss / held accuracy: 0.9807573556900024 0.0017881905660033226 1.0

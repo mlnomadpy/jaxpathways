@@ -4,6 +4,8 @@ Phase 03: State, randomness & control flow · about 65 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Pytrees and structured parameters](https://www.tahabouhsine.com/jaxpathways/lesson-state-02.html).
+
 ## What you will be able to do
 
 - Separate carry from recorded outputs
@@ -168,7 +170,7 @@ visual_data = {'kind': 'line', 'x': [1, 2, 3, 4], 'xlabel': 'completed step', 'y
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:03:50.876078+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T12:28:42.990159+00:00. JAX 0.9.2.
 
 ```text
 History: [1.    1.5   1.75  1.875]

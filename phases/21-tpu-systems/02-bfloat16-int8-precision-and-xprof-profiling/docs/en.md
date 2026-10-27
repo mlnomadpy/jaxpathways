@@ -4,6 +4,8 @@ Phase 21: TPU Systems: Generations, Memory, Precision & XProf · about 25 minute
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. A separate precision and profiling runner is implemented in the target instructions. Bounded hardware receipts cover v5e1 launch, resume and precision checks; four single-device Pallas cases; and a four-device v5e collective fixture. Each receipt applies only to its recorded source, environment, cases and hardware. Other lessons and TPU configurations require separate qualification.
 
+**Before this lesson:** [TPU generations and HBM memory budgeting](https://www.tahabouhsine.com/jaxpathways/lesson-tpu-03.html).
+
 ## What you will be able to do
 
 - Measure error for BF16 operands with requested FP32 and BF16 dot result dtypes, verify the actual returned dtypes, and avoid inferring internal partial-sum precision from output values.
@@ -21,9 +23,15 @@ This lesson measures numerical error for BF16 operands with requested FP32 and B
 
 ## What does `preferred_element_type` establish for BF16 dot products?
 
-`jnp.dot(..., preferred_element_type=...)` requests the output element type. The lower-level `jax.lax.dot` documentation also describes this as a compiler hint for accumulation when no explicit `DotAlgorithm` is selected. The lesson verifies the actual returned dtype and compares outputs; neither measurement proves that every partial sum was rounded to BF16 or FP32. FP32 itself is finite precision, so the FP32 JAX dot is a reference rather than exact arithmetic. The error ordering below belongs to the recorded input fixture and this CPU backend only. The retained optimized-HLO file for the installed CPU run shows BF16 operands widened to FP32, an FP32 dot, and a conversion of the returned result to BF16. That describes this compiled CPU graph; HLO does not reveal the physical instruction-level reduction order, and the result does not qualify TPU lowering.
+Lower precision asks two separate questions: how much space does an array occupy, and how much does the computed answer change? This lesson keeps the input matrix and weights fixed so you can compare three paths: BF16 operands returning FP32, BF16 operands returning BF16, and stored INT8 weight codes dequantized to FP32 before the dot.
 
-The INT8 example quantizes each output column using `scale = max(abs(W[:, j])) / 127`, stores one signed byte per weight plus one FP32 scale per column, and then dequantizes to FP32 before the dot. A zero column uses a safe scale and must produce a zero quantized column without division by zero. This is a numerical reference only: it does not show a native INT8 dot, packed storage, activation quantization, or reduced device memory traffic.
+Start with the returned answer. The recorded CPU run has maximum absolute errors $0.03718$, $0.05545$ and $0.12516$, respectively, against the same FP32 reference. The corresponding mean errors are $0.00756$, $0.00912$ and $0.02322$. The maximum asks about the worst output element; the mean summarizes all elements. A small mean can hide a larger error at a particular output, so inspect both before deciding whether a task can tolerate a precision change.
+
+Now follow one INT8 weight column. Its scale is the largest absolute weight in that column divided by $127$. Dividing weights by that scale and rounding produces signed integer codes; multiplying the codes by the scale reconstructs approximate weights. A zero column needs a safe scale and all-zero codes so the calculation never divides by zero. Each output column gets its own scale because columns can have different ranges.
+
+For the $(256,64)$ weight matrix, BF16 storage takes $32768$ bytes. INT8 codes take $16384$ bytes plus $256$ bytes for 64 FP32 scales. That is a smaller stored representation. However, this reference then materializes FP32 weights, which take $65536$ bytes, before multiplying them. Saving checkpoint bytes therefore does not by itself establish a lower-memory or faster dot product. For the $(64,256)$ input, FP32 and BF16 take $65536$ and $32768$ bytes; the $(64,64)$ result takes $16384$ or $8192$ bytes. Temporary lifetimes and other live arrays still matter for peak device memory.
+
+Finally separate a returned dtype from an internal reduction. `preferred_element_type` requests a result element type and, on the generic lower-level dot path, supplies a compiler hint about accumulation. The retained CPU HLO widens BF16 operands to FP32, performs an FP32 dot and converts the requested BF16 result afterward. That is evidence about this compiled graph. It does not identify the physical partial-sum rounding order or establish TPU lowering. The probe command below lets you inspect those artifacts instead of inferring internal arithmetic from the output label.
 
 **Run the source-bound CPU dtype and compiler-IR probe**
 
@@ -34,8 +42,18 @@ JAX_PLATFORMS=cpu python phases/21-tpu-systems/02-bfloat16-int8-precision-and-xp
 **Expected:** Retains the original and BF16 operands, FP32 reference, both requested-result arrays, explicit FP32-result-to-BF16 cast, seed-zero and seed-42 fixtures, plus seed 7 as a changed-seed check. The receipt records environment and source/data hashes and points to a result summary with returned dtypes, computed errors, and equality counts. StableHLO and optimized HLO are compiler evidence; they do not establish physical partial-sum precision or TPU lowering.
 
 $$
-\text{Cost per } 10^6 \text{ tokens} = \frac{C_{\text{chip\_hour}} \times N_{\text{chips}} \times (T_{\text{run}} / 3600)}{\text{Tokens}_{\text{processed}} / 10^6}
+B_{\text{stored}} = N_w b_w + N_s b_s; \quad B_{\text{runtime operands}} = N_x b_x + N_w b_w; \quad B_{\text{result}} = N_y b_y
 $$
+
+### Warmup, profiled calls, synchronization and unprofiled measurement boundaries
+
+**Predict:** Which work is outside the trace, what may appear inside it, and does the shown source contain a collective?
+
+![Warmup, profiled calls, synchronization and unprofiled measurement boundaries](../outputs/mechanism.svg)
+
+*Conceptual execution boundary schematic; durations and event nesting depend on the retained trace.*
+
+Conceptual flow, not drawn to time scale: synchronized warmup runs before the trace. The profiled region repeats a fixed-input matrix dot and synchronizes each result, so a captured timeline can include host dispatch, runtime/device work, synchronization and profiler activity. No collective appears in this function. A separate unprofiled loop measures wall time including host dispatch and synchronization.
 
 ### Pause and reason
 
@@ -47,13 +65,18 @@ The call requests a BF16 returned dtype, and this run verifies that dtype and co
 
 </details>
 
-## 1. Capture a warmed XProf trace on your Cloud TPU VM and inspect in TensorBoard
+## Capture a bounded CPU rehearsal or TPU trace
 
-The worked CPU example warms the exact function it profiles and writes its trace under `TPU_TRACE_DIR` (default `./tpu-xprof-trace`). The directory remains after the function returns. Open that directory in TensorBoard/XProf and inspect the actual event names, timestamp units, host dispatch, compilation boundary, device work, synchronization, and input stalls that are present in your trace. A CPU trace teaches event reading; it does not establish TPU performance. For timing comparisons, measure synchronized steps outside the profiler.
+A useful trace needs a question. Here it is: what events occur while a warmed, fixed-signature BF16 matrix dot is repeatedly dispatched and synchronized? The function allocates its bounded input once, warms that signature, then profiles a fixed number of calls. Every result is checked for finiteness so a broken workload cannot produce an apparently successful timing receipt.
+
+Read the backend and step count first. Then inspect the actual host and device lanes. A host span around dispatch and `block_until_ready` includes the time spent submitting and waiting; it is not automatically an isolated device kernel. This workload has no collective, so a gap between calls is not evidence of collective communication.
+
+The separate unprofiled run measures wall-clock time for the same loop, including dispatch and synchronization. Comparing it with the profiled interval helps you notice instrumentation overhead. Keep CPU rehearsal and TPU receipts separately labelled, since the event names and execution behavior can differ. The commands below retain the target trace for that inspection.
 
 **Run tpu-06.py and capture a 5-step warmed XProf trace on the Cloud TPU VM**
 
 ```bash
+gcloud compute tpus tpu-vm ssh "$TPU_NAME" --zone="$ZONE" --command="mkdir -p ~/jax-tpu-lab"
 gcloud compute tpus tpu-vm scp public/exercises/tpu-06.py "$TPU_NAME":~/jax-tpu-lab/ --zone="$ZONE"
 gcloud compute tpus tpu-vm ssh "$TPU_NAME" --zone="$ZONE" --command="set -euo pipefail; source ~/jax-tpu-lab/.venv/bin/activate; export TPU_TRACE_DIR=~/jax-tpu-lab/tpu-xprof-trace; JAX_PLATFORMS=tpu python ~/jax-tpu-lab/tpu-06.py"
 mkdir -p ./tpu-xprof-trace
@@ -65,12 +88,25 @@ gcloud compute tpus tpu-vm scp --recurse "$TPU_NAME":~/jax-tpu-lab/tpu-xprof-tra
 **Launch TensorBoard with the XProf profile plugin on your workstation**
 
 ```bash
-# Launch TensorBoard with the XProf profile plugin on your workstation
-pip install tensorboard tensorboard-plugin-profile xprof
+# Use the reviewed logger environment from projects/reproducible-experiments/requirements-loggers.txt, then start TensorBoard.
 tensorboard --logdir ./tpu-xprof-trace --port 6006
 ```
 
-**Expected:** Serves the XProf Trace Viewer, Overview Page, and Memory Viewer at http://localhost:6006.
+**Expected:** Starts TensorBoard from the pinned logger environment. XProf must already be present in the reviewed target environment; do not install an unpinned plugin during the lesson.
+
+## Practice reading a real trace before attributing TPU time
+
+Before interpreting the trace you capture here, work through the [retained CPU event example](https://www.tahabouhsine.com/jaxpathways/lesson-performance-03.html). It includes actual event start/end timestamps, a parent span with two children, a double-counting counterexample and a measured change to an injected input wait. Apply the same event-accounting steps to your own trace, then identify its actual backend, event names and lanes. This dot-product fixture has no collective, so do not label any interval as collective communication. A target TPU trace may contain different events; retain that target evidence separately from the CPU worked example.
+
+### Pause and reason
+
+A host annotation contains a dot dispatch and block_until_ready. Is its duration isolated TPU kernel time?
+
+<details><summary>Compare your reasoning</summary>
+
+No. It includes host dispatch and waiting within the declared annotation. Inspect the actual device lanes and synchronization structure before making a device-kernel or critical-path claim.
+
+</details>
 
 ## Compare BF16 operands with requested FP32 or BF16 dot result dtypes, plus per-column INT8 reference error
 
@@ -80,6 +116,7 @@ Create main.py with evaluate_precision_policies.
 # Step 1 — Compare BF16 operands with requested FP32 or BF16 dot result dtypes, plus per-column INT8 reference error
 from pathlib import Path
 import os
+import tempfile
 import tempfile
 import time
 import jax
@@ -126,8 +163,14 @@ def evaluate_precision_policies(seed=0):
             "returned_dtype": str(tensor.dtype),
             "max_abs_err": round(float(jnp.max(diff)), 5),
             "mean_abs_err": round(float(jnp.mean(diff)), 5),
-            "weight_bytes": int(w_int8.size),
-            "scale_bytes": int(scale.size * 4),
+            "input_shape": list(x.shape), "weight_shape": list(w.shape), "result_shape": list(tensor.shape),
+            "stored_weight_bytes": int((w.astype(jnp.bfloat16).size * 2) if "BF16" in label else w_int8.size),
+            "scale_metadata_bytes": int(0 if "BF16" in label else scale.size * 4),
+            "runtime_input_bytes": int(x.size * (2 if "BF16" in label else 4)),
+            "runtime_weight_operand_bytes": int(w.astype(jnp.bfloat16).size * 2 if "BF16" in label else w.size * 4),
+            "dequantized_fp32_workspace_bytes": int(w.size * 4 if "INT8" in label else 0),
+            "result_bytes": int(tensor.size * (2 if tensor.dtype == jnp.bfloat16 else 4)),
+            "storage_note": "logical array sizes; not peak HBM or measured traffic",
         })
     return results
 
@@ -135,47 +178,62 @@ def evaluate_precision_policies(seed=0):
 
 Measuring both max and mean absolute error across requested result dtypes quantifies why requested FP32 result dtype is standard on TPU MXUs.
 
-## Capture a warmed XProf trace and verify *.xplane.pb output
+## Capture a bounded fixed-input XProf trace and measure unprofiled work
 
-Append capture_warmed_trace and the verification assertions to main.py.
+Warm and synchronize the fixed signature, profile a bounded number of identical finite dots, then separately measure the same work without the profiler. Report observed backend and retained files; do not infer collectives.
 
 ```python
 # Step 2 — Capture a warmed XProf trace and verify *.xplane.pb output
-def capture_warmed_trace(steps=4, trace_dir=None):
-    x = jnp.ones((256, 256), dtype=jnp.bfloat16)
-    # Wrap with `jax.jit` (`step_fn`) so XLA traces and compiles the function.
-    # Request an FP32 dot result, then explicitly cast the returned values to BF16.
+def capture_warmed_trace(steps=5, trace_dir=None):
+    if not isinstance(steps, int) or not 1 <= steps <= 16:
+        raise ValueError("steps must be an integer in [1, 16]")
+    # Reuse the same bounded input each iteration. For this 128x128 matrix of 0.125,
+    # every dot entry is 128 * 0.125 * 0.125 = 2.0, so repeated calls cannot grow the values.
+    x = jnp.full((128, 128), 0.125, dtype=jnp.bfloat16)
     step_fn = jax.jit(lambda a: jnp.dot(a, a, preferred_element_type=jnp.float32).astype(jnp.bfloat16))
-    t0 = time.perf_counter()
-    # Wait for device work to finish before timing it or comparing its result on the host.
-    jax.block_until_ready(step_fn(x))
-    warmup_ms = (time.perf_counter() - t0) * 1000.0
-    # Enter managed runtime/context scope for this block:
+
+    warm = jax.block_until_ready(step_fn(x))
+    if not bool(np.isfinite(np.asarray(warm)).all()):
+        raise FloatingPointError("warmup output contains a non-finite value")
+
     trace_dir = Path(trace_dir or os.environ.get("TPU_TRACE_DIR", "./tpu-xprof-trace")).expanduser().resolve()
     trace_dir.mkdir(parents=True, exist_ok=True)
     with jax.profiler.trace(str(trace_dir)):
-        t1 = time.perf_counter()
-        # Repeat the update loop over `range(steps)` steps:
         for _ in range(steps):
-            x = step_fn(x)
-        # Wait for device work to finish before timing it or comparing its result on the host.
-        jax.block_until_ready(x)
-        steady_ms = (time.perf_counter() - t1) * 1000.0 / steps
-    # Collect files from the retained trace directory.
+            profiled_result = jax.block_until_ready(step_fn(x))
+            if not bool(np.isfinite(np.asarray(profiled_result)).all()):
+                raise FloatingPointError("profiled output contains a non-finite value")
+
+    # Measure the same fixed-signature work outside the profiler. This includes host dispatch
+    # and synchronization, and is separate from trace duration or profiler event durations.
+    t0 = time.perf_counter()
+    for _ in range(steps):
+        unprofiled_result = jax.block_until_ready(step_fn(x))
+    unprofiled_ms = (time.perf_counter() - t0) * 1000.0
+    if not bool(np.isfinite(np.asarray(unprofiled_result)).all()):
+        raise FloatingPointError("unprofiled output contains a non-finite value")
+
     xplane_files = list(trace_dir.rglob("*.xplane.pb"))
-    return {"warmup_ms": warmup_ms, "steady_ms": steady_ms, "xplane_count": len(xplane_files), "trace_dir": str(trace_dir)}
+    return {
+        "backend": jax.default_backend(), "jax_version": jax.__version__, "input_shape": list(x.shape), "steps": steps,
+        "warmup_finite": True, "all_finite": True, "profiled_xplane_count": len(xplane_files),
+        "trace_dir": str(trace_dir), "unprofiled_total_ms": unprofiled_ms,
+        "unprofiled_ms_per_step": unprofiled_ms / steps,
+        "measurement_note": "unprofiled wall time includes host dispatch and synchronization; not a device-only duration",
+        "workload_note": "fixed-input BF16 dot; no collective communication in this function",
+    }
 
 
 
 prec_table = evaluate_precision_policies()
-trace_info = capture_warmed_trace()
-# Assert invariant `trace_info["xplane_count"] >= 1` holds
-assert trace_info["xplane_count"] >= 1
+trace_info = capture_warmed_trace(steps=5)
+# Assert invariant `trace_info["profiled_xplane_count"] >= 1` holds
+assert trace_info["profiled_xplane_count"] >= 1
 assert prec_table[0]["returned_dtype"] == "float32"
 assert prec_table[1]["returned_dtype"] == "bfloat16"
 assert all(np.isfinite(row["max_abs_err"]) and np.isfinite(row["mean_abs_err"]) for row in prec_table)
 print("Precision comparison:", prec_table)
-print("Captured *.xplane.pb trace count:", trace_info["xplane_count"], "steady_ms:", round(trace_info["steady_ms"], 4))
+print("Observed backend:", trace_info["backend"], "profiled steps:", trace_info["steps"], "XPlane files:", trace_info["profiled_xplane_count"], "unprofiled ms/step:", round(trace_info["unprofiled_ms_per_step"], 4))
 ```
 
 Warming up before entering jax.profiler.trace ensures the captured *.xplane.pb file records steady-state execution rather than first-call compilation.
@@ -185,7 +243,7 @@ Warming up before entering jax.profiler.trace ensures the captured *.xplane.pb f
 Run the final shape and numerical assertions to confirm the state built in Steps 1 and 2.
 
 ```python
-assert trace_info["xplane_count"] >= 1
+assert trace_info["profiled_xplane_count"] >= 1
 assert prec_table[0]["returned_dtype"] == "float32"
 assert prec_table[1]["returned_dtype"] == "bfloat16"
 assert all(np.isfinite(row["max_abs_err"]) and np.isfinite(row["mean_abs_err"]) for row in prec_table)
@@ -199,6 +257,7 @@ Checking these invariants confirms the computation is ready for the full worked 
 # Step 1 — Compare BF16 operands with requested FP32 or BF16 dot result dtypes, plus per-column INT8 reference error
 from pathlib import Path
 import os
+import tempfile
 import time
 import jax
 import jax.numpy as jnp
@@ -244,52 +303,74 @@ def evaluate_precision_policies(seed=0):
             "returned_dtype": str(tensor.dtype),
             "max_abs_err": round(float(jnp.max(diff)), 5),
             "mean_abs_err": round(float(jnp.mean(diff)), 5),
-            "weight_bytes": int(w_int8.size),
-            "scale_bytes": int(scale.size * 4),
+            "input_shape": list(x.shape), "weight_shape": list(w.shape), "result_shape": list(tensor.shape),
+            "stored_weight_bytes": int((w.astype(jnp.bfloat16).size * 2) if "BF16" in label else w_int8.size),
+            "scale_metadata_bytes": int(0 if "BF16" in label else scale.size * 4),
+            "runtime_input_bytes": int(x.size * (2 if "BF16" in label else 4)),
+            "runtime_weight_operand_bytes": int(w.astype(jnp.bfloat16).size * 2 if "BF16" in label else w.size * 4),
+            "dequantized_fp32_workspace_bytes": int(w.size * 4 if "INT8" in label else 0),
+            "result_bytes": int(tensor.size * (2 if tensor.dtype == jnp.bfloat16 else 4)),
+            "storage_note": "logical array sizes; not peak HBM or measured traffic",
         })
     return results
 
 
 
 # Step 2 — Capture a warmed XProf trace and verify *.xplane.pb output
-def capture_warmed_trace(steps=4, trace_dir=None):
-    x = jnp.ones((256, 256), dtype=jnp.bfloat16)
-    # Wrap with `jax.jit` (`step_fn`) so XLA traces and compiles the function.
-    # Request an FP32 dot result, then explicitly cast the returned values to BF16.
+def capture_warmed_trace(steps=5, trace_dir=None):
+    if not isinstance(steps, int) or not 1 <= steps <= 16:
+        raise ValueError("steps must be an integer in [1, 16]")
+    # Reuse the same bounded input each iteration. For this 128x128 matrix of 0.125,
+    # every dot entry is 128 * 0.125 * 0.125 = 2.0, so repeated calls cannot grow the values.
+    x = jnp.full((128, 128), 0.125, dtype=jnp.bfloat16)
     step_fn = jax.jit(lambda a: jnp.dot(a, a, preferred_element_type=jnp.float32).astype(jnp.bfloat16))
-    t0 = time.perf_counter()
-    # Wait for device work to finish before timing it or comparing its result on the host.
-    jax.block_until_ready(step_fn(x))
-    warmup_ms = (time.perf_counter() - t0) * 1000.0
+
+    warm = jax.block_until_ready(step_fn(x))
+    if not bool(np.isfinite(np.asarray(warm)).all()):
+        raise FloatingPointError("warmup output contains a non-finite value")
+
     trace_dir = Path(trace_dir or os.environ.get("TPU_TRACE_DIR", "./tpu-xprof-trace")).expanduser().resolve()
     trace_dir.mkdir(parents=True, exist_ok=True)
     with jax.profiler.trace(str(trace_dir)):
-        t1 = time.perf_counter()
-        # Repeat the update loop over `range(steps)` steps:
         for _ in range(steps):
-            x = step_fn(x)
-        # Wait for device work to finish before timing it or comparing its result on the host.
-        jax.block_until_ready(x)
-        steady_ms = (time.perf_counter() - t1) * 1000.0 / steps
-    # Collect files from the retained trace directory.
+            profiled_result = jax.block_until_ready(step_fn(x))
+            if not bool(np.isfinite(np.asarray(profiled_result)).all()):
+                raise FloatingPointError("profiled output contains a non-finite value")
+
+    # Measure the same fixed-signature work outside the profiler. This includes host dispatch
+    # and synchronization, and is separate from trace duration or profiler event durations.
+    t0 = time.perf_counter()
+    for _ in range(steps):
+        unprofiled_result = jax.block_until_ready(step_fn(x))
+    unprofiled_ms = (time.perf_counter() - t0) * 1000.0
+    if not bool(np.isfinite(np.asarray(unprofiled_result)).all()):
+        raise FloatingPointError("unprofiled output contains a non-finite value")
+
     xplane_files = list(trace_dir.rglob("*.xplane.pb"))
-    return {"warmup_ms": warmup_ms, "steady_ms": steady_ms, "xplane_count": len(xplane_files), "trace_dir": str(trace_dir)}
+    return {
+        "backend": jax.default_backend(), "jax_version": jax.__version__, "input_shape": list(x.shape), "steps": steps,
+        "warmup_finite": True, "all_finite": True, "profiled_xplane_count": len(xplane_files),
+        "trace_dir": str(trace_dir), "unprofiled_total_ms": unprofiled_ms,
+        "unprofiled_ms_per_step": unprofiled_ms / steps,
+        "measurement_note": "unprofiled wall time includes host dispatch and synchronization; not a device-only duration",
+        "workload_note": "fixed-input BF16 dot; no collective communication in this function",
+    }
 
 
 
 prec_table = evaluate_precision_policies()
-trace_info = capture_warmed_trace()
-# Assert invariant `trace_info["xplane_count"] >= 1` holds
-assert trace_info["xplane_count"] >= 1
+trace_info = capture_warmed_trace(steps=5)
+# Assert invariant `trace_info["profiled_xplane_count"] >= 1` holds
+assert trace_info["profiled_xplane_count"] >= 1
 assert prec_table[0]["returned_dtype"] == "float32"
 assert prec_table[1]["returned_dtype"] == "bfloat16"
 assert all(np.isfinite(row["max_abs_err"]) and np.isfinite(row["mean_abs_err"]) for row in prec_table)
 print("Precision comparison:", prec_table)
 print("Retained trace directory:", trace_info["trace_dir"])
-print("Captured *.xplane.pb trace count:", trace_info["xplane_count"], "steady_ms:", round(trace_info["steady_ms"], 4))
+print("Observed backend:", trace_info["backend"], "profiled steps:", trace_info["steps"], "XPlane files:", trace_info["profiled_xplane_count"], "unprofiled ms/step:", round(trace_info["unprofiled_ms_per_step"], 4))
 ```
 
-Expected: Prints measured max and mean errors against the finite-precision FP32 reference, reports the requested result settings and observed returned dtypes, and confirms that at least one *.xplane.pb trace file was captured. Any error ordering is specific to the fixed input and backend.
+Expected: Prints precision errors and policy-specific bytes, then records the observed backend and JAX version, warmup/profile finite-check status, bounded profiled step count, retained XPlane file count, and separate unprofiled wall time per step. The timing includes host dispatch and synchronization. No collective is present in the profiled function.
 
 ## Measured output error for BF16 inputs and an FP32 INT8 dequantization reference
 
@@ -301,11 +382,13 @@ Expected: Prints measured max and mean errors against the finite-precision FP32 
 
 ### Read the figure
 
-Errors compare returned outputs with the finite-precision FP32 JAX reference for this seeded CPU fixture. Requested/returned result dtypes do not expose the precision of every internal partial sum.
+Read the three operand paths along the horizontal axis. Each pair of bars compares one returned result with the same finite-precision FP32 CPU reference. The maximum-error bar asks how far the worst output element moved; the mean-error bar asks about the average absolute change across the output matrix.
+
+In this run, requesting an FP32 result from BF16 operands gives mean error $0.00756$, while requesting BF16 gives $0.00912$. The INT8 dequantization path gives $0.02322$. This ordering describes these seeded inputs and this backend. To choose a policy for a model, repeat the comparison on representative activations and evaluate the model's actual task metric as well as tensor error.
 
 ### Connect it to the computation
 
-The measured INT8 error belongs to this fixed example. Its storage estimate includes one FP32 scale per output column; this reference does not demonstrate runtime memory traffic savings.
+Compare the error bars with the storage calculation. INT8 codes use fewer stored bytes, yet this reference expands them to FP32 for the dot and has the largest output error of the three paths. You can therefore support a checkpoint-storage claim from the byte counts, but need separate runtime and quality evidence for a deployment decision. The profiler artifact answers timing questions; these bars answer numerical ones.
 
 ```python
 # Perform matrix contraction / projection to compute `visual_data`.
@@ -323,19 +406,24 @@ visual_data = {
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T17:46:52.522777+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T16:12:31.866664+00:00. JAX 0.9.2.
 
 ```text
-Precision comparison: [{'result_dtype_setting': 'BF16 operands / requested FP32 result', 'returned_dtype': 'float32', 'max_abs_err': 0.03718, 'mean_abs_err': 0.00756, 'weight_bytes': 16384, 'scale_bytes': 256}, {'result_dtype_setting': 'BF16 operands / requested BF16 result', 'returned_dtype': 'bfloat16', 'max_abs_err': 0.05545, 'mean_abs_err': 0.00912, 'weight_bytes': 16384, 'scale_bytes': 256}, {'result_dtype_setting': 'INT8 per-column / FP32 dequantized dot result', 'returned_dtype': 'float32', 'max_abs_err': 0.12516, 'mean_abs_err': 0.02322, 'weight_bytes': 16384, 'scale_bytes': 256}]
-Captured *.xplane.pb trace count: 5 steady_ms: 0.1102
-Precision comparison: [{'result_dtype_setting': 'BF16 operands / requested FP32 result', 'returned_dtype': 'float32', 'max_abs_err': 0.03718, 'mean_abs_err': 0.00756, 'weight_bytes': 16384, 'scale_bytes': 256}, {'result_dtype_setting': 'BF16 operands / requested BF16 result', 'returned_dtype': 'bfloat16', 'max_abs_err': 0.05545, 'mean_abs_err': 0.00912, 'weight_bytes': 16384, 'scale_bytes': 256}, {'result_dtype_setting': 'INT8 per-column / FP32 dequantized dot result', 'returned_dtype': 'float32', 'max_abs_err': 0.12516, 'mean_abs_err': 0.02322, 'weight_bytes': 16384, 'scale_bytes': 256}]
-Retained trace directory: /private/tmp/jaxpathways-reader-review-fix/tpu-xprof-trace
-Captured *.xplane.pb trace count: 5 steady_ms: 0.1348
+Precision comparison: [{'result_dtype_setting': 'BF16 operands / requested FP32 result', 'returned_dtype': 'float32', 'max_abs_err': 0.03718, 'mean_abs_err': 0.00756, 'input_shape': [64, 256], 'weight_shape': [256, 64], 'result_shape': [64, 64], 'stored_weight_bytes': 32768, 'scale_metadata_bytes': 0, 'runtime_input_bytes': 32768, 'runtime_weight_operand_bytes': 32768, 'dequantized_fp32_workspace_bytes': 0, 'result_bytes': 16384, 'storage_note': 'logical array sizes; not peak HBM or measured traffic'}, {'result_dtype_setting': 'BF16 operands / requested BF16 result', 'returned_dtype': 'bfloat16', 'max_abs_err': 0.05545, 'mean_abs_err': 0.00912, 'input_shape': [64, 256], 'weight_shape': [256, 64], 'result_shape': [64, 64], 'stored_weight_bytes': 32768, 'scale_metadata_bytes': 0, 'runtime_input_bytes': 32768, 'runtime_weight_operand_bytes': 32768, 'dequantized_fp32_workspace_bytes': 0, 'result_bytes': 8192, 'storage_note': 'logical array sizes; not peak HBM or measured traffic'}, {'result_dtype_setting': 'INT8 per-column / FP32 dequantized dot result', 'returned_dtype': 'float32', 'max_abs_err': 0.12516, 'mean_abs_err': 0.02322, 'input_shape': [64, 256], 'weight_shape': [256, 64], 'result_shape': [64, 64], 'stored_weight_bytes': 16384, 'scale_metadata_bytes': 256, 'runtime_input_bytes': 65536, 'runtime_weight_operand_bytes': 65536, 'dequantized_fp32_workspace_bytes': 65536, 'result_bytes': 16384, 'storage_note': 'logical array sizes; not peak HBM or measured traffic'}]
+Observed backend: cpu profiled steps: 5 XPlane files: 8 unprofiled ms/step: 0.351
+Precision comparison: [{'result_dtype_setting': 'BF16 operands / requested FP32 result', 'returned_dtype': 'float32', 'max_abs_err': 0.03718, 'mean_abs_err': 0.00756, 'input_shape': [64, 256], 'weight_shape': [256, 64], 'result_shape': [64, 64], 'stored_weight_bytes': 32768, 'scale_metadata_bytes': 0, 'runtime_input_bytes': 32768, 'runtime_weight_operand_bytes': 32768, 'dequantized_fp32_workspace_bytes': 0, 'result_bytes': 16384, 'storage_note': 'logical array sizes; not peak HBM or measured traffic'}, {'result_dtype_setting': 'BF16 operands / requested BF16 result', 'returned_dtype': 'bfloat16', 'max_abs_err': 0.05545, 'mean_abs_err': 0.00912, 'input_shape': [64, 256], 'weight_shape': [256, 64], 'result_shape': [64, 64], 'stored_weight_bytes': 32768, 'scale_metadata_bytes': 0, 'runtime_input_bytes': 32768, 'runtime_weight_operand_bytes': 32768, 'dequantized_fp32_workspace_bytes': 0, 'result_bytes': 8192, 'storage_note': 'logical array sizes; not peak HBM or measured traffic'}, {'result_dtype_setting': 'INT8 per-column / FP32 dequantized dot result', 'returned_dtype': 'float32', 'max_abs_err': 0.12516, 'mean_abs_err': 0.02322, 'input_shape': [64, 256], 'weight_shape': [256, 64], 'result_shape': [64, 64], 'stored_weight_bytes': 16384, 'scale_metadata_bytes': 256, 'runtime_input_bytes': 65536, 'runtime_weight_operand_bytes': 65536, 'dequantized_fp32_workspace_bytes': 65536, 'result_bytes': 16384, 'storage_note': 'logical array sizes; not peak HBM or measured traffic'}]
+Retained trace directory: /private/tmp/jaxpathways-content-repairs-review/tpu-xprof-trace
+Observed backend: cpu profiled steps: 5 XPlane files: 8 unprofiled ms/step: 0.0937
 Requested BF16 / FP32 result max-error ratio for seed 0: 1.49
-Warmup ms: 25.381 Traced steady step ms: 0.1348
-Seed 42 returned dtypes and mean errors: {'BF16 operands / requested FP32 result': {'returned_dtype': 'float32', 'mean_abs_err': 0.0075}, 'BF16 operands / requested BF16 result': {'returned_dtype': 'bfloat16', 'mean_abs_err': 0.00902}, 'INT8 per-column / FP32 dequantized dot result': {'returned_dtype': 'float32', 'mean_abs_err': 0.02182}} xplane files: 5
+Observed backend: cpu steps: 5 finite: True XPlane files: 1
+Rejected steps above the fixed maximum before tracing
+{'bf16_weight_bytes': 8192, 'int8_code_bytes': 4096, 'scale_bytes': 128, 'zero_column_scale': 1.0, 'zero_codes': 0}
+Observed backend and JAX version: cpu 0.9.2
+Three returned dtypes: ['float32', 'bfloat16', 'float32']
+Three mean absolute errors: [0.0075, 0.00902, 0.02182]
+Trace steps/files: 3 8 unprofiled ms/step: 0.11773609245816867
 Mean error (per-channel vs per-tensor): 0.01389 0.0979
-xplane.pb bytes: 260182
+xplane.pb bytes: 275765
 PASS: tpu-06
 
 ```
@@ -358,24 +446,53 @@ assert np.isfinite(ratio)
 
 The ratio is computed from this fixed seed-zero fixture and the current CPU backend. `preferred_element_type` requests the returned dtype and acts as an accumulation hint for this generic dot path; it does not independently certify backend internals.
 
-## Compare warmup duration vs traced steady-state step duration
+## Check finite output under a changed bounded trace count
 
-**Predict before running:** Does the warmup step outside the profiler take longer than the traced steady-state steps?
+**Predict before running:** Will five profiled dots remain finite when the same input is reused, and are requests above the maximum rejected?
 
 ```python
-# Experiment — Compare warmup duration vs traced steady-state step duration
-print("Warmup ms:", round(trace_info["warmup_ms"], 3), "Traced steady step ms:", round(trace_info["steady_ms"], 4))
-# Assert invariant `trace_info["warmup_ms"] > trace_info["steady_ms"]` holds
-assert trace_info["warmup_ms"] > trace_info["steady_ms"]
+import tempfile
+with tempfile.TemporaryDirectory(prefix="tpu-trace-steps-") as tmp:
+    five = capture_warmed_trace(steps=5, trace_dir=tmp)
+print("Observed backend:", five["backend"], "steps:", five["steps"], "finite:", five["all_finite"], "XPlane files:", five["profiled_xplane_count"])
+assert five["all_finite"] and five["steps"] == 5 and five["profiled_xplane_count"] >= 1
+try:
+    capture_warmed_trace(steps=17, trace_dir=tmp)
+except ValueError:
+    print("Rejected steps above the fixed maximum before tracing")
+else:
+    raise AssertionError("trace step count must be bounded")
 ```
 
-**Expected:** Warmup takes significantly longer than a single steady-state step inside the profiler block.
+**Expected:** Five repeated fixed-input dots remain finite and produce an XPlane file; 17 steps are rejected before tracing.
 
-Keeping warmup outside `jax.profiler.trace` prevents XLA compilation from dominating the captured XProf timeline.
+The output is not fed back as input, so magnitudes do not grow between repetitions. The explicit upper bound keeps this teaching trace workload finite and bounded.
+
+## Check shape-dependent byte accounting and a zero output column
+
+**Predict before running:** How do stored bytes and scale bytes change for a 128×32 weight matrix, and what happens when one full output column is zero?
+
+```python
+# Shape ledger: BF16 weights are 128*32*2 B; INT8 codes are 128*32 B and 32 FP32 scales.
+shape = (128, 32)
+bf16_weight_bytes = shape[0] * shape[1] * 2
+int8_code_bytes = shape[0] * shape[1]
+scale_bytes = shape[1] * 4
+zero_column = jnp.zeros((shape[0], 1), dtype=jnp.float32)
+zero_scale = jnp.where(jnp.max(jnp.abs(zero_column), axis=0, keepdims=True) == 0, 1.0, jnp.max(jnp.abs(zero_column), axis=0, keepdims=True) / 127.0)
+zero_codes = jnp.clip(jnp.round(zero_column / zero_scale), -127, 127).astype(jnp.int8)
+print({"bf16_weight_bytes": bf16_weight_bytes, "int8_code_bytes": int8_code_bytes, "scale_bytes": scale_bytes, "zero_column_scale": float(zero_scale[0,0]), "zero_codes": int(jnp.count_nonzero(zero_codes))})
+assert (bf16_weight_bytes, int8_code_bytes, scale_bytes) == (8192, 4096, 128)
+assert float(zero_scale[0,0]) == 1.0 and int(jnp.count_nonzero(zero_codes)) == 0
+```
+
+**Expected:** For 128×32 weights, BF16 storage is 8,192 B; INT8 codes plus FP32 scales are 4,096 B + 128 B. A zero column uses scale 1 and remains all zero.
+
+Storage bytes depend on actual shape and dtype. The zero-column case confirms safe metadata without changing its all-zero codes.
 
 ## Make it yours
 
-Run `evaluate_precision_policies(seed=42)` and `capture_warmed_trace(steps=3)`. Report the observed backend, each returned dtype and the two mean errors; do not infer the physical accumulation path from this comparison. Confirm that `xplane_count >= 1`.
+Run `evaluate_precision_policies(seed=42)` and `capture_warmed_trace(steps=3)`. Report the observed backend, each of the three returned dtypes, and all three mean errors. State that the displayed precision comparison uses the CPU rehearsal when the backend is CPU, and that this trace workload contains no collective. Report JAX version and confirm warmup, profiled and unprofiled outputs are finite, and `profiled_xplane_count >= 1`; predict and check that `steps=5` keeps the output finite because each iteration reuses the same input.
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
@@ -406,12 +523,17 @@ def compare_precision_run(evaluate_precision_policies, capture_warmed_trace):
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution
 p42 = evaluate_precision_policies(seed=42)
 t3 = capture_warmed_trace(steps=3)
-print("Seed 42 returned dtypes and mean errors:", {r["result_dtype_setting"]: {"returned_dtype": r["returned_dtype"], "mean_abs_err": r["mean_abs_err"]} for r in p42}, "xplane files:", t3["xplane_count"])
-assert p42[0]["returned_dtype"] == "float32" and p42[1]["returned_dtype"] == "bfloat16"
-assert t3["xplane_count"] >= 1
+print("Observed backend and JAX version:", t3["backend"], t3["jax_version"])
+print("Three returned dtypes:", [r["returned_dtype"] for r in p42])
+print("Three mean absolute errors:", [r["mean_abs_err"] for r in p42])
+print("Trace steps/files:", t3["steps"], t3["profiled_xplane_count"], "unprofiled ms/step:", t3["unprofiled_ms_per_step"])
+assert t3["warmup_finite"] and t3["all_finite"] and t3["profiled_xplane_count"] >= 1
+assert [r["returned_dtype"] for r in p42] == ["float32", "bfloat16", "float32"]
+# Changed-step-count check: five repeats remain finite because input is not fed back as output.
+t5 = capture_warmed_trace(steps=5)
+assert t5["all_finite"] and t5["steps"] == 5
 ```
 
 </details>
@@ -547,25 +669,25 @@ Verifying a non-empty `*.xplane.pb` file confirms the profiler flushed device an
 
 ## Check your understanding
 
-Why should you run and synchronize at least one warmup step before entering `with jax.profiler.trace(trace_dir):` on a TPU VM?
+Why does the code warm and synchronize before entering the trace, then measure a separate unprofiled loop?
 
-1. Because `jax.profiler.trace` deletes all model weights if warmup is skipped
-2. So the captured `*.xplane.pb` trace measures steady-state TPU execution and collective communication rather than one-time Python tracing and XLA HLO compilation
-3. Because `bfloat16` only works inside a profiler context
+1. Warmup removes all host activity, so the trace contains only accelerator instructions
+2. The fixed-signature warmup moves initial compilation out of the captured window; the trace still records whatever host, device, synchronization and profiler events occur, while the unprofiled loop supplies a separate wall-time measurement
+3. A matrix dot automatically inserts a cross-device collective, which the profiler needs to show
 
 <details><summary>Answer and explanation</summary>
 
-**1. Because `jax.profiler.trace` deletes all model weights if warmup is skipped**
+**1. Warmup removes all host activity, so the trace contains only accelerator instructions**
 
-Tracing observes execution and does not delete model state. Warmup prepares the tested executable before the recorded window.
+Warmup excludes the first invocation from the trace but does not remove host dispatch, synchronization, other compilation events, or profiler overhead from captured work.
 
-**2. So the captured `*.xplane.pb` trace measures steady-state TPU execution and collective communication rather than one-time Python tracing and XLA HLO compilation (correct)**
+**2. The fixed-signature warmup moves initial compilation out of the captured window; the trace still records whatever host, device, synchronization and profiler events occur, while the unprofiled loop supplies a separate wall-time measurement (correct)**
 
-Warming and synchronizing the same signature reduces initial compilation in the recorded window. Inspect the trace to confirm: new shapes or static arguments can still compile, and cache state can still affect timing. Record target latency outside profiler overhead too.
+The synchronized warmup prepares the tested signature before tracing. The captured function is one fixed-input dot and includes no collective, so it cannot support a communication claim. Trace event durations may nest or overlap and include runtime/profiler activity. The separate unprofiled measurement includes host dispatch and synchronization; it is not a device-only latency.
 
-**3. Because `bfloat16` only works inside a profiler context**
+**3. A matrix dot automatically inserts a cross-device collective, which the profiler needs to show**
 
-Profiling is not restricted to BF16. Record the precision used and the actual operations in the captured target workload.
+A dot call on one array does not imply a distributed collective. Communication appears only if the actual workload and trace contain such operations.
 
 </details>
 
@@ -576,7 +698,7 @@ If XProf shows large gaps between device steps on your TPU VM, check for un-jitt
 ## Carry forward
 
 - Use BF16 operands when appropriate, request the desired result dtype with `preferred_element_type`, and verify the actual returned dtype. Treat internal accumulation behavior as backend-specific unless a supported explicit dot algorithm or target evidence establishes it. Use per-column scales when quantizing weights to `int8`.
-- Capture warmed `jax.profiler.trace` (`*.xplane.pb`) artifacts on the TPU VM and copy them back with `gcloud compute tpus tpu-vm scp --recurse` before deleting the VM.
+- Capture the same bounded workload after synchronized warmup. Interpret the events that the trace contains; this fixed-input dot has no collective. Label CPU rehearsal and TPU target traces by their observed backend, and report unprofiled wall time separately from profiler event timing.
 
 ## Keep your evidence
 

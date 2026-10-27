@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "networks-03",
-  "contentHash": "9481319f90191f78b23a8aa2ccfefd13602af083049d52e74b044882e219031d",
-  "executedAt": "2026-10-21T16:05:06.820818+00:00",
+  "contentHash": "d795fda915c6fb0fccc4425ae6afa78c2ab9b007cbfa763901b9eba24d59cb08",
+  "executedAt": "2026-10-27T12:29:42.913814+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -11,18 +11,18 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Updates: 80 held-out loss: 0.018426384776830673 accuracy: 1.0\nUpdates: 80 held-out loss: 0.018426384776830673 accuracy: 1.0\nCount-weighted held-out metrics: [0.01842638 0.99999995] constructed accuracy: 0.5416666666666666\nPASS: networks-03\n",
+  "stdout": "Updates: 80 held-out loss: 0.018426384776830673 accuracy: 1.0\nUpdates: 80 held-out loss: 0.018426384776830673 accuracy: 1.0\nDeterministic evaluation repeated exactly; Param, BatchStat, and RngState unchanged. Negative control changed BatchStat and RngState; parameters stayed separate.\nCount-weighted held-out metrics: [0.01842638 0.99999995] constructed accuracy: 0.5416666666666666\nPASS: networks-03\n",
   "notebookCells": [
     {
-      "sourceHash": "2f07815bd242dfba1199cf91999b9e7a5b8099aa82765c458a27bc411aa519be",
+      "sourceHash": "69b27bf99bb078ccfe5830024ba41f3a9acbdce905ceef1427e3e40b41d978f5",
       "outputs": []
     },
     {
-      "sourceHash": "3bedb1297b821474779b71a8517474a33d02ac6e4219e9bcc0e9a0d6ef175d73",
+      "sourceHash": "95cfabd77276d2978f73c14bc00c8c67a3a7c102a0574f39b4023472ce993517",
       "outputs": []
     },
     {
-      "sourceHash": "e88e241461e1e76f589bd3257a835edc86ea34105d7a54f41b5a1e253ba60b1a",
+      "sourceHash": "cad900207cfaa40f98dac7fd63e2ea9254a95daab5014af019f6c84738f2905d",
       "outputs": [
         {
           "output_type": "stream",
@@ -34,7 +34,7 @@
       ]
     },
     {
-      "sourceHash": "4453b28e355d38c8a965f42901a20e448411d7969f7e50ad4bd83f2f4d98bc61",
+      "sourceHash": "88de026ae506288f6c3f6141b025bee13a7bb72f20198d3e604fd715b7716a45",
       "outputs": [
         {
           "output_type": "stream",
@@ -50,7 +50,7 @@
       "outputs": []
     },
     {
-      "sourceHash": "25df6d662f9d3f0c4e984c6a201f79fa0cfd7a2633dc4b0773dfba6c2dd4ee6c",
+      "sourceHash": "53dc08a479da44f2b1718bf964cd5c4d3e3305811c536df9d501b1833a6e3476",
       "outputs": [
         {
           "output_type": "display_data",
@@ -65,12 +65,24 @@
       ]
     },
     {
-      "sourceHash": "3fa5b65977ced4c3c653918681a8466f8bf03db3f92202b8705f2d979d6567b6",
+      "sourceHash": "8d96645c9c7b87b253874add5b05e45b3f4727fb3f18bf53bdec9deb5db715f1",
       "outputs": []
     },
     {
-      "sourceHash": "f001925ff600c0a3891c713e6645bd749a4364241ec3a03f0148dcbcd0a24592",
+      "sourceHash": "3bef7686db77c2714b7d30ad9f1c75e78f9bade910e0c8338e07c0dd09a61872",
       "outputs": []
+    },
+    {
+      "sourceHash": "c576b88148a699809da79f71d11311683608b58f9b4614bc8ee564ef7db0693f",
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Deterministic evaluation repeated exactly; Param, BatchStat, and RngState unchanged. Negative control changed BatchStat and RngState; parameters stayed separate.\n"
+          ]
+        }
+      ]
     },
     {
       "sourceHash": "22d5d8896e54aecd8b70f9aafa0c68cf3475cdb9799648df8d1bbbd8b53d1ac8",

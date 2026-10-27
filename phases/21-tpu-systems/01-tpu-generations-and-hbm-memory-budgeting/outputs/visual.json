@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "tpu-03",
-  "contentHash": "54dda500f31d51e93d5ffe56ac080976ac0353378d8b1453b25c3b35f0073deb",
-  "rendererHash": "a1bd5b648f4731ae5d5f0a24811c2540d1a0a132149ce589d17c4113509cbedf",
+  "contentHash": "68c34e20d5b8f341b5b48a5e848e4652fcfbdb9117d73eca87511e2153919344",
+  "rendererHash": "17e3bbad72ee4c43425845aaee76b86b85e84750551278be03d8c16842f4dc63",
   "kind": "analytic",
-  "generatedAt": "2026-10-21T16:06:33.618015+00:00",
+  "generatedAt": "2026-10-27T12:19:53.908573+00:00",
   "provenance": "analytic_calculation_not_device_execution",
   "environment": {
     "backend": "cpu",
@@ -56,14 +56,34 @@
             ]
           }
         ]
+      },
+      {
+        "kind": "bar",
+        "labels": [
+          "replicated",
+          "ideal even shard",
+          "80% usable HBM"
+        ],
+        "xlabel": "48 GiB state on four v5e chips",
+        "ylabel": "GiB per device",
+        "series": [
+          {
+            "label": "per-device requirement or budget",
+            "y": [
+              48.0,
+              12.0,
+              12.8
+            ]
+          }
+        ]
       }
     ]
   },
   "diagram": {
-    "title": "TPU HBM-to-MXU dataflow and mixed-precision state budget",
-    "prediction": "Which tensors stay in `float32` in HBM and which operands stream as `bfloat16` into the MXU?",
-    "reading": "Follow the assumed mixed-precision ledger from HBM to compute: FP32 master weights and moments coexist with BF16 compute weights. A dot can request BF16 inputs and FP32 accumulation. A quantized path additionally needs its own scale and accumulation contract. The diagram names memory/compute boundaries; it does not show an observed kernel placement or prove an INT8 speedup.",
-    "alt": "Conceptual mixed-precision ledger: HBM holds master weights and optimizer state; the compute path requires explicit operand and accumulation types, supported lowering and separately inspected target traces.",
+    "title": "TPU state placement, HBM budget and compute path",
+    "prediction": "What remains on each physical chip under replication versus explicit sharding, and where do BF16 operands enter?",
+    "reading": "Training state may be replicated or sharded; this diagram treats placement as an explicit choice rather than assuming aggregate HBM is enough. The 48 GiB, four-v5e-chip case needs 48 GiB/device if replicated or 12 GiB/device under ideal even sharding, before activations and temporaries. Verify actual NamedSharding and live memory before claiming the latter placement. Inference KV cache is a separate scenario.",
+    "alt": "Conceptual TPU per-device ledger: replicated training state is copied to every chip; explicitly sharded state is partitioned across chips; activations and temporaries use additional HBM; a separate inference path holds KV cache; BF16 operands stream from HBM to compute.",
     "scope": "Architecture and dataflow mechanism diagram.",
     "height": 6,
     "panel": {
@@ -73,7 +93,7 @@
           "id": "0",
           "x": 5,
           "y": 1,
-          "label": "TPU HBM capacity: fp32 master weights + Adam (m, v) + bf16/int8 KV cache",
+          "label": "Per-device HBM: replicated or explicitly sharded training state + activations + temporaries; inference KV is a separate case",
           "tone": "data",
           "w": 8.6,
           "h": 1.05

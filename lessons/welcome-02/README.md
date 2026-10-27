@@ -4,6 +4,8 @@ Phase 00: Setup & first steps · about 45 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Set up your learning workspace](https://www.tahabouhsine.com/jaxpathways/lesson-welcome-01.html).
+
 ## What you will be able to do
 
 - Read the table before using an API
@@ -21,14 +23,16 @@ An array is a collection of values with a shape, a dtype and a device. Shape tel
 
 ## Read one array two ways
 
-Take the two rows $[1,2,3]$ and $[4,5,6]$. Summing across each row gives $[6,15]$: one answer per observation. Summing down the rows gives $[5,7,9]$: one answer per feature. The values are the same; the question determines the axis.
+Take the two rows $[1,2,3]$ and $[4,5,6]$. Summing across each row gives $[6,15]$: one answer per observation. Summing down the rows gives $[5,7,9]$: one answer per feature. Within that example, the values are the same; the question determines the axis. The exact program below uses the same shape with entries starting at zero.
 
 In Python, the row sums use `axis=1`, because the feature axis is reduced. The feature sums use `axis=0`, because the observation axis is reduced. The axis you name is the one you consume, not the one you keep.
 
 Read the heatmap by locating one row and one column before looking at its color. Color helps compare values, but labels establish which observation and feature you are comparing. A device label is a separate property; moving the same values to another device does not change what a row means.
 
+For the exact program below, the entries start at $0$, so the row sums are $[3,12]$ and the column sums are $[3,5,7]$. Adding $1$ to every entry gives the earlier $[1,2,3]$, $[4,5,6]$ example: each row sum increases by $3$, and each column sum increases by $2$. The different answers come from different inputs, not different reduction rules.
+
 $$
-Y_{i,j} = \alpha X_{i,j} + \beta, \qquad X \in \mathbb{R}^{M \times N}
+r_i=\sum_{j=0}^{2}X_{ij},\qquad c_j=\sum_{i=0}^{1}X_{ij},\qquad X=\begin{bmatrix}0&1&2\\3&4&5\end{bmatrix}
 $$
 
 ### Pause and reason
@@ -162,7 +166,7 @@ visual_data = {'kind': 'heatmap', 'values': x.tolist(), 'rows': ['row 0', 'row 1
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:03:16.771051+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T12:28:12.708768+00:00. JAX 0.9.2.
 
 ```text
 Shape: (2, 3)

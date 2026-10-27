@@ -4,6 +4,8 @@ Phase 02: JAX transformations · about 55 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Your first gradient](https://www.tahabouhsine.com/jaxpathways/lesson-first-gradient.html).
+
 ## What you will be able to do
 
 - Derive a batch mean-squared-error gradient for one weight.
@@ -133,34 +135,35 @@ assert jnp.allclose(gradient, -28./3.)
 
 Expected: Loss ≈ $4.666667$; gradient ≈ $-9.333334$. Small floating-point differences are normal.
 
-## Loss and slope answer different questions
+## Loss and derivative use separate vertical scales
 
-**Predict:** Where is the loss smallest, and where does its slope change sign?
+**Predict:** At which weight is the derivative zero, and what is the loss at that same weight?
 
-![Loss and slope answer different questions](../outputs/figure.svg)
+![Loss and derivative use separate vertical scales](../outputs/figure.svg)
 
 **Recorded CPU computation**
 
 ### Read the figure
 
-The solid bowl is mean squared loss and the dashed line is its derivative with respect to the weight. The horizontal axis varies the weight. The two vertical quantities have different meanings even though they share one axis.
-
-Both reach zero at $w=2$. At $w=1$, the loss is about $4.67$, while the derivative is about $-9.33$. Left of the minimum, the derivative is negative; right of it, the derivative is positive.
+The upper panel plots mean squared loss in loss units; the lower panel plots its derivative with respect to weight in loss-per-weight units. Both panels use exactly the same horizontal weight coordinates. At w=1, loss is 14/3 and derivative is -28/3. At w=2, the derivative is zero while the loss is also zero for this dataset. A zero derivative identifies a stationary point, not generally a zero-valued objective.
 
 ### Connect it to the computation
 
-The loss tells us how wrong the predictions are. The derivative tells us how that loss changes when the weight increases slightly. A negative derivative means moving right initially lowers the loss, which is why subtracting the gradient moves the weight toward $2$.
-
-The dashed line below zero is a negative slope, not a negative squared loss. Likewise, an intersection of the two curves away from the minimum has no special optimization meaning. `value_and_grad` returns these two different pieces of information together.
+The derivative curve crosses zero at the loss minimum for this convex quadratic. The separate vertical scales prevent a negative derivative from looking like a negative loss. The plotted values come from the lesson loss and autodiff derivative on the same grid; the hand checks at w=1 verify the selected coordinates. If a constant 1 were added to every squared-error value, predict which panel would move and which zero crossing would stay fixed.
 
 ```python
 grid = jnp.linspace(0.0, 4.0, 81)
-visual_data = {'kind': 'line', 'x': grid.tolist(), 'xlabel': 'weight', 'ylabel': 'loss or derivative (different quantities)', 'series': [{'label': 'mean squared loss', 'y': jax.vmap(loss)(grid).tolist()}, {'label': 'derivative', 'y': jax.vmap(jax.grad(loss))(grid).tolist()}]}
+loss_values = jax.vmap(loss)(grid)
+gradient_values = jax.vmap(jax.grad(loss))(grid)
+assert jnp.allclose(loss(1.0), 14. / 3.)
+assert jnp.allclose(jax.grad(loss)(1.0), -28. / 3.)
+assert jnp.allclose(jax.grad(loss)(2.0), 0.)
+visual_data = {'panels': [{'kind': 'line', 'x': grid.tolist(), 'xlabel': 'weight w', 'ylabel': 'mean squared loss (squared target units)', 'series': [{'label': 'L(w)', 'y': loss_values.tolist()}]}, {'kind': 'line', 'x': grid.tolist(), 'xlabel': 'weight w (same coordinates)', 'ylabel': 'dL/dw (loss units per weight unit)', 'series': [{'label': 'gradient', 'y': gradient_values.tolist()}, {'label': 'zero derivative', 'y': [0.0] * len(grid)}]}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:03:33.705972+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T12:28:29.159988+00:00. JAX 0.9.2.
 
 ```text
 Loss: 4.6666669845581055 gradient: -9.333333969116211

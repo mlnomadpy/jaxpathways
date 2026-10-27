@@ -4,6 +4,8 @@ Phase 05: Neural network training · about 95 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Model and state with Flax NNX](https://www.tahabouhsine.com/jaxpathways/lesson-networks-02.html).
+
 ## What you will be able to do
 
 - Choose a transparent train and held-out split
@@ -27,8 +29,10 @@ Capture parameter and relevant state values before evaluation and compare afterw
 
 Aggregate evaluation contributions with their counts. Unequal batch sizes make an average of batch means different from an example mean. Finally, inspect actual errors in the held-out prediction field: a visually attractive boundary cannot rule out leakage or a denominator mistake.
 
+This classifier produces one binary logit $z_i$ per example, not a vector of class probabilities. The implementation evaluates the softplus term stably with Optax; the NumPy reference uses `logaddexp`. A zero logit gives loss $\log 2$ for either label. A positive logit lowers loss for label $1$ and raises it for label $0$. Both logits and labels must have shape $(B,)$, otherwise broadcasting can create an unintended pairwise loss.
+
 $$
-\mathcal{L}(\Theta) = -\frac{1}{B}\sum_{i=1}^{B} \sum_{c=1}^{C} y_{i,c} \log \hat{p}_{i,c}(\Theta)
+L=\frac1B\sum_{i=1}^B\left[\log(1+e^{z_i})-y_i z_i\right],\qquad z_i\in\mathbb R,\quad y_i\in\{0,1\}
 $$
 
 ### Pause and reason
@@ -62,12 +66,26 @@ Binary cross-entropy uses scores directly. Accuracy thresholds scores at zero; s
 
 Repeat the full initialization and training routine from the same seed and batches. Compare final parameter arrays within tolerance and compare held-out metrics. This is stronger than checking that one seeded initialization looks similar. It verifies the sequence of updates, but only in the tested CPU environment. Floating-point reductions, package versions, and backend changes may affect results. Store model seed, data seeds, batch policy, learning rate, iteration count, dependency versions, and metrics. Do not use a different initialization as a supposed resume of an existing optimizer state.
 
+## Extend the frozen check to BatchNorm and Dropout
+
+The classifier above has no mutable forward state, so its exact state snapshot is a clean first check. This bounded extension adds `nnx.BatchNorm` running mean and variance plus `nnx.Dropout`. `training=True` uses batch statistics and updates `nnx.BatchStat`; it also requests a dropout mask and advances the dropout RNG count/key. `training=False` tells BatchNorm to use its stored running statistics and tells Dropout to return deterministic activations without consuming a key. The optimizer updates only `nnx.Param`. Compare all three categories around repeated held-out calls: parameters, BatchStat, and RngState. Then use a disposable clone as a negative control with `training=True`; its batch statistics and dropout key should change, proving the checks can detect the wrong mode. This synthetic batch is a mechanics test, not an accuracy benchmark.
+
+### Pause and reason
+
+What must a frozen evaluation check compare when the model has BatchNorm and Dropout?
+
+<details><summary>Compare your reasoning</summary>
+
+Compare parameter arrays, BatchStat running values, and RngState key/count before and after deterministic evaluation. A score alone cannot show that those states stayed fixed.
+
+</details>
+
 ## 1. Construct data, model, and optimizer
 
 Create main.py in the training dependency environment. The generator returns separate train and held-out arrays.
 
 ```python
-# Step 1 — 1. Construct data, model, and optimizer
+# Step 1 : 1. Construct data, model, and optimizer
 from flax import nnx
 import jax
 import jax.numpy as jnp
@@ -100,7 +118,7 @@ The held-out seed is $11$; every optimizer call below uses seed-10 data only.
 Append train and evaluation functions. Notice that only train_step receives an optimizer.
 
 ```python
-# Step 2 — 2. Define the two compiled functions: The 80-update counter is an optimizer invariant.
+# Step 2 : 2. Define the two compiled functions: The 80-update counter is an optimizer invariant.
 # Define and JIT-compile `train_step(m, o, x, y)` so XLA traces and fuses the operations:
 @nnx.jit
 def train_step(m,o,x,y):
@@ -126,7 +144,7 @@ The 80-update counter is an optimizer invariant. Pre-update losses returned duri
 Append snapshot and reference comparisons. Print both training and held-out results instead of a single success number.
 
 ```python
-# Step 3 — 3. Verify held-out metrics and state isolation: The synthetic fixture normally exceeds 0.85 held-out accuracy.
+# Step 3 : 3. Verify held-out metrics and state isolation: The synthetic fixture normally exceeds 0.85 held-out accuracy.
 frozen=snapshot(model)
 step_count=int(optimizer.step[...])
 test_loss,test_accuracy=evaluate(model,test_x,test_y)
@@ -147,7 +165,7 @@ The synthetic fixture normally exceeds $0.85$ held-out accuracy. Parameter bytes
 ## Run the example
 
 ```python
-# Step 1 — 1. Construct data, model, and optimizer
+# Step 1 : 1. Construct data, model, and optimizer
 from flax import nnx
 import jax
 import jax.numpy as jnp
@@ -172,7 +190,7 @@ def initialize():
     return m,nnx.Optimizer(m,optax.adam(.03),wrt=nnx.Param)
 model,optimizer=initialize()
 
-# Step 2 — 2. Define the two compiled functions: The 80-update counter is an optimizer invariant.
+# Step 2 : 2. Define the two compiled functions: The 80-update counter is an optimizer invariant.
 # Define and JIT-compile `train_step(m, o, x, y)` so XLA traces and fuses the operations:
 @nnx.jit
 def train_step(m,o,x,y):
@@ -190,7 +208,7 @@ before_loss=float(objective(model,train_x,train_y))
 for _ in range(80):train_step(model,optimizer,train_x,train_y)
 assert int(optimizer.step[...])==80
 
-# Step 3 — 3. Verify held-out metrics and state isolation: The synthetic fixture normally exceeds 0.85 held-out accuracy.
+# Step 3 : 3. Verify held-out metrics and state isolation: The synthetic fixture normally exceeds 0.85 held-out accuracy.
 frozen=snapshot(model)
 step_count=int(optimizer.step[...])
 test_loss,test_accuracy=evaluate(model,test_x,test_y)
@@ -239,11 +257,12 @@ visual_data = {'kind': 'field', 'values': prob.tolist(), 'extent': [-3.0, 3.0, -
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:05:06.820818+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T12:29:42.913814+00:00. JAX 0.9.2.
 
 ```text
 Updates: 80 held-out loss: 0.018426384776830673 accuracy: 1.0
 Updates: 80 held-out loss: 0.018426384776830673 accuracy: 1.0
+Deterministic evaluation repeated exactly; Param, BatchStat, and RngState unchanged. Negative control changed BatchStat and RngState; parameters stayed separate.
 Count-weighted held-out metrics: [0.01842638 0.99999995] constructed accuracy: 0.5416666666666666
 PASS: networks-03
 
@@ -254,7 +273,7 @@ PASS: networks-03
 **Predict before running:** Should equal seed, batches, and update count reproduce the final model?
 
 ```python
-# Experiment — Replay the complete update sequence: Replay reconstructs optimizer state from the start.
+# Experiment : Replay the complete update sequence: Replay reconstructs optimizer state from the start.
 replay,replay_optimizer=initialize()
 for _ in range(80):train_step(replay,replay_optimizer,train_x,train_y)
 for a,b in zip(snapshot(model),snapshot(replay)):np.testing.assert_allclose(a,b,rtol=1e-6,atol=1e-6)
@@ -270,7 +289,7 @@ Replay reconstructs optimizer state from the start. It is not a checkpoint-resum
 **Predict before running:** If the held-out rows are repeated twice, should mean loss or accuracy change?
 
 ```python
-# Experiment — Duplicating evaluation data: Means normalize the observation count.
+# Experiment : Duplicating evaluation data: Means normalize the observation count.
 doubled=evaluate(model,jnp.concatenate([test_x,test_x]),jnp.concatenate([test_y,test_y]))
 np.testing.assert_allclose(doubled,evaluate(model,test_x,test_y),rtol=1e-5,atol=1e-6)
 ```
@@ -278,6 +297,74 @@ np.testing.assert_allclose(doubled,evaluate(model,test_x,test_y),rtol=1e-5,atol=
 **Expected:** Both metrics stay the same.
 
 Means normalize the observation count. Duplicating data does not create independent evaluation evidence.
+
+## Stateful evaluation: running statistics and dropout keys
+
+**Predict before running:** After training forwards, will two `training=False` calls return equal outputs and preserve parameters, running statistics, and dropout RNG state? Which category changes in the negative control?
+
+```python
+# Experiment : Stateful evaluation: BatchNorm statistics and dropout RNG are state, distinct from parameters.
+from flax import nnx as state_nnx
+import jax as state_jax
+import jax.numpy as state_jnp
+import numpy as state_np
+import optax as state_optax
+class StatefulProbe(state_nnx.Module):
+    def __init__(self, seed=4):
+        rngs = state_nnx.Rngs(params=seed, dropout=seed+1)
+        self.hidden = state_nnx.Linear(2, 4, rngs=rngs)
+        self.norm = state_nnx.BatchNorm(num_features=4, rngs=rngs)
+        self.dropout = state_nnx.Dropout(rate=0.5, rngs=rngs)
+        self.out = state_nnx.Linear(4, 1, rngs=rngs)
+    def __call__(self, x, *, training):
+        x = self.norm(self.hidden(x), use_running_average=not training)
+        x = self.dropout(state_nnx.relu(x), deterministic=not training)
+        return self.out(x).squeeze(-1)
+def stateful_loss(model, x, y):
+    return state_jnp.mean(state_optax.sigmoid_binary_cross_entropy(model(x, training=True), y))
+@state_nnx.jit
+def stateful_train_step(model, optimizer, x, y):
+    loss, grads = state_nnx.value_and_grad(stateful_loss)(model, x, y)
+    optimizer.update(model, grads)
+    return loss
+def copy_state(state):
+    return state_jax.tree.map(lambda value: state_jnp.array(value, copy=True), state)
+def same_state(left, right):
+    def comparable(value):
+        if state_jax.dtypes.issubdtype(value.dtype, state_jax.dtypes.prng_key):
+            return state_jax.random.key_data(value)
+        return value
+    return all(bool(state_np.array_equal(comparable(a), comparable(b))) for a, b in zip(state_jax.tree.leaves(left), state_jax.tree.leaves(right)))
+state_x = state_jnp.asarray([[0., 1.], [1., 2.], [-1., 1.], [2., -1.], [1., -2.], [-2., 0.], [0., -1.], [2., 2.]])
+state_y = state_jnp.asarray([1., 1., 0., 1., 0., 0., 0., 1.])
+state_model = StatefulProbe()
+state_optimizer = state_nnx.Optimizer(state_model, state_optax.sgd(0.02), wrt=state_nnx.Param)
+for _ in range(3):
+    stateful_train_step(state_model, state_optimizer, state_x, state_y)
+params_before = copy_state(state_nnx.state(state_model, state_nnx.Param))
+stats_before = copy_state(state_nnx.state(state_model, state_nnx.BatchStat))
+rng_before = copy_state(state_nnx.state(state_model, state_nnx.RngState))
+eval_a = state_model(state_x, training=False)
+eval_b = state_model(state_x, training=False)
+state_np.testing.assert_array_equal(eval_a, eval_b)
+assert same_state(params_before, state_nnx.state(state_model, state_nnx.Param))
+assert same_state(stats_before, state_nnx.state(state_model, state_nnx.BatchStat))
+assert same_state(rng_before, state_nnx.state(state_model, state_nnx.RngState))
+# Negative control: training mode on an independent clone must change BatchStat and consume a dropout key.
+graphdef, state_snapshot = state_nnx.split(state_model)
+bad_mode_model = state_nnx.merge(graphdef, copy_state(state_snapshot))
+bad_stats = copy_state(state_nnx.state(bad_mode_model, state_nnx.BatchStat))
+bad_rng = copy_state(state_nnx.state(bad_mode_model, state_nnx.RngState))
+_ = bad_mode_model(state_x, training=True)
+assert not same_state(bad_stats, state_nnx.state(bad_mode_model, state_nnx.BatchStat))
+assert not same_state(bad_rng, state_nnx.state(bad_mode_model, state_nnx.RngState))
+assert same_state(params_before, state_nnx.state(state_model, state_nnx.Param))
+print('Deterministic evaluation repeated exactly; Param, BatchStat, and RngState unchanged. Negative control changed BatchStat and RngState; parameters stayed separate.')
+```
+
+**Expected:** Repeated evaluation outputs match exactly. Param, BatchStat, and RngState snapshots are unchanged. The negative-control training-mode call on a copied model changes BatchStat and RngState while leaving Param unchanged.
+
+NNX categories answer different questions: `Param` is optimizer-targeted, `BatchStat` holds running estimates, and `RngState` contains key/counter values. Deterministic evaluation neither updates running statistics nor requests dropout randomness. The negative control validates that the snapshots can detect a mode mistake.
 
 ## Make it yours
 
@@ -465,7 +552,7 @@ The data used in the loss determines whether it is held out. Calling optimizer.u
 
 ## Diagnose the result
 
-If metrics look suspiciously good, trace which arrays reach train_step. If evaluation modifies the model, compare snapshots and optimizer counts. If replay fails, compare data seeds, iteration counts, optimizer initialization, and versions before guessing that compilation is nondeterministic.
+If metrics look suspiciously good, trace which arrays reach train_step. If evaluation modifies the model, compare snapshots and optimizer counts. If replay fails, compare data seeds, iteration counts, optimizer initialization, and versions before guessing that compilation is nondeterministic. For stateful modules, compare `nnx.Param`, `nnx.BatchStat`, and `nnx.RngState` separately around evaluation. A deterministic score repeated twice is useful but does not replace the state snapshots; the training-mode negative control checks that the snapshots detect mutation.
 
 ## Carry forward
 

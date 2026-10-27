@@ -4,6 +4,8 @@ Phase 04: Math & optimization · about 80 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Least squares, rank, and conditioning](https://www.tahabouhsine.com/jaxpathways/lesson-optimization-06.html).
+
 ## What you will be able to do
 
 - Compute a small Jacobian by hand and connect forward sensitivities to reverse-mode gradients.
@@ -176,7 +178,7 @@ visual_data = {'kind': 'heatmap', 'values': jax.jacfwd(f)(x).tolist(), 'rows': [
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:04:07.186302+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T12:28:55.951577+00:00. JAX 0.9.2.
 
 ```text
 Jv / loss gradient: [3. 1.] [46. 19.]

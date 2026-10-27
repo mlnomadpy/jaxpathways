@@ -29,7 +29,12 @@ assert jnp.allclose(gradient, -28./3.)
 
 # Figure data experiment
 grid = jnp.linspace(0.0, 4.0, 81)
-visual_data = {'kind': 'line', 'x': grid.tolist(), 'xlabel': 'weight', 'ylabel': 'loss or derivative (different quantities)', 'series': [{'label': 'mean squared loss', 'y': jax.vmap(loss)(grid).tolist()}, {'label': 'derivative', 'y': jax.vmap(jax.grad(loss))(grid).tolist()}]}
+loss_values = jax.vmap(loss)(grid)
+gradient_values = jax.vmap(jax.grad(loss))(grid)
+assert jnp.allclose(loss(1.0), 14. / 3.)
+assert jnp.allclose(jax.grad(loss)(1.0), -28. / 3.)
+assert jnp.allclose(jax.grad(loss)(2.0), 0.)
+visual_data = {'panels': [{'kind': 'line', 'x': grid.tolist(), 'xlabel': 'weight w', 'ylabel': 'mean squared loss (squared target units)', 'series': [{'label': 'L(w)', 'y': loss_values.tolist()}]}, {'kind': 'line', 'x': grid.tolist(), 'xlabel': 'weight w (same coordinates)', 'ylabel': 'dL/dw (loss units per weight unit)', 'series': [{'label': 'gradient', 'y': gradient_values.tolist()}, {'label': 'zero derivative', 'y': [0.0] * len(grid)}]}]}
 
 # Experiment: Check JAX against the handwritten gradient
 # Experiment — Check JAX against the handwritten gradient: A derivative describes the direction.

@@ -1,0 +1,40 @@
+TAP version 13
+# Subtest: print qualification defaults to four chapters and supports full-book format options
+ok 1 - print qualification defaults to four chapters and supports full-book format options
+  ---
+  duration_ms: 1.025416
+  type: 'test'
+  ...
+# Subtest: EPUB distribution checker requires the exact final grouped appendix SVG
+ok 2 - EPUB distribution checker requires the exact final grouped appendix SVG
+  ---
+  duration_ms: 0.525667
+  type: 'test'
+  ...
+# Subtest: print stylesheet reserves a footer and keeps complete visual intros together
+ok 3 - print stylesheet reserves a footer and keeps complete visual intros together
+  ---
+  duration_ms: 5.182792
+  type: 'test'
+  ...
+# Subtest: print CSS groups tall visuals and mechanism prompts and numbers every PDF page
+ok 4 - print CSS groups tall visuals and mechanism prompts and numbers every PDF page
+  ---
+  duration_ms: 17187.6435
+  type: 'test'
+  ...
+# Subtest: saved-decoder appendix figure is embedded, grouped, and rejected when its group breaks
+ok 5 - saved-decoder appendix figure is embedded, grouped, and rejected when its group breaks
+  ---
+  duration_ms: 4107.107208
+  type: 'test'
+  ...
+1..5
+# tests 5
+# suites 0
+# pass 5
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 21636.365584

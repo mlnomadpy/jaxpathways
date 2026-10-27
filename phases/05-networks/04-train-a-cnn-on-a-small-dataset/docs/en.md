@@ -4,6 +4,8 @@ Phase 05: Neural network training · about 110 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [A compiled train and evaluation step](https://www.tahabouhsine.com/jaxpathways/lesson-networks-03.html).
+
 ## What you will be able to do
 
 - Generate images with an explicit label rule
@@ -271,7 +273,7 @@ visual_data = {'kind': 'panels', 'panels': [{'kind': 'heatmap', 'title': 'Held-o
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:05:14.555972+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T12:29:48.949231+00:00. JAX 0.9.2.
 
 ```text
 Held-out loss: 0.015700625 accuracy: 1.0 confusion:

@@ -22,6 +22,9 @@ export default defineConfig({
     baseURL,
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
+    ...(process.env.CHROME_BIN
+      ? { launchOptions: { executablePath: process.env.CHROME_BIN } }
+      : {}),
   },
   projects: [
     { name: 'desktop-chromium', use: { ...devices['Desktop Chrome'] } },

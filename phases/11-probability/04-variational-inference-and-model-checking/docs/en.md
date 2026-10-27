@@ -4,6 +4,8 @@ Phase 11: Probabilistic modeling · about 125 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Hamiltonian Monte Carlo and sampler diagnostics](https://www.tahabouhsine.com/jaxpathways/lesson-probability-03.html).
+
 ## What you will be able to do
 
 - Derive the diagonal Gaussian variational optimum for a correlated target
@@ -205,7 +207,7 @@ visual_data={"kind":"bar","x":[0,1,2],"labels":["weight 1","weight 2","sum of we
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:07:50.776965+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T12:32:04.473136+00:00. JAX 0.9.2.
 
 ```text
 VI mean: [ 0.99999994 -0.99999994] variances: [0.36000016 0.36000016] remaining KL: 0.5108256340026855

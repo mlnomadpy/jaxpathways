@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "operations-03",
-  "contentHash": "fb60f41174e6e4507cd11562f09d552f7ee15aba83c819a72430c223df6d0342",
-  "executedAt": "2026-10-21T16:10:40.910852+00:00",
+  "contentHash": "4faaf0ff2fcb699ebf38db303f8765c6deee5466a4db8c43a464fdac0e143276",
+  "executedAt": "2026-10-27T14:07:35.844287+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -11,35 +11,22 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "restored step: 2 replayed updates: [3, 4, 5, 6, 7, 8]\nall next-update state hashes match: True\nrestored step: 2 replayed updates: [3, 4, 5, 6, 7, 8]\nall next-update state hashes match: True\nPASS: operations-03\n",
+  "stdout": "restored step: 2 replayed updates: [3, 4, 5, 6, 7, 8]\nall next-update state hashes match: True\nPASS: operations-03\n",
   "notebookCells": [
     {
-      "sourceHash": "9aeea8682b2205b1a7883a7b1298120571f501be14e40867d7a2ae06f501e687",
+      "sourceHash": "d70c2392a48a3a964126de915c496c41e6d821af6f70853cad11b0d2c17ec3ad",
       "outputs": []
     },
     {
-      "sourceHash": "6eb86abf8bb037a0c00eff6d8d53d5b1f2a2612d3034be238dc49292abd4f84c",
+      "sourceHash": "d9c9a526451c81a23eb6445e628d4e3a3a9a9aca99b6bbcfbe23467065d87412",
       "outputs": []
     },
     {
-      "sourceHash": "0dca5fe9d1a0cc5a5ec9f0b29644573d52f5ee66036244735d4d2b08ba6e6800",
+      "sourceHash": "1959dce654a67ee076dbde7a966eaf2fcb56dc62f84c2f567c5599f4835f284c",
       "outputs": []
     },
     {
-      "sourceHash": "236b761f63b3eed665198532f99c3e150303539fcb5864d894fc6b27a530a863",
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "restored step: 2 replayed updates: [3, 4, 5, 6, 7, 8]\n",
-            "all next-update state hashes match: True\n"
-          ]
-        }
-      ]
-    },
-    {
-      "sourceHash": "6c5e432a033d27b593c0590475117f99d561f303123479519e1ef5b136f503f0",
+      "sourceHash": "6a84751e2cccc791a6a597f837789f1821c2a2c8f216fdcbf1b249db1b929f1c",
       "outputs": [
         {
           "output_type": "stream",
@@ -56,7 +43,7 @@
       "outputs": []
     },
     {
-      "sourceHash": "25df6d662f9d3f0c4e984c6a201f79fa0cfd7a2633dc4b0773dfba6c2dd4ee6c",
+      "sourceHash": "53dc08a479da44f2b1718bf964cd5c4d3e3305811c536df9d501b1833a6e3476",
       "outputs": [
         {
           "output_type": "display_data",

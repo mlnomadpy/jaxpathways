@@ -4,6 +4,8 @@ Phase 04: Math & optimization · about 75 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Regularization and honest validation](https://www.tahabouhsine.com/jaxpathways/lesson-optimization-10.html).
+
 ## What you will be able to do
 
 - Explain an unbiased minibatch gradient and verify how sampling and reduction affect its variance.
@@ -183,7 +185,7 @@ visual_data = {'kind': 'bar', 'labels': ['batch 1', 'batch 2', 'batch 3'], 'ylab
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:04:38.226400+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T12:29:18.109131+00:00. JAX 0.9.2.
 
 ```text
 full gradient / single variance / pair variance: -2.5 1.25 0.625

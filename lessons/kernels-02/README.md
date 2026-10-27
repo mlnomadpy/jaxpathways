@@ -4,6 +4,8 @@ Phase 13: Pallas kernels · about 110 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. A separate Pallas TPU kernel is implemented in the target instructions. Bounded hardware receipts cover v5e1 launch, resume and precision checks; four single-device Pallas cases; and a four-device v5e collective fixture. Each receipt applies only to its recorded source, environment, cases and hardware. Other lessons and TPU configurations require separate qualification.
 
+**Before this lesson:** [Pallas grids and BlockSpecs](https://www.tahabouhsine.com/jaxpathways/lesson-kernels-01.html).
+
 ## What you will be able to do
 
 - Implement a real TPU-targeted Pallas launch with a broadcast BlockSpec.
@@ -246,7 +248,7 @@ visual_data={'kind':'line','x':list(range(129)),'xlabel':'logical column','ylabe
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:08:21.222853+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T12:34:57.688140+00:00. JAX 0.9.2.
 
 ```text
 Interpretation max error: 0.0

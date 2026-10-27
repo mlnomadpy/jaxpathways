@@ -1,0 +1,13 @@
+FAIL tpu-01
+ Traceback (most recent call last):
+  File "/private/tmp/jaxpathways-content-repairs-review/scripts/render-lesson-figures.py", line 274, in <module>
+    assert len(lessons)==1;worker(lessons[0],args.output_dir)
+                           ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/jaxpathways-content-repairs-review/scripts/render-lesson-figures.py", line 232, in worker
+    assert any(word in (visual['title'] + visual['reading'] + visual['connection']).lower()
+           ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+               for word in ('analytic', 'calculated', 'calculation')), f"{lesson['id']}: analytic scope must be explicit"
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: tpu-01: analytic scope must be explicit
+
+Failed figures: tpu-01

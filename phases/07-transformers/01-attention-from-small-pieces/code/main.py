@@ -71,12 +71,42 @@ shifted, _ = attend(q_new, k, v + shift)
 assert jnp.allclose(shifted, actual + shift)
 
 # Reference solution. Try the exercise before reading this.
-# Exercise solution: Permute the three key/value pairs together, then permute only values.
+# Exercise solution: all inputs are declared here, independent of prior experiments.
+import jax
+import jax.numpy as jnp
+import numpy as np
+
+def attend(q, k, v):
+    scores = q @ k.T / jnp.sqrt(q.shape[-1])
+    weights = jax.nn.softmax(scores, axis=-1)
+    return weights @ v, weights
+
+q_ex = jnp.array([[2., 0.]])
+k_ex = jnp.array([[1., 0.], [0., 1.], [1., 1.]])
+v_ex = jnp.array([[2., 0.], [0., 4.], [4., 2.]])
 order = jnp.array([2, 0, 1])
-paired, _ = attend(q_new, k[order], v[order])
-mismatched, _ = attend(q_new, k, v[order])
-assert jnp.allclose(paired, actual)
-assert not jnp.allclose(mismatched, actual)
+original, weights = attend(q_ex, k_ex, v_ex)
+paired, paired_weights = attend(q_ex, k_ex[order], v_ex[order])
+value_only, _ = attend(q_ex, k_ex, v_ex[order])
+assert jnp.allclose(paired, original)
+assert not jnp.allclose(value_only, original)
+
+# Independent NumPy reference for the original and both permutations.
+def numpy_attend(q, k, v):
+    scores = q @ k.T / np.sqrt(q.shape[-1])
+    exp_scores = np.exp(scores - scores.max(axis=-1, keepdims=True))
+    w = exp_scores / exp_scores.sum(axis=-1, keepdims=True)
+    return w @ v
+np.testing.assert_allclose(original, numpy_attend(np.asarray(q_ex), np.asarray(k_ex), np.asarray(v_ex)), rtol=1e-6, atol=1e-6)
+np.testing.assert_allclose(paired, numpy_attend(np.asarray(q_ex), np.asarray(k_ex[order]), np.asarray(v_ex[order])), rtol=1e-6, atol=1e-6)
+np.testing.assert_allclose(value_only, numpy_attend(np.asarray(q_ex), np.asarray(k_ex), np.asarray(v_ex[order])), rtol=1e-6, atol=1e-6)
+
+# For any permutation p, sum_i w_i V_{p(i)} generally changes when w is nonuniform.
+# With q=0, all w_i=1/3 and the output is mean(V), invariant under every permutation.
+zero_query, _ = attend(jnp.zeros((1, 2)), k_ex, v_ex)
+assert jnp.allclose(zero_query, v_ex.mean(axis=0, keepdims=True))
+print("original / paired / value-only:", original, paired, value_only)
+print("zero-query mean:", zero_query)
 
 # Reference practice: Use a different value dimension
 # Use a different value dimension (Transfer / diagnosis)

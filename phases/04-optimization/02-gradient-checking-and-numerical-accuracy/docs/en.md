@@ -4,6 +4,8 @@ Phase 04: Math & optimization · about 80 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [The chain rule, Jacobians, and directions](https://www.tahabouhsine.com/jaxpathways/lesson-optimization-07.html).
+
 ## What you will be able to do
 
 - Build an independent derivative estimate
@@ -173,7 +175,7 @@ visual_data['yscale'] = 'log'
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:04:13.623123+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T12:28:59.051801+00:00. JAX 0.9.2.
 
 ```text
 Finite difference: [-2.9999971  2.4999976]

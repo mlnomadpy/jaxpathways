@@ -4,6 +4,8 @@ Phase 04: Math & optimization · about 75 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Linear algebra and loss intuition](https://www.tahabouhsine.com/jaxpathways/lesson-optimization-01.html).
+
 ## What you will be able to do
 
 - Fit a linear model with a direct solver and diagnose nonunique or sensitive coefficients.
@@ -160,7 +162,7 @@ visual_data = {'kind': 'bar', 'labels': ['row 0', 'row 1', 'row 2'], 'ylabel': '
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:04:03.664134+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T12:28:52.924271+00:00. JAX 0.9.2.
 
 ```text
 weights / rank / MSE: [0.6666669 1.6666665] 2 0.11111113

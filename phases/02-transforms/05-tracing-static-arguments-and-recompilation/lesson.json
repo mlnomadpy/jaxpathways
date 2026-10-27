@@ -154,11 +154,12 @@
     ],
     "visual": {
       "kind": "executed",
-      "title": "Compiled branch outputs: sum mode vs. mean mode",
-      "prediction": "Predict the ratio between `compiled(x, 'sum')` and `compiled(x, 'mean')` for the input array `x`.",
-      "code": "# Compare compiled execution in 'sum' mode and 'mean' mode:\nout_sum = float(compiled(x, 'sum'))\nout_mean = float(compiled(x, 'mean'))\nvisual_data = {'kind': 'bar', 'x': [0, 1], 'labels': ['sum', 'mean'], 'xlabel': 'static mode argument', 'ylabel': 'compiled(x, mode) output', 'series': [{'label': 'compiled(x, mode)', 'y': [out_sum, out_mean]}]}",
-      "reading": "Static mode 'sum' returns the sum and 'mean' returns the mean without Python control-flow tracing errors.",
-      "connection": "Marking `mode` as a static argument in `jax.jit` allows each distinct mode string to specialize and compile its own branch cleanly."
+      "title": "Call signatures separate runtime values from specialization choices",
+      "prediction": "Which call changes only data values, and which calls request a different staged program?",
+      "reading": "Read each row as one call to compiled(x, mode). Dynamic array values are shown in the value column; the specialization signature records shape, dtype and static mode. Calls 1 and 2 keep signature ((3,), float32, sum) while the sum changes from 6 to 9. Call 3 changes shape to (4,), and call 4 changes the static mode to mean. Those last two calls request different specialization signatures in the same function/process. This ledger is structural evidence, not a promise about a global or cross-process cache.",
+      "connection": "A value-only change supplies new data to an existing staged shape and mode. A shape or static-mode change affects the program specialization. The outputs are directly calculated from the listed arrays: sum([1,2,3])=6, sum([2,3,4])=9, sum([1,2,3,4])=10, and mean([1,2,3])=2. Predict what signature changes if the dtype becomes float64 while shape and mode stay fixed, then verify in a trace-counting function in one process.",
+      "alt": "A four-row call ledger lists call number, array values, shape/dtype, static mode, output, and whether the signature matches the first call. The second call changes values only and keeps the same signature. The third changes shape; the fourth changes static mode.",
+      "code": "visual_data = {'kind': 'flow', 'layout': 'sequence', 'nodes': ['values change; shape/dtype/mode fixed', 'same signature reused in this call ledger', 'shape or static mode changes specialization']}"
     },
     "buildSteps": [
       {
@@ -203,6 +204,49 @@
         "Reuse the function for changed array values."
       ],
       "code": "import jax\nimport jax.numpy as jnp\n\ndef reduce_values(values, mode):\n    # TODO: implement the declared reductions and reject unknown modes\n    raise NotImplementedError\n\ndef verify_reductions():\n    # TODO: compile with mode static and check both input sets\n    raise NotImplementedError\n"
+    },
+    "diagram": {
+      "title": "The specialization key separates changing data from program choices",
+      "prediction": "If only the array entries change, which ledger fields remain fixed?",
+      "reading": "The first two calls carry different runtime arrays through one matching structural signature. A shape or static-mode change creates a different specialization request. The table describes this lesson’s call ledger; JAX cache behavior can also depend on other details, so do not read it as a universal compilation counter.",
+      "alt": "Calls with shape (3,), float32 and static mode sum share the same signature even though their values and sums differ. Shape (4,) and mode mean each introduce a different signature.",
+      "scope": "Signature-to-trace ledger for the lesson calls.",
+      "height": 4.8,
+      "panel": {
+        "kind": "table",
+        "headers": [
+          "x values",
+          "shape · dtype · static",
+          "output and observation"
+        ],
+        "widths": [
+          0.27,
+          0.35,
+          0.38
+        ],
+        "rows": [
+          [
+            "[1,2,3]",
+            "(3,), f32, sum",
+            "6; initial"
+          ],
+          [
+            "[2,3,4]",
+            "same signature",
+            "9; values only changed"
+          ],
+          [
+            "[1,2,3,4]",
+            "(4,), f32, sum",
+            "10; shape changed"
+          ],
+          [
+            "[1,2,3]",
+            "(3,), f32, mean",
+            "2; static mode changed"
+          ]
+        ]
+      }
     }
   }
 }

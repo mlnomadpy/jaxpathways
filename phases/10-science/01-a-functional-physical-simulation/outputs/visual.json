@@ -2,9 +2,9 @@
   "schemaVersion": 1,
   "lessonId": "science-01",
   "contentHash": "57652b72fddba823d7f54206af80bca313c1771b8ae8bb574c14c425d55bb2de",
-  "rendererHash": "a1bd5b648f4731ae5d5f0a24811c2540d1a0a132149ce589d17c4113509cbedf",
+  "rendererHash": "17e3bbad72ee4c43425845aaee76b86b85e84750551278be03d8c16842f4dc63",
   "kind": "executed",
-  "generatedAt": "2026-10-21T16:04:49.047631+00:00",
+  "generatedAt": "2026-10-27T12:18:28.146183+00:00",
   "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",

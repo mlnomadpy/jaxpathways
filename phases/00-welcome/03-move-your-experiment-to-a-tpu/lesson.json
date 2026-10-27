@@ -13,6 +13,15 @@
     ],
     "sections": [
       {
+        "id": "optional-device-branch",
+        "title": "Choose the beginner CPU route or the optional placement branch",
+        "body": "If array shapes and transformed functions are new to you, continue from the first array lesson to [Arrays & pure functions](https://www.tahabouhsine.com/jaxpathways/phase-guides/arrays.html). Ordinary CPU lessons do not require virtual devices or cloud setup. Return here after JAX transformations and the first distributed-placement lesson. This branch assumes you can name the axis split across devices, explain what a replica contains and distinguish a JIT specialization from a new array value.\n\nFor a minimal placement prediction, imagine four logical devices and an array with eight rows. A row partition gives each device two rows; replication gives each device all eight. Inspect the reported shard indices to distinguish those cases. Four logical CPU devices do not create four physical accelerators. A physical TPU target additionally needs a reviewed source, pinned environment, expected backend and expected topology.",
+        "check": {
+          "prompt": "An eight-row array appears on four devices. Does that prove each device holds two rows?",
+          "answer": "No. It might be replicated. Inspect shard indices and local shapes: row partitioning owns two rows per device; replication stores all eight on each device."
+        }
+      },
+      {
         "id": "guided-reasoning",
         "title": "Check arithmetic and placement separately",
         "body": "Consider a prediction that adds a scalar bias after a dot product. Reducing the bias by \\(0.25\\) should reduce every prediction by \\(0.25\\), whatever compatible device performs the computation. That is a numerical invariant you can derive before running.\n\nNow inspect where the completed result resides. A correct NumPy comparison on CPU does not show that a TPU was selected. Conversely, a TPU device label does not show that the formula or input data was correct. Keep both checks.\n\nWait for the result before recording completion or timing. A returned array handle can precede finished device work. Preserve the requested platform, observed platform, environment and error tolerance alongside the values.",

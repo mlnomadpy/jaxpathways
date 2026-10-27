@@ -118,9 +118,9 @@ Status: authored lesson with CPU exercise.
 
 Status: authored lesson with CPU exercise.
 
-**Intended outcome:** Introduce a bad learning rate and diagnose it using loss and gradient evidence.
+**Intended outcome:** Localize a multilayer model failure in data, activations, gradients or update scale, then repair one cause and compare held-out loss.
 
-**Evidence:** Keep the analytic error recurrence, per-step weight/loss/gradient norm for rates 0.1 and 0.3, observed 3.24 loss multiplier, changed-scale comparison, clipping bound, and one repaired nonfinite-input case.
+**Evidence:** Keep the NaN input diagnosis, saturation and excessive-rate controls, per-layer gradient/activation evidence and held-out comparisons for each one-factor repair.
 
 **Checkpoint:** Derive why scaling features and targets by ten changes this squared-loss curvature by 100 without treating that bound as universal.
 

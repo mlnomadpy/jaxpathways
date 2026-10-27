@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "operations-08",
-  "contentHash": "eb0aa87d8a8593142c19fcf378004b40301f04a302adcc6087ff19b414dd520e",
-  "rendererHash": "a1bd5b648f4731ae5d5f0a24811c2540d1a0a132149ce589d17c4113509cbedf",
+  "contentHash": "bab848aeacd6ce065c119ea2c8e819be55475f64edeb08cf59b7e1731ad78c2b",
+  "rendererHash": "17e3bbad72ee4c43425845aaee76b86b85e84750551278be03d8c16842f4dc63",
   "kind": "executed",
-  "generatedAt": "2026-10-21T16:06:13.065854+00:00",
+  "generatedAt": "2026-10-27T16:10:58.786079+00:00",
   "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",
@@ -13,13 +13,13 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Accepted original / changed artifact / expired approval / wrong target: [True, False, False, False]\nAll failed gates preserved the selected version. This fixture does not authenticate reviewers.\n",
+  "stdout": "consumer x=1 predictions: before B activation A= 3.0 after B activation= 3.4 after rollback= 3.0\nrejected stale/expired/wrong-target and mismatched-version activations preserved pointer/cache/output\nchanged disk and cache artifacts rejected before prediction or cache mutation\nretirement: active/fallback rejected; A and B tombstoned after fallback clear: ['A', 'B']\nretired target activation and rollback rejected; stale pointer denied with cache and forced reload\naudit events bind actor and exact bundle hash; local single-writer fixture, no authentication\n",
   "data": {
     "kind": "bar",
     "labels": [
       "reviewed",
-      "changed model",
-      "expired",
+      "stale approval",
+      "expired approval",
       "wrong target"
     ],
     "xlabel": "attempted transition",

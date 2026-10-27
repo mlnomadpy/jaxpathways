@@ -4,6 +4,8 @@ Phase 00: Setup & first steps · about 60 minutes · 4 logical CPU devices
 
 This reference configures logical CPU devices to practice placement and sharding. Logical devices do not measure TPU performance. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Meet your arrays and devices](https://www.tahabouhsine.com/jaxpathways/lesson-welcome-02.html).
+
 ## What you will be able to do
 
 - Start four virtual CPU devices in a fresh process.
@@ -18,6 +20,22 @@ You can explore how JAX splits an array across devices using just your laptop. W
 ## The idea
 
 Logical CPU devices let us practice how a global array is divided and addressed. They share a physical host. Treat them as a way to make placement visible, then use a real accelerator run to investigate accelerator memory, communication and speed.
+
+## Choose the beginner CPU route or the optional placement branch
+
+If array shapes and transformed functions are new to you, continue from the first array lesson to [Arrays & pure functions](https://www.tahabouhsine.com/jaxpathways/phase-guides/arrays.html). Ordinary CPU lessons do not require virtual devices or cloud setup. Return here after JAX transformations and the first distributed-placement lesson. This branch assumes you can name the axis split across devices, explain what a replica contains and distinguish a JIT specialization from a new array value.
+
+For a minimal placement prediction, imagine four logical devices and an array with eight rows. A row partition gives each device two rows; replication gives each device all eight. Inspect the reported shard indices to distinguish those cases. Four logical CPU devices do not create four physical accelerators. A physical TPU target additionally needs a reviewed source, pinned environment, expected backend and expected topology.
+
+### Pause and reason
+
+An eight-row array appears on four devices. Does that prove each device holds two rows?
+
+<details><summary>Compare your reasoning</summary>
+
+No. It might be replicated. Inspect shard indices and local shapes: row partitioning owns two rows per device; replication stores all eight on each device.
+
+</details>
 
 ## Distinguish ownership from extra computing power
 
@@ -203,7 +221,7 @@ visual_data = {'kind': 'heatmap', 'values': owners.tolist(), 'unit': 'logical CP
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:03:18.471477+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T12:28:14.167775+00:00. JAX 0.9.2.
 
 ```text
 JAX version: 0.9.2

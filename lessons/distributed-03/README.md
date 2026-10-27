@@ -4,6 +4,8 @@ Phase 09: Distributed training · about 100 minutes · 4 logical CPU devices
 
 This reference configures logical CPU devices to practice placement and sharding. Logical devices do not measure TPU performance. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [A sharded training step](https://www.tahabouhsine.com/jaxpathways/lesson-distributed-02.html).
+
 ## What you will be able to do
 
 - Compare all-reduce and reduce-scatter against the same independent global gradient.
@@ -348,17 +350,17 @@ visual_data={'panels':[{'kind':'bar','labels':['all-reduce','reduce-scatter','af
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:06:40.269864+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T12:31:08.176137+00:00. JAX 0.9.2.
 
 ```text
 Gradient reference: [0.0029296851716935635, 0.00219726306386292, 0.0014648411888629198, 0.0007324193138629198, -2.6193447411060333e-09, -0.000732424552552402, -0.001464846427552402, -0.002197268418967724]
 Local result shapes: replicated (8,), reduce-scatter (2,), gathered (8,)
 Idealized ring bytes per rank: 48.0 24.0
-Completed CPU median microseconds: {'all_reduce': 323.709100484848, 'reduce_scatter': 339.7497348487377, 'all_gather_only': 214.2917364835739}
+Completed CPU median microseconds: {'all_reduce': 123.2917420566082, 'reduce_scatter': 104.75004091858864, 'all_gather_only': 83.62531661987305}
 Gradient reference: [0.0029296851716935635, 0.00219726306386292, 0.0014648411888629198, 0.0007324193138629198, -2.6193447411060333e-09, -0.000732424552552402, -0.001464846427552402, -0.002197268418967724]
 Local result shapes: replicated (8,), reduce-scatter (2,), gathered (8,)
 Idealized ring bytes per rank: 48.0 24.0
-Completed CPU median microseconds: {'all_reduce': 291.166827082634, 'reduce_scatter': 570.7498639822006, 'all_gather_only': 997.5829161703587}
+Completed CPU median microseconds: {'all_reduce': 93.8749872148037, 'reduce_scatter': 102.6662066578865, 'all_gather_only': 113.41739445924759}
 Sharded momentum matches the independent elementwise update.
 Joint permutation preserves the gradient; label-only reversal does not.
 Idealized payload/storage budget, not observed network traffic: [{'ranks': 2, 'all_reduce_bytes': 1048576, 'scatter_gather_bytes': 1048576, 'shard_storage_bytes': 524288}, {'ranks': 4, 'all_reduce_bytes': 1572864, 'scatter_gather_bytes': 1572864, 'shard_storage_bytes': 262144}, {'ranks': 8, 'all_reduce_bytes': 1835008, 'scatter_gather_bytes': 1835008, 'shard_storage_bytes': 131072}]

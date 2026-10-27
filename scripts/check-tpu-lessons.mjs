@@ -59,37 +59,88 @@ test('tpu-04 labels the four-device result as calculated expectation', () => {
   assert.match(lesson.content.visual.reading, /does not read a TPU execution receipt/i);
 });
 
-test('Phase 19 registry tasks use the lesson exercises and receipt fields', () => {
+test('Phase 19 registry tasks use current HBM and requested-target receipt contracts', () => {
   const course = JSON.parse(readFileSync('curriculum/course.json', 'utf8'));
   const phase = course.phases.find(item => item.id === 'tpu');
   const tpu01 = phase.lessons.find(item => item.id === 'tpu-01');
   const tpu04 = phase.lessons.find(item => item.id === 'tpu-04');
   const lesson01 = JSON.parse(readFileSync('phases/19-tpu/01-get-a-tpu-running-and-verify-the-runtime/lesson.json', 'utf8'));
   const lesson04 = JSON.parse(readFileSync('phases/19-tpu/02-bootstrap-venv-and-verify-tpu-runtime-receipt/lesson.json', 'utf8'));
-  assert.match(tpu01.exercise, /verify_runtime_contract.*v5litepod-4.*v6e-4.*hosts == 1.*at least 64 GiB/i);
-  assert.match(lesson01.content.exercise, /v5litepod-4.*v6e-4.*hosts == 1.*at least 64 GiB/i);
-  assert.match(lesson01.content.learnerStarter.code, /def inspect_runtime_and_slice\(verify_runtime_contract, expected_backend, min_devices, topologies\)/);
-  assert.match(lesson01.content.learnerStarter.code, /filter the supplied catalog by host count and HBM threshold/i);
-  const output = runPython('tpu-01', `exec(compile(lesson['content']['solution'], path + ':solution', 'exec'), namespace)
-catalog = namespace['topologies']
-for name, chips, hbm in [('v5litepod-4', 4, 64), ('v6e-4', 4, 128)]:
-    spec = next(row for row in catalog if row['slice'] == name)
-    assert spec['hosts'] == 1 and spec['chips_per_host'] == chips
-    assert spec['chips_per_host'] * spec['hbm_gib_per_chip'] == hbm
-assert [row['slice'] for row in catalog if row['hosts'] == 1 and row['chips_per_host'] * row['hbm_gib_per_chip'] >= 64] == ['v5litepod-4', 'v5litepod-8', 'v6e-4']
-assert [row['slice'] for row in catalog if row['hosts'] == 1 and row['chips_per_host'] * row['hbm_gib_per_chip'] >= 128] == ['v5litepod-8', 'v6e-4']`, { JAX_PLATFORMS: 'cpu' });
-  assert.match(output, /v5litepod-4 hosts: 1 chips: 4 total HBM GiB: 64/);
-  assert.match(output, /v6e-4 hosts: 1 chips: 4 total HBM GiB: 128/);
-  assert.match(output, /at least 64 GiB: \[?'?v5litepod-4/);
-  assert.match(tpu04.exercise, /closed_form_sum_of_squares\(4\).*closed_form_sum_of_squares\(8\).*10416\.0.*85344\.0/);
-  assert.match(tpu04.exercise, /receipt\['verified'\]/);
+  assert.match(tpu01.exercise, /48 GiB.*four 16 GiB v5e chips.*replicated.*ideal-sharded/i);
+  assert.match(lesson01.content.exercise, /48 GiB.*four 16 GiB v5e chips.*replicated.*ideal-sharded/i);
+  assert.match(lesson01.content.solution, /requested_physical_chips.*observed_jax_device_count/s);
+  const output = runPython('tpu-01', `receipt = namespace['receipt']
+assert receipt['arithmetic_ok'] is True and receipt['observed_backend'] == 'cpu'
+assert receipt['requested_target_ready'] is False and receipt['source_sha256'] is None
+assert receipt['process_count'] == 1 and receipt['device_count'] == 1
+exec(compile(lesson['content']['solution'], path + ':solution', 'exec'), namespace)
+selected = namespace['result']['selected_target']
+assert selected['api'] == 'Cloud TPU API direct VM/Flex-start'
+assert selected['machine_type'] == 'v5litepod-4'
+assert selected['requested_processes'] == selected['observed_process_count'] == 1
+assert selected['requested_physical_chips'] == 4 and selected['observed_jax_device_count'] == 1
+backend_mismatch = namespace['verify_runtime_contract'](expected_backend='tpu', expected_device_count=1)
+count_mismatch = namespace['verify_runtime_contract'](expected_backend='cpu', expected_device_count=4)
+assert backend_mismatch['expected_backend_ok'] is False and backend_mismatch['requested_target_ready'] is False
+assert count_mismatch['expected_backend_ok'] is True and count_mismatch['expected_topology_ok'] is False
+assert count_mismatch['requested_target_ready'] is False`, { JAX_PLATFORMS: 'cpu' });
+  assert.match(output, /requested_processes': 1, 'observed_process_count': 1/);
+  assert.match(output, /requested_physical_chips': 4, 'observed_jax_device_count': 1/);
+  assert.match(output, /48 GiB state\/device ideal even shard: 12\.0/);
+  assert.match(output, /requested_target_ready': False/);
+  assert.match(tpu04.exercise, /4-device and 8-device oracle values/i);
+  assert.match(lesson04.content.solution, /s4 == 10416\.0 and s8 == 85344\.0/);
+  assert.match(tpu04.exercise, /requested_target_ready.*observed_backend.*tpu.*device_count.*4/s);
   assert.match(lesson04.content.code, /def build_runtime_receipt\(/);
-  assert.match(lesson04.content.code, /"local_device_count".*"observed_total".*"expected_total"/s);
-  assert.match(lesson04.content.solution, /s4 == 10416\.0 and s8 == 85344\.0 and receipt\["verified"\] is True/);
-  assert.doesNotMatch(JSON.stringify(tpu04), /verify_runtime_contract|contract_ok|expected_pmap_sum_of_squares|signed JSON/);
+  assert.match(lesson04.content.code, /"observed_backend".*"device_count".*"process_count".*"local_device_count".*"observed_total".*"expected_total"/s);
+  assert.match(lesson04.content.solution, /receipt\["requested_target_ready"\] is False/);
+  assert.doesNotMatch(JSON.stringify(lesson04), /receipt\[.?verified|"verified"\s*:/);
+  const output04 = runPython('tpu-04', `receipt = namespace['receipt']
+assert receipt['arithmetic_ok'] is True and receipt['observed_backend'] == 'cpu'
+assert receipt['requested_target_ready'] is False and receipt['source_sha256'] is None
+assert receipt['process_count'] == 1 and receipt['device_count'] == 1
+exec(compile(lesson['content']['practice'][0]['solution'], path + ':practice', 'exec'), namespace)
+assert namespace['is_four_chip_tpu_receipt'](receipt) is False
+backend_mismatch = namespace['build_runtime_receipt'](expected_backend='tpu', expected_device_count=1)
+count_mismatch = namespace['build_runtime_receipt'](expected_backend='cpu', expected_device_count=4)
+assert backend_mismatch['expected_backend_ok'] is False and backend_mismatch['requested_target_ready'] is False
+assert count_mismatch['expected_backend_ok'] is True and count_mismatch['expected_topology_ok'] is False
+assert count_mismatch['requested_target_ready'] is False`, { JAX_PLATFORMS: 'cpu' });
+  assert.match(output04, /requested_target_ready": false/);
+  assert.match(output04, /observed_backend": "cpu"/);
   const runtimeMilestone = phase.studyGuide.milestones.find(item => item.lessonIds.includes('tpu-04'));
   assert.match(runtimeMilestone.task, /build_runtime_receipt\(\)/);
-  assert.doesNotMatch(runtimeMilestone.task, /verify_runtime_contract|contract_ok|expected_pmap_sum_of_squares|signed JSON/);
+  assert.doesNotMatch(runtimeMilestone.task, /verify_runtime_contract|contract_ok|expected_pmap_sum_of_squares|signed JSON|verified/);
+});
+
+test('tpu-01 and tpu-04 TPU gates reject missing source identity and CPU target mismatches', () => {
+  const temp = mkdtempSync(path.join(os.tmpdir(), 'tpu-target-gate-'));
+  try {
+    for (const [id, relative] of [
+      ['tpu-01', 'phases/19-tpu/01-get-a-tpu-running-and-verify-the-runtime/lesson.json'],
+      ['tpu-04', 'phases/19-tpu/02-bootstrap-venv-and-verify-tpu-runtime-receipt/lesson.json'],
+    ]) {
+      const lesson = JSON.parse(readFileSync(path.join(root, relative), 'utf8'));
+      const code = lesson.content.code;
+      const inline = spawnSync('python3', ['-c', `exec(${JSON.stringify(code)})`], {
+        cwd: root, encoding: 'utf8',
+        env: { ...process.env, JAX_PLATFORMS: 'cpu', TPU_REQUIRE_TARGET: '1' },
+      });
+      assert.notEqual(inline.status, 0, `${id} gated inline execution must fail closed`);
+      assert.match(inline.stderr, /requires a saved verifier script with a readable source identity/);
+
+      const script = path.join(temp, `${id}.py`);
+      writeFileSync(script, code);
+      const saved = spawnSync('python3', [script], {
+        cwd: root, encoding: 'utf8',
+        env: { ...process.env, JAX_PLATFORMS: 'cpu', TPU_REQUIRE_TARGET: '1' },
+      });
+      assert.notEqual(saved.status, 0, `${id} must reject the CPU backend or wrong device count`);
+      assert.match(saved.stderr, /Requested TPU target is not ready: expected TPU backend and exactly 4 JAX devices/);
+    }
+  } finally {
+    rmSync(temp, { recursive: true, force: true });
+  }
 });
 
 test('tpu-05 routes the CPU-only lesson away from TPU and includes a collective update program', () => {
@@ -110,6 +161,7 @@ test('tpu-05 routes the CPU-only lesson away from TPU and includes a collective 
 test('tpu-06 retains an inspectable CPU trace from the measured workload', () => {
   const phase = JSON.parse(readFileSync('curriculum/course.json', 'utf8')).phases.find(phase => phase.id === 'tpu-systems');
   const metadata = phase.lessons.find(lesson => lesson.id === 'tpu-06');
+  const lesson = JSON.parse(readFileSync('phases/21-tpu-systems/02-bfloat16-int8-precision-and-xprof-profiling/lesson.json', 'utf8'));
   assert.match(metadata.exercise, /capture_warmed_trace\(steps=3\)/);
   assert.match(metadata.objective, /requested result-dtype/);
   assert.doesNotMatch(JSON.stringify(phase), /verify float32 accumulator precision|accumulator drift|verify FP32 accumulation inside|capture_warmed_xprof_trace/);
@@ -118,7 +170,8 @@ test('tpu-06 retains an inspectable CPU trace from the measured workload', () =>
     const trace = path.join(temp, 'trace');
     const output = runPython('tpu-06', '', { TPU_TRACE_DIR: trace });
     assert.match(output, /Retained trace directory:/);
-    assert.match(output, /Captured \*\.xplane\.pb trace count: 1/);
+    assert.match(output, /Observed backend: cpu profiled steps: 5 XPlane files: 1/);
+    assert.match(lesson.content.code, /"workload_note": "fixed-input BF16 dot; no collective communication in this function"/);
     assert.ok(existsSync(path.join(trace, 'plugins', 'profile')) || readdirSync(trace).length > 0);
   } finally {
     rmSync(temp, { recursive: true, force: true });
@@ -132,7 +185,7 @@ test('tpu-06 precision probe retains raw outputs and independently checks dtype 
   assert.doesNotMatch(lessonText, /\b(?:bf16|fp32)\s+accum(?:ulation)?\b/i);
   assert.doesNotMatch(lessonText, /every partial sum.{0,100}rounded to 7/i);
   assert.match(lesson.content.sections[0].check.answer, /do not establish that every partial sum/i);
-  assert.match(lesson.content.visual.reading, /do not expose the precision of every internal partial sum/i);
+  assert.match(lesson.content.visual.reading, /do not show internal accumulation precision/i);
   const probe = path.join(lessonDir, 'labs/precision_contract_probe.py');
   const temp = mkdtempSync(path.join(os.tmpdir(), 'tpu06-precision-contract-'));
   try {

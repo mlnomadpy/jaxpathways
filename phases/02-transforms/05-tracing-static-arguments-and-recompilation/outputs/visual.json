@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "transforms-05",
-  "contentHash": "be317959804798f14933f1a2517d77e635fbe27b402c49b0d9d0a38a1f611b41",
-  "rendererHash": "a1bd5b648f4731ae5d5f0a24811c2540d1a0a132149ce589d17c4113509cbedf",
+  "contentHash": "3f1bc49e6fac9edcf8df73fc3434b0560134f13cd5a5b3dfadffceb95d5dfdd8",
+  "rendererHash": "17e3bbad72ee4c43425845aaee76b86b85e84750551278be03d8c16842f4dc63",
   "kind": "executed",
-  "generatedAt": "2026-10-21T16:03:26.232130+00:00",
+  "generatedAt": "2026-10-27T12:17:10.845072+00:00",
   "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",
@@ -15,25 +15,55 @@
   },
   "stdout": "Sum: 6.0\nMean: 2.0\n",
   "data": {
-    "kind": "bar",
-    "x": [
-      0,
-      1
-    ],
-    "labels": [
-      "sum",
-      "mean"
-    ],
-    "xlabel": "static mode argument",
-    "ylabel": "compiled(x, mode) output",
-    "series": [
-      {
-        "label": "compiled(x, mode)",
-        "y": [
-          6.0,
-          2.0
-        ]
-      }
+    "kind": "flow",
+    "layout": "sequence",
+    "nodes": [
+      "values change; shape/dtype/mode fixed",
+      "same signature reused in this call ledger",
+      "shape or static mode changes specialization"
     ]
+  },
+  "diagram": {
+    "title": "The specialization key separates changing data from program choices",
+    "prediction": "If only the array entries change, which ledger fields remain fixed?",
+    "reading": "The first two calls carry different runtime arrays through one matching structural signature. A shape or static-mode change creates a different specialization request. The table describes this lesson\u2019s call ledger; JAX cache behavior can also depend on other details, so do not read it as a universal compilation counter.",
+    "alt": "Calls with shape (3,), float32 and static mode sum share the same signature even though their values and sums differ. Shape (4,) and mode mean each introduce a different signature.",
+    "scope": "Signature-to-trace ledger for the lesson calls.",
+    "height": 4.8,
+    "panel": {
+      "kind": "table",
+      "headers": [
+        "x values",
+        "shape \u00b7 dtype \u00b7 static",
+        "output and observation"
+      ],
+      "widths": [
+        0.27,
+        0.35,
+        0.38
+      ],
+      "rows": [
+        [
+          "[1,2,3]",
+          "(3,), f32, sum",
+          "6; initial"
+        ],
+        [
+          "[2,3,4]",
+          "same signature",
+          "9; values only changed"
+        ],
+        [
+          "[1,2,3,4]",
+          "(4,), f32, sum",
+          "10; shape changed"
+        ],
+        [
+          "[1,2,3]",
+          "(3,), f32, mean",
+          "2; static mode changed"
+        ]
+      ]
+    }
   }
 }

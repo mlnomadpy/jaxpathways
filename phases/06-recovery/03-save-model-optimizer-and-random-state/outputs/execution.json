@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "recovery-03",
-  "contentHash": "0365474559a216bf166c4825fc8b6d325c045bc812c597bd997926f78a168467",
-  "executedAt": "2026-10-21T16:05:33.314450+00:00",
+  "contentHash": "d3044962164493b748cf0486331d5192851ff830c626498479ca31172f7f02c4",
+  "executedAt": "2026-10-27T12:30:10.531457+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -11,26 +11,16 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Restored step: 3\nOptimizer count: 3\nNext update and loss agree; checkpoint exists: True\nRestored step: 3\nOptimizer count: 3\nNext update and loss agree; checkpoint exists: True\nModel-only checkpoint produces a different Adam update\nReset key changes the noisy objective and continuation stream\nFull restore Adam count: 4; reset memory count: 1; next parameters differ.\nExpected changed configuration rejection\nExpected exact key-data mismatch\nPASS: recovery-03\n",
+  "stdout": "Learner transition step: 1 Adam count: 1\nRestored step: 3\nOptimizer count: 3\nNext update and loss agree; checkpoint exists: True\nModel-only checkpoint produces a different Adam update\nReset key changes the noisy objective and continuation stream\nFull restore Adam count: 4; reset memory count: 1; next parameters differ.\nExpected changed configuration rejection\nExpected exact key-data mismatch\nPASS: recovery-03\n",
   "notebookCells": [
     {
-      "sourceHash": "53e0b799653dc93e7c1dec1523d3c18ceb729f7078d9436cb7e82e73c32245ed",
-      "outputs": []
-    },
-    {
-      "sourceHash": "bbeb0540e5ed8412a07c25397124bdbbdb058cdfa206dbfa2f41d4d7544fd083",
-      "outputs": []
-    },
-    {
-      "sourceHash": "d7e7bda09f1986da5e0ccfe70f648abb5efdb0d0db26f75967a51ef0fe18b766",
+      "sourceHash": "b2a8b25ad801114ad6d7ce47e4ed2953e9cbb4ebe6b7b9667a5e54950aebe70f",
       "outputs": [
         {
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "Restored step: 3\n",
-            "Optimizer count: 3\n",
-            "Next update and loss agree; checkpoint exists: True\n"
+            "Learner transition step: 1 Adam count: 1\n"
           ]
         }
       ]
@@ -54,7 +44,7 @@
       "outputs": []
     },
     {
-      "sourceHash": "25df6d662f9d3f0c4e984c6a201f79fa0cfd7a2633dc4b0773dfba6c2dd4ee6c",
+      "sourceHash": "53dc08a479da44f2b1718bf964cd5c4d3e3305811c536df9d501b1833a6e3476",
       "outputs": [
         {
           "output_type": "display_data",

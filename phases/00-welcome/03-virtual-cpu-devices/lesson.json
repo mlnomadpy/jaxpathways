@@ -7,6 +7,15 @@
     "idea": "Logical CPU devices let us practice how a global array is divided and addressed. They share a physical host. Treat them as a way to make placement visible, then use a real accelerator run to investigate accelerator memory, communication and speed.",
     "sections": [
       {
+        "id": "optional-device-branch",
+        "title": "Choose the beginner CPU route or the optional placement branch",
+        "body": "If array shapes and transformed functions are new to you, continue from the first array lesson to [Arrays & pure functions](https://www.tahabouhsine.com/jaxpathways/phase-guides/arrays.html). Ordinary CPU lessons do not require virtual devices or cloud setup. Return here after JAX transformations and the first distributed-placement lesson. This branch assumes you can name the axis split across devices, explain what a replica contains and distinguish a JIT specialization from a new array value.\n\nFor a minimal placement prediction, imagine four logical devices and an array with eight rows. A row partition gives each device two rows; replication gives each device all eight. Inspect the reported shard indices to distinguish those cases. Four logical CPU devices do not create four physical accelerators. A physical TPU target additionally needs a reviewed source, pinned environment, expected backend and expected topology.",
+        "check": {
+          "prompt": "An eight-row array appears on four devices. Does that prove each device holds two rows?",
+          "answer": "No. It might be replicated. Inspect shard indices and local shapes: row partitioning owns two rows per device; replication stores all eight on each device."
+        }
+      },
+      {
         "id": "guided-reasoning",
         "title": "Distinguish ownership from extra computing power",
         "body": "Suppose a global array has four rows and each logical device owns one row. The global shape still describes all four rows; a local shard describes the one row stored for that owner. Asking for the global shape and inspecting a local buffer are different operations.\n\nThe ownership heatmap assigns a category to each device. A darker device color does not mean more work or a faster device. Follow the row boundary and the device label together.\n\nSet the logical-device configuration before JAX initializes its backend, then inspect the actual device count in a fresh process. Changing a flag after initialization does not retroactively repartition an already-running process.",

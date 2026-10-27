@@ -4,6 +4,8 @@ Phase 20: TPU Workflows: Launching Jobs & Checkpointed Experiments · about 20 m
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Stage and launch checkpointed TPU jobs](https://www.tahabouhsine.com/jaxpathways/lesson-tpu-02.html).
+
 ## What you will be able to do
 
 - Classify each course script as CPU-only, review-required, single-host-compatible, or multi-host-qualified before staging.
@@ -21,12 +23,10 @@ Use a per-script execution matrix. `distributed-02` is CPU-only because it expli
 
 ## Why every worker must launch and initialize
 
-`--worker=all` starts a process on each host, and `jax.distributed.initialize()` lets those processes discover the global topology. These steps establish process and device discovery only. They do not create a training mesh, distribute data, perform a collective update, or prove checkpoint recovery.
-
-**Execution matrix:** `distributed-02` → CPU-only (its source requests `jax.devices("cpu")`); do not set `JAX_PLATFORMS=tpu`. Other lesson scripts → inspect-required until a source review identifies device selection, dependencies, topology assumptions, and data ownership. A TPU-compatible single-host script may run only after that review, with a backend assertion and matching pinned environment. Multi-host-qualified requires all hosts, distinct process-owned inputs, and a verified global result. Existing bounded receipts cover the v5e1 launcher and precision target, four single-device Pallas cases, the four-device single-host collective fixture, and a separate sixteen-device fixture across four VM workers. That last target checks distinct process-owned data and same-process Orbax checkpoint restore and replay; it does not qualify this lesson’s discovery example, a fresh TPU process-group restart, or production model training. Each receipt applies only to its recorded source, environment, cases, and hardware; no generic “run any script” command is valid.
+The example is a mean across devices only under its stated equal-count setup: each participating device contributes exactly one valid example, every process has the same local device count, and every process joins the same `devices` collective. In general, averaging local means equally is wrong when valid counts differ. Reduce gradient numerators and valid-example counts separately, then divide the global numerator by the global count. `psum` reduces over the named mapped axis; all participating processes must enter it.
 
 $$
-g_{\text{global}} = \frac{1}{P}\sum_{p=0}^{P-1} g^{(p)} = \operatorname{psum}(g^{(p)}, \texttt{'data'}) / P
+g_{\text{global}} = \frac{\sum_{p=0}^{P-1} n_p g^{(p)}}{\sum_{p=0}^{P-1} n_p}; \qquad \text{this fixture assumes } n_p=1 \text{ valid example per device and equal devices per host}
 $$
 
 ### Pause and reason
@@ -84,18 +84,19 @@ jax.distributed.initialize()
 process_index = jax.process_index()
 process_count = jax.process_count()
 local_devices = jax.local_device_count()
-# Each process owns a distinct local batch value. pmap distributes each local value to one local device.
+# Each process owns one valid scalar example per local device; all processes must have equal local device counts for this equal-count mean.
 x_local = jnp.full((local_devices,), float(process_index + 1), dtype=jnp.float32)
 @partial(jax.pmap, axis_name="devices")
 def update(theta, x):
     local_grad = 2.0 * (theta - x)
+    # Equal-count fixture: one valid example per device, so global device count is also the global valid-example count.
     global_mean_grad = jax.lax.psum(local_grad, "devices") / jax.device_count()
     return theta - 0.1 * global_mean_grad, global_mean_grad
 
 theta0 = jnp.zeros((local_devices,), dtype=jnp.float32)
 theta1, grad = update(theta0, x_local)
 jax.block_until_ready((theta1, grad))
-expected_mean_gradient = -float(process_count + 1)
+expected_mean_gradient = -float(process_count + 1)  # assumes every process contributes one example per local device and local counts match
 expected_theta = 0.1 * float(process_count + 1)
 if not np.allclose(np.asarray(grad), expected_mean_gradient):
     raise RuntimeError("global reduction does not match the independently derived mean gradient")
@@ -125,7 +126,7 @@ gcloud compute tpus tpu-vm scp ./multihost_collective.py "$TPU_NAME":~/jax-tpu-l
 gcloud compute tpus tpu-vm ssh "$TPU_NAME" --zone="$ZONE" --worker=all --command="set -euo pipefail; mkdir -p ~/jax-tpu-lab/multihost-run; export TPU_RUN_DIR=~/jax-tpu-lab/multihost-run; JAX_PLATFORMS=tpu ~/jax-tpu-lab/.venv/bin/python ~/jax-tpu-lab/multihost_collective.py | tee ~/jax-tpu-lab/multihost-run/stdout-\$(hostname).jsonl"
 ```
 
-**Expected:** Each process writes a worker-indexed receipt with its distinct input, global gradient, updated parameter, and observed backend. The independent expected values are mean gradient = -(process_count + 1) and updated theta = 0.1 * (process_count + 1); these checks reject a local-only reduction. Process 0 publishes checkpoint.json after the global barrier. Treat these as TPU results only after running on and naming a multi-host slice.
+**Expected:** Each process writes a worker-indexed receipt with its distinct input, global gradient, updated parameter, and observed backend. The independent expected values are mean gradient = -(process_count + 1) under the one-example-per-device, equal-local-device-count assumption and updated theta = 0.1 * (process_count + 1); these checks reject a local-only reduction. Process 0 publishes checkpoint.json after the global barrier. Treat these as TPU results only after running on and naming a multi-host slice.
 
 **Copy each worker receipt and the process-0 checkpoint back before teardown**
 
@@ -267,7 +268,7 @@ print("Slice catalog global chips:", {s["slice"]: s["global_chips"] for s in SLI
 print("CPU route:", single_cmds["run"])
 ```
 
-Expected: Prints the global chip counts across v5litepod-4 (4), v5litepod-8 (8), v5litepod-16 (16), and v6e-16 (16) and the verified multi-host Pod SSH command.
+Expected: Prints the slice topology catalog and the reviewed CPU route for distributed-02. The one-step collective example is unqualified; it is shown for source study only and does not constitute a verified TPU Pod launch.
 
 ## Host count, per-host local chips, and global TPU chips across single-host and Pod slices
 
@@ -301,7 +302,7 @@ visual_data = {
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:11:48.366949+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T14:09:31.749206+00:00. JAX 0.9.2.
 
 ```text
 CPU route: python public/exercises/distributed-02.py

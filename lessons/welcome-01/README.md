@@ -327,7 +327,7 @@ visual_data = {'kind': 'bar', 'x': list(range(len(x))), 'labels': [f'x[{i}]' for
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:03:14.966566+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T12:28:10.998141+00:00. JAX 0.9.2.
 
 ```text
 Python: 3.14.3

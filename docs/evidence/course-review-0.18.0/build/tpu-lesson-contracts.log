@@ -1,0 +1,255 @@
+TAP version 13
+# Subtest: tpu-02 validates checkpoint integrity, compatibility, missing and completed resume
+not ok 1 - tpu-02 validates checkpoint integrity, compatibility, missing and completed resume
+  ---
+  duration_ms: 86.463917
+  type: 'test'
+  location: '/private/tmp/jaxpathways-content-repairs-review/scripts/check-tpu-lessons.mjs:22:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    tpu-02 CPU check failed:
+    
+    Traceback (most recent call last):
+      File "<string>", line 5, in <module>
+        exec(compile(lesson['content']['code'], path, 'exec'), namespace)
+        ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      File "phases/20-tpu-workflows/01-stage-and-launch-checkpointed-tpu-jobs/lesson.json", line 8, in <module>
+        "objectives": [
+        ^^^^^^
+    ModuleNotFoundError: No module named 'jax'
+    
+    
+    1 !== 0
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 0
+  actual: 1
+  operator: 'strictEqual'
+  stack: |-
+    runPython (file:///private/tmp/jaxpathways-content-repairs-review/scripts/check-tpu-lessons.mjs:18:10)
+    TestContext.<anonymous> (file:///private/tmp/jaxpathways-content-repairs-review/scripts/check-tpu-lessons.mjs:24:3)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.start (node:internal/test_runner/test:944:17)
+    startSubtestAfterBootstrap (node:internal/test_runner/harness:296:17)
+  ...
+# Subtest: tpu-03 memory ledger matches explicit bytes per parameter
+not ok 2 - tpu-03 memory ledger matches explicit bytes per parameter
+  ---
+  duration_ms: 44.447417
+  type: 'test'
+  location: '/private/tmp/jaxpathways-content-repairs-review/scripts/check-tpu-lessons.mjs:27:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    tpu-03 CPU check failed:
+    
+    Traceback (most recent call last):
+      File "<string>", line 5, in <module>
+        exec(compile(lesson['content']['code'], path, 'exec'), namespace)
+        ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      File "phases/21-tpu-systems/01-tpu-generations-and-hbm-memory-budgeting/lesson.json", line 2, in <module>
+        "schemaVersion": 1,
+        ^^^^^^^^
+    ModuleNotFoundError: No module named 'jax'
+    
+    
+    1 !== 0
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 0
+  actual: 1
+  operator: 'strictEqual'
+  stack: |-
+    runPython (file:///private/tmp/jaxpathways-content-repairs-review/scripts/check-tpu-lessons.mjs:18:10)
+    TestContext.<anonymous> (file:///private/tmp/jaxpathways-content-repairs-review/scripts/check-tpu-lessons.mjs:29:3)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+# Subtest: v5e Flex-start instructions keep a bounded queue and explicit owner cleanup
+ok 3 - v5e Flex-start instructions keep a bounded queue and explicit owner cleanup
+  ---
+  duration_ms: 0.967209
+  type: 'test'
+  ...
+# Subtest: tpu-04 labels the four-device result as calculated expectation
+ok 4 - tpu-04 labels the four-device result as calculated expectation
+  ---
+  duration_ms: 0.290167
+  type: 'test'
+  ...
+# Subtest: Phase 19 registry tasks use the lesson exercises and receipt fields
+not ok 5 - Phase 19 registry tasks use the lesson exercises and receipt fields
+  ---
+  duration_ms: 1.663541
+  type: 'test'
+  location: '/private/tmp/jaxpathways-content-repairs-review/scripts/check-tpu-lessons.mjs:62:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    The input did not match the regular expression /verify_runtime_contract.*v5litepod-4.*v6e-4.*hosts == 1.*at least 64 GiB/i. Input:
+    
+    'Use the Foundations ledger for a 48 GiB state on four 16 GiB v5e chips. Report replicated and ideal-sharded state per chip, the 12.8 GiB usable budget, and the result with a 1 GiB activation allowance. Then inspect the selected v5litepod-4 receipt: report observed process count and JAX device count separately from the requested physical chip count, plus the API and machine type. On CPU, arithmetic should pass while requested_target_ready remains false.'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  actual: 'Use the Foundations ledger for a 48 GiB state on four 16 GiB v5e chips. Report replicated and ideal-sharded state per chip, the 12.8 GiB usable budget, and the result with a 1 GiB activation allowance. Then inspect the selected v5litepod-4 receipt: report observed process count and JAX device count separately from the requested physical chip count, plus the API and machine type. On CPU, arithmetic should pass while requested_target_ready remains false.'
+  operator: 'match'
+  stack: |-
+    TestContext.<anonymous> (file:///private/tmp/jaxpathways-content-repairs-review/scripts/check-tpu-lessons.mjs:69:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: tpu-05 routes the CPU-only lesson away from TPU and includes a collective update program
+not ok 6 - tpu-05 routes the CPU-only lesson away from TPU and includes a collective update program
+  ---
+  duration_ms: 46.093958
+  type: 'test'
+  location: '/private/tmp/jaxpathways-content-repairs-review/scripts/check-tpu-lessons.mjs:95:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    tpu-05 CPU check failed:
+    
+    Traceback (most recent call last):
+      File "<string>", line 5, in <module>
+        exec(compile(lesson['content']['code'], path, 'exec'), namespace)
+        ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      File "phases/20-tpu-workflows/02-run-course-scripts-and-multihost-tpu-slices/lesson.json", line 2, in <module>
+        "schemaVersion": 1,
+        ^^^^^^^^
+    ModuleNotFoundError: No module named 'jax'
+    
+    
+    1 !== 0
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 0
+  actual: 1
+  operator: 'strictEqual'
+  stack: |-
+    runPython (file:///private/tmp/jaxpathways-content-repairs-review/scripts/check-tpu-lessons.mjs:18:10)
+    TestContext.<anonymous> (file:///private/tmp/jaxpathways-content-repairs-review/scripts/check-tpu-lessons.mjs:96:3)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: tpu-06 retains an inspectable CPU trace from the measured workload
+not ok 7 - tpu-06 retains an inspectable CPU trace from the measured workload
+  ---
+  duration_ms: 73.765583
+  type: 'test'
+  location: '/private/tmp/jaxpathways-content-repairs-review/scripts/check-tpu-lessons.mjs:110:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    tpu-06 CPU check failed:
+    
+    Traceback (most recent call last):
+      File "<string>", line 5, in <module>
+        exec(compile(lesson['content']['code'], path, 'exec'), namespace)
+        ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      File "phases/21-tpu-systems/02-bfloat16-int8-precision-and-xprof-profiling/lesson.json", line 6, in <module>
+        "problem": "Measure how BF16 operand rounding and the requested dot result dtype affect a fixed CPU matmul, and compare a per-column INT8 weight-quantization reference. Verify the returned dtypes and distinguish observable outputs from backend arithmetic details. Retain a trace of the actual worked workload in a user-selected directory so its events can be inspected.",
+        ^^^^^^
+    ModuleNotFoundError: No module named 'jax'
+    
+    
+    1 !== 0
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 0
+  actual: 1
+  operator: 'strictEqual'
+  stack: |-
+    runPython (file:///private/tmp/jaxpathways-content-repairs-review/scripts/check-tpu-lessons.mjs:18:10)
+    TestContext.<anonymous> (file:///private/tmp/jaxpathways-content-repairs-review/scripts/check-tpu-lessons.mjs:119:20)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: tpu-06 precision probe retains raw outputs and independently checks dtype and error summaries
+not ok 8 - tpu-06 precision probe retains raw outputs and independently checks dtype and error summaries
+  ---
+  duration_ms: 6.629834
+  type: 'test'
+  location: '/private/tmp/jaxpathways-content-repairs-review/scripts/check-tpu-lessons.mjs:128:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    The input did not match the regular expression /do not expose the precision of every internal partial sum/i. Input:
+    
+    'The bars compare maximum and mean absolute error for three returned results against the finite-precision FP32 CPU reference. They do not show internal accumulation precision. The profiler trace is a separate artifact, whose backend and events must be read from its receipt.'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  actual: 'The bars compare maximum and mean absolute error for three returned results against the finite-precision FP32 CPU reference. They do not show internal accumulation precision. The profiler trace is a separate artifact, whose backend and events must be read from its receipt.'
+  operator: 'match'
+  stack: |-
+    TestContext.<anonymous> (file:///private/tmp/jaxpathways-content-repairs-review/scripts/check-tpu-lessons.mjs:135:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: analytic figures render to isolated artifacts with non-device provenance
+not ok 9 - analytic figures render to isolated artifacts with non-device provenance
+  ---
+  duration_ms: 153.7165
+  type: 'test'
+  location: '/private/tmp/jaxpathways-content-repairs-review/scripts/check-tpu-lessons.mjs:237:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    tpu-03 render failed:  Traceback (most recent call last):
+      File "/private/tmp/jaxpathways-content-repairs-review/scripts/render-lesson-figures.py", line 274, in <module>
+        assert len(lessons)==1;worker(lessons[0],args.output_dir)
+                               ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      File "/private/tmp/jaxpathways-content-repairs-review/scripts/render-lesson-figures.py", line 225, in worker
+        exec(compile(source['code'],lesson['id']+'-example','exec'),namespace)
+        ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      File "tpu-03-example", line 2, in <module>
+    ModuleNotFoundError: No module named 'jax'
+    
+    
+    1 !== 0
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 0
+  actual: 1
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///private/tmp/jaxpathways-content-repairs-review/scripts/check-tpu-lessons.mjs:242:14)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+1..9
+# tests 9
+# suites 0
+# pass 2
+# fail 7
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 421.799875

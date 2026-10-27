@@ -1,6 +1,6 @@
 """MLOps: data contracts, CI gates and monitoring · learner-only exercises (2/2 contracts ready)"""
 
-# Exercise: Show that averaging slice means without counts changes the overall error.
+# Exercise: Compare the two reloaded artifacts at the same ten held-out IDs and fixed policy. Change only candidate B’s high-slice offset from 1.9 to 0.5, then report its per-example high-slice error and gate result. Distinguish that candidate comparison from the separate label-correction sensitivity check.
 
 # Inputs:
 # - The two slice mean errors and their example counts.
@@ -25,7 +25,7 @@ def compare_slice_averages(slice_means, slice_counts):
 
 
 # Change the population mix (transfer):
-# Keep the two slice errors, but evaluate nine high-slice examples and one low-slice example.
+# Keep each slice’s measured error fixed, but evaluate nine high-slice examples and one low-slice example. Recompute the weighted overall MSE from errors produced by the reloaded artifact.
 
 # Inputs:
 # - Keep the two slice errors, but evaluate nine high-slice examples and one low-slice example.

@@ -4,6 +4,8 @@ Phase 12: Reinforcement learning · about 90 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Policy gradients and PPO](https://www.tahabouhsine.com/jaxpathways/lesson-rl-03.html).
+
 ## What you will be able to do
 
 - Separate training seeds, evaluation streams and individual episodes.
@@ -448,7 +450,7 @@ visual_data = {'kind':'bar','labels':[str(s) for s in training_seeds],'xlabel':'
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:08:08.686005+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T12:32:23.828529+00:00. JAX 0.9.2.
 
 ```text
 training seeds: [0, 7, 23, 41, 59]

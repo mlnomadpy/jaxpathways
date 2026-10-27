@@ -4,6 +4,8 @@ Phase 02: JAX transformations · about 60 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Losses and value_and_grad](https://www.tahabouhsine.com/jaxpathways/lesson-transforms-02.html).
+
 ## What you will be able to do
 
 - Write and check a single-example function before batching it.
@@ -172,7 +174,7 @@ visual_data = {'kind': 'bar', 'labels': ['row 0', 'row 1', 'row 2'], 'ylabel': '
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:03:36.085578+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T12:28:31.648845+00:00. JAX 0.9.2.
 
 ```text
 [1. 1. 8.]

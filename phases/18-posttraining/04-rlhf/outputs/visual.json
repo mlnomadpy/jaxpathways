@@ -2,9 +2,9 @@
   "schemaVersion": 1,
   "lessonId": "posttraining-04",
   "contentHash": "1fd1780c91e620ac9e7e24091093856818b7e919bec8fc83dd8608c89bf36aa3",
-  "rendererHash": "a1bd5b648f4731ae5d5f0a24811c2540d1a0a132149ce589d17c4113509cbedf",
+  "rendererHash": "17e3bbad72ee4c43425845aaee76b86b85e84750551278be03d8c16842f4dc63",
   "kind": "executed",
-  "generatedAt": "2026-10-21T16:06:25.382729+00:00",
+  "generatedAt": "2026-10-27T12:19:48.685352+00:00",
   "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",

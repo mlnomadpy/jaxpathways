@@ -1,50 +1,51 @@
 """Select a TPU slice and provision your Cloud TPU VM · learner-only exercises (3/3 contracts ready)"""
 
-# Exercise: Call `verify_runtime_contract` for the active backend with `min_devices=1`. Compute and verify the chip count and total HBM GiB for `v5litepod-4` and `v6e-4`, confirm both have `hosts == 1`, and list every supplied single-host slice with at least 64 GiB of HBM.
+# Exercise: Use the Foundations ledger for a 48 GiB state on four 16 GiB v5e chips. Report replicated and ideal-sharded state per chip, the 12.8 GiB usable budget, and the result with a 1 GiB activation allowance. Then inspect the selected v5litepod-4 receipt: report observed process count and JAX device count separately from the requested physical chip count, plus the API and machine type. On CPU, arithmetic should pass while requested_target_ready remains false.
 
 # Inputs:
-# - The verify_runtime_contract callable, active backend expectation, minimum local device count, and topology rows with slice, hosts, chips_per_host, hbm_gib_per_chip, total_chips, and total_hbm_gib fields.
+# - The runtime verifier with expected_backend and expected_device_count, plus the named topology catalog.
+# - A 48 GiB state, four 16 GiB chips, 80% usable capacity and a 1 GiB per-chip activation assumption.
 
 # Outputs:
-# - The runtime receipt, verified host/chip/HBM rows for v5litepod-4 and v6e-4, and names of supplied single-host slices meeting the 64 GiB threshold.
+# - Replicated/ideal-sharded per-device memory decisions with and without activation overhead.
+# - Separate requested API/machine/chip/process values and observed JAX backend/process/device values.
 
 # Invariants to check:
-# - Require hosts == 1 for both named rows and derive capacity from the supplied total fields.
-# - The qualifying list includes only single-host rows whose total_hbm_gib meets the inclusive threshold.
+# - Aggregate HBM alone does not establish per-device fit.
+# - CPU arithmetic may pass while requested TPU readiness is false.
+# - Observed JAX device count does not by itself establish a physical chip count.
 
 # Hints:
-# - Call the verifier for the active backend with a minimum of one local device.
-# - Filter the topology catalog by both host count and total HBM; repeat the filter at a changed threshold to check the boundary.
+# - Compute 48/4 and compare 12 plus the activation allowance with 16 times 0.8.
+# - Use expected_device_count, not the obsolete minimum-device argument.
 
-import jax
-
-def inspect_runtime_and_slice(verify_runtime_contract, expected_backend, min_devices, topologies):
-    # TODO: check the active runtime, audit both named slice rows, and filter the supplied catalog by host count and HBM threshold.
+def inspect_runtime_and_slice(verify_runtime_contract, expected_backend, expected_device_count, topologies):
+    # TODO: check arithmetic, requested readiness, per-device fit and separately identified topology.
     raise NotImplementedError
 
 
 
-# Check whether a model state fits on a single-host TPU slice (Foundations):
-# Given a training state requiring \(48\) GiB of HBM, determine which slices in `topologies` have at least \(48\) GiB of total HBM.
+
+# Compare replicated and ideally sharded per-device HBM (Foundations):
+# A 48 GiB training state runs on four v5e chips, each with 16 GiB HBM. At an 80% usable-HBM budget, calculate per-device state for replication and ideal even sharding. Which placement meets the state-only limit? How does an added 1 GiB/device of activations change the result? Repeat for a 52 GiB state.
 
 # Inputs:
-# - A slice catalog with total HBM values and a required state size of 48 GiB.
+# - A 48 GiB state, four physical v5e chips with 16 GiB HBM each, 80% usable-HBM fraction and 1 GiB/device activation allowance.
 
 # Outputs:
-# - The names of slices with enough catalogued aggregate HBM.
+# - Per-device replicated and ideal-sharded state requirements, plus fit decisions before and after activation allowance.
+# - A 52 GiB changed-input result that shows the ideal shard exceeds the usable budget.
 
 # Invariants to check:
-# - Capacity filtering uses the provided requirement and catalog units consistently; it does not prove per-device fit.
+# - Replication stores the whole state on each chip; ideal even sharding divides by chip count; report this as an assumption, not a measured placement.
 
 # Hints:
-# - Filter the catalog by total_hbm_gib.
-# - Keep memory capacity claims separate from runtime verification.
+# - Compute the per-chip usable budget first.
+# - Repeat with 52 GiB to see the changed input cross the ideal-shard capacity limit.
 
-import jax.numpy as jnp
-import numpy as np
-
-def slices_meeting_hbm_requirement(topologies, required_gib):
-    # TODO: return the catalog slices whose aggregate HBM meets the requirement.
+def placement_hbm_screen(total_state_gib, chips, chip_hbm_gib, usable_fraction, activation_gib_per_chip):
+    # TODO: return per-chip state for replication and ideal even sharding,
+    # the usable budget after activation allowance, and fit flags.
     raise NotImplementedError
 
 

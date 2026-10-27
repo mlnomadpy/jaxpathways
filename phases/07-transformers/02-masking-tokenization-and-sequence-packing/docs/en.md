@@ -4,6 +4,8 @@ Phase 07: Transformers & language models · about 90 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Attention from small pieces](https://www.tahabouhsine.com/jaxpathways/lesson-transformers-01.html).
+
 ## What you will be able to do
 
 - Build a causal mask from positions
@@ -191,7 +193,7 @@ visual_data = {'kind': 'heatmap', 'values': weights.tolist(), 'rows': ['query ' 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T17:44:37.081260+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T12:30:33.611260+00:00. JAX 0.9.2.
 
 ```text
 Causal means: [2.       3.       4.666667 7.5     ]

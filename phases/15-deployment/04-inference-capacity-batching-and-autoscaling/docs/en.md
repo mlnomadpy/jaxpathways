@@ -4,6 +4,8 @@ Phase 15: Deployment, interoperability & edge AI · about 130 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Containerize a model service and verify its boundary](https://www.tahabouhsine.com/jaxpathways/lesson-deployment-07.html).
+
 ## What you will be able to do
 
 - Measure completed inference after warming each batch shape
@@ -285,19 +287,19 @@ visual_data={"kind":"panels","panels":[{"kind":"bar","x":[0,1,2],"labels":["batc
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:09:36.143311+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T13:37:47.899369+00:00. JAX 0.9.2.
 
 ```text
-{'batch': 1, 'first_call_ms': 48.685625195503235, 'p50_ms': 0.00818772241473198, 'p95_ms': 0.059150205925106995, 'steady_examples_per_second': 122134.08678837513}
-{'batch': 8, 'first_call_ms': 30.844833236187696, 'p50_ms': 0.014541670680046082, 'p95_ms': 0.057191750966012436, 'steady_examples_per_second': 550143.114640707}
-{'batch': 32, 'first_call_ms': 30.623292084783316, 'p50_ms': 0.02647959627211094, 'p95_ms': 0.07394021376967427, 'steady_examples_per_second': 1208477.639581813}
-measured batch-one service proxy (ms): 0.00818772241473198
-simulated last stable/overloaded response (ms): 0.00818772241473198 0.2014179714024067
-{'batch': 1, 'first_call_ms': 31.81570814922452, 'p50_ms': 0.008645933121442795, 'p95_ms': 0.05794912576675415, 'steady_examples_per_second': 115661.31566758227}
-{'batch': 8, 'first_call_ms': 28.422708623111248, 'p50_ms': 0.019083265215158463, 'p95_ms': 0.07076908368617293, 'steady_examples_per_second': 419215.4701935043}
-{'batch': 32, 'first_call_ms': 31.39637503772974, 'p50_ms': 0.03477046266198158, 'p95_ms': 0.0936855562031269, 'steady_examples_per_second': 920321.37481418}
-measured batch-one service proxy (ms): 0.008645933121442795
-simulated last stable/overloaded response (ms): 0.008645933121442795 0.21268995478749275
+{'batch': 1, 'first_call_ms': 57.906500063836575, 'p50_ms': 0.020333100110292435, 'p95_ms': 0.25483330246061087, 'steady_examples_per_second': 49180.89197297607}
+{'batch': 8, 'first_call_ms': 42.267332784831524, 'p50_ms': 0.06016646511852741, 'p95_ms': 0.2744519617408512, 'steady_examples_per_second': 132964.43432799433}
+{'batch': 32, 'first_call_ms': 42.43970802053809, 'p50_ms': 0.056040938943624496, 'p95_ms': 0.12370424810796975, 'steady_examples_per_second': 571011.1322758357}
+measured batch-one service proxy (ms): 0.020333100110292435
+simulated last stable/overloaded response (ms): 0.020333100110292435 0.5001942627131939
+{'batch': 1, 'first_call_ms': 45.24195799604058, 'p50_ms': 0.014479272067546844, 'p95_ms': 0.06546447984874243, 'steady_examples_per_second': 69064.24544928283}
+{'batch': 8, 'first_call_ms': 43.81012497469783, 'p50_ms': 0.06397883407771587, 'p95_ms': 0.19255380611866704, 'steady_examples_per_second': 125041.35336824523}
+{'batch': 32, 'first_call_ms': 38.61224977299571, 'p50_ms': 0.06958330050110817, 'p95_ms': 0.207480788230896, 'steady_examples_per_second': 459880.456511119}
+measured batch-one service proxy (ms): 0.014479272067546844
+simulated last stable/overloaded response (ms): 0.014479272067546844 0.3561900928616524
 hypothetical planned replicas: 3
 Analytic sample p95 / max (ms): 5.95000000000007 100.0
 Requests beyond the declared deadline: 2

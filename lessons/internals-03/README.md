@@ -4,6 +4,8 @@ Phase 14: Autodiff & JAX internals · about 120 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [JVPs, VJPs, and higher-order derivatives](https://www.tahabouhsine.com/jaxpathways/lesson-internals-02.html).
+
 ## What you will be able to do
 
 - Implement actual custom_jvp and custom_vjp rules with correct return and residual contracts.
@@ -275,7 +277,7 @@ visual_data={'panels':[{'kind':'line','x':np.asarray(grid).tolist(),'xlabel':'in
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:08:59.040338+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T12:35:25.228896+00:00. JAX 0.9.2.
 
 ```text
 Softplus first/second: [0.01798621 0.5        0.95257413] [0.01766271 0.25       0.04517666]

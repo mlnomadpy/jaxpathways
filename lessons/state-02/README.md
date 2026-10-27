@@ -4,6 +4,8 @@ Phase 03: State, randomness & control flow · about 60 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Random keys without surprises](https://www.tahabouhsine.com/jaxpathways/lesson-state-01.html).
+
 ## What you will be able to do
 
 - Identify containers, leaves and structure
@@ -162,7 +164,7 @@ visual_data = {'kind': 'bar', 'labels': ['weight[0]', 'weight[1]', 'bias'], 'yla
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:03:47.877883+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T12:28:40.578778+00:00. JAX 0.9.2.
 
 ```text
 Before/after: 4.0 0.6399999260902405

@@ -4,6 +4,8 @@ Phase 11: Probabilistic modeling · about 110 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Distributions and sampling](https://www.tahabouhsine.com/jaxpathways/lesson-probability-01.html).
+
 ## What you will be able to do
 
 - State the prior, likelihood and observation-noise assumptions
@@ -183,7 +185,7 @@ visual_data={"kind":"line","x":grid.tolist(),"xlabel":"input value","ylabel":"pr
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:07:40.328163+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T12:31:53.801407+00:00. JAX 0.9.2.
 
 ```text
 posterior mean: [0.923077  1.7777778] covariance: [[0.30769232 0.        ]

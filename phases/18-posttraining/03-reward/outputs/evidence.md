@@ -4,7 +4,7 @@ Copy this template into your own portfolio and fill it after running your modifi
 
 ## Evidence required
 
-Keep synthetic label provenance, stable preference-loss and gradient references, offset/scale tests and the learned ordering.
+Keep stable likelihood and gradient checks, contradictory preference controls, pre-fit and post-fit held-out probability/Brier metrics, separate disagreement slices and score-offset/scale limitations.
 
 - Command: `python3 phases/18-posttraining/03-reward/code/main.py`
 - Working directory: Repository root

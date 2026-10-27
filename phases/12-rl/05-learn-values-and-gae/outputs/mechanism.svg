@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="576pt" height="518.4pt" viewBox="0 0 576 518.4" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:description>Mechanism diagram for reverse GAE. At t=0, position 0 transitions to position 1 with reward 1, delta 1 and trace mask 1. At t=1, position 1 transitions to final pre-reset position 3 with reward 2. Continuing-cutoff bootstrap mask 1 gives delta and advantage 3; the trace mask is 0. The reverse arrow contributes 0.25 times 3 to A0, giving 1.75. A reset observation at position 0 is isolated from the prior episode. At a finite deadline or true terminal, bootstrap mask is 0, giving delta 1 and A0 1.25 for the finite-horizon case.</dc:description>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.10.8, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 518.4
+L 576 518.4
+L 576 0
+L 0 0
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 226.624045 265.604994
+Q 212.000886 265.604994 199.278386 265.604994
+" style="fill: none; stroke: #536273; stroke-width: 1.7; stroke-linecap: round"/>
+    <path d="M 204.478386 268.204994
+L 199.278386 265.604994
+L 204.478386 263.004994
+z
+" style="fill: #536273; stroke: #536273; stroke-width: 1.7; stroke-linecap: round"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 22.000224 200.274055
+L 193.00008 200.274055
+Q 196.325077 200.274055 196.325077 204.757551
+L 196.325077 326.452437
+Q 196.325077 330.935933 193.00008 330.935933
+L 22.000224 330.935933
+Q 18.675227 330.935933 18.675227 326.452437
+L 18.675227 204.757551
+Q 18.675227 200.274055 22.000224 200.274055
+z
+" clip-path="url(#p95ee50cbe2)" style="fill: #eef3ff; stroke: #3559a8; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 231.000048 184.26157
+L 439.999872 184.26157
+Q 443.324869 184.26157 443.324869 188.745066
+L 443.324869 342.464922
+Q 443.324869 346.948418 439.999872 346.948418
+L 231.000048 346.948418
+Q 227.675051 346.948418 227.675051 342.464922
+L 227.675051 188.745066
+Q 227.675051 184.26157 231.000048 184.26157
+z
+" clip-path="url(#p95ee50cbe2)" style="fill: #e5f4ee; stroke: #17735c; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 390.124914 17.731726
+L 565.874766 17.731726
+Q 569.199763 17.731726 569.199763 22.215222
+L 569.199763 111.885138
+Q 569.199763 116.368634 565.874766 116.368634
+L 390.124914 116.368634
+Q 386.799917 116.368634 386.799917 111.885138
+L 386.799917 22.215222
+Q 386.799917 17.731726 390.124914 17.731726
+z
+" clip-path="url(#p95ee50cbe2)" style="fill: #fff0e6; stroke: #a64d20; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 238.125042 414.841354
+L 432.874878 414.841354
+Q 436.199875 414.841354 436.199875 419.32485
+L 436.199875 508.994766
+Q 436.199875 513.478262 432.874878 513.478262
+L 238.125042 513.478262
+Q 234.800045 513.478262 234.800045 508.994766
+L 234.800045 419.32485
+Q 234.800045 414.841354 238.125042 414.841354
+z
+" clip-path="url(#p95ee50cbe2)" style="fill: #f1f3f5; stroke: #536273; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="text_1">
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; fill: #172334" transform="translate(50.883746 245.829681)">t=0: pos0 → pos1, r=1</text>
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; fill: #172334" transform="translate(63.707965 257.027494)">V(0)=0.5; V(1)=1</text>
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; fill: #172334" transform="translate(34.876715 268.225306)">δ₀=1; m_boot=1; m_trace=1</text>
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; fill: #172334" transform="translate(69.189215 279.701244)">A₀=1 + 0.25 A₁</text>
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; fill: #172334" transform="translate(40.377496 290.899056)">A₀=1.75 cutoff / 1.25 finite</text>
+   </g>
+   <g id="text_2">
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; fill: #172334" transform="translate(287.045273 240.369838)">t=1 collector cutoff</text>
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; fill: #172334" transform="translate(254.880429 251.56765)">pos1 → final pre-reset pos3, r=2</text>
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; fill: #172334" transform="translate(296.478085 262.765463)">V(1)=1; V(3)=4</text>
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; fill: #172334" transform="translate(266.633554 273.963275)">continue: boot=1, δ₁=A₁=3</text>
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; fill: #172334" transform="translate(275.630429 285.161088)">finite: boot=0, δ₁=A₁=1</text>
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; fill: #172334" transform="translate(300.58746 296.3589)">both: trace=0</text>
+   </g>
+   <g id="text_3">
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; fill: #172334" transform="translate(406.977184 58.47268)">Next episode: t=2, obs pos0</text>
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; fill: #172334" transform="translate(417.251402 69.670492)">A₂=0 in the hand fixture</text>
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; fill: #172334" transform="translate(404.425621 80.868305)">No A₂ → A₁: cutoff m_trace=0</text>
+   </g>
+   <g id="text_4">
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; fill: #172334" transform="translate(261.233554 449.844339)">True terminal alternative, t=1</text>
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; fill: #172334" transform="translate(290.167929 461.042152)">r=2, V(current)=1</text>
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; fill: #172334" transform="translate(284.277304 472.239964)">m_boot=0, δ₁=A₁=1</text>
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; fill: #172334" transform="translate(307.853085 483.715902)">m_trace=0</text>
+   </g>
+   <g id="text_5">
+    <g id="patch_7">
+     <path d="M 125.544589 189.318197
+L 312.705527 189.318197
+L 312.705527 175.361947
+L 125.544589 175.361947
+z
+" style="fill: #ffffff"/>
+    </g>
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #394658" x="219.125058" y="184.960384" transform="rotate(-0 219.125058 184.960384)">reverse scan: γλ m_trace(t=0)=0.25</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="p95ee50cbe2">
+   <rect x="3.00024" y="3.00024" width="569.99952" height="512.39952"/>
+  </clipPath>
+ </defs>
+</svg>

@@ -4,7 +4,7 @@ Copy this template into your own portfolio and fill it after running your modifi
 
 ## Evidence required
 
-Keep shifted target/role masks, valid response-token counts, gradient support and the changed target-selection result.
+Keep ragged mask/gradient oracles and saved-decoder/tokenizer identities, declared one-step SFT budget, pre/post held-out response NLL and the parent-bound child manifest. This is synthetic transfer evidence.
 
 - Command: `python3 phases/18-posttraining/01-sft/code/main.py`
 - Working directory: Repository root

@@ -132,13 +132,13 @@
     "answer": 2,
     "explanation": "Simulation establishes tested semantics. Buffering and tile changes affect several costs, and only actual target measurements can rank performance.",
     "visual": {
-      "title": "Fewer tile programs can require more work and local storage",
       "kind": "executed",
-      "prediction": "Will the tile configuration with the fewest programs also minimize padding and buffer footprint?",
-      "reading": "The first panel shows logical kernel-program counts for three tile shapes on the same \\((17,257)\\) matrix: \\(9\\), \\(6\\) and \\(4\\). The second panel shows modeled double-buffered data storage: \\(24\\), \\(48\\) and \\(96\\) KiB. These are exact configuration-derived counts, not measured timing or device-memory counters.\n\nThe largest tile has fewer programs but four times the modeled data-buffer footprint of the smallest. Its padded element count also rises from \\(9216\\) to \\(16384\\), even though the logical matrix still contains only \\(4369\\) elements.",
-      "connection": "Every pictured configuration also runs through the actual Pallas pipeline in CPU simulation and matches the same NumPy result. The figure explains the resource tradeoff that remains after correctness is established.\n\nThe footprint omits semaphores, bookkeeping, layout padding, registers and compiler scratch. It is distinct from total VMEM use or speedup. A real TPU trace and synchronized timing are needed to learn whether a larger tile improves reuse enough to offset its costs.",
-      "alt": "Program counts fall from nine to four as tile size grows, while modeled double-buffered data storage rises from twenty-four to ninety-six KiB.",
-      "code": "labels=['8 x 128','16 x 128','16 x 256']\nvisual_data={'panels':[{'kind':'bar','labels':labels,'ylabel':'program count (configuration-derived)','series':[{'label':'grid programs','y':[row[0] for row in metadata]}]},{'kind':'bar','labels':labels,'ylabel':'modeled data buffers (KiB)','series':[{'label':'double-buffered inputs and output','y':[row[2]/1024 for row in metadata]}]}]}"
+      "title": "Input and output slots have distinct lifetimes across a tile pipeline",
+      "prediction": "During steady state, why may tile k+1 load into a different slot while tile k computes?",
+      "reading": "The pipeline has two actual input references, x_hbm and y_hbm, each declared with a buffered count of two by default, plus out_hbm with two output slots. For each tile, loads make x[k] and y[k] available, axpy_body reads both and produces out[k], and the store must finish before that output slot is reused. The prologue fills initial slots, the steady state overlaps a later load with current compute/store, and the drain completes the last pending stores. The exact overlap is an explanatory schedule, not a CPU timing claim.",
+      "connection": "Two input slots keep tile k values alive while the next tile is fetched into another slot. Reusing the current slot before axpy_body has read it risks overwriting a live input. Likewise, an output slot stays live until its store completes. In this code the input slot count can be two or three, while output count remains two. Predict what happens to input storage if buffers changes from two to three; arithmetic and result must remain unchanged.",
+      "alt": "A table shows prologue, steady state and drain by pipeline phase. x[k], y[k] load into input slot A, compute reads those exact references, and output slot A stores out[k]. In steady state, x[k+1] and y[k+1] load into slot B while tile k computes. The drain completes the final output store before slots are reused.",
+      "code": "visual_data = {'kind': 'flow', 'layout': 'sequence', 'nodes': ['prologue: load first tile', 'steady state: load next while compute consumes live refs', 'drain: finish compute and store before reuse']}"
     },
     "buildSteps": [
       {
@@ -210,6 +210,49 @@
         "Keep input and output buffer counts separate."
       ],
       "code": "import numpy as np\nimport jax.numpy as jnp\n\ndef compare_pipeline_modes(run_pipeline, seed, tile, dtypes):\n    # TODO: generate the two fixed arrays once and compare all schedule/dtype combinations.\n    raise NotImplementedError(\"Compare synchronous and buffered pipelines on fixed represented inputs\")"
+    },
+    "diagram": {
+      "title": "Buffer lifetime through prologue, steady state, and drain",
+      "prediction": "Which slot can receive tile k+1 while the compute stage still reads tile k?",
+      "reading": "The code declares input pipeline buffers through spec with pl.Buffered(buffer_count=buffers) and output_spec with pl.Buffered(buffer_count=2). The actual references are x_hbm, y_hbm, and out_hbm. An input slot is reusable only after axpy_body has consumed that tile; an output slot is reusable only after its store is complete. Buffer letters A and B denote alternating slots, not named variables in the Pallas API.",
+      "alt": "Prologue loads tile 0 into input slot A. During steady state, compute consumes x[k], y[k] from one slot while the next tile loads into the other; out[k] is stored after compute. Drain finishes the last compute and store before any slot is reused.",
+      "scope": "Schematic schedule of buffer lifetimes; stage overlap is illustrative, not measured.",
+      "height": 5.5,
+      "panel": {
+        "kind": "table",
+        "headers": [
+          "phase",
+          "load x_hbm / y_hbm",
+          "compute axpy_body",
+          "store out_hbm / reuse"
+        ],
+        "widths": [
+          0.17,
+          0.27,
+          0.27,
+          0.29
+        ],
+        "rows": [
+          [
+            "Prologue",
+            "tile 0 into A",
+            "wait for inputs",
+            "idle"
+          ],
+          [
+            "Steady",
+            "tile k+1 into B",
+            "tile k reads A",
+            "out[k]; release after store"
+          ],
+          [
+            "Drain",
+            "no next tile",
+            "finish final tile",
+            "finish store; then reuse"
+          ]
+        ]
+      }
     }
   }
 }

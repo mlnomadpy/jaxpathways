@@ -4,6 +4,8 @@ Phase 16: Workload operations · about 85 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Accelerator jobs and runtime lifecycle](https://www.tahabouhsine.com/jaxpathways/lesson-operations-01.html).
+
 ## What you will be able to do
 
 - Build useful summaries from structured events emitted by a real worker.
@@ -25,6 +27,18 @@ If the live process reports step 42 and the newest accepted checkpoint is step 4
 Name metric units and update points: examples processed, valid tokens, optimizer steps and accepted checkpoint steps are different counters. A sudden flat line can indicate stalled computation, blocked logging or a failed collector; inspect another signal before assigning the cause.
 
 Read the two progress curves at the same time coordinate and locate the failure. The gap describes lag in recoverable progress, while the slope of live progress describes reported work rate. Neither alone proves hardware utilization.
+
+Reviewed support: the subprocess protocol, atomic checkpoint writer and event parser are supplied. Learner-authored transition: derive throughput and recovery lag from event names, synchronized durations, example counts and accepted checkpoints.
+
+```python
+elapsed = time.perf_counter() - begin
+step += 1
+emit('progress', step=step, examples=cfg['batch_size'], update_s=elapsed)
+if step % cfg['checkpoint_every'] == 0:
+    write_checkpoint(state)
+```
+
+Worked trace: progress step 1 reports 8 examples, then step 2 reports 8; checkpoint step 2 is accepted. A controlled failure after step 5 leaves live progress at 5 and durable progress at 4. The observed-minus-durable gap is one update, or 8 examples under this fixed batch. Recompute examples/s from total examples over summed synchronized update_s, then compare it with examples/s over supervisor wall_s. They answer different timing questions.
 
 ### Pause and reason
 
@@ -68,253 +82,38 @@ The fixture fits a line with minibatch momentum updates. Loss may rise between b
 
 This bounded lab captures stdout and stderr in memory and analyzes events after the child exits. That is appropriate for a few dozen events. A long-running service needs streamed, bounded logs, a durable sink, timestamps aligned for its fleet, and monitored queue/backpressure behavior. The lesson provides measurement contracts and actual failure evidence, not an operational telemetry backend.
 
-## Create the local artifact helpers
+## Compute a rate over one declared interval
 
-Create main.py with this block. Run python3 main.py in the CPU course environment.
-
-```python
-# Step 1: Create the local artifact helpers
-"""Bounded local JAX subprocess supervisor and lifecycle verifier."""
-from pathlib import Path
-import hashlib
-import json
-import math
-import os
-import subprocess
-import sys
-import tempfile
-import time
-
-
-def digest(value):
-    return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(',', ':'), allow_nan=False).encode()).hexdigest()
-
-
-def atomic_json(path, value):
-    """Replace one local JSON file only after its bytes have been flushed."""
-    path = Path(path)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    fd, temporary = tempfile.mkstemp(prefix=path.name+'.', suffix='.tmp', dir=path.parent)
-    try:
-        with os.fdopen(fd, 'w') as stream:
-            json.dump(value, stream, sort_keys=True, allow_nan=False)
-            stream.flush()
-            os.fsync(stream.fileno())
-        os.replace(temporary, path)
-    finally:
-        if os.path.exists(temporary):
-            os.unlink(temporary)
-```
-
-The only filesystem writes are to the caller-selected run directory. Stable JSON encoding makes hashes reproducible.
-
-## Define the supervised worker
-
-Append this block to main.py. Run python3 main.py in the CPU course environment.
+Use one numerator and the matching measured interval.
 
 ```python
-# This file is materialized only inside the caller-owned temporary run folder.
-WORKER = r'''
-import hashlib, json, os, sys, time
-from pathlib import Path
-import jax
-import jax.numpy as jnp
-import numpy as np
-root = Path(sys.argv[1])
-cfg = json.loads((root/'config.json').read_text())
-worker_hash = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
-def emit(event, **fields):
-    print(json.dumps(dict(event=event, monotonic_s=time.monotonic(), **fields)), flush=True)
-def digest(value):
-    return hashlib.sha256(json.dumps(value,sort_keys=True,separators=(',', ':'),allow_nan=False).encode()).hexdigest()
-def write_checkpoint(state):
-    target = root/'checkpoint.json'
-    temporary = root/'checkpoint.pending'
-    with temporary.open('w') as stream:
-        json.dump(dict(state,checksum=digest(state)),stream,sort_keys=True,allow_nan=False)
-        stream.flush()
-        os.fsync(stream.fileno())
-    os.replace(temporary,target)
-    emit('checkpoint',step=state['step'],state_hash=digest(state))
-try:
-    emit('started',pid=os.getpid(),backend=jax.default_backend(),device_count=jax.device_count())
-    if jax.default_backend() != cfg['backend'] or jax.device_count() < cfg['min_devices']:
-        raise ValueError('runtime backend/device contract failed')
-    x = jnp.linspace(-1.,1.,64)
-    y = 2*x+1
-    data_hash = digest(dict(x=np.asarray(x).tolist(),y=np.asarray(y).tolist()))
-    training = {name:cfg[name] for name in ('seed','learning_rate','momentum','batch_size')}
-    config_hash = digest(training)
-    if cfg['resume']:
-        saved = json.loads((root/'checkpoint.json').read_text())
-        checksum = saved.pop('checksum',None)
-        if checksum != digest(saved) or saved.get('worker_hash') != worker_hash:
-            raise ValueError('checkpoint checksum/source mismatch')
-        if saved['schema_version'] != 1 or saved['config_hash'] != config_hash or saved['data_hash'] != data_hash:
-            raise ValueError('checkpoint provenance mismatch')
-        state = saved
-        step = saved['step']
-        params=jnp.array(saved['params'])
-        velocity=jnp.array(saved['velocity'])
-        key=jnp.array(saved['key'],dtype=jnp.uint32)
-        if not isinstance(step,int) or isinstance(step,bool) or step < 0 or step > cfg['steps'] or params.shape != (2,) or velocity.shape != (2,) or key.shape != (2,):
-            raise ValueError('invalid checkpoint state shape or step')
-        if not bool(jnp.all(jnp.isfinite(params))) or not bool(jnp.all(jnp.isfinite(velocity))):
-            raise ValueError('nonfinite checkpoint state')
-        emit('restored',step=step,state_hash=digest(saved))
-    else:
-        step=0
-        params=jnp.zeros(2)
-        velocity=jnp.zeros(2)
-        key=jax.random.PRNGKey(cfg['seed'])
-    def update(params,velocity,key):
-        key, sample = jax.random.split(key)
-        indices=jax.random.choice(sample,64,(cfg['batch_size'],),replace=False)
-        objective=lambda p:jnp.mean((p[0]*x[indices]+p[1]-y[indices])**2)
-        loss, grad=jax.value_and_grad(objective)(params)
-        velocity=cfg['momentum']*velocity+grad
-        params=params-cfg['learning_rate']*velocity
-        return params,velocity,key,loss
-    compiled=jax.jit(update)
-    # Compile and synchronize once without consuming actual training state.
-    begin=time.perf_counter()
-    warm=compiled(params,velocity,key)
-    jax.block_until_ready(warm)
-    emit('ready',compile_warmup_s=time.perf_counter()-begin,step=step)
-    while step < cfg['steps']:
-        if cfg.get('stall_at') == step:
-            emit('stall_injected',step=step)
-            time.sleep(cfg.get('stall_seconds',10.))
-        begin=time.perf_counter()
-        params,velocity,key,loss=compiled(params,velocity,key)
-        jax.block_until_ready((params,velocity,key,loss))
-        elapsed=time.perf_counter()-begin
-        step+=1
-        state=dict(schema_version=1,worker_hash=worker_hash,step=step,params=np.asarray(params).tolist(),velocity=np.asarray(velocity).tolist(),key=np.asarray(key).tolist(),config_hash=config_hash,data_hash=data_hash)
-        emit('progress',step=step,loss=float(loss),examples=cfg['batch_size'],update_s=elapsed,state_hash=digest(state))
-        if step % cfg['checkpoint_every'] == 0 or step == cfg['steps']:
-            write_checkpoint(state)
-        if cfg.get('fail_after') == step:
-            raise RuntimeError('controlled failure after update')
-    write_checkpoint(state)
-    emit('completed',step=step,state_hash=digest(state))
-except Exception as error:
-    emit('failed',kind=type(error).__name__,message=str(error))
-    raise SystemExit(23)
-'''
+def rate_per_second(count, seconds):
+    return count / seconds if seconds else 0.
 ```
 
-The string is a real Python program launched in a separate process. It emits structured events, synchronizes JAX updates and preserves complete state.
+The helper is used for both synchronized update time and whole-job wall time.
 
-## Add bounded launch and result collection
+## Compute the recoverability gap
 
-Append this block to main.py. Run python3 main.py in the CPU course environment.
+Compare observed progress with the accepted checkpoint.
 
 ```python
-# Step 3 — Add bounded launch and result collection
-def default_config(**changes):
-    cfg=dict(seed=3,learning_rate=.04,momentum=.8,batch_size=8,steps=8,
-             checkpoint_every=2,backend='cpu',min_devices=1,resume=False,
-             fail_after=None,stall_at=None,stall_seconds=10.)
-    # Apply configuration overrides before validating the resulting fields.
-    cfg.update(changes)
-    for name in ('steps','checkpoint_every','batch_size','min_devices'):
-        if not isinstance(cfg[name],int) or isinstance(cfg[name],bool) or cfg[name] < 1:
-            raise ValueError(name+' must be a positive integer')
-    if cfg['batch_size'] > 64 or not 0 <= cfg['momentum'] < 1 or not 0 < cfg['learning_rate'] < 1:
-        raise ValueError('invalid training configuration')
-    return cfg
-
-
-def launch(root, config=None, timeout=10.):
-    root=Path(root)
-    root.mkdir(parents=True,exist_ok=True)
-    cfg=default_config(**(config or {}))
-    if timeout <= 0:
-        raise ValueError('timeout must be positive')
-    atomic_json(root/'config.json',cfg)
-    worker=root/'worker.py'
-    worker.write_text(WORKER)
-    env=dict(os.environ,JAX_PLATFORMS=cfg['backend'],PYTHONUNBUFFERED='1')
-    started=time.perf_counter()
-    process=subprocess.Popen([sys.executable,str(worker),str(root)],stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,env=env)
-    timed_out=False
-    try:
-        stdout,stderr=process.communicate(timeout=timeout)
-    except subprocess.TimeoutExpired:
-        timed_out=True
-        process.terminate()
-        try:
-            stdout,stderr=process.communicate(timeout=1.)
-        except subprocess.TimeoutExpired:
-            process.kill()
-            stdout,stderr=process.communicate(timeout=1.)
-    wall=time.perf_counter()-started
-    events=[]
-    malformed=[]
-    for line in stdout.splitlines():
-        if not line.strip():
-            continue
-        try:
-            event=json.loads(line)
-            if not isinstance(event,dict) or 'event' not in event:
-                raise ValueError('not an event')
-            events.append(event)
-        except (ValueError,TypeError):
-            malformed.append(line)
-    status='timed_out' if timed_out else 'completed' if process.returncode == 0 and not malformed and events and events[-1]['event']=='completed' else 'failed'
-    result=dict(status=status,returncode=process.returncode,wall_s=wall,events=events,stderr=stderr,
-                worker_hash=hashlib.sha256(WORKER.encode()).hexdigest(),config=cfg,malformed_stdout=malformed)
-    atomic_json(root/'run.json',result)
-    return result
+def checkpoint_gap(last_step, checkpoint_step):
+    return max(0, last_step - checkpoint_step)
 ```
 
-The supervisor owns the child handle, captures its output and always waits for termination after a timeout.
+A log line and a durable checkpoint represent different boundaries.
 
-## Summarize event boundaries
+## Translate missing updates into examples
 
-Append this block to main.py. Run python3 main.py in the CPU course environment.
+Change the batch size only after interpreting the logged steps.
 
 ```python
-# Step 4 — Summarize event boundaries
-def summarize(result):
-    updates=[e for e in result['events'] if e['event']=='progress']
-    checkpoints=[e['step'] for e in result['events'] if e['event']=='checkpoint']
-    count=sum(e['examples'] for e in updates)
-    update_s=sum(e['update_s'] for e in updates)
-    latest=max((e['step'] for e in updates),default=0)
-    checkpoint=max(checkpoints,default=0)
-    return dict(status=result['status'],updates=len(updates),examples=count,last_step=latest,checkpoint_step=checkpoint,
-                uncheckpointed_updates=max(0,latest-checkpoint),update_s=update_s,
-                update_examples_per_s=count/update_s if update_s else 0.,
-                job_examples_per_s=count/result['wall_s'] if result['wall_s'] else 0.,
-                update_duty_fraction=update_s/result['wall_s'] if result['wall_s'] else 0.)
+def checkpointed_examples(last_step, checkpoint_step, batch_size):
+    return checkpoint_gap(last_step, checkpoint_step) * batch_size
 ```
 
-The summary retains work counts, timing boundaries and checkpoint lag separately.
-
-## Run a healthy job and a controlled incident
-
-Append this block to main.py. Run python3 main.py in the CPU course environment.
-
-```python
-# Step 5 — Run a healthy job and a controlled incident
-# Keep this run’s database and artifacts in a scratch directory removed on exit.
-with tempfile.TemporaryDirectory(prefix='ops-signals-') as folder:
-    observed=launch(Path(folder)/'healthy',dict(steps=12))
-    interrupted=launch(Path(folder)/'failed',dict(steps=12,fail_after=5))
-healthy=summarize(observed)
-incident=summarize(interrupted)
-progress=[e for e in observed['events'] if e['event']=='progress']
-assert healthy['examples']==96 and healthy['updates']==12
-assert incident['last_step']==5 and incident['checkpoint_step']==4
-assert incident['uncheckpointed_updates']==1
-assert healthy['job_examples_per_s'] < healthy['update_examples_per_s']
-print('healthy:',healthy)
-print('incident:',incident)
-```
-
-Both summaries are derived from real child output; failures are not invented status rows.
+The count is meaningful because the fixture uses a fixed batch size.
 
 ## Run the example
 
@@ -351,6 +150,15 @@ def atomic_json(path, value):
         if os.path.exists(temporary):
             os.unlink(temporary)
 
+def rate_per_second(count, seconds):
+    return count / seconds if seconds else 0.
+
+def checkpoint_gap(last_step, checkpoint_step):
+    return max(0, last_step - checkpoint_step)
+
+def checkpointed_examples(last_step, checkpoint_step, batch_size):
+    return checkpoint_gap(last_step, checkpoint_step) * batch_size
+
 # This file is materialized only inside the caller-owned temporary run folder.
 WORKER = r'''
 import hashlib, json, os, sys, time
@@ -507,9 +315,10 @@ def summarize(result):
     latest=max((e['step'] for e in updates),default=0)
     checkpoint=max(checkpoints,default=0)
     return dict(status=result['status'],updates=len(updates),examples=count,last_step=latest,checkpoint_step=checkpoint,
-                uncheckpointed_updates=max(0,latest-checkpoint),update_s=update_s,
-                update_examples_per_s=count/update_s if update_s else 0.,
-                job_examples_per_s=count/result['wall_s'] if result['wall_s'] else 0.,
+                uncheckpointed_updates=checkpoint_gap(latest,checkpoint),
+                uncheckpointed_examples=checkpointed_examples(latest,checkpoint,result['config']['batch_size']),update_s=update_s,
+                update_examples_per_s=rate_per_second(count,update_s),
+                job_examples_per_s=rate_per_second(count,result['wall_s']),
                 update_duty_fraction=update_s/result['wall_s'] if result['wall_s'] else 0.)
 
 # Step 5 — Run a healthy job and a controlled incident
@@ -563,15 +372,13 @@ visual_data={'kind':'line','x':points,'xlabel':'completed update number','ylabel
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:10:19.758849+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T14:07:11.859354+00:00. JAX 0.9.2.
 
 ```text
-healthy: {'status': 'completed', 'updates': 12, 'examples': 96, 'last_step': 12, 'checkpoint_step': 12, 'uncheckpointed_updates': 0, 'update_s': 0.0005424180999398232, 'update_examples_per_s': 176985.2444279614, 'job_examples_per_s': 134.0888322292049, 'update_duty_fraction': 0.0007576271833428652}
-incident: {'status': 'failed', 'updates': 5, 'examples': 40, 'last_step': 5, 'checkpoint_step': 4, 'uncheckpointed_updates': 1, 'update_s': 0.00017024856060743332, 'update_examples_per_s': 234950.59140167283, 'job_examples_per_s': 63.73120309435376, 'update_duty_fraction': 0.0002712536398148432}
-healthy: {'status': 'completed', 'updates': 12, 'examples': 96, 'last_step': 12, 'checkpoint_step': 12, 'uncheckpointed_updates': 0, 'update_s': 0.0010205814614892006, 'update_examples_per_s': 94064.02489412241, 'job_examples_per_s': 145.81407297938878, 'update_duty_fraction': 0.0015501577052812246}
-incident: {'status': 'failed', 'updates': 5, 'examples': 40, 'last_step': 5, 'checkpoint_step': 4, 'uncheckpointed_updates': 1, 'update_s': 0.00019728997722268105, 'update_examples_per_s': 202747.2483047227, 'job_examples_per_s': 62.60537761097469, 'update_duty_fraction': 0.0003087853380721636}
-examples / synchronized seconds: 96 0.0010205814614892006
-measured update duty fraction, not hardware utilization: 0.0015501577052812246
+healthy: {'status': 'completed', 'updates': 12, 'examples': 96, 'last_step': 12, 'checkpoint_step': 12, 'uncheckpointed_updates': 0, 'uncheckpointed_examples': 0, 'update_s': 0.012025083880871534, 'update_examples_per_s': 7983.312295451719, 'job_examples_per_s': 38.14028121004611, 'update_duty_fraction': 0.004777500841571176}
+incident: {'status': 'failed', 'updates': 5, 'examples': 40, 'last_step': 5, 'checkpoint_step': 4, 'uncheckpointed_updates': 1, 'uncheckpointed_examples': 8, 'update_s': 0.0014702919870615005, 'update_examples_per_s': 27205.48051135291, 'job_examples_per_s': 19.329414685684224, 'update_duty_fraction': 0.0007104970881737602}
+examples / synchronized seconds: 96 0.012025083880871534
+measured update duty fraction, not hardware utilization: 0.004777500841571176
 PASS: operations-02
 
 ```
@@ -611,7 +418,7 @@ A progress log is not a committed state artifact. Recovery must select the commi
 
 ## Make it yours
 
-Compute the fraction of supervisor wall time spent inside synchronized updates, and state precisely what that fraction excludes.
+Use the emitted healthy and incident logs to recompute synchronized examples/s and the step-5 versus checkpoint-4 gap. Change checkpoint_every from 2 to 3, rerun, and describe how the actual failure log changes the recovery gap.
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 

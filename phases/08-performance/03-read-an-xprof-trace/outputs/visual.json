@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "performance-03",
-  "contentHash": "0e5df397dcf57d17f4a9edf39d20645213d63d0acb28261810126d34f74f2bf8",
-  "rendererHash": "a1bd5b648f4731ae5d5f0a24811c2540d1a0a132149ce589d17c4113509cbedf",
+  "contentHash": "36679c10fef2382e1b0ba19c51f3e194b352bbd23035a1be8c366cd8cbc0bb72",
+  "rendererHash": "17e3bbad72ee4c43425845aaee76b86b85e84750551278be03d8c16842f4dc63",
   "kind": "executed",
-  "generatedAt": "2026-10-21T16:04:40.022958+00:00",
+  "generatedAt": "2026-10-27T12:18:19.824964+00:00",
   "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",
@@ -13,36 +13,71 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Trace directory: /private/var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-course-trace-lqu2pdyl\n{\n  \"input_wait_us\": [\n    1278,\n    1268,\n    1267,\n    1269\n  ],\n  \"model_and_wait_us\": [\n    98,\n    80,\n    74,\n    71\n  ],\n  \"step_us\": [\n    1406,\n    1361,\n    1351,\n    1347\n  ]\n}\nFour named steps verified; host annotations are not isolated device kernels.\n",
+  "stdout": "Trace directory: /private/var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-course-trace-fv3pus1m\n{\n  \"input_wait_us\": [\n    1259,\n    1255,\n    1258,\n    1444\n  ],\n  \"model_and_wait_us\": [\n    63,\n    39,\n    84,\n    253\n  ],\n  \"step_us\": [\n    1329,\n    1297,\n    1347,\n    1705\n  ]\n}\nFour named steps verified; host annotations are not isolated device kernels.\n",
   "data": {
     "kind": "line",
     "x": [
-      0,
-      1,
-      2,
-      3
+      2.0,
+      0.5
     ],
-    "xlabel": "captured step",
-    "ylabel": "host annotation duration (microseconds)",
+    "xlabel": "requested injected sleep (milliseconds)",
+    "ylabel": "actual host annotation duration (microseconds)",
     "series": [
       {
-        "label": "injected input wait",
+        "label": "input_wait",
         "y": [
-          1278,
-          1268,
-          1267,
-          1269
+          2520,
+          642
         ]
       },
       {
-        "label": "model call and completion wait",
+        "label": "model_and_wait",
         "y": [
-          98,
-          80,
-          74,
-          71
+          119,
+          79
         ]
       }
     ]
+  },
+  "diagram": {
+    "title": "Measured CPU trace event timeline",
+    "prediction": "Which nested named event occupies most of the enclosing step?",
+    "reading": "The table is the actual Perfetto excerpt for the 2 ms condition. Event intervals are on the same host thread and time axis. learner_step contains both child events; input_wait precedes model_and_wait. The line figure compares actual event durations from the same retained excerpt across the two requested sleep conditions.",
+    "alt": "Actual Perfetto CPU event timeline in microseconds: learner_step starts at 122 and ends at 2787, containing input_wait from 125 to 2645 and model_and_wait from 2668 to 2787.",
+    "scope": "Actual retained CPU host event timestamps and durations. No accelerator-kernel or collective rows are present.",
+    "height": 3.8,
+    "panel": {
+      "kind": "table",
+      "headers": [
+        "condition",
+        "event",
+        "start (us)",
+        "duration (us)",
+        "end (us)"
+      ],
+      "rows": [
+        [
+          "2 ms injected wait",
+          "learner_step",
+          122,
+          2665,
+          2787
+        ],
+        [
+          "2 ms injected wait",
+          "input_wait",
+          125,
+          2520,
+          2645
+        ],
+        [
+          "2 ms injected wait",
+          "model_and_wait",
+          2668,
+          119,
+          2787
+        ]
+      ]
+    }
   }
 }

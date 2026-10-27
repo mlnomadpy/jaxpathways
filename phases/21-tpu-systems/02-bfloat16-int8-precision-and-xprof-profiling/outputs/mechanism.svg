@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="576pt" height="432pt" viewBox="0 0 576 432" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:description>Flow diagram with warmup outside the profiler, a fixed-input dot and synchronization inside the trace, then a separate unprofiled wall-time loop. The trace flow contains no collective and has no duration scale.</dc:description>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.10.8, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 432
+L 576 432
+L 576 0
+L 0 0
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 286.79755 103.303894
+Q 286.79755 117.689352 286.79755 130.174151
+" style="fill: none; stroke: #536273; stroke-width: 1.7; stroke-linecap: round"/>
+    <path d="M 289.39755 124.974151
+L 286.79755 130.174151
+L 284.19755 124.974151
+z
+" style="fill: #536273; stroke: #536273; stroke-width: 1.7; stroke-linecap: round"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 286.79755 201.611476
+Q 286.79755 215.996933 286.79755 228.481733
+" style="fill: none; stroke: #536273; stroke-width: 1.7; stroke-linecap: round"/>
+    <path d="M 289.39755 223.281733
+L 286.79755 228.481733
+L 284.19755 223.281733
+z
+" style="fill: #536273; stroke: #536273; stroke-width: 1.7; stroke-linecap: round"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 286.79755 299.919057
+Q 286.79755 314.304515 286.79755 326.789314
+" style="fill: none; stroke: #536273; stroke-width: 1.7; stroke-linecap: round"/>
+    <path d="M 289.39755 321.589314
+L 286.79755 326.789314
+L 284.19755 321.589314
+z
+" style="fill: #536273; stroke: #536273; stroke-width: 1.7; stroke-linecap: round"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 75.72653 34.458666
+L 497.868571 34.458666
+Q 501.045984 34.458666 501.045984 39.046353
+L 501.045984 98.030902
+Q 501.045984 102.618589 497.868571 102.618589
+L 75.72653 102.618589
+Q 72.549117 102.618589 72.549117 98.030902
+L 72.549117 39.046353
+Q 72.549117 34.458666 75.72653 34.458666
+z
+" clip-path="url(#pbb679dbbc6)" style="fill: #f0eafa; stroke: #6240ad; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 75.72653 132.766248
+L 497.868571 132.766248
+Q 501.045984 132.766248 501.045984 137.353935
+L 501.045984 196.338484
+Q 501.045984 200.926171 497.868571 200.926171
+L 75.72653 200.926171
+Q 72.549117 200.926171 72.549117 196.338484
+L 72.549117 137.353935
+Q 72.549117 132.766248 75.72653 132.766248
+z
+" clip-path="url(#pbb679dbbc6)" style="fill: #eef3ff; stroke: #3559a8; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_7">
+    <path d="M 75.72653 231.073829
+L 497.868571 231.073829
+Q 501.045984 231.073829 501.045984 235.661516
+L 501.045984 294.646065
+Q 501.045984 299.233752 497.868571 299.233752
+L 75.72653 299.233752
+Q 72.549117 299.233752 72.549117 294.646065
+L 72.549117 235.661516
+Q 72.549117 231.073829 75.72653 231.073829
+z
+" clip-path="url(#pbb679dbbc6)" style="fill: #e5f4ee; stroke: #17735c; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_8">
+    <path d="M 75.72653 329.381411
+L 497.868571 329.381411
+Q 501.045984 329.381411 501.045984 333.969098
+L 501.045984 392.953647
+Q 501.045984 397.541334 497.868571 397.541334
+L 75.72653 397.541334
+Q 72.549117 397.541334 72.549117 392.953647
+L 72.549117 333.969098
+Q 72.549117 329.381411 75.72653 329.381411
+z
+" clip-path="url(#pbb679dbbc6)" style="fill: #fff0e6; stroke: #a64d20; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="text_1">
+    <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="286.79755" y="71.683003" transform="rotate(-0 286.79755 71.683003)">Outside trace: compile/warm fixed signature; block_until_ready; finite check</text>
+   </g>
+   <g id="text_2">
+    <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="286.79755" y="170.157459" transform="rotate(-0 286.79755 170.157459)">Profiler starts: repeat fixed-input 128x128 BF16 dot; no collective</text>
+   </g>
+   <g id="text_3">
+    <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="286.79755" y="268.465041" transform="rotate(-0 286.79755 268.465041)">Captured work may include host dispatch, runtime/device spans, sync and profiler activity</text>
+   </g>
+   <g id="text_4">
+    <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="286.79755" y="366.772622" transform="rotate(-0 286.79755 366.772622)">Profiler ends; separate unprofiled loop reports synchronized wall time</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="pbb679dbbc6">
+   <rect x="59.839464" y="3.00024" width="499.30779" height="425.99952"/>
+  </clipPath>
+ </defs>
+</svg>

@@ -1,51 +1,50 @@
 """ModelOps: own, approve, roll back and retire a model · learner-only exercises (2/2 contracts ready)"""
 
-# Exercise: Change the evaluation hash while keeping the model unchanged, and prove the old approval no longer applies.
+# Exercise: With C selected, try activating C with B’s valid bundle and approval. Then replace C’s artifact file with slope 99 and force a consumer reload. Finally corrupt the cache entry. Verify every rejection happens before prediction and preserves pointer and cache state. Explain how this differs from rollback to a retired target.
 
 # Inputs:
-# - The unchanged model bundle with a changed evaluation hash and the approval bound to the prior hash.
+# - Local A/B/C artifacts, exact bundles/approvals and lifecycle functions from the lesson.
+# - A fresh temporary registry with C selected and a consumer cache.
 
 # Outputs:
-# - A rejection showing the old approval no longer applies, with the active selection unchanged.
+# - Explicit rejections for C selected with B approval, disk C changed to slope 99, and a corrupted C cache entry.
+# - Pointer/cache snapshots proving rejection has no selection or cache-write side effects.
 
 # Invariants to check:
-# - Approval is bound to the evaluation hash as well as the model; changing that hash invalidates reuse.
+# - The consumer binds version, bundle and artifact identities before prediction.
+# - Same-shape or same-name artifacts cannot bypass the selected content hash.
+# - Each negative case changes one cause and restores the fixture before the next.
 
 # Hints:
-# - Compare the approval’s evaluation hash with the current bundle hash.
-# - Verify that rejection leaves the selected artifact ID untouched.
+# - Keep the original active.json bytes and a copy of the cache before each rejected call.
+# - Use force_reload for the disk case, then test the cached path separately.
 
-def check_changed_evaluation_hash(bundle, prior_approval, active_selection):
-    # TODO: Reject reuse of approval after the evaluation hash changes and preserve the current selection.
+def reject_identity_mismatches(registry, artifacts, bundles, approvals, cache):
+    # TODO: exercise and verify all three rejection boundaries from fresh state.
     raise NotImplementedError
 
 
 
 
-# Review a changed owner (transfer):
-# Change the responsible owner and check whether the old bundle approval can be reused.
+# Exercise approval expiry and retirement at a lifecycle boundary (Transfer):
+# Start a fresh registry with A active. At exactly the B approval expiry time, reject B activation without changing A. Then activate B while its token is valid, show that neither active B nor fallback A may be retired, explicitly clear fallback, retire A, and reject its reactivation. Verify the eligible B consumer still returns its prediction.
 
 # Inputs:
-# - Change the responsible owner and check whether the old bundle approval can be reused.
+# - The local lifecycle functions and valid A/B bundles and approval records.
 
 # Outputs:
-# - An approval rejection for the owner mismatch and unchanged selection.
+# - Expiry-boundary and retirement rejection evidence plus an eligible B prediction.
 
 # Invariants to check:
-# - The old approval does not bind to the newly named owner.
+# - No rejected transition mutates the active selection.
+# - Explicit fallback clearing precedes retirement.
+# - Retirement remains effective despite an otherwise valid old approval.
 
 # Hints:
-# - The owner is part of the reviewed release identity.
-# - Check owner identity in addition to bundle digest and expiry.
+# - Use times 150, 160 and the exact expiry 500.
+# - Re-read state and consumer prediction after each attempted transition.
 
-import hashlib
-import json
-import math
-import tempfile
-from pathlib import Path
-
-def practice_review_a_changed_owner(bundle, approval, new_owner, now):
-    """Complete the review a changed owner check."""
-    # TODO: ('Change the responsible owner and check the old approval bundle against the new owner metadata.', 'Old approval rejection and an unchanged active selection.', 'Approval identity includes the owner as well as the artifact content hash.')
+def check_expiry_and_retirement(registry, artifacts, bundles, approvals):
+    # TODO: verify expiry, active/fallback guards, explicit clearing and retired-target rejection.
     raise NotImplementedError
 

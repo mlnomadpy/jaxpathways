@@ -1,6 +1,6 @@
 """bfloat16, int8 precision, and XProf profiling on TPU · learner-only exercises (3/3 contracts ready)"""
 
-# Exercise: Run `evaluate_precision_policies(seed=42)` and `capture_warmed_trace(steps=3)`. Report the observed backend, each returned dtype and the two mean errors; do not infer the physical accumulation path from this comparison. Confirm that `xplane_count >= 1`.
+# Exercise: Run `evaluate_precision_policies(seed=42)` and `capture_warmed_trace(steps=3)`. Report the observed backend, each of the three returned dtypes, and all three mean errors. State that the displayed precision comparison uses the CPU rehearsal when the backend is CPU, and that this trace workload contains no collective. Report JAX version and confirm warmup, profiled and unprofiled outputs are finite, and `profiled_xplane_count >= 1`; predict and check that `steps=5` keeps the output finite because each iteration reuses the same input.
 
 # Inputs:
 # - The seeded precision-policy evaluator and warmed trace capture helper.

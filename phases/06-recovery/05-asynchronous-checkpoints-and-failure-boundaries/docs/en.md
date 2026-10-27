@@ -4,6 +4,8 @@ Phase 06: Data & checkpoint recovery · about 90 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Recover data position and resume](https://www.tahabouhsine.com/jaxpathways/lesson-recovery-04.html).
+
 ## What you will be able to do
 
 - Distinguish requested, completed, verified and published checkpoint state.
@@ -27,8 +29,10 @@ Keep completion signals separate from the record used to select accepted snapsho
 
 The saved/live/accepted bars represent different boundaries. Their gaps describe work at risk of replay or loss, not necessarily a defect. Interpret them against the failure location and the checkpoint API's stated guarantees.
 
+This is the intended single-writer event ordering, not a multihost commit formula. The program times the save-call return and the post-wait observation; it does not separately timestamp validation or publication. `wait_until_finished` returns before validation and publication of the application's `LATEST` record. For example, a fully written step-two directory interrupted before publication leaves accepted step one selected. Live training can already be at step two while only step one is recoverable under this selection policy. Filesystem durability and distributed commit guarantees require their own tested contract.
+
 $$
-T_{\text{commit}} = \max_{h \in \{1,\dots,H\}} T_{\text{write}}^{(h)} < T_{\text{rename}}
+t_{\rm request}\le t_{\rm return}\le t_{\rm wait\ done}\le t_{\rm validated}\le t_{\rm published}
 $$
 
 ### Pause and reason
@@ -243,21 +247,21 @@ visual_data={'kind':'bar','labels':['saved snapshot','live state','accepted chec
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:05:45.217630+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T12:30:19.948470+00:00. JAX 0.9.2.
 
 ```text
-Checkpoint workspace: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-async-lesson-e6nu1154
+Checkpoint workspace: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-async-lesson-c65wa812
 {
-  "save_call_seconds": 0.0043574171140789986,
-  "remaining_work_and_wait_seconds": 0.017880792263895273,
+  "save_call_seconds": 0.0030580000020563602,
+  "remaining_work_and_wait_seconds": 0.014302792027592659,
   "accepted_step": 1,
   "live_step": 2
 }
 Unpublished step 2 exists; application recovery still selects verified step 1.
-Checkpoint workspace: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-async-lesson-i_l7ei0e
+Checkpoint workspace: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-async-lesson-tyuzd6yu
 {
-  "save_call_seconds": 0.0023497911170125008,
-  "remaining_work_and_wait_seconds": 0.011486874893307686,
+  "save_call_seconds": 0.002879749983549118,
+  "remaining_work_and_wait_seconds": 0.008156917057931423,
   "accepted_step": 1,
   "live_step": 2
 }

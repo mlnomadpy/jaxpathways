@@ -4,6 +4,8 @@ Phase 06: Data & checkpoint recovery · about 70 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Asynchronous checkpoints and failure boundaries](https://www.tahabouhsine.com/jaxpathways/lesson-recovery-05.html).
+
 ## What you will be able to do
 
 - Decide what makes runs comparable
@@ -83,6 +85,20 @@ python projects/engineering-release/mlflow_lab.py --output ./engineering-run
 
 **Expected:** Two training runs, two registered versions, one prompt version, one three-span trace and a model.json artifact are written. Use a fresh folder for another independent run.
 
+## A zero training error can be the wrong release
+
+The third candidate in the exercise remembers five training pairs exactly and returns zero for every unseen input. Its training MSE is genuinely $0$; the metric is not fabricated. All four validation x values are unseen, so its validation predictions are $[0,0,0,0]$ against $[-2,0,2,4]$, giving MSE $6$. The linear candidates make nonzero but much smaller held-out errors. Log these predictions from reloaded artifacts before choosing a release. Model capacity and a lower training error are separate from generalization. The fresh exercise experiment replays both fitted linear artifacts and the memorizer under the same data and evaluation contract.
+
+### Pause and reason
+
+Would a memorizer still expose this problem if validation reused the training x values?
+
+<details><summary>Compare your reasoning</summary>
+
+No. That split would reward memorization. Use genuinely separate input identities and preserve the validation contract before comparing candidates.
+
+</details>
+
 ## Set MLflow options and load hashing and serialization tools
 
 Set the two MLflow environment options before importing the package, then import hashing, JSON, temporary-directory, and NumPy helpers.
@@ -127,6 +143,7 @@ update = jax.jit(lambda p, rate: p - rate * jax.grad(objective)(p))
 # Transfer the device result to the host for an independent NumPy comparison.
 data_hash = hashlib.sha256(np.asarray(x).tobytes() + np.asarray(y).tobytes()).hexdigest()
 curves, validation, run_ids = [], [], []
+candidate_artifacts = []
 # Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory(prefix='tracking-lesson-') as folder:
     root = Path(folder)
@@ -150,7 +167,9 @@ with tempfile.TemporaryDirectory(prefix='tracking-lesson-') as folder:
             oracle = sum((float(p[0]) * t + float(p[1]) - (2 * t + 1)) ** 2 for t in [-1.5, -.5, .5, 1.5]) / 4
             assert abs(held - oracle) < 1e-6
             mlflow.log_metric('validation_mse', held, step=30)
-            mlflow.log_dict({'weight': float(p[0]), 'bias': float(p[1]), 'preprocessing': 'one unscaled scalar feature'}, 'model.json')
+            model_record = {'kind': 'linear', 'weight': float(p[0]), 'bias': float(p[1]), 'preprocessing': 'one unscaled scalar feature'}
+            candidate_artifacts.append(model_record)
+            mlflow.log_dict(model_record, 'model.json')
             run_ids.append(run.info.run_id)
         curves.append(history)
         validation.append(held)
@@ -192,6 +211,7 @@ update = jax.jit(lambda p, rate: p - rate * jax.grad(objective)(p))
 # Transfer the device result to the host for an independent NumPy comparison.
 data_hash = hashlib.sha256(np.asarray(x).tobytes() + np.asarray(y).tobytes()).hexdigest()
 curves, validation, run_ids = [], [], []
+candidate_artifacts = []
 # Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory(prefix='tracking-lesson-') as folder:
     root = Path(folder)
@@ -215,7 +235,9 @@ with tempfile.TemporaryDirectory(prefix='tracking-lesson-') as folder:
             oracle = sum((float(p[0]) * t + float(p[1]) - (2 * t + 1)) ** 2 for t in [-1.5, -.5, .5, 1.5]) / 4
             assert abs(held - oracle) < 1e-6
             mlflow.log_metric('validation_mse', held, step=30)
-            mlflow.log_dict({'weight': float(p[0]), 'bias': float(p[1]), 'preprocessing': 'one unscaled scalar feature'}, 'model.json')
+            model_record = {'kind': 'linear', 'weight': float(p[0]), 'bias': float(p[1]), 'preprocessing': 'one unscaled scalar feature'}
+            candidate_artifacts.append(model_record)
+            mlflow.log_dict(model_record, 'model.json')
             run_ids.append(run.info.run_id)
         curves.append(history)
         validation.append(held)
@@ -257,13 +279,15 @@ visual_data={'kind':'line','x':list(range(1,31)),'xlabel':'completed update','yl
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:05:53.428377+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T12:30:28.350498+00:00. JAX 0.9.2.
 
 ```text
 Validation MSE by learning rate: {0.02: 0.11994461715221405, 0.15: 5.049471951679152e-10}
 Verified 30 logged steps per run; selected and reloaded the better validation candidate.
 Validation difference: 0.11994461664726686
-Wrong zero model validation MSE: 6.0
+Actual training MSE: {'linear-rate-0.02': 0.1401000006160622, 'linear-rate-0.15': 5.076259412817308e-10, 'training-lookup': 0.0}
+Actual held-out MSE: {'linear-rate-0.02': 0.11994461629745246, 'linear-rate-0.15': 5.076259412817308e-10, 'training-lookup': 6.0}
+Training-only selects the memorizer; held-out selection rejects it.
 Changed target changes dataset identity.
 PASS: recovery-06
 
@@ -285,40 +309,91 @@ Both runs share initialization, data and update count. This isolates a configura
 
 ## Make it yours
 
-Add a third, deliberately wrong model artifact and show why the smallest training loss alone is insufficient to select a release.
+Replay the two saved linear candidates in a fresh local MLflow experiment and add a third training-lookup model. The lookup stores each training x/y pair and predicts zero for an unseen x. Compute and log actual training and validation MSE for all three, save and reload every artifact, then show which model a training-only rule selects and which one the held-out rule selects.
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
 **Inputs:**
-- The fitted candidate parameters, held-out inputs and labels, and the current release candidate selected from the two trained runs.
+- The two fitted linear artifact dictionaries from the example, training and untouched validation arrays.
+- A third training-lookup model with zero as its unseen-input default.
 
 **Outputs:**
-- The deliberately wrong third candidate’s held-out loss and a decision that rejects it despite its low training loss.
+- Three local MLflow runs, each with actual training and held-out MSE and a model.json artifact.
+- Reloaded-prediction checks and distinct training-only versus validation-based selections.
 
 **Invariants to check:**
-- Release selection uses held-out evidence; a low training loss alone cannot override the candidate’s worse validation result.
+- The third candidate has zero actual training MSE and validation MSE 6.
+- All comparisons use the same split and data identity; validation is not used to fit any candidate.
+- The selection uses retrieved run records and every artifact is reloaded.
 
 **Hints:**
-- Evaluate the zero-weight, zero-bias candidate on the existing held-out set.
-- Compare its validation error with the selected candidate and record why it is not released.
+- Represent lookup inference explicitly and calculate both metrics from predictions.
+- Keep the exercise experiment in its own TemporaryDirectory and log all three model artifacts.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-import jax.numpy as jnp
+import numpy as np
 
-def evaluate_third_release_candidate(candidate_params, heldout_inputs, heldout_targets, selected_validation_loss):
-    # TODO: Measure the deliberately wrong candidate on held-out rows and decide whether it passes release selection.
+def compare_three_saved_candidates(candidates, train_x, train_y, validation_x, validation_y):
+    # TODO: log, reload and evaluate three candidates; compare selection rules.
     raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution
-bad_validation = sum((0. * t + 0. - (2*t+1))**2 for t in [-1.5,-.5,.5,1.5])/4
-assert bad_validation > min(validation)
-print('Wrong zero model validation MSE:',bad_validation)
+# Exercise solution: a memorizer can win training loss and fail held-out selection.
+def predict_artifact(record, values):
+    values = np.asarray(values, dtype=np.float64)
+    if record['kind'] == 'linear':
+        return record['weight'] * values + record['bias']
+    if record['kind'] == 'training-lookup':
+        mapping = dict(zip(record['training_x'], record['training_y']))
+        return np.array([mapping.get(float(value), record['unseen_default']) for value in values])
+    raise ValueError('Unknown model artifact kind')
+
+lookup = {'kind': 'training-lookup', 'training_x': np.asarray(x).tolist(),
+          'training_y': np.asarray(y).tolist(), 'unseen_default': 0.0}
+models = candidate_artifacts + [lookup]
+names = ['linear-rate-0.02', 'linear-rate-0.15', 'training-lookup']
+assert len(models) == 3
+train_errors, held_errors, replay_ids = [], [], []
+with tempfile.TemporaryDirectory(prefix='selection-exercise-') as folder:
+    selection_root = Path(folder)
+    mlflow.set_tracking_uri('sqlite:///' + str(selection_root / 'tracking.db'))
+    selection_client = MlflowClient()
+    selection_experiment = selection_client.create_experiment(
+        'three-candidate-selection', artifact_location=(selection_root / 'artifacts').as_uri())
+    for name, record in zip(names, models):
+        train_error = float(np.mean((predict_artifact(record, x) - np.asarray(y)) ** 2))
+        held_error = float(np.mean((predict_artifact(record, vx) - np.asarray(vy)) ** 2))
+        with mlflow.start_run(experiment_id=selection_experiment) as run:
+            mlflow.log_params({'candidate': name, 'model_kind': record['kind']})
+            mlflow.set_tags({'data_sha256': data_hash,
+                             'scope': 'same synthetic data; validation never used to fit lookup or linear candidates'})
+            mlflow.log_metric('train_mse', train_error)
+            mlflow.log_metric('validation_mse', held_error)
+            mlflow.log_dict(record, 'model.json')
+            replay_ids.append(run.info.run_id)
+        loaded_path = selection_client.download_artifacts(replay_ids[-1], 'model.json')
+        loaded_record = json.loads(Path(loaded_path).read_text())
+        np.testing.assert_array_equal(predict_artifact(loaded_record, vx), predict_artifact(record, vx))
+        train_errors.append(train_error)
+        held_errors.append(held_error)
+    assert len(selection_client.search_runs([selection_experiment])) == 3
+    training_pick = selection_client.search_runs([selection_experiment], order_by=['metrics.train_mse ASC'])[0]
+    validation_pick = selection_client.search_runs([selection_experiment], order_by=['metrics.validation_mse ASC'])[0]
+    assert training_pick.info.run_id == replay_ids[2]
+    assert validation_pick.info.run_id == replay_ids[int(np.argmin(held_errors))]
+    assert validation_pick.info.run_id != training_pick.info.run_id
+    assert train_errors[2] == 0.0
+    np.testing.assert_allclose(held_errors[2], 6.0)
+    assert held_errors[2] > min(held_errors)
+print('Actual training MSE:', dict(zip(names, train_errors)))
+print('Actual held-out MSE:', dict(zip(names, held_errors)))
+print('Training-only selects the memorizer; held-out selection rejects it.')
+
 ```
 
 </details>
@@ -417,7 +492,7 @@ If a run is missing, inspect the tracking URI and experiment ID before repeating
 
 ## Keep your evidence
 
-Keep both MLflow run IDs, source/data hashes, complete loss histories, the selection metric and predictions independently recomputed from the downloaded artifact.
+Keep retrieved metric histories and data tags, all three model artifacts, actual train/validation predictions after reload, and the different training-only versus held-out selections. Explain the memorizer's zero training MSE and validation MSE of 6.
 
 Save your predictions, modified code, terminal outputs, and reasoning in your engineering portfolio.
 

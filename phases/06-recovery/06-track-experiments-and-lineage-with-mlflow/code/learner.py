@@ -1,24 +1,28 @@
 """Track experiments and lineage with MLflow · learner-only exercises (2/2 contracts ready)"""
 
-# Exercise: Add a third, deliberately wrong model artifact and show why the smallest training loss alone is insufficient to select a release.
+# Exercise: Replay the two saved linear candidates in a fresh local MLflow experiment and add a third training-lookup model. The lookup stores each training x/y pair and predicts zero for an unseen x. Compute and log actual training and validation MSE for all three, save and reload every artifact, then show which model a training-only rule selects and which one the held-out rule selects.
 
 # Inputs:
-# - The fitted candidate parameters, held-out inputs and labels, and the current release candidate selected from the two trained runs.
+# - The two fitted linear artifact dictionaries from the example, training and untouched validation arrays.
+# - A third training-lookup model with zero as its unseen-input default.
 
 # Outputs:
-# - The deliberately wrong third candidate’s held-out loss and a decision that rejects it despite its low training loss.
+# - Three local MLflow runs, each with actual training and held-out MSE and a model.json artifact.
+# - Reloaded-prediction checks and distinct training-only versus validation-based selections.
 
 # Invariants to check:
-# - Release selection uses held-out evidence; a low training loss alone cannot override the candidate’s worse validation result.
+# - The third candidate has zero actual training MSE and validation MSE 6.
+# - All comparisons use the same split and data identity; validation is not used to fit any candidate.
+# - The selection uses retrieved run records and every artifact is reloaded.
 
 # Hints:
-# - Evaluate the zero-weight, zero-bias candidate on the existing held-out set.
-# - Compare its validation error with the selected candidate and record why it is not released.
+# - Represent lookup inference explicitly and calculate both metrics from predictions.
+# - Keep the exercise experiment in its own TemporaryDirectory and log all three model artifacts.
 
-import jax.numpy as jnp
+import numpy as np
 
-def evaluate_third_release_candidate(candidate_params, heldout_inputs, heldout_targets, selected_validation_loss):
-    # TODO: Measure the deliberately wrong candidate on held-out rows and decide whether it passes release selection.
+def compare_three_saved_candidates(candidates, train_x, train_y, validation_x, validation_y):
+    # TODO: log, reload and evaluate three candidates; compare selection rules.
     raise NotImplementedError
 
 

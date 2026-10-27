@@ -1,6 +1,6 @@
 """Failure recovery and operational runbooks · learner-only exercises (3/3 contracts ready)"""
 
-# Exercise: Repeat the recovery drill with seed \(9\), checkpoint cadence \(3\) and failure after update \(5\). Verify restoration at step \(3\) and equality with a matching uninterrupted run.
+# Exercise: Repeat with seed 9, checkpoint cadence 3 and failure after update 5. Read the actual restored and progress events. Identify which updates replay and compare all resumed state hashes with uninterrupted execution.
 
 # Inputs:
 # - A deterministic training state, checkpoint location, injected failure point, and matching resume configuration.

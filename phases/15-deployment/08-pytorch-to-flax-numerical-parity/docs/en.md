@@ -4,11 +4,14 @@ Phase 15: Deployment, interoperability & edge AI · about 130 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Move models between JAX, Keras, TensorFlow and PyTorch](https://www.tahabouhsine.com/jaxpathways/lesson-deployment-01.html).
+
 ## What you will be able to do
 
 - Map named PyTorch tensors into Flax NNX parameters with complete key, shape and dtype checks.
 - Locate the first mismatching operation using absolute and relative errors.
 - Verify input gradients and reload the converted artifact independently.
+- Convert one saved, bounded decoder fixture with fused QKV, explicit head layout, positions, padding-mask semantics, processor identity and tied embeddings.
 
 ## The problem
 
@@ -103,6 +106,31 @@ Keep the source in evaluation mode, use the same input and cotangent, and reset 
 $$
 J(x)^{\mathsf T}v=\nabla_x\left(\sum_i v_i f_i(x)\right)
 $$
+
+## Convert one bounded decoder checkpoint
+
+The optional companion `labs/transformer_bridge.py` creates and saves a tiny local PyTorch decoder state_dict, reloads it, converts it into Flax NNX, and checks each intermediate in execution order. Its architecture matches the course block: pre-normalized causal self-attention, residual addition, pre-normalized GELU MLP, second residual, and tied token/output embeddings. The fixture uses width 8, two heads, MLP width 16, one block, and a seven-token vocabulary. The fixture is generated locally; no production checkpoint is downloaded.
+
+The source key `qkv.weight` has shape `[3D,D]`, with contiguous `[Q_all,K_all,V_all]` rows. The NNX `qkv.kernel` has shape `[D,3D]`, so conversion transposes once; the reshape then interprets `[B,T,3,H,D/H]`. The other Linear weights map `[out,in]` to `[in,out]`; biases and embedding tables keep their axes. The output projection reads the exact token embedding table, so it is tied rather than copied into a second parameter. The fixture records a processor identity that binds the token-to-ID vocabulary.
+
+Inputs use asymmetric token rows, nonsequential `position_ids`, and a padding key. The mask contract is `True means this key is valid`, combined with a lower-triangular causal mask. The companion prints absolute and relative-L2 errors per boundary. It checks the elementwise budget `3e-6 + 3e-5*abs(reference)`: float32 CPU kernels differ by a few ULPs, while a meaningful layout or semantic error is orders of magnitude larger. A nonuniform mixed-sign cotangent checks an input VJP. Same-shape QKV/head reinterpretation and inverted mask faults must fail. Finally, a separate Python process reloads the converted artifact and reproduces logits. This supports only the declared fixture contract, not arbitrary PyTorch or Hugging Face checkpoint families.
+
+**Optional framework environment — macOS/Linux, workspace root**
+
+```sh
+python3 -m venv .venv-transformer-parity
+.venv-transformer-parity/bin/python -m pip install "jax==0.9.2" "flax==0.12.6" "torch==2.11.0" "numpy==2.4.4"
+```
+
+**Expected:** An isolated CPU-capable environment for the optional PyTorch/NNX fixture. The lesson core remains usable without installing these frameworks.
+
+**Optional saved Transformer fixture — workspace root after activating the environment**
+
+```sh
+JAX_PLATFORMS=cpu .venv-transformer-parity/bin/python phases/15-deployment/08-pytorch-to-flax-numerical-parity/labs/transformer_bridge.py
+```
+
+**Expected:** PASS for ordered activations, nonuniform VJP, deliberate same-shape QKV/head and mask faults, tied embeddings, processor identity, and fresh-process save/reload. The fixture is generated locally; no model download is required.
 
 ## Make the source boundaries inspectable
 
@@ -451,7 +479,7 @@ visual_data={'kind':'bar','labels':list(errors),'xlabel':'operation in execution
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:09:26.349865+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T12:39:32.689881+00:00. JAX 0.9.2.
 
 ```text
 Maximum absolute error per layer: {'hidden': 2.384185791015625e-07, 'norm': 3.5762786865234375e-07, 'activation': 3.5762786865234375e-07, 'output': 1.1920928955078125e-07}
@@ -687,7 +715,7 @@ Reject missing, extra, malformed or nonfinite weights before assignment. If the 
 
 ## Keep your evidence
 
-Keep source checkpoint and architecture identity, complete parameter mapping, per-layer max-absolute/relative-L2 errors, elementwise tolerances, input-gradient comparisons, wrong-epsilon diagnosis and a fresh-process converted-artifact receipt.
+Keep MLP normalization/activation parity, first-divergence evidence, the optional QKV/head layout and mask canaries, nonuniform VJP, processor/position identity and fresh-process reload results.
 
 Save your predictions, modified code, terminal outputs, and reasoning in your engineering portfolio.
 

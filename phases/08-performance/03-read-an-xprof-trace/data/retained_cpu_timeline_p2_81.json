@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "capture": "retained numeric excerpt from an executed JAX Perfetto CPU trace",
+  "source": {
+    "script": "code/capture_retained_cpu_timeline_p2_81.py",
+    "sha256": "bdc6894458ea8cb8f33aeebf76fd24974c5bae6190e88af0c706f3f5c8e4335c"
+  },
+  "environment": {
+    "python": "3.14.3",
+    "jax": "0.9.2",
+    "backend": "cpu",
+    "device": "TFRT_CPU_0",
+    "workload": "jit(tanh(a @ b)); a=(16,8), b=(8,8), float32; finite NumPy check passed"
+  },
+  "units": "Perfetto complete-event timestamps and durations in microseconds",
+  "warmup": "exact shape/dtype specialization compiled and synchronized before trace",
+  "profiled": "two steps in one trace: 2 ms injected host sleep, then 0.5 ms injected host sleep; both followed by the same synchronized model call",
+  "unprofiled_comparison": "prediction checked against the second profiled step in this trace; no independent end-to-end timing is claimed",
+  "events": [
+    {
+      "condition": "2 ms injected wait",
+      "name": "learner_step",
+      "start_us": 122,
+      "duration_us": 2665,
+      "end_us": 2787,
+      "pid": 701,
+      "tid": 164376313
+    },
+    {
+      "condition": "2 ms injected wait",
+      "name": "input_wait",
+      "start_us": 125,
+      "duration_us": 2520,
+      "end_us": 2645,
+      "pid": 701,
+      "tid": 164376313
+    },
+    {
+      "condition": "2 ms injected wait",
+      "name": "model_and_wait",
+      "start_us": 2668,
+      "duration_us": 119,
+      "end_us": 2787,
+      "pid": 701,
+      "tid": 164376313
+    },
+    {
+      "condition": "0.5 ms injected wait",
+      "name": "learner_step",
+      "start_us": 2796,
+      "duration_us": 732,
+      "end_us": 3528,
+      "pid": 701,
+      "tid": 164376313
+    },
+    {
+      "condition": "0.5 ms injected wait",
+      "name": "input_wait",
+      "start_us": 2798,
+      "duration_us": 642,
+      "end_us": 3440,
+      "pid": 701,
+      "tid": 164376313
+    },
+    {
+      "condition": "0.5 ms injected wait",
+      "name": "model_and_wait",
+      "start_us": 3448,
+      "duration_us": 79,
+      "end_us": 3527,
+      "pid": 701,
+      "tid": 164376313
+    }
+  ],
+  "input_wait_change": {
+    "predicted": "reducing requested sleep from 2 ms to 0.5 ms should reduce the input_wait host span by about 1.5 ms, while model_and_wait should stay in the same rough range",
+    "measured_wait_drop_us": 1878,
+    "measured_model_before_us": 119,
+    "measured_model_after_us": 79
+  },
+  "accounting": {
+    "outer_duration_us": 2665,
+    "children_union_us": 2639,
+    "outer_remainder_us": 26,
+    "naive_parent_plus_children_us": 5304,
+    "note": "Children are ordered and disjoint in this step; the parent already contains them."
+  },
+  "limits": [
+    "Trace contains CPU host annotations and runtime events; these spans do not isolate device kernel time.",
+    "Injected sleep is a controlled delay, not a production input pipeline measurement.",
+    "Profiler instrumentation can perturb short intervals; use a separate synchronized benchmark for performance claims."
+  ]
+}

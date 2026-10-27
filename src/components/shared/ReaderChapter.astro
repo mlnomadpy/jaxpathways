@@ -10,7 +10,7 @@ import {
 import { codePanel as sharedCodePanel } from '../../lib/lesson-content.js';
 import { lessonVisual, lessonExecution, lessonMechanism } from '../../lib/lesson-visuals.js';
 import { embeddedImage } from '../../lib/server/reader-assets.js';
-import type { authoredLessons } from '../../lib/course-data.js';
+import { authoredLessons } from '../../lib/course-data.js';
 interface Props {
   lesson: (typeof authoredLessons)[number];
   index: number;
@@ -18,6 +18,10 @@ interface Props {
 }
 const { lesson, index } = Astro.props;
 const c = lesson.content!;
+const preparation = lesson.prerequisites.map((id) => {
+  const position = authoredLessons.findIndex((item) => item.id === id);
+  return { id, position, title: authoredLessons[position]?.title || id };
+});
 const scope = executionScope(lesson);
 const maturity = materialStatus('lessons', lesson.id);
 const statusUrl = new URL(
@@ -42,6 +46,17 @@ const { offline = false } = Astro.props;
     this chapter and its practice tasks.
   </p>
   <p set:html={inlineMath(lesson.objective)} />
+  {preparation.length > 0 && (
+    <nav class="chapter-preparation" aria-label="Chapter preparation">
+      <strong>Before this chapter:</strong>{' '}
+      {preparation.map((item, i) => (
+        <Fragment>
+          {i > 0 && '; '}
+          <a href={`#chapter-${item.position}`}>{item.title}</a>
+        </Fragment>
+      ))}
+    </nav>
+  )}
   {c.setupBundle && (
     <p>
       <a href={new URL(c.setupBundle.url, 'https://www.tahabouhsine.com/jaxpathways/').href}>

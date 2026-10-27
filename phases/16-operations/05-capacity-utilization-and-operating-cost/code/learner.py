@@ -1,6 +1,6 @@
 """Capacity, utilization, and operating cost · learner-only exercises (3/3 contracts ready)"""
 
-# Exercise: Using the measured service-time input, calculate the minimum worker count for \(1200\) arrivals per hour with \(40\)% reserve, then independently verify that the chosen count satisfies the load bound.
+# Exercise: Using the measured duration input, compute workers for 1,200 arrivals/hour, 40% reserve and a \(1.5\times\) planning factor. Change arrivals to 2,400 while holding measured service time fixed. Interpret the resulting load and cost assumptions from the actual report.
 
 # Inputs:
 # - Arrival demand, measured service duration, reserve fraction, and proposed worker count.

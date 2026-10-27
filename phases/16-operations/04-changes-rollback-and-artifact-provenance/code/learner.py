@@ -1,6 +1,6 @@
 """Changes, rollback, and artifact provenance · learner-only exercises (3/3 contracts ready)"""
 
-# Exercise: Publish two compatible validated artifacts that differ in an explicit release note. Activate both in sequence, then rollback and verify the exact selected ID and content.
+# Exercise: Publish two validated models with distinct predictions at x=1. Record the consumer prediction while A is selected, after B activation, after a rejected candidate and after rollback. Change B’s slope while keeping the fixture validation threshold satisfied. Explain why publication alone does not change behavior and why the rejection must leave both selection and output unchanged.
 
 # Inputs:
 # - A candidate artifact, immutable payload/evidence hashes, validation record, and current release selection.

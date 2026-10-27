@@ -56,7 +56,7 @@ The out-of-range activation must follow the declared clipping or fallback policy
 
 ### Decide what is ready
 
-Use deployment-audit and engineering-release to assemble one release dossier: candidate selection and retention criteria; a named feature and parameter mapping; source/export and layerwise parity; full precision policy and calibration identity; raw-request validation; artifact and process receipts; measured request samples; and a queue/deadline analysis. Mark container and target-device evidence unmeasured unless you actually ran those environments. Another learner should be able to reproduce each claimed check from the recorded inputs and command.
+Use deployment-audit and engineering-release to assemble one release dossier: candidate selection and retention criteria; a named feature and parameter mapping; source/export and layerwise parity; full precision policy and calibration identity; raw-request validation; artifact and process receipts; measured request samples; and a queue/deadline analysis. Mark container and target-device evidence unmeasured unless you actually ran those environments. Another learner should be able to reproduce each claimed check from the recorded inputs and command. For framework transfer, run the optional bounded saved-decoder parity lab: map QKV/head layouts, masks, positions and tied embeddings, locate both deliberate attention failures, and compare a nonuniform VJP after fresh-process reload.
 
 ### Further work
 
@@ -94,9 +94,9 @@ Status: authored lesson with CPU exercise.
 
 Status: authored lesson with CPU exercise.
 
-**Intended outcome:** Convert a real PyTorch state dictionary to Flax NNX and validate intermediate outputs, gradients and reloaded artifacts with explicit numerical tolerances.
+**Intended outcome:** Map actual PyTorch parameters to Flax NNX and localize the first layer or gradient mismatch, then transfer to the optional small saved decoder.
 
-**Evidence:** Keep source checkpoint and architecture identity, complete parameter mapping, per-layer max-absolute/relative-L2 errors, elementwise tolerances, input-gradient comparisons, wrong-epsilon diagnosis and a fresh-process converted-artifact receipt.
+**Evidence:** Keep MLP normalization/activation parity, first-divergence evidence, the optional QKV/head layout and mask canaries, nonuniform VJP, processor/position identity and fresh-process reload results.
 
 **Checkpoint:** The first linear layer agrees, but LayerNorm is the first mismatch. What should you inspect next?
 

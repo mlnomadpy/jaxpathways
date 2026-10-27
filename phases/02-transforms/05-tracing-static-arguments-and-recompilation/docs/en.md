@@ -4,6 +4,8 @@ Phase 02: JAX transformations · about 60 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Compile a function with jit](https://www.tahabouhsine.com/jaxpathways/lesson-transforms-04.html).
+
 ## What you will be able to do
 
 - Distinguish runtime array values from shape/dtype metadata and static configuration.
@@ -27,9 +29,21 @@ A Python branch needs a concrete decision during tracing. If the decision is int
 
 Do not turn every input into a static value to silence an error. Many distinct static values can create many specializations. Trace counts are useful observations, but they are not a universal count of all compilation work or a cross-process cache guarantee.
 
+The symbol $m$ is the static `mode`, and $\sigma$ records the factors varied in this lesson, not JAX's complete cache key. With three float32 entries, changing $[1,2,3]$ to $[2,3,4]$ keeps those factors fixed while changing the sum from $6$ to $9$. Changing `sum` to `mean` selects a different Python branch during tracing. Verify those observations in one process; do not infer a universal compilation or cross-process cache count.
+
 $$
-\theta_{t+1} = \theta_t - \eta \cdot \frac{1}{B}\sum_{i=1}^{B} \nabla_\theta \ell(\theta_t, x_i, y_i)
+\sigma=(\operatorname{shape}(x),\operatorname{dtype}(x),m),\qquad f_m(x)=\begin{cases}\sum_i x_i&m=\texttt{sum}\\\frac{1}{n}\sum_i x_i&m=\texttt{mean}\end{cases}
 $$
+
+### The specialization key separates changing data from program choices
+
+**Predict:** If only the array entries change, which ledger fields remain fixed?
+
+![The specialization key separates changing data from program choices](../outputs/mechanism.svg)
+
+*Signature-to-trace ledger for the lesson calls.*
+
+The first two calls carry different runtime arrays through one matching structural signature. A shape or static-mode change creates a different specialization request. The table describes this lesson’s call ledger; JAX cache behavior can also depend on other details, so do not read it as a universal compilation counter.
 
 ### Pause and reason
 
@@ -140,32 +154,29 @@ assert jnp.allclose(compiled(x, mode="mean"), 2.)
 
 Expected: Sum: $6.0$; Mean: $2.0$. These mode choices can use separate compiled specializations.
 
-## Compiled branch outputs: sum mode vs. mean mode
+## Call signatures separate runtime values from specialization choices
 
-**Predict:** Predict the ratio between `compiled(x, 'sum')` and `compiled(x, 'mean')` for the input array `x`.
+**Predict:** Which call changes only data values, and which calls request a different staged program?
 
-![Compiled branch outputs: sum mode vs. mean mode](../outputs/figure.svg)
+![Call signatures separate runtime values from specialization choices](../outputs/figure.svg)
 
 **Recorded CPU computation**
 
 ### Read the figure
 
-Static mode 'sum' returns the sum and 'mean' returns the mean without Python control-flow tracing errors.
+Read each row as one call to compiled(x, mode). Dynamic array values are shown in the value column; the specialization signature records shape, dtype and static mode. Calls 1 and 2 keep signature ((3,), float32, sum) while the sum changes from 6 to 9. Call 3 changes shape to (4,), and call 4 changes the static mode to mean. Those last two calls request different specialization signatures in the same function/process. This ledger is structural evidence, not a promise about a global or cross-process cache.
 
 ### Connect it to the computation
 
-Marking `mode` as a static argument in `jax.jit` allows each distinct mode string to specialize and compile its own branch cleanly.
+A value-only change supplies new data to an existing staged shape and mode. A shape or static-mode change affects the program specialization. The outputs are directly calculated from the listed arrays: sum([1,2,3])=6, sum([2,3,4])=9, sum([1,2,3,4])=10, and mean([1,2,3])=2. Predict what signature changes if the dtype becomes float64 while shape and mode stay fixed, then verify in a trace-counting function in one process.
 
 ```python
-# Compare compiled execution in 'sum' mode and 'mean' mode:
-out_sum = float(compiled(x, 'sum'))
-out_mean = float(compiled(x, 'mean'))
-visual_data = {'kind': 'bar', 'x': [0, 1], 'labels': ['sum', 'mean'], 'xlabel': 'static mode argument', 'ylabel': 'compiled(x, mode) output', 'series': [{'label': 'compiled(x, mode)', 'y': [out_sum, out_mean]}]}
+visual_data = {'kind': 'flow', 'layout': 'sequence', 'nodes': ['values change; shape/dtype/mode fixed', 'same signature reused in this call ledger', 'shape or static mode changes specialization']}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:03:40.549230+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T12:28:35.777112+00:00. JAX 0.9.2.
 
 ```text
 Sum: 6.0

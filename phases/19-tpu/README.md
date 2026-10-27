@@ -28,11 +28,11 @@ Review: [Select a TPU slice and provision your Cloud TPU VM](01-get-a-tpu-runnin
 
 ### Build in stages
 
-1. **Select a single-host TPU topology and provision the VM.** Use the runtime verifier for the active backend. Calculate and verify the chip count and total HBM for v5litepod-4 and v6e-4, confirm both are single-host slices, and list all supplied single-host slices with at least 64 GiB. Retain the target VM create/describe/delete log.
+1. **Select a single-host TPU topology and provision the VM.** Identify the requested API and machine type independently from observed JAX devices/processes. Calculate the 48 GiB replicated and ideal-sharded state ledger on four 16 GiB chips, include the 80% budget and assumed activation cost, and explain why aggregate capacity is insufficient. Keep the named resource create/describe/cleanup log.
 
    Lessons: [Select a TPU slice and provision your Cloud TPU VM](01-get-a-tpu-running-and-verify-the-runtime/docs/en.md).
 
-2. **Bootstrap .venv and verify the runtime contract receipt.** Install jax[tpu] in ~/jax-tpu-lab/.venv, run build_runtime_receipt(), and verify its observed reduction against the closed-form result for its actual local_device_count. Then compute the separate theoretical totals for 4 and 8 devices. Copy back the JSON receipt; distinguish its SHA-256 field from a digital signature and calculated expectations from observed device execution.
+2. **Bootstrap .venv and verify the runtime contract receipt.** Install the pinned runtime, run build_runtime_receipt(), compare arithmetic_ok with the local closed-form oracle, and inspect expected backend/count flags and requested_target_ready. Calculate separate 4-/8-device expectations. The target-only TPU_REQUIRE_TARGET path must reject CPU, wrong count or missing saved-source identity. Retrieve the receipt and identify its digest as an integrity field, not a signature.
 
    Lessons: [Bootstrap .venv and verify a TPU runtime receipt](02-bootstrap-venv-and-verify-tpu-runtime-receipt/docs/en.md).
 
@@ -48,11 +48,11 @@ No. The mapping depends on generation and topology; TPU7x exposes chiplets as de
 
 **Symptom:** You closed your SSH terminal after finishing a run, assuming the Cloud TPU VM stopped billing.
 
-**Check next:** Run gcloud compute tpus tpu-vm delete and confirm gcloud compute tpus tpu-vm list returns 0 items.
+**Check next:** Use the cleanup command for the route that created the named resource. A queued resource must be deleted through its owning route. Confirm those exact resource names are absent; leave unrelated project resources alone.
 
 ### Decide what is ready
 
-Retain the slice HBM table from tpu-01, the verified JSON runtime receipt from tpu-04, and the empty gcloud compute tpus tpu-vm list confirmation.
+Keep the per-device ledger, requested-versus-observed runtime/source/environment identity, synchronized arithmetic and fail-closed target checks. Record absence of the exact named owned VM and queued resource after route-specific cleanup; a project-wide empty list is not required.
 
 ### Further work
 
@@ -66,9 +66,9 @@ Continue immediately to Phase 20 (TPU Workflows: Launching Jobs & Checkpointed E
 
 Status: authored lesson with CPU exercise.
 
-**Intended outcome:** Choose a single-host TPU topology, create a Cloud TPU VM with gcloud (or connect to a Colab TPU), verify SSH access, and rehearse clean VM deletion.
+**Intended outcome:** Choose and identify a named single-host TPU topology, distinguish physical chips from JAX devices, compare per-device memory-fit assumptions and verify a requested-target receipt before a route-owned teardown.
 
-**Evidence:** Keep the slice HBM capacity table, single-host vs Pod classification, and gcloud create/describe/delete command log.
+**Evidence:** Keep the 48 GiB replicated versus ideal-sharded ledger with headroom/activation assumptions, requested API/machine/chip/process identity, observed process/device/backend receipt and source/environment identity where available. Retain absence checks only for the named owned VM or queued resource.
 
 **Checkpoint:** Which command sequence proves that your Cloud TPU VM is READY when you start and no longer billing when you finish?
 
@@ -78,9 +78,9 @@ Status: authored lesson with CPU exercise.
 
 Status: authored lesson with CPU exercise.
 
-**Intended outcome:** Create ~/jax-tpu-lab/.venv on the TPU VM, install jax[tpu], record the observed backend and local device count alongside a synchronized pmap reduction check, retrieve the JSON receipt, and then delete the VM.
+**Intended outcome:** Use the pinned TPU runtime, compare synchronized arithmetic with its oracle and distinguish requested backend/device readiness from a CPU rehearsal; retrieve the receipt and clean up only named owned resources.
 
-**Evidence:** Keep the JSON runtime receipt fields (backend, local_device_count, per_device_sums, observed_total, expected_total, verified, receipt_sha256). Label the 1-, 4-, and 8-device closed-form values as calculated expectations; only the receipt's local-device result is observed execution.
+**Evidence:** Keep arithmetic_ok, expected_backend_ok, expected_topology_ok, requested_target_ready, expected/observed backend and counts, source identity or its explicit absence, observed/expected reduction and receipt digest. Separate calculated 4-/8-device expectations from observed execution and require the gated target preflight to fail closed.
 
 **Checkpoint:** Why does build_runtime_receipt() synchronize the pmap reduction and compare observed_total with closed_form_sum_of_squares(local_device_count, 8)?
 

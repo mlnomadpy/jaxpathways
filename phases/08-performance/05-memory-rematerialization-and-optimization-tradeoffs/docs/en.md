@@ -4,6 +4,8 @@ Phase 08: Performance diagnosis · about 100 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Reason with HLO and the roofline model](https://www.tahabouhsine.com/jaxpathways/lesson-performance-04.html).
+
 ## What you will be able to do
 
 - Explain why reverse-mode differentiation needs forward intermediates.
@@ -254,7 +256,7 @@ visual_data={'kind':'panels','panels':panels}
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:06:31.781028+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T12:31:03.146454+00:00. JAX 0.9.2.
 
 ```text
 Saved residual descriptions:
@@ -276,7 +278,7 @@ f32[16] output of tanh from <string>:15:20 (layer)
 f32[16] output of tanh from <string>:15:20 (layer)
 f32[16] output of tanh from <string>:15:20 (layer)
 Compiler memory estimates: [{'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}, {'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}]
-Synchronized gradient samples: [[5.2333809435367584e-05, 2.6166904717683792e-05, 2.6541296392679214e-05, 5.112495273351669e-05, 3.154156729578972e-05], [2.1709129214286804e-05, 9.375158697366714e-06, 2.7916859835386276e-05, 3.804219886660576e-05, 2.2625084966421127e-05]]
+Synchronized gradient samples: [[4.537496715784073e-05, 2.416735514998436e-05, 2.1375250071287155e-05, 1.1249911040067673e-05, 9.000301361083984e-06], [3.954116255044937e-05, 4.1832681745290756e-05, 3.129197284579277e-05, 2.945913001894951e-05, 2.262461930513382e-05]]
 Independent reverse recurrence agrees with both gradients.
 plain 
 f32[16,16] from a constant
@@ -296,7 +298,7 @@ f32[16] output of tanh from <string>:15:20 (layer)
 f32[16] output of tanh from <string>:15:20 (layer)
 f32[16] output of tanh from <string>:15:20 (layer)
 Compiler memory estimates: [{'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}, {'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}]
-Synchronized gradient samples: [[5.2333809435367584e-05, 2.6166904717683792e-05, 2.6541296392679214e-05, 5.112495273351669e-05, 3.154156729578972e-05], [2.1709129214286804e-05, 9.375158697366714e-06, 2.7916859835386276e-05, 3.804219886660576e-05, 2.2625084966421127e-05]]
+Synchronized gradient samples: [[4.537496715784073e-05, 2.416735514998436e-05, 2.1375250071287155e-05, 1.1249911040067673e-05, 9.000301361083984e-06], [3.954116255044937e-05, 4.1832681745290756e-05, 3.129197284579277e-05, 2.945913001894951e-05, 2.262461930513382e-05]]
 Saved residual descriptions:
 plain 
 f32[16,16] from a constant
@@ -316,7 +318,7 @@ f32[16] output of tanh from <string>:81:20 (layer)
 f32[16] output of tanh from <string>:81:20 (layer)
 f32[16] output of tanh from <string>:81:20 (layer)
 Compiler memory estimates: [{'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}, {'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}]
-Synchronized gradient samples: [[5.8542005717754364e-05, 1.600012183189392e-05, 1.1499971151351929e-05, 9.750016033649445e-06, 8.20821151137352e-06], [1.6999896615743637e-05, 8.333008736371994e-06, 7.541850209236145e-06, 7.584225386381149e-06, 7.750000804662704e-06]]
+Synchronized gradient samples: [[3.4458935260772705e-05, 0.00012854114174842834, 0.00015137530863285065, 8.516572415828705e-05, 8.316570892930031e-05], [4.2582862079143524e-05, 3.750016912817955e-05, 4.7958921641111374e-05, 4.324968904256821e-05, 2.7041416615247726e-05]]
 Independent reverse recurrence agrees with both gradients.
 Whole-objective residuals: ['f32[16,16] from a constant', 'f32[16] from the argument v']
 Whole-objective memory estimate: CompiledMemoryStats(generated_code_size_in_bytes=0, argument_size_in_bytes=64, output_size_in_bytes=64, alias_size_in_bytes=0, temp_size_in_bytes=256, host_generated_code_size_in_bytes=0, host_argument_size_in_bytes=0, host_output_size_in_bytes=0, host_alias_size_in_bytes=0, host_temp_size_in_bytes=0)

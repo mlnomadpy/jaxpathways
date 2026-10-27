@@ -27,27 +27,28 @@ def summarize_trace_intervals(intervals):
 
 
 
-# Compute a union instead of summing overlap (Transfer):
-# For hypothetical intervals [0,10], [2,7] and [8,12] microseconds, calculate their union duration and compare with their summed durations. Explain why this matters for nested host events.
+# Account for the actual nested timeline (Transfer):
+# Use the retained 2 ms condition: learner_step [122,2787] us, input_wait [125,2645] us, model_and_wait [2668,2787] us. Compute the union of the child intervals, the outer remainder, and the naive sum that adds the parent to both children. Explain which interval is the measured host-path bottleneck and what this trace cannot establish.
 
 # Inputs:
-# - For hypothetical intervals [0,10], [2,7] and [8,12] microseconds, calculate their union duration and compare with their summed durations. Explain why this matters for nested host events.
+# - Read phases/08-performance/03-read-an-xprof-trace/data/retained_cpu_timeline_p2_81.json.
 
 # Outputs:
-# - Union duration and naive sum in microseconds.
+# - Child interval union, enclosing-step remainder, naive nested sum, and bounded critical-path interpretation.
 
 # Invariants to check:
-# - Overlapping time is counted once in wall-clock union duration.
+# - Intervals use microseconds; timestamps plus duration equal end time; nested parent is not independent work.
 
 # Hints:
-# - Sort endpoints and merge intervals that intersect.
+# - The children in the 2 ms condition are ordered and disjoint. The parent contains both.
 
-import gzip
 import json
 from pathlib import Path
 
-def practice_compute_a_union_instead_of_summing_overlap(intervals):
-    """Implement the compute a union instead of summing overlap check."""
-    # TODO: Sort the three intervals, merge overlaps, and compare union duration with the sum of individual durations.
+def interpret_retained_cpu_timeline(path):
+    data=json.loads(Path(path).read_text())
+    events={e['name']:e for e in data['events'] if e['condition']=='2 ms injected wait'}
+    # TODO: Verify start + duration = end; calculate child union and remainder;
+    # then demonstrate the incorrect parent + child sum as a negative control.
     raise NotImplementedError
 

@@ -27,8 +27,10 @@ Warm up the intended specialization before measuring repeated execution, and ret
 
 The first-call and warm bars represent different intervals. Their ratio depends on the workload and environment. A short dispatch time is not evidence of device throughput, and a warm kernel timing does not describe an entire service request.
 
+Both observations start with already placed inputs and end with completed outputs. The first call can include tracing, lowering, compilation, dispatch and execution. The warm median is computed from separate repeated calls; subtracting it from the first call does not isolate exact compiler time. For warm observations $[2,3,8]$ milliseconds, report the median $3$ and retain all samples. A first observation of $20$ milliseconds establishes its own elapsed interval, not a measured $17$-millisecond compilation phase.
+
 $$
-T_{\text{warm}} = \operatorname{median}_{r=1 \dots R}\left(t_{\text{ready}}^{(r)} - t_{\text{start}}^{(r)}\right), \qquad T_{\text{first}} = T_{\text{compile}} + T_{\text{warm}}
+T_{\rm first}=t_{\rm first,ready}-t_{\rm first,start},\qquad T_{\rm warm}=\operatorname{median}_r(t_{r,\rm ready}-t_{r,\rm start})
 $$
 
 ### Time the completed result
@@ -249,7 +251,7 @@ visual_data = {'kind': 'panels', 'panels': [{'kind': 'bar', 'title': 'First call
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:06:22.289646+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T12:30:56.205615+00:00. JAX 0.9.2.
 
 ```text
 {
@@ -267,17 +269,17 @@ CPU run: 2026-10-21T16:06:22.289646+00:00. JAX 0.9.2.
   ],
   "dtype": "float32",
   "boundary": "input already placed; call plus output synchronization",
-  "first_call_seconds": 0.029734750278294086,
+  "first_call_seconds": 0.036204333417117596,
   "warm_samples_seconds": [
-    4.00422140955925e-05,
-    1.6042031347751617e-05,
-    8.332543075084686e-06,
-    9.458046406507492e-06,
-    7.291790097951889e-06,
-    7.958151400089264e-06,
-    7.1660615503787994e-06
+    7.50003382563591e-05,
+    3.750016912817955e-05,
+    1.800013706088066e-05,
+    3.7250109016895294e-05,
+    4.987511783838272e-05,
+    5.308398976922035e-05,
+    4.924973472952843e-05
   ],
-  "warm_median_seconds": 8.332543075084686e-06,
+  "warm_median_seconds": 4.924973472952843e-05,
   "max_abs_error": 2.384185791015625e-07
 }
 {
@@ -295,25 +297,25 @@ CPU run: 2026-10-21T16:06:22.289646+00:00. JAX 0.9.2.
   ],
   "dtype": "float32",
   "boundary": "input already placed; call plus output synchronization",
-  "first_call_seconds": 0.01793929236009717,
+  "first_call_seconds": 0.024481584317982197,
   "warm_samples_seconds": [
-    2.9665883630514145e-05,
-    1.1583790183067322e-05,
-    7.4999406933784485e-06,
-    7.666181772947311e-06,
-    7.041264325380325e-06,
-    7.790978997945786e-06,
-    6.95791095495224e-06
+    5.2833929657936096e-05,
+    5.116686224937439e-05,
+    5.1083043217658997e-05,
+    5.104159936308861e-05,
+    5.016569048166275e-05,
+    5.050003528594971e-05,
+    5.5250246077775955e-05
   ],
-  "warm_median_seconds": 7.666181772947311e-06,
+  "warm_median_seconds": 5.1083043217658997e-05,
   "max_abs_error": 2.384185791015625e-07
 }
-Handle-only seconds: 7.750000804662704e-06
-Complete-call samples: [1.2207776308059692e-05, 7.417052984237671e-06, 7.375143468379974e-06]
-Structured samples: [4.1624996811151505e-05, 1.9082799553871155e-05, 1.5334226191043854e-05]
-Changed workload: (96, 32) [3.183400258421898e-05, 1.1416152119636536e-05, 1.0250136256217957e-05, 9.125098586082458e-06, 6.624963134527206e-06]
-Energy shape and samples: (64,) [3.5624951124191284e-05, 2.529192715883255e-05, 2.516619861125946e-05, 1.39591284096241e-05, 8.875038474798203e-06]
-{'boundary': 'placed inputs; warm call plus output wait', 'samples': [1.3208016753196716e-05, 8.375383913516998e-06, 7.4589625000953674e-06, 1.0333023965358734e-05, 6.125308573246002e-06]}
+Handle-only seconds: 1.0541174560785294e-05
+Complete-call samples: [3.845803439617157e-05, 4.208320751786232e-05, 1.766672357916832e-05]
+Structured samples: [8.029118180274963e-05, 4.858383908867836e-05, 4.933401942253113e-05]
+Changed workload: (96, 32) [6.837490946054459e-05, 4.5209191739559174e-05, 5.3999945521354675e-05, 5.299970507621765e-05, 5.5958982557058334e-05]
+Energy shape and samples: (64,) [0.00024233339354395866, 0.00019133370369672775, 6.041675806045532e-05, 5.9416983276605606e-05, 5.5208802223205566e-05]
+{'boundary': 'placed inputs; warm call plus output wait', 'samples': [3.470899537205696e-05, 4.1250139474868774e-05, 3.954209387302399e-05, 3.795791417360306e-05, 3.0375085771083832e-05]}
 PASS: performance-01
 
 ```

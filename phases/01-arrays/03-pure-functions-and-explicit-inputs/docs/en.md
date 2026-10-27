@@ -4,6 +4,8 @@ Phase 01: Arrays & pure functions · about 45 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Shapes, broadcasting, and dtypes](https://www.tahabouhsine.com/jaxpathways/lesson-arrays-02.html).
+
 ## What you will be able to do
 
 - Identify hidden inputs and side effects in a numerical function.
@@ -27,8 +29,10 @@ Pass the bias as an explicit argument instead. Then two calls with different bia
 
 Purity does not mean a whole application has no state. It means the numerical function receives the state it needs and returns any new state. Files, logs and orchestration can live outside that numerical boundary.
 
+Here $X$ has one observation per row, $w$ has one entry per feature, and $b$ is an explicit scalar input. The vector $\mathbf{1}$ has one entry per observation. For a row $[1,2]$, weights $[2,-1]$ and bias $3$, the prediction is $3$. Changing only the bias to $4$ makes it $4$. This is a changed-input claim; it does not assume a mutable global is reread by an already traced function.
+
 $$
-X'[i] = \begin{cases} v & \text{if } i = k \\ X[i] & \text{otherwise} \end{cases}
+f(X,w,b)=Xw+b\mathbf{1},\qquad f(X,w,b+1)-f(X,w,b)=\mathbf{1}
 $$
 
 ### Pause and reason
@@ -151,7 +155,7 @@ visual_data = {'kind': 'line', 'x': x.tolist(), 'xlabel': 'input', 'ylabel': 'pr
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:03:25.827380+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T12:28:21.504479+00:00. JAX 0.9.2.
 
 ```text
 [1. 3. 5.]

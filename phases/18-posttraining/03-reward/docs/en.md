@@ -4,6 +4,8 @@ Phase 18: Post-training: SFT, LoRA, reward models and RLHF · about 105 minutes 
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [LoRA: adapt, save and merge low-rank updates](https://www.tahabouhsine.com/jaxpathways/lesson-posttraining-02.html).
+
 ## What you will be able to do
 
 - Represent a preference as a comparison
@@ -88,6 +90,22 @@ Adding one common offset leaves every preference margin unchanged, so pair compa
 
 A perfectly fitted training ranking can coexist with overconfidence or poor held-out ranking. On separable data the model can keep increasing margins without learning a new ordering. Track weight norms, held-out likelihood and error slices; choose regularization and stopping on development data rather than demanding the smallest possible training loss.
 
+## Freeze a baseline before fitting and inspect held-out disagreement cases
+
+The three comparisons in the fitted example define training only. Add a separate fixed set of held-out feature pairs, including unanimous and split votes, before fitting the reward weights. Compute baseline pairwise probabilities from zero weights first, then score the same cases after the update. Report held-out Brier error and preference accuracy for unanimous cases; for disagreement cases, report predicted probabilities and Brier error against the vote fraction rather than forcing a majority label.
+
+This small finite fixture can expose a broken pairwise objective or a train/held-out mismatch. Its scores and votes are synthetic. They are not human reward calibration, language-response usefulness, or evidence that a downstream policy should optimize these scores.
+
+### Pause and reason
+
+How should a 50/50 disagreement pair enter held-out evaluation?
+
+<details><summary>Compare your reasoning</summary>
+
+Keep it in a separate disagreement slice and compare the predicted preference probability with the 0.5 vote fraction, for example with Brier error. Do not relabel it as unanimous.
+
+</details>
+
 ## 1. Define chosen-minus-rejected likelihood
 
 Create main.py in your activated course environment. Paste this block, then run python main.py; function definitions alone print nothing.
@@ -122,6 +140,34 @@ step = jax.jit(
 ```
 
 Write the desired order before fitting: response zero above one, and one above two. These labels are synthetic.
+
+## Freeze held-out reward pairs before fitting
+
+Insert this block after constructing the three training comparisons and before the fit loop. It records the fixed synthetic held-out baseline before reward weights are updated.
+
+```python
+# Held-out examples are fixed before the optimizer loop; they are not used for fitting.
+heldout_chosen = jnp.array([[1.0, 0.0], [0.0, 1.0], [0.2, 0.2], [-1.0, -1.0]])
+heldout_rejected = jnp.array([[0.0, 1.0], [-1.0, -1.0], [-0.1, 0.0], [0.0, 1.0]])
+heldout_votes = np.array([1.0, 1.0, 0.5, 0.25], dtype=np.float64)
+heldout_slices = np.array(["unanimous", "unanimous", "disagreement", "disagreement"])
+w_baseline = jnp.zeros_like(w)
+def heldout_report(weights):
+    margins = np.asarray((heldout_chosen - heldout_rejected) @ weights, dtype=np.float64)
+    probabilities = 1.0 / (1.0 + np.exp(-margins))
+    brier = (probabilities - heldout_votes) ** 2
+    unanimous = heldout_slices == "unanimous"
+    disagreement = ~unanimous
+    return {"probabilities": probabilities, "brier_mean": float(np.mean(brier)),
+            "unanimous_accuracy": float(np.mean((probabilities[unanimous] > 0.5) == (heldout_votes[unanimous] > 0.5))),
+            "disagreement_probabilities": probabilities[disagreement],
+            "disagreement_brier": float(np.mean(brier[disagreement]))}
+pretraining_heldout_baseline = heldout_report(w)
+assert np.allclose(pretraining_heldout_baseline["probabilities"], 0.5)
+print("Frozen held-out reward baseline before fit:", pretraining_heldout_baseline)
+```
+
+This code runs after the training comparisons are defined and before the optimizer loop. The zero-weight probabilities and fractional-vote Brier score are the baseline for this fixed held-out set.
 
 ## 3. Fit rewards and check their invariances
 
@@ -248,9 +294,10 @@ visual_data={"panels":[*visual_data.get("panels",[visual_data]),extra_panel]}
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:11:34.318913+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T14:08:52.262457+00:00. JAX 0.9.2.
 
 ```text
+Frozen held-out reward baseline before fit: {'probabilities': array([0.5, 0.5, 0.5, 0.5]), 'brier_mean': 0.140625, 'unanimous_accuracy': 0.0, 'disagreement_probabilities': array([0.5, 0.5]), 'disagreement_brier': 0.03125}
 Synthetic preference NLL initial/final: 0.6931471824645996 0.08669456839561462 ; rewards: [ 1.9811294  0.327278  -2.3084073]
 Synthetic preference NLL initial/final: 0.6931471824645996 0.08669456839561462 ; rewards: [ 1.9811294  0.327278  -2.3084073]
 Forward/reversed preference NLL: 0.08596369624137878 2.94565486907959
@@ -258,6 +305,9 @@ Balanced conflicting labels prefer a zero margin.
 Tied baseline and preference directions verified.
 Ranking unchanged; confidence and downstream reward scale change.
 Independent reward gradients agree in both label directions.
+heldout reward baseline: {'probabilities': array([0.5, 0.5, 0.5, 0.5]), 'brier_mean': 0.140625, 'unanimous_accuracy': 0.0, 'disagreement_probabilities': array([0.5, 0.5]), 'disagreement_brier': 0.03125}
+heldout reward after training-pair fit: {'probabilities': array([0.8394109 , 0.93312322, 0.65921421, 0.06687678]), 'brier_mean': 0.022286160720660468, 'unanimous_accuracy': 1.0, 'disagreement_probabilities': array([0.65921421, 0.06687678]), 'disagreement_brier': 0.029441639707967603}
+Synthetic, four-pair evaluation only; no human or language-quality claim.
 PASS: posttraining-03
 
 ```
@@ -457,6 +507,86 @@ Checking both directions catches a sign error that a single decreasing training 
 
 </details>
 
+## Evaluate held-out reward pairs and keep disagreement visible
+
+**Transfer**
+
+Define held-out feature pairs and their vote fractions before fitting. Calculate zero-weight baseline probabilities first. Fit the existing three training comparisons, then report held-out Brier score, unanimous-case accuracy, and the disagreement slice before and after. Keep the same pairs and labels for both measurements.
+
+<details><summary>Hint</summary>
+
+The probability that the chosen item wins is sigmoid((chosen - rejected) dot w). For a fractional vote v, Brier error is (p - v)^2. A disagreement pair does not have a single hard correctness label.
+
+</details>
+
+### How to write: Evaluate held-out reward pairs and keep disagreement visible — Step-by-step recipe & starter scaffold
+
+**Inputs:**
+- The existing three training feature comparisons and fitted reward weights
+- Four fixed held-out chosen/rejected feature pairs and vote fractions
+- A declared slice label for unanimous and disagreement examples
+
+**Outputs:**
+- Pre-fit baseline probabilities and Brier score
+- Post-fit held-out Brier score and unanimous-case accuracy
+- Separate disagreement probabilities and Brier score
+
+**Invariants to check:**
+- Hold out the examples before fitting
+- Use identical held-out pairs and vote fractions for baseline and post-fit metrics
+- Score disagreement against its fractional vote; do not force a hard label
+- Describe every score as a synthetic finite-fixture result
+
+**Hints:**
+- Use the chosen-minus-rejected feature vector in the sigmoid margin.
+- Compute baseline with `w_baseline = zeros_like(w)` before the optimizer update.
+- Report unanimity and disagreement slices separately.
+
+**Starter code scaffold (fill in the TODOs):**
+
+```python
+# Complete the baseline-first held-out report for fixed pair features.
+raise NotImplementedError
+```
+
+<details><summary>Reference solution and reasoning</summary>
+
+```python
+# Fixed synthetic held-out reward pairs. Baseline is calculated at w=0 before fitting.
+heldout_chosen = jnp.array([[1.0, 0.0], [0.0, 1.0], [0.2, 0.2], [-1.0, -1.0]])
+heldout_rejected = jnp.array([[0.0, 1.0], [-1.0, -1.0], [-0.1, 0.0], [0.0, 1.0]])
+heldout_votes = np.array([1.0, 1.0, 0.5, 0.25], dtype=np.float64)
+heldout_slices = np.array(["unanimous", "unanimous", "disagreement", "disagreement"])
+
+# Define the baseline before any reward-model optimization.
+w_baseline = jnp.zeros_like(w)
+def heldout_report(weights):
+    margins = np.asarray((heldout_chosen - heldout_rejected) @ weights, dtype=np.float64)
+    probabilities = 1.0 / (1.0 + np.exp(-margins))
+    brier = (probabilities - heldout_votes) ** 2
+    unanimous = heldout_slices == "unanimous"
+    disagreement = ~unanimous
+    return {
+        "probabilities": probabilities,
+        "brier_mean": float(np.mean(brier)),
+        "unanimous_accuracy": float(np.mean((probabilities[unanimous] > 0.5) == (heldout_votes[unanimous] > 0.5))),
+        "disagreement_probabilities": probabilities[disagreement],
+        "disagreement_brier": float(np.mean(brier[disagreement])),
+    }
+
+baseline = pretraining_heldout_baseline
+after = heldout_report(w)
+assert len(baseline["disagreement_probabilities"]) == 2
+assert np.all(np.isfinite(after["probabilities"]))
+print("heldout reward baseline:", baseline)
+print("heldout reward after training-pair fit:", after)
+print("Synthetic, four-pair evaluation only; no human or language-quality claim.")
+```
+
+The baseline is explicitly tied to zero reward weights before fitting. The same held-out examples are scored after training. Unanimous accuracy and disagreement Brier are reported separately; the fractional vote remains a target probability, not a hard label. This is a finite synthetic mechanism check.
+
+</details>
+
 ## Check your understanding
 
 What do pairwise preferences identify directly?
@@ -492,7 +622,7 @@ If margins have the wrong sign, inspect chosen/rejected order. If training ranki
 
 ## Keep your evidence
 
-Keep synthetic label provenance, stable preference-loss and gradient references, offset/scale tests and the learned ordering.
+Keep stable likelihood and gradient checks, contradictory preference controls, pre-fit and post-fit held-out probability/Brier metrics, separate disagreement slices and score-offset/scale limitations.
 
 Save your predictions, modified code, terminal outputs, and reasoning in your engineering portfolio.
 

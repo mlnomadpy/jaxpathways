@@ -4,6 +4,8 @@ Phase 10: Scientific computing · about 100 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [A functional physical simulation](https://www.tahabouhsine.com/jaxpathways/lesson-science-01.html).
+
 ## What you will be able to do
 
 - Construct and verify a fourth-order fixed-step transition.
@@ -232,7 +234,7 @@ visual_data={'kind':'line','x':times.tolist(),'xlabel':'time (seconds)','ylabel'
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:06:56.419136+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T12:31:16.519322+00:00. JAX 0.9.2.
 
 ```text
 Shape: (3, 41) endpoints: [0.12329848 0.24659697 0.49319394]

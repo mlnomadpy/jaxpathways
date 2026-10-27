@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "kernels-03",
-  "contentHash": "d055015bab85ae0aa31a5c589baff7dac35e7ad8214350b02b445eee543083c1",
-  "rendererHash": "a1bd5b648f4731ae5d5f0a24811c2540d1a0a132149ce589d17c4113509cbedf",
+  "contentHash": "ce81533e5ca20970e548c7b4fd7e5f973b58bf17097fc6bb6381df0da5f5f5df",
+  "rendererHash": "17e3bbad72ee4c43425845aaee76b86b85e84750551278be03d8c16842f4dc63",
   "kind": "executed",
-  "generatedAt": "2026-10-21T16:05:23.665666+00:00",
+  "generatedAt": "2026-10-27T12:18:59.741089+00:00",
   "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",
@@ -15,45 +15,55 @@
   },
   "stdout": "Actual backend: cpu simulated layout: TPU v5 lite\nSynchronous/buffered endpoints: -1.75 2.25\nprograms, padded elements, modeled data-buffer bytes: [(9, 9216, 24576), (6, 12288, 49152), (4, 16384, 98304)]\n",
   "data": {
-    "panels": [
-      {
-        "kind": "bar",
-        "labels": [
-          "8 x 128",
-          "16 x 128",
-          "16 x 256"
-        ],
-        "ylabel": "program count (configuration-derived)",
-        "series": [
-          {
-            "label": "grid programs",
-            "y": [
-              9,
-              6,
-              4
-            ]
-          }
-        ]
-      },
-      {
-        "kind": "bar",
-        "labels": [
-          "8 x 128",
-          "16 x 128",
-          "16 x 256"
-        ],
-        "ylabel": "modeled data buffers (KiB)",
-        "series": [
-          {
-            "label": "double-buffered inputs and output",
-            "y": [
-              24.0,
-              48.0,
-              96.0
-            ]
-          }
-        ]
-      }
+    "kind": "flow",
+    "layout": "sequence",
+    "nodes": [
+      "prologue: load first tile",
+      "steady state: load next while compute consumes live refs",
+      "drain: finish compute and store before reuse"
     ]
+  },
+  "diagram": {
+    "title": "Buffer lifetime through prologue, steady state, and drain",
+    "prediction": "Which slot can receive tile k+1 while the compute stage still reads tile k?",
+    "reading": "The code declares input pipeline buffers through spec with pl.Buffered(buffer_count=buffers) and output_spec with pl.Buffered(buffer_count=2). The actual references are x_hbm, y_hbm, and out_hbm. An input slot is reusable only after axpy_body has consumed that tile; an output slot is reusable only after its store is complete. Buffer letters A and B denote alternating slots, not named variables in the Pallas API.",
+    "alt": "Prologue loads tile 0 into input slot A. During steady state, compute consumes x[k], y[k] from one slot while the next tile loads into the other; out[k] is stored after compute. Drain finishes the last compute and store before any slot is reused.",
+    "scope": "Schematic schedule of buffer lifetimes; stage overlap is illustrative, not measured.",
+    "height": 5.5,
+    "panel": {
+      "kind": "table",
+      "headers": [
+        "phase",
+        "load x_hbm / y_hbm",
+        "compute axpy_body",
+        "store out_hbm / reuse"
+      ],
+      "widths": [
+        0.17,
+        0.27,
+        0.27,
+        0.29
+      ],
+      "rows": [
+        [
+          "Prologue",
+          "tile 0 into A",
+          "wait for inputs",
+          "idle"
+        ],
+        [
+          "Steady",
+          "tile k+1 into B",
+          "tile k reads A",
+          "out[k]; release after store"
+        ],
+        [
+          "Drain",
+          "no next tile",
+          "finish final tile",
+          "finish store; then reuse"
+        ]
+      ]
+    }
   }
 }

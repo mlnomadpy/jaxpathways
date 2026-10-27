@@ -4,6 +4,8 @@ Phase 02: JAX transformations · about 55 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Batch a function with vmap](https://www.tahabouhsine.com/jaxpathways/lesson-transforms-03.html).
+
 ## What you will be able to do
 
 - Explain tracing, compilation, dispatch, and synchronization as separate work.
@@ -27,8 +29,10 @@ Think of the first-call path as preparation followed by execution. A warm-call t
 
 First compare compiled and ordinary outputs on several inputs. Then, if speed is your question, state the input size, device, warmup and synchronization boundary. Three equal bars demonstrate agreement; they do not demonstrate acceleration.
 
+The code uses $X\in\mathbb{R}^{4\times3}$, $w\in\mathbb{R}^3$ and $y\in\mathbb{R}^4$. The residual has four entries; the gradient has three. JIT prepares another way to execute this same function. It does not change the denominator, objective or derivative. For a separate one-row check, $X=[1,2]$, $w=[0,0]$, $y=[1]$ give loss $1$ and gradient $[-2,-4]$.
+
 $$
-(s_{t+1}, y_t) = f(s_t, x_t), \qquad t = 0, \dots, T-1
+L(w;X,y)=\frac{1}{n}\lVert Xw-y\rVert_2^2,\qquad \nabla_wL=\frac{2}{n}X^{\mathsf T}(Xw-y),\qquad n=4
 $$
 
 ### Pause and reason
@@ -185,15 +189,18 @@ visual_data = {'kind': 'bar', 'labels': ['eager', 'first compiled', 'repeat comp
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:03:38.371314+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T12:28:33.757693+00:00. JAX 0.9.2.
 
 ```text
 Loss: 0.46000000834465027
-First/repeat seconds: 0.014777290634810925 2.187490463256836e-05
-eager median / min / max seconds: 2.4584122002124786e-05 2.3334287106990814e-05 4.179216921329498e-05
-compiled median / min / max seconds: 4.082918167114258e-06 3.666616976261139e-06 5.499925464391708e-06
+First/repeat seconds: 0.016132208053022623 2.4999957531690598e-05
+eager median / min / max seconds: 2.7916161343455315e-05 2.566678449511528e-05 4.8374757170677185e-05
+compiled median / min / max seconds: 4.35439869761467e-06 4.124827682971954e-06 6.3749030232429504e-06
 backend / shapes / dtype: cpu (4, 3) (3,) (4,) float32
-compiled value-and-grad median seconds: 7.874798029661179e-06
+Independent NumPy loss / gradient: 0.46000000834465027 [0.36000004 0.34000006 0.32000008]
+Benchmark boundary: warm the same signature first; start the clock, call,
+then jax.block_until_ready((value, gradient)) before stopping it.
+compiled value-and-grad median seconds: 8.895527571439743e-06
 PASS: transforms-04
 
 ```
@@ -262,6 +269,7 @@ Foundation · Compile `value_and_grad(loss)`, check the loss and gradient agains
 - Validate numerical results before interpreting speed.
 - Wait for every result leaf before stopping the timer.
 - Do not infer a universal speedup.
+- Compare the value and every gradient entry to an independent host matrix calculation; benchmark completion includes both returned arrays.
 
 **Hints:**
 - Keep shape and dtype fixed for equivalence.
@@ -281,12 +289,26 @@ def compare_compiled_value_gradient(loss, weight, inputs, targets):
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution
+# Exercise solution: compare independent arithmetic, not only two JAX paths.
+import numpy as np
 compiled_step = jax.jit(jax.value_and_grad(loss))
 v, g = compiled_step(w, x, y)
-expected_v, expected_g = jax.value_and_grad(loss)(w, x, y)
-assert jnp.allclose(v, expected_v)
-assert jnp.allclose(g, expected_g)
+# Wait for both outputs. Timing only dispatch does not measure completed work.
+jax.block_until_ready((v, g))
+eager_v, eager_g = jax.value_and_grad(loss)(w, x, y)
+host_x, host_w, host_y = np.asarray(x), np.asarray(w), np.asarray(y)
+residual = host_x @ host_w - host_y
+manual_v = float(np.dot(residual, residual) / len(host_y))
+manual_g = (2.0 / len(host_y)) * host_x.T @ residual
+np.testing.assert_allclose(v, manual_v, rtol=1e-5, atol=1e-6)
+np.testing.assert_allclose(g, manual_g, rtol=1e-5, atol=1e-6)
+np.testing.assert_allclose(v, eager_v, rtol=1e-5, atol=1e-6)
+np.testing.assert_allclose(g, eager_g, rtol=1e-5, atol=1e-6)
+np.testing.assert_allclose(manual_v, 0.46, atol=1e-6)
+print('Independent NumPy loss / gradient:', manual_v, manual_g)
+print('Benchmark boundary: warm the same signature first; start the clock, call,')
+print('then jax.block_until_ready((value, gradient)) before stopping it.')
+
 ```
 
 </details>

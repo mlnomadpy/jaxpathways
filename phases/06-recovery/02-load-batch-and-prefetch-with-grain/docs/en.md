@@ -4,6 +4,8 @@ Phase 06: Data & checkpoint recovery · about 75 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Design an input pipeline](https://www.tahabouhsine.com/jaxpathways/lesson-recovery-01.html).
+
 ## What you will be able to do
 
 - Build a Grain source/sampler/batch pipeline and verify its record order.
@@ -27,8 +29,10 @@ Capture the iterator state at the model's completed-update boundary. Do not subs
 
 Compare exact IDs and values before and after restore. Then change the dataset identity deliberately and require the restore process to detect the incompatible sequence. The same numeric cursor can point to different examples in another dataset.
 
+Here $I_t$ is the saved iterator state after completed update $t$, $D$ identifies the same data and $c$ the same pipeline configuration. `restore` is schematic notation for constructing the loader and calling its state-restoration API. It is not a claim that a guessed numeric cursor restores a shuffled pipeline. If batches are A/B, C/D, E/F and update two consumed C/D, the restored next IDs must be E/F. Repeating C/D has the right shape but the wrong continuation.
+
 $$
-v_{t+1} = \mu v_t + g_t, \qquad \theta_{t+1} = \theta_t - \eta v_{t+1}
+\operatorname{IDs}\!\left(\operatorname{next}(\operatorname{restore}(I_t;D,c))\right)=\operatorname{IDs}(B_{t+1})
 $$
 
 ### Pause and reason
@@ -214,7 +218,7 @@ visual_data = {'kind': 'bar', 'labels': ['slot 0', 'slot 1', 'slot 2', 'slot 3']
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:05:27.226925+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T12:30:05.366155+00:00. JAX 0.9.2.
 
 ```text
 First IDs: [8, 6, 7, 9]

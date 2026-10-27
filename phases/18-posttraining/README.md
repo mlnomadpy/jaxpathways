@@ -4,7 +4,7 @@ Training systems.
 
 Connect supervised demonstrations, frozen-base LoRA, reward modeling, sampled PPO and direct preference optimization. Keep the reference, behavior policy, reward model and dataset identities separate.
 
-Predict the mask, denominator or preference direction before training. Keep independent objective checks and changed-condition evidence.
+Predict the mask, denominator or preference direction before training. Keep independent objective checks and changed-condition evidence. SFT, LoRA, reward ranking and DPO can follow the supervised route. Before the PPO lesson, complete the explicitly linked RL rollout, policy and evaluation preparation. DPO branches from reward learning and does not require completing PPO.
 
 **Prerequisites:** 17: Self-supervised pretraining: masked and contrastive learning.
 
@@ -20,7 +20,7 @@ Should response-only loss remove prompt tokens from the model context?
 
 <details><summary>Compare your reasoning</summary>
 
-No. Prompt inputs remain visible under the causal attention contract; the shifted response mask controls which targets receive loss.
+No. Prompt inputs remain visible under the causal attention contract; the shifted response mask controls which targets receive loss. The PPO branch additionally requires the declared RL lessons. Test your readiness by explaining why old behavior log probabilities stay frozen during multiple optimizer epochs. SFT, LoRA and DPO can be studied without taking that branch.
 
 </details>
 
@@ -40,7 +40,7 @@ Review: [Supervised fine-tuning with response-only token loss](01-sft/docs/en.md
 
    Lessons: [Learn a reward model from pairwise preferences](03-reward/docs/en.md).
 
-4. **RLHF mechanics: a frozen reward and PPO policy updates.** Identify current, behavior, reference and reward states; work both clipping signs; verify baseline cancellation by enumeration; and compare the trained bandit with its regularized optimum and probability plot.
+4. **RLHF mechanics: a frozen reward and PPO policy updates.** First complete rl-01 through rl-04. Explain which mask stops reset leakage, how a frozen behavior log probability differs from the current policy, and which unit is an evaluation replicate. Then identify current, behavior, reference and reward states; work both clipping signs and verify the small bandit against its exact optimum. The optional saved-decoder appendix remains a separate mechanics/replay result with a failed quality gate.
 
    Lessons: [RLHF mechanics: a frozen reward and PPO policy updates](04-rlhf/docs/en.md).
 
@@ -64,7 +64,7 @@ No. The log-probability margin improves from 1 to 2 while the chosen probability
 
 ### Decide what is ready
 
-Complete stages 4–8 of training-methods. Retain shifted token-mask checks, frozen-base/merge evidence, preference oracles, signed PPO clipping and fixed-reference DPO comparisons. Add the new lesson evidence: ragged likelihood oracle, rank-capacity counterexample, conflicting preferences, exact bandit optimum and a DPO ratio improvement with lower chosen probability. State which model integrations remain absent.
+Complete stages 4–8 of training-methods. Retain shifted token-mask checks, frozen-base/merge evidence, preference oracles, signed PPO clipping and fixed-reference DPO comparisons. Add the new lesson evidence: ragged likelihood oracle, rank-capacity counterexample, conflicting preferences, exact bandit optimum and a DPO ratio improvement with lower chosen probability. State which model integrations remain absent. Complete the saved-decoder SFT and sequence-scoring handoffs with a frozen reference, held-out preference/disagreement cases and source retention. Use the full course workspace for the pinned inference package and tokenizer. Enforce the LoRA base manifest on reload.
 
 ### Further work
 
@@ -78,9 +78,9 @@ The PPO lesson uses a terminal synthetic preference bandit. The optional, regist
 
 Status: authored lesson with CPU exercise.
 
-**Intended outcome:** Align predictions with their target tokens. Separate the attention mask from the loss mask.
+**Intended outcome:** Align response-only shifted targets, then apply a bounded saved-decoder SFT transfer with frozen baselines, tokenizer identity and held-out reporting.
 
-**Evidence:** Keep shifted target/role masks, valid response-token counts, gradient support and the changed target-selection result.
+**Evidence:** Keep ragged mask/gradient oracles and saved-decoder/tokenizer identities, declared one-step SFT budget, pre/post held-out response NLL and the parent-bound child manifest. This is synthetic transfer evidence.
 
 **Checkpoint:** Should prompt inputs disappear when using response-only loss?
 
@@ -90,9 +90,9 @@ Status: authored lesson with CPU exercise.
 
 Status: authored lesson with CPU exercise.
 
-**Intended outcome:** Separate the frozen base from trainable adapters. Understand initialization and the first gradient.
+**Intended outcome:** Separate frozen-base and low-rank updates, then save and reload a base-bound adapter with nonunit scaling and wrong-base rejection.
 
-**Evidence:** Keep base-training evidence, unchanged base arrays, adapter factors/rank/alpha, initial-gradient checks and reloaded/new-input merge parity.
+**Evidence:** Keep frozen-base and gradient asymmetry checks, rank/alpha scaling, the serialized base digest and target/tensor manifest, fresh-process merge parity on new inputs and incompatible-base/metadata rejections.
 
 **Checkpoint:** Does LoRA require updating the base weights during adapter training?
 
@@ -102,9 +102,9 @@ Status: authored lesson with CPU exercise.
 
 Status: authored lesson with CPU exercise.
 
-**Intended outcome:** Represent a preference as a comparison. Fit score differences with a stable likelihood.
+**Intended outcome:** Fit pairwise reward differences and evaluate unchanged held-out unanimous and disagreement cases against a pre-fit baseline.
 
-**Evidence:** Keep synthetic label provenance, stable preference-loss and gradient references, offset/scale tests and the learned ordering.
+**Evidence:** Keep stable likelihood and gradient checks, contradictory preference controls, pre-fit and post-fit held-out probability/Brier metrics, separate disagreement slices and score-offset/scale limitations.
 
 **Checkpoint:** What do pairwise preferences identify directly?
 
@@ -126,9 +126,9 @@ Status: authored lesson with CPU exercise.
 
 Status: authored lesson with CPU exercise.
 
-**Intended outcome:** Compare chosen and rejected response log probabilities. Subtract the reference preference.
+**Intended outcome:** Compare reference-corrected preference margins, then score unequal-length saved-decoder responses with explicit masks and a bounded sequence update.
 
-**Evidence:** Keep reference identity, response log-probability conventions, log(2) initialization, independent margin loss, reversed labels and frozen-reference checks.
+**Evidence:** Keep reference-cancellation and falling-chosen-probability counterexamples, exact tokenizer/model identity, summed shifted response log probabilities with EOS/padding checks, pre/post held-out and retention records and the unchanged failed PPO quality result.
 
 **Checkpoint:** Does this DPO loop require a separately trained reward model and fresh policy rollouts?
 

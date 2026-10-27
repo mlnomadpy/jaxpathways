@@ -1,3 +1,11 @@
+# Current author review: 0.18.0
+
+Start with [the 0.18.0 review guide](review-guide-0.18.0.md) and [blank feedback notes](review-notes-0.18.0.md). The [complete local HTML book](http://127.0.0.1:4210/downloads/jax-foundations.html) and [book overview](http://127.0.0.1:4210/book.html) use the frozen review preview. The guide lists the new lesson routes, workspace requirements and evidence limits. Exact source and artifact identities are in [the qualification packet](evidence/course-review-0.18.0/verification.json). This candidate addresses content issues #74 through #91 on top of PR #71 and is not merged or deployed.
+
+Local reproduction: use a clean checkout of the repair branch, install the pinned Python environment and `npm ci`, run `npm run build`, then `npm run preview -- --host 127.0.0.1 --port 4210`. The PR site workflow retains the generated HTML/EPUB review book as a downloadable artifact. Prior review guides and failed model-quality evidence remain historical records below.
+
+---
+
 # Author review: 0.16.1
 
 Start with the [frozen book preview](http://127.0.0.1:4201/book.html), [review guide](review-guide-0.16.1.md) and [blank feedback notes](review-notes-0.16.1.md). Exact source and artifact hashes are in the [qualification packet](evidence/course-review-0.16.1/verification.json). Implementation commit `9f123dd92f18f910486b4da13b360aeea10e6054` is pinned for review. This patch builds on draft PR #69; no merge or deployment.

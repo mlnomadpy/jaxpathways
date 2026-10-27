@@ -7,7 +7,7 @@
     "code": "# Compile a function with jit\nimport time\nimport jax\nimport jax.numpy as jnp\ndef loss(w, x, y):\n    return jnp.mean((x @ w - y) ** 2)\nx = jnp.arange(12, dtype=jnp.float32).reshape(4, 3) / 10.\nw = jnp.array([1., 2., -1.])\ny = jnp.ones(4)\n# Wrap with `jax.jit` (`compiled`) so XLA traces and compiles the function.\ncompiled = jax.jit(loss)\nt0 = time.perf_counter()\n# Wait for device work to finish before timing it or comparing its result on the host.\nfirst = compiled(w, x, y).block_until_ready()\nfirst_seconds = time.perf_counter() - t0\nt0 = time.perf_counter()\n# Wait for device work to finish before timing it or comparing its result on the host.\nsecond = compiled(w, x, y).block_until_ready()\nrepeat_seconds = time.perf_counter() - t0\nprint(\"Loss:\", float(second))\nprint(\"First/repeat seconds:\", first_seconds, repeat_seconds)\nassert jnp.allclose(first, loss(w, x, y))\nassert jnp.allclose(second, first)",
     "output": "Loss ≈ \\(0.46\\). Timings depend on the device, process, and workload; no speed threshold is required.",
     "exercise": "Foundation · Compile `value_and_grad(loss)`, check the loss and gradient against both the eager transform and the manual matrix formula, and explain how you would synchronize a benchmark of its two outputs.",
-    "solution": "# Exercise solution\ncompiled_step = jax.jit(jax.value_and_grad(loss))\nv, g = compiled_step(w, x, y)\nexpected_v, expected_g = jax.value_and_grad(loss)(w, x, y)\nassert jnp.allclose(v, expected_v)\nassert jnp.allclose(g, expected_g)",
+    "solution": "# Exercise solution: compare independent arithmetic, not only two JAX paths.\nimport numpy as np\ncompiled_step = jax.jit(jax.value_and_grad(loss))\nv, g = compiled_step(w, x, y)\n# Wait for both outputs. Timing only dispatch does not measure completed work.\njax.block_until_ready((v, g))\neager_v, eager_g = jax.value_and_grad(loss)(w, x, y)\nhost_x, host_w, host_y = np.asarray(x), np.asarray(w), np.asarray(y)\nresidual = host_x @ host_w - host_y\nmanual_v = float(np.dot(residual, residual) / len(host_y))\nmanual_g = (2.0 / len(host_y)) * host_x.T @ residual\nnp.testing.assert_allclose(v, manual_v, rtol=1e-5, atol=1e-6)\nnp.testing.assert_allclose(g, manual_g, rtol=1e-5, atol=1e-6)\nnp.testing.assert_allclose(v, eager_v, rtol=1e-5, atol=1e-6)\nnp.testing.assert_allclose(g, eager_g, rtol=1e-5, atol=1e-6)\nnp.testing.assert_allclose(manual_v, 0.46, atol=1e-6)\nprint('Independent NumPy loss / gradient:', manual_v, manual_g)\nprint('Benchmark boundary: warm the same signature first; start the clock, call,')\nprint('then jax.block_until_ready((value, gradient)) before stopping it.')\n",
     "question": "Why wait with block_until_ready when timing a computation?",
     "options": [
       "To change its gradient",
@@ -195,7 +195,8 @@
       "invariants": [
         "Validate numerical results before interpreting speed.",
         "Wait for every result leaf before stopping the timer.",
-        "Do not infer a universal speedup."
+        "Do not infer a universal speedup.",
+        "Compare the value and every gradient entry to an independent host matrix calculation; benchmark completion includes both returned arrays."
       ],
       "hints": [
         "Keep shape and dtype fixed for equivalence.",

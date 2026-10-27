@@ -32,7 +32,7 @@ Review: [A sharded training step](02-a-sharded-training-step/docs/en.md).
 
    Lessons: [Arrays, meshes, and sharding](01-arrays-meshes-and-sharding/docs/en.md) · [A sharded training step](02-a-sharded-training-step/docs/en.md).
 
-2. **Connect communication and recovery.** Inspect collectives without inferring network speed from payload size. Restore data position and optimizer state before comparing subsequent global steps.
+2. **Connect communication and recovery.** Inspect collectives without inferring network speed from payload size. Restore data position and optimizer state before comparing subsequent global steps. Continue to the 2x2 data/model mesh: predict parameter and momentum slices and per-device bytes, then compare one forward/backward/update with an unsharded NumPy oracle under uneven and empty valid counts.
 
    Lessons: [Communication-efficient algorithms](03-communication-efficient-algorithms/docs/en.md) · [Resilient distributed training](04-resilient-distributed-training/docs/en.md).
 
@@ -78,9 +78,9 @@ Status: authored lesson with CPU exercise.
 
 Status: authored lesson with CPU exercise.
 
-**Intended outcome:** Run a training step with explicit data and parameter placement.
+**Intended outcome:** Compute global count-weighted gradients and verify a 2x2 data/model mesh forward, backward and momentum update against an unsharded oracle.
 
-**Evidence:** Each local gradient already divides by its local count. Summing four equal local means omits division by four. For unequal counts, an unweighted mean also misrepresents examples; sum count-weighted local means and divide by total count.
+**Evidence:** Keep 1D and 2D shard ownership, per-device parameter/momentum bytes, asymmetric-input forward/backward/update comparisons, unequal and empty valid-count cases and the wrong local-mean control.
 
 **Checkpoint:** Four equal-size shards compute local mean gradients. Which aggregation gives the global mean gradient?
 
