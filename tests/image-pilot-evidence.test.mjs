@@ -92,7 +92,10 @@ test('the built guide exposes all seven public figures and the full planned caps
       7,
     );
     for (const image of figures) {
-      const relative = image.getAttribute('src').replace(/^\//, 'dist/');
+      const base = (process.env.BASE_PATH || '/').replace(/\/+$/, '');
+      const source = image.getAttribute('src');
+      assert(source.startsWith(`${base}/project-assets/`), 'figure uses the configured site base');
+      const relative = path.join('dist', source.slice(base.length + 1));
       assert.equal(
         sha256(relative),
         sha256(
