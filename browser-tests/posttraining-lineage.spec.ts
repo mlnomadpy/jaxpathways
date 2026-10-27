@@ -96,6 +96,8 @@ test('appendix status, accessible figure, bounded layout, and approval downloads
 test('standalone book keeps the appendix figure grouped, embedded, and within the viewport', async ({
   page,
 }) => {
+  // The complete illustrated book needs more layout time than one lesson on CI.
+  test.slow();
   await page.goto('/downloads/jax-foundations.html#appendix-posttraining-lineage');
 
   const appendix = page.locator('#appendix-posttraining-lineage');
