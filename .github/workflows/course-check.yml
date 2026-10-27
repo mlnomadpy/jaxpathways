@@ -51,12 +51,11 @@ jobs:
           name: review-book-${{ github.sha }}
           retention-days: 14
           path: |
-            public/downloads/jax-foundations.html
+            dist/downloads/jax-foundations.html
             public/downloads/jax-foundations.epub
             public/downloads/jax-foundations.build.json
-            docs/review-guide-0.18.1.md
-            docs/review-notes-0.18.1.md
-            docs/evidence/course-review-0.18.1/verification.json
+            docs/review-guide-0.18.2.md
+            docs/reader-disclosure-design.md
       - name: Validate EPUB with official W3C EPUBCheck
         run: |
           curl -fL https://github.com/w3c/epubcheck/releases/download/v5.4.0/epubcheck-5.4.0.zip -o /tmp/epubcheck.zip

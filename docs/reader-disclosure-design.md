@@ -1,6 +1,6 @@
 # A calmer course reader
 
-The default page should teach the idea. Supporting material stays available through named, keyboard-accessible disclosures. This is a local preview for review, not a published release.
+The default page should teach the idea. Supporting material stays available through named, keyboard-accessible disclosures. These are the presentation rules for the reader introduced in 0.18.2.
 
 ## Visual direction
 

@@ -1,6 +1,6 @@
 # Reader presentation review: 0.18.2
 
-This is a local UI candidate. The published edition remains 0.18.1.
+This guide covers the reader presentation introduced in 0.18.2. Check the [book overview](https://www.tahabouhsine.com/jaxpathways/book.html) for the currently deployed edition.
 
 Start with [the arrays chapter](http://127.0.0.1:4210/downloads/jax-foundations.html#chapter-4), then compare the [online lesson](http://127.0.0.1:4210/lesson-arrays-01.html).
 
@@ -12,4 +12,4 @@ For review, read a chapter without opening optional details, then attempt an exe
 
 Keyboard opening and closing of the execution log was checked in the browser. The existing desktop/mobile print lifecycle checks pass: printing expands supporting material, keeps reference solutions in their existing separate section, and restores the prior disclosure state. Existing renderer/print checks pass after updating the print inspector to recognize the shorter captions; its older caption support remains intact. Astro, type and lint checks pass. Lesson and phase source revisions are unchanged.
 
-No paid training runs, cloud qualification or deployment are part of this presentation pass. The design rules are in [reader-disclosure-design.md](reader-disclosure-design.md).
+Deployment and live SEO/schema validation are recorded separately for publication. The design rules are in [reader-disclosure-design.md](reader-disclosure-design.md).
