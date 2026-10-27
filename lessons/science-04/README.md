@@ -57,7 +57,9 @@ The recovered rate is about $0.700000009$, close to the known $0.7$. The tiny di
 
 ## Recognize observations that cannot identify a parameter
 
-At time zero the state equals the prescribed initial condition regardless of the rate. If the dataset contains only initial observations, the loss gradient is zero for every rate and no optimizer can recover it. This is non-identifiability, not a learning-rate problem. With noisy data, late-time points may also carry little useful signal after the system has nearly decayed. Inspect sensitivities and measurement precision before collecting more equally uninformative data.
+The fitted rate on the original grid is about $0.700000009$, against the synthetic truth $0.7$. On new initial values, the original-grid RMSE is near roundoff; refining the step gives an RMSE around $7.3\times10^{-9}$, slightly larger because the original fitted rate had compensated for RK4's tiny grid bias. A residual need not decrease monotonically when a numerical solver is refined.
+
+This held-out check changes initial conditions but keeps the same equation and noiseless observation rule. It tests whether the recovered rate transfers across starts within this model, not whether the model matches a real physical process. If observations existed only at time zero, the rate gradient would be exactly zero for every candidate; more optimizer steps could not add missing information.
 
 ## Keep numerical bias separate from physical estimates
 
@@ -267,15 +269,11 @@ Expected: The rate moves from 1.4 to approximately 0.700000009. Held-out and ref
 
 ### Read the figure
 
-The top panel shows the positive rate estimate versus completed optimizer updates. Update $0$ is the initial $1.4$, before training. The reference line is the known synthetic rate $0.7$. By update $20$, the fitted rate is about $0.7055$; by update $40$, about $0.70006$.
-
-The lower panel shows mean squared trajectory error on a logarithmic scale. Its initial value is about $0.1168$, falling to about $1.55\times10^{-5}$ after twenty updates. The displayed first sixty updates focus on the informative descent rather than the eventual floating-point floor.
+The top panel's horizontal axis counts completed optimizer updates and its vertical axis is the positive rate in inverse seconds. The fitted curve starts at 1.4, approaches the known synthetic rate 0.7, and is about 0.7055 at update 20 and 0.70006 at update 40. The lower panel uses the same update axis and shows mean squared trajectory error in squared excess-temperature units on a log scale, falling from about 0.1168 to about $1.55\times10^{-5}$ by update 20.
 
 ### Connect it to the computation
 
-These recorded post-update values correspond to the same parameters shown above. The reference observations come from the analytic exponential, while fitting uses RK4, so agreement tests a numerical model against independently generated data.
-
-A tiny final loss is plausible for noiseless synthetic data and a single smooth parameter. It is not an uncertainty estimate or proof about real instruments. Held-out starts, grid refinement and the deliberately biased Euler example provide the additional evidence needed to interpret the parameter.
+The observations come from the analytic exponential, while the fit uses RK4, so the curve compares an independently generated target with the numerical forward model. The training fixture is noiseless; its final near-zero loss is not a parameter-uncertainty estimate. New starts and grid refinement expose whether the fitted rate transfers, and the initial-time-only case predicts no recovery because the rate has zero sensitivity there.
 
 ```python
 indices=list(range(61))
@@ -284,7 +282,7 @@ visual_data={'panels':[{'kind':'line','x':indices,'xlabel':'completed updates','
 
 ## Recorded reference execution
 
-CPU run: 2026-10-27T12:31:45.878322+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:06:53.460951+00:00. JAX 0.9.2.
 
 ```text
 Initial/fitted rate: 1.4 0.7000000090128304
@@ -296,7 +294,7 @@ Initial/final loss: 0.11676630453561089 1.9484774169068916e-32
 Held-out RMSE: 4.572895313141112e-16 finer-grid RMSE: 7.282689372293896e-09
 Initial-time-only gradient: 0.0
 True rate: 0.7 perfect coarse Euler rate: 0.5906238205625731
-batch, median milliseconds, milliseconds per trajectory: [(1, 0.006416812539100647, 0.006416812539100647), (16, 0.005582813173532486, 0.00034892582334578037), (256, 0.03045797348022461, 0.00011897645890712738)]
+batch, median milliseconds, milliseconds per trajectory: [(1, 0.007166992872953415, 0.007166992872953415), (16, 0.008167233318090439, 0.0005104520823806524), (256, 0.08099991828203201, 0.00031640593078918755)]
 Changed true/recovered rate: 0.4 0.40000000054230433
 Recovered initial amplitude: 2.8000000000000003
 Noisy grid-search estimate: 0.7 residual MSE: 2.6000611439697964e-05

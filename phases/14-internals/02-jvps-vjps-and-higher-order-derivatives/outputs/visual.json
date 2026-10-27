@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "internals-02",
-  "contentHash": "5c808b39d0d3f3a8b5eb39795e8447cd0949c800570328cffe8c2a7f9f6c2e38",
+  "contentHash": "e2233007ae34cbf723cc316f53ea72a89091b1f1d1e6086f2ec283ae73ed18d0",
   "rendererHash": "17e3bbad72ee4c43425845aaee76b86b85e84750551278be03d8c16842f4dc63",
   "kind": "executed",
-  "generatedAt": "2026-10-27T12:19:04.809686+00:00",
+  "generatedAt": "2026-10-27T17:02:01.082311+00:00",
   "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",
@@ -69,7 +69,7 @@
   "diagram": {
     "title": "JVP and VJP use different vector spaces",
     "prediction": "Does a VJP simply return the same vector as a JVP?",
-    "reading": "The top row pushes a three-component direction into two output components. The bottom pulls a two-component sensitivity back to three inputs. Shapes disambiguate the two products even when a square worked example would not. The adjoint identity checks their relationship.",
+    "reading": "Read each row as a map between spaces: JVP takes \\(v\\in\\mathbb R^3\\) through \\(J\\in\\mathbb R^{2\\times3}\\) to \\(Jv\\in\\mathbb R^2\\); VJP takes \\(u\\in\\mathbb R^2\\) through \\(J^T\\) to \\(J^Tu\\in\\mathbb R^3\\). The diagram\u2019s three-to-two shape example is a shape lesson, while the executed numerical fixture happens to be two-to-two. Preserve that distinction; a nonsquare check is what catches swapped spaces.",
     "alt": "The top row pushes a three-component direction into two output components. The bottom pulls a two-component sensitivity back to three inputs. Shapes disambiguate the two products even when a square worked example would not. The adjoint identity checks their relationship.",
     "scope": "Architecture and dataflow mechanism diagram.",
     "height": 3.5,

@@ -20,21 +20,11 @@ Workload lifecycle states describe what a job can do now. Creation, startup, rea
 
 ## A running process is not necessarily a ready service
 
-A process can exist while loading weights, waiting for resources or failing repeated health checks. A ready state should correspond to a concrete capability, such as accepting a validated inference request, rather than elapsed startup time.
+A launched process can still be importing JAX, checking devices, or compiling its first update. In this worker, `started` means only that Python began; `ready` comes after the runtime contract passes and a disposable compiled update finishes. That boundary matters because compile time is not training progress.
 
-Attach each transition to an observed event and define timeouts. If a job is rejected before launch, do not record that as a completed training run. If it terminates, preserve whether useful work completed or a failure interrupted it.
+Follow the recorded run: request CPU with one device; the child reports CPU/1, emits `ready`, then eight `progress` events and `completed`. Requesting 999 devices yields `started` then `failed`, with no update. With the recorded stall injected at step 0, before the first update, the child reaches `ready` and `stall_injected`, then the supervisor times out, terminates, and reaps it. The recorded exits were 0, 23, and -15; the last value is a signal result on this POSIX run, not a portable timeout code.
 
-The lifetime bars compare actual process intervals in this fixture. They do not by themselves show readiness or accelerator utilization. Use the state timeline to explain what each interval includes.
-
-Reviewed support: stable JSON, worker creation, process deadlines and cleanup are supplied in the complete program. Learner-authored transition: validate a job request and interpret the final observed event before assigning an outcome.
-
-```python
-status = ('timed_out' if timed_out else
-          'completed' if returncode == 0 and events[-1]['event'] == 'completed'
-          else 'failed')
-```
-
-Worked trace: requested backend=cpu, min_devices=1 → started reports cpu/1 → ready is emitted after initialization → progress events 1…8 → completed. With min_devices=999, started is followed by failed and no ready event. If stall_at=2 exceeds the deadline, the supervisor terminates and reaps the process, then records timed_out. Ask which event is the last observed boundary before choosing the runbook action.
+The figure measures launch-to-reaped-exit wall time: about 0.60 s for completion, 0.41 s for runtime rejection, and 6.01 s for timeout. The rejected bar is shorter because it exits before training; it is not a faster training run. First locate the last event, then choose whether to inspect initialization, update work, or cancellation.
 
 $$
 \text{State}_{\text{job}} \in \{\texttt{provisioned}, \texttt{started}, \texttt{completed}, \texttt{timed\_out}, \texttt{cleaned\_up}\}
@@ -52,27 +42,27 @@ They have different causes and operational effects. Provisioning or loading chan
 
 ## Separate intent from observation
 
-The configuration requests CPU and at least one device. The started event records what JAX actually discovered. Requesting $999$ devices should fail before training rather than silently run on fewer resources. An exit code of zero alone is insufficient: a worker that exits early without its completed event did not satisfy our job contract. Conversely, the last progress event is not proof of completion.
+The config file records intent; the `started` event records what JAX actually found. In the accepted run those values are backend `cpu` and one device. The `min_devices=999` request fails the worker's preflight, so no progress event can be mistaken for partial success. A zero exit is also insufficient by itself: this supervisor requires the final `completed` event as evidence that the worker met its contract. When you read a run record, compare requested config, observed runtime, final event, and process exit before calling it complete.
 
 ## The process handle is the lifecycle authority
 
-The supervisor owns a Popen handle and calls communicate with a deadline. On timeout it requests termination, waits briefly, then kills and reaps if needed. Merely writing timed_out into a JSON file would leave the actual worker alive. Exit values differ by platform: on POSIX a signal can appear as a negative return code, so our checks require a nonzero outcome rather than one portable magic number. This worker does not spawn descendants; a production process tree needs its own process-group or scheduler cancellation contract.
+The supervisor keeps the `Popen` handle and waits with a deadline. In the injected stall, it first calls `terminate`, waits briefly, escalates to `kill` only if needed, and calls `communicate` again so the child is reaped and its output collected. Writing `timed_out` into JSON without ending the process would leave the worker alive and able to hold resources or write files. This fixture has no descendants; a scheduler or process tree needs its own cancellation boundary.
 
 ## Ready means initialization finished
 
-The worker imports JAX, validates the device contract, constructs data and compiles one update using a disposable result. It waits for that warmup result before emitting ready. The real parameters, momentum and random key remain unchanged during warmup. This makes the first progress event a genuine update from initial state, and keeps compile time separate from steady update time. A started process can still fail before ready.
+`ready` is emitted only after JAX discovers the requested device, builds the fixture data, compiles an update, and blocks until that disposable result is available. The warmup uses temporary values, so the saved parameters, momentum, and random key still describe step 0. This is why `started` without `ready` points to runtime or initialization, while `ready` without `progress` points later in the path. The eight measured progress events then represent actual updates.
 
 ## Configuration should reject nonsense early
 
-Total steps, batch size, checkpoint cadence and minimum device count must be positive integers. The minibatch cannot exceed the $64$-example fixture when sampling without replacement. Momentum lies in $[0,1)$, and learning rate is positive under this example’s bounded configuration. These validation choices document the teaching workload, not all valid optimizers. The worker command is an argument list and does not invoke a shell.
+The worker's request is validated before a child is created: step count, checkpoint cadence, batch size, and minimum device count must be positive integers. The fixture has 64 examples and samples without replacement, so a batch larger than 64 is invalid here. Momentum and learning rate are bounded for this demonstration. These checks make a malformed request fail at the caller boundary instead of consuming startup time; they are not universal optimizer rules.
 
 ## Treat a deadline as evidence, not a diagnosis
 
-The lab inserts a real sleep after initialization and emits stall_injected. The supervisor times out and terminates the child. In an actual job, reaching a deadline would not by itself distinguish slow compilation, input starvation, deadlock or a workload that simply needs more time. Keep the last event, stderr and runtime contract before choosing a repair. Our intentional event makes this particular test diagnosable without pretending to emulate every failure.
+The intentional stall sleeps after `ready` and writes `stall_injected`, so this trace identifies a pause after initialization and before the first update. A production timeout alone cannot tell you whether work was compiling, starved for input, deadlocked, or simply under-budgeted. Preserve the last structured event, stderr, requested backend, and device discovery before changing the deadline or retrying. Here the deliberate marker supplies a cause for the drill; a generic deadline would not.
 
 ## Transfer the contract to available hardware
 
-On a separately prepared accelerator host from the TPU course (`phase-tpu`), the same `launch` function accepts `backend='tpu'` (or `gpu`) and a required `min_devices` count. It requests that backend through `JAX_PLATFORMS` and records discovery; missing runtime support fails immediately before training starts. You can also run the portable TPU launcher (`resources/tpu-gcp/launch.py --platform tpu`) over SSH and copy the run folder back before deleting the TPU VM. Do not run that path on a laptop and call failure a hardware benchmark. Multi-host initialization, scheduler allocation, credentials, preemption signals and target-specific installation remain additional deployment contracts. No cloud resource is provisioned automatically by this lesson.
+On a prepared accelerator host, the same launch contract can request `tpu` or `gpu`; `JAX_PLATFORMS` constrains discovery and the `started` record captures what was found. If the runtime cannot satisfy the requested backend or device count, the child fails before training. The provided SSH example runs on an existing TPU VM and copies back its run record; it does not provision hardware. Treat this CPU exercise as a lifecycle rehearsal, then verify allocation, credentials, multi-host startup, and cancellation on the actual target.
 
 **Supervise a bounded TPU worker on a Cloud TPU VM and copy back the run record**
 
@@ -344,11 +334,15 @@ Expected: The actual child outcomes are completed, failed and timed_out. A worke
 
 ### Read the figure
 
-The horizontal categories identify three actual child runs. The vertical axis is supervisor wall-clock seconds, from launch to reaped exit. The timeout bar reflects the configured deadline plus cancellation overhead. The failure bar includes Python and JAX startup before the runtime check rejects the job. These are measured durations, so their exact values vary across hosts and reruns.
+The horizontal categories are three different outcomes: completed work, runtime rejection and timeout. The vertical axis is supervisor wall time from child launch through reaped exit, in seconds. These bars time the whole local process lifecycle, including startup and shutdown, rather than the numerical update alone.
+
+Compare the timeout bar with the configured six-second deadline. Its extra interval includes the supervisor's cancellation and reap work. The shorter rejection bar means the child exited sooner, not that it trained more efficiently; its event stream has no completed updates. Read an outcome and its events together before interpreting a duration.
 
 ### Connect it to the computation
 
-Compare the bars with the event traces, not by height alone. The completed run contains progress and a completed event; the rejected run has no progress; the stalled run reaches ready but never finishes. A shorter failing bar does not mean an efficient job. This plot demonstrates lifecycle measurement on the local CPU, not accelerator throughput.
+Completion contains eight updates and a final `completed` event. Rejection exits before `ready` or progress. The injected timeout reaches `ready` and `stall_injected` but no update. The event sequence supplies the meaning that a bar height cannot.
+
+Predict what changes if invalid configuration is rejected before spawning a process: that request avoids startup work, but still needs a clear rejection result. By contrast, cancelling an already running child must end and reap that child. This distinction explains why returning a `timed_out` label alone is insufficient.
 
 ```python
 visual_data={'kind':'bar','labels':['completed','runtime rejected','timed out'],'xlabel':'observed outcome','ylabel':'supervisor wall time (seconds)','series':[{'label':'actual local process','y':[successful['wall_s'],rejected['wall_s'],stalled['wall_s']]}]}
@@ -356,7 +350,7 @@ visual_data={'kind':'bar','labels':['completed','runtime rejected','timed out'],
 
 ## Recorded reference execution
 
-CPU run: 2026-10-27T14:06:57.965359+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:15:33.327373+00:00. JAX 0.9.2.
 
 ```text
 statuses: completed failed timed_out

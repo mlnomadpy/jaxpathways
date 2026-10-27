@@ -1,5 +1,19 @@
 [
   {
+    "version": "0.18.1",
+    "date": "2026-10-27",
+    "editionKey": "jaxpathways-2026-review-edition",
+    "modifiedAt": "2026-10-27T17:00:33Z",
+    "title": "Explain every chapter through worked examples and figures",
+    "summary": "Extend the teaching pass to the remaining 92 lessons and connect all 22 chapter introductions to a clear learning progression.",
+    "changes": [
+      "Rewrite the remaining 92 lesson explanations around motivation, concrete worked examples, observed results, common misconceptions and the learner's next decision, building on the 12 advanced lessons revised in 0.18.0.",
+      "Explain plot axes, units, actual coordinates, curve comparisons and diagram dataflow using each lesson's retained numerical fixture. Preserve explicit distinctions between separate captures, simulations, conceptual diagrams and target evidence.",
+      "Connect all 22 chapter introductions to their learning goals and lesson sequence. Clarify negative and zero slopes, the initial state in trajectory arrays, masked losses, state ownership, uncertainty, sharding and the difference between objective improvement and model quality.",
+      "Preserve executable lesson code, formulas, commands, exercises, plot computations, prerequisite routes, recorded failed quality gates and all maturity levels. Refresh the reader and runnable companions for author review; no merge or deployment."
+    ]
+  },
+  {
     "version": "0.18.0",
     "date": "2026-10-27",
     "editionKey": "jaxpathways-2026-review-edition",

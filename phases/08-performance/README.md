@@ -12,7 +12,9 @@ Keep workload shapes, warm-up policy and synchronized timings with your device r
 
 ## Study guide: What measured evidence identifies the bottleneck?
 
-Optimize a verified computation and a named timing boundary. Trace events, compiler estimates and wall-clock samples answer different questions; connect them before proposing a change.
+Before changing an implementation, decide which part of the user's wait you are trying to reduce. Compilation, dispatch, transfer, device execution and synchronization can occupy different portions of a run. A fast return from a Python call may measure submission rather than completed work.
+
+First establish numerical equivalence, then choose a repeatable timing boundary. Read a retained trace by its named events and nesting, and use roofline or rematerialization calculations as hypotheses about a tradeoff. Connect a proposed change to the operation's share of the complete workload before expecting a large end-to-end gain.
 
 ### Check your starting point
 

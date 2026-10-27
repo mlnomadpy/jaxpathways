@@ -15,7 +15,7 @@
       {
         "id": "guided-reasoning",
         "title": "Why every worker must launch and initialize",
-        "body": "The example is a mean across devices only under its stated equal-count setup: each participating device contributes exactly one valid example, every process has the same local device count, and every process joins the same `devices` collective. In general, averaging local means equally is wrong when valid counts differ. Reduce gradient numerators and valid-example counts separately, then divide the global numerator by the global count. `psum` reduces over the named mapped axis; all participating processes must enter it.",
+        "body": "A multi-host collective is a coordinated computation: every participating process must initialize and enter the same named collective. The lesson's small update assumes one valid example per device and equal local device counts, so an average of local means equals the global mean. If valid counts differ, reduce gradient sums and counts separately, then divide once by the total count. A successful `--worker=all` launch only shows that workers started; retain each process receipt and check input ownership and the global update before calling it training evidence.",
         "check": {
           "prompt": "If a TPU slice has `hosts = 4` and `chips_per_host = 4` (`v5litepod-16`), what are `jax.local_device_count()` and `jax.device_count()` on each host after `jax.distributed.initialize()`?",
           "answer": "`jax.local_device_count()` is `4` (the chips attached to that host VM), while `jax.device_count()` is `16` (all chips across all 4 hosts in the Pod slice)."
@@ -24,7 +24,7 @@
       },
       {
         "title": "1. Route a script using the execution matrix",
-        "body": "For `distributed-02`, use its CPU mode and retain its CPU receipt; the command below runs that CPU path only. The separate v5e1 launcher and precision target and four-device single-host collective target are qualified only for their recorded sources, pinned environments, and device layouts. A different lesson ID is not a substitute for one of those target programs: review its exact source, backend assertion, dependencies, topology, and input ownership before considering a new TPU qualification.",
+        "body": "Route the exact source, not a lesson category. `distributed-02` selects CPU, so run it on CPU and keep its CPU receipt. The v5e1 launcher, precision target and four-device single-host collective each have separate, bounded receipts for their named sources, environments and layouts; those receipts do not qualify a different script. Before staging another program, inspect its backend selection and dependencies, then specify process/device topology and which process owns each input. Generate a TPU command only when those checks are complete.",
         "commands": [
           {
             "label": "Run the known CPU-only distributed lesson in CPU mode",
@@ -36,7 +36,7 @@
       },
       {
         "title": "2. Separate multi-host discovery from a qualified training run",
-        "body": "Launching with `--worker=all` and calling `jax.distributed.initialize()` verifies that processes can discover the global device topology. The command below is a discovery check only. A training claim additionally requires distinct per-process data, an explicit global reduction/update, independently derived expected values, synchronized output/checkpoint evidence, and a receipt from every process.\n\nThe following one-step example is executable but unqualified; it is not a reported TPU result. Run it only after the same pinned dependencies are installed on each worker, then retain every receipt and validate the named multi-host slice. Do not infer multi-host support from a single-host receipt. A separate sixteen-device v5e checkpoint test has actual per-process receipts: see the [hardware evidence guide](https://www.tahabouhsine.com/jaxpathways/tpu-performance.html). It uses `resources/tpu-gcp/multihost_target.py`, not this one-step teaching example; its result does not qualify the example below.",
+        "body": "The discovery command launches all workers and calls `jax.distributed.initialize()`. This is a discovery check only: it reports the global topology but does not prove that data was partitioned correctly, that gradients were globally reduced, or that a checkpoint can be recovered. The one-step example below is an executable teaching program, not a reported TPU result. A real multi-host claim needs a named slice, simultaneous initialization, distinct process-owned inputs, independently checked global update values, synchronized checkpoint evidence and a receipt from every worker. The recorded sixteen-device v5e checkpoint run is separate: it used `resources/tpu-gcp/multihost_target.py` and its own receipts; it does not qualify this example.",
         "commands": [
           {
             "label": "Record multi-host process and device discovery only",
@@ -64,7 +64,7 @@
       {
         "title": "Tabulate single-host and multi-host TPU slice topologies",
         "instruction": "Create main.py with SLICE_CATALOG and compute global_chips, total_hbm_gib, and multi_host.",
-        "code": "# Step 1 — Tabulate single-host and multi-host TPU slice topologies\nimport json\nimport jax\nimport numpy as np\n\nSLICE_CATALOG = [\n    {\"slice\": \"v5litepod-4\", \"hosts\": 1, \"chips_per_host\": 4, \"hbm_per_chip_gib\": 16},\n    {\"slice\": \"v5litepod-8\", \"hosts\": 1, \"chips_per_host\": 8, \"hbm_per_chip_gib\": 16},\n    {\"slice\": \"v5litepod-16\", \"hosts\": 4, \"chips_per_host\": 4, \"hbm_per_chip_gib\": 16},\n    {\"slice\": \"v6e-16\", \"hosts\": 4, \"chips_per_host\": 4, \"hbm_per_chip_gib\": 32},\n]\nfor entry in SLICE_CATALOG:\n    entry[\"global_chips\"] = entry[\"hosts\"] * entry[\"chips_per_host\"]\n    entry[\"total_hbm_gib\"] = entry[\"global_chips\"] * entry[\"hbm_per_chip_gib\"]\n    entry[\"multi_host\"] = entry[\"hosts\"] > 1",
+        "code": "# Step 1 \u2014 Tabulate single-host and multi-host TPU slice topologies\nimport json\nimport jax\nimport numpy as np\n\nSLICE_CATALOG = [\n    {\"slice\": \"v5litepod-4\", \"hosts\": 1, \"chips_per_host\": 4, \"hbm_per_chip_gib\": 16},\n    {\"slice\": \"v5litepod-8\", \"hosts\": 1, \"chips_per_host\": 8, \"hbm_per_chip_gib\": 16},\n    {\"slice\": \"v5litepod-16\", \"hosts\": 4, \"chips_per_host\": 4, \"hbm_per_chip_gib\": 16},\n    {\"slice\": \"v6e-16\", \"hosts\": 4, \"chips_per_host\": 4, \"hbm_per_chip_gib\": 32},\n]\nfor entry in SLICE_CATALOG:\n    entry[\"global_chips\"] = entry[\"hosts\"] * entry[\"chips_per_host\"]\n    entry[\"total_hbm_gib\"] = entry[\"global_chips\"] * entry[\"hbm_per_chip_gib\"]\n    entry[\"multi_host\"] = entry[\"hosts\"] > 1",
         "explanation": "Separating hosts from chips_per_host shows immediately when a slice crosses the single-host boundary into multi-host execution."
       },
       {
@@ -85,14 +85,14 @@
       {
         "title": "Compare local vs global device counts across slices",
         "prediction": "How many global chips are left idle if you launch a script without `--worker=all` on `v5litepod-16`?",
-        "code": "# Experiment — Compare local vs global device counts across slices\nv5e16 = next(s for s in SLICE_CATALOG if s[\"slice\"] == \"v5litepod-16\")\nidle_without_worker_all = v5e16[\"global_chips\"] - v5e16[\"chips_per_host\"]\nprint(\"v5litepod-16 global chips:\", v5e16[\"global_chips\"], \"Idle chips without --worker=all:\", idle_without_worker_all)\n# Assert invariant `idle_without_worker_all == 12` holds\nassert idle_without_worker_all == 12",
+        "code": "# Experiment \u2014 Compare local vs global device counts across slices\nv5e16 = next(s for s in SLICE_CATALOG if s[\"slice\"] == \"v5litepod-16\")\nidle_without_worker_all = v5e16[\"global_chips\"] - v5e16[\"chips_per_host\"]\nprint(\"v5litepod-16 global chips:\", v5e16[\"global_chips\"], \"Idle chips without --worker=all:\", idle_without_worker_all)\n# Assert invariant `idle_without_worker_all == 12` holds\nassert idle_without_worker_all == 12",
         "output": "Without `--worker=all`, 12 of the 16 TPU chips on `v5litepod-16` never receive a process.",
         "explanation": "Worker 0 only controls its own 4 local chips; the other 3 hosts (`3 * 4 = 12` chips) require `--worker=all`."
       },
       {
         "title": "Verify total HBM scaling from v5litepod-16 to v6e-16",
         "prediction": "How much total HBM is available across a 16-chip `v6e-16` Pod slice compared to `v5litepod-16`?",
-        "code": "# Experiment — Verify total HBM scaling from v5litepod-16 to v6e-16\nhbm_by_slice = {s[\"slice\"]: s[\"total_hbm_gib\"] for s in SLICE_CATALOG}\nprint(\"Total HBM GiB by slice:\", hbm_by_slice)\nassert hbm_by_slice[\"v6e-16\"] == 512 and hbm_by_slice[\"v5litepod-16\"] == 256",
+        "code": "# Experiment \u2014 Verify total HBM scaling from v5litepod-16 to v6e-16\nhbm_by_slice = {s[\"slice\"]: s[\"total_hbm_gib\"] for s in SLICE_CATALOG}\nprint(\"Total HBM GiB by slice:\", hbm_by_slice)\nassert hbm_by_slice[\"v6e-16\"] == 512 and hbm_by_slice[\"v5litepod-16\"] == 256",
         "output": "v6e-16 provides 512 GiB of total HBM across 4 hosts (32 GiB/chip), double v5litepod-16's 256 GiB (16 GiB/chip).",
         "explanation": "Doubling per-chip HBM on Trillium (`v6e`) doubles the total sharded model state capacity for the same 4-host Pod topology."
       }
@@ -176,8 +176,8 @@
       "title": "Host count, per-host local chips, and global TPU chips across single-host and Pod slices",
       "kind": "executed",
       "prediction": "How do `hosts`, `chips_per_host`, and `global_chips` change when moving from `v5litepod-4` and `v5litepod-8` to `v5litepod-16` and `v6e-16`?",
-      "reading": "The horizontal axis compares four Cloud TPU slices (`v5litepod-4`, `v5litepod-8`, `v5litepod-16`, `v6e-16`). For each slice, the three bars show the number of Linux VM hosts, the number of local TPU chips per host, and the total global TPU chips.",
-      "connection": "`v5litepod-4` and `v5litepod-8` keep `hosts = 1`, whereas `v5litepod-16` and `v6e-16` use `4` hosts with `4` local chips each (`16` global chips), visually showing why `--worker=all` becomes mandatory at 16 chips.",
+      "reading": "The horizontal axis lists four requested slices. The three bars per slice count VM hosts, local chips per host and global physical chips. `v5litepod-4` has 1 host \u00d7 4 chips = 4 global chips; `v5litepod-8` has 1 \u00d7 8 = 8. `v5litepod-16` and `v6e-16` each have 4 hosts \u00d7 4 local chips = 16 global chips. The host and chip counts are different units of topology, so read each bar series by its legend. The decision boundary is hosts: at four hosts, launch all workers and initialize distributed JAX; then verify local and global JAX device counts in each receipt.",
+      "connection": "The slice calculation shows why `--worker=all` is required for the two 16-chip, four-host layouts; it is not evidence that a workload trained across them. In a 4-host example with 4 local chips per host, the expected topology is 4 local chips and 16 global chips per host process, subject to the selected API's runtime mapping. Keep the CPU rehearsal and recorded target receipts separate, and require per-process receipts plus a checked global update before claiming multi-host training.",
       "alt": "Host count, per-host local chips, and global TPU chips across single-host and Pod slices. Bar chart comparing hosts, chips per host, and global chips for v5litepod-4, v5litepod-8, v5litepod-16, and v6e-16.",
       "code": "visual_data = {\n    'kind': 'bar',\n    'labels': [s['slice'] for s in SLICE_CATALOG],\n    'xlabel': 'Cloud TPU slice topology',\n    'ylabel': 'host / chip count',\n    'series': [\n        {'label': 'Linux VM hosts', 'y': [float(s['hosts']) for s in SLICE_CATALOG]},\n        {'label': 'local chips per host', 'y': [float(s['chips_per_host']) for s in SLICE_CATALOG]},\n        {'label': 'global TPU chips', 'y': [float(s['global_chips']) for s in SLICE_CATALOG]},\n    ],\n}"
     },

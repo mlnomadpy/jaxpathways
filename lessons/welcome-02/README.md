@@ -23,13 +23,11 @@ An array is a collection of values with a shape, a dtype and a device. Shape tel
 
 ## Read one array two ways
 
-Take the two rows $[1,2,3]$ and $[4,5,6]$. Summing across each row gives $[6,15]$: one answer per observation. Summing down the rows gives $[5,7,9]$: one answer per feature. Within that example, the values are the same; the question determines the axis. The exact program below uses the same shape with entries starting at zero.
+Take the two rows $[0,1,2]$ and $[3,4,5]$ from the program below. Summing across each row gives $[3,12]$: one answer per observation. Summing down the rows gives $[3,5,7]$: one answer per feature. The values stay fixed; the question determines the axis.
 
-In Python, the row sums use `axis=1`, because the feature axis is reduced. The feature sums use `axis=0`, because the observation axis is reduced. The axis you name is the one you consume, not the one you keep.
+The row sums use `axis=1`, because the feature axis is reduced. The feature sums use `axis=0`, because the observation axis is reduced. The axis you name is the one you consume, not the one you keep. Check this in the heatmap by pointing to the cells that contribute to one output.
 
-Read the heatmap by locating one row and one column before looking at its color. Color helps compare values, but labels establish which observation and feature you are comparing. A device label is a separate property; moving the same values to another device does not change what a row means.
-
-For the exact program below, the entries start at $0$, so the row sums are $[3,12]$ and the column sums are $[3,5,7]$. Adding $1$ to every entry gives the earlier $[1,2,3]$, $[4,5,6]$ example: each row sum increases by $3$, and each column sum increases by $2$. The different answers come from different inputs, not different reduction rules.
+Now predict a changed input. If every entry increases by $1$, each three-feature row sum increases by $3$, while each two-observation column sum increases by $2$. The new outputs are $[6,15]$ and $[5,7,9]$. Use the different increments to explain the reduction instead of memorizing axis numbers.
 
 $$
 r_i=\sum_{j=0}^{2}X_{ij},\qquad c_j=\sum_{i=0}^{1}X_{ij},\qquad X=\begin{bmatrix}0&1&2\\3&4&5\end{bmatrix}
@@ -59,9 +57,9 @@ axis 1: measurements (3)
 
 ## Derive a reduction and its output shape
 
-Summing along axis $1$ removes the measurement axis and leaves one number per observation. The first row sums to $3$, the second to $12$, so the result has shape $(2,)$. Summing along axis $0$ instead combines observations and leaves three measurement totals: $[3, 5, 7]$.
+Summing along axis $1$ consumes the feature axis and leaves one total per observation. From the displayed rows $[0,1,2]$ and $[3,4,5]$, calculate $0+1+2=3$ and $3+4+5=12$; the result $[3,12]$ has shape $(2,)$. Summing along axis $0$ consumes the observation axis instead, leaving one total per feature: $[3,5,7]$, shape $(3,)$.
 
-A reduction can also keep the reduced axis with `keepdims=True.` Column means then have shape $(1, 3)$, which states explicitly that the same three means are subtracted from every row. Derive the numbers and shape before using sum or mean.
+With `keepdims=True`, the column means retain a leading singleton dimension, shape $(1,3)$. That shape makes the intended reuse across both rows visible when centering. Before running your exercise, write the output shape next to the axis you plan to reduce; if you need one value per observation, the answer should have two entries.
 
 ```text
 (2,3) --sum(axis=1)--> (2,) : [3,12]
@@ -166,7 +164,7 @@ visual_data = {'kind': 'heatmap', 'values': x.tolist(), 'rows': ['row 0', 'row 1
 
 ## Recorded reference execution
 
-CPU run: 2026-10-27T12:28:12.708768+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:02:29.749911+00:00. JAX 0.9.2.
 
 ```text
 Shape: (2, 3)

@@ -1,0 +1,18 @@
+PASS optimization-02
+PASS networks-02
+PASS networks-04
+PASS recovery-06
+PASS welcome-01
+PASS posttraining-03
+PASS posttraining-04
+PASS tpu-05
+PASS welcome-01: script + notebook code
+PASS optimization-02: script + notebook code
+PASS networks-02: script + notebook code
+PASS networks-04: script + notebook code
+PASS recovery-06: script + notebook code
+PASS posttraining-03: script + notebook code
+PASS posttraining-04: script + notebook code
+PASS tpu-05: script + notebook code
+OK: 8 executed (104 total CPU lessons); 16 executions
+Release 0.18.1: 104 lessons and 22 phases match the recorded source snapshot.

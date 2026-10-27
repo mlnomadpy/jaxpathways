@@ -12,7 +12,9 @@ Predict the mask, denominator or preference direction before training. Keep inde
 
 ## Study guide: Which parameters and signals change during adaptation?
 
-Connect supervised demonstrations, frozen-base LoRA, reward modeling, sampled PPO and direct preference optimization. Keep the reference, behavior policy, reward model and dataset identities separate.
+A pretrained model can be adapted with demonstrations, low-rank updates or preference evidence, but these methods ask different questions of the data. Response-only SFT scores demonstrated tokens; LoRA restricts which parameter changes are available; reward learning and preference objectives use comparisons between alternatives.
+
+Keep the base, reference, behavior policy and reward model identities separate as you follow a concrete example through each objective. Derive the scored positions and likelihood reductions before comparing curves. The PPO route needs its RL preparation, while DPO follows its own reference-scoring branch; shared bookkeeping does not make the algorithms interchangeable.
 
 ### Check your starting point
 

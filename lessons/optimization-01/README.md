@@ -61,6 +61,8 @@ With bias zero the prediction is $[2, -1, 1]$. Subtracting $[3, 0, 2]$ gives thr
 
 For residual $r=Xw+b\mathbf{1}-y$, the gradients are $\frac{2}{n}X^\mathsf{T}r$ and $2\operatorname{mean}(r)$ for weights and bias respectively. At this point they are $[-4/3, -4/3]$ and $-2$. This hand calculation is an independent test of both the model and the reduction axis. Here $r$ is the vector of residuals, $n$ counts observations, and $\mathbf{1}$ repeats the scalar bias for every row. The transpose $X^\mathsf{T}$ gathers each feature’s contribution to its weight gradient.
 
+At bias zero, each row contributes two times its residual times its feature vector, divided by three. Since each residual is -1, row contributions are $(-2/3, 0)$, $(0, -2/3)$, and $(-2/3, -2/3)$. Their sum is $(-4/3, -4/3)$. The bias derivative is the mean of twice the residual, so it is -2. A negative derivative means a small increase in that parameter lowers the loss locally; the loss itself remains nonnegative.
+
 $$
 \begin{aligned}r&=Xw+b\mathbf{1}-y\\L&=\frac{1}{n}\sum_{i=1}^{n}r_i^2\\\nabla_w L&=\frac{2}{n}X^\mathsf{T}r,\qquad\frac{\partial L}{\partial b}=\frac{2}{n}\sum_{i=1}^{n}r_i\end{aligned}
 $$
@@ -70,6 +72,8 @@ $$
 A column target of shape $(3, 1)$ and predictions of shape $(3,)$ combine into a $(3, 3)$ residual matrix. Each target is compared with every prediction. At the parameters that exactly fit our observations, this wrong loss is $28/9$ rather than zero. JAX is following the array rules correctly; the data contract is wrong.
 
 Check shapes at the loss boundary instead of hoping a small loss will reveal the mistake. Flattening is appropriate only when the original column really represents one scalar per observation; flattening multi-output targets would discard their meaning.
+
+The wrong loss $(28/9)$ can be reconstructed: predictions are $(3,0,2)$, column targets are $(3,0,2)$, and broadcasting creates nine pairwise differences. Their squared sum is $28$, then the mean divides by $9$. Only three of those nine entries are the intended row-to-row comparisons. The reduction still returns a scalar, which is why checking only the loss rank would miss the mistake.
 
 ## Change the dataset and retain the contract
 
@@ -177,13 +181,15 @@ The matrix-vector product produces one value per observation, and the scalar bia
 
 For bias $0$, the prediction-minus-target residual is $-1$ on every row. Squaring and averaging gives $(1+1+1)/3=1$. With bias $1$, all residuals are zero and the mean squared loss is zero. Read the gaps between bars to understand the loss; do not average the bar heights themselves.
 
+Before moving a weight, predict which row-specific bars would move if only the second feature weight changed; rows with second feature zero should stay fixed.
+
 ```python
 visual_data = {'kind': 'bar', 'labels': ['observation 0', 'observation 1', 'observation 2'], 'ylabel': 'target / prediction', 'series': [{'label': 'target', 'y': targets.tolist()}, {'label': 'bias 1', 'y': predict(w, 1.0, X).tolist()}, {'label': 'bias 0', 'y': predict(w, 0.0, X).tolist()}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-27T12:28:50.457332+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:13:17.463757+00:00. JAX 0.9.2.
 
 ```text
 Predictions: [3. 0. 2.]

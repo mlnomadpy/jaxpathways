@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "distributed-03",
-  "contentHash": "7e8030ff1df539475ca7b07f15be850009cce6d9ffadb66a38dddb66de2cf46e",
+  "contentHash": "3454869c4363771eda22137fbc30dccf8883503d000e1eedde54dbc61d9686a7",
   "rendererHash": "17e3bbad72ee4c43425845aaee76b86b85e84750551278be03d8c16842f4dc63",
   "kind": "executed",
-  "generatedAt": "2026-10-27T12:18:24.807555+00:00",
+  "generatedAt": "2026-10-27T17:01:11.099706+00:00",
   "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",
@@ -13,7 +13,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Gradient reference: [0.0029296851716935635, 0.00219726306386292, 0.0014648411888629198, 0.0007324193138629198, -2.6193447411060333e-09, -0.000732424552552402, -0.001464846427552402, -0.002197268418967724]\nLocal result shapes: replicated (8,), reduce-scatter (2,), gathered (8,)\nIdealized ring bytes per rank: 48.0 24.0\nCompleted CPU median microseconds: {'all_reduce': 111.91656813025475, 'reduce_scatter': 126.16673484444618, 'all_gather_only': 107.20780119299889}\n",
+  "stdout": "Gradient reference: [0.0029296851716935635, 0.00219726306386292, 0.0014648411888629198, 0.0007324193138629198, -2.6193447411060333e-09, -0.000732424552552402, -0.001464846427552402, -0.002197268418967724]\nLocal result shapes: replicated (8,), reduce-scatter (2,), gathered (8,)\nIdealized ring bytes per rank: 48.0 24.0\nCompleted CPU median microseconds: {'all_reduce': 179.16597425937653, 'reduce_scatter': 565.1251412928104, 'all_gather_only': 104.20894250273705}\n",
   "data": {
     "panels": [
       {
@@ -59,7 +59,7 @@
   "diagram": {
     "title": "Reduce-scatter followed by all-gather",
     "prediction": "Does every participant hold the complete reduced array after reduce-scatter?",
-    "reading": "Contributions \\([1,2]\\) and \\([3,4]\\) are summed into portions \\([4]\\) and \\([6]\\). After reduce-scatter neither participant holds the full result. All-gather then gives each \\([4,6]\\). This analytic example shows ownership, not a physical schedule or measured traffic.",
+    "reading": "The table's two participants contribute \\([1,2]\\) and \\([3,4]\\). Reduce-scatter sums matching entries to \\([4,6]\\) and assigns one entry to each participant; neither local result is the full vector yet. All-gather then gives both participants \\([4,6]\\). In the lesson's actual four-rank, eight-value case, the corresponding reduced pieces have two entries each. The table explains ownership and order, not a physical schedule or measured traffic.",
     "alt": "Contributions \\([1,2]\\) and \\([3,4]\\) are summed into portions \\([4]\\) and \\([6]\\). After reduce-scatter neither participant holds the full result. All-gather then gives each \\([4,6]\\). This analytic example shows ownership, not a physical schedule or measured traffic.",
     "scope": "Architecture and dataflow mechanism diagram.",
     "height": 3.8,

@@ -23,11 +23,9 @@ A loss value tells us how the current prediction is scored. Its derivative tells
 
 ## Read the value and derivative at the same point
 
-Take $L(w)=(w-2)^2+1$ as a new hand-worked objective. At $w=0$, the loss is $5$ and the derivative is $-4$. A small positive change in the weight should decrease the loss. At $w=2$, the derivative is zero but the loss remains $1$.
+We need both the score and its direction because they answer different questions: the loss says how this parameter setting performs, while the derivative predicts how a small adjustment changes that score. For the separate objective $L(w)=(w-2)^2+1$, at $w=0$ the loss is $5$ and the slope is $-4$, so increasing $w$ slightly should lower the loss. At $w=2$, the slope is zero but the loss is still $1$.
 
-The added constant changes every loss value but leaves the derivative unchanged. This is a useful diagnostic: if a derivative implementation changes when you add a parameter-independent constant, investigate the implementation. Equally, a nonzero minimum loss need not mean optimization failed.
-
-When reading a plot of value and slope, compare them at the same horizontal coordinate and respect their different vertical units. The loss is not a gradient norm, and a small loss is separate from that all parameters are close to their intended values.
+The plot has weight on both horizontal axes, loss in the upper panel and loss-per-weight in the lower. For the lesson’s unshifted data, $w=1$ gives $(L,L')=(14/3,-28/3)$, and $w=2$ gives $(0,0)$. A zero derivative is a stationary point; it does not generally mean zero loss. Adding a constant shifts loss values without moving the derivative’s zero.
 
 ### Pause and reason
 
@@ -41,9 +39,9 @@ It is multiplied by $10$ as well. Unlike adding a constant, scaling the objectiv
 
 ## From three residuals to one decision
 
-Read the formula from the inside out. For example $i$, the model predicts $wx_i$. Subtract the observed target $y_i$ to get the residual, square it, and then average over all $N$ examples. The symbol $\sum$ just tells us to add the individual terms.
+A batch needs one scalar score before `grad` can return a single objective gradient. For each row, compute prediction, subtract its target, square the residual, then average the squared errors. This order makes the reduction and its scale visible.
 
-For inputs $[1, 2, 3]$, targets $[2, 4, 6]$ and weight $1$, the predictions are $[1, 2, 3]$. The residuals are $[-1, -2, -3]$. Their squares add to $14$, so the mean loss is $14/3$. At weight $2$, every residual is zero. These two settings give us independent checks before we use gradients.
+With inputs $[1,2,3]$, targets $[2,4,6]$, and $w=1$, predictions are $[1,2,3]$, residuals are $[-1,-2,-3]$, and squared errors sum to $14$. The mean loss is $14/3$. At $w=2$, predictions match all targets and the loss is zero. These hand values check both the model and the averaging before differentiating.
 
 $$
 L(w)=\frac{1}{N}\sum_{i=1}^{N}(wx_i-y_i)^2
@@ -51,9 +49,9 @@ $$
 
 ## Derive the gradient independently
 
-Each squared residual contributes two factors when we differentiate: twice the residual, and the input $x_i$ from differentiating $wx_i$. We average those contributions just as we averaged the losses.
+Differentiating the mean loss preserves one contribution from every example, then averages them. Each squared residual contributes twice the residual, and differentiating the prediction $wx_i$ contributes the input $x_i$.
 
-For this dataset, the loss simplifies to $(14/3)(w-2)^2$. At $w=1$, its derivative is $-28/3$. The negative sign tells us that a small increase in the weight reduces the loss. That sign is useful: subtracting a negative gradient should move the weight upward, toward $2$.
+For this dataset, each residual is $x_i(w-2)$, so the loss is $(14/3)(w-2)^2$. At $w=1$, its slope is $-28/3$. The negative sign predicts that raising the weight lowers the loss. Since gradient descent subtracts the gradient, the update should move upward; this direction check can reveal a missing minus sign before running code.
 
 $$
 \begin{aligned}\frac{dL}{dw}&=\frac{2}{N}\sum_{i=1}^{N}(wx_i-y_i)x_i\\L(w)&=\frac{14}{3}(w-2)^2\quad\text{for our three examples}\end{aligned}
@@ -61,15 +59,15 @@ $$
 
 ## Read value_and_grad as an interface
 
-The transformation returns a callable whose result is a pair: (value, gradient). In this lesson the value has shape $()$ and the gradient also has shape $()$ because the parameter is scalar. For a vector parameter, the gradient would have the vector parameter shape, not the batch shape. For a structured parameter tree, the gradient mirrors the tree.
+`value_and_grad` returns the objective value and its derivative together, which keeps evaluation and update tied to the same parameter value. In the scalar example both outputs have shape $()$. With a vector parameter the gradient has the parameter’s shape, and with a parameter pytree it has matching structure; it does not acquire the batch shape just because the loss used a batch.
 
-Only the first positional argument is differentiated by default. Data can be explicit additional inputs without becoming parameters. Making that boundary explicit will matter when we compile training steps and reuse them across batches. value_and_grad bundles value and derivative computation in one transformed call; it does not guarantee a specific speedup for every workload.
+By default, the first positional argument is differentiated. Passing data as later arguments makes the boundary explicit: differentiate parameters while treating this batch as input. The returned pair is an interface contract, not a promise of speed. Inspect both value and gradient shapes when moving from this scalar example to a model.
 
 ## Predict whether a step improves the objective
 
-A gradient descent step uses $w_{\mathrm{new}}=w-\alpha g$. With $\alpha=0.1$ and $g=-28/3$, w_new is about $1.9333$, much closer to $2$ than the initial $1$. The loss therefore falls to about $0.02074$.
+An update is useful only if its sign and size move the objective in the intended direction. Starting at $w=1$, with gradient $-28/3$ and step size $\alpha=0.1$, gradient descent gives $w_{new}=1.9333$, closer to the zero-loss weight $2$; the loss falls to about $0.02074$.
 
-For this quadratic, the error $e=w-2$ evolves as $e_{\mathrm{new}}=(1-28\alpha/3)e$. The loss decreases for a nonzero error when the absolute value of that multiplier is below one, giving $0<\alpha<\frac{3}{14}$. At $\alpha=0.3$, the multiplier is $-1.8$: the update crosses the optimum and increases the magnitude of the error. This threshold belongs to this dataset and objective, not to all training problems. Here $\alpha$ is the step size, $g$ is the gradient, and $e$ measures how far the current weight is from $2$. Try reading the error multiplier before running each step-size experiment.
+For this quadratic the error is multiplied by $1-28\alpha/3$ each step. At $\alpha=0.3$, that multiplier is $-1.8$: the update crosses the solution and leaves a larger error, so loss rises. Read this as a property of this quadratic and dataset, not a universal learning-rate rule. The plotted slope tells direction; this calculation tells whether the chosen step overshoots.
 
 $$
 \begin{aligned}w_{\mathrm{new}}&=w-\alpha g\\e_{\mathrm{new}}&=\left(1-\frac{28\alpha}{3}\right)e,\qquad e=w-2\end{aligned}
@@ -77,9 +75,9 @@ $$
 
 ## Separate objective value from useful metrics
 
-A single mean can hide an important individual error. Keep residuals or another diagnostic metric alongside the scalar loss. With `has_aux=True`, the function returns `(scalar_loss, auxiliary_data)`, and value_and_grad returns `((loss, auxiliary_data), gradient)`. The differentiation objective is still the scalar loss; the auxiliary return does not create an additional objective.
+A mean loss compresses a batch to one number, so it can hide which example is still wrong. Keep residuals or another diagnostic as auxiliary output when they help explain behavior. With `has_aux=True`, `value_and_grad` differentiates only the scalar loss and carries auxiliary data alongside its value.
 
-In a larger model, auxiliary data might contain predictions or accuracy. This interface avoids confusing model outputs, logging information, and the objective. It also makes it easier to test what the step actually optimizes.
+For example, predictions can be useful to inspect while optimizing their mean squared error. They are not a second objective merely because the function returns them. Read the result nesting carefully: objective plus auxiliary data is paired with the gradient. This distinction prevents logging outputs from being mistaken for quantities that receive gradients.
 
 ## Import JAX differentiation and array operations
 
@@ -145,11 +143,11 @@ Expected: Loss ≈ $4.666667$; gradient ≈ $-9.333334$. Small floating-point di
 
 ### Read the figure
 
-The upper panel plots mean squared loss in loss units; the lower panel plots its derivative with respect to weight in loss-per-weight units. Both panels use exactly the same horizontal weight coordinates. At w=1, loss is 14/3 and derivative is -28/3. At w=2, the derivative is zero while the loss is also zero for this dataset. A zero derivative identifies a stationary point, not generally a zero-valued objective.
+Both panels use the same horizontal weight coordinate. The upper vertical axis is mean squared loss; the lower is derivative per weight unit. At $w=1$, read loss $14/3$ and slope $-28/3$; at $w=2$, both are zero for this dataset. Follow the lower curve to its zero, then read the upper curve at that same weight. The panels have separate units and scales.
 
 ### Connect it to the computation
 
-The derivative curve crosses zero at the loss minimum for this convex quadratic. The separate vertical scales prevent a negative derivative from looking like a negative loss. The plotted values come from the lesson loss and autodiff derivative on the same grid; the hand checks at w=1 verify the selected coordinates. If a constant 1 were added to every squared-error value, predict which panel would move and which zero crossing would stay fixed.
+The lower curve crosses zero at the minimum of this convex quadratic, while the upper curve gives the objective value there. A stationary point need not have zero loss: adding a constant would lift only the upper curve and leave the lower zero crossing fixed. Use the two panels together to distinguish objective height from local direction.
 
 ```python
 grid = jnp.linspace(0.0, 4.0, 81)
@@ -163,7 +161,7 @@ visual_data = {'panels': [{'kind': 'line', 'x': grid.tolist(), 'xlabel': 'weight
 
 ## Recorded reference execution
 
-CPU run: 2026-10-27T12:28:29.159988+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:02:51.126054+00:00. JAX 0.9.2.
 
 ```text
 Loss: 4.6666669845581055 gradient: -9.333333969116211

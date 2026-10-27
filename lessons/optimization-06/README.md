@@ -44,6 +44,8 @@ Compare with an independent solver or known projection, inspect rank, and check 
 
 Take rows $(1,0)$, $(0,1)$, $(1,1)$ and targets $y=(1,2,2)$. These targets cannot all be matched. The best weights are $w=(2/3,5/3)$, with predictions $(2/3,5/3,7/3)$. The residual $r=Xw-y=(-1/3,-1/3,1/3)$ has zero dot product with each column. The mean squared error is $1/9$.
 
+The residual signs matter for the optimality check. The two columns are $(1,0,1)$ and $(0,1,1)$. Their dot products with residual (-1/3,-1/3,1/3) are both zero. The residual is nonzero, but no move along either feature column can reduce squared error to first order. Its squared norm is $3(1/9)=1/3$, and dividing by three observations gives mean squared error 1/9.
+
 $$
 \min_w\|Xw-y\|_2^2,\qquad X^\mathsf{T}(Xw-y)=0
 $$
@@ -58,7 +60,11 @@ Rank counts independent column directions. If both columns are the same vector $
 
 ## Measure sensitivity rather than guessing
 
-Singular values measure how strongly a matrix stretches different unit directions. For a full-column-rank matrix, the ratio $\kappa=\sigma_{\max}/\sigma_{\min}$ is its condition number. A tiny smallest singular value means some weight changes barely affect predictions. The inverse question—recovering weights from targets—can then amplify small disturbances. Our perturbation experiment is deliberately aligned with such a weak direction. It illustrates sensitivity, not a universal noise model. Rank decisions also depend on the solver cutoff and dtype.
+Singular values measure how strongly a matrix stretches different unit directions. For a full-column-rank matrix, $\kappa=\sigma_{\max}/\sigma_{\min}$ is its condition number in the Euclidean norm. A small $\sigma_{\min}$ means some changes to the weights barely affect predictions. Recovering weights from targets can therefore amplify a small disturbance along that weak direction.
+
+Let $q$ be a unit right-singular direction with $\|Xq\|_2=\sigma_{\min}$. Under a fixed full-rank least-squares solve, a target perturbation of size $\epsilon$ along its corresponding left-singular direction changes the coefficient along $q$ by $\epsilon/\sigma_{\min}$. For an illustrative $\sigma_{\min}=0.001$ and $\epsilon=0.01$, that coefficient change is $10$, while the fitted prediction changes by only $0.01$ along that direction. Large coefficient movement and small prediction movement can coexist.
+
+The lesson's actual perturbation experiment targets such a weak direction; it is not a universal noise model. Inspect its singular values, parameter changes and prediction error together. A solver that drops a direction below its rank cutoff uses a different effective inverse, so report the cutoff and dtype before comparing sensitivity.
 
 $$
 \kappa_2(X)=\frac{\sigma_{\max}(X)}{\sigma_{\min}(X)}
@@ -156,13 +162,15 @@ The feature matrix makes the third prediction equal the sum of the first two. Ma
 
 Least squares balances this conflict. For each feature column, the residual contributions cancel, giving $X^{\mathsf T}r=0$. That orthogonality, rather than zero residual on every row, is the optimality condition. The unequal bar heights are an unavoidable limitation of this model, not evidence that the solver failed.
 
+Before perturbing targets, predict whether a weak singular direction will produce a larger coefficient change than a strong one.
+
 ```python
 visual_data = {'kind': 'bar', 'labels': ['row 0', 'row 1', 'row 2'], 'ylabel': 'target / prediction', 'series': [{'label': 'target', 'y': y.tolist()}, {'label': 'least-squares fit', 'y': (X @ w).tolist()}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-27T12:28:52.924271+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:16:55.472662+00:00. JAX 0.9.2.
 
 ```text
 weights / rank / MSE: [0.6666669 1.6666665] 2 0.11111113

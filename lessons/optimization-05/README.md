@@ -50,6 +50,8 @@ $$
 
 Points on the line through $a$ have the form $ca$, where $c$ is a scalar. Choose the point nearest $u$. Its coefficient is $c=(a^\mathsf{T}u)/(a^\mathsf{T}a)$. For our axis direction, $c=3$, so the projection is $p=(3,0)$ and the leftover is $r=u-p=(0,4)$. Notice that the coefficient depends on how long we draw $a$; the projected point does not.
 
+With the rescaled direction $a=(2,0)$, the numerator $a^\mathsf{T}u=6$ and the denominator $a^\mathsf{T}a=4$, so the coefficient is $1.5$. The projected vector remains $(3,0)$. Changing the length used to describe a line must not change the closest point on that line.
+
 $$
 p=\frac{a^\mathsf{T}u}{a^\mathsf{T}a}a,\qquad r=u-p,\qquad a^\mathsf{T}r=0
 $$
@@ -156,13 +158,15 @@ We projected onto the horizontal direction. The residual is perpendicular to tha
 
 The lengths form a familiar check: $\lVert p\rVert=3$, $\lVert r\rVert=4$, and $\lVert u\rVert=5$, with $3^2+4^2=5^2$. Projection separates the part represented by the chosen direction from the part that direction cannot represent.
 
+Before changing the direction vector length, predict whether the projected endpoint should move; a correct projection onto the same line leaves it fixed.
+
 ```python
 visual_data = {'kind': 'vectors', 'arrows': [{'label': 'input u', 'start': [0, 0], 'end': u.tolist()}, {'label': 'projection p', 'start': [0, 0], 'end': p.tolist()}, {'label': 'residual r', 'start': p.tolist(), 'end': u.tolist()}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-27T12:28:47.819734+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:13:14.231176+00:00. JAX 0.9.2.
 
 ```text
 projection / residual: [3. 0.] [0. 4.]

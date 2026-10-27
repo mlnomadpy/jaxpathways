@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "operations-04",
-  "contentHash": "98787aa72a6d6959455558ef055fe8c2cac2a4808b1d5a57dca6d0ee9947947b",
+  "contentHash": "052c5af2aae5ace6b88df4dd6fa9821116636ffcc5214d4bae664a05d6c537d0",
   "rendererHash": "17e3bbad72ee4c43425845aaee76b86b85e84750551278be03d8c16842f4dc63",
   "kind": "executed",
-  "generatedAt": "2026-10-27T12:19:33.196911+00:00",
+  "generatedAt": "2026-10-27T17:01:50.736967+00:00",
   "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",
@@ -41,7 +41,7 @@
   "diagram": {
     "title": "Rejected candidates do not become active",
     "prediction": "Should a rejected candidate change the active artifact pointer?",
-    "reading": "Candidate B can exist while A remains active. Only the passing branch permits activation under the policy; failure keeps A selected. Letters identify artifacts, not scores. Preserve compatible processor and configuration identities with the selected model.",
+    "reading": "Read the arrows as a release decision trace: published B flows to evaluation; a passing gate leads to activating B, while a failing gate leads to keeping A active. The worked consumer returns 3.0 for A and 3.4 for B at \\(x=1\\), so the pointer choice has an observable effect. After activation, rollback uses the previous compatible ID and returns the output to 3.0. Predict the failed-gate branch: it must leave the old pointer and its 3.0 response unchanged.",
     "alt": "Candidate B can exist while A remains active. Only the passing branch permits activation under the policy; failure keeps A selected. Letters identify artifacts, not scores. Preserve compatible processor and configuration identities with the selected model.",
     "scope": "Architecture and dataflow mechanism diagram.",
     "height": 6.3,

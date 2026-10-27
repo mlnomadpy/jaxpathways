@@ -21,11 +21,9 @@ A distribution describes variability in outcomes. Averaging independent observat
 
 ## A precise mean does not make individual outcomes predictable
 
-Suppose observations have standard deviation $2$. For $100$ independent observations from the same distribution, the sample mean's standard deviation is $2/\sqrt{100}=0.2$. A new individual observation still has standard deviation $2$.
+For independent readings with standard deviation $3$, the sample mean of $100$ readings has standard deviation $3/\sqrt{100}=0.3$, while a new reading still has standard deviation $3$. The first quantity describes variation in an average across repeated samples; the second describes the data-generating spread of individual values.
 
-The standard-error curve is calculated under its sampling assumptions; it is not itself a collection of measured repeated experiments. Correlated observations can reduce the amount of independent information in a batch.
-
-When interpreting a narrow interval, ask what random quantity the interval describes: a mean, a latent parameter or a new observation. More data can make an estimated average precise while the underlying process remains noisy.
+The displayed standard-error curve is calculated from the independence assumption, not estimated from repeated experimental batches. Positive correlation would make $2/\sqrt{N}$ too optimistic because the effective amount of independent information is smaller. Before using a narrow band, identify whether its random quantity is a mean, parameter or future observation.
 
 ### Pause and reason
 
@@ -51,7 +49,9 @@ A single future reading has standard deviation $3$. An average of $N$ independen
 
 ## Logarithms preserve ratios that densities lose
 
-A normal log-density is a negative quadratic plus normalization terms. Summing log-densities for independent observations avoids multiplying many small values. A mixture is different: it adds weighted densities, so we use log-sum-exp rather than summing component log-densities. For equal components with log-densities $-1000$ and $-1001$, subtracting the maximum before exponentiation preserves their relative contribution. The ordinary density may still be too small to represent, but its log remains finite.
+A probability density is not the probability of observing one exact real-valued reading. Density has inverse-reading units, and probability comes from integrating it over an interval or region. For example, the normal density at its peak can exceed one for a sufficiently small standard deviation without violating probability rules.
+
+A normal log-density is a negative quadratic plus normalization terms. Summing log-densities for independent observations avoids multiplying many small values. A mixture instead adds weighted densities, so use log-sum-exp: for component log-densities $-1000$ and $-1001$, subtracting the maximum before exponentiation preserves their relative contribution. The executed stable mixture log density is about $-1000.380$; direct exponentiation underflows at this scale even though the log result remains finite.
 
 $$
 \log\!\left(\frac{e^a+e^b}{2}\right)=m+\log(e^{a-m}+e^{b-m})-\log 2,\quad m=\max(a,b)
@@ -169,11 +169,11 @@ Expected: The sample mean is close to $2$, the variance is close to $9$, and the
 
 ### Read the figure
 
-The horizontal axis is the number of independent observations on a logarithmic scale: equal spacing represents equal ratios of sample sizes. The vertical axis is the standard deviation in sensor-reading units. The flat curve stays at $3$: it describes one reading. The decreasing curve is $3/\sqrt{N}$: it describes the average of $N$ readings. At $N=100$, the average has standard deviation $0.3$, ten times smaller than an individual reading. These curves are analytic quantities evaluated by the executed example, not measured coverage intervals.
+The horizontal axis is independent sample count $N$ on a logarithmic scale, so equal horizontal steps multiply sample size by the same ratio. The vertical axis is standard deviation in sensor-reading units. The individual-reading curve stays at 3; the sample-mean curve is $3/\sqrt{N}$, reaching 0.3 at $N=100$. These are analytic standard deviations under independence, not observed confidence-interval coverage.
 
 ### Connect it to the computation
 
-The two curves explain the mean test in our code. A large simulation can estimate the distribution mean accurately while predictions for new sensor values remain noisy. Correlated draws, such as the Markov chains later in this phase, do not satisfy the same independent-sample calculation unchanged.
+At $N=100$, averaging reduces uncertainty about the mean by a factor of ten but does not shrink the spread of the next reading. The seeded sample check reports mean 2.0067 and variance 9.0353, close to the model values 2 and 9 for this finite draw. Correlated draws would not follow the same standard-error curve without accounting for dependence.
 
 ```python
 # Transfer the device result to the host for an independent NumPy comparison.
@@ -183,7 +183,7 @@ visual_data = {"kind":"line","x":sizes.tolist(),"xlabel":"independent observatio
 
 ## Recorded reference execution
 
-CPU run: 2026-10-27T12:31:49.477610+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:13:56.914419+00:00. JAX 0.9.2.
 
 ```text
 sample mean, variance: 2.0067408084869385 9.035282135009766

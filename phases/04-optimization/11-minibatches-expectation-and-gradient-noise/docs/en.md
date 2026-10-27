@@ -42,7 +42,7 @@ The usual inverse-size relationship assumes a particular sampling model, often i
 
 ## Define the population before estimating it
 
-Use the per-example loss $\ell(w,y)=\tfrac12(w-y)^2$ with targets $(1,2,3,4)$. At $w=0$, the per-example gradients are $(-1,-2,-3,-4)$. Their mean is $-2.5$, and their population variance is $1.25$: average the squared deviations from the mean, dividing by $4$. This finite training dataset is the population for our sampling experiment, not the population of all future data.
+Use the per-example loss $\ell(w,y)=\tfrac12(w-y)^2$ with targets $(1,2,3,4)$. At $w=0$, the per-example gradients are $g_i=w-y_i=(-1,-2,-3,-4)$. Their mean is $g=-2.5$. The population variance is $\frac14\sum_{i=1}^{4}(g_i-g)^2=\frac{2.25+0.25+0.25+2.25}{4}=1.25$. The mean gradient $-2.5$ gives the average direction; variance $1.25$ measures how individual gradients spread around it. This four-example training set is the finite population for our sampling experiment, not the population of all future data.
 
 $$
 g=\frac1n\sum_{i=1}^n g_i,\qquad \operatorname{Var}(g_i)=\frac1n\sum_{i=1}^n(g_i-g)^2
@@ -51,6 +51,8 @@ $$
 ## Make the independence assumption explicit
 
 Draw $B$ examples independently and uniformly with replacement, where $B$ is the batch size. Repeated examples are allowed. The batch gradient $\hat g$ has expectation $g$ and variance $\operatorname{Var}(g_i)/B$. For $B=2$, enumerate all $16$ ordered pairs. The batch variance is $0.625$. Sampling without replacement follows a different variance formula; correlated samples can reduce the benefit of averaging.
+
+For batch size two there are $4^2=16$, ordered draws with replacement. Independence makes the cross term vanish, so averaging divides variance by two: $1.25/2=0.625$. The batch-three bar is $1.25/3\approx0.4167$. These bars are variances, not standard deviations; standard deviation scales as one over the square root of batch size.
 
 $$
 \mathbb{E}[\hat g]=g,\qquad \operatorname{Var}(\hat g)=\frac{\operatorname{Var}(g_i)}{B}
@@ -178,6 +180,8 @@ Each batch averages independent, uniformly sampled per-example gradients with re
 
 The bar heights are squared gradient units, not loss or gradient magnitude. A shorter bar does not mean a smaller learning rate or a faster overall training run. Sampling without replacement, correlated examples, and changing parameters require a different variance analysis.
 
+Before increasing batch size, predict both quantities separately: mean gradient stays -2.5, while independent-sample variance falls as 1/B.
+
 ```python
 triples = (per[:, None, None] + per[None, :, None] + per[None, None, :]) / 3
 visual_data = {'kind': 'bar', 'labels': ['batch 1', 'batch 2', 'batch 3'], 'ylabel': 'gradient variance', 'series': [{'label': 'exact enumeration', 'y': [float(jnp.var(per)), float(jnp.var(pairs)), float(jnp.var(triples))]}]}
@@ -185,7 +189,7 @@ visual_data = {'kind': 'bar', 'labels': ['batch 1', 'batch 2', 'batch 3'], 'ylab
 
 ## Recorded reference execution
 
-CPU run: 2026-10-27T12:29:18.109131+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:13:32.881282+00:00. JAX 0.9.2.
 
 ```text
 full gradient / single variance / pair variance: -2.5 1.25 0.625

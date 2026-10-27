@@ -23,7 +23,7 @@ Exact recovery joins numerical state and input-pipeline state at one completed u
 
 ## Read the data and model transition before the serialization helpers
 
-This is the learner-authored transition that defines the recovery boundary: take one batch from the iterator, update the training state from that batch, and return both. The long standalone program also contains reviewed support code for the synthetic source, fixed-size byte packing, version capture, contract validation and Orbax calls. Those helpers make the exercise reproducible; the idea to learn is the alignment of the iterator cursor and training state after the same completed update.
+The learner-authored transition consumes one batch, updates the training state from that batch, and returns both the updated state and iterator. This is the boundary to understand before reading packing and Orbax helpers: model state and data position must advance together. The full program adds a real Grain iterator and verifies the same boundary across restore.
 
 ### Pause and reason
 
@@ -37,13 +37,9 @@ It must yield the third batch in the shuffled epoch: [4, 10, 11, 3]. The recorde
 
 ## Align model time with data time
 
-If saved weights include the C/D update but the iterator still points to C/D, recovery trains on that batch again. If the iterator is one batch too far ahead, it skips data. Both runs can continue without a shape error.
+After two batches, the checkpoint is at completed step $2$, and the next IDs are $[4,10,11,3]$. The retained run compares four future batches across the epoch boundary: $[4,10,11,3]$, $[2,0,11,1]$, $[5,7,6,8]$, then $[4,3,10,9]$. The uninterrupted and restored loss values match at steps $3$ through $6$, and full state agrees at step six.
 
-Draw one vertical boundary after an update and align parameters, optimizer, key and cursor with it. The next restored arrow must consume the same examples as the uninterrupted run.
-
-When comparing loss trajectories, align measurement conventions too. A loss before an update and a loss after it describe different states. Compare IDs and state values alongside loss, because similar scalar losses can conceal different training histories.
-
-The components are parameters $\Theta_t$, optimizer state $O_t$, random key $k_t$, completed step $t$, opaque Grain iterator state $I_t$, and configuration/data contract $c$. The transition $F_c$ consumes the iterator's next batch and then applies one update. A modulo position formula is insufficient for the shuffled, multi-epoch iterator below. Compare all future example IDs as well as the next state; matching one scalar loss can conceal a repeated or skipped batch.
+If weights include the update for a batch but the iterator points before it, that batch is repeated. If the iterator points beyond the consumed batch, it is skipped. Save parameters, Adam state, key, step, and next-unconsumed iterator position at one completed-update boundary; similar first losses do not repair a misaligned cursor.
 
 $$
 C_t=(\Theta_t,O_t,k_t,t,I_t,c),\qquad (\Theta_{t+1},O_{t+1},k_{t+1},I_{t+1})=F_c(\Theta_t,O_t,k_t,I_t)
@@ -57,7 +53,7 @@ $$
 
 *Architecture and dataflow mechanism diagram.*
 
-Read down the middle column: all state describes the same completed update. Across each row is its next use. An older cursor repeats data and a newer cursor skips it. The table shows logical state, not wall-clock timing.
+Each row names one state value at the accepted boundary and the next transition that consumes it. Read downward to see that parameters and optimizer state belong after update (t), the key is the next unused random value, the iterator is at the next unconsumed batch, and the counter records (t) completed. The horizontal reading across a row explains its next use. An older iterator repeats data and a later iterator skips it. Compare the diagram with the observed step-2 next IDs before restoring; the table represents logical alignment, not elapsed time.
 
 ### Pause and reason
 
@@ -71,9 +67,9 @@ Different data or optimizer state can coincidentally produce similar loss. Exact
 
 ## Commit one logical boundary
 
-consume retrieves a batch, computes an update and returns the updated training state. After two calls, the model step is two and the iterator points at batch three. We pack that iterator snapshot in the same Orbax payload as the model, Adam memory, random stream and contract.
+Each `consume` call takes one batch, applies its update, and returns the updated state with the advanced iterator. After two calls, the model step is (2) and the iterator is ready for batch three. Store both in the same Orbax payload so the restored parameters and cursor describe the same point.
 
-A real prefetcher may prepare data ahead of consumption; the snapshot semantics must refer to the iterator boundary supported by its implementation. This tutorial uses a serial Grain loader and synchronous checkpointing, so no speculative workers or asynchronous outstanding writes complicate the boundary. Do not extrapolate this protocol to an arbitrary data queue without checking its restore contract.
+This example uses a serial loader and synchronous checkpointing. A prefetched pipeline may have requested records beyond those consumed by training, so define the snapshot boundary from that loader's supported state semantics rather than from a guessed queue count.
 
 ```text
 read batch 1 → update 1
@@ -83,15 +79,15 @@ restore → read batch 3 → update 3
 
 ## Persist opaque iterator bytes without editing them
 
-Grain get_state returns bytes. We store them as a fixed-size uint8 buffer plus length so the Orbax restore target has a predictable shape. set_state receives the original byte sequence recovered from that buffer. The application does not inspect or patch Grain internal counters.
+Grain returns the iterator snapshot as bytes. The example stores them in a (4096)-byte uint8 buffer plus a length so the restore target has fixed shape, then passes the recovered bytes back to Grain unchanged. Oversized snapshots fail rather than being truncated.
 
-The buffer capacity is $4096$ bytes and over-capacity snapshots fail. It is a teaching representation, not a general replacement for Grain checkpoint integration handlers. Restore is supported for this tested source/sampler/worker configuration. Changing those settings may invalidate a snapshot, so our contract also records seed, batch size, record count and source revision.
+This packing is a teaching device, not a substitute for Grain's supported handlers. Restore is checked for the tested source, sampler, batch, and worker configuration; a changed seed or batch size is an incompatibility to detect.
 
 ## Audit the future, including an epoch transition
 
-There are twelve records in each of two epochs and three four-example batches per epoch. We checkpoint after two batches. The remaining four batches are the final batch of epoch zero followed by all three batches of epoch one. Compare each future ID vector and each future loss in order, then compare every final state leaf.
+The fixture has 12 records per epoch, in batches of four. From the checkpoint after two batches, the next four batches include the last batch of epoch zero and all three batches of epoch one. The plotted losses overlap at steps (3,4,5,6): approximately (0.54963), (0.83905), (0.07169), and (0.32428) for both paths.
 
-Comparing only final loss can miss skipped or repeated observations, particularly on an easy dataset. Comparing only IDs can miss an optimizer/key reset. Comparing only weights can miss a count or random-state error that changes a subsequent step. The combined check targets all three failure classes.
+Those are four scalar comparisons, not a full proof by themselves. The script also compares each batch's IDs and every final state leaf, catching a skipped/repeated record or an optimizer/key reset that a similar loss could hide.
 
 ```text
 epoch 0: batch 1 | batch 2 | checkpoint | batch 3
@@ -101,9 +97,9 @@ replay compares IDs + losses + params + Adam + key + step
 
 ## Define the limits of this recovery claim
 
-The payload contract contains dataset SHA256, source revision, counts, ordering configuration, update configuration, PRNG implementation and package versions. Refuse a mismatch rather than silently announcing a resumed run. This is intentionally stricter than claiming compatibility between arbitrary versions.
+The local contract binds the run to the dataset digest, source revision, record count, ordering settings, batch size, update configuration, PRNG implementation, and package versions. The retained checks reject changed seed, changed data digest, and a different batch configuration rather than silently resuming.
 
-The local directory is temporary and the writer is synchronous. The lesson verifies readable files and CPU replay after reconstructing objects in the same process; it does not simulate power loss, a separate machine, multi-host orchestration, async interruption or remote storage behavior. Your portfolio report should state those limits and identify the next failure mode to test. Production use should adopt the library-supported combined handlers/manager and test its completion/recovery boundaries.
+The writer is synchronous, storage is local, and restore runs in the same process environment. This demonstrates the tested continuation path only; it does not qualify power-loss behavior, remote storage, worker loss, multi-host restart, or arbitrary configuration migration.
 
 ## Learner transition: commit the iterator cursor with the update
 
@@ -269,11 +265,11 @@ Expected: The next four ID batches and losses match; parameters, Adam state, con
 
 ### Read the figure
 
-The uninterrupted and resumed loss curves overlap within the numerical tolerance across steps 3 through 6 in this fixed CPU run. This figure compares four scalar losses; the separate tree assertions check the parameter and optimizer leaves as well.
+The horizontal axis is the training step after the checkpoint, from 3 through 6; the vertical axis is batch loss. The uninterrupted and restored series overlap at approximately (0.54963), (0.83905), (0.07169), and (0.32428). These are four measured scalar losses, not a full state comparison.
 
 ### Connect it to the computation
 
-This example restores model weights, optimizer moments, the step counter, PRNG key and data position under an unchanged batching configuration and environment. Its continuation checks support parity for this fixture. They do not establish exact continuation after a batching change, worker loss or a fresh multi-host restart.
+The overlap shows the restored trajectory follows the reference for the remaining batches, including the epoch transition. Use the separate batch-ID ledger and state-leaf assertions to tell whether the same data and optimizer transition produced those values. On a changed configuration, first investigate the cursor and contract rather than assuming a close loss means a correct resume.
 
 ```python
 # Compare step losses for the 4 post-checkpoint updates (`reference_losses` vs `resumed_losses`):
@@ -282,7 +278,7 @@ visual_data = {'kind': 'line', 'x': [3, 4, 5, 6], 'xlabel': 'training step after
 
 ## Recorded reference execution
 
-CPU run: 2026-10-27T12:30:17.416058+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:05:05.152023+00:00. JAX 0.9.2.
 
 ```text
 Restored boundary: 2 next IDs: [4, 10, 11, 3]

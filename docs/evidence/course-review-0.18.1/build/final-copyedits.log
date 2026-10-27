@@ -1,0 +1,6 @@
+PASS optimization-06
+PASS tpu-02
+PASS optimization-06: script + notebook code
+PASS tpu-02: script + notebook code
+OK: 2 executed (104 total CPU lessons); 4 executions
+Release 0.18.1: 104 lessons and 22 phases match the recorded source snapshot.

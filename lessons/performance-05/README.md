@@ -23,11 +23,9 @@ Reverse-mode differentiation needs information from forward execution. Remateria
 
 ## Follow an intermediate from creation to last use
 
-Imagine a backward rule needs an intermediate from the first operation in a chain. One strategy retains it; another reruns enough forward work to reconstruct it. Draw the value's lifetime and mark which computation is repeated.
+During reverse-mode differentiation, a backward rule may need a value produced earlier. Keeping it saves recomputation but extends its lifetime; discarding it can shorten retention if the program recomputes it when needed. Trace one value from creation to last use to predict what a checkpoint boundary can change.
 
-Saved autodiff entries, estimated bytes and compiled peak memory are different quantities. Fusion, temporary buffers and reuse can change the compiled memory picture even when a source-level list of saved values changes.
-
-Read each plot with its own units. Fewer entries alone are separate from lower peak device memory or faster execution. Use the storage model to form a hypothesis, then inspect compiler information and actual target behavior.
+A residual description, a compiler temporary-byte estimate, and peak device memory are separate quantities. The plot has two panels precisely because they need different units and can respond differently.
 
 ### Pause and reason
 
@@ -41,9 +39,9 @@ The compiler may already eliminate or reuse them, while other temporaries domina
 
 ## Follow one layer backward
 
-Our layer multiplies a vector by a fixed matrix and applies tanh. In the backward pass, the derivative of tanh uses the forward output. If that output is retained, the derivative can reuse it. If selected intermediates are discarded, the program must reconstruct the needed value from retained inputs and weights.
+For $h=\tanh(xW)$, the local tanh derivative uses the forward output: $1-h^2$. Given an incoming cotangent, multiply by that factor and then by the transposed weight matrix to propagate sensitivity to $x$. Keeping $h$ lets the backward pass reuse it; rematerializing can reconstruct selected values from the input and weights.
 
-For layer output $h$, the local derivative factor is $1-h^2$. Multiplying the incoming cotangent by that factor, then applying the transposed weight matrix, propagates sensitivity to the preceding vector. The NumPy reference implements this recurrence explicitly instead of calling autodiff.
+The independent NumPy recurrence checks this chain explicitly, giving a numerical reference for the automatic gradient.
 
 $$
 \bar x=W^\top\bigl(\bar h\odot(1-h^2)\bigr)
@@ -51,27 +49,27 @@ $$
 
 ## Choose a boundary around pure work
 
-We apply jax.checkpoint to the layer function. The outer objective uses four layers and a sum of squared final outputs. The reference and rematerialized versions share the same weights and input. If a function relies on untracked mutation, hidden randomness or effects, recomputation can have a different meaning; explicit state and keys remain essential.
+The example wraps a pure layer in `jax.checkpoint` inside a four-layer objective that sums squared final outputs. Both policies use the same input and weights, so they compare differentiation choices under one workload. Mutation, hidden randomness or side effects would need explicit treatment because recomputation executes the function again.
 
-Checkpointing the entire loss at an unhelpful boundary may simply recompute nearly all work without eliminating the intermediates you expected. Compare policies at meaningful blocks, and start with a small function whose derivative you can verify.
+Choose a boundary around meaningful repeated work. Rematerializing too much can redo most of the objective without removing the values you meant to release.
 
 ## Inspect what autodiff saves
 
-print_saved_residuals names values retained for differentiation. The output describes a constant weight matrix and selected vector intermediates. Count the entries to compare policies, but read their shapes too: one large matrix may cost more than many scalar entries. The printed list is a diagnostic representation, not a device-memory allocation trace.
+`print_saved_residuals` names values retained for differentiation, including a constant $16\times16$ weight matrix and selected 16-element intermediates. In the recorded example, ordinary differentiation lists nine descriptions and layer rematerialization lists six. The decrease confirms that the reported autodiff residual set changed, but entries are not bytes and have different shapes.
 
-In this fixed example, the ordinary policy reports nine residual descriptions and layer rematerialization reports six. Those counts explain that the differentiation strategy changed; they do not guarantee a proportional reduction in peak bytes.
+Read the shapes as well as the count before predicting storage impact.
 
 ## Read compiled memory estimates separately
 
-Compile the gradient for the same input contract and inspect memory_analysis. Argument, output, temporary and alias bytes answer different questions. Backend support and reporting conventions can vary, so record missing analysis as unavailable instead of substituting zero.
+The compiled gradient's memory report separates argument, output, temporary and alias bytes. In the recorded CPU run, both policies estimate 256 temporary bytes, despite the residual-description count changing from nine to six. That comparison shows no reduction in this compiler-reported category for these input shapes.
 
-In the tested small CPU example, both policies report the same temporary-buffer estimate. That is a useful result: fewer saved autodiff values need not reduce this compiled program’s allocated temporary storage. Fusion, buffer reuse and compiler decisions stand between a mathematical strategy and a memory allocation.
+Compiler fusion and buffer reuse mediate between autodiff's saved values and compiled storage. If a backend does not provide this analysis, report it as unavailable rather than treating missing data as zero.
 
 ## Measure the tradeoff you actually care about
 
-Warm both compiled gradients and collect synchronized calls. Keep all samples, not just the fastest. Rematerialization can add arithmetic; on a tiny workload, dispatch and noise can dominate. No strict timing ordering is required.
+The independent recurrence agrees with both gradients, so the numerical comparison passes for this fixture. Synchronized runtime samples are reported separately; rematerialization can add arithmetic, and these tiny CPU timings vary enough that a strict speed ordering is not a useful decision rule.
 
-A training-memory claim requires the complete training step, representative model and batch shapes, and actual peak memory on the target device. Include optimizer state and input buffers. Test whether the policy enables the intended larger batch without changing the objective, then verify quality and runtime again.
+To choose a policy for training memory, compare the full representative step on the target device, including optimizer state and inputs. Ask whether it enables the intended batch size while preserving the objective, then verify runtime and model quality.
 
 ## Define two differentiation policies
 
@@ -235,15 +233,11 @@ Expected: Both gradients agree with the independent reverse recurrence. The save
 
 ### Read the figure
 
-The upper panel counts saved-residual descriptions for ordinary differentiation and layer rematerialization. The vertical unit is entries, not bytes. In this fixed network the counts are nine and six, including a shared constant matrix; the decrease shows a changed differentiation strategy.
-
-The lower panel reports compiler-estimated temporary bytes when that analysis is supported. In the recorded CPU example both bars have height $256$. Equal bars mean the compiler reports no reduction in this category for these shapes, even though the residual-entry count decreased.
+The upper panel's y-axis counts saved autodiff residual descriptions: ordinary differentiation has 9 and layer rematerialization has 6, including a shared constant matrix. These are entries, not bytes. The lower panel's y-axis is compiler-estimated temporary storage in bytes; both recorded bars are 256 bytes for this CPU example. Equal lower bars mean no estimated temporary-byte reduction in this category.
 
 ### Connect it to the computation
 
-The independent reverse recurrence checks the numerical derivative for both policies. The figure then compares two distinct storage views: values named by autodiff and temporary buffers estimated after compilation. Compiler reuse and fusion can make their relationship non-proportional.
-
-These are not measurements of peak accelerator allocation or total training memory. The runtime samples are recorded separately, and a meaningful policy decision needs representative model size, optimizer state and actual target-device measurements. If a backend lacks memory analysis, the plot explicitly substitutes a labeled availability panel rather than treating missing bytes as zero.
+The independently checked reverse recurrence supports that both policies compute the same gradient on this fixture. The two panels measure different views: rematerialization changes which values autodiff names as residuals, while the compiler still reports 256 temporary bytes for each program. Neither panel measures peak accelerator allocation or total training memory. Next inspect a representative full training step and its target-device memory before choosing a policy.
 
 ```python
 panels=[{'kind':'bar','title':'Autodiff residual descriptions','labels':['ordinary','layer remat'],'ylabel':'saved entries (not bytes)','series':[{'label':'residual descriptions','y':[len(r) for r in reports]}]}]
@@ -256,7 +250,7 @@ visual_data={'kind':'panels','panels':panels}
 
 ## Recorded reference execution
 
-CPU run: 2026-10-27T12:31:03.146454+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:06:00.920916+00:00. JAX 0.9.2.
 
 ```text
 Saved residual descriptions:
@@ -278,7 +272,7 @@ f32[16] output of tanh from <string>:15:20 (layer)
 f32[16] output of tanh from <string>:15:20 (layer)
 f32[16] output of tanh from <string>:15:20 (layer)
 Compiler memory estimates: [{'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}, {'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}]
-Synchronized gradient samples: [[4.537496715784073e-05, 2.416735514998436e-05, 2.1375250071287155e-05, 1.1249911040067673e-05, 9.000301361083984e-06], [3.954116255044937e-05, 4.1832681745290756e-05, 3.129197284579277e-05, 2.945913001894951e-05, 2.262461930513382e-05]]
+Synchronized gradient samples: [[6.245775148272514e-05, 5.400041118264198e-05, 4.358310252428055e-05, 3.929203376173973e-05, 3.899959847331047e-05], [4.158308729529381e-05, 4.2833853513002396e-05, 6.041722372174263e-05, 5.133310332894325e-05, 3.700004890561104e-05]]
 Independent reverse recurrence agrees with both gradients.
 plain 
 f32[16,16] from a constant
@@ -298,7 +292,7 @@ f32[16] output of tanh from <string>:15:20 (layer)
 f32[16] output of tanh from <string>:15:20 (layer)
 f32[16] output of tanh from <string>:15:20 (layer)
 Compiler memory estimates: [{'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}, {'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}]
-Synchronized gradient samples: [[4.537496715784073e-05, 2.416735514998436e-05, 2.1375250071287155e-05, 1.1249911040067673e-05, 9.000301361083984e-06], [3.954116255044937e-05, 4.1832681745290756e-05, 3.129197284579277e-05, 2.945913001894951e-05, 2.262461930513382e-05]]
+Synchronized gradient samples: [[6.245775148272514e-05, 5.400041118264198e-05, 4.358310252428055e-05, 3.929203376173973e-05, 3.899959847331047e-05], [4.158308729529381e-05, 4.2833853513002396e-05, 6.041722372174263e-05, 5.133310332894325e-05, 3.700004890561104e-05]]
 Saved residual descriptions:
 plain 
 f32[16,16] from a constant
@@ -318,7 +312,7 @@ f32[16] output of tanh from <string>:81:20 (layer)
 f32[16] output of tanh from <string>:81:20 (layer)
 f32[16] output of tanh from <string>:81:20 (layer)
 Compiler memory estimates: [{'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}, {'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}]
-Synchronized gradient samples: [[3.4458935260772705e-05, 0.00012854114174842834, 0.00015137530863285065, 8.516572415828705e-05, 8.316570892930031e-05], [4.2582862079143524e-05, 3.750016912817955e-05, 4.7958921641111374e-05, 4.324968904256821e-05, 2.7041416615247726e-05]]
+Synchronized gradient samples: [[6.358325481414795e-05, 3.262516111135483e-05, 3.1750183552503586e-05, 2.270890399813652e-05, 9.291805326938629e-06], [1.237494871020317e-05, 8.792150765657425e-06, 7.83335417509079e-06, 1.7334241420030594e-05, 1.2707896530628204e-05]]
 Independent reverse recurrence agrees with both gradients.
 Whole-objective residuals: ['f32[16,16] from a constant', 'f32[16] from the argument v']
 Whole-objective memory estimate: CompiledMemoryStats(generated_code_size_in_bytes=0, argument_size_in_bytes=64, output_size_in_bytes=64, alias_size_in_bytes=0, temp_size_in_bytes=256, host_generated_code_size_in_bytes=0, host_argument_size_in_bytes=0, host_output_size_in_bytes=0, host_alias_size_in_bytes=0, host_temp_size_in_bytes=0)

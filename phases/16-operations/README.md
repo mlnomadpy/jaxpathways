@@ -12,7 +12,9 @@ Use a bounded failure drill and retain its raw event log. Check state and data i
 
 ## Study guide: Can you detect, explain and safely recover a failed model release?
 
-Operational evidence connects work done to user-visible behavior. Separate worker health, model quality and release ownership so an alert leads to a specific investigation rather than automatic retraining.
+An operational signal is useful when it leads to a specific question and action. A stalled worker, a degraded data slice and an unapproved artifact can all hurt users, but each requires different evidence. Trace the work, the candidate and the selected release rather than collapsing them into one green status.
+
+Begin with a bounded worker and structured events, then rehearse recovery and a rejected change. Follow that foundation into capacity, data quality, retrieval traces and model ownership. At each transition, ask which artifact a consumer would actually load and which observations justify changing it.
 
 ### Check your starting point
 

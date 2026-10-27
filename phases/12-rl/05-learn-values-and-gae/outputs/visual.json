@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "rl-05",
-  "contentHash": "fcc5c8651a166d4185d843af73e8b8866e53158d5a0f0cb52c387fc5cac59e94",
+  "contentHash": "1c3970b69463953ce5252283cc06a983e6057a82139e020733151dd029d8f813",
   "rendererHash": "17e3bbad72ee4c43425845aaee76b86b85e84750551278be03d8c16842f4dc63",
   "kind": "executed",
-  "generatedAt": "2026-10-27T15:33:13.943871+00:00",
+  "generatedAt": "2026-10-27T17:11:06.596927+00:00",
   "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",
@@ -533,7 +533,7 @@
   "diagram": {
     "title": "A cutoff bootstraps value but stops reverse GAE",
     "prediction": "If the collector cutoff is the task\u2019s true finite deadline, which bootstrap term and advantage values change?",
-    "reading": "This is a hand-computed mechanism example with gamma=0.5 and lambda=0.5, separate from the gamma=0.9 critic-fit rollout plot. Read each transition from left to right in increasing time. The reverse-scan arrow points from A1 back to A0. At t=0, delta0 = 1 + 0.5(1) - 0.5 = 1, bootstrap mask is 1 and trace mask is 1, so A0 = 1 + 0.25(3) = 1.75 for a continuing cutoff. At t=1, the final pre-reset observation is position 3 with V=4: a continuing collector uses bootstrap mask 1 and delta1=2+0.5(4)-1=3. The trace mask is 0, so the reset episode at position 0 cannot send A2 backward across the boundary. If this same cutoff is the finite task deadline, bootstrap mask becomes 0, delta1=1, and A0=1.25. A true terminal also has bootstrap mask 0; for reward 2 and current value 1, its residual is 1 even if a terminal observation has a stored value.\n\n```text\nCase                         delta1  m_boot  m_trace1  A1   A0\nContinuing collector cutoff      3       1       0      3    1.75\nFinite-horizon deadline          1       0       0      1    1.25\nTrue terminal                    1       0       0      1    n/a\n```\n\nChanged-input prediction: turning the continuing cutoff into a task deadline removes the 0.5 x V(position 3)=2 bootstrap contribution from delta1; because the trace mask was already zero, the difference reaches A0 only through the earlier t=0 trace.",
+    "reading": "Read the graph left to right as \\(t=0: s_0=0\\to s_1=1, r_0=1\\) then \\(t=1: s_1=1\\to s_2=3, r_1=2\\); the reverse arrow points from the second residual back to the first with coefficient \\(\\gamma\\lambda=0.25\\). For this diagram only, \\(\\gamma=\\lambda=0.5\\): continuing cutoff gives \\(\\delta_1=A_1=3\\), then \\(A_0=1.75\\); making it the finite deadline removes \\(\\gamma V(3)=2\\), giving \\(\\delta_1=1\\) and \\(A_0=1.25\\). The trace mask is zero in both cases, isolating reset episode \\(t=2, s_2=0\\). A true terminal also has bootstrap mask zero. Predict which number changes if the collector cutoff is reclassified as the task deadline: the bootstrap contribution changes, while the trace boundary stays closed. The critic-fit plot elsewhere uses gamma=0.9.",
     "alt": "Mechanism diagram for reverse GAE. At t=0, position 0 transitions to position 1 with reward 1, delta 1 and trace mask 1. At t=1, position 1 transitions to final pre-reset position 3 with reward 2. Continuing-cutoff bootstrap mask 1 gives delta and advantage 3; the trace mask is 0. The reverse arrow contributes 0.25 times 3 to A0, giving 1.75. A reset observation at position 0 is isolated from the prior episode. At a finite deadline or true terminal, bootstrap mask is 0, giving delta 1 and A0 1.25 for the finite-horizon case.",
     "scope": "Deterministic hand fixture with gamma=0.5 and lambda=0.5; the critic loss plot separately uses gamma=0.9 discounted targets.",
     "height": 7.2,

@@ -51,11 +51,9 @@ All three calculations are legal. Only the first answers the question about each
 
 ## Derive the centering and scale values
 
-Think of one column at a time. The symbol $x_{ij}$ means the value in row $i$, feature $j$, and $N$ is the number of training rows. The mean $\mu_j$ is the column’s center. The variance $s_j^2$ averages squared distances from that center; its square root $s_j$ is the scale we divide by.
+Read each column as its own small calculation. Feature 0 is $[1,3,5]$: its mean is $3$, so subtracting that value gives $[-2,0,2]$. The squared distances sum to $8$, and dividing by the three training rows gives population variance $8/3$. Feature 1 similarly centers from $[10,14,18]$ by its mean $14$, yielding $[-4,0,4]$ and variance $32/3$. The second column's standard deviation is twice the first's, so dividing by each column's own scale makes their standardized values match.
 
-For the first feature $[1, 3, 5]$, the mean is $3$. The centered values are $[-2, 0, 2]$, so the variance is $8/3$. The second feature $[10, 14, 18]$ centers to $[-4, 0, 4]$ and has variance $32/3$. Its scale is twice as large, so both columns have the same standardized pattern.
-
-A constant column has scale zero. We use a safe denominator of $1$ for that column, which leaves its centered training values at zero. Learn the mean and scale from training data, then reuse them on new data; recomputing them on each incoming batch changes the meaning of a feature.
+The execution prints the means $[3,14]$, the centered matrix, and a transformed new row. A constant training column has scale zero; this lesson uses scale $1$ for exactly constant columns so its centered training values remain zero. Fit these statistics on training data and reuse them on later data rather than recentering each incoming batch.
 
 $$
 \begin{aligned}\mu_j&=\frac{1}{N}\sum_{i=1}^{N}x_{ij}\\s_j^2&=\frac{1}{N}\sum_{i=1}^{N}(x_{ij}-\mu_j)^2\\z_{ij}&=\frac{x_{ij}-\mu_j}{s_j}\quad(s_j>0)\end{aligned}
@@ -63,9 +61,9 @@ $$
 
 ## Fit statistics once; apply them consistently
 
-Centering training data using its own mean is useful. Recomputing the mean separately for each validation batch changes the transformation and incorporates information from that batch. A model then sees features represented in different coordinate systems.
+Centering a training set with its own mean is useful because it establishes the coordinate system that the model will see. Recomputing the mean on each validation or inference batch would shift that coordinate system from call to call and would use the new batch's values to define its own transformation.
 
-Separate `fit_standardizer(training_data)`, which computes statistics, from `apply_standardizer(data, statistics)`, which reuses them. The same rule will apply to training/validation splits, inference requests, and checkpointed preprocessing state. A new batch is not expected to have zero mean after applying training statistics; that difference can be meaningful.
+Keep the two jobs conceptually separate: fitting computes the feature statistics once, and applying uses those saved statistics on any compatible data. The recorded new row transforms to approximately $[2.44949,2.44949]$, not zero, because the lesson applies training means and scales to that row. That nonzero output is evidence of displacement relative to the training distribution, not a failed centering operation.
 
 ## Give constant features an explicit policy
 
@@ -155,7 +153,7 @@ visual_data = {'kind': 'line', 'x': [0, 1, 2], 'xlabel': 'observation index', 'y
 
 ## Recorded reference execution
 
-CPU run: 2026-10-27T12:28:18.162254+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:02:36.471172+00:00. JAX 0.9.2.
 
 ```text
 Mean: [ 3. 14.]

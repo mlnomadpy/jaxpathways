@@ -1,4 +1,10 @@
-# Current author review: 0.18.0
+# Current author review: 0.18.1
+
+Start with [the teaching review guide](review-guide-0.18.1.md), [the complete local book](http://127.0.0.1:4210/downloads/jax-foundations.html) and [blank feedback notes](review-notes-0.18.1.md). The remaining 92 lessons now have worked-example and figure explanations, building on the 12 lessons revised in 0.18.0. All 22 chapter introductions connect their learning progression. The [editorial coverage](evidence/course-review-0.18.1/editorial-coverage.json) and [qualification packet](evidence/course-review-0.18.1/verification.json) bind the review to exact sources and exports. The candidate is not merged or deployed; human acceptance and existing scope limits remain open.
+
+---
+
+# Author review: 0.18.0
 
 Start with [the 0.18.0 review guide](review-guide-0.18.0.md) and [blank feedback notes](review-notes-0.18.0.md). The [complete local HTML book](http://127.0.0.1:4210/downloads/jax-foundations.html) and [book overview](http://127.0.0.1:4210/book.html) use the frozen review preview. The guide lists the new lesson routes, workspace requirements and evidence limits. Exact source and artifact identities are in [the qualification packet](evidence/course-review-0.18.0/verification.json). This candidate addresses content issues #74 through #91 on top of PR #71 and is not merged or deployed.
 

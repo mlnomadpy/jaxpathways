@@ -23,13 +23,9 @@ Slow steps can come from preparing new program specializations or from waiting f
 
 ## Distinguish new tracing from host waiting
 
-Change only array values while keeping shapes, dtypes and static choices fixed. Then change one signature component and record the observed trace behavior. Changing everything together makes the cause ambiguous.
+Two different costs can look like a pause: staging a new signature and waiting for already-dispatched work. First vary one signature component while keeping the function and process fixed; then inspect host-side reads such as converting a device scalar to Python. A `float(score)` wait does not itself imply a new trace.
 
-Inspect host reads and logging next. Converting device results into Python values can force a wait even when no retracing occurs. That delay needs a different intervention from reducing signature variation.
-
-Trace counts describe observed Python tracing. They are not a universal count of compiler work or a guarantee of cache reuse after restart. Combine the ledger with a trace of completed work before deciding which change improves the actual workload.
-
-The tuple $\sigma_r$ is the controlled signature ledger for call $r$; $n_r$ is the number of observed Python tracing events after that call. Value-only changes can leave $\Delta n_r=0$; a changed relevant shape or static option can increase it. This observation does not count every compiler stage. Hold the function and process fixed, change one factor, and read the actual trace records before assigning a cause.
+The trace counter answers only whether this diagnostic observed Python tracing. Combine it with synchronized timing or a trace before deciding which change affected the workload.
 
 $$
 \sigma_r=(\operatorname{shape}(x_r),\operatorname{dtype}(x_r),c_{r,\rm static}),\qquad \Delta n_r=n_r-n_{r-1}
@@ -47,9 +43,9 @@ Inspect synchronization, transfers, data preparation and logging. A stable trace
 
 ## A call signature is different from its numerical data
 
-Our score is the sum of squared scaled inputs. With $x=[0, \ldots, 7]$ and gain $1$, the answer is $140$; with gain $2$ it becomes $560$. Passing a float32 scalar gain keeps its abstract shape and dtype unchanged when the value changes. The transformed computation can read that value at execution time.
+The function sums squared inputs after multiplying by a gain. For $x=[0,\ldots,7]$, gain 1 gives 140 and gain 2 gives 560, yet changing the float32 scalar value leaves shape and dtype unchanged. The same specialization can therefore consume different numerical values.
 
-An array of twelve elements has a different shape from the eight-element array. Ordinary jit specializes to these shapes, so this is a plausible cause of new staging work. A ledger records the actual calls before attributing a pause. Sharding, compiler options, callable identity and other context can matter too; the ledger is a diagnosis aid, not a full cache-key specification.
+Changing the input length from 8 to 12 changes its abstract shape and is a plausible reason for a new trace. Alter one factor at a time; sharding, callable identity and compiler context can also affect specialization.
 
 ```text
 call → (shape, dtype, static choices) → specialization
@@ -58,9 +54,9 @@ call → (shape, dtype, static choices) → specialization
 
 ## Observe tracing without mislabeling compilation
 
-The score function appends its input signature to a Python list. This is a deliberate authoring diagnostic: Python runs while JAX traces the function, whereas the compiled numerical operations can run later without replaying that Python append. Never use this list as optimizer state or a reliable callback from accelerator execution.
+The Python list append runs when JAX traces the function; later compiled numerical execution does not replay that Python statement. The list is an intentionally simple tracing diagnostic, not optimizer state or an accelerator callback.
 
-We log the change in list length around each call, but assert numerical answers rather than a fixed event count. Cache state and implementation details affect observations. A trace event does not prove that a new executable was compiled, and absence of an event is not proof that no compiler activity occurred. Enable public jax_log_compiles diagnostics or obtain a profiler trace for stronger evidence, recording exactly which log event supports a claim.
+In the recorded calls, observed trace deltas are $(1,0,0,1)$: initial signature, changed values, changed dynamic gain, then length 12. This counter records Python tracing events, not exact compiler invocations. Use compile logs or a profiler when the claim concerns compiler behavior, and name the observed event.
 
 **Capture public compilation diagnostics on macOS/Linux**
 
@@ -84,15 +80,15 @@ Remove-Item Env:JAX_LOG_COMPILES
 
 ## Choose static arguments for structure rather than convenience
 
-A Boolean selecting one of two Python branches can be static so tracing selects the branch. Its value then becomes part of specialization, so changing that choice can trigger staging. Static arguments must be hashable and are unsuitable for arbitrary numerical array data. Avoid declaring a rapidly changing scalar gain static just to make Python logic convenient.
+A static Boolean lets Python choose a branch during tracing, so changing its value can create a separate specialization. This is appropriate for structural choices, not rapidly changing numeric data. A typed scalar array keeps a changing gain dynamic; a runtime Boolean condition can use `lax.cond`.
 
-If the gain only participates in arithmetic, pass it as a typed scalar array as we did. If a runtime Boolean chooses arithmetic, express the selection with lax.cond or another appropriate array operation. Static metadata and dynamic numerical values serve different purposes; changing one into the other can change the number of specializations and the program itself.
+Predict how many distinct structures the code can select before making an argument static. Static values must be hashable, and changing a static option changes the program branch as well as specialization.
 
 ## A host metric is an explicit synchronization boundary
 
-`float(score)` needs the scalar contents in Python. That read waits for any outstanding work needed to produce it. Keeping a scalar loss as a JAX array allows later device computations to consume it without Python inspecting its value. A chain can then be synchronized once at the final output.
+Converting a scalar JAX value with `float(score)` asks Python for its contents, so it waits for the work needed to produce that value. Keeping it as a JAX scalar lets later device computations consume it; wait once at the final result when the metric is not needed immediately.
 
-The exercise compares six dependent updates with host consumption after each step against six updates with a final wait. Both variants must produce the same scalar. Their wall-clock boundaries include different waits and conversion overhead; we record both but assert no speed ordering. Removing intermediate logging also removes observability, so production systems may use bounded logging intervals instead of silently dropping metrics.
+The exercise compares six dependent updates with a host read after each step against a final wait. Check that both produce the same scalar, then read their measured boundaries without assuming a speed ordering. If intermediate metrics matter, choose a bounded reporting interval rather than removing observability.
 
 ## Prepare a trace ledger
 
@@ -228,15 +224,11 @@ Expected: A JSON ledger of four calls and observed Python trace events. Checked 
 
 ### Read the figure
 
-Each bar reports the additional Python tracing events observed during one call category. The sequence is $(1,0,0,1)$: the initial call traces, new array values do not, a new dynamic gain does not, and a new input shape triggers another trace.
-
-The two zero-height bars are meaningful observations. The calls still execute and can return changed values; zero means the trace counter did not increase for those calls.
+The horizontal axis lists four call categories; the vertical axis is the additional observed Python trace-event count per call, not time. The bars are 1 for the first signature, 0 for changed array values, 0 for changed dynamic gain, and 1 for a length-12 input. Zero-height bars mean the call ran without a new Python trace event in this retained run.
 
 ### Connect it to the computation
 
-The existing specialization can accept compatible dynamic values without rerunning the traced Python body. Changing the example’s shape from length $8$ to length $12$ changes the abstract input signature, so a new trace is observed. This isolates shape from ordinary value changes.
-
-The vertical axis counts Python traces, not seconds, device kernels, or an exact count of backend compilations. To diagnose runtime overhead, combine this kind of counter with synchronized measurements or a profiler. A changed answer alone is not evidence of retracing.
+Changing data and gain changed results while the signature stayed length 8; changing length to 12 produced the second observed trace. The bars support the narrow conclusion that this diagnostic saw events for the initial and changed-shape calls. They do not count device kernels or all compilation work. Next predict the trace delta when only a runtime scalar changes, then separately time any host read you suspect is waiting.
 
 ```python
 visual_data = {'kind': 'bar', 'labels': ['initial', 'new values', 'new gain', 'new shape'], 'ylabel': 'observed Python trace events', 'series': [{'label': 'trace delta', 'y': [r['observed_trace_delta'] for r in call_rows]}]}
@@ -244,7 +236,7 @@ visual_data = {'kind': 'bar', 'labels': ['initial', 'new values', 'new gain', 'n
 
 ## Recorded reference execution
 
-CPU run: 2026-10-27T12:30:57.914142+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:05:53.544175+00:00. JAX 0.9.2.
 
 ```text
 {
@@ -360,8 +352,8 @@ CPU run: 2026-10-27T12:30:57.914142+00:00. JAX 0.9.2.
   ]
 }
 Static branch trace observations: [{'shape': [8], 'square': True}, {'shape': [8], 'square': False}]
-Per-step host reads seconds: 0.00010195793583989143
-Final-only wait seconds: 2.7750153094530106e-05
+Per-step host reads seconds: 0.00010458333417773247
+Final-only wait seconds: 3.0084047466516495e-05
 Added ledger row: {'label': 'new length sixteen', 'shape': [16], 'dtype': 'float32', 'observed_trace_delta': 1, 'result': 1240.0}
 Masked versus unmasked padded objective: 55.0 58.0
 Observed runtime-Python-branch tracing failure

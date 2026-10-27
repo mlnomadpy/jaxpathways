@@ -29,6 +29,8 @@ Record absolute error and an appropriate relative measure. Near-zero references 
 
 The layer-error plot identifies a location to investigate, not a universal threshold for all architectures. Use several inputs, including boundary cases, and compare the full preprocessing-to-output contract. Matching one fixture is separate from arbitrary checkpoint compatibility.
 
+In the matched fixture, maximum absolute errors stay between $1.19\times10^{-7}$ and $3.58\times10^{-7}$ across hidden, normalization, activation and output. With only epsilon changed, hidden error remains $2.38\times10^{-7}$, then normalization jumps to 0.0465; activation reaches 0.0514 and output later falls to 0.0120. The first bad layer identifies the likely cause more reliably than the largest final error.
+
 ### Small errors need a scale-aware budget
 
 **Predict:** Why can a larger absolute difference pass at a larger reference value?
@@ -37,7 +39,7 @@ The layer-error plot identifies a location to investigate, not a universal thres
 
 *Architecture and dataflow mechanism diagram.*
 
-Read each row as one elementwise decision using absolute tolerance $2\times10^{-6}$ and relative tolerance $2\times10^{-5}$. Near zero the absolute term determines the allowance. At reference $100$, the relative term increases it. These are hand-worked tolerance examples, not measured conversion errors; the executed bar plot below reports the model comparison.
+Each table row is one elementwise tolerance check: allowed difference is $2\times10^{-6}+2\times10^{-5}|y|$. Near zero, a difference of $10^{-6}$ passes and $3\times10^{-6}$ fails; at reference 100, the budget is 0.002002, so 0.001 passes. These are hand-worked tolerance examples. The executed plot separately shows the epsilon fault’s first mismatch at normalization.
 
 ### Pause and reason
 
@@ -467,11 +469,11 @@ Expected: Correct FP32 conversion passes layerwise and input-gradient tolerances
 
 ### Read the figure
 
-The horizontal categories follow execution order: hidden linear, normalization, activation and output. Bars show maximum absolute difference in that layer’s output units. The correct mapping remains near floating-point rounding error; the changed-epsilon model first diverges at normalization. The earlier matching hidden output narrows the cause. These are numerical errors, not accuracy or latency.
+The x-axis follows hidden linear, normalization, activation and output; the y-axis is maximum absolute output error in each layer’s units. Matched mapping errors remain at roughly $1.19\times10^{-7}$–$3.58\times10^{-7}$. Wrong epsilon leaves hidden error at $2.38\times10^{-7}$, then raises normalization to 0.0465, activation to 0.0514, and output to 0.0120. The earliest jump points to normalization; do not debug the later output projection first.
 
 ### Connect it to the computation
 
-All weights are identical between the correct and wrong-epsilon target models. A parameter-file comparison alone would miss the changed operation. Later error may grow or shrink through nonlinearities and the output projection, so the largest bar is not necessarily the location of the original bug. The per-element tolerance and gradient checks are reported separately from this plot.
+All weights are held fixed, so the wrong-epsilon bars isolate an operation mismatch. The hidden layer still matches within rounding error, while normalization is the first large error (0.0465); later activation grows it to 0.0514 and output reduces it to 0.0120. The per-element budget and nonuniform-cotangent gradient check are separate evidence. Next inspect epsilon and axes, then rerun varied inputs.
 
 ```python
 visual_data={'kind':'bar','labels':list(errors),'xlabel':'operation in execution order','ylabel':'maximum absolute output error','series':[{'label':'matched architecture (max across inputs)','y':[max(v) for v in errors.values()]},{'label':'wrong epsilon (last input batch)','y':[wrong_reports[k]['max_abs'] for k in errors]}]}
@@ -479,7 +481,7 @@ visual_data={'kind':'bar','labels':list(errors),'xlabel':'operation in execution
 
 ## Recorded reference execution
 
-CPU run: 2026-10-27T12:39:32.689881+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:09:33.686179+00:00. JAX 0.9.2.
 
 ```text
 Maximum absolute error per layer: {'hidden': 2.384185791015625e-07, 'norm': 3.5762786865234375e-07, 'activation': 3.5762786865234375e-07, 'output': 1.1920928955078125e-07}

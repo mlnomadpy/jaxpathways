@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "recovery-06",
-  "contentHash": "224c3b6beae16d05406f459203b2644a4210ce806e6eb76bd66c2e100706855c",
-  "executedAt": "2026-10-27T12:30:28.350498+00:00",
+  "contentHash": "d9fbd9fd03001f0073680f56ec67a6152a5a8c26fe8ce06592b4b0dc45d25be4",
+  "executedAt": "2026-10-27T17:26:53.719843+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -28,12 +28,12 @@
           "output_type": "stream",
           "name": "stderr",
           "text": [
-            "2026/10/27 05:30:25 INFO mlflow.store.db.utils: Creating initial MLflow database tables...\n",
-            "2026/10/27 05:30:25 INFO mlflow.store.db.utils: Updating database tables\n",
+            "2026/10/27 10:26:49 INFO mlflow.store.db.utils: Creating initial MLflow database tables...\n",
+            "2026/10/27 10:26:49 INFO mlflow.store.db.utils: Updating database tables\n",
             "\r",
             "Downloading artifacts:   0%|          | 0/1 [00:00<?, ?it/s]\r",
-            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 8388.61it/s]\r",
-            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 1854.25it/s]\n"
+            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 1412.22it/s]\r",
+            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 820.32it/s] \n"
           ]
         }
       ]
@@ -53,12 +53,12 @@
           "output_type": "stream",
           "name": "stderr",
           "text": [
-            "2026/10/27 05:30:26 INFO mlflow.store.db.utils: Creating initial MLflow database tables...\n",
-            "2026/10/27 05:30:26 INFO mlflow.store.db.utils: Updating database tables\n",
+            "2026/10/27 10:26:51 INFO mlflow.store.db.utils: Creating initial MLflow database tables...\n",
+            "2026/10/27 10:26:51 INFO mlflow.store.db.utils: Updating database tables\n",
             "\r",
             "Downloading artifacts:   0%|          | 0/1 [00:00<?, ?it/s]\r",
-            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 2007.80it/s]\r",
-            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 1353.44it/s]\n"
+            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 1587.55it/s]\r",
+            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 1077.67it/s]\n"
           ]
         }
       ]
@@ -114,20 +114,20 @@
           "output_type": "stream",
           "name": "stderr",
           "text": [
-            "2026/10/27 05:30:27 INFO mlflow.store.db.utils: Creating initial MLflow database tables...\n",
-            "2026/10/27 05:30:27 INFO mlflow.store.db.utils: Updating database tables\n",
+            "2026/10/27 10:26:51 INFO mlflow.store.db.utils: Creating initial MLflow database tables...\n",
+            "2026/10/27 10:26:51 INFO mlflow.store.db.utils: Updating database tables\n",
             "\r",
             "Downloading artifacts:   0%|          | 0/1 [00:00<?, ?it/s]\r",
-            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 2532.79it/s]\r",
-            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 1683.78it/s]\n",
+            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 1390.22it/s]\r",
+            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 942.33it/s] \n",
             "\r",
             "Downloading artifacts:   0%|          | 0/1 [00:00<?, ?it/s]\r",
-            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 2449.94it/s]\r",
-            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 1379.25it/s]\n",
+            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 1547.71it/s]\r",
+            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 987.13it/s] \n",
             "\r",
             "Downloading artifacts:   0%|          | 0/1 [00:00<?, ?it/s]\r",
-            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 1754.94it/s]\r",
-            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 1145.67it/s]\n"
+            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 2129.09it/s]\r",
+            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 1302.17it/s]\n"
           ]
         }
       ]

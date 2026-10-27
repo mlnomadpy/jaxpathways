@@ -12,7 +12,9 @@ Complete this short 2-lesson setup course right after 00: Setup & first steps, t
 
 ## Study guide: Can you provision a Cloud TPU VM, verify that JAX actually executes on its chips, and prove clean teardown?
 
-Every accelerator experiment starts with knowing how many hosts and GiB of HBM your slice provides, verifying that libtpu is active inside an isolated .venv, and deleting billable VMs when finished.
+Choosing an accelerator begins with a workload and a per-device capacity calculation. Aggregate HBM can look sufficient while a replicated parameter or optimizer array still exceeds the memory available to one device. Work through the placement and headroom assumptions before creating a resource.
+
+Then compare the requested runtime with the observed backend and topology. A numerical check answers whether the tested arithmetic agrees; the receipt answers which environment ran it. Keep the named creation route and its matching cleanup steps together so the experiment has a clear beginning and end.
 
 ### Check your starting point
 

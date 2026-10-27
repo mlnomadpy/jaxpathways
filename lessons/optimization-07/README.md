@@ -52,6 +52,8 @@ $$
 
 Choose $v=(1,-1)$. A small move $\varepsilon v$ in the input changes the output by approximately $\varepsilon Jv$. Here $Jv=(3,1)$: the first output moves three times as fast as the second along this direction. `jax.jvp` returns both the ordinary output and this directional sensitivity. It can compute the product without storing the full Jacobian.
 
+For a small step $h=0.01$, the linear prediction is $f(x+hv)$ approximately f(x)+h(3,1)=$(7.03,6.01)$. The first output changes by about 0.03, the second by about 0.01. The omitted terms are second order in h, so shrinking h should improve the approximation until floating-point rounding matters.
+
 $$
 f(x+\varepsilon v)\approx f(x)+\varepsilon Jv
 $$
@@ -59,6 +61,8 @@ $$
 ## Pull output sensitivity backward
 
 Suppose the scalar loss is $L(x)=\tfrac12\|f(x)\|_2^2$. Its derivative with respect to the outputs is $c=f(x)=(7,6)$. The chain rule gives $\nabla_x L=J^\mathsf{T}c=(46,19)$. `jax.vjp` returns the output and a pullback function. Passing $c$ into that function returns input sensitivities. The pullback result is a tuple because a function can have several inputs.
+
+Here $c=f(x)=(7,6)$ is the sensitivity of half the squared output norm to its two outputs. The pullback is $(4\cdot7+3\cdot6,\,1\cdot7+2\cdot6)=(46,19)$. Both components are positive, so increasing either input slightly increases this loss at $(2,3)$.
 
 $$
 \nabla_x L=J^\mathsf{T}\nabla_f L
@@ -172,13 +176,15 @@ For a joint input change in direction $v=(1,-1)$, multiply the whole matrix by t
 
 These are local sensitivities, not model weights, probabilities, or final output values. The entries can change at another input. To check the interpretation, take a small step $\epsilon v$ and compare the output change with $\epsilon Jv$.
 
+Before a small finite move along v, predict output change hJv; halve h and check whether the nonlinear discrepancy shrinks.
+
 ```python
 visual_data = {'kind': 'heatmap', 'values': jax.jacfwd(f)(x).tolist(), 'rows': ['output 0', 'output 1'], 'columns': ['input 0', 'input 1'], 'unit': 'partial derivative'}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-27T12:28:55.951577+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:13:24.196759+00:00. JAX 0.9.2.
 
 ```text
 Jv / loss gradient: [3. 1.] [46. 19.]

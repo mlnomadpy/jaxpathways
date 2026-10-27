@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "science-01",
-  "contentHash": "57652b72fddba823d7f54206af80bca313c1771b8ae8bb574c14c425d55bb2de",
-  "executedAt": "2026-10-27T12:31:13.891802+00:00",
+  "contentHash": "d8876a806e1e189ede2e16ae51fa00b7ecd3f997ce3c8c481b59eddd7ff096a5",
+  "executedAt": "2026-10-27T17:06:12.551779+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,

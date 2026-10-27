@@ -22,11 +22,9 @@ A pairwise reward model learns to give a preferred item a higher score than its 
 
 ## A preference compares scores rather than calibrating utility
 
-If chosen and rejected scores are $3$ and $1$, their margin is $2$. Adding $10$ to both scores leaves the margin unchanged and therefore leaves a difference-based preference loss unchanged. The absolute offset is not identified by those comparisons.
+A preference label says which of two responses was favored under a shared prompt and rubric. The model turns the score difference into a preference probability: $p=\sigma(r_+-r_-)$. That probability describes the label likelihood; each response still receives a scalar reward score, not a calibrated probability of being good. Adding the same constant to both rewards leaves $p$ unchanged.
 
-Conflicting labels can make an intermediate preference probability more appropriate than an extreme one. Inspect disagreement and source quality rather than assuming the model should confidently fit every pair.
-
-The margin plot shows separation on the fixture. To support downstream policy optimization, evaluate generalization and possible exploitation separately. A reward that ranks a few training pairs correctly can still be unreliable on policy-generated outputs.
+In the recorded three-pair synthetic fit, mean pairwise NLL falls from 0.693 nats (a 50/50 tie) to 0.087, and all three training margins become positive. This shows the fitted ranking on those pairs, not human agreement. Before using the scores downstream, inspect held-out pairs and ask whether disagreements and unseen prompts are represented.
 
 ### Pause and reason
 
@@ -50,7 +48,7 @@ Keep the prompt identity, chosen/rejected response identities, label source and 
 
 ## Fit score differences with a stable likelihood
 
-The probability of preferring a chosen response is the sigmoid of its reward difference. The negative log likelihood is softplus of the negative margin. A tied pair starts at $\log 2$. A common offset to all rewards cancels, so comparisons alone do not identify an absolute reward origin.
+For margin $m=r_+-r_-$, the chance assigned to the observed preference is $\sigma(m)$, while the training loss is $\log(1+e^{-m})$. At $m=0$, the probability is one half and loss is $\log2$; at $m=\log3$, the probability is three quarters. Those are probabilities of the pairwise label under the model, not probabilities that a reward score is correct in general. The scalar score itself remains relative: the shared prompt comparison cancels any common offset.
 
 $$
 L_{\mathrm{RM}}=\mathbb E\left[\operatorname{softplus}\!\left(-(r_w(x,y^+)-r_w(x,y^-))\right)\right]
@@ -68,13 +66,11 @@ $$
 
 ## Disagreement changes the optimum
 
-If the same two responses appear once with each preference direction, the average loss is minimized at a tied score, not at infinite confidence in either label. With unequal vote frequencies, the optimum reflects those frequencies under this likelihood model. Collapsing disputed examples into one apparently certain label discards information.
-
-Group train and evaluation splits by prompt/source. Report agreement, likelihood and calibration under the labeling protocol, and inspect disagreements. A scalar metric can hide systematic preferences that conflict between raters or domains. The next policy optimizer will amplify the score signal, so keep a separate evaluator for qualities the reward model may have missed.
+Conflicting labels provide evidence about uncertainty. If the same pair appears once in each direction, the average likelihood is best at margin zero, which assigns one-half to each direction; forcing a huge positive margin would fit one label and contradict the other. For uneven votes, the fitted probability can reflect their frequency. Preserve the vote fraction and source rather than reducing every pair to an unquestioned majority.
 
 ## Separate ranking from calibration
 
-Check ordering, held-out pair likelihood and agreement by prompt/source slice. A large positive margin means the model is confident under its likelihood, not that a response is universally good. Separable preferences can drive growing margins; regularization, validation and stopping rules matter even when every training comparison is correct.
+On the held-out synthetic set, the pre-fit zero-score model assigns 0.5 to all four comparisons, with mean Brier error 0.1406 and 0/1 accuracy on unanimous cases. After fitting the three training pairs, held-out Brier error is 0.0223 and unanimous accuracy is 1/1. On the two disagreement cases, Brier error changes only from 0.0313 to 0.0294; their probabilities are retained rather than forced into a unanimous label. This is a tiny synthetic check, not human or language-response validation. Use held-out slices to decide whether this reward is ready for the next experiment.
 
 ## Preserve disagreement and data provenance
 
@@ -82,13 +78,11 @@ Real raters may disagree for legitimate reasons. Retain the rating rubric, task,
 
 ## Keep the reward model fixed during policy evaluation
 
-The next lesson freezes the learned reward while optimizing a policy. If reward changes mid-comparison, observed improvement may reflect a moving evaluator. Retain a reference policy, independent task metrics and adversarial examples to detect reward exploitation.
+The next lesson freezes this reward model while a policy changes. If scores moved during that comparison, a policy could appear to improve because the evaluator changed. Carry the reward-model identity and its held-out behavior with the run, keep an independent task metric, and inspect outputs the reward may score incorrectly. A rising reward alone is not evidence of better responses.
 
 ## Audit both what scores identify and what they do not
 
-Adding one common offset leaves every preference margin unchanged, so pair comparisons cannot identify an absolute zero of reward. Positive scaling preserves ranking but changes probabilities and confidence. The scale also changes the reward-versus-KL tradeoff in policy optimization. Save normalization and model identity when handing scores to the next phase.
-
-A perfectly fitted training ranking can coexist with overconfidence or poor held-out ranking. On separable data the model can keep increasing margins without learning a new ordering. Track weight norms, held-out likelihood and error slices; choose regularization and stopping on development data rather than demanding the smallest possible training loss.
+Pairwise comparisons identify relative margins, not an absolute zero: adding a common offset changes no training probability. Scaling the weights preserves ordering but changes confidence and the reward scale, which changes how strongly a downstream KL penalty competes with reward. In this recorded fit, the margins are about 1.65, 4.29, and 2.64 for the three ordered pairs. Save model identity and normalization so the next policy run uses a known score scale.
 
 ## Freeze a baseline before fitting and inspect held-out disagreement cases
 
@@ -274,13 +268,11 @@ Expected: The model learns all three declared preferences; common reward offsets
 
 ### Read the figure
 
-The vertical axis is pairwise negative log likelihood in nats. It starts near $0.693=\log2$, then falls to about $0.087$. Each point is before an update on the same three synthetic comparisons; it is not a human agreement rate.
-
-The second panel reports final chosen-minus-rejected score margins for the three training comparisons. All are positive, so each ordering agrees with its synthetic label. The zero-versus-two comparison spans the other two and has the largest margin. A common reward offset would leave every bar unchanged; multiplying weights by two would double them without changing ordering. Neither operation is visible in a ranking-only accuracy number.
+The first panel uses completed parameter updates on x and pairwise NLL in nats on y; on the same three synthetic training pairs it falls from 0.693 (a tied 50/50 prediction) to 0.087. The second panel gives final chosen-minus-rejected reward margins: about 1.65, 4.29, and 2.64 for 0>1, 0>2, and 1>2. All are positive, and the widest comparison has the largest margin.
 
 ### Connect it to the computation
 
-The initial zero weights tie all response scores. Training increases the chosen-minus-rejected margins. The offset and scaling exercises explain why reward values must be interpreted relative to their model and downstream objective.
+This confirms the model learned the fixture's three relative orderings, not an absolute or universally calibrated notion of quality. The held-out report is a separate check: Brier error falls from 0.1406 to 0.0223 and unanimous accuracy rises from 0/1 to 1/1, while disagreement Brier changes only from 0.0313 to 0.0294. Because the held-out set has only four synthetic comparisons, use a larger prompt-grouped evaluation before trusting the score in policy optimization.
 
 ```python
 visual_data={'kind':'line','xlabel':'completed parameter updates before measurement','ylabel':'pairwise preference NLL (nats)','series':[{'label':'recorded CPU training loss','x':list(range(len(history))),'y':history}]}
@@ -294,7 +286,7 @@ visual_data={"panels":[*visual_data.get("panels",[visual_data]),extra_panel]}
 
 ## Recorded reference execution
 
-CPU run: 2026-10-27T14:08:52.262457+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:26:59.191516+00:00. JAX 0.9.2.
 
 ```text
 Frozen held-out reward baseline before fit: {'probabilities': array([0.5, 0.5, 0.5, 0.5]), 'brier_mean': 0.140625, 'unanimous_accuracy': 0.0, 'disagreement_probabilities': array([0.5, 0.5]), 'disagreement_brier': 0.03125}

@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "tpu-03",
-  "contentHash": "68c34e20d5b8f341b5b48a5e848e4652fcfbdb9117d73eca87511e2153919344",
+  "contentHash": "2c3f496cb1c99a959c9833836e370a11b1f538653ee1a885de2bbbc549534bb2",
   "rendererHash": "17e3bbad72ee4c43425845aaee76b86b85e84750551278be03d8c16842f4dc63",
   "kind": "analytic",
-  "generatedAt": "2026-10-27T12:19:53.908573+00:00",
+  "generatedAt": "2026-10-27T17:21:11.037456+00:00",
   "provenance": "analytic_calculation_not_device_execution",
   "environment": {
     "backend": "cpu",
@@ -82,7 +82,7 @@
   "diagram": {
     "title": "TPU state placement, HBM budget and compute path",
     "prediction": "What remains on each physical chip under replication versus explicit sharding, and where do BF16 operands enter?",
-    "reading": "Training state may be replicated or sharded; this diagram treats placement as an explicit choice rather than assuming aggregate HBM is enough. The 48 GiB, four-v5e-chip case needs 48 GiB/device if replicated or 12 GiB/device under ideal even sharding, before activations and temporaries. Verify actual NamedSharding and live memory before claiming the latter placement. Inference KV cache is a separate scenario.",
+    "reading": "Follow the arrows from the per-device HBM ledger, through operand traffic, into the chosen compute path, and finally to a target trace. The ledger must name placement: for 48 GiB of state on four 16 GiB v5e chips, replication needs 48 GiB/device; ideal even sharding needs 12 GiB/device. With the fixture's 1 GiB activation allowance, that shard needs 13 GiB against 12.8 GiB usable, so it misses by 0.2 GiB. The bandwidth node carries GB/s figures, while the compute comparison is in FLOP/byte; inspect each unit on its own. Inference KV cache is a separate ledger. The next step is to confirm actual sharding and inspect a target trace for memory, compute and communication evidence.",
     "alt": "Conceptual TPU per-device ledger: replicated training state is copied to every chip; explicitly sharded state is partitioned across chips; activations and temporaries use additional HBM; a separate inference path holds KV cache; BF16 operands stream from HBM to compute.",
     "scope": "Architecture and dataflow mechanism diagram.",
     "height": 6,

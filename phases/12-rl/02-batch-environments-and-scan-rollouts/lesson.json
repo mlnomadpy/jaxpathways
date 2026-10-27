@@ -14,7 +14,7 @@
       {
         "id": "guided-reasoning",
         "title": "Keep the array shape fixed while activity changes",
-        "body": "Draw one environment per row and time across columns. Mark the transition that terminates an episode, then mark later padding separately. The terminal transition can still earn reward; masking it out too early loses part of the episode.\n\nCarry the next state and activity information explicitly. If the implementation resets finished environments, distinguish that contract from absorbing padding instead of mixing them in one explanation.\n\nThe active-count curve decreases while the tensor shape stays fixed. It measures active environments, not shrinking allocation. Verify one environment independently, then permute the batch to check that unrelated trajectories stay independent.",
+        "body": "A compiled rollout needs a fixed \\((T,B)\\) array even when episodes finish at different times. In this collector, `active` is read before `step`, so an action that reaches the goal still contributes its reward; later rows remain as padding. For one row, read `active → terminal + reward → padding`; compare it with an episode that stays active through all columns. This implementation does not auto-reset inside the scan.",
         "check": {
           "prompt": "Should every cell after the first done flag be treated identically to the transition that caused done?",
           "answer": "No. The terminating transition can contain valid reward and learning information. Later padding follows the declared terminal policy and should not invent extra transitions."
@@ -22,24 +22,24 @@
       },
       {
         "title": "Give each axis one meaning",
-        "body": "For \\(T=8\\) and \\(B=64\\), the reward array has shape \\((8,64)\\). Summing axis zero gives one return per episode. Summing axis one gives total reward at each time index across the batch, a different statistic. vmap maps reset and step over environments; scan threads the complete batch of states through time. The carry has the same structure, shapes and dtypes at every iteration."
+        "body": "The rollout stores rewards with shape \\((T,B)=(8,64)\\): time is axis 0 and environment is axis 1. Summing axis 0 gives 64 episode returns; summing axis 1 gives eight batch totals by time, which answers a different question. `scan` advances the batch state through time while `vmap` handles environments. Check an entry's indices before reducing so time and episode are not accidentally swapped."
       },
       {
         "title": "Split randomness where ownership changes",
-        "body": "First split a reset key from an action key. Split reset keys across the \\(B\\) environments. Split action keys across the \\(T\\) time steps, then across environments. A scalar reset key broadcast to all environments would create correlated starts. An action key reused at every step would replay draws. Deterministic transitions do not need an extra key, so their signature stays simple."
+        "body": "Give independent random draws an owner. The collector splits reset and action keys; reset keys are split across 64 environments, and action keys across time and environments. Reusing one reset key would give identical starts, while reusing an action key at each step would repeat the same draw. The transition itself is deterministic, so it needs no key."
       },
       {
         "title": "Store the behavior policy before changing it",
-        "body": "Each position has a policy logit \\(\\theta_s\\). Applying the sigmoid gives the probability of moving right; the left probability is its complement. A sampled action is discrete, so we will not differentiate through action sampling. Instead, we store its log probability under the behavior policy. Stable log-sigmoid avoids taking a logarithm of a probability rounded to zero.",
+        "body": "At each position, \\(\\theta_s\\) is a logit and \\(\\operatorname{sigmoid}(\\theta_s)\\) is the probability of moving right. The collector stores the sampled action's log probability before training changes `theta`; later policy-gradient code compares against that behavior-policy record. Because the action is discrete, the estimator differentiates log probability times a credit signal rather than differentiating through the random draw. `log_sigmoid` keeps this calculation stable.",
         "math": "\\pi_\\theta(1\\mid s)=\\sigma(\\theta_s),\\qquad \\log\\pi_\\theta(a\\mid s)=a\\log\\sigma(\\theta_s)+(1-a)\\log\\sigma(-\\theta_s)"
       },
       {
         "title": "A final transition is still a learning example",
-        "body": "The active mask is computed from the state before step. Therefore the action that reaches the goal is active and retains its reward. Only subsequent rows are padding. Masking with the next state would delete the successful action itself. We store the final observation in the returned state and do not replace it with a fresh start. This collector handles one finite episode per environment, not an endless auto-reset stream."
+        "body": "Suppose the state before a step is active and action 1 reaches the goal. That row's mask is true, so its reward 1 stays in the batch; only the next row is padding. Masking from the returned `done` state would erase the successful transition. The stored `next_observation` is the true final position, not a fresh reset state."
       },
       {
         "title": "Credit each action with rewards that follow it",
-        "body": "Reward-to-go sums rewards from the current time onward. For rewards \\((-0.01,-0.01,1,0)\\), targets are \\((0.98,0.99,1,0)\\). The first action can influence all later rewards; the last successful action is credited with the goal reward only. We reverse the time axis, take a cumulative sum, and reverse it back. There is no value bootstrap here because these are complete finite-horizon episodes.",
+        "body": "Reward-to-go is the sum of current and later rewards. For `(-0.01,-0.01,1,0)`, the stored targets are `(0.98,0.99,1,0)`: the first action is associated with all later reward, and the goal-reaching action gets 1. These complete episodes use no value bootstrap. Returns from sampled episodes vary, so the estimate of an action's expected outcome is noisy; a learned baseline can reduce policy-gradient variance, which the later value/GAE lesson studies.",
         "math": "G_{t,b}=\\sum_{u=t}^{T-1}r_{u,b}"
       }
     ],
@@ -134,8 +134,8 @@
       "title": "The live batch shrinks while the array shape stays fixed",
       "kind": "executed",
       "prediction": "Should every row contain the same number of active environments?",
-      "reading": "The horizontal axis is the transition index; the vertical axis counts environments active before that transition. The first value is \\(64\\). The count never rises because we do not reset inside a rollout. Decreases show episodes reaching the goal; episodes still active on the final row will either finish or time out on that row. In the recorded seed, the first two counts are both \\(64\\): even the nearer starting position needs two actions to reach the goal. The third count is \\(58\\), and the last is \\(29\\). The unchanged first pair is therefore expected, not a stalled loop.",
-      "connection": "This curve is not reward or policy quality: a fast-ending policy could succeed, fail or exploit a termination bug in a different task. Here the transition tests establish that early endings are goals. The fixed \\((8,64)\\) reward array retains later rows, but their active flags are false. Changing the seed can move individual counts while preserving these invariants.",
+      "reading": "The x-axis is transition index (1–8); the y-axis counts active environments before that transition. The single uniform-random-policy series reads `[64,64,58,53,47,44,39,29]`: it begins with all 64 active, then fewer remain after goal-reaching transitions. The first two equal counts are expected because even a start at position 1 needs two right moves. Predict the next count's direction: without auto-reset, it can stay level or fall, never rise.",
+      "connection": "The plotted values exactly match `active environments by transition` in the CPU execution. The \\((8,64)\\) rollout allocation stays fixed while the live count falls from 64 to 29; those are different quantities. A falling count only says episodes ended, not whether a policy is good. Check the terminal-transition mask and reward before treating the curve as evidence of successful behavior.",
       "alt": "The live batch shrinks while the array shape stays fixed. The horizontal axis is the transition index; the vertical axis counts environments active before that transition. The first value is \\(64\\). The count never rises because we do not reset inside a rollout. Decreases show episodes reaching the goal; episodes still active on the final row will either finish or time out on that row. In the recorded seed, the first two counts are both \\(64\\): even the nearer starting position needs two actions to reach the goal. The third count is \\(58\\), and the last is \\(29\\). The unchanged first pair is therefore expected, not a stalled loop.",
       "code": "visual_data = {'kind':'line','x':list(range(1,9)),'xlabel':'transition index','ylabel':'active environments before transition','series':[{'label':'uniform random policy','y':records['active'].sum(1).tolist()}]}"
     },
@@ -184,7 +184,7 @@
     "diagram": {
       "title": "A terminal transition still counts",
       "prediction": "Should every cell after the first done flag be treated identically to the transition that caused done?",
-      "reading": "Each row is one environment. A terminating transition can still earn reward; later cells are padding under this absorbing-state contract. Tensor length stays fixed while activity changes. This is a conceptual rollout example, not an auto-reset implementation.",
+      "reading": "Read each table row as an environment and each column as a transition in time. `active → terminal + reward → padding` shows that the ending transition is still data; later cells are fixed-shape padding. Row C stays active through the displayed window. Predict what would be lost if masking used the next state's `done` flag: the transition carrying the goal reward would disappear. This is absorbing padding, not an auto-reset stream.",
       "alt": "Each row is one environment. A terminating transition can still earn reward; later cells are padding under this absorbing-state contract. Tensor length stays fixed while activity changes. This is a conceptual rollout example, not an auto-reset implementation.",
       "scope": "Architecture and dataflow mechanism diagram.",
       "height": 4.1,

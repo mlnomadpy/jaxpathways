@@ -1,0 +1,24 @@
+PASS optimization-05: script + notebook code
+PASS optimization-01: script + notebook code
+PASS optimization-06: script + notebook code
+PASS optimization-07: script + notebook code
+PASS optimization-03: script + notebook code
+PASS optimization-11: script + notebook code
+PASS optimization-12: script + notebook code
+PASS recovery-02: script + notebook code
+PASS performance-01: script + notebook code
+PASS probability-01: script + notebook code
+PASS rl-01: script + notebook code
+PASS rl-02: script + notebook code
+PASS rl-03: script + notebook code
+PASS rl-05: script + notebook code
+PASS kernels-01: script + notebook code
+PASS kernels-02: script + notebook code
+PASS kernels-03: script + notebook code
+PASS kernels-04: script + notebook code
+PASS deployment-04: script + notebook code
+PASS deployment-06: script + notebook code
+PASS operations-01: script + notebook code
+PASS operations-05: script + notebook code
+PASS tpu-02: script + notebook code
+OK: 23 executed (104 total CPU lessons); 46 executions

@@ -171,11 +171,11 @@ Expected: The posterior mean is approximately $(0.9231,1.7778)$. Latent variance
 
 ### Read the figure
 
-The horizontal axis is the input value. The vertical axis is predictive standard deviation, in target units. The lower curve propagates posterior weight uncertainty; the upper curve also adds the assumed observation noise before taking a square root. At input zero they are about $0.555$ and $1.144$. The curves rise symmetrically toward both ends because centered training inputs produce zero intercept-slope covariance.
+The horizontal axis is input value, and the vertical axis is predictive standard deviation in target units. The lower curve is uncertainty in the latent line; the upper curve adds the assumed unit observation-noise variance before taking the square root. At input zero, the executed model gives standard deviations about $\sqrt{4/13}=0.555$ and $\sqrt{17/13}=1.144$. At input two, they are about 1.444 and 1.757 because slope uncertainty grows away from the centered training inputs.
 
 ### Connect it to the computation
 
-The gap is not a fixed standard deviation of one: variances add, then we take the square root. The lower curve is narrowest near the observed center and grows under extrapolation. These are exact Gaussian-model standard deviations, not measured error bars or empirical coverage on a real test set.
+The curves come from the exact Gaussian posterior for fixed inputs $-1,0,1$, prior scale 2 and known noise scale 1. Variances add before taking the square root; observation noise is not added as a standard deviation. If we changed the assumed noise scale, only the upper predictive variance would receive that additional noise term directly, while refitting would also change the posterior covariance. These are conditional model quantities, not empirical coverage.
 
 ```python
 grid=jnp.linspace(-3,3,61)
@@ -185,7 +185,7 @@ visual_data={"kind":"line","x":grid.tolist(),"xlabel":"input value","ylabel":"pr
 
 ## Recorded reference execution
 
-CPU run: 2026-10-27T12:31:53.801407+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:07:04.106433+00:00. JAX 0.9.2.
 
 ```text
 posterior mean: [0.923077  1.7777778] covariance: [[0.30769232 0.        ]

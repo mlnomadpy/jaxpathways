@@ -21,11 +21,9 @@ The launcher records warmup and synchronized updates separately, then checkpoint
 
 ## Why launching a TPU experiment is different from running a notebook cell
 
-When you launch a JAX script on a TPU VM, the first call to a `@jax.jit` step traces Python and compiles an XLA HLO program for the attached TPU chips. The runner records one separate warmup duration, then logs each synchronized update interval. Compute the steady-state mean or median from those logged intervals and their actual count; do not subtract compilation from the timed-update total because compilation was already outside that set.
+A script makes the run sequence and its evidence repeatable. The first `@jax.jit` call traces and compiles; the launcher records that synchronized warmup separately, then synchronizes each timed update before writing its event. The CPU fixture records both intervals so you can compare their own samples; exact timings vary across captures. For example, a hypothetical $1$-second warmup followed by $100$ updates of $0.01$ seconds takes $1+100\times0.01=2$ seconds in total. Averaging that total gives $2/100=0.02$ seconds per update including startup, while the steady update interval is $0.01$ seconds. State which question your summary answers; neither CPU duration estimates TPU performance. Use the actual number of `step` events to compute a steady-state summary, and leave `compile_warmup_s` outside that summary.
 
-A production-grade TPU launcher runs one synchronized warmup call before the training loop and logs `compile_warmup_s` in a dedicated `warmup` event. Subsequent `step` events measure synchronized steady-state updates (`jax.block_until_ready`).
-
-Whenever a checkpoint step arrives, writing directly to `checkpoint-latest.json` risks leaving a half-written file if a Spot TPU VM is preempted mid-write. Writing a temporary sibling file, flushing it, and replacing the destination gives atomic name replacement on supported local filesystems for this tested single-writer model. It does not guarantee durability after power loss, serialize concurrent writers, or qualify distributed publication. After interruption, parse the latest path and validate its checksum, schema and run identity before resuming. If the prior checkpoint is still at the destination because replacement did not happen, it remains the candidate to validate. Never load the `.tmp` file. This example does not retain an additional backup, so if the latest file is missing or invalid, restart from the initial state unless you separately saved a validated checkpoint. A checkpoint hash detects changed serialized state; a separately hashed configuration binds data identity, seed, learning rate, batch schedule, and optimizer rule.
+The checkpoint contains parameters, optimizer moments and PRNG key, plus a state hash and run-configuration identity. The tested single-writer local-filesystem path writes a sibling `.tmp`, flushes it, and replaces the destination. If interrupted, load only the published checkpoint after checking schema, hash and run identity; a leftover temp file is not a checkpoint. If the destination is missing or invalid, this fixture has no backup to restore, so restart from initial state or use a separately retained validated checkpoint. Atomic name replacement does not by itself promise power-loss durability, concurrent-writer safety or distributed publication.
 
 $$
 \bar{T}_{\text{step}} = \frac{\sum_{i=1}^{N_{\text{updates}}} \Delta t_i}{N_{\text{updates}}}, \quad \Delta t_i = t^{\text{end}}_i - t^{\text{start}}_i
@@ -39,7 +37,7 @@ $$
 
 *Architecture and dataflow mechanism diagram.*
 
-Read top to bottom: the launcher loads either the initial state or `checkpoint-latest.json`, runs one synchronized `@jax.jit` warmup call to compile XLA HLO without mutating state, executes timed steady-state steps while appending to `events.jsonl`, and writes `checkpoint-latest.json` atomically via `.tmp` + `fsync` + `os.replace`.
+Read the arrows as a job lifecycle: load initial or validated checkpoint state, compile one synchronized warmup without changing that state, run synchronized updates while appending `step` events, then publish a checkpoint through `.tmp` and atomic replacement. After interruption, validate the published file's schema, state hash and run identity before resume; discard a leftover `.tmp`. The measured CPU example separates about 196.9 ms warmup from a 1.018 ms median step. The next decision is whether the named checkpoint is valid; an invalid or missing destination needs a separately saved backup or a restart, not a guess.
 
 ### Pause and reason
 
@@ -53,7 +51,7 @@ Without restoring the optimizer momentum/variance buffers (`m_w`, `m_b`) and the
 
 ## 1. Stage the launcher and run a checkpoint-resumed TPU experiment
 
-Use the local CPU exercise first to test the resume contract: a missing requested checkpoint raises an error; modified state or changed configuration is rejected; resuming an already completed run returns its saved final state without executing another update. Only after these checks should you run the same launcher on a TPU VM.
+First run the CPU fixture to check the resume contract, then treat its receipt as a logical rehearsal. It stops at step 4, resumes to step 8 and compares the final state hash with the uninterrupted control; both are `eba1c0bc…eccbed9`, an exact match in the recorded run. It also rejects a modified checkpoint hash. This establishes the tested deterministic resume path on CPU only. A TPU job needs its own saved receipt naming the source, pinned environment, requested topology and observed TPU backend before its timing or recovery result is called TPU evidence.
 
 **Stage launch.py and verify checkpoint resume on the Cloud TPU VM**
 
@@ -443,11 +441,13 @@ Expected: Prints the matching 64-character state_hash for the resumed and contro
 
 ### Read the figure
 
-The horizontal axis shows training steps 1 through 6, with a vertical dotted boundary at step 3 where the first run stopped and wrote its checkpoint. The solid line is the uninterrupted 6-step control run; the dashed line is the run that stopped at step 3 and resumed for steps 4–6.
+The horizontal axis is training step 1 through 6; the vertical axis is minibatch mean-squared loss (unitless). The solid curve is the uninterrupted CPU control; the dashed curve stops after step 3 and resumes at step 4. At steps 1 to 6 both show 3.6712, 3.78913, 1.91372, 2.09553, 1.81174 and 1.16636, so their maximum absolute difference is 0. The overlap means this recorded CPU resume reproduced the control trajectory. It does not measure TPU speed. For a changed checkpoint or configuration, first expect the state-hash check to reject a mismatch.
 
 ### Connect it to the computation
 
-Because the checkpoint at step 3 saved `(w, b, m_w, m_b, key)` atomically and the warmup call did not consume the restored state, the two loss trajectories lie directly on top of each other (`max_abs_diff == 0`).
+The plotted six-step example saves after step $3$, carrying $(w,b,m_w,m_b,key)$ into the next update. The runnable launcher example uses a separate eight-step check that pauses after step $4$; its resumed and uninterrupted final state hashes also match (`eba1c0bc…eccbed9`). Keep each example's step boundary with its own results rather than mixing their step numbers.
+
+Both examples ask the same recovery question: does restoring the complete accepted state produce the continuation that the control run would have produced? Use the curve for step-by-step loss agreement and the complete-state comparison for information a scalar loss can hide. Obtain a separate named target receipt before interpreting either CPU example as TPU recovery evidence.
 
 ```python
 visual_data = {
@@ -465,14 +465,14 @@ visual_data = {
 
 ## Recorded reference execution
 
-CPU run: 2026-10-27T14:09:29.793538+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:17:01.239752+00:00. JAX 0.9.2.
 
 ```text
 Resumed state_hash matches uninterrupted control: ecba6a13e41beb0003af0371f8422efa3b08538c4420efb07a9bc61b0a10cdc1
 Losses across 6 steps: [3.6712, 3.78913, 1.91372, 2.09553, 1.81174, 1.16636]
 Resumed state_hash matches uninterrupted control: ecba6a13e41beb0003af0371f8422efa3b08538c4420efb07a9bc61b0a10cdc1
 Losses across 6 steps: [3.6712, 3.78913, 1.91372, 2.09553, 1.81174, 1.16636]
-Warmup ms: 196.898 Median steady step ms: 1.0181
+Warmup ms: 148.079 Median steady step ms: 0.2248
 Resume rejection: checkpoint state hash mismatch
 Step 8 resumed vs control hash: eba1c0bcfb80184d9f5108c1d6539369e21f95276e5d6806234237f41eccbed9 eba1c0bcfb80184d9f5108c1d6539369e21f95276e5d6806234237f41eccbed9
 Recorded event sequence: ['started', 'warmup', 'step', 'step', 'checkpoint', 'completed', 'restored', 'warmup', 'step', 'step', 'checkpoint', 'completed']

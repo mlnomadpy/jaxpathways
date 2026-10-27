@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "tpu-03",
-  "contentHash": "68c34e20d5b8f341b5b48a5e848e4652fcfbdb9117d73eca87511e2153919344",
-  "executedAt": "2026-10-27T14:09:33.489463+00:00",
+  "contentHash": "2c3f496cb1c99a959c9833836e370a11b1f538653ee1a885de2bbbc549534bb2",
+  "executedAt": "2026-10-27T17:21:17.931462+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,

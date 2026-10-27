@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "optimization-01",
-  "contentHash": "73a87819d5650bfb9786f0e0c77cd64f624248608f32957c08d9056e5922a8eb",
-  "executedAt": "2026-10-27T12:28:50.457332+00:00",
+  "contentHash": "09645363575bc3fd549e430ff11250787efaea7759c0009470b02d17d2b915d0",
+  "executedAt": "2026-10-27T17:13:17.463757+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,

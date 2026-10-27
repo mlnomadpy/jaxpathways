@@ -12,7 +12,9 @@ Predict the mask, denominator or preference direction before training. Keep inde
 
 ## Study guide: What learning signal can unlabelled data provide?
 
-Train small masked-token, hidden-patch and paired-view models. Audit information leakage, reduction counts and pair identity before interpreting a falling objective.
+Self-supervised learning creates targets from the data itself. That makes the information boundary especially important: a hidden token or patch must remain a target rather than leaking into the input, and a contrastive positive must keep its source identity when views move around a batch.
+
+Work through one selected token, one patch and one row of a similarity matrix. Then read the recorded objectives beside their baselines and held-out checks. Saving and reloading an encoder gives the next exercise a concrete starting point; the evaluation determines whether the learned representation helps under a changed condition.
 
 ### Check your starting point
 

@@ -12,7 +12,9 @@ Record the state before and after a transition and explain every changed leaf.
 
 ## Study guide: Have you saved everything needed to determine the next step?
 
-A program’s state includes random keys, counters and structured values as well as model parameters. Explicit ownership lets you reproduce a transition, run a batch safely, and later recover an interrupted experiment.
+A training step does more than change weights. It also consumes randomness, advances counters and may update running statistics. Writing those values as explicit inputs and outputs lets you ask exactly which transition occurred and which values are needed to repeat the next one.
+
+Follow a key and a carry through one step before studying a whole loop. The key tree explains ownership of random draws; the pytree explains how corresponding state leaves travel together; scan and conditional branches explain how those structures remain compatible across execution paths.
 
 ### Check your starting point
 

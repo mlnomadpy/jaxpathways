@@ -12,7 +12,9 @@ Draw the input and output shapes before running each change.
 
 ## Study guide: Can you spot a wrong axis even when the program runs?
 
-Array bugs often return plausible numbers. Use unequal dimensions and hand-computed rows so that a successful operation cannot hide a mistaken meaning. Carry that habit into preprocessing and model inputs.
+An array carries a meaning as well as a shape. If rows are observations and columns are features, a mean over rows answers a different question from a mean over columns. Broadcasting can complete successfully while adding an observation bias where a feature bias was intended.
+
+Use unequal dimensions and one hand-computed row throughout this chapter. Follow training statistics into a new batch, keep the caller's inputs intact, and distinguish replacing an indexed value from accumulating repeated contributions. These habits become the input contract for every later model.
 
 ### Check your starting point
 

@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "kernels-03",
-  "contentHash": "ce81533e5ca20970e548c7b4fd7e5f973b58bf17097fc6bb6381df0da5f5f5df",
+  "contentHash": "b1d41431c6e22e3f09fc7117c2f9150edc3e86d9e1d5553c807aa1f59f05c66b",
   "rendererHash": "17e3bbad72ee4c43425845aaee76b86b85e84750551278be03d8c16842f4dc63",
   "kind": "executed",
-  "generatedAt": "2026-10-27T12:18:59.741089+00:00",
+  "generatedAt": "2026-10-27T17:11:09.766183+00:00",
   "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",
@@ -26,7 +26,7 @@
   "diagram": {
     "title": "Buffer lifetime through prologue, steady state, and drain",
     "prediction": "Which slot can receive tile k+1 while the compute stage still reads tile k?",
-    "reading": "The code declares input pipeline buffers through spec with pl.Buffered(buffer_count=buffers) and output_spec with pl.Buffered(buffer_count=2). The actual references are x_hbm, y_hbm, and out_hbm. An input slot is reusable only after axpy_body has consumed that tile; an output slot is reusable only after its store is complete. Buffer letters A and B denote alternating slots, not named variables in the Pallas API.",
+    "reading": "The nodes/columns show load \u2192 compute \u2192 store; the phase rows show prologue \u2192 steady state \u2192 drain. In prologue tile 0 enters A; in steady state tile `k+1` enters B while `axpy_body` consumes `k` in A; in drain the last compute and store complete. Input Refs become reusable after compute consumes them, and output slots after store completes. Buffer letters describe this schedule, not Pallas variable names. Predict the failure if A were overwritten before compute: the result could read the next tile's values.",
     "alt": "Prologue loads tile 0 into input slot A. During steady state, compute consumes x[k], y[k] from one slot while the next tile loads into the other; out[k] is stored after compute. Drain finishes the last compute and store before any slot is reused.",
     "scope": "Schematic schedule of buffer lifetimes; stage overlap is illustrative, not measured.",
     "height": 5.5,

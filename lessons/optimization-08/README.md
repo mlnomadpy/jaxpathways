@@ -30,6 +30,8 @@ With $\eta=0.25$, the steep coordinate is multiplied by $-1.5$: it changes sign 
 
 Sketch narrow elliptical contours for this quadratic and mark the first two iterates. The saved coordinate plot shows how each direction progresses. Keep the objective coefficients, initial point and rate labels aligned when comparing this calculation with a trajectory; a path from another quadratic would tell a different story.
 
+At the starting point (1,1), the gradient is $(1,10)$. With rate $\eta=0.1$ the update subtracts $(0.1,1)$, giving $(0.9,0)$. Substitution into the objective gives half of 0.9 squared, or $0.405$, down from 5.5. At rate 0.25 the next point is $(0.75,-1.5)$; its steep-direction contribution alone is $11.25$, so progress in the other coordinate cannot compensate.
+
 ### Pause and reason
 
 For this quadratic, what condition on a positive learning rate contracts both coordinates?
@@ -170,6 +172,8 @@ For a quadratic direction with curvature $\lambda$, gradient descent multiplies 
 
 The steeper direction is faster here because the rate exactly cancels it. Increasing the rate further does not keep making it better: sufficiently large steps produce oscillation or divergence. This is why one shared rate can be constrained by a steep direction while making slow progress in a flatter one.
 
+Before choosing a shared rate, compute 1-eta times each curvature; the steep direction usually sets the tighter stability limit.
+
 ```python
 points = [jnp.array([1.0, 1.0])]
 for _ in range(20):
@@ -180,7 +184,7 @@ visual_data = {'kind': 'line', 'x': list(range(21)), 'xlabel': 'completed update
 
 ## Recorded reference execution
 
-CPU run: 2026-10-27T12:29:03.434660+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:03:37.425377+00:00. JAX 0.9.2.
 
 ```text
 final weights / loss: [ 0.12157664 -0.        ] 0.0073904395

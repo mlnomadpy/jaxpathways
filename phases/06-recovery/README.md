@@ -12,7 +12,9 @@ Compare sample IDs, optimizer memory, random state and losses after restore.
 
 ## Study guide: Can an interrupted run make exactly the same next update?
 
-Recovery is a contract between data order, model state and publication. Tracking explains which run produced an artifact; a checkpoint supplies the values needed to continue it. Neither replaces the other.
+Imagine a run stops just after an update. Loading the weights is only part of continuing: the optimizer, next random draw and next data record must correspond to the same boundary. A seed can replay a sequence from its beginning, while iterator state identifies where to continue it.
+
+Trace record IDs and complete training state across a save, interruption and fresh restore. Then distinguish a requested save from a completed, verified and accepted checkpoint. Experiment tracking supplies the source and data lineage around that continuation; it does not replace the state required to resume.
 
 ### Check your starting point
 

@@ -12,7 +12,9 @@ Keep terminal, timeout and reset behavior explicit. Verify a small enumerated ex
 
 ## Study guide: Is the policy improving under a fixed evaluation protocol?
 
-Environment semantics and data collection define the learning problem. Verify transitions, masks and behavior-policy probabilities before trusting a noisy return curve.
+A policy changes the data it will see next, so learning from interaction requires careful bookkeeping. A transition gives an immediate reward; a return combines later rewards; a value estimates expected return; an advantage compares an outcome with that baseline. Follow one short trajectory before introducing their batched estimators.
+
+Keep episode endings and collection cutoffs distinct when deriving targets. Then connect the sign of an advantage to a policy update, freeze the behavior probabilities needed for PPO comparisons and inspect variation across independent evaluation units. The small environment makes those choices visible before a larger control task.
 
 ### Check your starting point
 

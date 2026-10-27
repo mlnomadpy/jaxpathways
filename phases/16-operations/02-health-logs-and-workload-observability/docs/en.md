@@ -22,23 +22,9 @@ Logs tell us what a process reported; accepted checkpoints tell us what can be r
 
 ## Keep observed progress separate from recoverable progress
 
-If the live process reports step 42 and the newest accepted checkpoint is step 40, there are two completed steps beyond that recovery boundary. Whether they must be replayed depends on the recovery contract and recorded input state.
+Monitoring is useful when its counters identify distinct facts. `progress.step` is work completed in memory; a `checkpoint` event is state replaced on disk. In the failed drill, events report steps 1 through 5, but the accepted checkpoint is step 4. That one-step gap is one completed update, or 8 examples at this run's batch size, which may need replay.
 
-Name metric units and update points: examples processed, valid tokens, optimizer steps and accepted checkpoint steps are different counters. A sudden flat line can indicate stalled computation, blocked logging or a failed collector; inspect another signal before assigning the cause.
-
-Read the two progress curves at the same time coordinate and locate the failure. The gap describes lag in recoverable progress, while the slope of live progress describes reported work rate. Neither alone proves hardware utilization.
-
-Reviewed support: the subprocess protocol, atomic checkpoint writer and event parser are supplied. Learner-authored transition: derive throughput and recovery lag from event names, synchronized durations, example counts and accepted checkpoints.
-
-```python
-elapsed = time.perf_counter() - begin
-step += 1
-emit('progress', step=step, examples=cfg['batch_size'], update_s=elapsed)
-if step % cfg['checkpoint_every'] == 0:
-    write_checkpoint(state)
-```
-
-Worked trace: progress step 1 reports 8 examples, then step 2 reports 8; checkpoint step 2 is accepted. A controlled failure after step 5 leaves live progress at 5 and durable progress at 4. The observed-minus-durable gap is one update, or 8 examples under this fixed batch. Recompute examples/s from total examples over summed synchronized update_s, then compare it with examples/s over supervisor wall_s. They answer different timing questions.
+The figure plots both counters against completed update number: progress reaches 5 while the saved line ends at 4. A flat checkpoint line between its writes is expected; a flat progress line may be a stall, blocked logger, or failed collector. Check the process and another signal before deciding which. The next useful question is whether the mismatch is only expected checkpoint cadence or a missing progress event.
 
 ### Pause and reason
 
@@ -52,15 +38,15 @@ No. It proves the observation reached the log. Recovery durability depends on th
 
 ## An event needs meaning and units
 
-Each event has a monotonic timestamp and an event name. A progress event adds completed step, scalar loss, examples processed, synchronized update seconds and a hash of the resulting complete state. Checkpoint events record the step that was actually replaced on disk. A heartbeat would show liveness only; it must not increment examples or claim training progress. Monotonic time is useful for local durations but is not a globally comparable timestamp across unrelated hosts.
+Each `progress` record carries a step, loss, example count, synchronized update seconds, and a hash of the resulting state. A `checkpoint` record names the step actually accepted on disk. A heartbeat would only say that a process responded; it must not add examples or advance the training counter. The monotonic timestamps support durations within this process, not clock comparisons across machines. When you inspect a trace, use event type and unit together rather than treating every increasing number as progress.
 
 ## Time completed computation
 
-JAX may return control before an operation finishes. The worker calls block_until_ready on the result before stopping its update timer. That timer includes dispatch and completion of one compiled minibatch update, but excludes JSON encoding, checkpoint writes, process startup and compilation. The ready event records a separate compile/warmup duration. A benchmark that times dispatch alone would understate service time.
+JAX can return control before device work has finished. The worker calls `block_until_ready` before stopping the update timer, so `update_s` includes dispatch plus completion of that compiled minibatch. It excludes import, compilation, JSON logging, and checkpoint writes; warmup has its own event. A dispatch-only timer would make the update look faster than the completed work actually was. Compare timers only when their start and stop boundaries match.
 
 ## Two throughputs answer different questions
 
-For $12$ updates of $8$ examples, the numerator is $96$ examples. Divide by the sum of synchronized update durations to describe the update path. Divide by supervisor wall time to describe the short job end to end. The latter is lower here because this tiny workload spends much of its lifetime outside the compiled updates. Neither rate should be relabeled as a device hardware utilization percentage.
+In the healthy run, 12 updates process 96 examples. Dividing by summed synchronized update time estimates the compiled update path; dividing the same 96 examples by supervisor wall time includes startup and checkpointing, so it is lower for this short job. The execution record reports that split directly. Neither rate is accelerator utilization: to answer a utilization question you need a device-specific counter, not examples divided by seconds.
 
 $$
 q_{\mathrm{update}}=\frac{N}{\sum_i t_i},\qquad q_{\mathrm{job}}=\frac{N}{T_{\mathrm{wall}}}
@@ -68,7 +54,7 @@ $$
 
 ## Freshness is about committed progress
 
-The controlled incident fails after update $5$, while the checkpoint cadence is every $2$ updates. Its last committed checkpoint is step $4$, leaving one completed but uncommitted update. This is a count of potential replay work, not a time-based recovery objective. To express time at risk, use appropriate measured durations and explicitly distinguish completed work from work that might still be in flight.
+Checkpoint cadence is every two updates. The injected failure occurs after update 5, leaving step 4 as the newest committed state and one completed update, 8 examples, outside it. That gap estimates replayable work, not recovery time: a slow checkpoint write or a different batch duration changes seconds at risk. For a time estimate, use measured update durations and say whether the final in-flight update completed.
 
 $$
 \mathrm{uncommitted\ updates}=\max(0,\mathrm{last\ progress\ step}-\mathrm{checkpoint\ step})
@@ -76,11 +62,11 @@ $$
 
 ## A declining loss is not a health guarantee
 
-The fixture fits a line with minibatch momentum updates. Loss may rise between batches because different examples are sampled, and momentum can overshoot. A lower recent loss does not prove input freshness, checkpoint durability or correct evaluation. Conversely, a noisy loss sequence does not prove a stalled process. Diagnose loss behavior using the optimization lessons; diagnose missing progress using event and process evidence.
+This fixture trains a line with sampled minibatches and momentum, so loss can rise when the next minibatch is harder or momentum overshoots. A lower loss does not verify fresh data or a durable checkpoint; a noisy loss does not prove a stall. Use the loss to inspect optimization, and event cadence plus the process handle to inspect liveness. The signals answer different questions.
 
 ## Scope of this collector
 
-This bounded lab captures stdout and stderr in memory and analyzes events after the child exits. That is appropriate for a few dozen events. A long-running service needs streamed, bounded logs, a durable sink, timestamps aligned for its fleet, and monitored queue/backpressure behavior. The lesson provides measurement contracts and actual failure evidence, not an operational telemetry backend.
+This worker captures stdout and stderr in memory and parses a few dozen events after exit. That makes the record easy to inspect, but it does not provide streaming alerts or a durable fleet log. A long-lived service needs bounded streaming, a persistent sink, aligned timestamps, and monitoring for queue backpressure. The lesson's concrete result is the local event trace and its checkpoint gap, not a production telemetry service.
 
 ## Compute a rate over one declared interval
 
@@ -349,11 +335,11 @@ Expected: The healthy run records $96$ processed examples. The failure occurs at
 
 ### Read the figure
 
-The horizontal axis is completed update number for the failed run. The vertical axis is step index. The progress line reaches $5$, while the checkpoint line advances at steps $2$ and $4$, ending at $4$. The vertical gap at the final point is one update. These values come from actual emitted events, not a hypothetical fleet trace.
+The x-axis is completed update number, and the y-axis is step index. The failed trace has progress at steps 1–5, while the checkpoint staircase advances at 2 and 4 and ends at 4. At failure, the vertical gap is one update, or 8 examples for this batch size. These are step counts from the emitted events, not estimated utilization.
 
 ### Connect it to the computation
 
-The staircase records when state becomes available for recovery. A gap is expected between checkpoints; it becomes operationally relevant when the process fails. Resuming from step $4$ repeats update $5$ using its restored optimizer and random state. This plot does not show elapsed recovery time or prove power-loss durability.
+A checkpoint plateau between writes is expected; the final gap matters because failure makes update 5 replayable from step 4. The run record reports the incident as failed with 40 examples observed, 8 uncheckpointed, and a completed-checkpoint boundary at step 4. If cadence changed from every two updates to every one, predict that the final gap would shrink to zero, at the cost of more checkpoint writes. The plot does not measure replay time or storage durability.
 
 ```python
 committed=0
@@ -372,13 +358,13 @@ visual_data={'kind':'line','x':points,'xlabel':'completed update number','ylabel
 
 ## Recorded reference execution
 
-CPU run: 2026-10-27T14:07:11.859354+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:10:21.936406+00:00. JAX 0.9.2.
 
 ```text
-healthy: {'status': 'completed', 'updates': 12, 'examples': 96, 'last_step': 12, 'checkpoint_step': 12, 'uncheckpointed_updates': 0, 'uncheckpointed_examples': 0, 'update_s': 0.012025083880871534, 'update_examples_per_s': 7983.312295451719, 'job_examples_per_s': 38.14028121004611, 'update_duty_fraction': 0.004777500841571176}
-incident: {'status': 'failed', 'updates': 5, 'examples': 40, 'last_step': 5, 'checkpoint_step': 4, 'uncheckpointed_updates': 1, 'uncheckpointed_examples': 8, 'update_s': 0.0014702919870615005, 'update_examples_per_s': 27205.48051135291, 'job_examples_per_s': 19.329414685684224, 'update_duty_fraction': 0.0007104970881737602}
-examples / synchronized seconds: 96 0.012025083880871534
-measured update duty fraction, not hardware utilization: 0.004777500841571176
+healthy: {'status': 'completed', 'updates': 12, 'examples': 96, 'last_step': 12, 'checkpoint_step': 12, 'uncheckpointed_updates': 0, 'uncheckpointed_examples': 0, 'update_s': 0.020353708881884813, 'update_examples_per_s': 4716.585097934746, 'job_examples_per_s': 86.91440289879009, 'update_duty_fraction': 0.018427400565050198}
+incident: {'status': 'failed', 'updates': 5, 'examples': 40, 'last_step': 5, 'checkpoint_step': 4, 'uncheckpointed_updates': 1, 'uncheckpointed_examples': 8, 'update_s': 0.0008766651153564453, 'update_examples_per_s': 45627.457166168075, 'job_examples_per_s': 38.270822211904765, 'update_duty_fraction': 0.0008387673692296375}
+examples / synchronized seconds: 96 0.020353708881884813
+measured update duty fraction, not hardware utilization: 0.018427400565050198
 PASS: operations-02
 
 ```

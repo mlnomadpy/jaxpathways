@@ -429,11 +429,17 @@
   ],
   "revisionFollowUp": {
     "date": "2026-10-27",
-    "baseCommit": "15bf7aa4fbd4460501cc4d6d7802324673a89f6f",
-    "guide": "docs/review-guide-0.18.0.md",
-    "scope": "Repairs for content issues #74 through #91 with independent AI review, bounded CPU teaching checks and regenerated book companions. Existing maturity levels, failed model-quality results and human/native-reader/target qualification limits remain unchanged."
+    "baseCommit": "db4bc9012d053681509c2aecf03411c77c6a785a",
+    "guide": "docs/review-guide-0.18.1.md",
+    "scope": "All 104 authored lessons now have an editorial pass across 0.18.0 and 0.18.1, including explanations of worked examples and figures; all 22 chapter introductions connect their learning progression. Human acceptance, target qualification and model-quality outcomes remain separate."
   },
   "revisionFollowUpHistory": [
+    {
+      "date": "2026-10-27",
+      "baseCommit": "15bf7aa4fbd4460501cc4d6d7802324673a89f6f",
+      "guide": "docs/review-guide-0.18.0.md",
+      "scope": "Repairs for content issues #74 through #91 with independent AI review, bounded CPU teaching checks and regenerated book companions. Existing maturity levels, failed model-quality results and human/native-reader/target qualification limits remain unchanged."
+    },
     {
       "date": "2026-10-21",
       "baseCommit": "7554817ed19a26dabfb1e183220cf84308382906",

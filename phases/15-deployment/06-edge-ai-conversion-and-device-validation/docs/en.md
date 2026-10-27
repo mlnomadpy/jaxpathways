@@ -77,6 +77,8 @@ Our sample uses three sensor features in the range $0$ to $255$ and divides by $
 
 Peak memory includes activations, tensors held by the runtime, workspace, preprocessing buffers and, for autoregressive models, KV cache. A compressed file may expand on load. Batch one often minimizes interaction latency but may reduce throughput. Include cold process startup, model load and runtime initialization in a separate device cold-start measurement; our first-request timing starts after imports and model setup, so it does not cover them. Measure power or energy with an actual target-device tool and record thermal state.
 
+The local proxy records thirty warm requests and reports their sample p50 and p95. Its request timer includes JSON decode, normalization, transfer, inference, waiting and response encoding, but starts after imports and model setup. Read the exact values from that capture's trace; the numerical ordering can change when the script is rerun. The metadata explicitly marks `edge_device_validated=false`, so these durations describe the desktop request boundary rather than phone latency.
+
 ## Measure the request the user experiences
 
 The timer includes JSON decoding, normalization, host/device placement, inference completion and response encoding. Thirty warm requests produce an instructional p50 and p95, not a production tail-latency estimate. A device report needs more samples, realistic input variation and sustained runs to reveal thermal throttling. Never reuse a kernel-only time as end-to-end latency. Verify the numerical output before interpreting any timings.
@@ -258,15 +260,15 @@ Expected: A JSON report with $30$ measured warm requests, first-request time, p5
 
 ### Read the figure
 
-The horizontal axis counts warm requests, and the vertical axis measures end-to-end latency in milliseconds. The solid line joins the measured request times. The dashed horizontal line is the empirical $95$th percentile of those same $30$ samples; it is a summary threshold, not a second implementation.
+The horizontal axis counts thirty warm requests; the vertical axis is complete request time in milliseconds. Follow the solid local-CPU trace and compare each point with the dashed empirical p95 from those same thirty samples. A point above p95 is a slow member of this sample, not an automatic breach of a separately defined service objective.
 
-Read a solid point above the dashed line as a request slower than that percentile threshold. The line is not the maximum, so a few points can lie above it. The first cold request is reported separately and is not the first point of this warm-only plot.
+Inspect the early requests and the later cluster. A warmed model can still show request-wrapper and scheduling variation. The timer begins after imports and model setup, so the early points do not include a true cold process start. The p95 line is a descriptive sample threshold and can move when the experiment is rerun.
 
 ### Connect it to the computation
 
-Each duration includes JSON decoding, normalization, transfer, inference, waiting for completion, and encoding the response. That boundary explains why the chart should not be read as pure model execution time. An early high warm point or later spike shows variation in the whole request; this plot alone cannot identify its cause.
+Each dot includes JSON decode, normalization, transfer, inference completion and response encoding. It therefore answers a different question from an isolated kernel timer. Use the same raw golden request when moving to a target device, then compare both its prediction and its actual runtime placement before interpreting a latency difference.
 
-The percentile is computed from a small sample, with interpolation between ordered values. It does not guarantee that future requests will meet the threshold. Compare the sample distribution, median, and tail across repeated runs on the target device. These are local CPU proxy measurements, not evidence of mobile or edge-device latency.
+Ask which unmeasured costs a user would still see: process startup, model load, device-runtime initialization or sustained thermal effects. The receipt says `edge_device_validated=false`; those device questions remain for a named-hardware run. Thirty desktop samples explain the protocol, not a production tail guarantee.
 
 ```python
 visual_data = {'kind': 'line', 'x': list(range(1, len(samples) + 1)), 'xlabel': 'warm request number', 'ylabel': 'end-to-end milliseconds', 'series': [{'label': 'local CPU request', 'y': samples}, {'label': 'recorded p95', 'y': [report['p95_ms']] * len(samples)}]}
@@ -274,88 +276,88 @@ visual_data = {'kind': 'line', 'x': list(range(1, len(samples) + 1)), 'xlabel': 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-27T13:37:50.673003+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:15:12.407255+00:00. JAX 0.9.2.
 
 ```text
 {
   "runtime": "JAX CPU instructional proxy",
   "jax": "0.9.2",
-  "first_request_ms": 28.759791050106287,
+  "first_request_ms": 20.254916977137327,
   "warm_samples_ms": [
-    0.30629104003310204,
-    0.13300031423568726,
-    0.10416563600301743,
-    0.09404215961694717,
-    0.08379202336072922,
-    0.07987488061189651,
-    0.07529184222221375,
-    0.07625017315149307,
-    0.07241731509566307,
-    0.07320893928408623,
-    0.2843751572072506,
-    0.19733421504497528,
-    0.11804094538092613,
-    0.09366730228066444,
-    0.20899996161460876,
-    0.25641685351729393,
-    0.11983327567577362,
-    0.09570783004164696,
-    0.08879229426383972,
-    0.1927502453327179,
-    0.21858327090740204,
-    0.27245795354247093,
-    0.15258416533470154,
-    0.11170795187354088,
-    0.09150011464953423,
-    0.08262461051344872,
-    0.07604202255606651,
-    0.07429206743836403,
-    0.07279170677065849,
-    0.07133278995752335
+    0.22416701540350914,
+    0.10362500324845314,
+    0.07787486538290977,
+    0.06537465378642082,
+    0.05979090929031372,
+    0.055833254009485245,
+    0.05574990063905716,
+    0.061125028878450394,
+    0.055791810154914856,
+    0.057833269238471985,
+    0.05795806646347046,
+    0.05354173481464386,
+    0.05050003528594971,
+    0.052333809435367584,
+    0.05100015550851822,
+    0.06533274427056313,
+    0.05337502807378769,
+    0.05487492308020592,
+    0.05137501284480095,
+    0.049083027988672256,
+    0.0488748773932457,
+    0.04900014027953148,
+    0.05429191514849663,
+    0.04866672679781914,
+    0.047625042498111725,
+    0.05141599103808403,
+    0.04583410918712616,
+    0.04970794543623924,
+    0.7312917150557041,
+    0.1598750241100788
   ],
-  "p50_ms": 0.09487499482929707,
-  "p95_ms": 0.2790124155580997,
+  "p50_ms": 0.05458341911435127,
+  "p95_ms": 0.1952356193214653,
   "boundary": "JSON decode + normalize + transfer + infer + wait + encode",
   "edge_device_validated": false
 }
 {
   "runtime": "JAX CPU instructional proxy",
   "jax": "0.9.2",
-  "first_request_ms": 21.576874889433384,
+  "first_request_ms": 17.005333211272955,
   "warm_samples_ms": [
-    0.2598748542368412,
-    0.11408282443881035,
-    0.09520910680294037,
-    0.08758390322327614,
-    0.08004205301404,
-    0.07525039836764336,
-    0.07308367639780045,
-    0.07195910438895226,
-    0.06862496957182884,
-    0.07029110565781593,
-    0.06937514990568161,
-    0.06741611286997795,
-    0.06745802238583565,
-    0.0677499920129776,
-    0.06687501445412636,
-    0.06683310493826866,
-    0.06800005212426186,
-    0.07029203698039055,
-    0.07116701453924179,
-    0.06762472912669182,
-    0.06800005212426186,
-    0.06541609764099121,
-    0.06579095497727394,
-    0.07033394649624825,
-    0.06633298471570015,
-    0.06787525489926338,
-    0.06749993190169334,
-    0.06650015711784363,
-    0.0654999166727066,
-    0.0689169391989708
+    0.2099159173667431,
+    0.09224982932209969,
+    0.07258262485265732,
+    0.0665830448269844,
+    0.05654105916619301,
+    0.05299970507621765,
+    0.04983274266123772,
+    0.05370797589421272,
+    0.04862481728196144,
+    0.04845811054110527,
+    0.048667192459106445,
+    0.04737498238682747,
+    0.04758266732096672,
+    0.046374741941690445,
+    0.046374741941690445,
+    0.09116716682910919,
+    0.21291710436344147,
+    0.10416703298687935,
+    0.331041868776083,
+    0.260333064943552,
+    0.15554111450910568,
+    0.09787501767277718,
+    0.07191719487309456,
+    0.06129080429673195,
+    0.14287512749433517,
+    0.1932918094098568,
+    0.08024973794817924,
+    0.06174994632601738,
+    0.054833944886922836,
+    0.05174987018108368
   ],
-  "p50_ms": 0.06831251084804535,
-  "p95_ms": 0.1055896515026688,
+  "p50_ms": 0.06416649557650089,
+  "p95_ms": 0.23899588268250213,
   "boundary": "JSON decode + normalize + transfer + infer + wait + encode",
   "edge_device_validated": false
 }

@@ -22,24 +22,9 @@ A candidate artifact can exist without serving users. Validation, activation and
 
 ## Publishing is different from activating
 
-Imagine candidate B is uploaded while artifact A remains active. If B fails evaluation, the correct transition leaves A active. The presence of B in storage is not permission to select it.
+Publishing candidate B stores its bytes but leaves artifact A selected. In the worked release, a consumer reading $x=1$ returns 3.0 before activation. B has a different digest and returns 3.4, but the same request still returns 3.0 after B is published. Only after the held-out gate passes does activation move the pointer to B and the consumer output change.
 
-Rollback should select a known compatible artifact together with its processor and configuration. Restoring only weights while leaving an incompatible tokenizer or schema in place can create another failure.
-
-The artifact-selection bars summarize discrete identities; their numeric height is not a quality score. Read them as a sequence of accepted or rejected transitions. A state diagram makes the unchanged active identity on rejection easier to verify.
-
-In the worked run, A and B are valid but have different parameters: at input 1, the consumer returns 3.0 for A and 3.4 for B. Publishing B leaves A selected. Activation changes the observed output; rollback restores it.
-
-Reviewed support: immutable artifact storage, digest checking and atomic pointer writes are supplied. Learner-authored transition: check the candidate evidence, predict how the selected model behaves, activate only after validation, and use the observed consumer output to verify rollback.
-
-```python
-artifact = read_artifact(store, identifier)
-if artifact.get('validation', {}).get('passed') is not True:
-    raise ValueError('artifact has no passing validation evidence')
-atomic_json(pointer, dict(current=identifier, previous=previous))
-```
-
-Worked trace: publish A, then select A → consumer(x=1) returns 3.0. Publish B with a valid model that returns 3.4 at x=1; before activation the consumer still returns 3.0. Select B → it returns 3.4. A rejected candidate leaves both pointer bytes and prediction at 3.4. Roll back → pointer selects A and a fresh consumer read returns 3.0. A digest identifies bytes; the local validation gate is not authenticated authorization.
+The figure's y values are categorical IDs: 1 means A and 2 means B. The sequence is A, A, B, B, A across activate A, publish B, activate B, rejected candidate, and rollback. The rejection leaves the pointer and response unchanged; rollback selects A and a fresh read returns 3.0. Next, check both selected identity and a real consumer result rather than trusting a successful command message.
 
 $$
 \text{ArtifactID} = \operatorname{sha256}(\text{weights} \;\|\; \text{config} \;\|\; \text{tokenizer})
@@ -53,7 +38,7 @@ $$
 
 *Architecture and dataflow mechanism diagram.*
 
-Candidate B can exist while A remains active. Only the passing branch permits activation under the policy; failure keeps A selected. Letters identify artifacts, not scores. Preserve compatible processor and configuration identities with the selected model.
+Read the arrows as a release decision trace: published B flows to evaluation; a passing gate leads to activating B, while a failing gate leads to keeping A active. The worked consumer returns 3.0 for A and 3.4 for B at $x=1$, so the pointer choice has an observable effect. After activation, rollback uses the previous compatible ID and returns the output to 3.0. Predict the failed-gate branch: it must leave the old pointer and its 3.0 response unchanged.
 
 ### Pause and reason
 
@@ -67,23 +52,23 @@ No. The rejection should leave the active release unchanged. Test that invariant
 
 ## A name is not a content identity
 
-Filenames such as latest or final can be overwritten without revealing that the bytes changed. Our artifact ID is the SHA-256 digest of a canonical JSON encoding with sorted keys and nonfinite values rejected. Reordering dictionary insertion alone does not change that encoding. Changing a parameter, source hash or even a release note produces a different ID. This identity detects changed bytes; it does not prove that the artifact is correct or authorized.
+A filename such as `latest` can point to different bytes over time. Here each artifact ID is a SHA-256 digest of canonical JSON, so changing a parameter or release note creates a new identity. The recorded A and B digests differ. That lets the run record name the exact candidate and rollback target, but a digest says which bytes were read, not whether they are accurate or approved.
 
 ## Attach enough provenance to reproduce the question
 
-The artifact includes worker-source hash, training-configuration hash, data hash, full state and a validation record. These fields tie a claimed result to a concrete experiment. The local validation flag is a demonstration gate supplied by this trusted authoring workflow; it is not a signed attestation or protection against an adversarial publisher. A production registry needs access controls, trusted validators and policies appropriate to its use. Activation also independently evaluates the two model parameters on fixed held-out inputs $(-1.5,-0.37,0.22,1.5)$, using the known relationship $y=2x+1$. It requires mean squared error no larger than $1$. This intentionally permissive fixture gate checks that a changed model is actually evaluated; it is not a production quality threshold.
+The artifact carries source, configuration, data, state, and validation evidence so an operator can ask which experiment produced it. Activation also evaluates the parameters on four fixed held-out inputs and requires mean squared error at most 1. This is a deliberately permissive teaching gate, not a production threshold. The local `passed` flag is not authenticated approval; a real registry needs trusted validators and access controls.
 
 ## Publish without affecting the current reader
 
-publish writes a complete content-addressed file but does not create or change active.json. This permits inspection before use. activate reads that file, recomputes its digest and checks the gate before replacing the pointer. A failed gate leaves the current pointer byte-for-byte unchanged. The pointer contains current and previous IDs so an operator can identify what changed.
+`publish` writes the complete content-addressed artifact without touching `active.json`; `activate` rereads the bytes, checks the digest and validation result, then replaces the pointer. In the failed-candidate branch, the pointer bytes stay unchanged and the consumer still returns 3.4 for $x=1$. Atomic sibling-file replacement protects this single-writer local exercise from a partial pointer file, not from concurrent deployment races or cross-file transactions.
 
 ## Keep selection atomic and scope the guarantee
 
-The atomic helper writes to a temporary sibling file, flushes and fsyncs it, then replaces the selected filename. The exercise has one writer and a local filesystem. It does not provide compare-and-swap against concurrent deployments, distributed consensus, atomic updates across multiple files or guaranteed power-loss durability. A multi-writer service must add a concurrency contract rather than assuming this example already supplies one.
+Rollback calls the same validation and activation path using the previous artifact ID. The run shows the pointer returning to A and a new consumer read returning 3.0. That proves model selection reverted in this fixture; it does not undo requests already served, database changes, or incompatible external schemas. Include tokenizer, processor, and configuration identities with weights whenever those components affect the model's input or output.
 
 ## Rollback is another checked selection
 
-Rollback reads the previous ID and calls the same activation path. It therefore rejects a previous artifact that has become corrupt. Selecting older weights does not undo external side effects, database migrations, changed data schemas or requests already served. Here the only changed operational state is a local pointer to a compatible JSON artifact. Describe that bounded result precisely.
+Keep candidate and previous IDs, data/config/source hashes, held-out result, and the reason for the decision in the release record. The recorded B in the accepted pointer drill differs only by release metadata, so it is not evidence of a model quality improvement. A separate degraded-parameter candidate fails the measured gate. Treat artifact identity, gate outcome, and user-visible behavior as three linked but distinct facts.
 
 ## A change record should support diagnosis
 
@@ -437,11 +422,11 @@ Expected: Publishing B leaves A selected and the local consumer predicts 3.0 at 
 
 ### Read the figure
 
-The horizontal categories are actions in the executed local release drill. The vertical values are categorical codes: $1$ means artifact A and $2$ means artifact B. They are identifiers, not quality scores. The selected ID remains A after publishing B, changes to B after activation, stays B after a rejected candidate, and returns to A after rollback.
+The x-axis lists executed release actions; the y-axis is a categorical pointer code, where 1 means artifact A and 2 means B. The observed pointer sequence is 1, 1, 2, 2, 1: publishing B leaves A selected, activation selects B, rejection leaves B selected, and rollback selects A. The codes name artifacts; they are not quality scores.
 
 ### Connect it to the computation
 
-The flat pair around the rejected gate is the important invariant: failure must not partially change the active pointer. Every transition in the diagram is backed by a read of the local pointer in the figure experiment. The result proves a single-writer local selection workflow, not a multi-host rollout or rollback of external side effects.
+The consumer trace confirms the pointer change has an effect: for $x=1$, output is 3.0 before B, 3.4 after B is activated, and 3.0 after rollback. A rejected candidate leaves both the selected ID and output unchanged. Predict the safe outcome if B's held-out gate fails: the pointer should remain at A and the output should remain 3.0. This is a single-writer local release drill, not a distributed rollout.
 
 ```python
 with tempfile.TemporaryDirectory() as folder:
@@ -464,7 +449,7 @@ visual_data={'kind':'bar','labels':['activate A','publish B','activate B','rejec
 
 ## Recorded reference execution
 
-CPU run: 2026-10-27T14:07:39.348446+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:10:51.512226+00:00. JAX 0.9.2.
 
 ```text
 consumer x=1 before B / after B / after rollback: 3.0 3.4 3.0

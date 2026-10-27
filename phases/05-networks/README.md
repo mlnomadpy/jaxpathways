@@ -12,7 +12,9 @@ Explain a loss curve together with held-out errors; a lower training loss alone 
 
 ## Study guide: Did the network learn the task, or exploit an evaluation mistake?
 
-Move from explicit matrix operations to stateful modules while preserving independent checks. Learn to distinguish capacity, optimization, data quality and evaluation errors before adding layers.
+A neural network combines familiar matrix operations, but several new sources of error arrive together: nonlinear activations, trainable module state, optimizer state and different training/evaluation behavior. Follow one example from features to prediction and loss before reasoning about a whole training curve.
+
+The chapter moves from a small nonlinear task to NNX state, train/eval isolation, a CNN and controlled fault diagnosis. Use the decision regions and confusion counts to ask which examples the model gets wrong. Pair those observations with state snapshots and layer diagnostics to explain the cause.
 
 ### Check your starting point
 

@@ -43,6 +43,8 @@ The wrong orientation can still have the expected shape. Unequal dimensions and 
 
 Our inputs have shape $[\mathrm{batch}, 3]$. Keras Dense uses a $[3, 2]$ kernel; PyTorch Linear stores $[2, 3]$ weights and multiplies by their transpose. Bias has shape $[2]$. For $x=[1, 2, -1]$, the first output is $1+1+1+0.1=3.1$. Verify a hand-derived row before comparing whole arrays. Convolution kernels have additional layout conventions; do not apply this dense transpose rule to them.
 
+The executed two-row batch returns $[[3.1,-0.45],[-4.9,4.55]]$ in both matched implementations. For the first row, the output arithmetic is $1+1+1+0.1=3.1$; for the second output it is $-2+2-0.25-0.2=-0.45$. If the outputs differ while shapes match, check feature order before changing tolerances: the fixture deliberately swaps first and last features and observes $(-0.9,4.05)$.
+
 ## Use Keras as a shared model vocabulary
 
 Keras $3$ can execute models on JAX, TensorFlow or PyTorch. Select KERAS_BACKEND before importing keras, in a fresh process. Use `keras.layers` and `keras.ops` in portable model code; a call to tf.* inside a custom layer is a TensorFlow dependency. This does not port arbitrary Python side effects or framework-specific training loops. A .keras archive preserves Keras configuration and weights; an inference export has a different job.
@@ -212,15 +214,11 @@ Expected: Two rows match; the first is $[3.1, -0.45]$ within absolute tolerance 
 
 ### Read the figure
 
-The upper matrix has input features as rows and output features as columns. The lower matrix swaps those axes. The cell values are weights, and the two panels contain the same six numbers in transposed positions.
-
-Track the weight $-1$: it moves from input $2$, output $0$ in the upper panel to output $0$, input $2$ in the lower panel. It still connects the same input feature to the same output feature. The layout changes from shape $(3,2)$ to $(2,3)$.
+The upper heatmap uses input feature as row and output feature as column; the lower uses output as row and input as column. Cell units are weights, and the same six numbers move by transpose: weight $-1$ stays on the connection from input 2 to output 0. The shapes change from $3\times2$ to $2\times3$, but the function should not. Use the known batch output $[[3.1,-0.45],[-4.9,4.55]]$ as the next numerical check.
 
 ### Connect it to the computation
 
-With the first convention, a row batch computes $XW+b$. With the transposed storage convention, the equivalent calculation uses $X\widetilde W^{\mathsf T}+b$, where $\widetilde W=W^{\mathsf T}$. Transposing storage without adapting the computation would change the meaning or produce a shape error.
-
-The picture explains this layout contract using an explicit numerical reference. It does not demonstrate that every layer or serialized model can be transferred between frameworks by one transpose. Check activations, bias, preprocessing, and layer-specific conventions against an independent output reference as well.
+The first layout computes $XW+b$; the transposed storage computes $X\widetilde W^T+b$, with $\widetilde W=W^T$. In the executed fixture both produce scores $(3.1,-0.45)$ and $(-4.9,4.55)$. A feature-order swap instead gives $(-0.9,4.05)$, despite valid dimensions. After checking the transpose, inspect feature names, bias, activation and preprocessing; the dense result does not qualify conversion of a full framework model.
 
 ```python
 visual_data = {'kind': 'panels', 'panels': [{'kind': 'heatmap', 'title': 'Input × output layout', 'values': keras_kernel.tolist(), 'rows': ['input 0', 'input 1', 'input 2'], 'columns': ['output 0', 'output 1'], 'unit': 'weight'}, {'kind': 'heatmap', 'title': 'Output × input layout', 'values': torch_weight.tolist(), 'rows': ['output 0', 'output 1'], 'columns': ['input 0', 'input 1', 'input 2'], 'unit': 'weight'}]}
@@ -228,7 +226,7 @@ visual_data = {'kind': 'panels', 'panels': [{'kind': 'heatmap', 'title': 'Input 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-27T12:35:33.282891+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:09:09.907505+00:00. JAX 0.9.2.
 
 ```text
 Matched dense outputs: [[ 3.1  -0.45]

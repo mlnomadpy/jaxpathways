@@ -29,6 +29,8 @@ Trace the build context into the image, then configuration and artifact mounts i
 
 The current subprocess experiment demonstrates a process boundary. It is not evidence that a Docker build or container benchmark ran. Use that distinction when extending the lesson to your own container execution and keep the resulting receipt.
 
+The executed companion accepts two valid requests and rejects three invalid boundaries; successful predictions are 0.5, 2.5 and 5.0 across its independent three-input check. That evidence comes from fresh ordinary Python processes. When a case fails, inspect stdout/exit status and artifact validation first; a passing process check still leaves the Docker image and runtime untested.
+
 $$
 \text{Gate}(\mathcal{B}) = \mathbb{I}\!\left[\epsilon_{\text{parity}} \le \tau \;\wedge\; L_{p95} \le L_{\text{SLO}} \;\wedge\; \text{hash}(\mathcal{B}) = h_{\text{manifest}}\right]
 $$
@@ -41,7 +43,7 @@ $$
 
 *Architecture and dataflow mechanism diagram.*
 
-Each row identifies an object and the evidence needed to make a claim about it. The current companion supplies artifact checks and fresh-process predictions. An actual container run must add image, user and runtime evidence; device qualification adds hardware and workload measurements. Do not fill later rows with results from an earlier boundary.
+Rows progress from artifact to local process, container image and target device; each row needs its own evidence. Here two predictions and three rejections support the process contract, while the image and device rows remain unproven by this companion. For a container result, add image digest, non-root identity, mounted-artifact check and readiness; do not copy process evidence into those rows.
 
 ### Pause and reason
 
@@ -264,11 +266,11 @@ This companion tests the process/artifact contract. Run the Docker lab for conta
 
 ### Read the figure
 
-The horizontal categories separate the two valid request shapes from three deliberately invalid boundaries. Bar height is the number of cases observed by the local subprocess checker: $2$ successful prediction cases and $3$ expected rejections. These counts do not represent throughput, latency or a failure probability. Each success is also checked against independent affine arithmetic.
+The x-axis groups valid prediction cases and expected rejection cases; the y-axis is observed case count in the local process checker. Two valid cases produce predictions and three malformed or mismatched requests are rejected. These are coverage counts, not rates or throughput. The successful values independently match 0.5, 2.5 and 5.0; next test the same contract inside the actual image.
 
 ### Connect it to the computation
 
-A container must preserve this contract. The Docker lab supplies additional engine, user and readiness evidence; this plot comes from ordinary Python processes and cannot prove image behavior by itself.
+The plot’s five cases exercise the Python process/artifact boundary only. A container claim needs a built image identity, mounted artifact, actual container run, user identity and readiness result; a device claim adds hardware and workload evidence. Extend the receipt one boundary at a time so a local process success cannot be mistaken for container qualification.
 
 ```python
 visual_data={'kind':'bar','labels':['valid predictions','expected rejections'],'xlabel':'local process contract','ylabel':'observed case count','series':[{'label':'executed CPU cases','y':[accepted,rejected]}]}
@@ -276,7 +278,7 @@ visual_data={'kind':'bar','labels':['valid predictions','expected rejections'],'
 
 ## Recorded reference execution
 
-CPU run: 2026-10-27T12:41:30.592235+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:09:45.435139+00:00. JAX 0.9.2.
 
 ```text
 Fresh-process valid requests: 2 rejected boundaries: 3

@@ -21,11 +21,7 @@ A Pallas grid assigns work to programs, and BlockSpec maps those programs to arr
 
 ## Map every logical element to an owning program
 
-The lesson's five-by-eleven matrix is covered by nine program IDs. Those IDs are categories, not measured magnitudes. Tile outlines and a discrete legend show which program owns each region without implying that a higher ID performs more work.
-
-At an edge, the physical tile extends beyond the logical matrix. This implementation pads the inputs before the kernel, making each block access valid, then crops the result back to the logical shape. A padded slot is storage for the computation, not an extra observation or logical output.
-
-Enumerate coordinates independently and verify coverage of every valid element. Then test dimensions that are not multiples of the tile size; perfectly divisible fixtures can conceal boundary mistakes.
+Tiling answers a practical question: which kernel invocation writes each output cell? For the worked $(5,11)$ input and $(2,4)$ block, the grid is $(3,3)$, or nine program IDs. Each ID owns one tile; at the lower-right, ID 8 owns logical row 4 and columns 8–10. The padded block has more slots than logical outputs, so use padding before launch and crop after. Predict the owner of cell $(3,7)$, then check your arithmetic against the map.
 
 ### Program coordinates and partial boundary tiles
 
@@ -35,7 +31,7 @@ Enumerate coordinates independently and verify coverage of every valid element. 
 
 *Architecture and dataflow mechanism diagram.*
 
-Two-by-four tiles cover a five-by-eleven logical matrix. Each cell lists a program ID and valid row/column range. Bottom and right tiles are partial; accesses outside the logical range need boundary treatment. Program IDs are categories, matching the corrected discrete ownership heatmap. Here explicit padding makes whole-block accesses valid; cropping removes artificial output positions.
+Rows in the table are grid rows and columns are grid columns; each cell names one program ID and its valid logical row/column range. The map's $(2,4)$ block covers five rows by eleven columns using a $(3,3)$ grid. For ID 8, only row 4 and columns 8–10 are valid, although its launched tile has eight slots. Predict the result of skipping padding: invalid positions could become unintended output, so this wrapper pads whole blocks and crops to the logical matrix.
 
 ### Pause and reason
 
@@ -49,11 +45,11 @@ It exercises partial boundary tiles and guards. A tile-aligned case never asks t
 
 ## Write the simplest useful contract
 
-Two nonempty matrices have the same shape and dtype; the result has that shape and dtype. The kernel computes in float32 and casts once at its output, supporting float32 and bfloat16 inputs. This explicit precision policy becomes important later. A function returning an array is not the kernel body contract: the body reads input Refs and writes every element of its output Ref.
+Start with the array contract: two nonempty matrices of equal shape and dtype produce one result of the same shape and dtype. The body does not return an array; it reads input Refs and writes every output Ref. This example promotes loaded float32 or bfloat16 values to float32, computes elementwise $2X+Y$, then casts once to output dtype. Keeping the numerical contract explicit lets later checks distinguish indexing errors from rounding.
 
 ## A grid coordinate is not an element coordinate
 
-For a $(5,11)$ matrix and $(2,4)$ blocks, the grid is $(3,3)$. Invocation $(i,j)$ owns rows starting at $2i$ and columns starting at $4j$. The BlockSpec index map returns block coordinates $(i,j)$; Pallas applies the block-size scaling. Confusing this with element offsets can produce skipped regions or out-of-bounds windows.
+For the $(5,11)$ matrix with $(2,4)$ blocks, $i,j=(2,1)$ names a program tile, not element $(2,1)$. Its starting element is $(2\cdot2,1\cdot4)=(4,4)$. The BlockSpec map returns block coordinates $(i,j)$ and Pallas applies block-size scaling. Work one cell from that tile, such as $(4,7)$, to see why confusion between program IDs and element offsets skips or misplaces data.
 
 $$
 G_m=\left\lceil\frac{M}{B_m}\right\rceil,\quad G_n=\left\lceil\frac{N}{B_n}\right\rceil
@@ -61,15 +57,15 @@ $$
 
 ## Make boundary behavior explicit
 
-We pad both inputs to $(6,12)$, launch complete blocks and crop the output to $(5,11)$. This avoids relying on implicit out-of-bounds reads or uninitialized output cells. There are $55$ logical elements and $72$ padded elements, so $17$ elements represent extra work. Padding with zeros is harmless here because each output depends only on corresponding input elements. A reduction, softmax or stencil would require a separate padding argument.
+Ceiling division gives grid $(3,3)$, so the physical launch covers $(6,12)$ slots for only 55 logical values. Padding adds 17 slots; cropping returns the original $(5,11)$ shape. Zero padding is safe for this elementwise $2X+Y$ because each output uses only the matching input cell. A sum or stencil would need a different edge rule. Compare the last logical output to the padded region to see why cropping belongs in the wrapper.
 
 ## Check ownership and arithmetic separately
 
-The ownership map comes from integer row/column arithmetic, independent of the kernel result. The value reference comes from NumPy. Checking only a mean could hide a missing or swapped tile; compare every element and explicitly inspect the last row and column. A different block size must change work partitioning while preserving the logical result.
+Two independent questions catch different bugs: integer coordinate arithmetic checks each output has one owner, while a NumPy expression checks the value. Compare all 55 values, not their mean, then inspect the bottom-right output (about 7.05) and change block size. Ownership should change with block geometry; the cropped result should not.
 
 ## Interpretation proves bounded semantics, not speed
 
-The call sets interpret=True, which runs actual Pallas semantics through a CPU-compatible execution path. This verifies the grid, Ref operations and numerical results for the fixture. It does not validate TPU layout constraints, target lowering, memory overlap or accelerator throughput. The next lesson introduces a separate TPU-only path that refuses to substitute interpretation when target hardware is absent.
+`interpret=True` runs the actual Pallas kernel semantics through the CPU-compatible path for this fixture. It supports the elementwise result and ownership checks, but it does not test TPU layout restrictions or target lowering. This path is useful while learning the mapping; do not time it as an accelerator comparison. The next lesson adds a separately guarded TPU launch.
 
 ## Write a block-local kernel and a boundary-aware wrapper
 
@@ -227,15 +223,11 @@ Expected: Logical shape (5,11); endpoints -3.75 and approximately 7.05. Grid (3,
 
 ### Read the figure
 
-Rows and columns are logical matrix coordinates. Each color identifies the program that owns that cell, using the program-ID labels on the colorbar under $(2,4)$ blocks. Program IDs are labels, not execution time or device IDs. Programs zero through two cover the first two rows; programs six through eight cover the last logical row.
-
-The bottom-right cell belongs to program $8$. Its logical region has only one row and three columns, although the launched block has two rows and four columns. The padded cells are intentionally outside this cropped ownership display.
+The x-axis is logical matrix column and the y-axis is logical matrix row; the discrete colorbar gives owning program ID under $(2,4)$ blocks. IDs are categories, not a numeric scale. In the $(5,11)$ grid, the last logical row is split among IDs 6, 7 and 8; the bottom-right cell $(4,10)$ belongs to 8. Predict the owner of $(3,7)$ before checking the colors: it lies in program row 1, column 1, ID 4.
 
 ### Connect it to the computation
 
-The independent ownership arithmetic agrees with a $(3,3)$ grid over a padded $(6,12)$ buffer. The numerical Pallas result is separately compared element by element with NumPy, including the bottom-right value of about $7.05$.
-
-Color differences do not imply parallel execution or different speeds. This CPU interpretation figure explains mapping and boundaries; TPU scheduling and layout constraints need their own target-specific evidence.
+The CPU execution independently computes grid $(3,3)$ over padded $(6,12)$ and compares every cropped output with NumPy; the bottom-right value is about 7.05. The color map explains ownership, while the numeric comparison verifies arithmetic. It contains no latency or device scheduling measurement. Use the partial bottom/right tiles to predict which slots are padding, then verify the crop removes them.
 
 ```python
 visual_data={'kind':'heatmap','values':owner.tolist(),'unit':'program ID (categorical label)','rows':[str(i) for i in range(5)],'columns':[str(i) for i in range(11)],'xlabel':'logical column','ylabel':'logical row'}
@@ -243,7 +235,7 @@ visual_data={'kind':'heatmap','values':owner.tolist(),'unit':'program ID (catego
 
 ## Recorded reference execution
 
-CPU run: 2026-10-27T12:34:50.460451+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:14:33.555261+00:00. JAX 0.9.2.
 
 ```text
 Shape and boundary: (5, 11) -3.75 7.050000190734863

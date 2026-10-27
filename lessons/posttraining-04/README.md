@@ -22,13 +22,9 @@ This lesson isolates RLHF mechanics in a small categorical bandit. A trainable p
 
 ## Keep the four policy-and-reward roles distinct
 
-Before this lesson, complete rl-01 through rl-04: functional environments, rollout masks, behavior-policy identity, signed PPO clipping and held-out evaluation. This is an additional prerequisite for learned-reward policy optimization, not for response-only SFT or LoRA.
+Keep the objects in this run separate. The frozen reward model assigns scalar scores to terminal actions; it was fitted from pairwise preferences earlier. A preference probability such as $\sigma(r_+-r_-)$ is the reward model's likelihood for a comparison, not the policy's probability of sampling an action. PPO uses policy action probabilities to form its current-to-old ratio.
 
-The old policy probabilities stay fixed during the inner PPO updates for one rollout batch. They refresh when a new rollout is collected. The reference policy remains fixed across those rollouts and defines the KL comparison. The reward model is frozen during policy optimization.
-
-Advantages and old probabilities should not quietly become new optimization targets during the inner update. This fixture uses an exact baseline and categorical KL; it does not contain a learned language-model critic or human-feedback collection pipeline.
-
-Read reward, KL and action-probability panels together. Higher reward accompanied by a larger reference deviation is a tradeoff, not an unqualified success. Keep each plotted quantity tied to the actual policy state at measurement.
+For one rollout batch, old action log probabilities and advantages are fixed while current policy parameters update. At the next batch, the old snapshot refreshes. The reference policy and reward model stay fixed across the run. This exercise has three terminal actions, an exact expected-reward baseline, and exact categorical KL; there is no learned value head or GAE here. A larger sequence exercise adds those components separately.
 
 ### Different objects have different update lifetimes
 
@@ -38,7 +34,7 @@ Read reward, KL and action-probability panels together. Higher reward accompanie
 
 *Architecture and dataflow mechanism diagram.*
 
-Current parameters change within PPO updates. Old probabilities stay fixed for that rollout batch and refresh next rollout. The reference and reward remain fixed during policy training. This categorical fixture has an exact baseline, so no learned critic is shown.
+Each table row names an object's role and update lifetime: current policy parameters change on inner steps; old action log probabilities refresh only with a new rollout; reference probabilities and reward scores stay fixed; the exact baseline is computed for each rollout. The action-0 probability moves from 0.402 under the reference to 0.974 under the trained policy, alongside a final 0.782-nat KL, making the separate reference row operationally visible. Predict what goes wrong if the old snapshot refreshes every inner step: the ratio denominator resets, while the fixed reference still measures total drift. This bandit has an enumerable baseline and no learned value head. The optional sequence-PPO appendix adds a critic and EOS/timeout GAE, but its held-out reward floor failed.
 
 ### Pause and reason
 
@@ -52,29 +48,23 @@ Old rollout-time probabilities refresh. The reference remains fixed under this l
 
 ## Before coding: identify four different objects
 
-Keep a notebook table with current policy, old behavior policy, reference policy and reward model. The current policy changes on optimizer steps. The old policy is a snapshot taken before collecting the batch; its sampled-action log probabilities stay fixed while reusing that batch. The reference and reward model stay fixed for the whole experiment. Confusing old and reference makes even a numerically stable loop implement the wrong objective.
-
-This lab is a bandit: one prompt, three terminal actions and no sequence credit assignment. It lets us calculate expectations exactly. Language PPO additionally needs token masks, rollout termination, value/advantage estimation and a generation pipeline; none of those can be inferred from this loop.
+The current policy supplies probabilities used to sample actions and changes on each optimizer step. The old behavior probabilities are the saved denominator for this batch's PPO ratio; they stay fixed through its inner epochs, then refresh at the next rollout. The reference probabilities define KL and remain fixed across batches. The reward model supplies the scalar score and also remains fixed. These are four different snapshots, even when the current policy initially has the same values as the old or reference policy.
 
 ## Keep three identities separate
 
-The reward model scores outputs. The reference policy anchors the desired deviation penalty and stays fixed. The old behavior policy generated the current batch and remains fixed only while that batch is reused. At the next rollout, old behavior updates to the new policy; the reference does not.
+The worker samples one of three terminal actions and saves its old log probability. For this tiny action set it can enumerate the old policy's expected reward exactly, then subtract that baseline from the sampled action's frozen reward to obtain an advantage. The centered advantage is an update signal, not a preference probability or a new reward-model score. A language policy needs a value or other baseline because its full action space cannot be enumerated this way.
 
 ## Collect actions before optimizing them
 
-The code samples terminal response actions from the current categorical policy. It stores their old log probabilities and computes an advantage using the frozen reward minus that policy’s exact expected reward. This exact baseline is available only because the action space is tiny; a general language system needs a suitable baseline or value estimator.
+Take $A=2$, ratio $\rho=1.5$, and clip range $[0.8,1.2]$: the unclipped product is 3 and the clipped product is 2.4, so PPO keeps 2.4 as the surrogate term. With $A=-2$ and $\rho=0.5$, the products are -1 and -1.6, so it keeps -1.6. The sign of the advantage determines which side is restrictive. The minimized loss is negative surrogate plus a KL penalty. Clipping limits this sampled objective; it does not freeze the policy or guarantee a global trust region.
 
 ## Work a signed clipping example
 
-For advantage $A=2$, ratio $\rho=1.5$, and clip interval $[0.8,1.2]$, the products are $3$ and $2.4$, so the minimum is $2.4$. Further increasing this ratio no longer improves that positive-advantage surrogate term. For $A=-2$ and $\rho=0.5$, the products are $-1$ and $-1.6$, so the minimum is $-1.6$.
-
-Clipping limits the reward for moving in the advantageous direction too far on these samples. It does not freeze all probability changes or prove a global trust region. The explicit KL term can still contribute gradients when a surrogate term is clipped. Read the negative sign in the minimized loss carefully: we minimize negative surrogate plus a penalty.
+Subtracting a baseline that does not depend on the sampled action leaves the expected unclipped score-function gradient unchanged, because action probabilities sum to one. It can reduce sampling noise. Here all three actions are enumerable, so the code checks the baseline gradient against the exact expected-reward gradient rather than relying on a noisy sample. This identity does not make the clipped multi-epoch PPO estimator unbiased, and it is not a claim about a learned critic.
 
 ## Why a baseline can help without changing the expected gradient
 
-For sampled action $a$, the advantage here is reward minus the old policy’s exact expected reward. The baseline is independent of which action was sampled and is frozen for the update. Its expected contribution to the unclipped score-function gradient is zero because policy probabilities sum to one. Subtracting it can reduce sampling variance without changing that expected gradient.
-
-Our three-action environment lets you enumerate this identity instead of trusting a noisy Monte Carlo comparison. The identity alone does not prove that arbitrary baselines, clipped multi-epoch surrogates or learned value estimators are unbiased. Preserve which estimator is being checked.
+For each sampled action, PPO computes $\rho=\exp(\log\pi_{\mathrm{current}}-\log\pi_{\mathrm{old}})$ and takes the minimum of the signed unclipped and clipped advantage products. In the code, old log probabilities and advantages are detached, so later optimizer steps cannot rewrite the batch that generated the action. Clipping is applied after multiplying by the signed advantage; clipping the ratio alone loses the negative-advantage behavior.
 
 $$
 \sum_a\pi(a)\nabla_\theta\log\pi(a)\,[r(a)-c]=\nabla_\theta\sum_a\pi(a)r(a)
@@ -82,7 +72,7 @@ $$
 
 ## Clip the surrogate with the advantage sign intact
 
-Form a probability ratio from current and old log probabilities. Take the minimum of unclipped and clipped advantage products. Negative advantages reverse which bound matters; clipping only the ratio and maximizing it indiscriminately changes the algorithm. Advantages and behavior probabilities are detached.
+The objective also penalizes exact categorical KL from the current policy to the fixed reference, with coefficient $\beta$. The figure's final expected learned reward is about 1.92, up from about 0.28 at the reference, while KL reaches about 0.78 nats. The probability panel shows action 0 rising from about 0.402 to 0.974, so reward rises as the policy moves away from its reference. Those are exact expectations over this three-action synthetic bandit, not human scores or language quality. The next decision is whether that reward gain justifies the measured reference drift under an independent task check.
 
 $$
 L=-\mathbb E\left[\min(\rho A,\operatorname{clip}(\rho,1-\epsilon,1+\epsilon)A)\right]+\beta D_{\mathrm{KL}}(\pi_\theta\Vert\pi_{\mathrm{ref}})
@@ -90,17 +80,15 @@ $$
 
 ## Measure reward and reference drift together
 
-For this categorical bandit, compute the KL and expected learned reward exactly by summing over every action. The trainer includes this exact KL directly in the objective; it is not an implementation of every token-level reward-shaping variant. A higher reward with greater KL may be expected, and clipping does not guarantee a global trust region.
+A policy can exploit a reward model's blind spots, so higher learned reward must be checked against an independent evaluator and difficult examples. This lesson's three actions are synthetic and include no held-out language response set. Its 40-batch result says the policy optimized this fixed score while moving from the reference; it does not establish alignment or generalization.
 
 ## Do not confuse reward optimization with alignment
 
-The model can exploit a weak reward model. Keep independent evaluations, inspect unfavorable cases and fix reward/reference versions during a comparison. Actual human-feedback systems need human data provenance and held-out human judgments. This exercise demonstrates sampled policy optimization against a learned synthetic preference reward only.
+For this finite action set, the exact optimum of expected fixed reward minus $\beta$ times forward KL has probabilities proportional to reference probability times $e^{r/\beta}$. It is a comparison point, not a promised endpoint for sampled clipped PPO. The recorded regularized objective is 1.762 for the trained policy and 1.799 at that optimum, so the run remains below the analytic reference. Reward rises from 0.282 to 1.919 while KL reaches 0.782 nats; read those quantities separately.
 
 ## Use the exact solution as a bounded optimization reference
 
-For a finite action space with positive reference probabilities, maximizing expected fixed reward minus $\beta$ times forward KL has optimum proportional to reference probability times $\exp(r/\beta)$. This is a reference for the regularized bandit problem, not a statement that forty sampled PPO iterations must reach it. Compute it with log-softmax for numerical stability.
-
-Evaluate the regularized objective of your trained policy and this optimum. A gap can reflect finite optimization, clipping and sampled rollouts. A higher learned reward alone can come from excessive drift. Keep an independent task score and adversarial cases before carrying this pattern to a real reward model.
+The registered lesson is a bandit with an exact baseline, so it has no critic or GAE. In the optional saved-decoder sequence-PPO appendix, a new value head estimates expected remaining reward from each response prefix. GAE combines each step's reward-minus-value prediction with later temporal-difference residuals; at EOS it bootstraps zero, while a timeout bootstraps the final post-action value and stops the trace. Those are separate sequence mechanics, not present in this three-action loop. The retained appendix v5 report passed mechanics and replay review, but its strict held-out reward-improvement floor failed: child and parent both scored -0.009211 on eight held-out prompts and 29 valid actions. Equality does not meet a strictly positive improvement requirement, so do not describe that extension as a model-quality success.
 
 $$
 \pi^*(a)=\frac{\pi_{\mathrm{ref}}(a)e^{r(a)/\beta}}{\sum_b\pi_{\mathrm{ref}}(b)e^{r(b)/\beta}}
@@ -310,13 +298,11 @@ Expected: Sampled PPO updates increase exact expected learned reward while the r
 
 ### Read the figure
 
-The top panel shows exact expected learned reward after each rollout batch, rising toward the highest-scored action. The bottom panel shows exact KL in nats to the fixed reference. The final reward is about $1.92$, with KL about $0.78$. The axes are different quantities and must not be added as if they shared units.
-
-The third panel compares reference and final action probabilities; each series sums to one. Probability moves toward action zero, the response favored by the learned reward. The other actions lose probability, explaining the rising expected reward and KL in the first two panels. Reward is measured in the learned score scale, KL in nats and these bars in probability: do not combine their heights. This is a finite synthetic policy distribution, not a measure of human approval.
+The first x-axis is completed rollout batch (1–40); its y-axis is exact expected learned reward, rising from 0.610 after batch 1 to 1.919 after batch 40 (the reference starts at 0.282). The second y-axis is exact categorical KL to the fixed reference in nats, ending at 0.782. In the probability panel, x names terminal actions and y is probability: action 0 moves from 0.402 under the reference to 0.974 under the trained policy. Keep reward units, nats, and probabilities separate.
 
 ### Connect it to the computation
 
-The policy concentrates on the action favored by the learned reward, which also moves it away from the reference. These deterministic expectation measurements evaluate a policy trained from random rollouts; they are not sampled human preference scores or a safety assessment.
+The fixed reward favors action 0, so concentration on that action explains both the reward gain and reference drift. The exact regularized objective is 1.762 for the trained policy versus 1.799 at the analytic optimum; sampled clipped PPO approached but did not reach that reference. This is a synthetic three-action bandit with no learned critic, GAE, held-out response set, or human judgments. Predict what a larger KL coefficient should do: it should resist concentration and reduce drift, though the actual sampled trajectory must be measured.
 
 ```python
 visual_data={'panels':[{'kind':'line','xlabel':'completed PPO rollout batches','ylabel':'expected learned reward','series':[{'label':'exact policy expectation','x':list(range(1,len(history)+1)),'y':history}]},{'kind':'line','xlabel':'completed PPO rollout batches','ylabel':'KL to fixed reference (nats)','series':[{'label':'exact categorical KL','x':list(range(1,len(kl_history)+1)),'y':kl_history}]}]}
@@ -330,7 +316,7 @@ visual_data={"panels":[*visual_data.get("panels",[visual_data]),extra_panel]}
 
 ## Recorded reference execution
 
-CPU run: 2026-10-27T14:08:59.633448+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:27:04.951903+00:00. JAX 0.9.2.
 
 ```text
 Reward initial/final and final KL: 0.28191882371902466 1.9185447692871094 0.7824773192405701

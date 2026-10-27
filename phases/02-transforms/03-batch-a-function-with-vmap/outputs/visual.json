@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "transforms-03",
-  "contentHash": "550145f1b48061ac3b039d0a1b65be6e46876140cf16bfbdc25e055b6721c493",
+  "contentHash": "33b77093190fbb99ca4016713902c27ff27e362639c0c04178100e91e8b0f47d",
   "rendererHash": "17e3bbad72ee4c43425845aaee76b86b85e84750551278be03d8c16842f4dc63",
   "kind": "executed",
-  "generatedAt": "2026-10-27T12:17:08.731416+00:00",
+  "generatedAt": "2026-10-27T17:02:17.479371+00:00",
   "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",
@@ -36,7 +36,7 @@
   "diagram": {
     "title": "Mapped rows and shared weights",
     "prediction": "What should happen if you duplicate an input row while keeping the same shared weights?",
-    "reading": "Each row enters the same single-example rule with one shared weight vector. The scalar results are stacked in row order. This is a mathematical mapping, not a hardware-thread allocation. Reordering observations should reorder outputs identically.",
+    "reading": "Read the graph left to right as the shared-parameter computation. Each input-row node feeds its corresponding single-example step; the one shared weight vector is used by all three steps. Each step sends one scalar down to its output node, giving \\(1,1,8\\) in row order. The links describe mapped dataflow, not allocated hardware threads.",
     "alt": "Each row enters the same single-example rule with one shared weight vector. The scalar results are stacked in row order. This is a mathematical mapping, not a hardware-thread allocation. Reordering observations should reorder outputs identically.",
     "scope": "Architecture and dataflow mechanism diagram.",
     "height": 4,

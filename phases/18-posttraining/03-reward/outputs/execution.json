@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "posttraining-03",
-  "contentHash": "c44308839165db2861b68ab6705ddee58cdaa719f78b93d40832eebe0eec382e",
-  "executedAt": "2026-10-27T14:08:52.262457+00:00",
+  "contentHash": "e9505b0143cc80bb170cc13bb9ab073caf7b540f66216ec246642307df94e65b",
+  "executedAt": "2026-10-27T17:26:59.191516+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,

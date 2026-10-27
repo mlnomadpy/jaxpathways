@@ -73,9 +73,9 @@ This exercise has one controller process and four addressable devices. Multi-hos
 
 ## A global array contains local pieces
 
-The host array has shape $(4,2)$: four examples with two values each. Mesh assigns the four devices the named axis data. `P("data",None)` maps the first array dimension to that mesh axis and leaves the feature dimension unpartitioned. Each local shard therefore has shape $(1,2)$.
+The input `x` has global shape $(4,2)$: four rows, two features each. The mesh names the four logical devices along `data`, and `P("data",None)` assigns the first array axis across them while keeping both features of a row together. The recorded shard report makes this concrete: device 0 owns row 0 with values $[0,1]$, device 1 owns $[2,3]$, through device 3 owning $[6,7]$. Each local shape is $(1,2)$, while `x.shape` remains $(4,2)$.
 
-Use shard.index to identify its slice in the global array and shard.data to inspect its values. The global x.shape stays $(4,2)$; it does not become $(1,2)$ just because each device holds one row. Conversion with `np.asarray(x)` gathers the fully addressable global array to the host in this small single-process exercise.
+Use `shard.index` to map a local piece back to global positions and `shard.data` to inspect its values. In this single-process exercise, `np.asarray(x)` gathers the fully addressable global array to the host. Predict the local shape again for twelve rows: four-way row partitioning should give $(3,2)$ on each device. Five rows cannot be divided evenly; replication keeps all five rows on every device instead of dropping one.
 
 ```text
 Global rows [0,1] [2,3] [4,5] [6,7]
@@ -86,9 +86,9 @@ local shape (1,2) on every device; global shape (4,2)
 
 ## Check arithmetic separately from placement
 
-The function $2x+1$ is elementwise: a row does not need a value from a different row. For the first row $[0,1]$, predict $[1,3]$; for the final row $[6,7]$, predict $[13,15]$. The jit contract declares input and output placement explicitly. The NumPy check verifies all values, and shard inspections verify the intended partition. Neither alone verifies both.
+The arithmetic `2*x + 1` is elementwise, so each output depends only on the matching input cell. For row $[0,1]$, hand-calculate $[1,3]$; for row $[6,7]$, calculate $[13,15]$. The recorded global result contains those rows at its beginning and end, and the NumPy comparison checks all entries. The shard report checks placement, so neither check can stand in for the other.
 
-block_until_ready waits for the result before reporting. It is useful when observing execution and essential for a future synchronized timing experiment, but no timings are claimed here. Four-way row partitioning requires a row count divisible by four. Try five rows deliberately, read the shape error, and choose a repair that preserves what your experiment means.
+`block_until_ready` waits for the result before reporting. Here it provides completion ordering; no timing claim follows from it. Now predict the local shape for five rows before running: a four-way row split cannot give equal integer row counts, so the recorded error is expected. Choose replication when all five rows must remain available on each logical device, and inspect the local shapes to confirm the repair.
 
 ## Start a fresh CPU runtime
 
@@ -221,7 +221,7 @@ visual_data = {'kind': 'heatmap', 'values': owners.tolist(), 'unit': 'logical CP
 
 ## Recorded reference execution
 
-CPU run: 2026-10-27T12:28:14.167775+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:02:31.513460+00:00. JAX 0.9.2.
 
 ```text
 JAX version: 0.9.2

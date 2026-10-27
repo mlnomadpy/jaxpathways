@@ -52,6 +52,8 @@ $$
 
 A logit $z$ is an unrestricted real score. The sigmoid maps it into a probability: $p=1/(1+e^{-z})$. At $z=0$, the probability is $1/2$ and either binary label has loss $\log 2$. For a positive label, differentiating the loss gives $p-1$, so gradient descent increases the logit. More generally the derivative is $p-y$. A very wrong, confident prediction still supplies a useful gradient.
 
+At logit $0$, the probability is $0.5$. The derivative probability minus label is $-0.5$ for label $1$, so gradient descent raises the logit; it is $+0.5$ for label $0$, so descent lowers it. At logit $10$, positive-label loss is about $0.0000458$, while negative-label loss is about $10.0000458$. These are costs assigned to observed labels, not probabilities.
+
 $$
 \ell(z,y)=\operatorname{softplus}(z)-yz,\qquad \frac{\partial\ell}{\partial z}=\operatorname{sigmoid}(z)-y
 $$
@@ -172,6 +174,8 @@ A large positive logit strongly favors label $1$. That confidence is rewarded on
 
 Loss is not a probability or classification accuracy, so values above $1$ are valid. The near-flat parts approach zero without implying an exact zero probability for the other class. Computing this loss from logits with a stable formula avoids unnecessary overflow or taking the logarithm of a rounded zero.
 
+Before moving the logit, compute probability minus label; its sign predicts the descent direction for the observed label.
+
 ```python
 grid = jnp.linspace(-10.0, 10.0, 81)
 visual_data = {'kind': 'line', 'x': grid.tolist(), 'xlabel': 'logit', 'ylabel': 'binary cross-entropy', 'series': [{'label': 'observed label 1', 'y': binary_loss(grid, 1.0).tolist()}, {'label': 'observed label 0', 'y': binary_loss(grid, 0.0).tolist()}]}
@@ -179,7 +183,7 @@ visual_data = {'kind': 'line', 'x': grid.tolist(), 'xlabel': 'logit', 'ylabel': 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-27T12:29:10.676395+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:03:46.964706+00:00. JAX 0.9.2.
 
 ```text
 uncertain loss / confident-wrong loss: 0.6931472 100.0

@@ -1,0 +1,92 @@
+
+> jaxpathways@0.18.1 check
+> npm run content:build && npm run check:astro && npm run check:types && npm run lint && npm run format:check && node scripts/validate-curriculum.mjs && npm run build && npm test && npm run check:epub-identity && python3 scripts/check-distribution.py && npm run check:site
+
+
+> jaxpathways@0.18.1 content:build
+> node scripts/render-curriculum.mjs && python3 scripts/audit-learning-material.py && python3 scripts/build-distribution.py && python3 scripts/build-assessments.py && python3 scripts/build-project-workspace.py && python3 scripts/build-tpu-workspace.py && python3 scripts/build-experiment-workshop.py
+
+{
+  "byKind": {
+    "lessons": 104,
+    "phases": 22,
+    "projects": 31,
+    "plans": 10,
+    "assessments": 11,
+    "pathways": 10,
+    "careers": 7,
+    "tracks": 4,
+    "guides": 3,
+    "book": 1
+  },
+  "phaseLevels": {
+    "available-draft": 9,
+    "in-development": 13
+  },
+  "itemLevels": {
+    "available-draft": 162,
+    "in-development": 31,
+    "planned": 10
+  },
+  "tasks": 545,
+  "lessonTasks": 414,
+  "projectStages": 131,
+  "currentCpuLessons": 104,
+  "currentProjectReferences": 28,
+  "expertReviewedLessons": 0,
+  "novicePilotedLessons": 0,
+  "choiceSpecificFeedbackLessons": 104,
+  "boundedHardwareQualifications": 4,
+  "fullCapstonesPlanned": 10,
+  "optionalPilots": 3,
+  "verifiedOptionalPilots": 3
+}
+Built offline HTML/EPUB (104 lessons), staged project, and tutor bundles.
+Built course workspace with canonical lessons, projects and tutor skills.
+Exported 11 synthesis assessment drafts for Astro and download.
+Built project workflow guide and portable CLI practice workspace.
+Built TPU/GCP guides, precision figures and practice bundle; no cloud resources created.
+Verified workshop: six recorded CPU runs, frozen source/config/data, metrics, artifacts and figure provenance; optional adapters checked separately.
+
+> jaxpathways@0.18.1 check:astro
+> astro check
+
+10:17:52 [types] Generated 61ms
+10:17:52 [check] Getting diagnostics for Astro files in /private/tmp/jaxpathways-content-repairs-review...
+Result (148 files): 
+- 0 errors
+- 0 warnings
+- 0 hints
+
+
+> jaxpathways@0.18.1 check:types
+> tsc -p tsconfig.domain.json && tsc -p tsconfig.browser-tests.json
+
+
+> jaxpathways@0.18.1 lint
+> eslint src scripts/*.mjs astro.config.mjs
+
+
+> jaxpathways@0.18.1 format:check
+> prettier --check src astro.config.mjs eslint.config.js
+
+Checking formatting...
+All matched files use Prettier code style!
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: tpu-01: analytic figure must distinguish itself from device evidence
+    at file:///private/tmp/jaxpathways-content-repairs-review/scripts/validate-curriculum.mjs:55:14
+    at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:681:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5) {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}
+
+Node.js v22.22.3

@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "kernels-01",
-  "contentHash": "5c2bf71a7aad7ee0646907ed755c064137f9d20f71ce5548a5b1e5b45fe61c80",
+  "contentHash": "3788f27d73237e0d0e249c615bfc00085a57ede69d7f840a680db61c79901477",
   "rendererHash": "17e3bbad72ee4c43425845aaee76b86b85e84750551278be03d8c16842f4dc63",
   "kind": "executed",
-  "generatedAt": "2026-10-27T12:18:56.149677+00:00",
+  "generatedAt": "2026-10-27T17:11:05.988850+00:00",
   "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",
@@ -110,7 +110,7 @@
   "diagram": {
     "title": "Program coordinates and partial boundary tiles",
     "prediction": "Why test an awkward shape in addition to a tile-aligned shape?",
-    "reading": "Two-by-four tiles cover a five-by-eleven logical matrix. Each cell lists a program ID and valid row/column range. Bottom and right tiles are partial; accesses outside the logical range need boundary treatment. Program IDs are categories, matching the corrected discrete ownership heatmap. Here explicit padding makes whole-block accesses valid; cropping removes artificial output positions.",
+    "reading": "Rows in the table are grid rows and columns are grid columns; each cell names one program ID and its valid logical row/column range. The map's \\((2,4)\\) block covers five rows by eleven columns using a \\((3,3)\\) grid. For ID 8, only row 4 and columns 8\u201310 are valid, although its launched tile has eight slots. Predict the result of skipping padding: invalid positions could become unintended output, so this wrapper pads whole blocks and crops to the logical matrix.",
     "alt": "Two-by-four tiles cover a five-by-eleven logical matrix. Each cell lists a program ID and valid row/column range. Bottom and right tiles are partial; accesses outside the logical range need boundary treatment. Program IDs are categories, matching the corrected discrete ownership heatmap. Here explicit padding makes whole-block accesses valid; cropping removes artificial output positions.",
     "scope": "Architecture and dataflow mechanism diagram.",
     "height": 4.6,

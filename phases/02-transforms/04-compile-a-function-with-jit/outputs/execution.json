@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "transforms-04",
-  "contentHash": "f06bfcfcacdaabe78d05509be5e01c9f4b89d8e066647982f7c2a27887eb2101",
-  "executedAt": "2026-10-27T12:28:33.757693+00:00",
+  "contentHash": "06a2cfc7d55fb6cb2bfdbb45dd72535e8b64bddb2b8a35ecece54926eb83964a",
+  "executedAt": "2026-10-27T17:02:57.787504+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -11,7 +11,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Loss: 0.46000000834465027\nFirst/repeat seconds: 0.016132208053022623 2.4999957531690598e-05\neager median / min / max seconds: 2.7916161343455315e-05 2.566678449511528e-05 4.8374757170677185e-05\ncompiled median / min / max seconds: 4.35439869761467e-06 4.124827682971954e-06 6.3749030232429504e-06\nbackend / shapes / dtype: cpu (4, 3) (3,) (4,) float32\nIndependent NumPy loss / gradient: 0.46000000834465027 [0.36000004 0.34000006 0.32000008]\nBenchmark boundary: warm the same signature first; start the clock, call,\nthen jax.block_until_ready((value, gradient)) before stopping it.\ncompiled value-and-grad median seconds: 8.895527571439743e-06\nPASS: transforms-04\n",
+  "stdout": "Loss: 0.46000000834465027\nFirst/repeat seconds: 0.02620441699400544 2.7124769985675812e-05\neager median / min / max seconds: 4.8562418669462204e-05 4.229089245200157e-05 0.00017616711556911469\ncompiled median / min / max seconds: 6.395392119884491e-06 5.917157977819443e-06 8.458271622657776e-06\nbackend / shapes / dtype: cpu (4, 3) (3,) (4,) float32\nIndependent NumPy loss / gradient: 0.46000000834465027 [0.36000004 0.34000006 0.32000008]\nBenchmark boundary: warm the same signature first; start the clock, call,\nthen jax.block_until_ready((value, gradient)) before stopping it.\ncompiled value-and-grad median seconds: 1.241639256477356e-05\nPASS: transforms-04\n",
   "notebookCells": [
     {
       "sourceHash": "804d1fb2173681aa29e6cc555464b209a33a5dfc21c699342755c4856344a511",
@@ -33,7 +33,7 @@
           "name": "stdout",
           "text": [
             "Loss: 0.46000000834465027\n",
-            "First/repeat seconds: 0.016006541904062033 1.9624829292297363e-05\n"
+            "First/repeat seconds: 0.02316433284431696 2.5499612092971802e-05\n"
           ]
         }
       ]
@@ -68,8 +68,8 @@
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "eager median / min / max seconds: 2.806214615702629e-05 2.6458874344825745e-05 8.345814421772957e-05\n",
-            "compiled median / min / max seconds: 4.729023203253746e-06 4.459172487258911e-06 7.832888513803482e-06\n",
+            "eager median / min / max seconds: 4.4479500502347946e-05 3.700004890561104e-05 0.00016916682943701744\n",
+            "compiled median / min / max seconds: 6.520887836813927e-06 5.8747828006744385e-06 8.165836334228516e-06\n",
             "backend / shapes / dtype: cpu (4, 3) (3,) (4,) float32\n"
           ]
         }
@@ -112,7 +112,7 @@
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "compiled value-and-grad median seconds: 8.499948307871819e-06\n"
+            "compiled value-and-grad median seconds: 1.0020798072218895e-05\n"
           ]
         }
       ]

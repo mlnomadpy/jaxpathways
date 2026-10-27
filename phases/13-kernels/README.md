@@ -12,7 +12,9 @@ Begin with a profiled operation and independent oracle. Complete CPU semantics f
 
 ## Study guide: Does a custom kernel earn its complexity?
 
-A lower-level implementation first owes you the same numerical contract. Use hostile shapes, independent references and explicit target limits before attempting a speed claim.
+A lower-level kernel replaces an operation the learner already understands. Its first responsibility is to compute the same result for every supported element, including the last partial tile. Draw the relationship among a program coordinate, its operand slices and its output before changing block sizes.
+
+The chapter moves from indexing to contraction and buffer lifetimes, then to a measured decision about whether an optimization is worthwhile. Treat boundary cases and independent numerical references as explanations of the contract. CPU interpretation illustrates semantics; target execution is needed to judge a performance tradeoff.
 
 ### Check your starting point
 

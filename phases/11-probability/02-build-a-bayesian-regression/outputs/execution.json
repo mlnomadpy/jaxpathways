@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "probability-02",
-  "contentHash": "3404f7174e13cb909f0b3248272e7b7a89f756b6b9932a17845f5700ad02eeeb",
-  "executedAt": "2026-10-27T12:31:53.801407+00:00",
+  "contentHash": "40cc7122e261de704c90985066b4ae1249d9469d597fdc893d02c211a92824c8",
+  "executedAt": "2026-10-27T17:07:04.106433+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,

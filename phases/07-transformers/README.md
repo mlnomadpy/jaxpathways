@@ -12,7 +12,9 @@ Inspect what each token can attend to and count only valid targets in the loss.
 
 ## Study guide: Can you prove that a predicted token cannot see its future?
 
-Attention is a weighted mixing operation whose axes and masks are testable. Build a causal model from these contracts before interpreting a generated sentence as evidence of learning.
+Attention lets each query mix values according to its relationship with the keys. Its matrix looks abstract until you follow one row: which positions are allowed, what probabilities do they receive, and which values are combined? Shapes, masks and target shifts determine the meaning of that calculation.
+
+Build the causal model from those local contracts. Change a future token and check an earlier output, trace the prompt-to-answer target boundary, and keep padding or packed documents out of valid comparisons. Read generation as the result of both a model and a declared decoding policy.
 
 ### Check your starting point
 

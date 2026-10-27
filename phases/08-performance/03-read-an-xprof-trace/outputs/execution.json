@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "performance-03",
-  "contentHash": "36679c10fef2382e1b0ba19c51f3e194b352bbd23035a1be8c366cd8cbc0bb72",
-  "executedAt": "2026-10-27T12:30:59.254312+00:00",
+  "contentHash": "ac35edab935b3e0058c63ec172a7cda506859e534a97edb6d6bf0b1b09aec23b",
+  "executedAt": "2026-10-27T17:05:55.689675+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -11,7 +11,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Trace directory: /private/var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-course-trace-2wuglhy3\n{\n  \"input_wait_us\": [\n    1260,\n    1258,\n    1290,\n    1259\n  ],\n  \"model_and_wait_us\": [\n    55,\n    64,\n    146,\n    119\n  ],\n  \"step_us\": [\n    1326,\n    1341,\n    1445,\n    1384\n  ]\n}\nFour named steps verified; host annotations are not isolated device kernels.\nTrace directory: /private/var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-course-trace-3orqwrm8\n{\n  \"input_wait_us\": [\n    1262,\n    1267,\n    1633,\n    1267\n  ],\n  \"model_and_wait_us\": [\n    99,\n    57,\n    173,\n    116\n  ],\n  \"step_us\": [\n    1366,\n    1332,\n    1812,\n    1394\n  ]\n}\nFour named steps verified; host annotations are not isolated device kernels.\nUnattributed outer time, microseconds: [5, 8, 6, 11]\nWrong double-counted totals: [2727, 2656, 3618, 2777]\n{'input_wait_drop_us': 1878, 'model_before_us': 119, 'model_after_us': 79}\n{'minimum_ms': 0.057, 'median_ms': 0.10750000000000001, 'maximum_ms': 0.173}\n{'outer_us': 2665, 'children_union_us': 2639, 'remainder_us': 26, 'wrong_parent_plus_children_us': 5304}\nPASS: performance-03\n",
+  "stdout": "Trace directory: /private/var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-course-trace-0uym5n49\n{\n  \"input_wait_us\": [\n    1201,\n    1268,\n    1026,\n    1104\n  ],\n  \"model_and_wait_us\": [\n    113,\n    1078,\n    108,\n    94\n  ],\n  \"step_us\": [\n    1328,\n    2355,\n    1145,\n    1206\n  ]\n}\nFour named steps verified; host annotations are not isolated device kernels.\nTrace directory: /private/var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-course-trace-yt3veneq\n{\n  \"input_wait_us\": [\n    1272,\n    1273,\n    1492,\n    1539\n  ],\n  \"model_and_wait_us\": [\n    96,\n    192,\n    858,\n    1040\n  ],\n  \"step_us\": [\n    1380,\n    1500,\n    2362,\n    2589\n  ]\n}\nFour named steps verified; host annotations are not isolated device kernels.\nUnattributed outer time, microseconds: [12, 35, 12, 10]\nWrong double-counted totals: [2748, 2965, 4712, 5168]\n{'input_wait_drop_us': 1878, 'model_before_us': 119, 'model_after_us': 79}\n{'minimum_ms': 0.096, 'median_ms': 0.525, 'maximum_ms': 1.04}\n{'outer_us': 2665, 'children_union_us': 2639, 'remainder_us': 26, 'wrong_parent_plus_children_us': 5304}\nPASS: performance-03\n",
   "notebookCells": [
     {
       "sourceHash": "3e8868e0307cced4e322978bfe01ca2486c30f1363365da8595c145148ef002a",
@@ -24,25 +24,25 @@
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "Trace directory: /private/var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-course-trace-ba1jq9ea\n",
+            "Trace directory: /private/var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-course-trace-wsh5ksnv\n",
             "{\n",
             "  \"input_wait_us\": [\n",
-            "    1273,\n",
-            "    1263,\n",
-            "    1262,\n",
-            "    1260\n",
+            "    1266,\n",
+            "    1268,\n",
+            "    1298,\n",
+            "    1287\n",
             "  ],\n",
             "  \"model_and_wait_us\": [\n",
-            "    100,\n",
-            "    46,\n",
-            "    48,\n",
-            "    34\n",
+            "    131,\n",
+            "    99,\n",
+            "    95,\n",
+            "    133\n",
             "  ],\n",
             "  \"step_us\": [\n",
-            "    1383,\n",
-            "    1313,\n",
-            "    1312,\n",
-            "    1296\n",
+            "    1414,\n",
+            "    1379,\n",
+            "    1398,\n",
+            "    1431\n",
             "  ]\n",
             "}\n",
             "Four named steps verified; host annotations are not isolated device kernels.\n"
@@ -61,25 +61,25 @@
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "Trace directory: /private/var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-course-trace-a0nzw27g\n",
+            "Trace directory: /private/var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-course-trace-8qv7bt00\n",
             "{\n",
             "  \"input_wait_us\": [\n",
-            "    1273,\n",
-            "    1140,\n",
-            "    1262,\n",
-            "    1256\n",
+            "    1051,\n",
+            "    1294,\n",
+            "    1266,\n",
+            "    1323\n",
             "  ],\n",
             "  \"model_and_wait_us\": [\n",
-            "    114,\n",
-            "    93,\n",
-            "    58,\n",
-            "    43\n",
+            "    84,\n",
+            "    153,\n",
+            "    78,\n",
+            "    114\n",
             "  ],\n",
             "  \"step_us\": [\n",
-            "    1397,\n",
-            "    1241,\n",
-            "    1326,\n",
-            "    1302\n",
+            "    1145,\n",
+            "    1458,\n",
+            "    1353,\n",
+            "    1449\n",
             "  ]\n",
             "}\n",
             "Four named steps verified; host annotations are not isolated device kernels.\n"
@@ -113,8 +113,8 @@
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "Unattributed outer time, microseconds: [10, 8, 6, 3]\n",
-            "Wrong double-counted totals: [2784, 2474, 2646, 2601]\n"
+            "Unattributed outer time, microseconds: [10, 11, 9, 12]\n",
+            "Wrong double-counted totals: [2280, 2905, 2697, 2886]\n"
           ]
         }
       ]
@@ -142,7 +142,7 @@
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "{'minimum_ms': 0.043, 'median_ms': 0.0755, 'maximum_ms': 0.114}\n"
+            "{'minimum_ms': 0.078, 'median_ms': 0.099, 'maximum_ms': 0.153}\n"
           ]
         }
       ]

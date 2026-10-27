@@ -23,11 +23,9 @@ Hamiltonian Monte Carlo introduces momentum to propose distant states while acco
 
 ## A moving chain is not automatically a well-mixed chain
 
-Follow position and momentum through a leapfrog trajectory. A proposal can travel far without behaving like an independent posterior draw. Integration error and acceptance behavior provide one diagnostic, while between-chain agreement and autocorrelation provide others.
+The trace figure follows the first parameter coordinate for four chains after a fixed discard of 400 transitions. The lines cross the known mean of 1, and the executed sample mean is about 0.984; this is evidence about the marginal average, not proof that successive draws are independent or that every possible mode was found.
 
-Start multiple chains from meaningfully different positions where appropriate. Inspect the same retained sampling region across chains, and separate adaptation from retained draws. A trace that looks active may still stay in one region or be strongly correlated.
-
-The lesson's trace plot uses a known posterior mean as a reference. Matching that mean is not sufficient: spread and dependence matter too. Compute diagnostics from the retained samples with their conventions recorded; plotting a thinned subset should not silently redefine the diagnostic sample.
+The sampler retains rejected states as repeated values because each transition still contributes to the Markov chain's target distribution. The recorded acceptance rates are high, about 0.977 to 0.986, but high acceptance alone can accompany slow movement when the step is tiny. Compare trace behavior, covariance and chain diagnostics together; a thinned plot is for readability and does not change the samples used by the diagnostics.
 
 ### Pause and reason
 
@@ -61,7 +59,9 @@ We start four chains from dispersed points and discard the first $400$ transitio
 
 ## Use the reference model to expose failure
 
-Here the exact mean, variance and covariance are known. Check all of them: getting both marginal means right can still hide missing correlation. Acceptance alone is insufficient; a tiny step can accept almost everything while exploring slowly. Effective sample size concerns the information in correlated draws, not the number of rows stored. Before using a library such as NumPyro on an unknown posterior, repeat an exact-model validation and inspect its documented diagnostics. This CPU fixture establishes neither multimodal exploration nor accelerator performance.
+For this known correlated Gaussian, the retained sample mean is approximately $[0.984,-1.019]$, and the sampled covariance is about $[[0.980,0.773],[0.773,0.986]]$, close to the target's mean $[1,-1]$ and covariance with off-diagonal 0.8. Classical split R-hat is about 1.0002 for both coordinates. Those checks support this fixture's exploration but do not certify a different posterior, especially a multimodal one.
+
+The deliberately damaged step size changes the situation: the recorded bad-run acceptance is zero and its maximum energy error is roughly $5.02\times10^{10}$. That is a numerical integration failure, distinct from ordinary Monte Carlo variation. If the step were reduced, acceptance would likely recover for this target, but movement per transition could become smaller; inspect effective information as well as acceptance.
 
 ## Optional NumPyro check against a conjugate posterior
 
@@ -231,11 +231,11 @@ Expected: The pooled mean and covariance approach the stated target within the f
 
 ### Read the figure
 
-The horizontal axis counts retained transitions after discarding the initial $400$. The vertical axis is the first coordinate of the sampled parameter. Each colored line is one chain, plotted at every tenth retained transition to keep the figure readable. The target mean is $1$; the chains move on both sides of it. Their paths differ because they use different keys and initial positions. Connecting thinned points helps visual inspection but does not make the underlying draws independent.
+The horizontal axis counts retained transitions after the fixed discard of 400; the vertical axis is the first parameter coordinate. Four colored chains are plotted every tenth transition, and the horizontal reference is the known mean 1. The plotted values move on both sides of 1, including chain 1's sampled values near 0.96 and 0.11 early in the shown segment. Lines join thinned states for display; they do not imply independence.
 
 ### Connect it to the computation
 
-This trace is one piece of the evidence. The code also checks the two-dimensional covariance, which a single-coordinate trace cannot show, and prints classical split R-hat and acceptance. A smooth-looking trace or repeated crossings of the mean is distinct from exploration of modes absent from this single-Gaussian fixture.
+The first-coordinate trace cannot show the covariance between coordinates. The full retained sample gives mean $[0.984,-1.019]$, covariance about $[[0.980,0.773],[0.773,0.986]]$, and classical split R-hat near 1.0002, while the damaged large-step run has zero acceptance and huge energy error. Use the trace as one diagnostic alongside these numerical checks; it cannot rule out shared failure to explore a mode.
 
 ```python
 indices=np.arange(0,400,10)
@@ -245,7 +245,7 @@ visual_data={"kind":"line","x":indices.tolist(),"xlabel":"retained transition (a
 
 ## Recorded reference execution
 
-CPU run: 2026-10-27T12:32:00.078341+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:07:12.438740+00:00. JAX 0.9.2.
 
 ```text
 mean: [ 0.98358583 -1.0185838 ] covariance: [[0.98042357 0.7727629 ]

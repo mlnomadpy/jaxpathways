@@ -12,7 +12,9 @@ Compare against a single-device reference; measure real accelerator performance 
 
 ## Study guide: Is the distributed update still optimizing the same objective?
 
-Start with the global mathematical operation, then specify ownership and communication. Logical CPU devices help expose placement and reduction mistakes before you spend accelerator time.
+Distribution changes where arrays and computations live; it should preserve the intended global objective. Begin by drawing which rows and parameter columns each device owns. Then derive how distinct contributions and valid counts combine into one loss and update.
+
+Use logical CPU devices to make ownership and unequal partitions inspectable. The unsharded calculation gives you a numerical reference; shard indices and local byte counts give you a placement reference. Communication and recovery add separate questions about coordinated work, which require their own receipts.
 
 ### Check your starting point
 

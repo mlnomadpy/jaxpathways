@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "optimization-12",
-  "contentHash": "7e31a860ba95bc3a5de478bfff7f11c2a14af09f057a40bd77282cbb058b3602",
+  "contentHash": "3e7bd7bd46464cc9cea66a0349e339d6a2e59d544313721883380093ec5ef6fd",
   "rendererHash": "17e3bbad72ee4c43425845aaee76b86b85e84750551278be03d8c16842f4dc63",
   "kind": "executed",
-  "generatedAt": "2026-10-27T12:17:35.564357+00:00",
+  "generatedAt": "2026-10-27T17:11:00.057296+00:00",
   "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",
@@ -246,7 +246,7 @@
   "diagram": {
     "title": "A norm ball and a coordinate box",
     "prediction": "Does coordinate clipping at \\(2.5\\) guarantee that the whole gradient norm is at most \\(2.5\\)?",
-    "reading": "The blue arrow is \\((3,4)\\). Green scales it to norm \\(2.5\\) along the same ray. Orange clips each coordinate to \\(2.5\\), landing at the box corner with norm \\(2.5\\sqrt{2}\\). The circle and box are analytic constraints, not training measurements.",
+    "reading": "The blue arrow is \\((3,4)\\). Green scales it to norm \\(2.5\\) along the same ray. Orange clips each coordinate to \\(2.5\\), landing at the box corner with norm \\(2.5\\sqrt{2}\\). The circle and box are analytic constraints, not training measurements. The circle marks the global norm cap and the square marks coordinate bounds. Predict which endpoint changes if the threshold shrinks: global clipping moves along the same ray, while coordinate clipping can move toward a different direction.",
     "alt": "The blue arrow is \\((3,4)\\). Green scales it to norm \\(2.5\\) along the same ray. Orange clips each coordinate to \\(2.5\\), landing at the box corner with norm \\(2.5\\sqrt{2}\\). The circle and box are analytic constraints, not training measurements.",
     "scope": "Architecture and dataflow mechanism diagram.",
     "height": 6,

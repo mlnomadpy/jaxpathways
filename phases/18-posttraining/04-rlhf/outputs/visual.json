@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "posttraining-04",
-  "contentHash": "1fd1780c91e620ac9e7e24091093856818b7e919bec8fc83dd8608c89bf36aa3",
+  "contentHash": "08482d553276156fe99761aa2729145dc9dd47b7564c5097e173ec68d6bc58c9",
   "rendererHash": "17e3bbad72ee4c43425845aaee76b86b85e84750551278be03d8c16842f4dc63",
   "kind": "executed",
-  "generatedAt": "2026-10-27T12:19:48.685352+00:00",
+  "generatedAt": "2026-10-27T17:26:18.339421+00:00",
   "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",
@@ -327,7 +327,7 @@
   "diagram": {
     "title": "Different objects have different update lifetimes",
     "prediction": "Which frozen object refreshes between rollout batches: old policy probabilities or the reference policy?",
-    "reading": "Current parameters change within PPO updates. Old probabilities stay fixed for that rollout batch and refresh next rollout. The reference and reward remain fixed during policy training. This categorical fixture has an exact baseline, so no learned critic is shown.",
+    "reading": "Each table row names an object's role and update lifetime: current policy parameters change on inner steps; old action log probabilities refresh only with a new rollout; reference probabilities and reward scores stay fixed; the exact baseline is computed for each rollout. The action-0 probability moves from 0.402 under the reference to 0.974 under the trained policy, alongside a final 0.782-nat KL, making the separate reference row operationally visible. Predict what goes wrong if the old snapshot refreshes every inner step: the ratio denominator resets, while the fixed reference still measures total drift. This bandit has an enumerable baseline and no learned value head. The optional sequence-PPO appendix adds a critic and EOS/timeout GAE, but its held-out reward floor failed.",
     "alt": "Current parameters change within PPO updates. Old probabilities stay fixed for that rollout batch and refresh next rollout. The reference and reward remain fixed during policy training. This categorical fixture has an exact baseline, so no learned critic is shown.",
     "scope": "Architecture and dataflow mechanism diagram.",
     "height": 5.2,

@@ -12,7 +12,9 @@ Preserve checkpoint, data and calibration provenance. Compare held-out inputs be
 
 ## Study guide: Does the exported service preserve the model’s complete contract?
 
-A deployment includes preprocessing, parameter layout, numeric policy and runtime behavior. Verify the same raw examples across each boundary before comparing memory or speed.
+A deployed model begins with a raw request and ends with a response, not with a weight file alone. Preprocessing, parameter layout, precision, serialization and runtime execution must preserve the meaning of that request across each boundary.
+
+Carry the same examples through adaptation, framework conversion, export and inference so the first changed result is easy to locate. Then ask what storage savings, queue calculations or edge budgets actually imply for this runtime. Keep numerical fidelity, held-out task behavior and measured service work as separate parts of a deployment decision.
 
 ### Check your starting point
 

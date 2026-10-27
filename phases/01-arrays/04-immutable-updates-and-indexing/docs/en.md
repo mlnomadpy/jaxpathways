@@ -23,13 +23,9 @@ An indexed update in JAX returns an array value. This makes the relationship bet
 
 ## Separate a new value from a new physical buffer
 
-Start with $[2,4,6]$. Setting the middle entry to $10$ produces $[2,10,6]$. Adding $10$ at that position produces $[2,14,6]$. Both operations begin from the same original values; the second is not automatically applied to the result of the first.
+Start from the displayed original array $[1,2,3,4]$. The set operation replaces index $1$ with $20$, producing $[1,20,3,4]$. The add operation contributes $5$ at indices $0$ and $2$, producing $[6,2,8,4]$. Both outputs branch from the same original, so the add result still has $2$ at index $1$; it did not inherit the set result.
 
-Draw two arrows from the original array, one labeled set and one labeled add. If you want sequential updates, explicitly feed the first result into the second operation. This is the same state-flow idea we will use in optimization and recurrent loops.
-
-Do not infer allocation cost from that drawing. A compiler may reuse storage when it can preserve the program's semantics. First verify old/new values and duplicate-index behavior for the operation you use, then measure memory behavior separately.
-
-The index $i$ is zero-based. On $x=[2,4,6]$, the two expressions produce $[2,10,6]$ and $[2,14,6]$ from the same original value. The indicator $\mathbf{1}_{i=1}$ is $1$ only at the middle entry and $0$ elsewhere. This equation describes returned values, not whether the compiler allocates a new physical buffer.
+Draw two arrows from the original, labeled set and add. If you want both effects in sequence, pass the first returned array into the second operation; the final values would then be $[6,20,8,4]$. These are value semantics. The drawing does not establish whether the compiler allocated a distinct physical buffer.
 
 $$
 x^{\mathrm{set}}_i=\begin{cases}10&i=1\\x_i&i\ne1\end{cases},\qquad x^{\mathrm{add}}_i=x_i+10\,\mathbf{1}_{i=1}
@@ -47,9 +43,9 @@ The returned updated value was discarded. Assign or pass that result into the ne
 
 ## A Python name and an array value are different
 
-After `y = x.at[1].set(20)`, $x$ still denotes the original array and $y$ denotes the updated value. After `x = x.at[1].set(20)`, the Python name $x$ is rebound to the new value. That spelling does not retroactively change another name holding the original value.
+After `y = x.at[1].set(20)`, the name `x` still refers to $[1,2,3,4]$ and `y` refers to $[1,20,3,4]$. If instead you write `x = x.at[1].set(20)`, Python rebinds the name `x`; it does not alter an earlier value held through `original = x`.
 
-Keep `original = x` before an update when you want a reference for tests. Comparing original and updated makes the semantics visible. Repeatedly inspecting only the newly rebound name can make a functional update look like mutation even though the old value still exists.
+The execution receipt prints the original, set result, and add result side by side, and the heatmap uses those as three rows. Keeping a second name for the original makes the distinction observable. Before running a changed index, predict which positions should differ and check the untouched positions too.
 
 ## Set replaces; add accumulates
 
@@ -153,7 +149,7 @@ visual_data = {'kind': 'heatmap', 'values': jnp.stack([x, y, z]).tolist(), 'rows
 
 ## Recorded reference execution
 
-CPU run: 2026-10-27T12:28:23.834497+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:02:44.373932+00:00. JAX 0.9.2.
 
 ```text
 Original: [1. 2. 3. 4.]

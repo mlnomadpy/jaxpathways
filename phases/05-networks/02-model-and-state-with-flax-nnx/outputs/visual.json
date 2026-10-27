@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "networks-02",
-  "contentHash": "b9af5c6791d5532820de50680f6a5d9f3b5b96db12422abcecb5fec7c275d7b1",
+  "contentHash": "c4ced91a8a1458c1256b42df8897e93e05ca1b61b868eec818846cd93d15d485",
   "rendererHash": "17e3bbad72ee4c43425845aaee76b86b85e84750551278be03d8c16842f4dc63",
   "kind": "executed",
-  "generatedAt": "2026-10-27T15:28:30.985953+00:00",
+  "generatedAt": "2026-10-27T17:26:13.991350+00:00",
   "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",
@@ -45,7 +45,7 @@
   "diagram": {
     "title": "NNX GraphDef and State with shared and copied module identity",
     "prediction": "If `left` and `right` point to the same hidden module, what changes when only one reference is assigned a new bias?",
-    "reading": "Read the top row as structure: `GraphDef` records module types, named edges and the shared-reference relation `left is right`. The middle row is the `State` snapshot, with arrays at paths such as `hidden.kernel`, `hidden.bias`, `out.kernel`, `out.bias`, and `calls`. `nnx.merge(GraphDef, State)` rebuilds the object graph. The lower row distinguishes two cases. Reusing the same State variable objects can preserve identity; copying each state leaf before merge gives equal starting values with independent mutable variables. In this lesson the ordinary model has named paths `hidden`, `out`, and `calls`; `left`/`right` are a labelled identity variant of that graph, not extra layers in its parameter-count fixture.",
+    "reading": "Read the upper `GraphDef` node as the module wiring and named edges; the side node states the alias relation `left is right`. The middle `State` node lists `hidden.kernel`, `hidden.bias`, `out.kernel`, `out.bias`, and `calls`. Arrows from both inputs to `nnx.merge(GraphDef, State)` show that structure and current values are needed to rebuild the model. The two lower arrows contrast reusing mutable Variable objects with copying state leaves first. Test the distinction by changing a bias through one alias and by incrementing a cloned counter; the retained run gives source/clone counters 1 and 2.",
     "alt": "GraphDef contains module wiring and shared-reference identity, while State contains named arrays for hidden.kernel, hidden.bias, out.kernel, out.bias, and calls. GraphDef plus State enters nnx.merge to reconstruct the model. A shared state reference retains variable identity; copied state leaves reconstruct equal values with independent mutable identity.",
     "scope": "Architecture and dataflow mechanism diagram.",
     "height": 6.6,

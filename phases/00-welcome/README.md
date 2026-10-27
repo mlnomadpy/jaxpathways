@@ -12,7 +12,9 @@ Start with each lesson’s recorded CPU baseline. For first physical TPU practic
 
 ## Study guide: Can someone else reproduce your first result?
 
-Start with one saved program and a known answer. The terminal, interpreter and working folder are part of the experiment: a notebook that imports a package is not yet proof that the downloaded script uses the same environment.
+Your first goal is to make one saved program produce an answer you can predict. When a notebook and a terminal disagree, the cause may be the interpreter, working folder or input file before JAX itself enters the picture. Record those choices beside the result so you can explain what actually ran.
+
+Follow the local CPU route first. The optional virtual-device branch later makes array ownership visible; the cloud branch adds an explicitly requested target and its runtime receipt. A matching answer establishes the checked arithmetic, while the backend and device fields explain where it happened.
 
 ### Check your starting point
 

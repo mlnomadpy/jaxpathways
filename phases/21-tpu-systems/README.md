@@ -12,7 +12,9 @@ After completing this third TPU mini-course, you can plan a candidate accelerato
 
 ## Study guide: How do you size TPU HBM capacity, bound BF16/INT8 precision error, and capture a clean XProf trace?
 
-Budgeting HBM helps reject workloads that exceed the declared training-state capacity before provisioning. Synchronized warmup reduces compilation and first-use work in the measured interval; inspect the trace for recompilation, transfers and host activity rather than assuming it contains only accelerator execution.
+Hardware specifications become useful only after you connect them to the workload. Training-state memory, inference KV-cache growth, arithmetic intensity and numerical precision place different demands on a device. Calculate those demands under explicit storage and placement assumptions before comparing theoretical ceilings.
+
+Then separate three observations: how many bytes are represented, how the numerical result changes and where execution time is spent. The memory ledger, precision chart and XProf trace each answer one of these questions. Read them together to form a target-specific hypothesis, and retain the actual target evidence when testing it.
 
 ### Check your starting point
 

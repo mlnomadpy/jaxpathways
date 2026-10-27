@@ -37,7 +37,7 @@ The lesson's variance comparison asks which downstream quantities are sensitive 
 
 *Architecture and dataflow mechanism diagram.*
 
-Both analytic matrices have unit marginal variances. Purple adds covariance $0.8$, stretching along the shared diagonal; green has zero covariance. These are unit Mahalanobis-distance contours, not 95% regions or fitted samples. Sum variances are $3.6$ and $2$, respectively.
+The horizontal and vertical axes are the two parameter coordinates; both ellipses are unit Mahalanobis-distance contours from analytic covariance matrices, not 95% regions or sampled points. The purple ellipse has unit marginal variances and correlation 0.8, so its long axis follows the shared diagonal; the green ellipse has the same marginals but zero covariance and is circular. Projecting onto the sum direction gives variances 3.6 and 2, respectively. Matching coordinate means or marginal variances therefore does not determine uncertainty in their sum.
 
 ### Pause and reason
 
@@ -71,11 +71,15 @@ $$
 
 ## Inspect what the model predicts, not only its optimizer
 
-A posterior predictive check draws plausible replicated observations and compares meaningful features with the observed data. Choose a discrepancy such as residual curvature, outlier count or group-specific spread; a single global mean can conceal a failure. Our stress fixture uses a zero linear mean and noise standard deviation $0.25$, then supplies targets $x^2-1$. Positive residuals at both ends and negative residuals near the center reveal curvature missing from the mean model. Narrower intervals cannot repair that pattern.
+The observed synthetic targets are $x^2-1$ at the nine inputs, while the assumed linear model predicts a zero mean with noise standard deviation 0.25. The standardized residuals are $[12,5,0,-3,-4,-3,0,5,12]$: positive at both ends and negative through the middle. That curved pattern is structured model mismatch, not a noisy estimate of a correctly specified line.
+
+Only two of nine targets fall inside the nominal 95% intervals in this tiny fixture, giving recorded coverage about 0.222. The pattern and residual signs explain why: narrower intervals cannot repair the missing quadratic mean. A posterior predictive check flags tension with the assumed model; it does not alone prove which alternative model is true.
 
 ## Keep inference and model errors separate
 
-The first experiment has a correct known target but an inadequate variational family. The second deliberately changes the data-generating mean while retaining an inadequate likelihood. Posterior predictive checks can reveal tension but are verified separately from model truth. For a real workflow, choose checks before inspecting a final held-out split, keep group sizes and uncertainty in reported coverage, and refit only on permitted data. The optional project workflow in `projects/bayesian-regression/` runs NumPyro NUTS on the same known Gaussian regression, then compares a linear model with a centered quadratic remedy on a deliberately curved fixture. It saves the posterior predictive histogram counts and observed discrepancy alongside the figure. This demonstrates one observable failure and a targeted remedy; it does not estimate real-data coverage or replace the separate diagonal-family experiment.
+The Gaussian VI experiment uses a correct known target but a diagonal family that cannot represent correlation; its optimized marginal variances are about 0.36 and its remaining KL is about 0.5108. The predictive stress test instead keeps a linear mean model while generating curved targets, producing coverage 2/9 and the residual pattern above. These are distinct failures: approximation-family restriction versus data/model mismatch.
+
+If the variational family were full covariance, it could represent the first Gaussian target; that change would not fix the second experiment's curved mean. Conversely, adding a quadratic mean could address the residual pattern but would not restore covariance the diagonal family cannot express. Evaluate approximation and model assumptions separately, using a check matched to each source of error.
 
 ## 1. Specify a correlated target and a simpler approximation
 
@@ -195,11 +199,11 @@ Expected: The optimized variances are $(0.36,0.36)$, compared with target margin
 
 ### Read the figure
 
-The horizontal categories identify three quantities: variance of the first weight, variance of the second weight and variance of their sum. The vertical axis is variance in squared parameter units. The target bars are $1,1,3.6$. The optimized diagonal approximation gives $0.36,0.36,0.72$. The especially large gap for the sum comes from both smaller marginal variances and missing positive covariance.
+The horizontal categories are the first weight, second weight and their sum; the vertical axis is variance in squared parameter units. The exact target bars are 1, 1 and 3.6. The optimized diagonal approximation gives about 0.36, 0.36 and 0.72. The sum gap combines narrower marginals with omitted positive covariance 0.8; it is not explained by a mean error, since the fitted means match the target.
 
 ### Connect it to the computation
 
-The code checks that the optimizer reaches the analytic variational optimum. The remaining gap therefore comes from the chosen diagonal family and KL direction on this particular Gaussian target. It is not evidence that every variational approximation has the same bias; a full-covariance Gaussian can represent this target.
+The exact objective's optimizer reaches this diagonal-family optimum, with remaining KL about 0.5108, so additional iterations cannot add the missing covariance. A full-covariance family could represent this Gaussian target. That change would not solve the separate curved-residual fixture; model checks and inference-family checks address different causes of poor uncertainty.
 
 ```python
 visual_data={"kind":"bar","x":[0,1,2],"labels":["weight 1","weight 2","sum of weights"],"xlabel":"quantity","ylabel":"variance (squared parameter units)","series":[{"label":"exact target","y":[1.,1.,3.6]},{"label":"optimized diagonal q","y":[float(variance[0]),float(variance[1]),float(variance.sum())]}]}
@@ -207,7 +211,7 @@ visual_data={"kind":"bar","x":[0,1,2],"labels":["weight 1","weight 2","sum of we
 
 ## Recorded reference execution
 
-CPU run: 2026-10-27T12:32:04.473136+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:07:18.472190+00:00. JAX 0.9.2.
 
 ```text
 VI mean: [ 0.99999994 -0.99999994] variances: [0.36000016 0.36000016] remaining KL: 0.5108256340026855

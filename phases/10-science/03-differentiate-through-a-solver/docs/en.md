@@ -23,11 +23,9 @@ Differentiating a numerical solver gives sensitivity of its discrete computation
 
 ## Differentiate the computation you actually executed
 
-For $y'=-ay$, Euler gives $y_N=(1-ah)^N y_0$, where $h$ is step size and $N$ is step count. Differentiating that expression gives $-Nh(1-ah)^{N-1}y_0$. The continuous derivative at time $T=Nh$ is instead $-Ty_0e^{-aT}$.
+For the executed RK4 example, the final state is $u_0R(-kh)^N$, where $R$ is the fourth-order step polynomial and $T=Nh=2$ seconds. Differentiating this discrete expression gives the sensitivity of the calculation that actually ran. The continuous model's sensitivity is instead $-Tu_0e^{-kT}$, a different reference at finite step size.
 
-These expressions give two distinct references: one checks differentiation through the discrete steps, and the other measures convergence toward the continuous sensitivity. Hold final time fixed as you refine the grid.
-
-In the sensitivity plot, disagreement with the continuous answer can be discretization error even when autodiff is correct. Compare the discrete analytic derivative first, then inspect refinement behavior.
+JAX gives $-0.9863878097$; the independently differentiated RK4 expression agrees to float64 roundoff, while the continuous derivative is $-0.9863878558$. That small difference is solver bias, not autodiff failure. Hold the two-second horizon fixed while refining, then check whether the discrete sensitivity approaches the continuous one.
 
 ### Pause and reason
 
@@ -223,15 +221,11 @@ Expected: Endpoint autodiff approximately -0.9863878097; continuous reference ap
 
 ### Read the figure
 
-The horizontal axis shows the number of updates over the same two-second horizon. The vertical axis is absolute error in the endpoint derivative with respect to rate, on a logarithmic scale. A lower point means closer agreement with the exact continuous derivative, not a smaller temperature or lower training loss.
-
-With five steps the error is about $2.449\times10^{-4}$. At ten, twenty and forty steps it is about $1.319\times10^{-5}$, $7.654\times10^{-7}$ and $4.609\times10^{-8}$. The final doubling improves agreement by about $16.6$, consistent with fourth-order convergence in this range.
+The horizontal axis is the number of RK4 updates over a fixed two-second horizon. The vertical axis is absolute endpoint derivative error relative to the exact continuous sensitivity, in excess-temperature units per rate unit, on a logarithmic scale. The plotted errors fall from about $2.449\times10^{-4}$ at 5 steps to $4.609\times10^{-8}$ at 40 steps; the last doubling improves the error by about 16.6 times, consistent with fourth-order behavior over this range.
 
 ### Connect it to the computation
 
-The plotted derivatives come from JAX differentiating scan. The reference is the independently derived continuous sensitivity $-tu_0e^{-kt}$. A separate polynomial check verifies the derivative of the discrete RK4 program to much tighter tolerance.
-
-The downward trend does not prove convergence for a stiff or discontinuous system, and it cannot continue indefinitely at fixed precision. It shows why checking only autodiff against another differentiation of the same program would miss solver bias.
+The plotted derivative is JAX autodiff through the discrete `scan`; the reference is $-tu_0e^{-kt}$ for the continuous cooling equation. A separate polynomial oracle checks that autodiff differentiated the RK4 computation correctly. If we compared only against that discrete oracle, we would validate differentiation but miss physical-sensitivity bias; if the system were stiff or the precision fixed at a coarser value, this refinement trend need not continue.
 
 ```python
 counts=[5,10,20,40]
@@ -241,7 +235,7 @@ visual_data={'kind':'line','x':counts,'xlabel':'RK4 steps over two seconds','yla
 
 ## Recorded reference execution
 
-CPU run: 2026-10-27T12:31:22.132969+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:06:22.069056+00:00. JAX 0.9.2.
 
 ```text
 Autodiff: -0.9863878096749447 discrete oracle: -0.9863878096749429 continuous oracle: -0.9863878557664257

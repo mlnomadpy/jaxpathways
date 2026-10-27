@@ -1,0 +1,10 @@
+PASS tpu-03
+OK: 22 phases, 104 canonical lesson briefs, 10 routes; prerequisites acyclic and ordered.
+Content status: 104 authored lessons with script/notebook companions; 0 planned. 31 staged integration projects and synthesis assessments are linked across all routes.
+OK: 4 core domains, 7 career routes; every specialization and role has a home.
+OK: career milestones and starting-point checks reference their required route phases.
+PASS tpu-01: script + notebook code
+PASS tpu-04: script + notebook code
+PASS tpu-03: script + notebook code
+OK: 3 executed (104 total CPU lessons); 6 executions
+Release 0.18.1: 104 lessons and 22 phases match the recorded source snapshot.

@@ -22,20 +22,9 @@ Operating cost depends on resource allocation, runtime and the billing model. A 
 
 ## Account for billed time as well as useful work
 
-A job may spend time provisioning, loading, compiling, updating and shutting down. For short jobs, fixed startup costs can dominate even if the update loop is efficient. Reusing a warm service changes that tradeoff but introduces its own allocation costs.
+A fresh job pays for imports, initialization, compilation, updates, logging and checkpoint writes. The update timer covers only one part of that lifecycle. If you size workers from the inner update time alone, you omit work the process still has to finish.
 
-Track the resource count and billed interval under the actual pricing assumptions. If a rate is hypothetical, label the resulting cost as modeled. A duration multiplied by an assumed price is not an invoice.
-
-The timing panels compare different intervals. Their ratios can describe job-level busy fraction, but they do not measure accelerator instruction or memory utilization. Choose the metric that answers the operational question before optimizing it.
-
-Reviewed support: child setup, timing collection and unit-checked arithmetic helpers are supplied. Learner-authored transition: choose a service boundary, derive worker demand from measured durations, and label assumptions before interpreting a modeled cost.
-
-```python
-offered_worker_hours_per_hour = arrivals_per_hour * service_seconds / 3600
-minimum_workers = math.ceil(offered_worker_hours_per_hour / (1 - reserve_fraction))
-```
-
-Worked trace: for 1,200 arrivals/hour and 6 seconds/job, demand is 2 worker-hours per hour. With a 40% reserve, divide by 0.6 and round up: 4 workers. This arithmetic does not estimate queueing tails, hardware utilization or a billed invoice. The service-time sample is three local CPU observations, not an accelerator fleet distribution.
+The two panels compare fresh jobs with $8$, $32$ and $64$ updates. Their separate vertical scales reveal that synchronized updates occupy a small fraction of the complete local job. Small differences among the wall-time bars can change across captures; this is not a scaling benchmark. First decide whether your planned service launches a new process for each job or reuses a warm worker.
 
 ### Pause and reason
 
@@ -49,11 +38,13 @@ No. The loop can wait on data, synchronization or inefficient kernels. Device ut
 
 ## Measure the service boundary you intend to provision
 
-We run jobs with $8$, $32$ and $64$ updates in fresh child processes. Supervisor wall time includes imports, runtime startup, compilation, updates, logs and checkpoints. If a production worker stays warm across many jobs, this measurement overstates repeated startup cost; if production adds queueing or remote data, it understates those delays. Write the boundary alongside the number. We use the maximum of these three local observations as an illustrative conservative input, not a statistical tail estimate.
+The supervisor starts its clock before child launch and stops after exit. That interval includes Python/JAX startup, compilation warmup, updates, logging and checkpoints. The inner timer begins after `ready` and waits for each update to complete, so those two durations have deliberately different boundaries.
+
+Follow the $8$-update category across the two panels. Both bars summarize the same job, but the lower one accounts for only its synchronized update intervals. The remainder is time outside that timer, not a measurement of idle hardware. A persistent warm worker removes or amortizes some fixed costs and therefore needs a separately measured service-time distribution.
 
 ## Convert seconds into worker demand
 
-Let $\lambda$ be arrivals per hour, $t$ seconds per job and $m$ workers, each running one job at a time. Offered demand is $\lambda t/3600$ worker-hours per hour. Nominal load is this demand divided by $m$. The units cancel to a fraction. A load above one means average demand exceeds nominal capacity under the model; a load below one does not guarantee a latency target.
+For arrival rate $\lambda$ per hour and $t$ seconds of service per job, offered demand is $\lambda t/3600$ worker-hours per hour. With 1,200 arrivals and 6 seconds each, demand is 2 worker-hours each hour. At a 40% reserve, usable capacity is 0.6 per worker, so $\lceil2/0.6\rceil=4$ workers in this simplified model. The arithmetic describes average demand; it does not predict burst queues or latency tails.
 
 $$
 \rho=\frac{\lambda t}{3600m}
@@ -61,7 +52,9 @@ $$
 
 ## State the reserve rather than hiding it
 
-For reserve fraction $r$, require nominal load no greater than $1-r$. The smallest integer worker count in this simple model is the ceiling below, with at least one worker in our function. For $90$-second jobs arriving $80$ times an hour, demand is $2$ worker-hours per hour. A $25$% reserve requires at least $3$ workers; four workers would run at nominal load $0.5$.
+Reserve reduces the capacity you plan to use. A $40\%$ reserve leaves a usable fraction of $1-0.4=0.6$ per worker. For the preceding demand of $2$ worker-hours per hour, three workers provide $1.8$ usable worker-hours, which is insufficient; four provide $2.4$. Rounding the worker count up is part of the decision, not a display preference.
+
+State what the reserve is intended to cover, such as maintenance or variation in offered work. It does not automatically protect a latency target during bursts. Retain the arrival and service-time assumptions so a later measurement can challenge this average-demand plan.
 
 $$
 m_{\min}=\left\lceil\frac{\lambda t}{3600(1-r)}\right\rceil
@@ -69,15 +62,21 @@ $$
 
 ## A cost number needs a declared price model
 
-We use an invented planning rate of $1.50$ currency units per worker-hour, explicitly not a current cloud price. Reserving two workers for an hour costs $3$ under that model, whether busy or idle. A job’s active-time cost is $pt/3600$ for hourly rate $p$, but dividing the reserved hourly bill by actual completed jobs can produce a different cost per completion. Include idle capacity, failed attempts, storage and transfer charges when those belong to the real budget.
+Suppose a worker costs a hypothetical $1.50$ currency units per reserved hour. Holding the four workers from the worked plan for one hour costs $4\times1.50=6$, whether they are busy for the entire hour or not. Charging only the six seconds spent on an individual job answers an active-time allocation question; it does not account for reserved idle capacity.
+
+Keep the rate, billing interval and provisioned duration explicit. Real estimates also need failed attempts, storage, transfer and the provider's current billing rules. The rate here is an arithmetic assumption, not a quoted cloud price.
 
 ## Do not confuse duty fraction with hardware utilization
 
-The worker records seconds inside synchronized compiled updates. Dividing their sum by job wall time is an application duty fraction. A small value in a tiny job mostly reflects startup and operational overhead. It does not measure CPU core occupancy, accelerator compute utilization, memory-bandwidth pressure or scheduler allocation. Those require their own target-specific measurements. Increasing update count can amortize startup without making each update intrinsically faster.
+Define application duty fraction for this measurement as synchronized update time divided by complete job time. For an illustrative job taking $2$ seconds end to end with $0.02$ seconds in that update interval, the fraction is $0.02/2=0.01$, or $1\%$. These example values explain the ratio; read the plotted capture for its actual durations.
+
+The remaining time can include imports, compilation, logging and checkpoint work. The ratio does not reveal CPU-core occupancy, accelerator utilization, bandwidth or allocated-but-idle device time. Use it to choose which stage to inspect next, and use device-specific evidence for hardware utilization.
 
 ## Capacity is a distribution, not just a mean
 
-Real arrivals can burst, job durations can vary, failures consume retries, and a worker may be unavailable. Three short measurements cannot estimate a high percentile reliably. Retain individual timings, choose a larger representative study on the actual target, and test the queue/latency objective before buying capacity. The local examples execute real jobs; all arrival, reserve and price scenarios remain labeled assumptions.
+An average can conceal very different queue behavior. Consider a changed, hypothetical workload where $80\%$ of jobs take $1$ second and $20\%$ take $10$. The mean is $0.8\times1+0.2\times10=2.8$ seconds, while most jobs finish quickly and the slow group can hold a worker much longer. A plan based only on the mean misses which users wait behind that group.
+
+Retain individual service times and replay representative arrivals with the routing and retry policy you intend to use. Include unavailable workers and burst periods before judging a latency objective. The three local measurements demonstrate complete-process accounting; they are too few to estimate a production high percentile.
 
 ## Keep job duty tied to matching intervals
 
@@ -369,11 +368,15 @@ Expected: Three actual local durations feed a first-order plan whose arrival rat
 
 ### Read the figure
 
-The horizontal categories in both panels are actual jobs with $8$, $32$ and $64$ updates. The upper panel shows complete supervisor wall time in seconds. The lower panel shows the sum of synchronized update times in seconds. The panels use separate linear vertical scales, so compare their labeled numerical values rather than bar heights across panels. The labels retain the actual measurements from this run.
+Both panels use the categories $8$, $32$ and $64$ updates in fresh child processes. The upper axis is complete job seconds. The lower axis is summed synchronized update seconds. They have separate linear scales, so equal-looking bar heights across panels do not mean equal durations.
+
+Choose one category and compare its two numerical axis readings. The update interval is only a small part of its complete lifecycle. Then compare categories within a panel. Since each job starts a new process and the sample is tiny, a non-monotone wall-time ordering can reflect fixed costs and host variation rather than the cost of an extra update.
 
 ### Connect it to the computation
 
-The lower-panel values are much smaller than the complete-job values because startup, compilation, logging and checkpoint writes are outside the update timer. Calculate each pair’s ratio from its labels to see how much of the short job is spent in measured updates. The ratio can be large for such small workloads. Host scheduling and filesystem work vary, so close wall-time values need not increase monotonically with update count. This figure explains timing boundaries and startup amortization; it does not measure hardware utilization or prove scaling on an accelerator.
+The upper clock includes startup, initialization, warmup, updates, logging and checkpoints; the lower clock counts only synchronized updates. Their ratio is an application duty fraction under those boundaries. It is not hardware utilization.
+
+Predict how the picture would change for a worker that stays warm for many jobs: some startup and compilation costs could be shared instead of repaid for each category. Measure that actual lifecycle before replacing the current service-time assumption in the capacity calculation. Keep the workload's arrival rate, reserve and hypothetical price separate from the measured local durations.
 
 ```python
 visual_data={'panels':[{'kind':'bar','labels':[str(n) for n,_,_ in samples],'xlabel':'updates in fresh local process','ylabel':'complete job seconds','title':'Complete process lifetime','series':[{'label':'wall time','y':[r['wall_s'] for _,r,_ in samples]}]},{'kind':'bar','labels':[str(n) for n,_,_ in samples],'xlabel':'updates in fresh local process','ylabel':'synchronized update seconds','title':'Training updates only — separate vertical scale','series':[{'label':'update time','y':[st['update_s'] for _,_,st in samples]}]}]}
@@ -381,13 +384,13 @@ visual_data={'panels':[{'kind':'bar','labels':[str(n) for n,_,_ in samples],'xla
 
 ## Recorded reference execution
 
-CPU run: 2026-10-27T15:33:32.460027+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:15:40.807623+00:00. JAX 0.9.2.
 
 ```text
-measured local job seconds: [1.644194584339857, 1.2458703750744462, 1.3570785420015454]
-illustrative capacity plan: {'offered_worker_hours_per_hour': 0.2740324307233095, 'load_fraction': 0.13701621536165476, 'minimum_workers_with_reserve': 1, 'hourly_budget': 3.0, 'hypothetical_cost_per_job': 0.0006850810768082738, 'within_reserve': True}
+measured local job seconds: [0.8413121248595417, 0.8365796250291169, 0.9017954594455659]
+illustrative capacity plan: {'offered_worker_hours_per_hour': 0.15029924324092767, 'load_fraction': 0.07514962162046383, 'minimum_workers_with_reserve': 1, 'hourly_budget': 3.0, 'hypothetical_cost_per_job': 0.0003757481081023191, 'within_reserve': True}
 assumptions: 600 arrivals/hour, 2 workers, hypothetical 1.50 per worker-hour, 25% reserve
-nominal load at two demand scenarios: 0.13701621536165476 0.2740324307233095
+nominal load at two demand scenarios: 0.07514962162046383 0.15029924324092767
 required workers under changed hypothetical reserve: 1
 PASS: operations-05
 

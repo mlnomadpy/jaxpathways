@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "tpu-02",
-  "contentHash": "d3dc16389d81c72ec8f562be4dc34f3dc6be0acb9bac17275916bcbb09e29dc2",
-  "executedAt": "2026-10-27T14:09:29.793538+00:00",
+  "contentHash": "fc9afc30bc587e4773a9ef29e2b70db07ec4462f2935d6d57d5c7d3e7d995a63",
+  "executedAt": "2026-10-27T17:17:01.239752+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -11,7 +11,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Resumed state_hash matches uninterrupted control: ecba6a13e41beb0003af0371f8422efa3b08538c4420efb07a9bc61b0a10cdc1\nLosses across 6 steps: [3.6712, 3.78913, 1.91372, 2.09553, 1.81174, 1.16636]\nResumed state_hash matches uninterrupted control: ecba6a13e41beb0003af0371f8422efa3b08538c4420efb07a9bc61b0a10cdc1\nLosses across 6 steps: [3.6712, 3.78913, 1.91372, 2.09553, 1.81174, 1.16636]\nWarmup ms: 196.898 Median steady step ms: 1.0181\nResume rejection: checkpoint state hash mismatch\nStep 8 resumed vs control hash: eba1c0bcfb80184d9f5108c1d6539369e21f95276e5d6806234237f41eccbed9 eba1c0bcfb80184d9f5108c1d6539369e21f95276e5d6806234237f41eccbed9\nRecorded event sequence: ['started', 'warmup', 'step', 'step', 'checkpoint', 'completed', 'restored', 'warmup', 'step', 'step', 'checkpoint', 'completed']\nLoaded step: 4 Leftover tmp files: []\nPASS: tpu-02\n",
+  "stdout": "Resumed state_hash matches uninterrupted control: ecba6a13e41beb0003af0371f8422efa3b08538c4420efb07a9bc61b0a10cdc1\nLosses across 6 steps: [3.6712, 3.78913, 1.91372, 2.09553, 1.81174, 1.16636]\nResumed state_hash matches uninterrupted control: ecba6a13e41beb0003af0371f8422efa3b08538c4420efb07a9bc61b0a10cdc1\nLosses across 6 steps: [3.6712, 3.78913, 1.91372, 2.09553, 1.81174, 1.16636]\nWarmup ms: 148.079 Median steady step ms: 0.2248\nResume rejection: checkpoint state hash mismatch\nStep 8 resumed vs control hash: eba1c0bcfb80184d9f5108c1d6539369e21f95276e5d6806234237f41eccbed9 eba1c0bcfb80184d9f5108c1d6539369e21f95276e5d6806234237f41eccbed9\nRecorded event sequence: ['started', 'warmup', 'step', 'step', 'checkpoint', 'completed', 'restored', 'warmup', 'step', 'step', 'checkpoint', 'completed']\nLoaded step: 4 Leftover tmp files: []\nPASS: tpu-02\n",
   "notebookCells": [
     {
       "sourceHash": "604e58fa9a4da635572bd68f8189fa5b4376a9eef3ec06d3900ebc081f4c4c74",
@@ -73,7 +73,7 @@
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "Warmup ms: 155.862 Median steady step ms: 0.0754\n"
+            "Warmup ms: 138.521 Median steady step ms: 0.0709\n"
           ]
         }
       ]

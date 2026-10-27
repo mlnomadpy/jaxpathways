@@ -21,9 +21,9 @@ Getting a TPU running separates into four explicit boundaries: choosing an acces
 
 ## Why a TPU VM is a host computer attached to accelerator chips
 
-When you create a Cloud TPU VM, Google Cloud allocates a Linux host machine directly attached over PCIe/ICI to the TPU chips on that board—for example, a `v5litepod-4` VM is one Linux host attached to $4$ TPU v5e chips (`16` GiB HBM each). Your SSH session lands on that Linux host, not inside a chip.
+A Cloud TPU VM gives you a Linux host attached to accelerator chips; SSH and Python run on the host. For the selected Cloud TPU API route, `v5litepod-4` requests one host with four physical v5e chips, each with 16 GiB HBM. That resource description is the hardware request, while `jax.device_count()` is the runtime's logical device count. Keep both in the receipt because the mapping depends on generation and API; for example, the TPU7x transfer case in this lesson maps two JAX devices to each chip.
 
-For the selected direct Cloud TPU API v5litepod-4 VM route, the request describes one host with four v5e chips (16 GiB per chip). That mapping is specific to the named generation, machine type and API. jax.device_count() counts JAX devices, not physical chips; record the API resource description and JAX device inventory separately. Newer TPU generations or APIs can map multiple JAX devices to one physical chip.
+Use the requested topology to plan work, then verify the observed process and device counts on the host. The recorded rehearsal requested four chips but ran on CPU: it observed one process, one CPU device and `arithmetic_ok: true`, while `requested_target_ready` was false. That is a useful arithmetic check, not a TPU receipt.
 
 $$
 N_{\text{JAX devices}} = \texttt{jax.device\_count()}, \qquad N_{\text{physical chips}} = f(\text{generation},\text{machine type},\text{API topology})
@@ -37,7 +37,7 @@ $$
 
 *Topology schematic for the named Cloud TPU API routes; check the selected resource and runtime receipt.*
 
-For the listed single-host Cloud TPU API examples, one Linux host runs one JAX process. The process reports JAX devices. The selected v5e/v6e topology maps one JAX device to each physical chip; that mapping is API and generation specific. The TPU7x transfer case exposes two JAX devices per physical chip. HBM is counted per physical chip, not per process.
+Follow the arrows from the selected API and machine type to the Linux host, then from its JAX process to the device inventory and the generation/API mapping to physical chips. In this one-host `v5litepod-4` example, the resource request names four physical v5e chips, while the CPU rehearsal observed one process and one CPU device. The mapping in the final node is topology-specific, not a rule for all TPUs. Use the resource description for requested chips and the synchronized receipt for observed JAX devices; use per-chip HBM, not aggregate slice HBM, for a fit decision.
 
 ### Pause and reason
 
@@ -51,17 +51,15 @@ Why does creating a Cloud TPU VM and seeing `STATUS: READY` in `gcloud` not prov
 
 ## 1. Choose how to get a TPU: Colab/Kaggle vs Google Cloud TPU VM
 
-Choose the runtime that matches the task. A hosted notebook can support a small single-process backend check if TPU access is available. It does not provide every topology, shell permission or multi-host workflow in this course. Availability and quotas depend on the provider.
+Choose access by the work you need to verify. A hosted notebook can check a single-process backend when TPU access is available, but this course's commands and multi-host workflow use Cloud TPU VMs. Availability, quota and supported zones must be checked before a request.
 
-For the v5e lab below, use the Cloud TPU API: direct TPU VM creation or a bounded Flex-start queued resource. Keep creation, status, SSH and deletion commands within that API. Google now recommends Compute Engine or GKE for newer features. Its Compute Engine TPU Flex-start workflow uses supported TPU machine types and MIGs, but does not support GPU-style resize requests. Do not mix that workflow with this v5e queued-resource example. See both linked API guides before adapting the lab.
+This exercise uses the Cloud TPU API's direct VM or bounded Flex-start queued-resource route for v5e. Keep creation, status, SSH and cleanup in the same route. A direct request is ready only when its named VM reports `READY`; Flex-start first needs the named request to become `ACTIVE`, then its VM must report `READY`. A queued request alone does not mean chips are allocated. The separate Compute Engine Flex-start workflow has different resource commands, so do not mix its lifecycle with this example.
 
 ## 2. Authenticate `gcloud`, enable the TPU API, and check quota
 
-On your local workstation (or inside Google Cloud Shell), set your project ID, zone, and TPU name, enable `tpu.googleapis.com`, and inspect the available accelerator types in your chosen zone before requesting hardware. Using a single-host slice such as `v5litepod-4` (`4` chips on `1` host) avoids multi-host coordination while still letting you run real `jax.pmap` and mesh sharding across $4$ TPU devices.
+Set the project, zone and resource name on your workstation, enable the TPU API, and list accelerator types in that zone before creating anything. For this selected API route, `v5litepod-4` means one host and four physical chips; the expected four JAX devices are a separate runtime check. One host keeps this exercise out of multi-host coordination while still letting a TPU program use its local devices.
 
-The example zone is a starting choice for v5e Flex-start, not a capacity promise. Check supported zones, quota and current pricing before creating a request. Set both a queue expiry and a run duration; a budget alert is not a spending cap.
-
-For the selected Cloud TPU API route, v5litepod-4 requests 4 physical v5e chips on 1 VM host; v5e has one TensorCore per chip, and the expected 4 JAX devices must still be checked at runtime. Other APIs can choose different host layouts for a similarly named topology. Do not derive physical chip count from jax.device_count() alone.
+The fixture's `v5litepod-4` has 64 GiB aggregate HBM, but each of its four chips has 16 GiB. For a 48 GiB state, replication would require 48 GiB on every chip and cannot fit. Ideal even sharding gives $48/4=12$ GiB per chip; adding the exercise's 1 GiB activation allowance gives 13 GiB, above the 12.8 GiB usable budget at 80% of 16 GiB. So even the ideal shard is short by 0.2 GiB under these assumptions. Treat this as a sizing screen, then inspect actual placement and peak memory before choosing a slice. Check current quota, supported zones and pricing before a real request; the example zone is not a capacity promise.
 
 **Configure project, zone, and enable the Cloud TPU API**
 
@@ -83,7 +81,9 @@ gcloud compute tpus accelerator-types list --zone="$ZONE"
 
 ## 3. Select one Cloud TPU API provisioning route
 
-Choose one route, not both. A direct VM must reach READY. A Flex-start request must reach ACTIVE and its named VM must become READY before SSH. A queued request is not proof that capacity has been allocated. Inspect failed or expired requests and delete them instead of leaving a future allocation behind.
+Choose one provisioning route and track its named resource through readiness. For direct creation, describe the named VM and proceed only when it is `READY` with the requested accelerator type. For Flex-start, describe the named queued resource until it is `ACTIVE`, then check that its named VM is `READY` and has the expected type. If the queue fails or expires, inspect and remove that request rather than assuming a VM exists.
+
+After the run, preserve the receipt and delete the resource that owns this route: delete the direct VM, or delete the Flex-start queued resource. Verify those names are absent. This checks cleanup of the resources created for the exercise; unrelated project resources do not determine this run's cleanup result.
 
 **Route 2A: Create a single-host Cloud TPU v5e-4 VM directly**
 
@@ -109,7 +109,7 @@ gcloud compute tpus tpu-vm describe "$TPU_NAME" --project="$PROJECT_ID" --zone="
 
 ## 4. SSH into the TPU VM and install the pinned runtime
 
-After the selected TPU VM is READY, bootstrap its isolated environment from the reviewed pinned requirements file. Install the matching TPU JAX extra at the same pinned version. This is environment setup; backend and topology readiness are established separately by the synchronized receipt.
+Wait for the named VM to reach `READY`, then create the isolated `.venv` on that Linux host and install the reviewed requirements plus the matching pinned `jax[tpu]` extra. Record the environment identity with the run. An installed package proves only that Python can import it; it does not show which backend JAX selected or whether the requested devices can execute work. Those checks belong in the synchronized runtime receipt.
 
 **Bootstrap the pinned runtime on the TPU VM**
 
@@ -123,7 +123,9 @@ gcloud compute tpus tpu-vm ssh "$TPU_NAME" --zone="$ZONE" --command='set -euo pi
 
 ## 5. Run the requested-target preflight, retrieve its receipt, and clean up route-owned resources
 
-Before any training launch, run the runtime verifier on the requested target and retrieve its receipt. Arithmetic, backend, device-count and topology/API identity remain separate. A CPU rehearsal may pass arithmetic without establishing TPU readiness. After saving evidence, delete only the direct VM or the owning queued request and verify the named resources are absent.
+Run the saved verifier on the requested VM, copy its JSONL receipt back before cleanup, and read its fields separately: arithmetic, observed backend, observed JAX device count, process count, and requested API topology. Here the selected resource contract requests one host, four physical chips and four JAX devices. On the recorded CPU rehearsal, the sum of squares is correct, but the observed backend is `cpu`, the device count is 1, and requested-target readiness is false. Continue on CPU for learning; launch a TPU workload only after the requested backend and device-count checks pass on the named target.
+
+After retrieving the receipt, delete the direct VM or its owning Flex-start request, then check that the same named resource is absent. Do not use a project-wide empty list as the success condition.
 
 **Run the target verifier and copy its receipt to the workstation**
 
@@ -343,11 +345,11 @@ Expected: The topology catalog distinguishes VM hosts, expected one-process-per-
 
 ### Read the figure
 
-Analytic catalog calculation; not an observed device result. Panel one reports physical chip count per requested API topology. Panel two reports total HBM in GiB. The axes are independent and must not be numerically compared. These are catalog expectations, not observed device receipts.
+The figure has separate panels with their own units: the first uses physical chip count and shows `v5litepod-1/4/8` as 1/4/8 chips and `v6e-4` as 4; the second uses aggregate HBM in GiB and shows 16/64/128/128. Read values within a panel, not across the two axes. For example, the four-chip `v5litepod-4` totals 64 GiB, but its 16 GiB per-chip limit still governs whether one device's state fits. These are requested API catalog calculations, not device measurements. The next check is the named resource description plus the JAX receipt.
 
 ### Connect it to the computation
 
-The chip panel is derived from hosts times chips per host. The HBM panel multiplies physical chips by published per-chip capacity. The topology diagram separates process, JAX device and chip ownership.
+Chip-count bars are hosts times chips per host; HBM bars multiply chips by the fixture's per-chip capacity. The actual rehearsal receipt instead reports the requested `v5litepod-4` topology alongside one CPU process and one CPU device, with arithmetic passing and target readiness false. Keep catalog expectation and observed receipt side by side, then confirm backend and device count on the requested TPU before a training launch.
 
 ```python
 visual_data = {
@@ -368,7 +370,7 @@ assert all(t['expected_jax_devices'] == t['total_chips'] for t in topologies)
 
 ## Recorded reference execution
 
-CPU run: 2026-10-27T15:46:39.416210+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:21:15.150261+00:00. JAX 0.9.2.
 
 ```text
 Verified runtime receipt: {"arithmetic_ok": true, "device_count": 1, "device_kinds": ["cpu"], "environment_lock": "projects/reproducible-experiments/requirements.txt; jax[tpu]==0.9.2", "expected_backend": "tpu", "expected_backend_ok": false, "expected_device_count": 4, "expected_sum_of_squares": 140.0, "expected_topology_ok": false, "jax": "0.9.2", "local_device_count": 1, "observed_backend": "cpu", "pmap_sum_of_squares": 140.0, "process_count": 1, "python": "3.14.3", "receipt_sha256": "71ec1d62d8092ac592002e0ca6cd5d79c77fb8ccfee100fb33a747381d7baec8", "requested_target_ready": false, "source_identity": "unavailable: interactive execution has no readable __file__", "source_sha256": null, "target_topology": {"api": "Cloud TPU API direct VM/Flex-start", "hosts_expected": 1, "machine_type": "v5litepod-4", "physical_chips_expected": 4, "topology_source": "requested Cloud TPU resource contract; physical chips are not inferred from JAX devices"}}

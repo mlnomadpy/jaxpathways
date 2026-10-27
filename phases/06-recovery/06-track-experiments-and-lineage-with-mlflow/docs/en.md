@@ -23,11 +23,9 @@ A tracker is useful when a plotted point leads back to the data, source, configu
 
 ## Make every metric point traceable
 
-Two runs may log validation loss at step 100 using different splits or denominators. The matching metric name and step do not make the values comparable. Record what was averaged and which examples contributed.
+A metric record needs its run, data identity, reduction, and measurement boundary. Two `validation_mse` values at step 30 are comparable here because both runs use the same four validation rows and mean-squared-error definition, and the training curve records post-update values. A name and step alone would not establish that.
 
-Link a selection decision to the precise checkpoint and evaluation. A run often contains many checkpoints, so selecting a run is not the same as selecting weights. Keep the model artifact's identity even if a dashboard display name changes.
-
-The MLflow curves are recorded observations. Read configuration and metric definitions before ranking them. Tracking preserves a comparison's evidence; it cannot repair incompatible evaluation contracts. The same principle applies to Weights & Biases and other experiment trackers.
+The example logs training history and a coefficient artifact, then retrieves the recorded metrics and artifact through `MlflowClient`. Selecting a run identifies a candidate run; retain the exact artifact identity too, since a run can contain more than one checkpoint or model file.
 
 ### Pause and reason
 
@@ -41,15 +39,21 @@ Its artifact identity, dataset revision, metric definition, step convention, sou
 
 ## Decide what makes runs comparable
 
-We reuse a known regression problem so the engineering does not hide behind model complexity. Training inputs and validation inputs are separate. The target is $y=2x+1$, and the learned parameters are a weight and bias. Both runs start from zero, use the same examples and receive $30$ updates. Only the learning rate changes. Log those choices as parameters. Never compare two metrics with the same name when one is a sum and the other a mean, or one was measured before the update and the other afterward.
+Both runs fit $y=2x+1$ from zero-initialized weight and bias on the same five training points for $30$ updates. Only the learning rate changes: $0.02$ or $0.15$. The validation set has four separate input values, and the code calculates its mean squared error after the final update.
+
+The retrieved validation MSEs are about $0.11994$ and $5.05\times10^{-10}$, respectively. This controlled comparison supports choosing the latter on this fixture. It does not establish an optimal rate across wall-clock budgets or data distributions.
 
 ## Give data and code an identity
 
-A path such as data.csv is a location, not a version. Hash the actual bytes, record the split IDs, and preserve preprocessing configuration. For this tiny fixture the hash covers the training arrays; a real dataset manifest should additionally identify schema, split/group rules and transformations. A Git commit is useful for clean code, but uncommitted edits require a source hash or captured diff. A checkpoint and an MLflow run should refer to the same identities; neither replaces the other.
+The SHA-256 tag covers the bytes of the five training features and targets. Changing one target produces a different digest in the practice check. This makes a content change visible even when the filename, shape, and row count stay the same.
+
+For a larger dataset, also record split IDs, schema, preprocessing, and source revision. A hash identifies the checked bytes but does not describe how examples were selected or prove the data are correct. Tie the model artifact and run to the same data and code identities.
 
 ## Use a database and a deliberate artifact location
 
-The companion creates a temporary SQLite database and local artifact directory. SQLite stores run metadata; the artifacts contain the learned coefficients and preprocessing note. MlflowClient reads the records back, so a print statement is not our only evidence that logging occurred. These local examples use MLflow 3.16.1. A shared server needs supported database storage, artifact access, authentication, backup and retention; do not expose this local exercise as a public service.
+The exercise creates a temporary SQLite tracking database and local artifact directory. Run parameters and metric histories live in the database; each candidate's `model.json` stores its coefficients and preprocessing note. The client then retrieves metric steps and downloads the selected artifact, so the visible curve corresponds to recorded data.
+
+This is a local MLflow 3.16.1 example. A shared tracking service adds requirements for database support, artifact access, authentication, backups, and retention that this temporary setup does not test.
 
 **From the course workspace, install the tested CPU dependencies**
 
@@ -62,7 +66,9 @@ python -m pip install -r requirements-cpu.txt
 
 ## Log at a useful boundary
 
-JAX dispatch is asynchronous. Converting a scalar loss to a Python float waits for it; logging every update is acceptable for this small demonstration but can slow a real training loop. Choose a reporting cadence, log the completed step, and separate checkpoint cadence from logging cadence. Here every training MSE is measured after its update. The validation MSE is computed on a fixed four-row set, with a second Python calculation checking the denominator.
+JAX dispatch can be asynchronous; converting the loss to a Python float waits for that scalar before MLflow records it. Here each of 30 points is measured after its update, and validation MSE is computed at step 30 on four rows. The independent host calculation confirms the validation denominator and target values.
+
+Logging every update makes the curve easy to retrieve in this small run. For larger jobs, choose a reporting cadence and keep it distinct from checkpoint cadence so metric collection does not become the training schedule.
 
 $$
 \operatorname{MSE}=\frac{1}{n}\sum_{i=1}^{n}(\hat y_i-y_i)^2
@@ -70,11 +76,13 @@ $$
 
 ## Retrieve before trusting the dashboard
 
-The checker fetches all thirty metric steps, compares their stored values with the actual trajectory, checks the data tag and queries runs ordered by validation MSE. The faster-learning candidate wins this fixture. That is validation selection, not a final test result or a universal learning-rate recommendation. Finally we download the selected artifact and inspect its coefficients. Autologging can help supported frameworks, but explicit logging makes the boundary of this custom JAX loop visible.
+The client fetches all 30 training points for each run, checks their step numbers and values against the local histories, verifies the data tag, and orders candidates by retrieved validation MSE. It then downloads and inspects the selected coefficient artifact. The plotted rate (0.15) curve falls faster and ends lower than rate (0.02), matching the retrieved values.
+
+Training curves alone do not choose a release: in this same comparison the validation result provides the selection measure, and a final untouched test plus runtime/release checks remain separate. The plot is evidence of these two configurations, not a general recommendation.
 
 ## Continue into a real registry
 
-Run the connected project lab to log two pyfunc models, register immutable versions, move a champion alias, reload the selected version and retain prompt/trace evidence. An alias is a mutable lookup; resolve it to a version for a deployment record. Setting champion does not roll out a service and MLflow does not enforce this course’s quality policy for you.
+A registry alias such as `champion` is a mutable pointer to a registered model version. Resolve it to the immutable version and artifact identity when recording a release. Moving that pointer does not deploy a service, validate the artifact in a runtime, or make a validation set into a final test set.
 
 **Keep the local database and artifacts in a new output folder**
 
@@ -87,7 +95,9 @@ python projects/engineering-release/mlflow_lab.py --output ./engineering-run
 
 ## A zero training error can be the wrong release
 
-The third candidate in the exercise remembers five training pairs exactly and returns zero for every unseen input. Its training MSE is genuinely $0$; the metric is not fabricated. All four validation x values are unseen, so its validation predictions are $[0,0,0,0]$ against $[-2,0,2,4]$, giving MSE $6$. The linear candidates make nonzero but much smaller held-out errors. Log these predictions from reloaded artifacts before choosing a release. Model capacity and a lower training error are separate from generalization. The fresh exercise experiment replays both fitted linear artifacts and the memorizer under the same data and evaluation contract.
+The training-lookup artifact stores all five $x,y$ pairs and returns zero for unseen inputs. It therefore gets training MSE (0), but all four validation x values are unseen. Its reloaded predictions are $[0,0,0,0]$ against $[-2,0,2,4]$, giving validation MSE (6). The retrieved linear candidates have much smaller held-out errors on the same split.
+
+The exercise computes both metrics from reloaded artifacts, so the contrast is about model behavior rather than a fabricated record. A training-only selection picks the lookup; the validation-based selection rejects it. Keep the evaluation split separate from fitting and do not infer performance outside this small regression fixture.
 
 ### Pause and reason
 
@@ -267,11 +277,11 @@ Verified 30 logged steps per run; selected and reloaded the better validation ca
 
 ### Read the figure
 
-The horizontal axis counts completed updates, from $1$ to $30$. The vertical axis is post-update training MSE on a logarithmic scale: equal vertical distances represent ratios. The rate $0.15$ curve drops more quickly and ends far below the rate $0.02$ curve. The companion independently retrieves every plotted metric from MLflow. The final validation errors are about $0.11994$ and $5.05\times10^{-10}$, respectively; they are not plotted as a fabricated validation trajectory.
+The horizontal axis is completed update $1$ through $30$; the vertical axis is post-update training MSE on a logarithmic scale, so equal vertical distances correspond to multiplicative ratios. Both runs start from zero and share the same training data; rate $0.15$ falls faster and ends near $5.05\times10^{-10}$, while rate $0.02$ ends near $0.1401$.
 
 ### Connect it to the computation
 
-The comparison is controlled by shared data, initialization and update budget. It illustrates tracking and retrieval of evidence, not a general optimizer ranking. A separately held-out test and release checks still belong after validation selection.
+The retrieved MLflow history confirms each plotted training point, while the separately logged validation MSEs are about $5.05\times10^{-10}$ and $0.11994$. For this fixed fixture, both measures favor rate $0.15$; inspect the retrieved artifact and validation protocol before selection. The graph is not a universal rate ranking or a final test result.
 
 ```python
 visual_data={'kind':'line','x':list(range(1,31)),'xlabel':'completed update','ylabel':'post-update training MSE (log scale)','yscale':'log','series':[{'label':'rate 0.02','y':curves[0]},{'label':'rate 0.15','y':curves[1]}]}
@@ -279,7 +289,7 @@ visual_data={'kind':'line','x':list(range(1,31)),'xlabel':'completed update','yl
 
 ## Recorded reference execution
 
-CPU run: 2026-10-27T12:30:28.350498+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:26:53.719843+00:00. JAX 0.9.2.
 
 ```text
 Validation MSE by learning rate: {0.02: 0.11994461715221405, 0.15: 5.049471951679152e-10}

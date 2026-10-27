@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "transforms-05",
-  "contentHash": "3f1bc49e6fac9edcf8df73fc3434b0560134f13cd5a5b3dfadffceb95d5dfdd8",
+  "contentHash": "d4de3b5fcddb94d810fe5ad0bd2764839f7ac66ac456fcf21e15bce15d345d68",
   "rendererHash": "17e3bbad72ee4c43425845aaee76b86b85e84750551278be03d8c16842f4dc63",
   "kind": "executed",
-  "generatedAt": "2026-10-27T12:17:10.845072+00:00",
+  "generatedAt": "2026-10-27T17:02:20.091351+00:00",
   "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",
@@ -26,7 +26,7 @@
   "diagram": {
     "title": "The specialization key separates changing data from program choices",
     "prediction": "If only the array entries change, which ledger fields remain fixed?",
-    "reading": "The first two calls carry different runtime arrays through one matching structural signature. A shape or static-mode change creates a different specialization request. The table describes this lesson\u2019s call ledger; JAX cache behavior can also depend on other details, so do not read it as a universal compilation counter.",
+    "reading": "The table nodes are four calls. The first two carry different arrays through the same shape, dtype and static-mode signature, so their sums change from \\(6\\) to \\(9\\) while the requested staged computation stays the same. The third changes shape and the fourth changes static mode. Read each arrow as the next call in this controlled sequence; the table is not a global cache counter.",
     "alt": "Calls with shape (3,), float32 and static mode sum share the same signature even though their values and sums differ. Shape (4,) and mode mean each introduce a different signature.",
     "scope": "Signature-to-trace ledger for the lesson calls.",
     "height": 4.8,

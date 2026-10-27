@@ -23,11 +23,9 @@ A convolution combines a local input patch with weights reused across spatial po
 
 ## Trace one convolution output
 
-In a separate shape example, a three-by-three kernel sliding over a five-by-five image with stride one and no padding has three valid positions along each axis. It produces a three-by-three output per filter.
+For one output cell, take the matching $3\times3$ image patch, multiply element by element by one filter, sum over the patch's height, width, and input channels, then add that filter's bias. The same filter values are reused at the next location; only the selected pixels move. The independent NumPy dot product checks one interior cell before training.
 
-For one output location, multiply the selected patch by the kernel and sum over spatial and input-channel axes, then add the filter bias. Moving to another location changes the patch while reusing the filter. A new padding or stride convention changes the indexing contract.
-
-The confusion matrix answers a later question about classification errors. Pick one off-diagonal cell, identify its true/predicted labels, and inspect an image from that cell. Correct synthetic-shape classification is separate from recognition of natural photographs.
+The 5-by-5 diagram is a separate shape example: with stride one and no padding, the top-left patch can move to three positions across and three down, giving a 3-by-3 output map. The trained images are 8-by-8, so the same kernel yields 6-by-6 positions. Use the confusion matrix afterward to see which held-out orientations were mistaken.
 
 $$
 H_{\text{out}} = \left\lfloor \frac{H_{\text{in}} + 2P - K}{S} \right\rfloor + 1, \qquad W_{\text{out}} = \left\lfloor \frac{W_{\text{in}} + 2P - K}{S} \right\rfloor + 1
@@ -41,7 +39,7 @@ $$
 
 *Architecture and dataflow mechanism diagram.*
 
-The purple square selects one three-by-three patch within a five-by-five input. Each selected cell contributes to one output under the declared convolution. Moving the patch reuses weights. This separate shape example has three valid positions per axis at stride one without padding; it does not display learned weights.
+The highlighted purple square is one $3\times3$ receptive field on a $5\times5$ input. Its nine selected cells contribute, with their corresponding filter weights, to one output location. Move the square one cell at a time: at stride one and no padding it has three valid positions across and three down, producing a $3\times3$ map. The filter is reused at each position. Then compare this shape example with the trained $8\times8$ inputs, which produce $6\times6$ spatial outputs; the diagram shows the indexing rule, not learned filter values.
 
 ### Pause and reason
 
@@ -55,11 +53,15 @@ The filter weights and bias. The input patch changes. This is different from lea
 
 ## Generate images with an explicit label rule
 
-Our images have height eight, width eight, and one channel. Class zero contains a horizontal bright bar; class one contains a vertical bright bar. The bar position varies among interior rows or columns, and independent Gaussian noise perturbs every pixel. Alternate labels so both splits are balanced. Generate training and held-out sets from different seeds; identical seeds would reproduce images and create leakage. Every observation follows a known rule, so inspect a few images and labels before training. This synthetic distribution contains no occlusion, perspective, or multiple objects and should never be described as realistic vision evaluation.
+Each example is an $8\times8\times1$ image. Horizontal bars are class zero and vertical bars are class one; the bar's interior position varies, and Gaussian noise perturbs every pixel. Alternating labels keeps the generated split balanced. A different seed creates new held-out images without changing the label rule.
+
+In the retained held-out image, a bright horizontal band appears around row 3, while other pixels remain near zero with noise. Inspecting an image and its label makes the task concrete before the CNN is fit. This generator has no perspective, occlusion, or natural objects, so its result says nothing about photographs.
 
 ## Derive the convolution output shape
 
-NNX Conv accepts channels-last arrays: batch, height, width, channels. A $3\times3$ filter with stride one and VALID padding slides only where the whole patch fits. An $8\times8$ image therefore yields $6\times6$ spatial outputs. Four output channels mean four independently learned filters; the kernel shape is $(3, 3, 1, 4)$, followed by four biases. Each output is a patch dot product plus a bias. Deep-learning convolution uses cross-correlation here: do not reverse the filter in the independent NumPy reference. We check one interior output explicitly before fitting, which catches axis or padding misunderstandings.
+The input layout is $(B,H,W,C)$. With an $8\times8$ image and a $3\times3$ filter, VALID padding and stride one allow $8-3+1=6$ positions along each spatial axis. Four output channels mean four learned filters, so each image produces a $6\times6\times4$ activation array. The kernel shape is $(3,3,1,4)$ with four bias values.
+
+The patch reference uses cross-correlation, the operation used by this convolution API: it does not flip the filter. Matching the NumPy result at the selected output checks channel order, patch indexing, and bias addition before the optimizer can obscure a layout error.
 
 ```text
 (B,8,8,1) → Conv3×3/VALID → (B,6,6,4) → ReLU → spatial mean → (B,4) → Linear → (B,2)
@@ -67,11 +69,15 @@ NNX Conv accepts channels-last arrays: batch, height, width, channels. A $3\time
 
 ## Pool spatial responses and retain class scores
 
-ReLU replaces negative filter responses with zero. Averaging axes one and two summarizes how strongly each learned pattern appears anywhere in the remaining image. Pooling discards exact position, which suits orientation classification but would hurt a task asking for bar location. The classifier head emits two logits per image. softmax_cross_entropy_with_integer_labels consumes those scores and integer labels directly; do not apply softmax beforehand. A stable independent NumPy reference subtracts the largest score before computing log-sum-exp. The objective is averaged over observations, not over classes.
+After ReLU, averaging spatial axes $1$ and $2$ turns each $6\times6$ map into one value per filter. The result retains four features per image, regardless of where the bar appears. That invariance fits orientation classification, but it discards location information that a localization task would need.
+
+The head produces two raw class scores. Pass those logits and integer labels directly to the stable cross-entropy; applying softmax first is unnecessary and changes the expected input. The NumPy reference subtracts the largest score before log-sum-exp and averages over images.
 
 ## Read a confusion matrix rather than a success label
 
-Use rows for true classes and columns for predicted classes. The diagonal counts correct classifications; off-diagonal cells identify orientation-specific mistakes. A balanced 24-image held-out set contains $12$ examples per class, so a model always predicting horizontal has accuracy $0.5$. After training, print both held-out mean loss and accuracy, along with all four confusion counts. Check that the matrix sums to $24$ and that its trace divided by $24$ equals accuracy. This independent accounting prevents a reduction-axis error from looking like good performance. Keep the split and hyperparameters fixed; a new data distribution is a new experiment, not another chance to select the reported test result.
+Rows in the matrix are true classes and columns are predicted classes. The retained counts are $[[12,0],[0,12]]$: all 12 horizontal and all 12 vertical held-out images land on the diagonal. The matrix totals 24, and its trace divided by 24 equals the reported accuracy $1.0$; held-out mean loss is $0.015700625$.
+
+A horizontal-only baseline would get 12 of 24 correct, or $0.5$, because the set is balanced. If an off-diagonal count appears after a change, its row tells you the true orientation and its column the predicted one; inspect examples from that cell. Zero observed errors is not a guarantee on other images.
 
 ## 1. Generate two disjoint synthetic splits
 
@@ -257,15 +263,11 @@ Expected: Held-out accuracy is at least $0.9$ for the fixed fixture; confusion c
 
 ### Read the figure
 
-The upper panel is one held-out image, with pixel columns across and rows down. Its dark horizontal stripe is near row $3$; the faint variation elsewhere is added noise. This color bar measures pixel value, so the picture is an input to the classifier.
-
-The lower panel summarizes all held-out predictions. Rows are actual classes and columns are predicted classes. The two diagonal cells contain $12$ each; both off-diagonal cells contain zero. The lower color bar measures example count, which is a different quantity from pixel intensity.
+The top heatmap has pixel columns on the horizontal axis and pixel rows on the vertical axis; its color bar is pixel value. This held-out example shows a bright horizontal band around row 3. In the lower heatmap, row labels are actual orientation and columns are predicted orientation; the color bar counts examples. Its observed cells are ([[12,0],[0,12]]), with all 24 images on the diagonal.
 
 ### Connect it to the computation
 
-The upper-left confusion cell counts horizontal images classified as horizontal; the lower-right counts vertical images classified as vertical. Off-diagonal counts would identify the two kinds of confusion. Here the $24$ held-out images are all classified correctly.
-
-Use the sample image to understand the task and the confusion matrix to understand the observed errors. The single image is distinct from accuracy, and a zero in the matrix means no observed mistakes of that kind in this set, not that such a mistake is impossible. This is a small synthetic stripe task, not evidence of general image recognition.
+The image panel explains one input, while the confusion panel compares all 24 held-out labels with predictions: 12 horizontal and 12 vertical are correct, with no observed off-diagonal errors. Check that the matrix sum is 24 and trace/24 is the reported accuracy $1.0$. If a changed run has a nonzero off-diagonal cell, use its row and column to select examples for inspection. The zero errors apply only to this synthetic split.
 
 ```python
 visual_data = {'kind': 'panels', 'panels': [{'kind': 'heatmap', 'title': 'Held-out image 0', 'values': test_x[0, :, :, 0].tolist(), 'unit': 'pixel value'}, {'kind': 'heatmap', 'title': 'Held-out confusion', 'values': confusion.tolist(), 'rows': ['actual horizontal', 'actual vertical'], 'columns': ['pred. horizontal', 'pred. vertical'], 'unit': 'example count'}]}
@@ -273,7 +275,7 @@ visual_data = {'kind': 'panels', 'panels': [{'kind': 'heatmap', 'title': 'Held-o
 
 ## Recorded reference execution
 
-CPU run: 2026-10-27T12:29:48.949231+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:26:39.317194+00:00. JAX 0.9.2.
 
 ```text
 Held-out loss: 0.015700625 accuracy: 1.0 confusion:

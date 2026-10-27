@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "tpu-01",
-  "contentHash": "f3be6dfeb7267752fe37f15704581a3f2016af05f13f0832f774e99e8052f397",
+  "contentHash": "72e79e367efb0b2ec723317c3833714daff6867c6e3c64046f96517229ead9ea",
   "rendererHash": "17e3bbad72ee4c43425845aaee76b86b85e84750551278be03d8c16842f4dc63",
   "kind": "analytic",
-  "generatedAt": "2026-10-27T15:46:12.786570+00:00",
+  "generatedAt": "2026-10-27T17:19:32.592436+00:00",
   "provenance": "analytic_calculation_not_device_execution",
   "environment": {
     "backend": "cpu",
@@ -66,7 +66,7 @@
   "diagram": {
     "title": "Process, JAX-device and physical-chip ownership for a selected Cloud TPU topology",
     "prediction": "Which counts come from the host launcher, which from JAX, and which from the resource topology?",
-    "reading": "For the listed single-host Cloud TPU API examples, one Linux host runs one JAX process. The process reports JAX devices. The selected v5e/v6e topology maps one JAX device to each physical chip; that mapping is API and generation specific. The TPU7x transfer case exposes two JAX devices per physical chip. HBM is counted per physical chip, not per process.",
+    "reading": "Follow the arrows from the selected API and machine type to the Linux host, then from its JAX process to the device inventory and the generation/API mapping to physical chips. In this one-host `v5litepod-4` example, the resource request names four physical v5e chips, while the CPU rehearsal observed one process and one CPU device. The mapping in the final node is topology-specific, not a rule for all TPUs. Use the resource description for requested chips and the synchronized receipt for observed JAX devices; use per-chip HBM, not aggregate slice HBM, for a fit decision.",
     "alt": "Workstation requests a TPU topology. One Linux VM host owns one JAX process; that process sees JAX devices; an explicit generation and API topology maps those JAX devices to physical chips and per-chip HBM. Device count and chip count are separate labels.",
     "scope": "Topology schematic for the named Cloud TPU API routes; check the selected resource and runtime receipt.",
     "height": 6,

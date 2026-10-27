@@ -29,6 +29,8 @@ Draw arrival, enqueue, dispatch and completion on one timeline. Then measure or 
 
 This lesson combines measured CPU batch computation with a separately simulated queue. Keep those panels distinct. A queue simulation explores stated assumptions; it is not an observed autoscaling system or a production traffic measurement.
 
+The upper panel measures resident-input CPU computation per batch; it reports a median and p95 for each of three batch shapes. These very short timings can change order across captures, so use them to practice reading per-batch units rather than declaring an optimal batch size. The lower panel is a separate queue simulation using one measured service duration as its time unit.
+
 ### Pause and reason
 
 Can higher batch throughput coexist with worse user latency?
@@ -275,11 +277,15 @@ Expected: The program prints first-call, warm p50/p95 and examples-per-second me
 
 ### Read the figure
 
-The upper panel shows measured CPU warm p50 and p95 milliseconds per batch for batch sizes $1,8,32$. Each timing waits for completion; inputs are already resident. These are sample percentiles, not confidence bounds or a speedup guarantee. The lower panel uses request index on the horizontal axis and simulated response time divided by the measured batch-one median on the vertical axis. Stable arrivals stay at $1$; overloaded arrivals rise from $1$ to $24.6$.
+Read the upper panel as milliseconds per complete batch, with batch sizes $1$, $8$ and $32$ along the horizontal axis. For each shape, p50 summarizes the middle of its warm sample and p95 describes a higher sample percentile. Compare those bars within the same batch before comparing shapes. Dividing a batch time by its size gives an amortized per-example cost; it does not make an individual request finish before its batch completes.
+
+The lower panel uses request index horizontally and response time divided by the chosen service time vertically. Spaced arrivals stay at $1$ service-time unit. Overloaded arrivals increase from $1$ to $24.6$ units by request index $59$. The queue panel therefore explains backlog under its declared arrivals; it does not measure live traffic or prove a production latency target.
 
 ### Connect it to the computation
 
-The lower panel’s growth comes entirely from the chosen arrival schedule and serial queue recurrence. The service duration stays fixed in the simulation. Normalizing by the measured service duration makes the buildup visible without freezing host-dependent milliseconds into the prose. Real requests can add networking, preprocessing, variable service times and batch collection; those costs are not inferred from this graph.
+The measured batch bars answer a compute question, while the simulated curves answer a waiting question. With arrivals $0.6t$ apart and service duration $t$, each request adds $0.4t$ of backlog in the serial-worker model. That arithmetic explains the rising lower curve even though the numerical model and service duration are unchanged.
+
+Predict two different interventions: a shorter service duration can increase capacity, while collecting a larger batch can add intentional waiting before service. Measure each boundary and replay an arrival pattern before deciding which intervention helps the user's response time. Small CPU timing differences between these batches are not a device ranking.
 
 ```python
 visual_data={"kind":"panels","panels":[{"kind":"bar","x":[0,1,2],"labels":["batch 1","batch 8","batch 32"],"xlabel":"resident-input batch shape","ylabel":"measured CPU milliseconds per batch","series":[{"label":"warm p50","y":[r["p50_ms"] for r in measurements]},{"label":"warm p95","y":[r["p95_ms"] for r in measurements]}]},{"kind":"line","x":request_index.tolist(),"xlabel":"request index (simulation)","ylabel":"simulated response / measured service","series":[{"label":"spaced arrivals","y":(stable_latency/service_ms).tolist()},{"label":"overloaded arrivals","y":(overloaded_latency/service_ms).tolist()}]}]}
@@ -287,19 +293,19 @@ visual_data={"kind":"panels","panels":[{"kind":"bar","x":[0,1,2],"labels":["batc
 
 ## Recorded reference execution
 
-CPU run: 2026-10-27T13:37:47.899369+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:15:10.318871+00:00. JAX 0.9.2.
 
 ```text
-{'batch': 1, 'first_call_ms': 57.906500063836575, 'p50_ms': 0.020333100110292435, 'p95_ms': 0.25483330246061087, 'steady_examples_per_second': 49180.89197297607}
-{'batch': 8, 'first_call_ms': 42.267332784831524, 'p50_ms': 0.06016646511852741, 'p95_ms': 0.2744519617408512, 'steady_examples_per_second': 132964.43432799433}
-{'batch': 32, 'first_call_ms': 42.43970802053809, 'p50_ms': 0.056040938943624496, 'p95_ms': 0.12370424810796975, 'steady_examples_per_second': 571011.1322758357}
-measured batch-one service proxy (ms): 0.020333100110292435
-simulated last stable/overloaded response (ms): 0.020333100110292435 0.5001942627131939
-{'batch': 1, 'first_call_ms': 45.24195799604058, 'p50_ms': 0.014479272067546844, 'p95_ms': 0.06546447984874243, 'steady_examples_per_second': 69064.24544928283}
-{'batch': 8, 'first_call_ms': 43.81012497469783, 'p50_ms': 0.06397883407771587, 'p95_ms': 0.19255380611866704, 'steady_examples_per_second': 125041.35336824523}
-{'batch': 32, 'first_call_ms': 38.61224977299571, 'p50_ms': 0.06958330050110817, 'p95_ms': 0.207480788230896, 'steady_examples_per_second': 459880.456511119}
-measured batch-one service proxy (ms): 0.014479272067546844
-simulated last stable/overloaded response (ms): 0.014479272067546844 0.3561900928616524
+{'batch': 1, 'first_call_ms': 49.99895812943578, 'p50_ms': 0.02291705459356308, 'p95_ms': 0.06364851724356407, 'steady_examples_per_second': 43635.624984760434}
+{'batch': 8, 'first_call_ms': 34.4394170679152, 'p50_ms': 0.02925051376223564, 'p95_ms': 0.24676243774592854, 'steady_examples_per_second': 273499.46961712965}
+{'batch': 32, 'first_call_ms': 33.450540620833635, 'p50_ms': 0.03277091309428215, 'p95_ms': 0.0826959265395999, 'steady_examples_per_second': 976475.6907424511}
+measured batch-one service proxy (ms): 0.02291705459356308
+simulated last stable/overloaded response (ms): 0.02291705459356308 0.5637595430016518
+{'batch': 1, 'first_call_ms': 30.60975018888712, 'p50_ms': 0.025562476366758347, 'p95_ms': 0.0629498856142163, 'steady_examples_per_second': 39119.84056835777}
+{'batch': 8, 'first_call_ms': 28.963209129869938, 'p50_ms': 0.027937814593315125, 'p95_ms': 0.07306882180273531, 'steady_examples_per_second': 286350.2430828722}
+{'batch': 32, 'first_call_ms': 26.724332943558693, 'p50_ms': 0.04395795986056328, 'p95_ms': 0.07016286253929117, 'steady_examples_per_second': 727968.2701723535}
+measured batch-one service proxy (ms): 0.025562476366758347
+simulated last stable/overloaded response (ms): 0.025562476366758347 0.6288369186222553
 hypothetical planned replicas: 3
 Analytic sample p95 / max (ms): 5.95000000000007 100.0
 Requests beyond the declared deadline: 2

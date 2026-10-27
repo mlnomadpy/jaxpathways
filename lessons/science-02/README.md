@@ -23,11 +23,9 @@ A simulation ensemble repeats one rule across independent systems and across tim
 
 ## There are two different axes of repetition
 
-Picture a grid with time running left to right and one independent trajectory per row. State arrows connect adjacent times within a row. No state arrow crosses into another trajectory unless the physical model explicitly couples them.
+Think of the output as a table: each row is one independent experiment and each column is a saved time. In this fixture the rows start at $0.5,1,2$, and the columns run from time zero through two seconds. A state update connects neighboring columns in one row; no update uses another row's value.
 
-Initial conditions can vary by trajectory while a physical parameter stays shared, or both may vary. That is an argument-mapping choice, not merely a shape convenience. Record it before applying vectorization.
-
-The trajectory plot shows outputs of that grid. Preserve the returned time/batch axis order when plotting; an accidental transpose can connect different systems instead of successive times. Compare one row with an independently run single trajectory.
+The plot follows the three rows of this batch-major table. At two seconds the endpoints are about $0.1233,0.2466,0.4932$, so the top-starting trajectory remains four times the lowest. If the physical systems exchanged heat, this independence assumption would fail and a coupled state update would be needed rather than simply adding more `vmap` lanes.
 
 ### Vectorize across systems; scan through time
 
@@ -37,7 +35,7 @@ The trajectory plot shows outputs of that grid. Preserve the returned time/batch
 
 *Architecture and dataflow mechanism diagram.*
 
-Each row is an independent initial condition. Horizontal arrows advance only that system; there are no cross-row state dependencies. Vectorization groups rows and scan represents recurrence. Boxes show state positions in the computation, not physical coordinates or measured durations.
+Each row is one independent system; the horizontal arrows link that system's successive states over time. There are no arrows between rows, matching the uncoupled equations in the code. Vectorization represents the row axis and `scan` the within-row recurrence. If the physical model introduced heat exchange between systems, cross-row dependencies would be required; the current diagram would no longer describe it.
 
 ### Pause and reason
 
@@ -59,7 +57,9 @@ $$
 
 ## Read shapes as physical statements
 
-Three initial values and forty updates produce a batch-major array of shape $(3,41)$. Row $b$ is one trajectory; column $n$ holds all experiment values at time $nh$. The extra time point is the initial state. We deliberately use different axis sizes to make an accidental transpose visible. A mean over the batch answers a different question from a mean over time.
+Three initial states and forty updates produce shape $(3,41)$: row $b$ is one trajectory, and column $n$ stores that trajectory at time $nh$. Column zero stores the initial state at $t=0$; the next forty columns store the forty updates, giving 41 saved times in total. Since the dimensions differ, transposing by mistake is visible: it would plot 41 systems with three time samples rather than three systems with 41 samples.
+
+A mean over rows would summarize the ensemble at each time; a mean over columns would average each trajectory over time. Neither operation is a shape-only convenience: each asks a different physical question.
 
 ## One transformation handles independence; another handles dependency
 
@@ -67,7 +67,9 @@ vmap transforms a scalar simulation into an ensemble operation. scan still enfor
 
 ## Use physical structure as a second check
 
-This equation is linear in the initial state. Starting at $2$ must produce four times the trajectory starting at $0.5$. That check is separate from the exponential comparison and catches unintended normalization over the batch axis. Linearity is special to this model; do not impose it on a nonlinear reaction model simply because batching worked here.
+The equation is linear in its initial value: doubling $u_0$ doubles every later state. Thus the trajectory from 2 should be four times the trajectory from 0.5 at each of the 41 saved times, including the endpoint $0.4932$ versus $0.1233$. This relationship independently checks that batching did not mix or normalize the rows.
+
+If the rate varies by experiment, that same proportionality still applies when each compared pair shares a rate, but their endpoints no longer have one common decay fraction. If the equation becomes nonlinear in state, do not assume proportional trajectories; check against the model's actual structure instead.
 
 ## Choose saved outputs deliberately
 
@@ -217,15 +219,11 @@ Expected: Shape (3, 41); endpoints approximately [0.12329849, 0.24659697, 0.4931
 
 ### Read the figure
 
-Time in seconds runs horizontally; excess temperature runs vertically. The three curves correspond to initial values $0.5$, $1$ and $2$. Each is one row of the batch-major output, including its initial observation.
-
-At two seconds their values are approximately $0.1233$, $0.2466$ and $0.4932$. Their absolute changes differ, but every curve retains the same fraction of its initial value. The highest remains four times the lowest throughout.
+The horizontal axis is time from 0 to 2 seconds; the vertical axis is excess temperature. Each curve is one row of the executed $3\times41$ batch-major output, including its time-zero value: starts 0.5, 1 and 2. At two seconds the curves end near 0.1233, 0.2466 and 0.4932. The highest endpoint is four times the lowest because the equation is linear in the initial state and shares one rate across the batch.
 
 ### Connect it to the computation
 
-The common rate produces that shared relative decay. vmap adds independent experiments without inserting a mean, normalization or interaction between them. The code checks both this proportional relationship and the analytic exponential.
-
-The plot has no runtime or memory axis. It establishes numerical behavior for this ensemble, not a speedup from vectorization. The last lesson adds synchronized measurements with their own limitations.
+The analytic exponential and the proportional-endpoint check both pass for these three independent starts. `vmap` evaluates the same rule across rows; `scan` carries each row's state through columns. The figure has no speed or memory axis, so vectorization here establishes a correct ensemble calculation, not a performance gain. If one trajectory's state affected another, the no-cross-row assumption would need to change before batching.
 
 ```python
 # Transfer the device result to the host for an independent NumPy comparison.
@@ -234,7 +232,7 @@ visual_data={'kind':'line','x':times.tolist(),'xlabel':'time (seconds)','ylabel'
 
 ## Recorded reference execution
 
-CPU run: 2026-10-27T12:31:16.519322+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:06:15.539480+00:00. JAX 0.9.2.
 
 ```text
 Shape: (3, 41) endpoints: [0.12329848 0.24659697 0.49319394]
