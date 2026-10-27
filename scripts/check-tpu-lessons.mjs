@@ -31,7 +31,7 @@ test('tpu-03 memory ledger matches explicit bytes per parameter', () => {
   const file = path.join(root, 'phases/21-tpu-systems/01-tpu-generations-and-hbm-memory-budgeting/lesson.json');
   const lesson = JSON.parse(readFileSync(file, 'utf8'));
   assert.equal(lesson.content.visual.kind, 'analytic');
-  assert.match(lesson.content.visual.connection, /not device measurements/i);
+  assert.match(lesson.content.visual.reading, /not device measurements/i);
   const course = JSON.parse(readFileSync('curriculum/course.json', 'utf8'));
   const metadata = course.phases.flatMap(phase => phase.lessons).find(lesson => lesson.id === 'tpu-03');
   assert.match(metadata.check, /18 bytes per parameter/);
@@ -56,7 +56,7 @@ test('tpu-04 labels the four-device result as calculated expectation', () => {
   const lesson = JSON.parse(readFileSync(file, 'utf8'));
   assert.equal(lesson.content.visual.kind, 'analytic');
   assert.match(lesson.content.visual.title, /not an observed runtime receipt/i);
-  assert.match(lesson.content.visual.reading, /does not read a TPU execution receipt/i);
+  assert.match(lesson.content.visual.reading, /NumPy calculation, not a recorded device result or receipt/i);
 });
 
 test('Phase 19 registry tasks use current HBM and requested-target receipt contracts', () => {
@@ -185,7 +185,9 @@ test('tpu-06 precision probe retains raw outputs and independently checks dtype 
   assert.doesNotMatch(lessonText, /\b(?:bf16|fp32)\s+accum(?:ulation)?\b/i);
   assert.doesNotMatch(lessonText, /every partial sum.{0,100}rounded to 7/i);
   assert.match(lesson.content.sections[0].check.answer, /do not establish that every partial sum/i);
-  assert.match(lesson.content.visual.reading, /do not show internal accumulation precision/i);
+  assert.match(lesson.content.visual.reading, /returned result.*finite-precision FP32 CPU reference/s);
+  assert.match(lesson.content.sections[0].body, /does not identify.{0,60}physical partial-sum rounding order/i);
+  assert.match(lesson.content.sections[0].body, /or establish TPU lowering/i);
   const probe = path.join(lessonDir, 'labs/precision_contract_probe.py');
   const temp = mkdtempSync(path.join(os.tmpdir(), 'tpu06-precision-contract-'));
   try {
