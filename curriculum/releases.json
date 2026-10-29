@@ -1,5 +1,17 @@
 [
   {
+    "version": "0.11.2",
+    "date": "2026-10-29",
+    "title": "Focus testing and refresh recorded lesson evidence",
+    "summary": "Provide targeted test suites and current CPU artifact receipts while keeping source integrity and published release history intact.",
+    "changes": [
+      "Organized Node verification into unit, app, content and built-site suites with changed-input selection and automatic build prerequisites. Focused Python lesson/project selection protects complete validation receipts; specialized pull-request jobs run only for relevant changes.",
+      "Removed obsolete fixed-count and duplicate assertions, batched starter syntax checks, and separated representative reader interactions from exhaustive generated-page equation and control coverage.",
+      "Recomputed the existing Transformer, solver, inverse-problem and precision figures and reran their scripts and notebooks against the committed lesson sources. CPU execution remains distinct from accelerator qualification and independent teaching review.",
+      "Hash the exact bytes of the explicitly declared corrupt tokenizer canary while retaining strict canonical JSON parsing elsewhere. Regression checks preserve fixture integrity and immutable published snapshots."
+    ]
+  },
+  {
     "version": "0.11.1",
     "date": "2026-10-21",
     "title": "Practice and check answers in the offline reader",

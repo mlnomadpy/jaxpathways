@@ -21,14 +21,12 @@ jobs:
       - uses: actions/setup-python@v7
         with:
           python-version: '3.14'
-      - name: Install numerical verification dependency
-        # npm check runs independent NumPy checks for the worked teaching examples.
-        # Match the course environment without installing the full training stack.
-        run: python -m pip install numpy==2.4.4
       - uses: withastro/action@v6
         with:
           node-version: '24'
-          build-cmd: npm run build && npm run check
+          # The verify job already ran the complete suite and subpath checks.
+          # Check this final deployment output without rebuilding it a second time.
+          build-cmd: npm run build && python3 scripts/check-distribution.py && npm run check:site
         env:
           BASE_PATH: /jaxpathways
           SITE_URL: https://www.tahabouhsine.com

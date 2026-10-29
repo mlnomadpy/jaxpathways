@@ -3,10 +3,25 @@ import { createHash } from 'node:crypto';
 import assert from 'node:assert/strict';
 import { portablePath } from './portable-path.mjs';
 
-const read = path => JSON.parse(readFileSync(path, 'utf8'));
+const read = path => {
+  const source = readFileSync(path, 'utf8');
+  try {
+    return JSON.parse(source);
+  } catch (error) {
+    throw new SyntaxError(`Invalid canonical JSON in ${path}: ${error.message}`);
+  }
+};
 const stable = value => Array.isArray(value) ? value.map(stable) : value && typeof value === 'object'
   ? Object.fromEntries(Object.keys(value).sort().map(key => [key, stable(value[key])])) : value;
 const hash = value => createHash('sha256').update(JSON.stringify(stable(value))).digest('hex');
+// This published canary intentionally appends corrupt bytes to a tokenizer file.
+// Track its exact bytes: treating other malformed JSON as a canary would hide source errors.
+const negativeJsonFixtures = new Set([
+  'projects/text-harness/foundations/reference/run/corrupt-package/tokenizer.json',
+]);
+const jsonSourceHash = file => negativeJsonFixtures.has(file)
+  ? createHash('sha256').update(readFileSync(file)).digest('hex')
+  : hash(read(file));
 const notes = read('curriculum/releases.json');
 const release = notes[0];
 assert.match(release.version, /^\d+\.\d+\.\d+$/);
@@ -36,7 +51,7 @@ const sources = {};
 for (const directory of ['curriculum', 'learning-paths', 'projects']) {
   for (const file of readdirSync(directory, { recursive: true }).map(portablePath).sort()) {
     if (!file.endsWith('.json') || /(?:^|\/)(?:releases|release-snapshots|(?:project-)?validation)\.json$/.test(file) || file.includes('/outputs/')) continue;
-    sources[`${directory}/${file}`] = hash(read(`${directory}/${file}`));
+    sources[`${directory}/${file}`] = jsonSourceHash(`${directory}/${file}`);
   }
 }
 // Practical guides and their launchers are canonical course material too.

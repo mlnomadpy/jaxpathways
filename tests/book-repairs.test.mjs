@@ -1,7 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { spawnSync } from 'node:child_process';
 import { lessonPreparation } from '../src/lib/views/routes.js';
 
 const read = (file) => JSON.parse(readFileSync(file, 'utf8'));
@@ -42,20 +41,4 @@ test('every advertised career skill has named lesson, project and review evidenc
     }
   }
   assert.equal(source.roles.find((role) => role.id === 'training-engineer').defaultPathwayId, 'models');
-});
-
-test('all ten lifecycle briefs are discoverable and retain planned status', () => {
-  const plans = read('curriculum/project-plans.json');
-  assert.equal(plans.length, 10);
-  for (const plan of plans) {
-    assert.equal(plan.status, 'planned');
-    assert(readFileSync(plan.source, 'utf8').length > 1000);
-    assert(!source.projectIds.includes(plan.id));
-  }
-});
-
-test('project sharding refuses to overwrite the complete receipt', () => {
-  const result = spawnSync('python3', ['scripts/check-projects.py', '--shard', '0/4'], { encoding: 'utf8' });
-  assert.equal(result.status, 2);
-  assert.match(result.stderr, /require --receipt/);
 });

@@ -1,13 +1,13 @@
 {
   "name": "jaxpathways",
   "private": true,
-  "version": "0.11.1",
+  "version": "0.11.2",
   "scripts": {
     "dev": "npm run content:build && astro dev",
-    "check": "npm run content:build && npm run check:astro && npm run check:types && npm run lint && npm run format:check && node scripts/validate-curriculum.mjs && npm run build && npm test && python3 scripts/check-distribution.py && npm run check:site",
+    "check": "npm run content:build && npm run check:astro && npm run check:types && npm run lint && npm run format:check && node scripts/validate-curriculum.mjs && npm run release:check && npm run build:site && npm run test:all -- --no-build && npm run test:tools && python3 scripts/check-distribution.py && npm run check:site",
     "curriculum:docs": "node scripts/render-curriculum.mjs",
     "smoke:cpu": "python3 scripts/smoke-lessons.py",
-    "build": "npm run release:check && npm run content:build && astro build",
+    "build": "npm run release:check && npm run content:build && npm run build:site",
     "test:project": "python3 scripts/check-projects.py",
     "test:browser": "playwright test",
     "audit:content": "python3 scripts/audit-learning-material.py",
@@ -17,7 +17,7 @@
     "lint": "eslint src scripts/*.mjs astro.config.mjs",
     "format": "prettier --write src astro.config.mjs eslint.config.js",
     "format:check": "prettier --check src astro.config.mjs eslint.config.js",
-    "test": "node --test scripts/*.test.cjs tests/*.test.mjs",
+    "test": "node scripts/run-tests.mjs",
     "check:site": "node scripts/check-site.mjs && node scripts/check-seo.mjs",
     "check:deployment": "node scripts/check-deployment.mjs",
     "figures:build": "python3 scripts/render-lesson-figures.py",
@@ -31,7 +31,15 @@
     "test:experiments": "python3 projects/reproducible-experiments/tests/check.py --implementation solution --stage all",
     "test:experiment-loggers": "python3 projects/reproducible-experiments/tests/loggers_check.py",
     "test:tpu-lessons": "node scripts/check-tpu-lessons.mjs",
-    "audit:structure": "python3 scripts/audit-content.py"
+    "audit:structure": "python3 scripts/audit-content.py",
+    "build:site": "astro build",
+    "test:unit": "node scripts/run-tests.mjs --suite unit",
+    "test:app": "node scripts/run-tests.mjs --suite app",
+    "test:content": "node scripts/run-tests.mjs --suite content",
+    "test:site": "node scripts/run-tests.mjs --suite site",
+    "test:all": "node scripts/run-tests.mjs --suite all",
+    "test:changed": "node scripts/run-tests.mjs --changed",
+    "test:tools": "python3 -m unittest discover -s tests -p test_python_runners.py && python3 -m unittest discover -s tests -p test_ci_selection.py"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",

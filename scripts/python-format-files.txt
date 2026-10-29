@@ -36,3 +36,8 @@ projects/policy-evaluation/starter/model.py
 projects/bayesian-regression/starter/numpyro_workflow.py
 projects/bayesian-regression/solution/numpyro_workflow.py
 projects/bayesian-regression/tests/check_numpyro.py
+scripts/check-projects.py
+scripts/smoke-lessons.py
+scripts/select-ci-checks.py
+tests/test_python_runners.py
+tests/test_ci_selection.py
