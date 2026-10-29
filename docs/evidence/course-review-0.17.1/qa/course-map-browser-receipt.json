@@ -1,0 +1,19 @@
+{
+  "task": "final lesson course-map browser regression",
+  "baseUrl": "http://127.0.0.1:4203",
+  "candidate": "/private/tmp/jaxpathways-review-0.17.1-final-r2",
+  "servedPath": "/lesson-tpu-06.html",
+  "servedHtmlSha256": "aa4311944a4eaf9b9a8fa109ae219f8c7ad791b9440543505f2f9f8c8a261631",
+  "referenceHtmlSha256": "aa4311944a4eaf9b9a8fa109ae219f8c7ad791b9440543505f2f9f8c8a261631",
+  "servedHtmlMatchesCandidate": true,
+  "testFile": "browser-tests/reader-stage-dock.spec.ts",
+  "testCommand": "PLAYWRIGHT_PORT=4203 PLAYWRIGHT_BROWSERS_PATH=/private/tmp/jaxpathways-playwright npx playwright test browser-tests/reader-stage-dock.spec.ts --grep 'final lesson' --repeat-each=3 --workers=1",
+  "result": "6 passed: 3 desktop and 3 mobile",
+  "assertions": [
+    "course-map link is the #next-activity control inside #lesson-stage-bar",
+    "href remains course.html",
+    "after activation route is /course.html with only the canonical default authored phase query",
+    "the default phase card is visible and open and its first authored lesson row is visible"
+  ],
+  "logPath": "/private/tmp/jaxpathways-reader-stage-dock-4203-final.log"
+}

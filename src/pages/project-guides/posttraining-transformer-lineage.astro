@@ -1,0 +1,75 @@
+---
+import GuideContents from '../../components/shared/GuideContents.astro';
+import MaterialStatus from '../../components/shared/MaterialStatus.astro';
+import PageIntro from '../../components/shared/PageIntro.astro';
+import GuideLayout from '../../layouts/GuideLayout.astro';
+import { course } from '../../lib/course-data.js';
+import { projectGuide } from '../../lib/server/project-guide.js';
+import { siteUrl } from '../../lib/urls.js';
+
+const content = projectGuide(
+  {
+    id: 'posttraining-audit',
+    source: 'projects/posttraining-audit/transformer_lineage/TEACHING.md',
+  },
+  course,
+);
+---
+
+<GuideLayout
+  title="Optional saved-decoder sequence PPO appendix | JAX Pathways"
+  description="Trace a small saved decoder through a four-action synthetic sequence-PPO exercise, with hand checks for EOS, timeout, clipped losses, restricted KL and a recorded failed heldout reward floor."
+  active="projects"
+  skipLabel="Skip to saved-decoder appendix"
+  mainClass="project-guide"
+>
+  <PageIntro
+    backHref="project-guides/posttraining-audit.html"
+    backLabel="Audit SFT, DPO and sequence PPO"
+    edition="Optional extension · saved 10,880-parameter decoder · synthetic CPU mechanics"
+    intro="Follow the state and masks from a saved decoder prefix to each generated action, then check the boundary and objective arithmetic by hand."
+  >
+    <Fragment slot="title" set:html={content.heading} />
+    <p>
+      This appendix is separate from registered Stage 5, which remains the table-policy sequence-PPO
+      exercise. Its mechanics and replay checks passed independent review, while its strict heldout
+      reward quality floor failed. The result is not evidence of language-model quality.
+    </p>
+    <a class="button" href={siteUrl('downloads/posttraining-audit.zip')} download>
+      Download the post-training project and optional appendix
+    </a>
+  </PageIntro>
+  <section aria-labelledby="preparation-project-status-heading">
+    <h2 id="preparation-project-status-heading">Preparation project status</h2>
+    <p>
+      The appendix starts from the saved inference package in the canonical text-harness project.
+      That preparation status is reported separately from this extension.
+    </p>
+    <MaterialStatus kind="projects" id="text-harness" />
+  </section>
+  <aside
+    class="material-status extension-status"
+    aria-label="Saved-decoder sequence PPO appendix status"
+    data-material-key="extension:posttraining-transformer-lineage"
+  >
+    <p>
+      <span class="material-badge" data-maturity="in-development">
+        In development
+      </span>
+      <span>
+        {' '}
+        Mechanics and replay passed independent review; the heldout reward quality gate failed.
+      </span>
+    </p>
+    <p>
+      Review the reward floor and restricted-support limits before interpreting any other
+      diagnostic.
+    </p>
+  </aside>
+  <GuideContents
+    sections={content.sections}
+    label="Saved-decoder appendix sections"
+    title="In this appendix"
+  />
+  <article set:html={content.body} />
+</GuideLayout>

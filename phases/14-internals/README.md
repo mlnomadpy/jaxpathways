@@ -12,7 +12,9 @@ Keep an independent derivative reference and test changed values, higher derivat
 
 ## Study guide: Which mathematical operation does the transformed program represent?
 
-Use internal representations to explain and verify transformations, not to memorize printed variable names. Separate primal values, tangent directions, cotangents and compiled artifacts.
+Transformations become less mysterious when you follow the quantities they carry. A primal is the ordinary value, a tangent describes change in an input direction, and a cotangent weights changes in outputs. Their shapes and roles explain why forward- and reverse-mode products answer different questions.
+
+Read one transformed equation with an independent derivative beside it. Check the adjoint relationship, then challenge a custom rule at a different base point and direction. Internal printed names are incidental; the mathematical relationship and the supported primitive boundary are what you need to understand.
 
 ### Check your starting point
 

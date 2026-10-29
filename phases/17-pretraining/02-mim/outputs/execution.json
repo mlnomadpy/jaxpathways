@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "pretraining-02",
-  "contentHash": "8e65358ea9ca267d917afa6b658a55bcbd94bd7bd6ba025993ed3aca34a3f432",
-  "executedAt": "2026-10-21T16:11:16.467187+00:00",
+  "contentHash": "73d31dacc666bdee272ddcec4075ddd1d7527840373277ee189f15639d9aa4b3",
+  "executedAt": "2026-10-27T16:11:36.532627+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -11,7 +11,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Masked pixel MSE initial/final/held amplitudes: 0.5538085699081421 0.0016928859986364841 0.0011766081443056464\nMasked pixel MSE initial/final/held amplitudes: 0.5538085699081421 0.0016928859986364841 0.0011766081443056464\nHidden MSE unchanged; full-image MSE is large.\nAmbiguous target MSE at predictions 0, 1, 2: 2, 1, 2\nBottom-right patch order verified.\nThe zero-loss shortcut receives hidden pixels; the real features contain only eight visible pixels and a bias.\nAll rectangular RGB patches agree; hidden-pixel intervention preserves visible features.\nPASS: pretraining-02\n",
+  "stdout": "Masked pixel MSE initial/final/held amplitudes: 0.5538085699081421 0.0016928859986364841 0.0011766081443056464\nMIM held-out alternating-mask losses / visible-mean baseline / frozen held-out probe accuracy: [0.03627391159534454, 0.03820060193538666] [0.008789061568677425, 0.02441406063735485] 0.75\nArtifact path: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jaxpathways-mim-encoder-0t1v0vg6/encoder.npz\nIdentity sidecar: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jaxpathways-mim-encoder-0t1v0vg6/identity.json\nSaved identity: tiny-mask-aware-patch-encoder-v1 gray-4x4-range-raw-patchify-2-v1 synthetic-amplitude-v2:g0-g3/g4-g7\nMasked pixel MSE initial/final/held amplitudes: 0.5538085699081421 0.0016928859986364841 0.0011766081443056464\nHidden MSE unchanged; full-image MSE is large.\nAmbiguous target MSE at predictions 0, 1, 2: 2, 1, 2\nMIM held-out alternating-mask losses / visible-mean baseline / frozen held-out probe accuracy: [0.03627391159534454, 0.03820060193538666] [0.008789061568677425, 0.02441406063735485] 0.75\nArtifact path: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jaxpathways-mim-encoder-g6k19gdx/encoder.npz\nIdentity sidecar: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jaxpathways-mim-encoder-g6k19gdx/identity.json\nSaved identity: tiny-mask-aware-patch-encoder-v1 gray-4x4-range-raw-patchify-2-v1 synthetic-amplitude-v2:g0-g3/g4-g7\nBottom-right patch order verified.\nThe zero-loss shortcut receives hidden pixels; the real features contain only eight visible pixels and a bias.\nAll rectangular RGB patches agree; hidden-pixel intervention preserves visible features.\nPASS: pretraining-02\n",
   "notebookCells": [
     {
       "sourceHash": "03903b2a4d9f849f4fe7d08a234558a43f9536d0934e700820268d2cbdb16963",
@@ -34,6 +34,21 @@
       ]
     },
     {
+      "sourceHash": "6eafaa63a6a331779139b0bddbe41572f609e2d2cfd449c188810f16200c66b7",
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "MIM held-out alternating-mask losses / visible-mean baseline / frozen held-out probe accuracy: [0.03627391159534454, 0.03820060193538666] [0.008789061568677425, 0.02441406063735485] 0.75\n",
+            "Artifact path: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jaxpathways-mim-encoder-mu81eweu/encoder.npz\n",
+            "Identity sidecar: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jaxpathways-mim-encoder-mu81eweu/identity.json\n",
+            "Saved identity: tiny-mask-aware-patch-encoder-v1 gray-4x4-range-raw-patchify-2-v1 synthetic-amplitude-v2:g0-g3/g4-g7\n"
+          ]
+        }
+      ]
+    },
+    {
       "sourceHash": "d9e7db9aee42a8dff07d16e6296fd81c2c597ed967c53c59db1f7a390660e4bc",
       "outputs": [
         {
@@ -50,7 +65,7 @@
       "outputs": []
     },
     {
-      "sourceHash": "25df6d662f9d3f0c4e984c6a201f79fa0cfd7a2633dc4b0773dfba6c2dd4ee6c",
+      "sourceHash": "53dc08a479da44f2b1718bf964cd5c4d3e3305811c536df9d501b1833a6e3476",
       "outputs": [
         {
           "output_type": "display_data",
@@ -84,6 +99,21 @@
           "name": "stdout",
           "text": [
             "Ambiguous target MSE at predictions 0, 1, 2: 2, 1, 2\n"
+          ]
+        }
+      ]
+    },
+    {
+      "sourceHash": "6eafaa63a6a331779139b0bddbe41572f609e2d2cfd449c188810f16200c66b7",
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "MIM held-out alternating-mask losses / visible-mean baseline / frozen held-out probe accuracy: [0.03627391159534454, 0.03820060193538666] [0.008789061568677425, 0.02441406063735485] 0.75\n",
+            "Artifact path: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jaxpathways-mim-encoder-1wjw0jv8/encoder.npz\n",
+            "Identity sidecar: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jaxpathways-mim-encoder-1wjw0jv8/identity.json\n",
+            "Saved identity: tiny-mask-aware-patch-encoder-v1 gray-4x4-range-raw-patchify-2-v1 synthetic-amplitude-v2:g0-g3/g4-g7\n"
           ]
         }
       ]

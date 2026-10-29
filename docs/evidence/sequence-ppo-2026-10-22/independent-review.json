@@ -1,0 +1,92 @@
+{
+  "bundle": {
+    "exact_source_and_extracted_bytes": true,
+    "members": 14,
+    "path": "/private/tmp/jaxpathways-sequence-ppo-review/public/downloads/posttraining-audit.zip",
+    "sha256": "54bb7a13c8a5fc150570d31ed87938f0487adfe6f89a507b20b4163b518b5eef",
+    "zip_check_path": "/private/tmp/jaxpathways-sequence-ppo-review/docs/evidence/sequence-ppo-2026-10-22/zip-content-check.json",
+    "zip_check_sha256": "1c257286362fd7a88f85eb2e32aa7adfe74a092cb4df14937fb04487112966db"
+  },
+  "independent_checks": {
+    "alternate_correct_candidate": "passed_with_python_loop_gae_and_equivalent_where_losses",
+    "black_26_5_1": "three_python_files_pass",
+    "distribution_checker": "pass",
+    "external_eos_bootstrap_candidate": "rejected_actual_advantages_1_6016_2_03_vs_1_148_1_4",
+    "external_old_refresh_candidate": "rejected_frozen_old_logp_hash_mismatch",
+    "external_timeout_no_bootstrap_candidate": "rejected_actual_advantages_0_4372_0_51_0_5_vs_0_810448_1_0284_1_22",
+    "figure_scalar_check": "eos_and_timeout_match_fixture",
+    "focused_browser_final_root_base": "desktop_and_mobile_2_of_2_pass",
+    "node_stage_and_figure_tests": "4_of_4_pass",
+    "raw_rollout_reconstruction": {
+      "eos": 61,
+      "heldout_reference_reward_mean": -0.9432687163352966,
+      "heldout_reward_mean": 5.345189392566681,
+      "heldout_sampled_kl_per_token_numpy": 0.28468582196749637,
+      "heldout_sequences": 8,
+      "heldout_valid_tokens": 27,
+      "heldout_visited_context_exact_kl_per_token_numpy": 0.19738259285956072,
+      "max_abs_error": 7.666349395307748e-07,
+      "pads": 70,
+      "timeouts": 67,
+      "updates": 16,
+      "valid_tokens": 442
+    },
+    "reference_all": "passed_preserved_stage4_and_sequence_stage5",
+    "signed_max_candidate": "rejected_actual_loss_minus_0_8_vs_expected_minus_0_4",
+    "untouched_starter": "rejected_at_gae_not_implemented"
+  },
+  "independent_evidence": {
+    "alternate_spelling": {
+      "path": "/private/tmp/sol-sequence-ppo-alt-independent/sequence-ppo-evidence.json",
+      "sha256": "43f9055ed5f365b62060cd732f600db13a3d6506b7ea1a34e4e90537de34b82a"
+    },
+    "reference": {
+      "path": "/private/tmp/sol-sequence-ppo-final-ref/sequence-ppo-evidence.json",
+      "sha256": "4aaa9741c6df9ece95bf8514309b208f5e936aa30d2ff35e8606705f2f46272f"
+    },
+    "six_todo_completed_starter": {
+      "path": "/private/tmp/sol-sequence-ppo-completed-starter-independent/sequence-ppo-evidence.json",
+      "sha256": "4b57b280ead0deb1dda2755fdb209e6bb3bfeb507cbb19e14a7e09db9e953fb8",
+      "starter_helper_asts_unchanged": 18,
+      "todo_bodies_changed": 6
+    }
+  },
+  "integration_files_sha256": {
+    "projects/posttraining-audit/README.md": "6d0d533f6339d783c00ce190f318ba826de2d7c41e8c43565953038fb8af1341",
+    "projects/posttraining-audit/figures/gae-eos-timeout-fixture.json": "c6d2b035cc7f7a9bc5671b995a10b557c538ddedb608212a93ec9aec9f4845dd",
+    "projects/posttraining-audit/figures/gae-eos-timeout.png": "dd482b636491063aae0bcbc8ea944657b95653ed4b0ffd45ab2aa31a81cc2db6",
+    "projects/posttraining-audit/figures/gae-eos-timeout.svg": "bc36b65eaa2c0c44ab5e90302bb60d691efbc346ac07df035168a885ee51f851",
+    "projects/posttraining-audit/figures/render_gae.py": "848e7cdf318de0fd7df7bcc7cb1d27820e411b19d5f18adf54ea7363c7990177",
+    "projects/posttraining-audit/project.json": "11bddb0c265087eecdc855d0990ede92df68d84932ce95baeff92da08c036721",
+    "projects/posttraining-audit/reference/sequence_ppo/recipe.json": "1c9053b83f36b24dfe6f765700e2fab9a51bee87f30c902e35102d11e7cedcc8",
+    "projects/posttraining-audit/requirements.txt": "5c78d55f74b1cc11c55e2bd84b093f7dfbe2dd3290cdf04799affd8e84885126",
+    "projects/posttraining-audit/solution/sequence_ppo.py": "792eb35048b6299b467bea4625caf8ec5716150a8d423efdf73c77dc8a08cb26",
+    "projects/posttraining-audit/starter/sequence_ppo.py": "2e512607f84e54ad90f9d8dfe79064ed0ee661ec9c58c5072dfc50cd55e7fbf9",
+    "projects/posttraining-audit/tests/check_sequence_ppo.py": "5320ad95be0bd58d00c8ce6010cdb8920661acaf5b88df5945666b5d7518a775"
+  },
+  "integration_root": "/private/tmp/jaxpathways-sequence-ppo-review",
+  "limits": [
+    "Synthetic fixed two-task fixture with shared task features across train and heldout prompt instances.",
+    "Policy and critic are small tables; no saved Transformer, human preference lineage, natural-language continuation, real-corpus quality or alignment claim.",
+    "Exact KL is categorical KL at sampled visited contexts, not full sequence-distribution divergence.",
+    "Timeout continuation is declared deterministic one-token fixture; its learned bootstrap is imperfect and does not qualify language continuation.",
+    "Acceptance is local source, learner contract, bundle and browser behavior only; no deployment, hosted or native-reader claim."
+  ],
+  "original_executable_files_sha256": {
+    "projects/posttraining-audit/reference/sequence_ppo/recipe.json": "1c9053b83f36b24dfe6f765700e2fab9a51bee87f30c902e35102d11e7cedcc8",
+    "projects/posttraining-audit/requirements.txt": "5c78d55f74b1cc11c55e2bd84b093f7dfbe2dd3290cdf04799affd8e84885126",
+    "projects/posttraining-audit/solution/sequence_ppo.py": "792eb35048b6299b467bea4625caf8ec5716150a8d423efdf73c77dc8a08cb26",
+    "projects/posttraining-audit/starter/sequence_ppo.py": "2e512607f84e54ad90f9d8dfe79064ed0ee661ec9c58c5072dfc50cd55e7fbf9",
+    "projects/posttraining-audit/tests/check_sequence_ppo.py": "5320ad95be0bd58d00c8ce6010cdb8920661acaf5b88df5945666b5d7518a775"
+  },
+  "original_source_root": "/Users/tahabsn/Documents/ChatGPT/jaxpathways",
+  "release_snapshot": {
+    "current_path": "/private/tmp/jaxpathways-sequence-ppo-review/curriculum/release-snapshots.json",
+    "current_sha256": "47cef24b8b6970a7aa1fed66c25f52602ae07d178dc9c5b2d6c8ee35a3b3fe80",
+    "old_rows_unchanged_after_json_decode": true,
+    "prior_22_path": "/private/tmp/jaxpathways-v016-prior-snapshots.json",
+    "prior_22_sha256": "ea77a476611d5559891d80abeb381d2c5256e1f964e15b0b8063a20518932fa4"
+  },
+  "schema": "sol-sequence-ppo-v016-independent-review-v1",
+  "verdict": "accepted_bounded_synthetic_cpu_stage_and_local_site_package"
+}

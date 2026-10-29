@@ -1,0 +1,59 @@
+{
+  "amendment": {
+    "acceptance_boundary": "The amendment proves the focused checker behavior only. The final8 pass remains historical evidence bound to its original checker hash; current checker must run in the later pinned CI job before publication.",
+    "changed_source_files": {
+      "tests/check.py": {
+        "current_sha256": "6f8f2b360f0a306508b6c658256cbac91195e4e665ad29741bafbcd7bc618aeb",
+        "historical_sha256": "ea60a601024e75851a9a5fcbb0698a26e01fabbb8fab04e65daad8f76b3bd3d1"
+      }
+    },
+    "checker_path": "tests/check.py",
+    "current_checker_sha256": "6f8f2b360f0a306508b6c658256cbac91195e4e665ad29741bafbcd7bc618aeb",
+    "full_checker_rerun_for_amended_hash": false,
+    "historical_checker_sha256": "ea60a601024e75851a9a5fcbb0698a26e01fabbb8fab04e65daad8f76b3bd3d1",
+    "model_and_data_unchanged": true,
+    "recipe_and_historical_run_artifacts_unchanged": true,
+    "source_diff": {
+      "after": "Mutation source is the owned project model.py reference fixture. Its mutation is run with reference parameters and compared with the independent float64 NumPy encoder oracle. Selected candidate grading remains the independent numerical forward comparison.",
+      "before": "Mutation source was the selected candidate file; checker required one exact softmax spelling and rejected equivalent learner implementations before numeric grading.",
+      "diff_hunk": "@@ attention mutation block @@\n-    candidate_source = Path(candidate_path).read_text(encoding=\"utf-8\")\n+    reference_path = PROJECT / \"model.py\"\n+    reference_source = reference_path.read_text(encoding=\"utf-8\")\n     softmax_source = \"weights = jax.nn.softmax(scores.astype(jnp.float32), axis=-1)\"\n-    if softmax_source not in candidate_source:\n-        raise AssertionError(\"candidate attention implementation is not inspectable\")\n-    uniform_source = candidate_source.replace(\n+    if softmax_source not in reference_source:\n+        raise AssertionError(\"owned reference fixture lacks its attention expression\")\n+    uniform_source = reference_source.replace(\n         softmax_source,\n         \"weights = safe_allowed.astype(jnp.float32) / \"\n         \"jnp.maximum(jnp.sum(safe_allowed.astype(jnp.float32), axis=-1, keepdims=True), 1.0)\",\n         1,\n     )\n@@\n     uniform_path.write_text(uniform_source)\n     uniform_module, _ = _load_candidate(uniform_path)\n-    uniform_hidden = np.asarray(uniform_module.hidden_states(params, ids, config))\n-    if np.allclose(uniform_hidden, oracle_hidden, rtol=2e-5, atol=2e-6):\n+    reference_module, _ = _load_candidate(reference_path)\n+    reference_params = reference_module.initialize(jax.random.key(17), config)\n+    reference_ids = np.asarray(ids)\n+    reference_oracle = _numpy_encoder_oracle(\n+        reference_params, reference_ids, config\n+    )\n+    uniform_hidden = np.asarray(\n+        uniform_module.hidden_states(reference_params, ids, config)\n+    )\n+    if np.allclose(uniform_hidden, reference_oracle, rtol=2e-5, atol=2e-6):\n         raise AssertionError(\"NumPy oracle did not reject uniform masked attention\")",
+      "location": "tests/check.py::_check_model, attention mutation block"
+    },
+    "unchanged_source_files_sha256": {
+      "baseline.py": "9ae760fd52ed76acfac4131087fd25b09af0ad4b5b96b9594edc4e21d1f0749c",
+      "config.py": "e61e01ad3f56d2fbcdbed72874de727bd9038c042d0070c6b907f5d49fd06a49",
+      "data/LICENSES.md": "fe7d1ba6e253521377a66d0cfc9e5488b1f82545513050aa221fa248ba184625",
+      "data/RECIPE_AMENDMENTS.md": "d1383661680d17d8014c07a686574dd7cbf6ee95ee6873e573de0b417844af36",
+      "data/dataset.py": "de8a207682b9ce55a13868068df3854a50bc119d7a91ad754f1ed7662cdb797d",
+      "data/frozen_recipe.json": "70649244860d731f92d09e805b025e05a731dbef90463d62b0428d0cb7e21134",
+      "data/prepare.py": "533431a5f56ba51274e1f5169c4b7b9c51584698efa316fbb41ed6372b558f62",
+      "data/recipe-history/c01-original-pretraining-recipe.json": "c74bf0e06cc6dc6f8972c6fecae6c86ed03623f60cfa2b91cff9e141e002e5a3",
+      "evaluation.py": "ba3c22efb2eb0ea8ed8afef012c329eb185a39dda84c629b27b81308d3d2dced",
+      "model.py": "0d50093ea497730be48007265b3db25b9044fa13b88a4485cfce7e4c45266f90",
+      "objectives.py": "b6970a4015c6646b39b89f77c129e37b2c8ce0a6f612bdddd9074d86f3239738",
+      "package_runtime.py": "1ab45e32baa18b05af7c651a9c81001b0846e9c8ec5302c88390730a78f60f57",
+      "plots.py": "6c0a67da4e5a6f1510ddcbd081715d54de6419571fd11df6c531a685679cd5f4",
+      "requirements-embedding-lock.txt": "ca59464c7c5e6ef56b7a952d26d6d97de7612e378ab70876dac17d91f1f265d3",
+      "requirements-embedding.txt": "f83afe66ff40961b580b6c40cf19b35c1f222f037f4148d12b56c26111dd3008",
+      "run.py": "d00008fec0cc11170e5253e4285ed2c4d2412f429204e696430022896455e55e",
+      "tests/resume_worker.py": "8ee26a7370d73e9a982beae059f7f7d4a51efc9b6f419d8e1ffeaf52bbb5a562",
+      "trainer.py": "8b40db81209571d48e209d983e04879f502ce65031bc51152c978f7944608f90"
+    }
+  },
+  "focused_checks": {
+    "command": "/private/tmp/jaxpathways-embedding-c01-env/bin/python - <<'PY'\nimport importlib.util\nfrom pathlib import Path\nimport tempfile\ncheck_path = Path(\"projects/embedding-model-300m/tests/check.py\").resolve()\nspec = importlib.util.spec_from_file_location(\"c01_check_focus\", check_path)\ncheck = importlib.util.module_from_spec(spec)\nspec.loader.exec_module(check)\nreference = check.PROJECT / \"model.py\"\ncheck._check_model(check._load_candidate(reference))\nsource = reference.read_text()\nold = \"weights = jax.nn.softmax(scores.astype(jnp.float32), axis=-1)\"\nassert old in source\nnew = \"attention_probability = jax.nn.softmax(\\n            scores.astype(jnp.float32), axis=-1\\n        )\\n        weights = attention_probability\"\nrenamed = Path(tempfile.mkdtemp()) / \"equivalent_attention.py\"\nrenamed.write_text(source.replace(old, new, 1))\ncheck._check_model(check._load_candidate(renamed))\nuniform = \"weights = safe_allowed.astype(jnp.float32) / jnp.maximum(\\n            jnp.sum(safe_allowed.astype(jnp.float32), axis=-1, keepdims=True), 1.0\\n        )\"\nmutant = Path(tempfile.mkdtemp()) / \"uniform_attention.py\"\nmutant.write_text(source.replace(old, uniform, 1))\ntry:\n    check._check_model(check._load_candidate(mutant))\nexcept AssertionError:\n    pass\nelse:\n    raise SystemExit(\"uniform-attention mutant unexpectedly passed\")\nprint(\"reference PASS; equivalent renamed/formatted candidate PASS; uniform-attention mutant REJECTED\")\nPY",
+    "observed_result": "Reference candidate passed; equivalent candidate with a renamed intermediate and multiline softmax passed; uniform-attention mutant was rejected by the NumPy forward oracle with mismatches across 160 of 192 hidden-state elements.",
+    "syntax_check": "python3 -m py_compile projects/embedding-model-300m/tests/check.py passed."
+  },
+  "historical_full_run": {
+    "checker_sha256_at_run_time": "ea60a601024e75851a9a5fcbb0698a26e01fabbb8fab04e65daad8f76b3bd3d1",
+    "independent_check_record": "/private/tmp/jaxpathways-embedding-c01-check-final8/independent-check.json",
+    "independent_check_sha256": "faa4691334e6cbf73a6dafa35617efb50aa75674c45becdea2670f2fd561bf90",
+    "result": "pass",
+    "run_directory": "/private/tmp/jaxpathways-embedding-c01-check-final8/full-run",
+    "scope": "Complete C01 pilot and checker execution under the historical checker source hash above.",
+    "sourcebound_receipt_sha256": "514287dcfd125d3127f93c43d0c20540b6325c9d4d39f4a803ea2fa57aa942b8"
+  },
+  "purpose": "Document a checker-only correction without relabeling historical final8 outputs as having been produced by the amended checker.",
+  "schema": "jaxpathways.embedding-c01.checker-amendment.v1"
+}

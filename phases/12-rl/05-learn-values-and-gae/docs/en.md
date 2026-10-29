@@ -4,26 +4,38 @@ Phase 12: Reinforcement learning · about 45 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Evaluate agents across seeds](https://www.tahabouhsine.com/jaxpathways/lesson-rl-04.html).
+
 ## What you will be able to do
 
-- Fit a tabular value function from actual rollout observations and masked return targets, and report its error before and after optimization.
+- Fit a tabular value function to sampled discounted returns using gamma=0.9 over the finite horizon of at most eight actions, and report its error before and after optimization.
 - Compute generalized advantages with a reverse scan over time and an independently hand-calculated multi-step example.
 - Use the retained final observation to bootstrap a continuing task cutoff while stopping the trace across episode resets.
 - Explain why the existing finite-horizon REINFORCE/PPO objective opts out of time-limit bootstrapping.
 
 ## The problem
 
-A policy-gradient update needs an estimate of how much better an action was than its state baseline. How can we learn that baseline from the same retained rollout, and what must happen to its target at a true terminal versus a collector time limit?
+For a finite task lasting at most eight actions, how can a tabular critic estimate the expected discounted return with gamma=0.9 from sampled trajectories? We will fit the table to those same discounted targets, then compute GAE with the same discount. At a true terminal there is no bootstrap; a collector cutoff in a continuing task can bootstrap from the final pre-reset observation while stopping the trace.
 
 ## The idea
 
-Fit a small value table to returns observed in genuine trajectories, then compute GAE by combining one-step TD residuals with a reverse scan. Keep bootstrap permission and trace continuation as separate masks: a continuing-task cutoff can use the final pre-reset state value, while the trace must stop before the reset episode.
+The table minimizes masked squared error to sampled discounted returns G_t = r_t + 0.9 r_(t+1) + ... through the episode end, over at most eight actions. GAE uses gamma=0.9 and lambda=0.95. This critic target matches that discount. The position-only table remains an approximation because position omits remaining time and sampled stochastic returns vary. A lower critic loss describes fit to these targets; by itself it says nothing about policy improvement.
 
 ## One retained transition has two observations
 
-For each action, keep the observation used to choose it and the actual observation returned by the transition. In the corridor collector these are `observation` and `next_observation`; the latter is saved before any reset. At a time limit, the row after the cutoff may begin a new episode at position 0 even though the final observation from the cutoff was position 3. A critic must evaluate position 3 for the bootstrap. The reset observation belongs to the next transition, not the previous transition's target.
+A transition records the state used to choose the action and the actual next state returned by `step`. At an external cutoff, the collector may next reset to position 0 even though the cutoff transition ended at position 3; keep that final pre-reset `next_observation` for a continuing-task bootstrap.
 
-The value table has one trainable scalar for each of the four positions. We fit it by minimizing squared error to sampled reward-to-go on live rows. Padding rows stay in the array for a fixed shape but contribute neither loss nor gradient. The fit is a real optimization over sampled trajectories; noisy returns mean the final error should fall without reaching zero.
+Keep four quantities distinct: reward is one transition's $r_t$; return is the future reward sum (here discounted with $\gamma=0.9$); value $V(s)$ is the expected return from a state; advantage estimates how much better this action's outcome was than that state baseline. The fitted four-position table approximates expected discounted return from sampled live rows, so noisy targets and omitted time remaining leave residual error. Padding remains in the fixed array but contributes no loss.
+
+### A cutoff bootstraps value but stops reverse GAE
+
+**Predict:** If the collector cutoff is the task’s true finite deadline, which bootstrap term and advantage values change?
+
+![A cutoff bootstraps value but stops reverse GAE](../outputs/mechanism.svg)
+
+*Deterministic hand fixture with gamma=0.5 and lambda=0.5; the critic loss plot separately uses gamma=0.9 discounted targets.*
+
+Read the graph left to right as $t=0: s_0=0\to s_1=1, r_0=1$ then $t=1: s_1=1\to s_2=3, r_1=2$; the reverse arrow points from the second residual back to the first with coefficient $\gamma\lambda=0.25$. For this diagram only, $\gamma=\lambda=0.5$: continuing cutoff gives $\delta_1=A_1=3$, then $A_0=1.75$; making it the finite deadline removes $\gamma V(3)=2$, giving $\delta_1=1$ and $A_0=1.25$. The trace mask is zero in both cases, isolating reset episode $t=2, s_2=0$. A true terminal also has bootstrap mask zero. Predict which number changes if the collector cutoff is reclassified as the task deadline: the bootstrap contribution changes, while the trace boundary stays closed. The critic-fit plot elsewhere uses gamma=0.9.
 
 ### Pause and reason
 
@@ -37,9 +49,7 @@ Use position 3, the actual transition result retained in `next_observation`. Pos
 
 ## Bootstrapping and trace continuation answer different questions
 
-A true terminal state has no future value, so its bootstrap mask is zero. A collector cutoff in a continuing task still has future value, so it can bootstrap from the final pre-reset observation. In both cases the recursive trace stops at the boundary. Otherwise an advantage from the new episode would flow backward through a reset. Padding also has a zero mask and contributes no value loss.
-
-The project has a finite action budget: its objective is reward accumulated within those eight actions. For that objective, the horizon has no future value, so use `bootstrap_on_truncation=False`. Set it true only when truncation means the collector stopped a continuing task whose process would otherwise continue.
+A bootstrap mask answers whether the next state has future value; a trace mask answers whether reverse GAE may carry later residuals across this transition. A true terminal has bootstrap mask 0. A continuing collector cutoff has bootstrap mask 1 from the final pre-reset observation, but trace mask 0 so the next episode cannot leak backward. The finite task's own eight-action deadline has no objective beyond it, so its bootstrap mask is also 0. Reset only after saving the final observation.
 
 $$
 \delta_t = r_t + \gamma\,m_t^{\mathrm{boot}} V(s_{t+1}) - V(s_t) \quad A_t = \delta_t + \gamma\lambda\,m_t^{\mathrm{trace}} A_{t+1}
@@ -47,15 +57,15 @@ $$
 
 ## Work the reverse scan by hand
 
-Let $\gamma=0.5$, $\lambda=0.5$, and let $V(0)=0.5$, $V(1)=1$, $V(2)=2$, $V(3)=4$. The first transition has reward 1 from position 0 to 1, so $\delta_0=1+0.5(1)-0.5=1$. The second has reward 2 from position 1 and is cut off at final position 3, so $\delta_1=2+0.5(4)-1=3$. It bootstraps from position 3 but ends the trace. Thus $A_1=3$, then $A_0=1+0.5(0.5)(3)=1.75$. The reset observation in the next row is position 0 and has no effect on either value.
+Use the diagram's separate hand fixture, with $\gamma=0.5$, $\lambda=0.5$, and values $V(0)=0.5$, $V(1)=1$, $V(3)=4$. The first transition has reward 1, so $\delta_0=1+0.5\cdot 1-0.5=1$. The cutoff transition has reward 2: for a continuing collector, $\delta_1=2+0.5\cdot 4-1=3$, and the trace stops at that boundary, so $A_1=3$ and $A_0=1+0.25\cdot 3=1.75$. At a finite deadline, remove the bootstrap term: $\delta_1=1$ and $A_0=1.25$. A reset episode's advantage never flows into this reverse scan. This is not the separate $\gamma=0.9$ critic-fit rollout.
 
 ## A lower fit error is evidence of optimization, not policy quality
 
-The fitted table estimates average sampled return for each observed position. It cannot represent time remaining, and it cannot predict the random outcome of an individual trajectory exactly. Read the error plot as training evidence for this small critic. It does not establish that a policy improved, that a neural critic works, or that a continuous-control agent is effective. To test policy improvement, the value estimate must be connected to an actor update and evaluated under held-out conditions.
+The critic-fit plot measures masked mean-squared error on gamma=0.9 discounted returns. The four position values cannot encode remaining time, and sampled returns differ, so a decreasing loss need not reach zero. A value estimate is not the realized return; an advantage is a return or TD-based estimate minus a value baseline. Fitting that baseline may reduce policy-gradient estimator variance, but this lesson does not add an actor update. To claim policy improvement, update an actor and evaluate it on held-out episodes.
 
 ## Define the rollout and return target
 
-Import the local CPU dependencies, define the fixed-shape collector, and retain each transition’s actual next observation. Add the finite-horizon reward-to-go helper.
+Import the local CPU dependencies, define the fixed-shape collector, and retain each transition’s actual next observation. Add the finite-horizon discounted-return helper with gamma=0.9.
 
 ```python
 import jax
@@ -97,9 +107,11 @@ def rollout(theta, key, batch_size=512, horizon=8):
     final_state, records = jax.lax.scan(collect, (position, elapsed, done), time_keys)
     return final_state, records
 
-def returns_to_go(rewards):
-    """Compute undiscounted finite-horizon returns along the time axis."""
-    return jnp.cumsum(rewards[::-1], axis=0)[::-1]
+def discounted_returns_to_go(rewards, gamma):
+    """Compute finite-horizon discounted returns along the time axis."""
+    discounts = gamma ** jnp.arange(rewards.shape[0], dtype=rewards.dtype)
+    weighted = rewards * discounts.reshape((-1,) + (1,) * (rewards.ndim - 1))
+    return jnp.cumsum(weighted[::-1], axis=0)[::-1] / discounts.reshape((-1,) + (1,) * (rewards.ndim - 1))
 ```
 
 The collector stores `next_observation` before any reset and returns time-major records. No repository module is needed.
@@ -178,7 +190,7 @@ Collect seed 313 data, compute return targets, fit the table for 250 updates, an
 
 ```python
 _, rollout_records = rollout(theta, jax.random.key(313), batch_size=512, horizon=8)
-targets = returns_to_go(rollout_records["reward"])
+targets = discounted_returns_to_go(rollout_records["reward"], gamma=.9)
 
 value_table, loss_history = fit_value_function(rollout_records, targets)
 
@@ -255,9 +267,11 @@ def rollout(theta, key, batch_size=512, horizon=8):
     final_state, records = jax.lax.scan(collect, (position, elapsed, done), time_keys)
     return final_state, records
 
-def returns_to_go(rewards):
-    """Compute undiscounted finite-horizon returns along the time axis."""
-    return jnp.cumsum(rewards[::-1], axis=0)[::-1]
+def discounted_returns_to_go(rewards, gamma):
+    """Compute finite-horizon discounted returns along the time axis."""
+    discounts = gamma ** jnp.arange(rewards.shape[0], dtype=rewards.dtype)
+    weighted = rewards * discounts.reshape((-1,) + (1,) * (rewards.ndim - 1))
+    return jnp.cumsum(weighted[::-1], axis=0)[::-1] / discounts.reshape((-1,) + (1,) * (rewards.ndim - 1))
 
 def value_loss(value_table, records, targets):
     """Masked MSE with fixed targets and padding sanitized before arithmetic."""
@@ -312,7 +326,7 @@ def generalized_advantage_estimate(records, value_table, gamma=.9, lam=.95,
 theta = jnp.array([-.7, .3, 1.1])
 
 _, rollout_records = rollout(theta, jax.random.key(313), batch_size=512, horizon=8)
-targets = returns_to_go(rollout_records["reward"])
+targets = discounted_returns_to_go(rollout_records["reward"], gamma=.9)
 
 value_table, loss_history = fit_value_function(rollout_records, targets)
 
@@ -348,11 +362,11 @@ Expected: A four-entry value table, its retained masked-MSE history, and time-ma
 
 ### Read the figure
 
-The line plots the masked mean-squared error after each gradient update on 512 episodes collected with seed 313. It falls from about 0.4651 to 0.2179. The residual error is expected because the four-entry table predicts a mean and the returns are stochastic. This plot measures critic fit only.
+The x-axis is value-table gradient update; the y-axis is masked mean-squared error on 512 retained episodes (seed 313). For discounted targets with $\gamma=0.9$, the plotted training error falls from about 0.3258 to 0.1359. Compare the first and last points to predict the direction of change; the remaining error is plausible because the four-entry position table omits time remaining and sampled returns vary. This curve measures critic fit, not episode return or policy quality.
 
 ### Connect it to the computation
 
-Every plotted point comes from `fit_value_function` on retained rollout data. The task's existing policy objectives and their exact-return evaluation remain separate; the critic extension has no continuous-control or actor-improvement claim.
+Each plotted point is produced by `fit_value_function` on the retained rollout and its gamma=0.9 targets. The separate hand-computed diagram uses gamma=0.5 and lambda=0.5 to expose bootstrap and trace masks; do not transfer its numerical advantages to this plot. Lower fit error says the table follows its training targets more closely, not that an actor improved. The existing policy objectives and exact-return evaluation remain separate.
 
 ```python
 visual_data = {'kind':'line','x':list(range(len(loss_history))),'xlabel':'gradient updates','ylabel':'masked value prediction MSE','series':[{'label':'sampled rollout, seed 313','y':np.asarray(loss_history).tolist()}]}
@@ -360,33 +374,57 @@ visual_data = {'kind':'line','x':list(range(len(loss_history))),'xlabel':'gradie
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:12:42.154594+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:14:29.636026+00:00. JAX 0.9.2.
 
 ```text
-initial / final masked value MSE: 0.4650774896144867 0.21788980066776276
-fitted V(position 0..3): [0.2825 0.5563 0.8614 0.    ]
-initial / final masked value MSE: 0.4650774896144867 0.21788980066776276
-fitted V(position 0..3): [0.2825 0.5563 0.8614 0.    ]
+initial / final masked value MSE: 0.3257838487625122 0.13587723672389984
+fitted V(position 0..3): [0.1953 0.4592 0.8403 0.    ]
+initial / final masked value MSE: 0.3257838487625122 0.13587723672389984
+fitted V(position 0..3): [0.1953 0.4592 0.8403 0.    ]
 GAE shape: (8, 512) all finite: True
-initial / final masked value MSE: 0.4650774896144867 0.21788980066776276
-fitted V(position 0..3): [0.2825 0.5563 0.8614 0.    ]
-initial / final masked value MSE: 0.4650774896144867 0.21788980066776276
-fitted V(position 0..3): [0.2825 0.5563 0.8614 0.    ]
+initial / final masked value MSE: 0.3257838487625122 0.13587723672389984
+fitted V(position 0..3): [0.1953 0.4592 0.8403 0.    ]
+initial / final masked value MSE: 0.3257838487625122 0.13587723672389984
+fitted V(position 0..3): [0.1953 0.4592 0.8403 0.    ]
 GAE shape: (8, 512) all finite: True
+undiscounted / matched / terminal / continuing-cutoff: [np.float64(-0.10000000000000009), np.float64(0.0), np.float64(0.0), 4.6]
 cutoff residual: 3.0
-initial / final MSE: 0.4650774896144867 0.21788980066776276
-V table: [0.2824999988079071, 0.5562999844551086, 0.8614000082015991, 0.0]
-seed 313 initial/final MSE: 0.4650774896144867 0.21788980066776276
-seed 313 fitted table: [0.2824999988079071, 0.5562999844551086, 0.8614000082015991, 0.0]
-seed 314 initial/final MSE: 0.4813799560070038 0.22098885476589203
-seed 314 fitted table: [0.29679998755455017, 0.5572999715805054, 0.8467000126838684, 0.0]
+initial / final MSE: 0.3257838487625122 0.13587723672389984
+V table: [0.19529999792575836, 0.459199994802475, 0.8403000235557556, 0.0]
+seed 313 initial/final MSE: 0.3257838487625122 0.13587723672389984
+seed 313 fitted table: [0.19529999792575836, 0.459199994802475, 0.8403000235557556, 0.0]
+seed 314 initial/final MSE: 0.33639785647392273 0.13899469375610352
+seed 314 fitted table: [0.20389999449253082, 0.45910000801086426, 0.8177000284194946, 0.0]
 continuing cutoff GAE: [1.75, 3.0, 0.0]
-finite-horizon GAE: [1.25, 1.0, -0.5]
+finite-horizon GAE: [1.25, 1.0, 0.0]
 cutoff / reset / terminal residual: 3.0 1.25 1.0
 finite-horizon/cutoff GAE at first transition: 1.25 1.75
 PASS: rl-05
 
 ```
+
+## Match value targets to the GAE discount
+
+**Predict before running:** For rewards [1,1], gamma=0.9, and terminal V=0, compare TD residuals for undiscounted values [2,1,0] and discounted values [1.9,1,0]. What residual does a continuing-task cutoff produce when reward=2, current V=1, and final pre-reset V=4?
+
+```python
+gamma = .9
+rewards = np.array([1., 1.])
+undiscounted_v = np.array([2., 1., 0.])
+discounted_v = np.array([1.9, 1., 0.])
+undiscounted_delta = rewards[0] + gamma * undiscounted_v[1] - undiscounted_v[0]
+discounted_delta = rewards[0] + gamma * discounted_v[1] - discounted_v[0]
+terminal_delta = rewards[1] + gamma * 0. - discounted_v[1]
+cutoff_delta = 2. + gamma * 4. - 1.
+np.testing.assert_allclose([undiscounted_delta, terminal_delta], [-.1, 0.])
+np.testing.assert_allclose([discounted_delta, terminal_delta], [0., 0.])
+np.testing.assert_allclose(cutoff_delta, 4.6)
+print("undiscounted / matched / terminal / continuing-cutoff:", [undiscounted_delta, discounted_delta, terminal_delta, cutoff_delta])
+```
+
+**Expected:** Undiscounted-target residuals [-0.1, 0]; matched discounted-target residuals [0, 0]; continuing cutoff residual 4.6. A true terminal uses zero bootstrap.
+
+The TD target uses the same gamma as the value objective. At a true terminal the bootstrap is zero. At an external cutoff of a continuing task, use the retained final pre-reset value; the GAE trace still stops at that boundary.
 
 ## Predict the time-limit target
 
@@ -410,39 +448,41 @@ The old episode's final observation supplies the next value. The reset state in 
 
 ```python
 _, value_records = rollout(jnp.array([-.7,.3,1.1]), jax.random.key(313), 512, 8)
-value_targets = returns_to_go(value_records['reward'])
+value_targets = discounted_returns_to_go(value_records['reward'], gamma=.9)
 value_table, value_history = fit_value_function(value_records, value_targets, 250, .1)
 assert value_history[-1] < value_history[0] * .7
 print('initial / final MSE:', float(value_history[0]), float(value_history[-1]))
 print('V table:', np.asarray(value_table).round(4).tolist())
 ```
 
-**Expected:** CPU JAX 0.9.2, seed 313: initial MSE 0.465077; final MSE 0.217890; fitted values [0.2825, 0.5563, 0.8614, 0.0].
+**Expected:** CPU JAX 0.9.2, seed 313: initial MSE 0.325784; final MSE 0.135877; fitted values [0.1953, 0.4592, 0.8403, 0.0].
 
 The loss falls through gradient updates on actual sampled episodes. It remains positive because a four-state table cannot predict the stochastic return of every individual trajectory.
 
 ## Make it yours
 
-Change the collection key from 313 to 314. Before running, predict which of the fitted values and final MSE should remain identical. Then retain both error histories and explain why changed trajectories should change the fitted table.
+The task lasts at most eight actions and the value target is discounted return with gamma=0.9, matching GAE gamma. Change the collection key from 313 to 314. Before running, predict which of the fitted values and final MSE should remain identical. Then retain both error histories and explain why changed trajectories should change the fitted table.
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
 **Inputs:**
 - A policy, an explicit collection key, and a retained rollout with `observation`, `next_observation`, and `active`.
 - A changed collection key 314 after the recorded seed 313 run.
-- The project’s return-to-go and value-fit functions.
+- The gamma=0.9 discounted-return and value-fit functions.
 
 **Outputs:**
-- The fitted four-state value table and initial/per-update masked-MSE history.
+- The fitted four-state value table and initial/per-update masked-MSE history for discounted targets.
 - A comparison that keeps both seed-specific fits visible.
 
 **Invariants to check:**
 - Only active transitions contribute to value loss.
+- The value target discounts rewards with gamma=0.9, the same discount used by GAE.
 - The fit uses sampled rollout targets and reports real optimization error.
 - Different collection keys can produce different trajectories and fitted values.
 
 **Hints:**
 - Build targets from the collected reward array.
+- Use gamma=.9 in both the discounted return targets and the GAE call.
 - Keep the retained `next_observation` for the later GAE step.
 - Compare final errors without expecting stochastic targets to produce zero error.
 
@@ -452,7 +492,7 @@ Change the collection key from 313 to 314. Before running, predict which of the 
 import jax
 import jax.numpy as jnp
 
-def fit_changed_rollout(theta, seed, rollout, returns_to_go, fit_value_function):
+def fit_changed_rollout(theta, seed, rollout, discounted_returns_to_go, fit_value_function):
     # TODO: collect a new rollout using the supplied seed
     final_state, records = ...
     # TODO: form targets and fit the state-value table
@@ -473,7 +513,7 @@ seed313_history = loss_history
 seed314_final_state, seed314_records = rollout(
     theta, jax.random.key(314), batch_size=512, horizon=8
 )
-seed314_targets = returns_to_go(seed314_records["reward"])
+seed314_targets = discounted_returns_to_go(seed314_records["reward"], gamma=.9)
 seed314_table, seed314_history = fit_value_function(
     seed314_records, seed314_targets, updates=250, learning_rate=.1
 )
@@ -512,6 +552,38 @@ print("seed 313 fitted table:", np.asarray(seed313_table).round(4).tolist())
 print("seed 314 initial/final MSE:", float(seed314_history[0]), float(seed314_history[-1]))
 print("seed 314 fitted table:", np.asarray(seed314_table).round(4).tolist())
 
+# Exact two-transition discount-mismatch example and boundary bootstrap check.
+gamma = .9
+rewards_np = np.array([1., 1.])
+undiscounted_v = np.array([2., 1., 0.])
+discounted_v = np.array([1.9, 1., 0.])
+undiscounted_deltas = np.array([
+    rewards_np[0] + gamma * undiscounted_v[1] - undiscounted_v[0],
+    rewards_np[1] + gamma * undiscounted_v[2] - undiscounted_v[1],
+])
+matched_deltas = np.array([
+    rewards_np[0] + gamma * discounted_v[1] - discounted_v[0],
+    rewards_np[1] + gamma * discounted_v[2] - discounted_v[1],
+])
+np.testing.assert_allclose(undiscounted_deltas, [-.1, 0.])
+np.testing.assert_allclose(matched_deltas, [0., 0.])
+terminal_delta = 2. + gamma * 0. - 1.
+continuing_cutoff_delta = 2. + gamma * 4. - 1.
+np.testing.assert_allclose([terminal_delta, continuing_cutoff_delta], [1., 4.6])
+terminal_records = {
+    "observation": jnp.array([[1]], dtype=jnp.int32),
+    "next_observation": jnp.array([[3]], dtype=jnp.int32),
+    "reward": jnp.array([[2.]]),
+    "active": jnp.array([[True]]),
+    "terminated": jnp.array([[True]]),
+    "truncated": jnp.array([[False]]),
+}
+terminal_advantage = generalized_advantage_estimate(
+    terminal_records, jnp.array([.5, 1., 2., 4.]), gamma=.9, lam=.95,
+    bootstrap_on_truncation=True
+)
+np.testing.assert_allclose(np.asarray(terminal_advantage), [[1.]], atol=1e-6)
+
 # Hand-check a two-transition episode followed by a reset observation.
 hand_table = jnp.array([.5, 1., 2., 4.])
 hand_records = {
@@ -520,7 +592,7 @@ hand_records = {
     "reward": jnp.array([[1.], [2.], [0.]]),
     "active": jnp.array([[True], [True], [True]]),
     "terminated": jnp.array([[False], [False], [False]]),
-    "truncated": jnp.array([[False], [True], [True]]),
+    "truncated": jnp.array([[False], [True], [False]]),
 }
 continuing_cutoff_advantages = generalized_advantage_estimate(
     hand_records, hand_table, gamma=.5, lam=.5, bootstrap_on_truncation=True
@@ -542,7 +614,7 @@ finite_horizon_advantages = generalized_advantage_estimate(
     hand_records, hand_table, gamma=.5, lam=.5, bootstrap_on_truncation=False
 )
 np.testing.assert_allclose(
-    np.asarray(finite_horizon_advantages[:, 0]), np.array([1.25, 1., -.5]), atol=1e-6
+    np.asarray(finite_horizon_advantages[:, 0]), np.array([1.25, 1., 0.]), atol=1e-6
 )
 print("continuing cutoff GAE:", np.asarray(continuing_cutoff_advantages[:, 0]).tolist())
 print("finite-horizon GAE:", np.asarray(finite_horizon_advantages[:, 0]).tolist())
@@ -659,13 +731,13 @@ finite_horizon_advantage = generalized_advantage_estimate(
 continuing_task_advantage = generalized_advantage_estimate(
     hand_records, hand_table, gamma=.5, lam=.5, bootstrap_on_truncation=True
 )
-np.testing.assert_allclose(np.asarray(finite_horizon_advantage[:, 0]), [1.25, 1., -.5], atol=1e-6)
+np.testing.assert_allclose(np.asarray(finite_horizon_advantage[:, 0]), [1.25, 1., 0.], atol=1e-6)
 np.testing.assert_allclose(np.asarray(continuing_task_advantage[:, 0]), [1.75, 3., 0.], atol=1e-6)
 assert not np.allclose(np.asarray(finite_horizon_advantage), np.asarray(continuing_task_advantage))
 print("finite-horizon/cutoff GAE at first transition:", float(finite_horizon_advantage[0, 0]), float(continuing_task_advantage[0, 0]))
 ```
 
-A boolean flag is not a substitute for declaring the task semantics; it chooses between two different objectives.
+A boolean flag is not a substitute for declaring the task semantics; it chooses between two different objectives. In this three-row hand fixture, the last row starts the next episode and has reward zero, current value $0.5$ and next value $1$. At discount $0.5$ its own residual is $0+0.5\cdot1-0.5=0$. It cannot propagate across the preceding reset boundary. The earlier row at the deadline uses no bootstrap under the finite-horizon contract.
 
 </details>
 
@@ -704,13 +776,13 @@ If the timeout target changes when the reset state changes, inspect whether the 
 
 ## Carry forward
 
-- Fit value predictions on live transitions and keep the sampled targets fixed during each critic update.
+- Fit value predictions on live transitions to sampled discounted returns using the same gamma as GAE, and keep targets fixed during each critic update.
 - Use the actual final observation for an external cutoff bootstrap, then stop the reverse trace at the reset boundary.
 - A true terminal suppresses bootstrap; a true finite-horizon deadline also has no future objective beyond the task horizon.
 
 ## Keep your evidence
 
-Keep two seed-specific learned value tables and loss histories, the pre-reset cutoff observation, independent terminal/cutoff calculations, and padding-mask checks.
+Keep the discounted target definition, seed-313/314 value tables and fit histories, independent two-transition TD residuals, terminal-versus-cutoff bootstrap/trace checks and a note on the position-only approximation. Critic-fit loss is not policy-improvement evidence.
 
 Save your predictions, modified code, terminal outputs, and reasoning in your engineering portfolio.
 

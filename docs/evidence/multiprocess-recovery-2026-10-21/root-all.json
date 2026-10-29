@@ -1,0 +1,949 @@
+{
+  "candidate": "/private/tmp/jaxpathways-reader-review-fix/projects/sharded-training/multiprocess/solution/model.py",
+  "candidate_sha256": "a7a7c1aca9009d284c41014ea1c6d1f5b7a9b4b1b60991491f5073f1a46ea8a5",
+  "equivalent_candidate": {
+    "math_passed": true,
+    "no_op_source_edit": "trailing comment",
+    "sha256": "b840ef314737c7c3ddf2cb130b6f5659abeeb0af00f058dfa94ab7978c3d12b3"
+  },
+  "math": {
+    "global_gradient": [
+      -0.9500000178813934,
+      -0.3999999761581421
+    ],
+    "loss_numerator": 0.48250002443790496,
+    "negative_controls": [
+      "local-mean",
+      "weight-only",
+      "stale-key",
+      "stale-cursor",
+      "duplicate-shard",
+      "missing-rank-early-commit"
+    ],
+    "next_momentum": [
+      -0.8540000200271607,
+      -0.45599997639656065
+    ],
+    "next_weights": [
+      0.342700012922287,
+      -0.1772000041604042
+    ]
+  },
+  "multiprocess": {
+    "approved_identity": {
+      "candidate": "/private/tmp/jaxpathways-reader-review-fix/projects/sharded-training/multiprocess/solution/model.py",
+      "candidate_sha256": "a7a7c1aca9009d284c41014ea1c6d1f5b7a9b4b1b60991491f5073f1a46ea8a5",
+      "data_sha256": "d038bc3ad53e64b8357963e185d1c0fe5a9c3745878526544e3c6e5b8c7ebcfa",
+      "experiment": {
+        "data_hash": "d038bc3ad53e64b8357963e185d1c0fe5a9c3745878526544e3c6e5b8c7ebcfa",
+        "learning_rate": 0.05,
+        "momentum_rate": 0.8,
+        "per_rank": 2,
+        "sampler": "sha256-key-epoch-id-sort-v1",
+        "schema": "l10b-multiprocess-v1",
+        "seed": 17,
+        "steps": 4,
+        "width": 2,
+        "world": 2
+      },
+      "runtime": {
+        "implementation": "CPython",
+        "jax": "0.9.2",
+        "jaxlib": "0.9.2",
+        "numpy": "2.4.4",
+        "python": "3.14.3"
+      },
+      "schema": "l10b-approved-experiment-identity-v2",
+      "source_hashes": {
+        "check.py": "f9ffbef4d9f38de45c0bff63f25119aec6e1cbcc5beaca635118f79f8c7e72ad",
+        "solution/model.py": "a7a7c1aca9009d284c41014ea1c6d1f5b7a9b4b1b60991491f5073f1a46ea8a5",
+        "starter/model.py": "166311a5dd9f47b77e0fdbed1cc4e116c4d0a96932fede3c7463f6af4770272d",
+        "supervisor.py": "30c0e9724565089e9796b8be39e6c763a3f874ad3fd8c9b8c8de0a877d1db330",
+        "worker.py": "f9838429d447308e54588c82523de0370e0525d92c748367e2a6fdccb94bbb03"
+      }
+    },
+    "candidate": "/private/tmp/jaxpathways-reader-review-fix/projects/sharded-training/multiprocess/solution/model.py",
+    "candidate_sha256": "a7a7c1aca9009d284c41014ea1c6d1f5b7a9b4b1b60991491f5073f1a46ea8a5",
+    "devices_per_process": 1,
+    "events": [
+      {
+        "kind": "uninterrupted_cluster",
+        "processes": {
+          "attempt_id": "c33d2e6050474ffdb546b9decb092da7",
+          "processes": [
+            {
+              "pid": 84038,
+              "rank": 0,
+              "returncode": 0
+            },
+            {
+              "pid": 84039,
+              "rank": 1,
+              "returncode": 0
+            }
+          ],
+          "rank_info": [
+            {
+              "attempt_id": "c33d2e6050474ffdb546b9decb092da7",
+              "backend": "cpu",
+              "global_device_count": 2,
+              "global_devices": [
+                "TFRT_CPU_0",
+                "TFRT_CPU_2048"
+              ],
+              "jax": "0.9.2",
+              "jaxlib": "0.9.2",
+              "local_device_count": 1,
+              "local_devices": [
+                "TFRT_CPU_0"
+              ],
+              "pid": 84038,
+              "process_count": 2,
+              "process_index": 0
+            },
+            {
+              "attempt_id": "c33d2e6050474ffdb546b9decb092da7",
+              "backend": "cpu",
+              "global_device_count": 2,
+              "global_devices": [
+                "TFRT_CPU_0",
+                "TFRT_CPU_2048"
+              ],
+              "jax": "0.9.2",
+              "jaxlib": "0.9.2",
+              "local_device_count": 1,
+              "local_devices": [
+                "TFRT_CPU_2048"
+              ],
+              "pid": 84039,
+              "process_count": 2,
+              "process_index": 1
+            }
+          ]
+        },
+        "verified": {
+          "candidate_sha256": "a7a7c1aca9009d284c41014ea1c6d1f5b7a9b4b1b60991491f5073f1a46ea8a5",
+          "current_generation": "attempts/c33d2e6050474ffdb546b9decb092da7/gen-0004",
+          "final_step": 4,
+          "momentum": [
+            -3.1627399921417236,
+            1.697509765625
+          ],
+          "weights": [
+            0.6384541392326355,
+            -0.31735193729400635
+          ],
+          "world": 2
+        }
+      },
+      {
+        "all_processes": [
+          {
+            "pid": 84113,
+            "rank": 0,
+            "returncode": -6
+          },
+          {
+            "pid": 84114,
+            "rank": 1,
+            "returncode": -9
+          }
+        ],
+        "attempt_id": "cef1d9e50921497f89b49def458c8a2e",
+        "kind": "observed_kill_after_commit",
+        "logs": {
+          "0": "E1021 15:26:07.302710 133095656 coordination_service.cc:1653] Shutdown barrier in coordination service has failed:\nDEADLINE_EXCEEDED: Barrier timed out. Id: Shutdown::13977362750750337988::0. This usually happens because a task triggered the barrier too early or too slowly. Please look at the task logs (both timed out and first task) to debug further.\n# of tasks that reached the barrier: 1/2.\nThe first task at the barrier: 0. Some timed out task names:\n1\n [type.googleapis.com/tensorflow.BarrierError='\\n\\x1eShutdown::13977362750750337988'] [type.googleapis.com/tensorflow.CoordinationServiceError='']\nThis suggests that the workers are out of sync. Either at least one worker (a) crashed early due to program error or scheduler events (e.g. preemption, eviction), (b) was too fast in its execution, or (c) too slow / hanging. Check the logs (both the program and scheduler events) for an earlier error to identify the root cause.\nE1021 15:26:07.302875 133095656 coordination_service.cc:1681] Use error polling to propagate the following error to all tasks: INTERNAL: Shutdown barrier has failed.\nBarrier result: 'DEADLINE_EXCEEDED: Barrier timed out. Id: Shutdown::13977362750750337988::0. This usually happens because a task triggered the barrier too early or too slowly. Please look at the task logs (both timed out and first task) to debug further.\n# of tasks that reached the barrier: 1/2.\nThe first task at the barrier: 0. Some timed out task names:\n1\n [type.googleapis.com/tensorflow.BarrierError='\\n\\x1eShutdown::13977362750750337988'] [type.googleapis.com/tensorflow.CoordinationServiceError=''] [type.googleapis.com/tensorflow.CoordinationServiceError='']\nE1021 15:26:07.303339 133095679 coordination_service_agent.cc:281] Polled an error from coordination service (this can be an error from this or another task).\nF1021 15:26:07.303436 133095679 client.h:80] Terminating process because the JAX distributed service detected fatal errors. This most likely indicates that another task died; see the other task logs for more details. Disable Python buffering, i.e. `python -u`, to be sure to see all the previous output. absl::Status: INTERNAL: Shutdown barrier has failed.\nBarrier result: 'DEADLINE_EXCEEDED: Barrier timed out. Id: Shutdown::13977362750750337988::0. This usually happens because a task triggered the barrier too early or too slowly. Please look at the task logs (both timed out and first task) to debug further.\n# of tasks that reached the barrier: 1/2.\nThe first task at the barrier: 0. Some timed out task names:\n1\n [type.googleapis.com/tensorflow.BarrierError='\\n\\x1eShutdown::13977362750750337988'] [type.googleapis.com/tensorflow.CoordinationServiceError='']\n\nRPC: /tensorflow.CoordinationService/PollForError [type.googleapis.com/tensorflow.CoordinationServiceError='']\n*** Check failure stack trace: ***\n    @        0x351f580a4  absl::lts_20250814::log_internal::LogMessage::Flush()\n    @        0x351fa1d40  std::__1::__function::__func<>::operator()()\n    @        0x34eab01fc  std::__1::__function::__func<>::operator()()\n    @        0x34eac70a8  xla::CoordinationServiceAgent::SetError()\n    @        0x34eacf454  std::__1::__function::__func<>::operator()()\n    @        0x34eab4a8c  tsl::RPCState<>::OnCompleted()\n    @        0x34eab3230  absl::lts_20250814::internal_any_invocable::LocalInvoker<>()\n    @        0x351e20064  tsl::(anonymous namespace)::PThread::ThreadFn()\n    @        0x183315c58  _pthread_start\n    @        0x183310c1c  thread_start\n",
+          "1": ""
+        },
+        "rank_info": [
+          {
+            "attempt_id": "cef1d9e50921497f89b49def458c8a2e",
+            "backend": "cpu",
+            "global_device_count": 2,
+            "global_devices": [
+              "TFRT_CPU_0",
+              "TFRT_CPU_2048"
+            ],
+            "jax": "0.9.2",
+            "jaxlib": "0.9.2",
+            "local_device_count": 1,
+            "local_devices": [
+              "TFRT_CPU_0"
+            ],
+            "pid": 84113,
+            "process_count": 2,
+            "process_index": 0
+          },
+          {
+            "attempt_id": "cef1d9e50921497f89b49def458c8a2e",
+            "backend": "cpu",
+            "global_device_count": 2,
+            "global_devices": [
+              "TFRT_CPU_0",
+              "TFRT_CPU_2048"
+            ],
+            "jax": "0.9.2",
+            "jaxlib": "0.9.2",
+            "local_device_count": 1,
+            "local_devices": [
+              "TFRT_CPU_2048"
+            ],
+            "pid": 84114,
+            "process_count": 2,
+            "process_index": 1
+          }
+        ],
+        "ready": {
+          "pid": 84113,
+          "step": 1
+        },
+        "stop_results": [
+          {
+            "pid": 84113,
+            "rank": 0,
+            "returncode": -6
+          },
+          {
+            "pid": 84114,
+            "rank": 1,
+            "returncode": -9
+          }
+        ],
+        "survivor_before_stop": {
+          "alive": true,
+          "pid": 84113,
+          "rank": 0
+        },
+        "termination": {
+          "pid": 84114,
+          "rank": 1,
+          "returncode": -9,
+          "signal": "SIGKILL"
+        }
+      },
+      {
+        "kind": "fresh_cluster_restore_after_commit",
+        "processes": {
+          "attempt_id": "79672a0016c0459b9e45a891a53d25d6",
+          "processes": [
+            {
+              "pid": 84460,
+              "rank": 0,
+              "returncode": 0
+            },
+            {
+              "pid": 84461,
+              "rank": 1,
+              "returncode": 0
+            }
+          ],
+          "rank_info": [
+            {
+              "attempt_id": "79672a0016c0459b9e45a891a53d25d6",
+              "backend": "cpu",
+              "global_device_count": 2,
+              "global_devices": [
+                "TFRT_CPU_0",
+                "TFRT_CPU_2048"
+              ],
+              "jax": "0.9.2",
+              "jaxlib": "0.9.2",
+              "local_device_count": 1,
+              "local_devices": [
+                "TFRT_CPU_0"
+              ],
+              "pid": 84460,
+              "process_count": 2,
+              "process_index": 0
+            },
+            {
+              "attempt_id": "79672a0016c0459b9e45a891a53d25d6",
+              "backend": "cpu",
+              "global_device_count": 2,
+              "global_devices": [
+                "TFRT_CPU_0",
+                "TFRT_CPU_2048"
+              ],
+              "jax": "0.9.2",
+              "jaxlib": "0.9.2",
+              "local_device_count": 1,
+              "local_devices": [
+                "TFRT_CPU_2048"
+              ],
+              "pid": 84461,
+              "process_count": 2,
+              "process_index": 1
+            }
+          ]
+        },
+        "verified": {
+          "candidate_sha256": "a7a7c1aca9009d284c41014ea1c6d1f5b7a9b4b1b60991491f5073f1a46ea8a5",
+          "current_generation": "attempts/79672a0016c0459b9e45a891a53d25d6/gen-0004",
+          "final_step": 4,
+          "momentum": [
+            -3.1627399921417236,
+            1.697509765625
+          ],
+          "weights": [
+            0.6384541392326355,
+            -0.31735193729400635
+          ],
+          "world": 2
+        }
+      },
+      {
+        "committed_attempt_id": "cfd52110a83c4e7284cae51620f2758e",
+        "committed_boundary": {
+          "pid": 84601,
+          "step": 1
+        },
+        "committed_processes": [
+          {
+            "pid": 84601,
+            "rank": 0,
+            "returncode": -6
+          },
+          {
+            "pid": 84603,
+            "rank": 1,
+            "returncode": -9
+          }
+        ],
+        "committed_rank1_kill": {
+          "pid": 84603,
+          "rank": 1,
+          "returncode": -9,
+          "signal": "SIGKILL"
+        },
+        "committed_rank_info": [
+          {
+            "attempt_id": "cfd52110a83c4e7284cae51620f2758e",
+            "backend": "cpu",
+            "global_device_count": 2,
+            "global_devices": [
+              "TFRT_CPU_0",
+              "TFRT_CPU_2048"
+            ],
+            "jax": "0.9.2",
+            "jaxlib": "0.9.2",
+            "local_device_count": 1,
+            "local_devices": [
+              "TFRT_CPU_0"
+            ],
+            "pid": 84601,
+            "process_count": 2,
+            "process_index": 0
+          },
+          {
+            "attempt_id": "cfd52110a83c4e7284cae51620f2758e",
+            "backend": "cpu",
+            "global_device_count": 2,
+            "global_devices": [
+              "TFRT_CPU_0",
+              "TFRT_CPU_2048"
+            ],
+            "jax": "0.9.2",
+            "jaxlib": "0.9.2",
+            "local_device_count": 1,
+            "local_devices": [
+              "TFRT_CPU_2048"
+            ],
+            "pid": 84603,
+            "process_count": 2,
+            "process_index": 1
+          }
+        ],
+        "committed_stop_results": [
+          {
+            "pid": 84601,
+            "rank": 0,
+            "returncode": -6
+          },
+          {
+            "pid": 84603,
+            "rank": 1,
+            "returncode": -9
+          }
+        ],
+        "current_after_failure": "attempts/cfd52110a83c4e7284cae51620f2758e/gen-0001",
+        "current_step_after_failure": 1,
+        "incomplete_attempt_id": "ea17a52013144d16a3c4b3843199b940",
+        "incomplete_processes": [
+          {
+            "pid": 84703,
+            "rank": 0,
+            "returncode": 0
+          },
+          {
+            "pid": 84704,
+            "rank": 1,
+            "returncode": -9
+          }
+        ],
+        "incomplete_rank_info": [
+          {
+            "attempt_id": "ea17a52013144d16a3c4b3843199b940",
+            "backend": "cpu",
+            "global_device_count": 2,
+            "global_devices": [
+              "TFRT_CPU_0",
+              "TFRT_CPU_2048"
+            ],
+            "jax": "0.9.2",
+            "jaxlib": "0.9.2",
+            "local_device_count": 1,
+            "local_devices": [
+              "TFRT_CPU_0"
+            ],
+            "pid": 84703,
+            "process_count": 2,
+            "process_index": 0
+          },
+          {
+            "attempt_id": "ea17a52013144d16a3c4b3843199b940",
+            "backend": "cpu",
+            "global_device_count": 2,
+            "global_devices": [
+              "TFRT_CPU_0",
+              "TFRT_CPU_2048"
+            ],
+            "jax": "0.9.2",
+            "jaxlib": "0.9.2",
+            "local_device_count": 1,
+            "local_devices": [
+              "TFRT_CPU_2048"
+            ],
+            "pid": 84704,
+            "process_count": 2,
+            "process_index": 1
+          }
+        ],
+        "incomplete_stop_results": [
+          {
+            "pid": 84703,
+            "rank": 0,
+            "returncode": 0
+          },
+          {
+            "pid": 84704,
+            "rank": 1,
+            "returncode": -9
+          }
+        ],
+        "kind": "observed_kill_during_incomplete_write",
+        "manifest2_exists": false,
+        "rank0_log": "",
+        "rank0_survivor_alive": true,
+        "rank0_temp_exists": true,
+        "rank1_final_exists": false,
+        "rank1_kill": {
+          "pid": 84704,
+          "rank": 1,
+          "returncode": -9,
+          "signal": "SIGKILL"
+        },
+        "rank1_log": "",
+        "staged_boundary": {
+          "pid": 84703,
+          "rank": 0,
+          "step": 2
+        }
+      },
+      {
+        "kind": "fresh_cluster_restore_after_incomplete_write",
+        "processes": {
+          "attempt_id": "1200c1318e9949e685f2b5c379e4295b",
+          "processes": [
+            {
+              "pid": 84721,
+              "rank": 0,
+              "returncode": 0
+            },
+            {
+              "pid": 84722,
+              "rank": 1,
+              "returncode": 0
+            }
+          ],
+          "rank_info": [
+            {
+              "attempt_id": "1200c1318e9949e685f2b5c379e4295b",
+              "backend": "cpu",
+              "global_device_count": 2,
+              "global_devices": [
+                "TFRT_CPU_0",
+                "TFRT_CPU_2048"
+              ],
+              "jax": "0.9.2",
+              "jaxlib": "0.9.2",
+              "local_device_count": 1,
+              "local_devices": [
+                "TFRT_CPU_0"
+              ],
+              "pid": 84721,
+              "process_count": 2,
+              "process_index": 0
+            },
+            {
+              "attempt_id": "1200c1318e9949e685f2b5c379e4295b",
+              "backend": "cpu",
+              "global_device_count": 2,
+              "global_devices": [
+                "TFRT_CPU_0",
+                "TFRT_CPU_2048"
+              ],
+              "jax": "0.9.2",
+              "jaxlib": "0.9.2",
+              "local_device_count": 1,
+              "local_devices": [
+                "TFRT_CPU_2048"
+              ],
+              "pid": 84722,
+              "process_count": 2,
+              "process_index": 1
+            }
+          ]
+        },
+        "verified": {
+          "candidate_sha256": "a7a7c1aca9009d284c41014ea1c6d1f5b7a9b4b1b60991491f5073f1a46ea8a5",
+          "current_generation": "attempts/1200c1318e9949e685f2b5c379e4295b/gen-0004",
+          "final_step": 4,
+          "momentum": [
+            -3.1627399921417236,
+            1.697509765625
+          ],
+          "weights": [
+            0.6384541392326355,
+            -0.31735193729400635
+          ],
+          "world": 2
+        }
+      },
+      {
+        "kind": "negative_duplicate_shard_rejected",
+        "observed_ids": {
+          "0": [
+            2,
+            3
+          ],
+          "1": [
+            2
+          ]
+        },
+        "processes": {
+          "attempt_id": "bf67d75e503446cbbeffa0fbbdbf732f",
+          "processes": [
+            {
+              "pid": 84728,
+              "rank": 0,
+              "returncode": 0
+            },
+            {
+              "pid": 84729,
+              "rank": 1,
+              "returncode": 0
+            }
+          ],
+          "rank_info": [
+            {
+              "attempt_id": "bf67d75e503446cbbeffa0fbbdbf732f",
+              "backend": "cpu",
+              "global_device_count": 2,
+              "global_devices": [
+                "TFRT_CPU_0",
+                "TFRT_CPU_2048"
+              ],
+              "jax": "0.9.2",
+              "jaxlib": "0.9.2",
+              "local_device_count": 1,
+              "local_devices": [
+                "TFRT_CPU_0"
+              ],
+              "pid": 84728,
+              "process_count": 2,
+              "process_index": 0
+            },
+            {
+              "attempt_id": "bf67d75e503446cbbeffa0fbbdbf732f",
+              "backend": "cpu",
+              "global_device_count": 2,
+              "global_devices": [
+                "TFRT_CPU_0",
+                "TFRT_CPU_2048"
+              ],
+              "jax": "0.9.2",
+              "jaxlib": "0.9.2",
+              "local_device_count": 1,
+              "local_devices": [
+                "TFRT_CPU_2048"
+              ],
+              "pid": 84729,
+              "process_count": 2,
+              "process_index": 1
+            }
+          ]
+        },
+        "reason": "duplicate sample ownership"
+      },
+      {
+        "final_weight_error": 0.19474870134586753,
+        "kind": "negative_local_mean_rejected"
+      },
+      {
+        "attempt_id": "7cccd36c5a874823b0d55843a92dea57",
+        "expected_error": "refusing incomplete all-rank commit; missing ranks ['1']",
+        "kind": "negative_early_commit_rejected",
+        "logs": {
+          "0": "Traceback (most recent call last):\n  File \"/private/tmp/jaxpathways-reader-review-fix/projects/sharded-training/multiprocess/worker.py\", line 339, in <module>\n    raise SystemExit(main())\n                     ~~~~^^\n  File \"/private/tmp/jaxpathways-reader-review-fix/projects/sharded-training/multiprocess/worker.py\", line 331, in main\n    save_generation(state)\n    ~~~~~~~~~~~~~~~^^^^^^^\n  File \"/private/tmp/jaxpathways-reader-review-fix/projects/sharded-training/multiprocess/worker.py\", line 246, in save_generation\n    raise RuntimeError(f\"refusing incomplete all-rank commit; missing ranks {missing}\")\nRuntimeError: refusing incomplete all-rank commit; missing ranks ['1']\n",
+          "1": "Traceback (most recent call last):\n  File \"/private/tmp/jaxpathways-reader-review-fix/projects/sharded-training/multiprocess/worker.py\", line 339, in <module>\n    raise SystemExit(main())\n                     ~~~~^^\n  File \"/private/tmp/jaxpathways-reader-review-fix/projects/sharded-training/multiprocess/worker.py\", line 331, in main\n    save_generation(state)\n    ~~~~~~~~~~~~~~~^^^^^^^\n  File \"/private/tmp/jaxpathways-reader-review-fix/projects/sharded-training/multiprocess/worker.py\", line 246, in save_generation\n    raise RuntimeError(f\"refusing incomplete all-rank commit; missing ranks {missing}\")\nRuntimeError: refusing incomplete all-rank commit; missing ranks ['1']\n"
+        },
+        "processes": [
+          {
+            "pid": 84741,
+            "rank": 0,
+            "returncode": 1
+          },
+          {
+            "pid": 84742,
+            "rank": 1,
+            "returncode": 1
+          }
+        ],
+        "rank_info": [
+          {
+            "attempt_id": "7cccd36c5a874823b0d55843a92dea57",
+            "backend": "cpu",
+            "global_device_count": 2,
+            "global_devices": [
+              "TFRT_CPU_0",
+              "TFRT_CPU_2048"
+            ],
+            "jax": "0.9.2",
+            "jaxlib": "0.9.2",
+            "local_device_count": 1,
+            "local_devices": [
+              "TFRT_CPU_0"
+            ],
+            "pid": 84741,
+            "process_count": 2,
+            "process_index": 0
+          },
+          {
+            "attempt_id": "7cccd36c5a874823b0d55843a92dea57",
+            "backend": "cpu",
+            "global_device_count": 2,
+            "global_devices": [
+              "TFRT_CPU_0",
+              "TFRT_CPU_2048"
+            ],
+            "jax": "0.9.2",
+            "jaxlib": "0.9.2",
+            "local_device_count": 1,
+            "local_devices": [
+              "TFRT_CPU_2048"
+            ],
+            "pid": 84742,
+            "process_count": 2,
+            "process_index": 1
+          }
+        ]
+      },
+      {
+        "expected_error": "checkpoint parameter/optimizer schema mismatch",
+        "kind": "negative_rechecksummed_shape_rejected",
+        "logs": {
+          "0": "Traceback (most recent call last):\n  File \"/private/tmp/jaxpathways-reader-review-fix/projects/sharded-training/multiprocess/worker.py\", line 339, in <module>\n    raise SystemExit(main())\n                     ~~~~^^\n  File \"/private/tmp/jaxpathways-reader-review-fix/projects/sharded-training/multiprocess/worker.py\", line 313, in main\n    state = load_current()\n  File \"/private/tmp/jaxpathways-reader-review-fix/projects/sharded-training/multiprocess/worker.py\", line 211, in load_current\n    raise ValueError(\"checkpoint parameter/optimizer schema mismatch\")\nValueError: checkpoint parameter/optimizer schema mismatch\n",
+          "1": "Traceback (most recent call last):\n  File \"/private/tmp/jaxpathways-reader-review-fix/projects/sharded-training/multiprocess/worker.py\", line 339, in <module>\n    raise SystemExit(main())\n                     ~~~~^^\n  File \"/private/tmp/jaxpathways-reader-review-fix/projects/sharded-training/multiprocess/worker.py\", line 313, in main\n    state = load_current()\n  File \"/private/tmp/jaxpathways-reader-review-fix/projects/sharded-training/multiprocess/worker.py\", line 211, in load_current\n    raise ValueError(\"checkpoint parameter/optimizer schema mismatch\")\nValueError: checkpoint parameter/optimizer schema mismatch\n"
+        },
+        "processes": [
+          {
+            "pid": 84803,
+            "rank": 0,
+            "returncode": 1
+          },
+          {
+            "pid": 84804,
+            "rank": 1,
+            "returncode": 1
+          }
+        ],
+        "rank_info": [
+          {
+            "attempt_id": "6a8fd0162a1b42bebcb8f68535939e3a",
+            "backend": "cpu",
+            "global_device_count": 2,
+            "global_devices": [
+              "TFRT_CPU_0",
+              "TFRT_CPU_2048"
+            ],
+            "jax": "0.9.2",
+            "jaxlib": "0.9.2",
+            "local_device_count": 1,
+            "local_devices": [
+              "TFRT_CPU_0"
+            ],
+            "pid": 84803,
+            "process_count": 2,
+            "process_index": 0
+          },
+          {
+            "attempt_id": "6a8fd0162a1b42bebcb8f68535939e3a",
+            "backend": "cpu",
+            "global_device_count": 2,
+            "global_devices": [
+              "TFRT_CPU_0",
+              "TFRT_CPU_2048"
+            ],
+            "jax": "0.9.2",
+            "jaxlib": "0.9.2",
+            "local_device_count": 1,
+            "local_devices": [
+              "TFRT_CPU_2048"
+            ],
+            "pid": 84804,
+            "process_count": 2,
+            "process_index": 1
+          }
+        ]
+      },
+      {
+        "expected_error": "checkpoint parent step is stale",
+        "kind": "negative_stale_parent_rejected",
+        "logs": {
+          "0": "Traceback (most recent call last):\n  File \"/private/tmp/jaxpathways-reader-review-fix/projects/sharded-training/multiprocess/worker.py\", line 339, in <module>\n    raise SystemExit(main())\n                     ~~~~^^\n  File \"/private/tmp/jaxpathways-reader-review-fix/projects/sharded-training/multiprocess/worker.py\", line 313, in main\n    state = load_current()\n  File \"/private/tmp/jaxpathways-reader-review-fix/projects/sharded-training/multiprocess/worker.py\", line 177, in load_current\n    raise ValueError(\"checkpoint parent step is stale\")\nValueError: checkpoint parent step is stale\n",
+          "1": "Traceback (most recent call last):\n  File \"/private/tmp/jaxpathways-reader-review-fix/projects/sharded-training/multiprocess/worker.py\", line 339, in <module>\n    raise SystemExit(main())\n                     ~~~~^^\n  File \"/private/tmp/jaxpathways-reader-review-fix/projects/sharded-training/multiprocess/worker.py\", line 313, in main\n    state = load_current()\n  File \"/private/tmp/jaxpathways-reader-review-fix/projects/sharded-training/multiprocess/worker.py\", line 177, in load_current\n    raise ValueError(\"checkpoint parent step is stale\")\nValueError: checkpoint parent step is stale\n"
+        },
+        "processes": [
+          {
+            "pid": 84855,
+            "rank": 0,
+            "returncode": 1
+          },
+          {
+            "pid": 84856,
+            "rank": 1,
+            "returncode": 1
+          }
+        ]
+      },
+      {
+        "attempt_id": "ca323510236a42f18d05c48d22888a90",
+        "expected_error": "checkpoint world size identity mismatch",
+        "kind": "negative-changed-world_rejected",
+        "logs": {
+          "0": "Traceback (most recent call last):\n  File \"/private/tmp/jaxpathways-reader-review-fix/projects/sharded-training/multiprocess/worker.py\", line 339, in <module>\n    raise SystemExit(main())\n                     ~~~~^^\n  File \"/private/tmp/jaxpathways-reader-review-fix/projects/sharded-training/multiprocess/worker.py\", line 313, in main\n    state = load_current()\n  File \"/private/tmp/jaxpathways-reader-review-fix/projects/sharded-training/multiprocess/worker.py\", line 166, in load_current\n    raise ValueError(\"checkpoint world size identity mismatch\")\nValueError: checkpoint world size identity mismatch\n",
+          "1": "Traceback (most recent call last):\n  File \"/private/tmp/jaxpathways-reader-review-fix/projects/sharded-training/multiprocess/worker.py\", line 339, in <module>\n    raise SystemExit(main())\n                     ~~~~^^\n  File \"/private/tmp/jaxpathways-reader-review-fix/projects/sharded-training/multiprocess/worker.py\", line 313, in main\n    state = load_current()\n  File \"/private/tmp/jaxpathways-reader-review-fix/projects/sharded-training/multiprocess/worker.py\", line 166, in load_current\n    raise ValueError(\"checkpoint world size identity mismatch\")\nValueError: checkpoint world size identity mismatch\n"
+        },
+        "processes": [
+          {
+            "pid": 85042,
+            "rank": 0,
+            "returncode": 1
+          },
+          {
+            "pid": 85043,
+            "rank": 1,
+            "returncode": 1
+          }
+        ]
+      },
+      {
+        "attempt_id": "0b64f53246634eb9914b2f4b45a07727",
+        "expected_error": "checkpoint is missing or reorders a rank shard",
+        "kind": "negative-changed-rank-ownership_rejected",
+        "logs": {
+          "0": "Traceback (most recent call last):\n  File \"/private/tmp/jaxpathways-reader-review-fix/projects/sharded-training/multiprocess/worker.py\", line 339, in <module>\n    raise SystemExit(main())\n                     ~~~~^^\n  File \"/private/tmp/jaxpathways-reader-review-fix/projects/sharded-training/multiprocess/worker.py\", line 313, in main\n    state = load_current()\n  File \"/private/tmp/jaxpathways-reader-review-fix/projects/sharded-training/multiprocess/worker.py\", line 169, in load_current\n    raise ValueError(\"checkpoint is missing or reorders a rank shard\")\nValueError: checkpoint is missing or reorders a rank shard\n",
+          "1": "Traceback (most recent call last):\n  File \"/private/tmp/jaxpathways-reader-review-fix/projects/sharded-training/multiprocess/worker.py\", line 339, in <module>\n    raise SystemExit(main())\n                     ~~~~^^\n  File \"/private/tmp/jaxpathways-reader-review-fix/projects/sharded-training/multiprocess/worker.py\", line 313, in main\n    state = load_current()\n  File \"/private/tmp/jaxpathways-reader-review-fix/projects/sharded-training/multiprocess/worker.py\", line 169, in load_current\n    raise ValueError(\"checkpoint is missing or reorders a rank shard\")\nValueError: checkpoint is missing or reorders a rank shard\n"
+        },
+        "processes": [
+          {
+            "pid": 85145,
+            "rank": 0,
+            "returncode": 1
+          },
+          {
+            "pid": 85146,
+            "rank": 1,
+            "returncode": 1
+          }
+        ]
+      },
+      {
+        "final_weight_error": 0.21277120877499045,
+        "kind": "negative_reset-momentum_rejected",
+        "next_ids": null,
+        "source_termination": {
+          "pid": 85180,
+          "rank": 1,
+          "returncode": -9,
+          "signal": "SIGKILL"
+        }
+      },
+      {
+        "final_weight_error": 0.1069462855786642,
+        "kind": "negative_stale-key_rejected",
+        "next_ids": [
+          4,
+          2
+        ],
+        "source_termination": {
+          "pid": 85234,
+          "rank": 1,
+          "returncode": -9,
+          "signal": "SIGKILL"
+        }
+      },
+      {
+        "final_weight_error": 0.11556950043445169,
+        "kind": "negative_stale-cursor_rejected",
+        "next_ids": [
+          2,
+          3,
+          0
+        ],
+        "source_termination": {
+          "pid": 85353,
+          "rank": 1,
+          "returncode": -9,
+          "signal": "SIGKILL"
+        }
+      }
+    ],
+    "oracle": [
+      {
+        "counts": [
+          2,
+          1
+        ],
+        "ids": [
+          2,
+          3,
+          0
+        ],
+        "loss": 1.0208333333333333,
+        "momentum": [
+          -2.7373333333333334,
+          0.444
+        ],
+        "weights": [
+          0.13686666666666666,
+          -0.0222
+        ]
+      },
+      {
+        "counts": [
+          2,
+          0
+        ],
+        "ids": [
+          1,
+          4
+        ],
+        "loss": 0.36110855555555554,
+        "momentum": [
+          -3.0086,
+          2.220466666666667
+        ],
+        "weights": [
+          0.28729666666666664,
+          -0.13322333333333336
+        ]
+      },
+      {
+        "counts": [
+          2,
+          1
+        ],
+        "ids": [
+          2,
+          1,
+          3
+        ],
+        "loss": 0.33210660517777785,
+        "momentum": [
+          -3.8604088888888892,
+          1.9850622222222225
+        ],
+        "weights": [
+          0.4803171111111111,
+          -0.23247644444444449
+        ]
+      },
+      {
+        "counts": [
+          2,
+          0
+        ],
+        "ids": [
+          0,
+          4
+        ],
+        "loss": 0.0016913945075061703,
+        "momentum": [
+          -3.1627400000000003,
+          1.697509777777778
+        ],
+        "weights": [
+          0.6384541111111111,
+          -0.3173519333333334
+        ]
+      }
+    ],
+    "preflight_negative_controls": {
+      "changed_config": {
+        "current_sha256": "3c79a392418f8494da45942659e35b82cef6f1c36fbe387c15031f5c7afe40a8",
+        "expected_error": "approved experiment/config/data identity mismatch",
+        "filesystem_unchanged": true,
+        "kind": "changed_total_steps_rejected_before_jax_or_restore",
+        "rank_info_for_attempt": [],
+        "requested_total_steps": 5,
+        "returncode": 1,
+        "stdout_stderr": "Traceback (most recent call last):\n  File \"/private/tmp/jaxpathways-reader-review-fix/projects/sharded-training/multiprocess/worker.py\", line 339, in <module>\n    raise SystemExit(main())\n                     ~~~~^^\n  File \"/private/tmp/jaxpathways-reader-review-fix/projects/sharded-training/multiprocess/worker.py\", line 64, in main\n    raise ValueError(\"approved experiment/config/data identity mismatch\")\nValueError: approved experiment/config/data identity mismatch\n",
+        "transition_2_exists": false
+      },
+      "missing_sidecar": {
+        "current_sha256": "e13444b3366d8808365fdf4db1cc6e9e5d8643e4f67f133cb0242f2f28bfdbed",
+        "expected_error": "approved experiment identity is missing for existing checkpoint state",
+        "filesystem_unchanged": true,
+        "kind": "missing_identity_sidecar_rejected_before_startup",
+        "rank_info_files": [
+          "rank-info-4016f071b6a64e33b3590967af8c31f2-0.json",
+          "rank-info-4016f071b6a64e33b3590967af8c31f2-1.json"
+        ],
+        "sidecar_created": false,
+        "transition_files": [
+          "transition-1.json"
+        ]
+      }
+    },
+    "python": "/Users/tahabsn/.pixi/envs/python/bin/python3",
+    "runtime": {
+      "implementation": "CPython",
+      "jax": "0.9.2",
+      "jaxlib": "0.9.2",
+      "numpy": "2.4.4",
+      "python": "3.14.3"
+    },
+    "schema": "l10b-local-multiprocess-result-v2",
+    "source_hashes": {
+      "check.py": "f9ffbef4d9f38de45c0bff63f25119aec6e1cbcc5beaca635118f79f8c7e72ad",
+      "solution/model.py": "a7a7c1aca9009d284c41014ea1c6d1f5b7a9b4b1b60991491f5073f1a46ea8a5",
+      "starter/model.py": "166311a5dd9f47b77e0fdbed1cc4e116c4d0a96932fede3c7463f6af4770272d",
+      "supervisor.py": "30c0e9724565089e9796b8be39e6c763a3f874ad3fd8c9b8c8de0a877d1db330",
+      "worker.py": "f9838429d447308e54588c82523de0370e0525d92c748367e2a6fdccb94bbb03"
+    },
+    "source_mutation_negative": {
+      "approved_worker_sha256": "f9838429d447308e54588c82523de0370e0525d92c748367e2a6fdccb94bbb03",
+      "changed_worker_sha256": "0ca3cd0f9a7f259d4baba3b374d868b31877a63a8b2df6c86fbf66b144208f25",
+      "expected_error": "approved executable source inventory mismatch",
+      "kind": "changed_worker_source_rejected_before_jax_or_restore",
+      "returncode": 1,
+      "stdout_stderr": "Traceback (most recent call last):\n  File \"/private/tmp/l10b-root-integration-20261021/source-mutation/multiprocess/worker.py\", line 339, in <module>\n    raise SystemExit(main())\n                     ~~~~^^\n  File \"/private/tmp/l10b-root-integration-20261021/source-mutation/multiprocess/worker.py\", line 73, in main\n    raise ValueError(\"approved executable source inventory mismatch\")\nValueError: approved executable source inventory mismatch\n"
+    },
+    "total_steps": 4,
+    "world": 2
+  },
+  "schema": "l10b-check-report-v1",
+  "stage": "all",
+  "work": "/private/tmp/l10b-root-integration-20261021"
+}

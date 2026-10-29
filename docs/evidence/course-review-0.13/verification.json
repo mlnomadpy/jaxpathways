@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 1,
+  "edition": "0.13.0",
+  "recordedAt": "2026-10-21T19:26:01.514999+00:00",
+  "status": "Author review candidate, no human acceptance or production publication.",
+  "baseCommit": "93c0b2d1f547d52bb9118e12cb8857e76f9f65c3",
+  "releaseSnapshotHash": "7edfe652236d43ae437c5a863eac9d3f263c899bc2e0cb428345a0292485a0f9",
+  "coverage": {
+    "lessons": 104,
+    "phases": 22,
+    "materialEntries": 203,
+    "registeredProjectReferences": 31,
+    "plannedFullCapstones": 10,
+    "developingPhases": 13,
+    "optionalEmbeddingPilot": "In Development; failed retrieval floors"
+  },
+  "checks": {
+    "automatedTests": 159,
+    "browserTests": 42,
+    "browserScope": "Desktop and emulated mobile Chromium, including delayed image geometry and single stage dock; no native reader or actual assistive technology.",
+    "pages": 217,
+    "canonicalSitemapUrls": 212,
+    "deploymentBases": [
+      "/",
+      "/jaxpathways/"
+    ],
+    "epubcheck": {
+      "version": "5.4.0",
+      "fatal": 0,
+      "errors": 0,
+      "warnings": 0
+    },
+    "carryForward": "104 lesson CPU source hashes and 31 registered reference suites unchanged from edition0.12; their accepted execution receipts remain historical. No unnecessary new execution claimed."
+  },
+  "embedding": {
+    "fullCurrentChecker": "pass",
+    "pipelineSourceHashesVerified": 19,
+    "runArtifactHashesVerified": 189,
+    "publicEvidenceHashesVerified": 48,
+    "sourceZipMembers": 80,
+    "extractedSourcePlotTests": 3,
+    "trainingTraceRecordsEqualHistoricalFinal8": 95,
+    "evaluationExposureQualityGatesEqualHistoricalFinal8": true,
+    "currentRuntimeFigureEqualsTeachingFigure": true,
+    "sourceReceiptSha256": "08a906e46ba32706982dd42be6884b6975f7c567155babcaf9f134a8af8fcdb4",
+    "independentCheckSha256": "377b50648ea03e1125e7e75ea3fa8ebb65fa474eab04a0ea4d86c4b04cce37dd",
+    "evidenceIndexSha256": "66cc6f7bec3c3b319e28ccc6d6ead1fab8d60519b3da370b41e038b1f7685691",
+    "objectiveSvgSha256": "6e86d755412a3943f6befa3b7f8524956679498e5f21e5dd86f2cd2f0edb8936",
+    "qualityGates": {
+      "interpretation": "Even a pilot gate pass is not a target-scale, general embedding or release qualification.",
+      "phase1_to_phase3_ndcg10_drop": -0.00012778170191213647,
+      "phase3_final_floors_pass": false,
+      "pilot_quality_gate_pass": false,
+      "precommitted_floors": {
+        "ndcg@10": 0.1,
+        "recall@10": 0.3
+      }
+    },
+    "independentReview": "Sol independently verified19current source and189artifact hashes and numeric parity. This is internal software/numerical review, not human teaching acceptance."
+  },
+  "book": {
+    "epubSha256": "26f64d4a6957b5bbfc7dd4d39506f7c896b329710012ea3edc73de4610ddb0cf",
+    "standaloneHtmlSha256": "f6b0f35fadf6102fb09982529afef3d4395a6ff955d9bf8ec41c7bdff7e05946",
+    "nativeReaders": "Pending actual Apple Books, second EPUB engine and assistive-technology sessions.",
+    "print": "0.11.1 selected Chromium print inspection remains historical; no0.13 full-book print qualification."
+  },
+  "preview": {
+    "url": "http://127.0.0.1:4195/book.html",
+    "directory": "/private/tmp/jaxpathways-review-0.13.0-final",
+    "bookSha256": "145fa3c7b37528b5e3def25ca45baee3a29feaef3e08dad7dfb408adcf1167fb"
+  },
+  "excludedWork": [
+    "C02 causal CPU workflow is in the original working tree and excluded. Its data freeze is accepted; training, independent lifecycle qualification and integration remain in progress.",
+    "C03 image workflow is in preparation and excluded.",
+    "Full target training, broader benchmarks, hardware and service qualification, public trained weights, native readers and independent learner/specialist acceptance remain open."
+  ],
+  "hostedChecks": "New edition checks pending draft push. All13basePR64checks passed at93c0b2d1f547d52bb9118e12cb8857e76f9f65c3.",
+  "evidenceFiles": {
+    "docs/evidence/course-review-0.13/browser.log": "42e6c235095b231ab489e7b86907ec92d64092b74cb1bb46dcba6945f9d784b3",
+    "docs/evidence/course-review-0.13/c01-current-check.log": "363c463a459ac086f8a325f00b83d5fb4c5e6df5b390002f2f5afb97047e63b8",
+    "docs/evidence/course-review-0.13/c01-current-independent-check.json": "377b50648ea03e1125e7e75ea3fa8ebb65fa474eab04a0ea4d86c4b04cce37dd",
+    "docs/evidence/course-review-0.13/c01-current-sourcebound-receipt.json": "08a906e46ba32706982dd42be6884b6975f7c567155babcaf9f134a8af8fcdb4",
+    "docs/evidence/course-review-0.13/check.log": "1866c88106da4355cef505d0ef0ca46ef3b0b07853d1bcba8a6271c4fc0538dc",
+    "docs/evidence/course-review-0.13/deployment.log": "4a309a2e8ab6d6763a92db238df7210349bc55f76cbb2d097de7bfe3ed017003",
+    "docs/evidence/course-review-0.13/epubcheck-report.json": "0d3826a32528fee3d787bb4feb41dfdddde8bc09c1bdf273418cefa9524dafb8",
+    "docs/evidence/course-review-0.13/epubcheck.log": "7762882cc0e77ad791a4d3cbda6ae124ed8682e19906d72b6983987e55585d12",
+    "docs/evidence/course-review-0.13/extracted-source-check.json": "694e48ce6e4597fc5120f321593088276fc761a02dedeb984aca509d49ae3eb1",
+    "docs/evidence/course-review-0.13/objective-panels.png": "dd4b21a0984eeb21541eff847df73397961cbedaa0da0cf0baf49cbb232314b9",
+    "docs/evidence/course-review-0.13/objectives-mobile.png": "5f641845f3e2a87ff988a756f46f997e279d8c40170cc0304e175c52e054cd2e",
+    "docs/evidence/course-review-0.13/pilot-desktop.png": "a4eef50adc29312e866e07fe9793dab663641cb424582f292e40cc279f390032",
+    "docs/evidence/course-review-0.13/pilot-mobile.png": "28b6f32a2be2cef3072eba0df88348c7c4fde24ebd9b3d6e23cb150bf8e67d96",
+    "docs/evidence/course-review-0.13/reader-mobile.png": "bf795f718dbe6c24dc1304f1caf4bf0cb3d92b374037421cdc01e3155d1083dc",
+    "docs/evidence/course-review-0.13/retrieval.png": "60208b73a3956a86b0a2188134a7e92fa066187006cc92339b39fe05d3312042"
+  },
+  "gitByteFidelity": {
+    "filesCompared": 122,
+    "result": "All122staged files matched tested working-tree bytes before commit; local node_modules symlink excluded.",
+    "whitespace": "Source diff check passes; verbatim hashed execution logs and historical artifacts retain their original whitespace."
+  }
+}

@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "operations-05",
-  "contentHash": "01ac7b214cb17c92d1863550bbc3cce55c3e96907b8e06e412edbccaf85dee52",
-  "rendererHash": "a1bd5b648f4731ae5d5f0a24811c2540d1a0a132149ce589d17c4113509cbedf",
+  "contentHash": "45ba4bb66446cf6335affefd77e0ca76304361e64f32ab0a7e45872ce2ff10e6",
+  "rendererHash": "17e3bbad72ee4c43425845aaee76b86b85e84750551278be03d8c16842f4dc63",
   "kind": "executed",
-  "generatedAt": "2026-10-21T16:06:07.470207+00:00",
+  "generatedAt": "2026-10-27T17:11:17.282606+00:00",
   "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",
@@ -13,7 +13,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "measured local job seconds: [0.6356031661853194, 0.7971081249415874, 0.7620466658845544]\nillustrative capacity plan: {'offered_worker_hours_per_hour': 0.13285135415693125, 'load_fraction': 0.06642567707846563, 'minimum_workers_with_reserve': 1, 'hourly_budget': 3.0, 'hypothetical_cost_per_job': 0.0003321283853923281, 'within_reserve': True}\nassumptions: 600 arrivals/hour, 2 workers, hypothetical 1.50 per worker-hour, 25% reserve\n",
+  "stdout": "measured local job seconds: [1.2446142500266433, 1.6147057921625674, 1.2466137087903917]\nillustrative capacity plan: {'offered_worker_hours_per_hour': 0.26911763202709454, 'load_fraction': 0.13455881601354727, 'minimum_workers_with_reserve': 1, 'hourly_budget': 3.0, 'hypothetical_cost_per_job': 0.0006727940800677364, 'within_reserve': True}\nassumptions: 600 arrivals/hour, 2 workers, hypothetical 1.50 per worker-hour, 25% reserve\n",
   "data": {
     "panels": [
       {
@@ -30,9 +30,9 @@
           {
             "label": "wall time",
             "y": [
-              0.6356031661853194,
-              0.7971081249415874,
-              0.7620466658845544
+              1.2446142500266433,
+              1.6147057921625674,
+              1.2466137087903917
             ]
           }
         ]
@@ -51,9 +51,9 @@
           {
             "label": "update time",
             "y": [
-              0.0005354168824851513,
-              0.0010756668634712696,
-              0.0029995902441442013
+              0.0029896246269345284,
+              0.021844540257006884,
+              0.029113583266735077
             ]
           }
         ]

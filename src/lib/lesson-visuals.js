@@ -16,7 +16,7 @@ export function lessonMechanism(lesson, { offline = false, imageResolver = siteU
   const imageUrl = offline
     ? imageResolver(artifact.mechanismImage)
     : siteUrl(artifact.mechanismImage);
-  return `<figure class="lesson-mechanism" aria-labelledby="${escapeHtml(id)}"><h3 id="${escapeHtml(id)}">${inlineMath(diagram.title)}</h3><p class="visual-prediction"><strong>Predict:</strong> ${inlineMath(diagram.prediction)}</p><div class="figure-scroll" role="region" aria-label="${escapeHtml(diagram.title)}" tabindex="0"><img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(diagram.alt || diagram.title)}" aria-describedby="${escapeHtml(id)}-reading" loading="lazy" decoding="async" /></div><figcaption>${inlineMath(diagram.scope)}</figcaption><div id="${escapeHtml(id)}-reading">${mathProse(diagram.reading)}</div>${offline ? '' : `<a href="${escapeHtml(imageUrl)}">Open full-size diagram</a>`}</figure>`;
+  return `<section class="lesson-mechanism"><figure class="print-visual-intro" aria-labelledby="${escapeHtml(id)}"><h3 id="${escapeHtml(id)}">${inlineMath(diagram.title)}</h3><p class="visual-prediction"><strong>Predict:</strong> ${inlineMath(diagram.prediction)}</p><div class="figure-scroll" role="region" aria-label="${escapeHtml(diagram.title)}" tabindex="0"><img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(diagram.alt || diagram.title)}" aria-describedby="${escapeHtml(id)}-reading" loading="lazy" decoding="async" /></div><figcaption>${inlineMath(diagram.scope)}</figcaption></figure><div id="${escapeHtml(id)}-reading">${mathProse(diagram.reading)}</div>${offline ? '' : `<a href="${escapeHtml(imageUrl)}">Open full-size diagram</a>`}</section>`;
 }
 
 /**
@@ -34,22 +34,28 @@ export function lessonVisual(lesson, { offline = false, imageResolver = siteUrl 
   const imageUrl = offline ? imageResolver(artifact.image) : url(artifact.image);
   const provenance =
     visual.kind === 'executed'
-      ? `Plot from a recorded CPU computation · JAX ${escapeHtml(artifact.environment.jax)} · ${artifact.environment.deviceCount} CPU device${artifact.environment.deviceCount === 1 ? '' : 's'}`
+      ? `Recorded environment: JAX ${escapeHtml(artifact.environment.jax)} · ${artifact.environment.deviceCount} CPU device${artifact.environment.deviceCount === 1 ? '' : 's'}`
       : visual.kind === 'analytic'
-        ? 'Calculated scenario; no device execution was performed'
-        : 'Conceptual workflow diagram';
+        ? 'Calculated expectation, without a device execution record'
+        : 'This diagram illustrates a workflow';
   const note =
     visual.kind === 'executed'
       ? 'The notebook contains the data experiment, plotting code, and recorded figure output. Rerun it to test your changes.'
       : visual.kind === 'analytic'
         ? 'This figure is a calculated expectation. It does not report device execution.'
         : 'The arrows describe the workflow; the reference execution below separately records the code results.';
-  return `<section class="lesson-visual" aria-labelledby="visual-${escapeHtml(lesson.id)}"><h2 id="visual-${escapeHtml(lesson.id)}">${inlineMath(visual.title)}</h2><p class="visual-prediction"><strong>Predict before looking:</strong> ${inlineMath(visual.prediction)}</p><figure><div class="figure-scroll" role="region" aria-label="${escapeHtml(visual.title)}" tabindex="0"><img src="${imageUrl}" alt="${escapeHtml(visual.alt || visual.title)}" aria-describedby="visual-${escapeHtml(lesson.id)}-description" loading="lazy" decoding="async" /></div><figcaption>${provenance}</figcaption></figure><div id="visual-${escapeHtml(lesson.id)}-description" class="figure-walkthrough"><h3>Read the figure</h3>${mathProse(visual.reading)}<h3>Connect it to the computation</h3>${mathProse(visual.connection)}</div>${offline ? '' : `<p class="figure-links"><a href="${url(artifact.image)}">Open full-size figure</a><a href="${url(artifact.data)}" download>Download data and provenance</a></p>`}<p class="soft">${note}</p></section>`;
+  const caption =
+    visual.kind === 'executed'
+      ? 'Recorded CPU computation'
+      : visual.kind === 'analytic'
+        ? 'Calculated scenario; not a device measurement'
+        : 'Conceptual workflow diagram';
+  return `<section class="lesson-visual" aria-labelledby="visual-${escapeHtml(lesson.id)}"><div class="print-visual-intro"><h2 id="visual-${escapeHtml(lesson.id)}">${inlineMath(visual.title)}</h2><p class="visual-prediction"><strong>Predict before looking:</strong> ${inlineMath(visual.prediction)}</p><figure><div class="figure-scroll" role="region" aria-label="${escapeHtml(visual.title)}" tabindex="0"><img src="${imageUrl}" alt="${escapeHtml(visual.alt || visual.title)}" aria-describedby="visual-${escapeHtml(lesson.id)}-description" loading="lazy" decoding="async" /></div><figcaption>${caption}</figcaption></figure></div><div id="visual-${escapeHtml(lesson.id)}-description" class="figure-walkthrough"><h3>Read the figure</h3>${mathProse(visual.reading)}<h3>Connect it to the computation</h3>${mathProse(visual.connection)}</div><details class="reading-disclosure figure-provenance"><summary>Figure data and execution details</summary><div class="disclosure-body"><p class="execution-meta">${provenance}</p>${offline ? '' : `<p class="figure-links"><a href="${url(artifact.image)}">Open full-size figure</a><a href="${url(artifact.data)}" download>Download data and provenance</a></p>`}<p class="soft">${note}</p></div></details></section>`;
 }
 
 /** @param {import('../types/course').Lesson} lesson */
 export function lessonExecution(lesson) {
   const run = lesson.execution;
   if (!lesson.contentHash || !run || run.contentHash !== lesson.contentHash) return '';
-  return `<section class="lesson-execution"><h2>Recorded reference execution</h2><p>Reference output captured from executing the complete lesson script (<code>code/main.py</code>) and its assertions in the course CPU environment.</p><p class="execution-meta">${escapeHtml(run.executedAt)} · Python ${escapeHtml(run.environment.python)} · JAX ${escapeHtml(run.environment.jax)} · ${run.environment.deviceCount} CPU device${run.environment.deviceCount === 1 ? '' : 's'}</p><pre tabindex="0" aria-label="Captured Python standard output"><code>${escapeHtml(run.stdout)}</code></pre><p><a href="${escapeHtml(siteUrl(run.url))}" download>Download execution record</a> · The notebook includes executed cells and figure outputs. Compare your run with these values; timings depend on the machine.</p></section>`;
+  return `<details class="lesson-execution reading-disclosure"><summary>Recorded output and runtime details</summary><div class="disclosure-body"><p>Reference output captured from executing the complete lesson script (<code>code/main.py</code>) and its assertions in the course CPU environment.</p><p class="execution-meta">${escapeHtml(run.executedAt)} · Python ${escapeHtml(run.environment.python)} · JAX ${escapeHtml(run.environment.jax)} · ${run.environment.deviceCount} CPU device${run.environment.deviceCount === 1 ? '' : 's'}</p><pre tabindex="0" aria-label="Captured Python standard output"><code>${escapeHtml(run.stdout)}</code></pre><p><a href="${escapeHtml(siteUrl(run.url))}" download>Download execution record</a> · The notebook includes executed cells and figure outputs. Compare your run with these values; timings depend on the machine.</p></div></details>`;
 }

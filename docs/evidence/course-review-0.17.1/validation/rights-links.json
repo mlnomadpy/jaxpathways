@@ -1,0 +1,48 @@
+{
+  "checks": {
+    "child_release_disclaimed": true,
+    "figure_link_present": true,
+    "quality_failure_disclosed": true,
+    "rights_notice_present": true,
+    "source_terms_and_scope_notice": true,
+    "teaching_local_rights_link": true,
+    "teaching_mechanics_approval_link": true,
+    "teaching_nonrun_approval_link": true
+  },
+  "kind": "transformer-lineage-0171-rights-and-local-link-check",
+  "linkEntries": [
+    {
+      "exists": true,
+      "source": "TEACHING.md",
+      "target": "../../../projects/posttraining-audit/README.md"
+    },
+    {
+      "exists": true,
+      "source": "TEACHING.md",
+      "target": "teaching/PARENT_RIGHTS.md"
+    },
+    {
+      "exists": true,
+      "source": "TEACHING.md",
+      "target": "../../../projects/posttraining-audit/README.md"
+    },
+    {
+      "exists": true,
+      "source": "TEACHING.md",
+      "target": "portable-nonrun-approval.json"
+    },
+    {
+      "exists": true,
+      "source": "TEACHING.md",
+      "target": "learner-mechanics-approval.json"
+    },
+    {
+      "exists": true,
+      "source": "TEACHING.md",
+      "target": "teaching/v5/figure.svg"
+    }
+  ],
+  "localLinksAllResolve": true,
+  "localMarkdownLinksChecked": 6,
+  "markdownFilesChecked": 3
+}

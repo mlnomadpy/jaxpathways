@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "operations-07",
-  "contentHash": "33d4f922404b7601fbbbd1b158a216eebbd7df6f8fcf86b1421c654e203c6695",
-  "rendererHash": "a1bd5b648f4731ae5d5f0a24811c2540d1a0a132149ce589d17c4113509cbedf",
+  "contentHash": "eae80733dad6decc79dff7c4f93bbe241aeaff1f9439642a6ed154eb5a36ad80",
+  "rendererHash": "17e3bbad72ee4c43425845aaee76b86b85e84750551278be03d8c16842f4dc63",
   "kind": "executed",
-  "generatedAt": "2026-10-21T16:06:11.653128+00:00",
+  "generatedAt": "2026-10-27T16:10:57.502321+00:00",
   "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",
@@ -13,30 +13,20 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Observed replay scores: [{'overall': 0.9, 'answerable': 1.0, 'unanswerable': 0.0}, {'overall': 1.0, 'answerable': 1.0, 'unanswerable': 1.0}]\nTwo real MLflow traces; no LLM API was called and no general model quality was evaluated.\n",
+  "stdout": "refund-order-204: Retrieval: the required evidence did not reach the model boundary.\ncase-sensitive-refund-77: Generation: inspect the recorded prompt, correct context and adapter response.\nreturn-ambiguous-9: Infrastructure: timeout occurred before retrieval or generation.\nserialized local retrieval+generation trace sample: {\"candidate_id\": \"candidate-baseline-01\", \"case_id\": \"hours-west-17\", \"config_hash\": \"479424bdd62be245\", \"diagnosis\": \"ok\", \"generation\": {\"model_input_context\": \"Support is open Monday through Friday, 09:00 to 17:00.\", \"prompt\": \"ANSWER_EVEN_WITHOUT_EVIDENCE FORMAT_REFUND\", \"response\": \"Support is open Monday through Friday, 09:00 to 17:00.\"}, \"index_id\": \"index-v1-complete\", \"model_adapter_id\": \"extractive-local-adapter-v1\", \"prompt_id\": \"prompt-v1-careless\", \"retrieval\": {\"context\": \"Support is open Monday through Friday, 09:00 to 17:00.\", \"query\": \"When is support open?\", \"retrieved_id\": \"doc-hours\"}, \"status\": \"complete\"}\nbaseline: {\"cases\": [{\"id\": \"hours-west-17\", \"passed\": true, \"status\": \"complete\"}, {\"id\": \"refund-order-204\", \"passed\": false, \"status\": \"complete\"}, {\"id\": \"return-ambiguous-9\", \"passed\": false, \"status\": \"timeout\"}, {\"id\": \"unsupported-tax-2\", \"passed\": false, \"status\": \"complete\"}, {\"id\": \"case-sensitive-refund-77\", \"passed\": false, \"status\": \"complete\"}], \"count\": 5, \"fraction\": 0.2, \"passed\": 1}\ncandidate: {\"cases\": [{\"id\": \"hours-west-17\", \"passed\": true, \"status\": \"complete\"}, {\"id\": \"refund-order-204\", \"passed\": true, \"status\": \"complete\"}, {\"id\": \"return-ambiguous-9\", \"passed\": true, \"status\": \"complete\"}, {\"id\": \"unsupported-tax-2\", \"passed\": true, \"status\": \"complete\"}, {\"id\": \"case-sensitive-refund-77\", \"passed\": true, \"status\": \"complete\"}], \"count\": 5, \"fraction\": 1.0, \"passed\": 5}\nsame frozen case IDs and denominator: 5 ['hours-west-17', 'refund-order-204', 'return-ambiguous-9', 'unsupported-tax-2', 'case-sensitive-refund-77']\nbaseline candidate identity: candidate-baseline-01 prompt-v1-careless index-v1-complete extractive-local-adapter-v1 479424bdd62be245\ncandidate identity: candidate-grounded-02 prompt-v2-grounded index-v2-complete extractive-local-adapter-v1 7916d53bb58408ce\nTraces are actual deterministic local adapter executions, not hosted LLM or general quality evidence.\n",
   "data": {
     "kind": "bar",
     "labels": [
-      "overall (10)",
-      "answerable (9)",
-      "unsupported (1)"
+      "baseline (5 cases)",
+      "grounded candidate (5 cases)"
     ],
-    "xlabel": "fixture group (count)",
+    "xlabel": "candidate (same stable IDs and denominator)",
     "ylabel": "fixture pass fraction",
     "series": [
       {
-        "label": "always-answer",
+        "label": "observed pass fraction",
         "y": [
-          0.9,
-          1.0,
-          0.0
-        ]
-      },
-      {
-        "label": "contract-aware",
-        "y": [
-          1.0,
-          1.0,
+          0.2,
           1.0
         ]
       }

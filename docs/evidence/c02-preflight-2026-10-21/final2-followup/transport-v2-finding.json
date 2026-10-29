@@ -1,0 +1,25 @@
+{
+  "scope": "Actual loopback parser admission/header/body deadline with a controlled 150 ms budget and no inference. Does not establish an interruptible native JAX operation.",
+  "serve_source_sha256": "8cccbda21bb5e6a085c17dd0aaf08f521d0d0dd8990c55a3f252e80b90c6e806",
+  "cases": [
+    {
+      "name": "incomplete_body",
+      "elapsed_seconds": 0.15948499972000718,
+      "response": "HTTP/1.0 408 Request Timeout\r\nServer: C02PilotLocal/1 Python/3.14.3\r\nDate: Wed, 21 Oct 2026 20:15:06 GMT\r\nContent-Type: application/json; charset=utf-8\r\nContent-Length: 38\r\nCache-Control: no-store\r\nConnection: close\r\n\r\n{\"error\": \"request lifetime exceeded\"}",
+      "recovery_health": {
+        "status": "ready",
+        "model_status": "parser-only probe",
+        "branch": "none",
+        "manifest_sha256": "7b9bce32ebce23e1c397667fd6b9f28d8a2a037fc1f76db28d8a4ee184115e0d",
+        "request_limits": {
+          "body_bytes": 8192,
+          "active_requests": 2,
+          "lifetime_seconds": 0.15,
+          "cancellation": "cooperative-between-generation-steps",
+          "max_new_tokens": 32
+        }
+      }
+    }
+  ],
+  "owned_server_stopped": true
+}

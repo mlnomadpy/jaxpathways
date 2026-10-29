@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "probability-04",
-  "contentHash": "ce10cff942c731bf3b8908107c924f04f4536c97e020560657637a6004b6e105",
-  "rendererHash": "a1bd5b648f4731ae5d5f0a24811c2540d1a0a132149ce589d17c4113509cbedf",
+  "contentHash": "63cff154aee40b1ef49ad3fda5fb01fb8aadfa2462c24901e31f89b8a920eb3b",
+  "rendererHash": "17e3bbad72ee4c43425845aaee76b86b85e84750551278be03d8c16842f4dc63",
   "kind": "executed",
-  "generatedAt": "2026-10-21T16:05:08.793384+00:00",
+  "generatedAt": "2026-10-27T17:02:16.566099+00:00",
   "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",
@@ -50,7 +50,7 @@
   "diagram": {
     "title": "The covariance changes uncertainty in a sum",
     "prediction": "Can matching each coordinate's mean prove a correct distribution for their sum?",
-    "reading": "Both analytic matrices have unit marginal variances. Purple adds covariance \\(0.8\\), stretching along the shared diagonal; green has zero covariance. These are unit Mahalanobis-distance contours, not 95% regions or fitted samples. Sum variances are \\(3.6\\) and \\(2\\), respectively.",
+    "reading": "The horizontal and vertical axes are the two parameter coordinates; both ellipses are unit Mahalanobis-distance contours from analytic covariance matrices, not 95% regions or sampled points. The purple ellipse has unit marginal variances and correlation 0.8, so its long axis follows the shared diagonal; the green ellipse has the same marginals but zero covariance and is circular. Projecting onto the sum direction gives variances 3.6 and 2, respectively. Matching coordinate means or marginal variances therefore does not determine uncertainty in their sum.",
     "alt": "Both analytic matrices have unit marginal variances. Purple adds covariance \\(0.8\\), stretching along the shared diagonal; green has zero covariance. These are unit Mahalanobis-distance contours, not 95% regions or fitted samples. Sum variances are \\(3.6\\) and \\(2\\), respectively.",
     "scope": "Architecture and dataflow mechanism diagram.",
     "height": 5.8,

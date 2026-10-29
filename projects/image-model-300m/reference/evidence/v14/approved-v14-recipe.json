@@ -1,0 +1,549 @@
+{
+  "candidate_api_required_files": [
+    "model.py",
+    "objectives.py",
+    "augment.py",
+    "training.py",
+    "evaluate.py",
+    "runner.py"
+  ],
+  "candidate_api_source_policy": {
+    "approval_field": "candidate_api_source_sha256",
+    "inventory_scope": "Every Python source file recursively under the selected candidate directory, excluding __pycache__",
+    "pipeline_journal_field": "candidate_api_source_sha256",
+    "preflight": "The complete inventory is hashed before candidate imports and checked again before initialization; approval must match the exact map.",
+    "relative_path_format": "POSIX path relative to candidate directory",
+    "required_api_entrypoints": [
+      "model.py",
+      "objectives.py",
+      "augment.py",
+      "training.py",
+      "evaluate.py",
+      "runner.py"
+    ],
+    "resume": "The exact candidate source map is part of run identity; any dependency change invalidates resume."
+  },
+  "created_utc": "2026-10-21",
+  "data": {
+    "class_order": [
+      "daisy",
+      "dandelion",
+      "roses",
+      "sunflowers",
+      "tulips"
+    ],
+    "counts": {
+      "archive_images": 3670,
+      "attributed_images": 3661,
+      "cross_label_exact_conflict_excluded": 2,
+      "eligible_images": 3657,
+      "final": {
+        "components": 374,
+        "images": 547,
+        "per_class": {
+          "daisy": 95,
+          "dandelion": 134,
+          "roses": 95,
+          "sunflowers": 104,
+          "tulips": 119
+        }
+      },
+      "fit": {
+        "components": 794,
+        "images": 2562,
+        "per_class": {
+          "daisy": 443,
+          "dandelion": 627,
+          "roses": 446,
+          "sunflowers": 488,
+          "tulips": 558
+        }
+      },
+      "recipe_dev": {
+        "components": 360,
+        "images": 548,
+        "per_class": {
+          "daisy": 95,
+          "dandelion": 134,
+          "roses": 95,
+          "sunflowers": 104,
+          "tulips": 120
+        }
+      },
+      "same_label_duplicate_excluded": 2,
+      "source_components": 1528,
+      "unattributed_excluded": 9
+    },
+    "membership_artifact": {
+      "path": "data/frozen-memberships.json",
+      "review_status": "independently checked split content; complete recipe still pending",
+      "sha256": "1d2b7c42bdd43d1fd2c261ebe26d832c016c600403ca8fd285efa57c3aa58dca"
+    },
+    "prepared_data": {
+      "arrays": {
+        "final_images.npy": "354e705e78de90ae68b0394fb7c2bf8761ba7dc2b7bce4324b3b575a050c0a04",
+        "final_labels.npy": "6a15e4fe1058d18a628170a90a10e3b64e491ae10430ca6c69307eada2931381",
+        "fit_images.npy": "8484b47e2e3878f07b0258a4ca8421ab2e16f58069b268a927e33cb10a3cbaa2",
+        "fit_labels.npy": "26a24bf50041c1a2fe764841603edbd1dabfbe2e77a0c39a1338ca28d351f80c",
+        "recipe_dev_images.npy": "d5aa23cd40991706c6e6b13764113d3aa6dfac7dfd8c7af9ea7ccff11c466a0c",
+        "recipe_dev_labels.npy": "e2da5465383e3db2de3e76249922a663c6315d1d4fd57150dfdddcf5b2482c29"
+      },
+      "external_directory": "/private/tmp/jaxpathways-c03-data-frozen-split-20261021-v7",
+      "note": "Prepared arrays, row identities, membership and split roles are unchanged from the independently reviewed v7 directory. This versioned revision changes only source/checker/run binding; it preserves the prior data, model, stage budgets, evaluation rules and quality floors. The full candidate API source inventory is additionally bound in each approval and pipeline run identity. Any source or recipe change requires another review revision.",
+      "source_manifest_sha256": "8dbba316320889596cecef1f06d58b479125f7c14d30bfba24aed5fe60a9b67c",
+      "split_rows": {
+        "splits/final.json": {
+          "bytes": 231978,
+          "row_count": 547,
+          "sha256": "08263b79af6fee906a6028ea38386c2456cdb5fe949c5c7506afd45fedf6a08c"
+        },
+        "splits/fit.json": {
+          "bytes": 1092148,
+          "row_count": 2562,
+          "sha256": "6dc2496a9c3b8cb52a148620a5b22cadb318ca1250e7a635d154a1126df48cc5"
+        },
+        "splits/recipe_dev.json": {
+          "bytes": 233063,
+          "row_count": 548,
+          "sha256": "05a90fe1e78517faa0668401aaecbf85beecdf568a43646f573c0848be028e8c"
+        }
+      }
+    },
+    "source_metadata_join": {
+      "authority": "source-manifest.json records array",
+      "duplicate_source_or_split_ids": "reject",
+      "enriched_metadata": "the source-inventory pHash is added in memory to the split row and shared by pipeline setup and both SimCLR relation computations",
+      "excluded_unattributed_source_records": "may retain null pHash when not referenced by any frozen split",
+      "id_key": "exact image ID string",
+      "identity_agreements": {
+        "array_label": "each prepared label array value must equal the corresponding split class_index",
+        "class_index": "must equal the index of split label in the frozen recipe class_order",
+        "split_source": [
+          "id",
+          "label",
+          "creator",
+          "creator_id",
+          "raw_sha256",
+          "decoded_pixel_sha256 == source pixel_sha256",
+          "source_url"
+        ]
+      },
+      "mismatched_or_missing_identity_fields": "reject at the production pipeline input loader before model initialization",
+      "referenced_source_phash": "exactly 16 hexadecimal digits; reject otherwise",
+      "required_source_identity_fields_for_referenced_ids": [
+        "id",
+        "label",
+        "creator",
+        "creator_id",
+        "raw_sha256",
+        "pixel_sha256",
+        "source_url",
+        "phash"
+      ],
+      "required_split_identity_fields": [
+        "id",
+        "label",
+        "class_index",
+        "creator",
+        "creator_id",
+        "raw_sha256",
+        "decoded_pixel_sha256",
+        "source_url"
+      ],
+      "split_ids_missing_from_source_inventory": "reject",
+      "split_json_contains_phash": false
+    },
+    "split_method": "Frozen whole-component membership; do not re-solve during materialization. Components join casefolded exact creator attribution name, exact raw SHA-256 identity, and EXIF-transposed RGB pixel SHA-256 identity. Upstream account/photo identities are retained as audit fields but are not separate union edges; inspected source mapping found no account split across creator names.",
+    "upstream": {
+      "archive_license_sha256": "701e91b9e9f46d1f9623fc793a00fd444fe2821f66b01f3a0ff4a73d82f49507",
+      "bytes": 228813984,
+      "name": "TensorFlow flower_photos archive",
+      "rights": "Image-level CC BY 2.0 credits come from the upstream LICENSE.txt credit list; that file is a notice and attribution list, not the complete legal code. Nine files without image-level credit are excluded.",
+      "sha256": "4c54ace7911aaffe13a365c34f650e71dd5bf1be0a58b464e5a7183e3e595d9c",
+      "url": "https://storage.googleapis.com/download.tensorflow.org/example_images/flower_photos.tgz"
+    }
+  },
+  "evaluation": {
+    "baselines": [
+      "uniform class probabilities (each class 1/5); argmax tie resolves to the first class in frozen class_order",
+      "fit-set majority-class predictor; ties resolve to the first class in frozen class_order",
+      "4x4 spatial-bin RGB means yielding 48 float features; fit-only per-class Euclidean centroids; equal-distance tie resolves to the first class in frozen class_order"
+    ],
+    "classification": [
+      "top-1 accuracy",
+      "top-3 accuracy",
+      "per-class recall",
+      "macro balanced accuracy",
+      "confusion matrix",
+      "NLL",
+      "Brier score",
+      "ECE with 10 equal-width probability bins; empty bins omitted and reported count retained"
+    ],
+    "component_bootstrap": {
+      "interval": [
+        0.025,
+        0.975
+      ],
+      "method": "Source-component percentile bootstrap. Sample final source components with replacement and include every image belonging to each selected component; report missing-class replicates as undefined rather than dropping them.",
+      "replicates": 500,
+      "seed": 8675309
+    },
+    "corruptions": {
+      "per_image_transforms": [
+        "Gaussian blur sigma=1.0 in 64-pixel coordinates",
+        "brightness add +0.05 in normalized space",
+        "contrast factor 0.90 around each image mean",
+        "JPEG quality 60 round trip",
+        "center 8x8 occlusion filled with normalized gray 0"
+      ],
+      "report": "Every condition reports image count, per-class counts, primary classification/calibration metrics, and delta from its matching original processor input.",
+      "splits": [
+        "final original 64x64 letterbox",
+        "final resized directly to 64x64 without aspect preservation"
+      ]
+    },
+    "decision_ties": "Use lexicographically smaller stage ID for equal quality metrics unless a stage-specific tie rule above applies. Record losing arms and all fixed-holdout inspection reruns as repeated engineering evaluation, never as a newly blind estimate.",
+    "final_evaluation": "After the dev-only deploy candidate and temperature are frozen, evaluate each predeclared trained arm, frozen probe, CNN control, and fixed nontrained baseline on the final inventory exactly once. Apply release/pilot quality floors only to the one dev-selected deploy candidate. No final result may select or re-rank a candidate.",
+    "limits": [
+      "One small five-class flower corpus, not MTEB or a broad vision benchmark.",
+      "No target-scale 300M optimization is authorized by this pilot recipe.",
+      "Pilot pass/fail is not an independent human acceptance, deployment qualification, or public-weight redistribution decision."
+    ],
+    "precommitted_quality_floors": {
+      "beats_fixed_color_centroid": true,
+      "brightness_plus_0.05_absolute_balanced_accuracy_drop": "<=0.15",
+      "calibrated_nll_minus_raw_nll": "<=0.05",
+      "final_macro_balanced_accuracy": ">=0.40"
+    },
+    "retrieval": {
+      "exclude": "same query ID and every gallery item in the query's exact source component",
+      "gallery_ids": "all final-split IDs in sorted path order",
+      "metrics": [
+        "Recall@1",
+        "Recall@5",
+        "Recall@10",
+        "average precision"
+      ],
+      "query_ids": "all final-split IDs in sorted path order",
+      "ranking_ties": "ascending stable image ID",
+      "relevance": "same class among remaining candidates; report queries with zero remaining relevant candidates and exclude only those queries from macro retrieval averages",
+      "score": "cosine similarity of L2-normalized frozen features"
+    },
+    "selection_tie_rule": "Stage-specific candidate ties use pilot.selection.deploy_choice.tie_order. For all other exact metric ties, sort stage IDs lexicographically. Recipe_dev alone selects arm and temperature; final data does not select or retune.",
+    "temperature": {
+      "fit_split": "recipe_dev only",
+      "grid": "601 evenly spaced log-temperature values from log(0.05) through log(20), inclusive",
+      "objective": "multiclass NLL",
+      "split_usage": "Fit the temperature on recipe_dev for each predeclared arm/control that reports calibrated metrics, then freeze it before final evaluation. No final labels/logits participate in temperature selection.",
+      "tie_rule": "lowest NLL; then smallest absolute log-temperature; then smaller temperature"
+    },
+    "uncertainty": "500 deterministic source-component bootstrap replicates; resample final components with replacement and include all images in sampled components. Report percentile 2.5/97.5 intervals, replicate seed, and any undefined metric replicate count."
+  },
+  "pilot": {
+    "architectures": {
+      "cnn": {
+        "channels": [
+          16,
+          32
+        ],
+        "dropout": 0.1,
+        "head": "linear 32-to-5",
+        "kernels": [
+          3,
+          3
+        ],
+        "padding": "SAME",
+        "pool": "global spatial mean",
+        "strides": [
+          1,
+          2
+        ]
+      },
+      "mae_decoder": {
+        "blocks": 1,
+        "dropout": 0.1,
+        "heads": 4,
+        "mlp_width": 64,
+        "patch_prediction_values": 192,
+        "width": 32
+      },
+      "vit": {
+        "blocks": 2,
+        "dropout": 0.1,
+        "head": "linear 32-to-5",
+        "heads": 4,
+        "image_size": 64,
+        "mlp_width": 64,
+        "patch_size": 8,
+        "position": "learned CLS plus 8x8 learned grid; interpolation permitted only by explicit evaluation setting",
+        "width": 32
+      }
+    },
+    "batching_and_rng": {
+      "batch_size": 8,
+      "key_derivation": "For each stream, start with PRNGKey of its named root seed and fold_in a stable uint32 derived as the first four SHA-256 bytes (big-endian) of the stage ID. Dropout and MAE-mask batch keys then fold_in the stage-local global update step. Per-image augmentation/view keys additionally fold_in the sorted-fit-ID integer index and then view index. Distinct root seeds separate sampling, augmentation, dropout, MAE mask and contrastive views. Sampling uses the declared PCG64 epoch stream and is not a JAX key. A resume restores all keys and sampler positions.",
+      "ordering": "For each epoch, independently permute the fit IDs using a deterministic PRNG seeded by fit_order and epoch. Treat epochs as a concatenated stream: batches consume consecutive stream elements, so a partial tail carries into the next epoch batch without dropping or duplicating any ID. Record per-epoch permutation, epoch/cursor, and each consumed ID.",
+      "partial_batch": "never drop the partial tail. Preserve its examples as the first part of the next epoch batch; fill the remainder from the next epoch permutation. Track both epoch/cursor positions and every consumed ID so each image is consumed once per completed epoch, with no duplicated or omitted IDs."
+    },
+    "optimizer": {
+      "beta1": 0.9,
+      "beta2": 0.999,
+      "epsilon": 1e-08,
+      "global_gradient_norm_clip": 1.0,
+      "name": "AdamW",
+      "reset": "fresh optimizer moments and stage-local step counter at every separately named branch/stage; parent model parameters are copied exactly before optimizer reset",
+      "schedule": "constant within each stage",
+      "weight_decay": 0.0001,
+      "weight_decay_policy": "Rank-two-or-higher trainable arrays receive decoupled weight decay, including CLS and positional embeddings. Rank-one bias and normalization vectors receive no decay. This exactly matches solution/training.py."
+    },
+    "scope": "Bounded CPU correctness/recipe pilot on this small natural-image classification corpus. Not a 300M run, benchmark qualification, general visual representation claim, or release qualification.",
+    "seeds": {
+      "augmentation_root": 314159,
+      "contrastive_view_root": 173205,
+      "dropout_root": 161803,
+      "fit_order": 271828,
+      "initial_cnn": 1731,
+      "initial_vit": 1729,
+      "mask_root": 141421
+    },
+    "selection": {
+      "candidates": [
+        "MAE",
+        "SimCLR"
+      ],
+      "deploy_choice": {
+        "candidates": [
+          "baseline-vit",
+          "finetune-mae",
+          "finetune-simclr",
+          "partial-selected"
+        ],
+        "excluded_baselines": "CNN is a deliberately small supervised architecture control and is not a deploy candidate. Uniform and fit-only color centroids are evaluation controls, not trainable deploy candidates.",
+        "metric": "recipe_dev macro balanced accuracy after each stage, evaluated using only its corresponding trained head",
+        "tie_order": [
+          "baseline-vit",
+          "finetune-mae",
+          "finetune-simclr",
+          "partial-selected"
+        ],
+        "use": "Use recipe_dev balanced accuracy to preselect one named candidate; exact ties follow the listed order. Evaluate every predeclared arm and control on final exactly once after that selection is frozen. Apply precommitted quality floors only to the dev-selected candidate. Retain all other final results for comparison; final results never change the selected arm or recipe."
+      },
+      "metric": "recipe_dev macro balanced accuracy of frozen linear probes",
+      "tie_rule": "Select MAE on exact metric ties; otherwise choose larger score. Final split is never used for selection, temperature, early stopping or recipe changes."
+    },
+    "stages": [
+      {
+        "augment": "supervised_fit",
+        "batch_size": 8,
+        "id": "baseline-cnn",
+        "learning_rate": 0.0003,
+        "objective": "5-class cross-entropy on the fixed supervised CNN; architecture control only and excluded from deploy selection",
+        "parent": "seeded-init-cnn-1731",
+        "updates": 64
+      },
+      {
+        "augment": "supervised_fit",
+        "batch_size": 8,
+        "id": "baseline-vit",
+        "learning_rate": 0.0003,
+        "objective": "5-class cross-entropy",
+        "parent": "seeded-init-vit-1729",
+        "updates": 64
+      },
+      {
+        "augment": "supervised_fit",
+        "batch_size": 8,
+        "id": "mae-pretrain",
+        "learning_rate": 0.0003,
+        "loss_denominator": "batch_size * hidden_patch_count * 192",
+        "objective": "visible-only encoder with fixed 32/64 hidden patch mask; one-layer decoder predicts all 192 normalized pixel values per hidden patch; no per-patch target normalization; padding pixels count like all other pixels",
+        "parent": "seeded-init-vit-1729",
+        "updates": 16
+      },
+      {
+        "augment": "full_two_view",
+        "batch_size": 8,
+        "id": "simclr-pretrain",
+        "learning_rate": 0.0003,
+        "objective": "symmetric multi-positive NT-Xent on 16 L2-normalized projected views per batch of 8 source images, temperature 0.2; for anchor a, loss = logsumexp of all 2N-1 nonself logits minus logsumexp over positives. Positives are its paired view plus views of same-batch images with pinned pHash Hamming distance <=6. No class labels enter positive or negative masks. A known-positive view never enters the negative set.",
+        "parent": "seeded-init-vit-1729",
+        "projector": "32-to-64 ReLU-to-32; L2 normalize; temperature 0.2",
+        "updates": 16
+      },
+      {
+        "augment": "supervised_fit horizontal flip during fitting; unchanged processor/no augmentation during evaluation",
+        "batch_size": 8,
+        "id": "probe-random",
+        "learning_rate": 0.001,
+        "objective": "frozen image features plus linear 5-class cross-entropy head",
+        "parent": "seeded-init-vit-1729",
+        "updates": 32
+      },
+      {
+        "augment": "supervised_fit horizontal flip during fitting; unchanged processor/no augmentation during evaluation",
+        "batch_size": 8,
+        "id": "probe-mae",
+        "learning_rate": 0.001,
+        "objective": "frozen image features plus linear 5-class cross-entropy head",
+        "parent": "mae-pretrain",
+        "updates": 32
+      },
+      {
+        "augment": "supervised_fit horizontal flip during fitting; unchanged processor/no augmentation during evaluation",
+        "batch_size": 8,
+        "id": "probe-simclr",
+        "learning_rate": 0.001,
+        "objective": "frozen image features plus linear 5-class cross-entropy head",
+        "parent": "simclr-pretrain",
+        "updates": 32
+      },
+      {
+        "augment": "supervised_fit horizontal flip during fitting; unchanged processor/no augmentation during evaluation",
+        "batch_size": 8,
+        "id": "probe-supervised",
+        "learning_rate": 0.001,
+        "objective": "fresh linear 5-class cross-entropy head trained on frozen supervised-ViT features; the separate baseline-vit result evaluates its originally trained head",
+        "parent": "baseline-vit",
+        "updates": 32
+      },
+      {
+        "augment": "supervised_fit",
+        "batch_size": 8,
+        "id": "finetune-mae",
+        "learning_rate": 0.0001,
+        "objective": "full ViT plus classifier cross-entropy",
+        "parent": "mae-pretrain",
+        "updates": 32
+      },
+      {
+        "augment": "supervised_fit",
+        "batch_size": 8,
+        "id": "finetune-simclr",
+        "learning_rate": 0.0001,
+        "objective": "full ViT plus classifier cross-entropy",
+        "parent": "simclr-pretrain",
+        "updates": 32
+      },
+      {
+        "augment": "supervised_fit",
+        "batch_size": 8,
+        "id": "partial-selected",
+        "learning_rate": 0.0001,
+        "objective": "fine-tune only final encoder block, final normalization and classifier",
+        "parent": "the MAE or SimCLR pretrained encoder selected using frozen-probe recipe_dev balanced accuracy; exact tie selects MAE",
+        "updates": 32
+      }
+    ]
+  },
+  "preoptimization_gate": {
+    "freeze_rule": "After review, any change to source code, dependencies, prepared arrays, membership, model, objective, budget, selection, metric or gate requires a new versioned recipe review before training.",
+    "optimization_permitted": true,
+    "required_reviewer": "Sol independent v13 R11 source/data/actual-loader and complete synthetic-graph acceptance"
+  },
+  "processor": {
+    "augmentation": {
+      "brightness": "add delta uniformly in [-0.15,0.15] to each normalized RGB pixel",
+      "clip_range": "clip after the full ordered transform to [-1,1]",
+      "contact_sheet_gate": {
+        "boundary": "review-only private data; no image examples are retained in the public repository",
+        "external_private_path": "/private/tmp/c03-simclr-policy-contact-sheet-final.png",
+        "selection": "first two lexicographically sorted fit IDs per frozen class, ten total",
+        "sha256": "9b47a82938caea98979ce85abeca478d569ee9673c25413b7b60d408bf8f33ea",
+        "views": "actual solution/augment.py transforms using PRNGKey(173205), fold_in(stage_step=0, stable sorted fit index, view index)",
+        "visible": "original and two views with class, image ID, creator and source URL"
+      },
+      "contrast": "multiply deviations from each image's spatial-and-channel mean by factor uniformly in [0.8,1.2]",
+      "evaluation": "none",
+      "random_resized_crop": "Sample area fraction uniformly from [0.75,1.0] and aspect ratio log-uniform in [0.90,1.1111111111]. Round crop width/height to positive integers. If either rounded size is outside [1,64], use the full 64x64 frame. Otherwise sample integer top and left uniformly over all valid placements. Map output pixel centers to crop coordinates, bilinearly interpolate with both coordinates and neighbors clamped to the selected crop boundary, then resize to 64x64.",
+      "saturation": "interpolate between grayscale luminance 0.299R+0.587G+0.114B and RGB by factor uniformly in [0.8,1.2]",
+      "self_supervision_base": "No extra supervised horizontal flip is applied before contrastive view generation; each view independently receives the full ordered crop/flip/color policy.",
+      "shared_controls": "CNN and supervised ViT share the supervised horizontal-flip policy. MAE uses the same fit flip and independent patch masks. SimCLR applies the full two-view policy independently per view. Evaluation and every reported probe use the unchanged processor with no augmentation.",
+      "supervised_fit": "one deterministic-keyed horizontal flip with probability 0.5; no color, crop, or scale change",
+      "view_flip": "Bernoulli(0.5), independent per view",
+      "view_order": [
+        "random resized crop",
+        "horizontal flip",
+        "brightness",
+        "contrast",
+        "saturation",
+        "clip"
+      ]
+    },
+    "decode": "Pillow 12.2.0; accept only JPEG/PNG; reject animated/multiframe; apply EXIF transpose; convert to RGB; alpha composited onto RGB (127,127,127); grayscale expanded to RGB; ICC profile not transformed.",
+    "input": "Single-frame JPEG or PNG; maximum 20 MiB and 40 megapixels. The pinned flower archive is verified to contain only JPEG files. Other formats are rejected.",
+    "resize": "aspect-preserving contain to 64x64 with Pillow Lanczos; center on RGB (127,127,127) canvas; no crop",
+    "tensor": "NHWC uint8 [0,255]; model input float32 x/127.5 - 1, range [-1,1]"
+  },
+  "review_change_scope": {
+    "flower_optimization_authorized": true,
+    "items": [
+      "The source-manifest pHash remains the only pHash authority and is joined in memory by exact ID.",
+      "The production loader checks split/source label, creator, creator ID, raw hash, decoded-pixel/source pixel hash, and source URL; split class index must match frozen class order and array labels must match each split class index.",
+      "Referenced split/source records must contain all declared identity fields; duplicates, missing records, mismatches, embedded split pHash, and malformed referenced pHash reject at the production loader boundary.",
+      "Actual frozen v7 inputs pass through the production loader with zero model initialization and zero optimizer updates. Synthetic split/source records mirror the actual schemas and exercise identity-specific negatives and a known pHash-neighbor relation.",
+      "The existing 384-update budget, data roles, model, objectives, selection, metrics, and quality floors remain unchanged; flower optimization remains unauthorized pending independent review.",
+      "Sol independent v13 R11 review closed the production split/source/array join; authorize exactly one unchanged 384-update, batch-8 local CPU attempt under a new source-bound approval, with no retune or cloud."
+    ],
+    "optimization_activation": {
+      "no_reuse_of_v11_approval": true,
+      "reviewed_source_only_recipe_sha256": "ebe2a5d4b1f9678e87bf9bb789fc2e3abe15aa06d37cf61df7caec64f91362d2",
+      "scope": "One exact local CPU attempt; 384 updates at batch size 8 across the unchanged eleven stages; retain any failed outcome.",
+      "source_data_objective_budget_selection_or_floor_changes": false
+    },
+    "previous_v11_activation_failure": {
+      "activation_sha256": "36301cc83149a82ae8a1475f302d62c19225f2bcad6eba04f4260525fb58a52b",
+      "approval_sha256": "29430a4888bb500cef83ed58b606eeab451364de28d04e8751e68005d0676679",
+      "failure_receipt": "/private/tmp/c03-cpu-pilot-v11-20261021/pretraining-failure-receipt.json",
+      "failure_receipt_sha256": "45f30228b536f31baf6de14613a6c1206a12e4c32027ad9ec5591297cae27528",
+      "optimizer_updates": 0,
+      "source_data_objective_budget_selection_or_floor_changes": false
+    },
+    "previous_v12_identity_review_rejection": {
+      "finding": "Same-ID source row with valid pHash but mismatched label/raw/pixel identity was accepted by v12; v13 adds explicit production-loader checks.",
+      "negative_receipt": "/private/tmp/c03-sol-v12-join-probe.json",
+      "negative_receipt_sha256": "962363c350a3438a2d4841ea3d53defb15a482aebc9f11b2a57c4b9b98909ebd",
+      "review_receipt": "/private/tmp/c03-sol-v12-independent-review.json",
+      "review_receipt_sha256": "6894d0e9e4d851471251fc42255d30d4c8231e68f44c9a0c95f7a7d6b11a48cf"
+    },
+    "real_data_roles_budgets_quality_floors_changed": false,
+    "synthetic_graph_only": true
+  },
+  "revision": "c03-source-inventory-identity-join-v14-cpu-pilot-activation",
+  "schema": "jaxpathways.image-pilot-recipe-review.v1",
+  "source_revision": "c03-source-inventory-cross-identity-join-v2",
+  "source_sha256": {
+    "README.md": "1656521c4d85b363cc95efdc0016d3a72064f2c764304c3df1a65e8ae253abd9",
+    "data/LICENSE.txt": "701e91b9e9f46d1f9623fc793a00fd444fe2821f66b01f3a0ff4a73d82f49507",
+    "data/frozen-memberships.json": "1d2b7c42bdd43d1fd2c261ebe26d832c016c600403ca8fd285efa57c3aa58dca",
+    "data/prepare.py": "1966186ff252b236c1dae2236027907385c1d8e263b4563fcd698322ecd76020",
+    "data/processor.py": "022c389ee9ebe50fdf54ddfc3c73e9cdeff66e29bf12a322fe0a5949b0c7813b",
+    "data/verify.py": "2d792d937816ab873f8a188e87c97037cc07456321c21e4b0fe0d95e024c3bd9",
+    "requirements-image-lock.txt": "4c5d6e77226e38dad7befb41ce1fa4449eb3890c767130ec385cbc107b950a5e",
+    "requirements-image.txt": "4834bafd2193bb76cb463e3f352eb36ab3ef6b2318c3f6a6998a528107cc7a39",
+    "run.py": "52f73b5a1ecccbbbbd848e5f8bd45207c5116c7cfde7ff87f99b8d72bfdf178f",
+    "solution/augment.py": "f4dc02a2820eb97d654bc06c124167ba66f8702f6ae474ff8d18231fce3f0f9a",
+    "solution/consumer.py": "f6a1cbe6d9f97b5d6eac8749e9f9ae816d325d93b19399b222d29742dcaaf7df",
+    "solution/consumer_runtime.py": "e0362d7743227eb7d3e0e5b51b3cb62e1d83490993ea59a576b77f2a9c433dca",
+    "solution/evaluate.py": "9c7d0413e75dab17b304b4582e19638e7a8074be3590c17f5b1fe32ea7f6beba",
+    "solution/model.py": "7de863c5abc6c6e2b5e398815d3689dae509b9405e7734b644548374526c59a0",
+    "solution/model_card.py": "1cd868c98ea1c34696684e1fb6e8e96cced1e22046d37ed5d734d59be8fdb2ef",
+    "solution/objectives.py": "fb2e6e8ab47620ea86a18b15eae4bce1eff4cb4d033834ed14a8040a69962073",
+    "solution/pipeline.py": "8b0dfc39bf91bf0e151504abcd6be31856a8dce83633dff1e067673083f45203",
+    "solution/runner.py": "e77b18725fbfa2c69dadbd61780b6efa8106f030131be8cfc0910c1e41fcb29a",
+    "solution/train_steps.py": "13ced16d1d463e8d48064ca098a7ad2f8e3d671b9dab3008aaacdaa81c4967d2",
+    "solution/training.py": "45e4de8c73e76e63bfb4c4bd7f620d754de6c150f510281ff32253fb9352e1c1",
+    "starter/augment.py": "4f6f705e6888daf057a24db2cf4af47b7ffeda7989758b0c9177e86c1879f9c1",
+    "starter/evaluate.py": "6b051f494dea69a5aab77aa99c31571fdcce77dc84a840a182c273eeec5373f2",
+    "starter/model.py": "55e8257aa8eae1315194aae06597f8920039b8ceef5f72a9c08d4871533591ff",
+    "starter/objectives.py": "a3e1c1b3d88e9717c8a363f623a07c51aa26b923df127a21562aaa35a6e14ac2",
+    "starter/runner.py": "8291cb55e324bc8a5b5891df0bb20f3748cebb3994b01db9ec0b9ffc55b26902",
+    "starter/training.py": "81b238cddd8c154559f9d6fff51cf567b1f561470498ae9c4afc605f9a1636ba",
+    "tests/check.py": "86912563c522422dd6f3c48b13c41b9753fad8c8aa2c8439abf2dbf5ad45d154",
+    "tests/oracles.py": "84f8dbd295ca2a180d90aa97f07542c8531abdd28d2adf8f486212d7b008208a"
+  },
+  "status": "Sol approved one exact bounded local CPU pilot attempt; task quality, target scale, human and release gates remain open",
+  "supersedes": {
+    "path": "data/recipe-review-v13.json",
+    "sha256": "ebe2a5d4b1f9678e87bf9bb789fc2e3abe15aa06d37cf61df7caec64f91362d2"
+  }
+}

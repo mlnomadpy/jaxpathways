@@ -3,22 +3,28 @@
 # Exercise: Reject an artifact whose bytes changed after its expected digest was recorded.
 
 # Inputs:
-# - Artifact bytes and the digest recorded before those bytes were changed.
+# - The service source SERVICE, original artifact bytes and recorded digest, changed artifact bytes, and one valid request.
 
 # Outputs:
-# - An integrity rejection for the artifact whose current digest differs from the recorded digest.
+# - A fresh-process integrity rejection before artifact activation or prediction.
 
 # Invariants to check:
-# - Digest comparison uses the exact bytes that would be loaded; a mismatch prevents artifact acceptance.
+# - The changed bytes are the MODEL_PATH supplied to the real service process.
+# - The expected digest remains the original recorded digest.
+# - The child exits unsuccessfully with an integrity error and emits no prediction output.
 
 # Hints:
-# - Hash the bytes after mutation and compare with the stored expected digest.
-# - Assert the rejection explicitly instead of treating an absent result as success.
+# - Serialize the original model and keep its digest before changing any bytes.
+# - Write the changed bytes to the artifact path used by the service, but pass the original digest in the child process environment.
+# - Assert the fresh child rejects with the integrity error and emits no prediction.
 
-import hashlib
+import hashlib, json, os, subprocess, sys, tempfile
+from pathlib import Path
 
-def reject_changed_artifact(artifact_bytes, expected_digest, verifier):
-    # TODO: Verify the changed bytes against the prior digest and require an explicit integrity failure.
+def reject_changed_artifact(service_source, model, valid_request):
+    """Run changed bytes through the fresh-process service boundary."""
+    # TODO: Preserve the original digest, mutate and write the artifact, invoke
+    # the service with the old digest, then assert integrity rejection and no output.
     raise NotImplementedError
 
 

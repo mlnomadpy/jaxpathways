@@ -1,0 +1,218 @@
+{
+  "schema": 1,
+  "evidence_status": "Preserved final engineering-validation run; not rerun while packaging the evidence directory.",
+  "original_run_directory": "/private/tmp/jaxpathways-text-foundations-w2-final",
+  "raw_receipt": {
+    "repository_path": "projects/text-harness/foundations/reference/run/sourcebound-receipt.json",
+    "sha256": "a26d19b5e940196bbb7338a61b6dfbfe781d3117779bae056763630a67b3c825",
+    "preserved_byte_for_byte": true,
+    "path_note": "The raw receipt retains original absolute source/output paths. sourcebound_artifacts maps each entry to its current repository path."
+  },
+  "sourcebound_artifacts": {
+    "candidate_model": {
+      "original_path": "/Users/tahabsn/Documents/ChatGPT/jaxpathways/projects/text-harness/foundations/model.py",
+      "repository_path": "projects/text-harness/foundations/model.py",
+      "sha256": "94a88ae7fd6a251b5b190b4631496e04bb71a31c1bfe418511fdd37ffef034c9"
+    },
+    "checker": {
+      "original_path": "/Users/tahabsn/Documents/ChatGPT/jaxpathways/projects/text-harness/foundations/tests/check_foundations.py",
+      "repository_path": "projects/text-harness/foundations/tests/check_foundations.py",
+      "sha256": "dbd4f2714f18e020f2dde31fdc4704b167d9b7d7ec56048ac31285f88ae77bb4"
+    },
+    "config": {
+      "original_path": "/Users/tahabsn/Documents/ChatGPT/jaxpathways/projects/text-harness/foundations/config.py",
+      "repository_path": "projects/text-harness/foundations/config.py",
+      "sha256": "5c05801a7ec1a15b3978c87c77ac4e64d1b056c60487cbcff3cdf72475c8bb64"
+    },
+    "data_pipeline": {
+      "original_path": "/Users/tahabsn/Documents/ChatGPT/jaxpathways/projects/text-harness/foundations/data.py",
+      "repository_path": "projects/text-harness/foundations/data.py",
+      "sha256": "ff8ff698090866d46bc1f2b3540393b9a16db2121ad824110bd2ba53db645bd8"
+    },
+    "inference_package_manifest": {
+      "original_path": "/private/tmp/jaxpathways-text-foundations-w2-final/inference-package/package.json",
+      "repository_path": "projects/text-harness/foundations/reference/run/inference-package/package.json",
+      "sha256": "02b92a9f56325e5a38be2c40bf263d2ca91db6122ba84dd4df266339457bf278"
+    },
+    "inference_package_parameters": {
+      "original_path": "/private/tmp/jaxpathways-text-foundations-w2-final/inference-package/params.npz",
+      "repository_path": "projects/text-harness/foundations/reference/run/inference-package/params.npz",
+      "sha256": "271cb6457de5da3f727c343c64b7bd350c00e503ea7ac847eecf51fbd5558802"
+    },
+    "inference_package_tokenizer": {
+      "original_path": "/private/tmp/jaxpathways-text-foundations-w2-final/inference-package/tokenizer.json",
+      "repository_path": "projects/text-harness/foundations/reference/run/inference-package/tokenizer.json",
+      "sha256": "c92b534443cc6a1eacd5e78406b2c42e59553df704a07102a03c639d3694f586"
+    },
+    "license": {
+      "original_path": "/Users/tahabsn/Documents/ChatGPT/jaxpathways/projects/text-harness/foundations/data/LICENSE.md",
+      "repository_path": "projects/text-harness/foundations/data/LICENSE.md",
+      "sha256": "001298ffd351f17c7f08541e185e1c7e3beff2a876fe004fa9176fda649e3c85"
+    },
+    "raw_metrics": {
+      "original_path": "/private/tmp/jaxpathways-text-foundations-w2-final/pilot-results.json",
+      "repository_path": "projects/text-harness/foundations/reference/run/pilot-results.json",
+      "sha256": "a10b3148d1d0a667e793a5ef0ef00dacff1bda7ecfa68cf48e7329baf5abeee3"
+    },
+    "requirements": {
+      "original_path": "/Users/tahabsn/Documents/ChatGPT/jaxpathways/projects/text-harness/foundations/requirements-foundations.txt",
+      "repository_path": "projects/text-harness/foundations/requirements-foundations.txt",
+      "sha256": "a486fbd8837a0b8c7e363e251e4231a96c11b2366eee79cc1b8b3f0745d53a4b"
+    },
+    "resume_checkpoint_manifest": {
+      "original_path": "/private/tmp/jaxpathways-text-foundations-w2-final/resume-input/checkpoint.json",
+      "repository_path": "projects/text-harness/foundations/reference/run/resume-input/checkpoint.json",
+      "sha256": "3786901e488f3eafd1176c3aab76790882833ffc1814fac33bb6c6f53e4c33f0"
+    },
+    "resume_checkpoint_state": {
+      "original_path": "/private/tmp/jaxpathways-text-foundations-w2-final/resume-input/state.npz",
+      "repository_path": "projects/text-harness/foundations/reference/run/resume-input/state.npz",
+      "sha256": "b0c6c40a4b2b5d94b52347783ae57031ed30c61c183cceb6fc9979df270f2932"
+    },
+    "source": {
+      "original_path": "/Users/tahabsn/Documents/ChatGPT/jaxpathways/projects/text-harness/foundations/data/source/alice-pg11.txt",
+      "repository_path": "projects/text-harness/foundations/data/source/alice-pg11.txt",
+      "sha256": "01b38ea4c710a84bc18d0bd41271a5a1a92b94e97b2812f4dece97d4a694725e"
+    },
+    "source_manifest": {
+      "original_path": "/Users/tahabsn/Documents/ChatGPT/jaxpathways/projects/text-harness/foundations/data/manifest.json",
+      "repository_path": "projects/text-harness/foundations/data/manifest.json",
+      "sha256": "d6ec10ee2ccc11a08cec7947adfe8fc1098f83c6bf2015e64ea17c85efed2442"
+    },
+    "tokenizer": {
+      "original_path": "/private/tmp/jaxpathways-text-foundations-w2-final/tokenizer.json",
+      "repository_path": "projects/text-harness/foundations/reference/run/tokenizer.json",
+      "sha256": "c92b534443cc6a1eacd5e78406b2c42e59553df704a07102a03c639d3694f586"
+    },
+    "tokenizer_info": {
+      "original_path": "/private/tmp/jaxpathways-text-foundations-w2-final/tokenizer-info.json",
+      "repository_path": "projects/text-harness/foundations/reference/run/tokenizer-info.json",
+      "sha256": "77d42f8baf9999b64d3aa83e6a1eb83447eef77c49fef8cb820af0b2bad3a5c8"
+    },
+    "train": {
+      "original_path": "/Users/tahabsn/Documents/ChatGPT/jaxpathways/projects/text-harness/foundations/train.py",
+      "repository_path": "projects/text-harness/foundations/train.py",
+      "sha256": "ee9f3bc73505ce8e00fe9680589d97805593e5c8c035cba4709b5f334eb27a2b"
+    }
+  },
+  "retained_run_files": {
+    "run/corrupt-package/package.json": {
+      "sha256": "02b92a9f56325e5a38be2c40bf263d2ca91db6122ba84dd4df266339457bf278",
+      "bytes": 1518
+    },
+    "run/corrupt-package/params.npz": {
+      "sha256": "271cb6457de5da3f727c343c64b7bd350c00e503ea7ac847eecf51fbd5558802",
+      "bytes": 50598
+    },
+    "run/corrupt-package/tokenizer.json": {
+      "sha256": "85caaf4ab3b8f9ac9cf018369e6a3de062227416bedf6d9d53016db53ebead32",
+      "bytes": 5803
+    },
+    "run/corrupt-state/checkpoint.json": {
+      "sha256": "3786901e488f3eafd1176c3aab76790882833ffc1814fac33bb6c6f53e4c33f0",
+      "bytes": 8362
+    },
+    "run/corrupt-state/state.npz": {
+      "sha256": "88ae9a3a3286aea0c5fc7cc5373ba3939d06ddacf4e08ab0a0b87ec6a2d60477",
+      "bytes": 157941
+    },
+    "run/coverage-checkpoint/checkpoint.json": {
+      "sha256": "ebfc77d143b1aa030b1b8086d4fffca0505fcadc99083efc99eaf82776972c1d",
+      "bytes": 4482
+    },
+    "run/coverage-checkpoint/state.npz": {
+      "sha256": "884431d3f64f90c0de8015ff6492442104f3848af06f633c1948e7256af12b2a",
+      "bytes": 27798
+    },
+    "run/inference-package/package.json": {
+      "sha256": "02b92a9f56325e5a38be2c40bf263d2ca91db6122ba84dd4df266339457bf278",
+      "bytes": 1518
+    },
+    "run/inference-package/params.npz": {
+      "sha256": "271cb6457de5da3f727c343c64b7bd350c00e503ea7ac847eecf51fbd5558802",
+      "bytes": 50598
+    },
+    "run/inference-package/tokenizer.json": {
+      "sha256": "c92b534443cc6a1eacd5e78406b2c42e59553df704a07102a03c639d3694f586",
+      "bytes": 5796
+    },
+    "run/package-child/canary.npz": {
+      "sha256": "5ab42d1b15e18f19e9142065a143fbaea6d0834b914eea8fa681b78d97770c19",
+      "bytes": 3842
+    },
+    "run/package-child/package.json": {
+      "sha256": "d518ce477c3571719dc9b6fc3ff8459d98eb6cea936647c334b0f6da29ebf2c3",
+      "bytes": 23
+    },
+    "run/pilot-results.json": {
+      "sha256": "a10b3148d1d0a667e793a5ef0ef00dacff1bda7ecfa68cf48e7329baf5abeee3",
+      "bytes": 18030
+    },
+    "run/resume-child/checkpoint.json": {
+      "sha256": "2864df1b011e48059611dc705ed3ed1ff48d070b73c07eb20770f6d95bf75fb7",
+      "bytes": 8362
+    },
+    "run/resume-child/state.npz": {
+      "sha256": "d6b7f351fe5b9a377d3d057737771ef8c78b0a62ba911964c5bc8044bb6ce33d",
+      "bytes": 157934
+    },
+    "run/resume-child/trace.json": {
+      "sha256": "3c8c1d12f614052e7821158a569bc878e10db9124954047e31fafd2e168664ae",
+      "bytes": 200
+    },
+    "run/resume-expected/checkpoint.json": {
+      "sha256": "2864df1b011e48059611dc705ed3ed1ff48d070b73c07eb20770f6d95bf75fb7",
+      "bytes": 8362
+    },
+    "run/resume-expected/state.npz": {
+      "sha256": "d6b7f351fe5b9a377d3d057737771ef8c78b0a62ba911964c5bc8044bb6ce33d",
+      "bytes": 157934
+    },
+    "run/resume-input/checkpoint.json": {
+      "sha256": "3786901e488f3eafd1176c3aab76790882833ffc1814fac33bb6c6f53e4c33f0",
+      "bytes": 8362
+    },
+    "run/resume-input/state.npz": {
+      "sha256": "b0c6c40a4b2b5d94b52347783ae57031ed30c61c183cceb6fc9979df270f2932",
+      "bytes": 157934
+    },
+    "run/sourcebound-receipt.json": {
+      "sha256": "a26d19b5e940196bbb7338a61b6dfbfe781d3117779bae056763630a67b3c825",
+      "bytes": 5150
+    },
+    "run/tokenizer-info.json": {
+      "sha256": "77d42f8baf9999b64d3aa83e6a1eb83447eef77c49fef8cb820af0b2bad3a5c8",
+      "bytes": 2525
+    },
+    "run/tokenizer.json": {
+      "sha256": "c92b534443cc6a1eacd5e78406b2c42e59553df704a07102a03c639d3694f586",
+      "bytes": 5796
+    }
+  },
+  "figure": {
+    "data_source_report_sha256": "a10b3148d1d0a667e793a5ef0ef00dacff1bda7ecfa68cf48e7329baf5abeee3",
+    "matplotlib_version": "3.10.8",
+    "artifacts": {
+      "make_pilot_figure.py": {
+        "repository_path": "projects/text-harness/foundations/reference/make_pilot_figure.py",
+        "sha256": "c52819be17cd9a984d257e71cdeee5072d5057cebde55dbe9fd760b2ccfefa3e",
+        "bytes": 5812
+      },
+      "pilot-figure-data.json": {
+        "repository_path": "projects/text-harness/foundations/reference/pilot-figure-data.json",
+        "sha256": "d69e016d4bc8d24192c6de5915d86c147e0cd4a607bf603537fc08d932150d03",
+        "bytes": 1402
+      },
+      "pilot-metrics.svg": {
+        "repository_path": "projects/text-harness/foundations/reference/pilot-metrics.svg",
+        "sha256": "d6229dcd040aada7ad6cda67a56e20e32a52aa25fc40288262feacaa8d11e111",
+        "bytes": 27401
+      },
+      "pilot-metrics.png": {
+        "repository_path": "projects/text-harness/foundations/reference/pilot-metrics.png",
+        "sha256": "b22afe836732c0a441ccb80fedbf5308f10e401326d968b5aa82ab6bde88ae9a",
+        "bytes": 132466
+      }
+    }
+  }
+}

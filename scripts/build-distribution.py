@@ -5,6 +5,7 @@ import json
 import subprocess
 from pathlib import Path
 from zipfile import ZipFile, ZIP_DEFLATED, ZIP_STORED
+from epub_identity import FINGERPRINT_PROPERTY, modified_at, primary_identifier, rendered_fingerprint
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / 'public/downloads'
@@ -16,7 +17,344 @@ REPOSITORY_ONLY_TPU_FILES = {
 PROJECT_EXTRA_FILES = {
     # kernel-audit's README documents this optional, separately pinned TPU environment.
     "kernel-audit": ("resources/tpu-gcp/requirements-qualification.txt",),
+    "posttraining-audit": (
+        "projects/text-harness/foundations/config.py",
+        "projects/text-harness/foundations/data.py",
+        "projects/text-harness/foundations/model.py",
+        "projects/text-harness/foundations/train.py",
+        "projects/text-harness/foundations/reference/run/inference-package/package.json",
+        "projects/text-harness/foundations/reference/run/inference-package/params.npz",
+        "projects/text-harness/foundations/reference/run/inference-package/tokenizer.json",
+    ),
 }
+POSTTRAINING_RECIPE = "projects/posttraining-audit/transformer_lineage/recipe.json"
+POSTTRAINING_RECIPE_SHA256 = "8411afc4412c59973d56b2cceae530dd642a5aa1c9e6f57a5dbb7f6ba110bc57"
+POSTTRAINING_PARENT_SHA256 = {
+    "projects/text-harness/foundations/config.py": "5c05801a7ec1a15b3978c87c77ac4e64d1b056c60487cbcff3cdf72475c8bb64",
+    "projects/text-harness/foundations/data.py": "ff8ff698090866d46bc1f2b3540393b9a16db2121ad824110bd2ba53db645bd8",
+    "projects/text-harness/foundations/model.py": "94a88ae7fd6a251b5b190b4631496e04bb71a31c1bfe418511fdd37ffef034c9",
+    "projects/text-harness/foundations/train.py": "ee9f3bc73505ce8e00fe9680589d97805593e5c8c035cba4709b5f334eb27a2b",
+    "projects/text-harness/foundations/reference/run/inference-package/package.json": "02b92a9f56325e5a38be2c40bf263d2ca91db6122ba84dd4df266339457bf278",
+    "projects/text-harness/foundations/reference/run/inference-package/params.npz": "271cb6457de5da3f727c343c64b7bd350c00e503ea7ac847eecf51fbd5558802",
+    "projects/text-harness/foundations/reference/run/inference-package/tokenizer.json": "c92b534443cc6a1eacd5e78406b2c42e59553df704a07102a03c639d3694f586",
+}
+
+
+def posttraining_parent_files(root):
+    """Validate and return only the seven frozen parent files for the child archive."""
+    recipe_path = root / POSTTRAINING_RECIPE
+    recipe_bytes = recipe_path.read_bytes()
+    if hashlib.sha256(recipe_bytes).hexdigest() != POSTTRAINING_RECIPE_SHA256:
+        raise ValueError("posttraining-audit parent recipe differs from the frozen bridge recipe")
+    recipe = json.loads(recipe_bytes)
+    parent = recipe.get("parent", {})
+    package_root = "projects/text-harness/foundations/reference/run/inference-package"
+    expected_package = {
+        path.removeprefix(package_root + "/"): digest
+        for path, digest in POSTTRAINING_PARENT_SHA256.items()
+        if path.startswith(package_root + "/")
+    }
+    expected_foundation = {
+        Path(path).name: digest
+        for path, digest in POSTTRAINING_PARENT_SHA256.items()
+        if path.startswith("projects/text-harness/foundations/")
+        and not path.startswith(package_root + "/")
+    }
+    if parent.get("packagePath") != package_root:
+        raise ValueError("posttraining-audit parent package path differs from the frozen bridge recipe")
+    if parent.get("packageFilesSha256") != expected_package:
+        raise ValueError("posttraining-audit parent package pins differ from the frozen bridge recipe")
+    if parent.get("foundationSourceSha256") != expected_foundation:
+        raise ValueError("posttraining-audit foundation pins differ from the frozen bridge recipe")
+    if set(PROJECT_EXTRA_FILES["posttraining-audit"]) != set(POSTTRAINING_PARENT_SHA256):
+        raise ValueError("posttraining-audit extra-file allowlist differs from the frozen bridge recipe")
+
+    validated = {}
+    for relative, expected in POSTTRAINING_PARENT_SHA256.items():
+        candidate = (root / relative).resolve()
+        if not candidate.is_relative_to(root.resolve()) or not candidate.is_file():
+            raise ValueError(f"posttraining-audit parent file is missing or unsafe: {relative}")
+        if hashlib.sha256(candidate.read_bytes()).hexdigest() != expected:
+            raise ValueError(f"posttraining-audit parent file hash mismatch: {relative}")
+        validated[relative] = candidate
+    return validated
+C01_SOURCE_FILES = {
+    "README.md",
+    "EVALUATION.md",
+    "MODALITIES.md",
+    "MONITORING.md",
+    "RELEASE.md",
+    "TRAINING_RECIPE.md",
+    "baseline.py",
+    "config.py",
+    "evaluation.py",
+    "model.py",
+    "objectives.py",
+    "package_runtime.py",
+    "plots.py",
+    "run.py",
+    "trainer.py",
+    "requirements-embedding-lock.txt",
+    "requirements-embedding.txt",
+    "data/LICENSES.md",
+    "data/RECIPE_AMENDMENTS.md",
+    "data/dataset.py",
+    "data/frozen_recipe.json",
+    "data/prepare.py",
+    "data/recipe-history/c01-original-pretraining-recipe.json",
+    "tools/build_evidence_index.py",
+    "tools/pack_reference_evidence.py",
+    "tools/render_teaching_objectives.py",
+    "starter/README.md",
+    "starter/model.py",
+    "tests/check.py",
+    "tests/resume_worker.py",
+    "tests/test_plots.py",
+}
+
+
+C02_SOURCE_FILES = {
+    'README.md',
+    'config.py',
+    'consumer.py',
+    'data/RIGHTS.md',
+    'data/foundation-reuse.json',
+    'data/frozen_recipe.json',
+    'data/lm_eval_tasks/LICENSE.md',
+    'data/lm_eval_tasks/NOTICE.md',
+    'data/lm_eval_tasks/arc_easy/arc_easy.yaml',
+    'data/lm_eval_tasks/hellaswag/hellaswag.yaml',
+    'data/lm_eval_tasks/hellaswag/utils.py',
+    'data/prepare.py',
+    'evaluate_pilot.py',
+    'evaluate_pythia_baseline.py',
+    'evaluate_pythia_qa.py',
+    'evaluate_qa_diagnostics.py',
+    'export_consumer.py',
+    'fetch_pythia_baseline.py',
+    'lm_eval_adapter.py',
+    'model.py',
+    'pythia_pin.py',
+    'render_c02_figures.py',
+    'requirements-c02-baseline.txt',
+    'requirements-c02-figures.txt',
+    'requirements-c02-lm-eval.txt',
+    'requirements-c02.txt',
+    'run_lm_eval.py',
+    'run_pilot.py',
+    'serve_local.py',
+    'squad_scoring.py',
+    'starter/README.md',
+    'starter/model.py',
+    'tests/check.py',
+    'tests/replay_branch.py',
+    'tests/resume_worker.py',
+    'tests/test_consumer.py',
+    'tests/test_data_freeze.py',
+    'tests/test_evaluation.py',
+    'tests/test_evidence_reconstruction.py',
+    'tests/test_export_consumer.py',
+    'tests/test_lm_eval_adapter.py',
+    'tests/test_model_math.py',
+    'tests/test_pythia_baseline.py',
+    'tests/test_qa_diagnostics.py',
+    'tests/test_runner_integrity.py',
+    'tests/test_service_live.py',
+    'tests/test_starter_contract.py',
+    'tests/test_training_recovery.py',
+    'tools/build_review_packet.py',
+    'training.py',
+}
+
+
+def c01_pilot_packet(root):
+    """Return the explicitly allowlisted C01 source and public evidence files."""
+    project = root / "projects" / "embedding-model-300m"
+    index_path = project / "reference" / "evidence-index.json"
+    if not index_path.is_file():
+        raise FileNotFoundError(f"Required C01 public evidence index is missing: {index_path}")
+    index = json.loads(index_path.read_text())
+    public_files = index.get("public_files")
+    source_files = index.get("source_files_sha256")
+    if not isinstance(public_files, dict) or not public_files:
+        raise ValueError("C01 evidence index must contain a nonempty public_files map")
+    if not isinstance(source_files, dict) or not source_files:
+        raise ValueError("C01 evidence index must contain a nonempty source_files_sha256 map")
+
+    def verified(relative, expected):
+        candidate = (project / relative).resolve()
+        if project.resolve() not in candidate.parents or not candidate.is_file():
+            raise ValueError(f"C01 evidence path is missing or unsafe: {relative}")
+        actual = hashlib.sha256(candidate.read_bytes()).hexdigest()
+        if actual != expected:
+            raise ValueError(f"C01 evidence hash mismatch: {relative}")
+        return candidate
+
+    files = {index_path}
+    for relative, expected in source_files.items():
+        if not isinstance(relative, str) or not isinstance(expected, str):
+            raise ValueError("C01 source hash entries must map paths to SHA-256 strings")
+        project_relative = relative.removeprefix("projects/embedding-model-300m/")
+        files.add(verified(project_relative, expected))
+    for relative, expected in public_files.items():
+        if (
+            not isinstance(relative, str)
+            or not relative.startswith("reference/")
+            or ".." in Path(relative).parts
+            or not isinstance(expected, str)
+            or len(expected) != 64
+        ):
+            raise ValueError(f"Unsafe C01 public evidence entry: {relative}")
+        lowered = relative.lower()
+        payload_names = {
+            "model.safetensors",
+            "tokenizer.json",
+            "tokenizer_config.json",
+            "special_tokens_map.json",
+            "vocab.txt",
+        }
+        payload_suffixes = {".safetensors", ".ckpt", ".pt", ".pth", ".onnx", ".gguf", ".msgpack", ".bin"}
+        if (
+            Path(lowered).name in payload_names
+            or Path(lowered).suffix in payload_suffixes
+            or "baseline_snapshot" in Path(lowered).parts
+            or ("checkpoints" in Path(lowered).parts and Path(lowered).suffix != ".json")
+        ):
+            raise ValueError(f"C01 source package cannot include model payload: {relative}")
+        files.add(verified(relative, expected))
+    for key in ("historical_receipt", "checker_amendment"):
+        reference = index.get(key)
+        if not isinstance(reference, dict) or not isinstance(reference.get("path"), str):
+            raise ValueError(f"C01 evidence index is missing {key}")
+        if reference["path"] not in public_files:
+            raise ValueError(f"C01 {key} must be included in public_files")
+        if public_files[reference["path"]] != reference.get("sha256"):
+            raise ValueError(f"C01 {key} digest does not match public_files")
+    source_files_to_bundle = {project / relative for relative in C01_SOURCE_FILES}
+    for path in source_files_to_bundle:
+        if not path.is_file():
+            raise FileNotFoundError(f"Required C01 source file is missing: {path.relative_to(project)}")
+    for relative in source_files:
+        project_relative = relative.removeprefix("projects/embedding-model-300m/")
+        if Path(project_relative).as_posix() not in C01_SOURCE_FILES:
+            raise ValueError(f"C01 source receipt names a file outside the package allowlist: {relative}")
+    files.update(source_files_to_bundle)
+    return project, index_path, index, files
+
+
+def c02_pilot_packet(root):
+    """Verify the complete C02 source set and its weights-free review evidence."""
+    project = root / "projects/causal-model-300m"
+    index_path = project / "reference/evidence-index.json"
+    index = json.loads(index_path.read_text())
+    expected_sources = {"projects/causal-model-300m/" + path for path in C02_SOURCE_FILES}
+    if set(index["source_files_sha256"]) != expected_sources:
+        raise ValueError("C02 source index differs from its complete package allowlist")
+    if not index.get("public_files"):
+        raise ValueError("C02 public evidence inventory is empty")
+    files = {index_path}
+    for entries, is_source in ((index["source_files_sha256"], True), (index["public_files"], False)):
+        for relative, digest in entries.items():
+            relative = relative.removeprefix("projects/causal-model-300m/") if is_source else relative
+            path = (project / relative).resolve()
+            if not path.is_relative_to(project.resolve()) or not path.is_file():
+                raise ValueError(f"C02 evidence is missing or unsafe: {relative}")
+            if not is_source:
+                if not relative.startswith("reference/") or path.suffix not in {".md", ".json", ".jsonl", ".svg", ".png", ".log"}:
+                    raise ValueError(f"C02 public evidence is outside the weights-free allowlist: {relative}")
+                if path.name in {"tokenizer.json", "tokenizer_config.json", "config.json", "weights.json"}:
+                    raise ValueError(f"C02 model/tokenizer payload is not public evidence: {relative}")
+            if not isinstance(digest, str) or len(digest) != 64 or hashlib.sha256(path.read_bytes()).hexdigest() != digest:
+                raise ValueError(f"C02 evidence hash mismatch: {relative}")
+            files.add(path)
+    return project, index_path, index, files
+
+
+def c03_pilot_packet(root):
+    """Verify the accepted C03 source freeze and numeric-only public packet."""
+    project = root / "projects/image-model-300m"
+    packet = project / "reference/evidence/v14"
+    manifest_path = packet / "packet-manifest.json"
+    manifest = json.loads(manifest_path.read_text())
+    recipe_path = packet / "approved-v14-recipe.json"
+    approval_path = packet / "approved-v14-approval.json"
+    recipe = json.loads(recipe_path.read_text())
+    approval = json.loads(approval_path.read_text())
+    identity = json.loads((packet / "source-and-run-identities.json").read_text())
+    expected_recipe = "df0a1a138f0635a39fcaa1b03f154403ed272560df9181fb5ad37722614d3c4c"
+    expected_approval = "f4fb56a70ec453ffd995c36c56c9b80cbd7cd9f739deb59f4db1fdd95c91f82b"
+    expected_manifest = "3b1dcfe589fffc25a43da336beb07d82334b6f8971a73084e2b989b6e8f2a794"
+
+    def verified(relative, expected):
+        candidate = (project / relative).resolve()
+        if not candidate.is_relative_to(project.resolve()) or not candidate.is_file():
+            raise ValueError(f"C03 evidence path is missing or unsafe: {relative}")
+        actual = hashlib.sha256(candidate.read_bytes()).hexdigest()
+        if actual != expected:
+            raise ValueError(f"C03 evidence hash mismatch: {relative}")
+        return candidate
+
+    if hashlib.sha256(recipe_path.read_bytes()).hexdigest() != expected_recipe:
+        raise ValueError("C03 recipe differs from the accepted v14 bytes")
+    if hashlib.sha256(approval_path.read_bytes()).hexdigest() != expected_approval:
+        raise ValueError("C03 approval differs from the accepted v14 bytes")
+    if hashlib.sha256(manifest_path.read_bytes()).hexdigest() != expected_manifest:
+        raise ValueError("C03 packet manifest differs from the accepted v14 bytes")
+    if approval.get("recipe_sha256") != expected_recipe or approval.get("source_files_sha256") != recipe.get("source_sha256"):
+        raise ValueError("C03 approval does not bind the accepted recipe and source inventory")
+    source_sha256 = recipe.get("source_sha256")
+    if not isinstance(source_sha256, dict) or len(source_sha256) != 28:
+        raise ValueError("C03 accepted recipe must enumerate exactly 28 source files")
+    if set(identity.get("as_run_source_inventory", {})) != set(source_sha256):
+        raise ValueError("C03 run identity source inventory differs from the accepted recipe")
+    if len(identity.get("as_run_candidate_python_inventory", {})) != 11:
+        raise ValueError("C03 candidate source inventory must contain exactly 11 Python files")
+    if approval.get("candidate_api_source_sha256") != {
+        path.split("/", 1)[1]: row["sha256"]
+        for path, row in identity["as_run_candidate_python_inventory"].items()
+    }:
+        raise ValueError("C03 candidate source inventory differs from accepted approval")
+    if not isinstance(manifest.get("files"), dict) or len(manifest["files"]) != 29:
+        raise ValueError("C03 public packet manifest must enumerate exactly 29 files")
+
+    expected_files = {manifest_path}
+    for relative, digest in source_sha256.items():
+        if not isinstance(relative, str) or relative.startswith("/") or ".." in Path(relative).parts:
+            raise ValueError(f"Unsafe C03 source entry: {relative}")
+        expected_files.add(verified(relative, digest))
+    for relative, digest in manifest["files"].items():
+        if (
+            not isinstance(relative, str)
+            or not (relative == "TEACHING.md" or relative.startswith("reference/") or relative.startswith("tools/"))
+            or ".." in Path(relative).parts
+            or not isinstance(digest, str)
+            or len(digest) != 64
+        ):
+            raise ValueError(f"Unsafe C03 public evidence entry: {relative}")
+        lowered = relative.lower()
+        if Path(lowered).suffix not in {".md", ".json", ".svg", ".png", ".py", ".txt"}:
+            raise ValueError(f"C03 public evidence is outside the numeric packet allowlist: {relative}")
+        if lowered.startswith("tools/") and Path(lowered).suffix not in {".py", ".txt"}:
+            raise ValueError(f"C03 tool file is outside the checker allowlist: {relative}")
+        if Path(lowered).suffix == ".png" and "figures" not in Path(lowered).parts:
+            raise ValueError(f"C03 PNG is outside the checked figure directory: {relative}")
+        if any(token in Path(lowered).name for token in ("weight", "checkpoint", "feature-vector", "embedding")):
+            raise ValueError(f"C03 model payload is not public evidence: {relative}")
+        expected_files.add(verified(relative, digest))
+    actual_project_files = {
+        path.resolve()
+        for path in project.rglob("*")
+        if path.is_file() and "__pycache__" not in path.parts and path.suffix != ".pyc"
+    }
+    if actual_project_files != expected_files:
+        raise ValueError(
+            "C03 source directory differs from the exact accepted package set: "
+            f"extra={sorted(str(p.relative_to(root)) for p in actual_project_files - expected_files)}, "
+            f"missing={sorted(str(p.relative_to(root)) for p in expected_files - actual_project_files)}"
+        )
+    return project, manifest_path, manifest, expected_files
+
+
 course = json.loads((ROOT / 'public/curriculum.json').read_text())
 release = json.loads((ROOT / 'curriculum/releases.json').read_text())[0]
 lessons = [lesson for phase in course['phases'] for lesson in phase['lessons'] if lesson['status'] == 'authored']
@@ -61,6 +399,12 @@ book_guides = json.loads(subprocess.check_output(["node", "scripts/render-book-g
 solutions=[]
 def chapter(lesson):
     body = f'<h1>{esc(lesson["title"])}</h1><p>{esc(lesson["objective"])}</p>'
+    if lesson.get('prerequisites'):
+        preparation = []
+        for dependency in lesson['prerequisites']:
+            target = next(item for item in lessons if item['id'] == dependency)
+            preparation.append('<a href="chapter-'+str(lessons.index(target))+'.xhtml">'+esc(target['title'])+'</a>')
+        body += '<nav aria-label="Chapter preparation"><strong>Before this chapter:</strong> '+'; '.join(preparation)+'</nav>'
     body += maturity('lessons', lesson['id'])
     c = lesson['content']
     if c.get('setupBundle'):
@@ -129,40 +473,62 @@ for phase in phases:
     stage_ids=', '.join(str(value) for value in (phase.get('projectStageIds') or []))
     stage_note=f' Start with project stage{("s" if len(phase.get("projectStageIds") or []) != 1 else "")} {esc(stage_ids)}.' if stage_ids else ''
     guide_bodies.append(maturity('phases', phase['id']) + f'<h1>Phase {esc(phase["number"])}: {esc(phase["title"])}</h1><h2>{rich(guide.get("question","Phase guide"))}</h2><p>{rich(guide.get("why",""))}</p><h2>Prepare and work through the phase</h2><ol>{milestones}</ol><h2>Readiness check</h2><p>{rich(guide.get("readiness",{}).get("prompt",""))}</p><p>Answer: {rich(guide.get("readiness",{}).get("answer",""))}</p><h2>Transfer question</h2><p>{rich(guide.get("transfer",{}).get("prompt",""))}</p><p>Approach: {rich(guide.get("transfer",{}).get("approach",""))}</p><h2>Common pitfall</h2><p><strong>{rich(guide.get("pitfall",{}).get("symptom",""))}</strong> {rich(guide.get("pitfall",{}).get("check",""))}</p><h2>Phase artifact</h2><p>{rich(guide.get("completion",""))}</p><p>{rich(guide.get("furtherWork",""))}</p><p><strong>Phase project:</strong> {esc(phase.get("project",""))}. {esc(phase.get("checkpoint",""))}{stage_note}</p><ul>{project_links}</ul>')
-nav = '<nav><h2>Contents</h2><ol><li><a href="intro.xhtml">About this edition and routes</a></li>' + ''.join(f'<li><a href="phase-{i}.xhtml">Phase {esc(p["number"])}: {esc(p["title"])}</a><ol>'+''.join(f'<li><a href="chapter-{lessons.index(l)}.xhtml">{esc(l["title"])}</a></li>' for l in p['lessons'] if l['status']=='authored')+'</ol></li>' for i,p in enumerate(phases)) + '<li><a href="appendix-workflow.xhtml">Appendix: project structure and evidence</a></li><li><a href="appendix-experiments.xhtml">Appendix: reproducible experiments workshop</a></li><li><a href="solutions.xhtml">Solutions</a></li></ol></nav>'
+nav = '<nav><h2>Contents</h2><ol><li><a href="intro.xhtml">About this edition and routes</a></li>' + ''.join(f'<li><a href="phase-{i}.xhtml">Phase {esc(p["number"])}: {esc(p["title"])}</a><ol>'+''.join(f'<li><a href="chapter-{lessons.index(l)}.xhtml">{esc(l["title"])}</a></li>' for l in p['lessons'] if l['status']=='authored')+'</ol></li>' for i,p in enumerate(phases)) + '<li><a href="appendix-workflow.xhtml">Appendix: project structure and evidence</a></li><li><a href="appendix-experiments.xhtml">Appendix: reproducible experiments workshop</a></li><li><a href="appendix-posttraining-lineage.xhtml">Optional appendix: saved-decoder sequence PPO</a></li><li><a href="solutions.xhtml">Solutions</a></li></ol></nav>'
 xhtml = lambda body, title='JAX Pathways: course reader': '<?xml version="1.0" encoding="utf-8"?><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><title>'+esc(title)+'</title><link rel="stylesheet" href="style.css"/></head><body>'+body+'</body></html>'
-identity = hashlib.sha256(json.dumps(lessons,sort_keys=True).encode()).hexdigest()
+identity = primary_identifier(release, lessons)
+payload = {
+    'mimetype': b'application/epub+zip',
+    'META-INF/container.xml': b'<?xml version="1.0"?><container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container"><rootfiles><rootfile full-path="OEBPS/package.opf" media-type="application/oebps-package+xml"/></rootfiles></container>',
+    'OEBPS/style.css': style.encode(),
+    'OEBPS/intro.xhtml': xhtml(intro).encode(),
+    'OEBPS/nav.xhtml': xhtml(nav.replace('<nav>','<nav xmlns:epub="http://www.idpf.org/2007/ops" epub:type="toc">',1)).encode(),
+}
+for i,body in enumerate(guide_bodies): payload[f'OEBPS/phase-{i}.xhtml'] = xhtml(body, f'Phase {phases[i]["number"]}: {phases[i]["title"]}').encode()
+for i,body in enumerate(chapters): payload[f'OEBPS/chapter-{i}.xhtml'] = xhtml(body, lessons[i]['title']).encode()
+workflow=book_guides['workflow']+'<p><a href="https://www.tahabouhsine.com/jaxpathways/project-workflow.html">Online guide and linked resources</a></p>'
+workshop=book_guides['experiments']+'<p><a href="https://www.tahabouhsine.com/jaxpathways/project-guides/reproducible-experiments.html">Online workshop and workspace</a></p>'
+lineage=book_guides['posttrainingTransformerLineage']+'<p>This optional saved-decoder appendix is separate from required Stage 5. Independent review accepted its mechanics and replay checks, but the strict heldout reward quality floor failed; it does not establish language-model quality. <a href="https://www.tahabouhsine.com/jaxpathways/project-guides/posttraining-transformer-lineage.html">Read the online appendix</a>.</p>'
+payload['OEBPS/appendix-workflow.xhtml'] = xhtml('<h1>Appendix: project structure and evidence</h1>'+workflow, 'Appendix: project structure and evidence').encode()
+payload['OEBPS/appendix-experiments.xhtml'] = xhtml('<h1>Appendix: reproducible experiments workshop</h1>'+workshop, 'Appendix: reproducible experiments workshop').encode()
+payload['OEBPS/appendix-posttraining-lineage.xhtml'] = xhtml('<h1>Optional appendix: a saved decoder enters sequence PPO</h1>'+lineage, 'Optional appendix: saved-decoder sequence PPO').encode()
+payload['OEBPS/solutions.xhtml'] = xhtml('<h1>Solutions</h1><p>Attempt each exercise and checkpoint before reading this appendix.</p>'+''.join(solutions), 'Solutions').encode()
+items=''.join(f'<item id="p{i}" href="phase-{i}.xhtml" media-type="application/xhtml+xml"'+(' properties="mathml"' if '<math ' in body else '')+'/>' for i,body in enumerate(guide_bodies))
+items += ''.join(f'<item id="c{i}" href="chapter-{i}.xhtml" media-type="application/xhtml+xml"'+(' properties="mathml"' if '<math ' in body else '')+'/>' for i,body in enumerate(chapters))
+for name, body in [('appendix-workflow', workflow), ('appendix-experiments', workshop), ('appendix-posttraining-lineage', lineage), ('solutions', ''.join(solutions))]:
+    properties = ' properties="mathml"' if '<math ' in body else ''
+    items += f'<item id="{name}" href="{name}.xhtml" media-type="application/xhtml+xml"{properties}/>'
+for lesson in lessons:
+    if lesson.get('visualArtifact'):
+        payload['OEBPS/figures/'+lesson['id']+'.png'] = (ROOT/'public'/lesson['visualArtifact']['png']).read_bytes()
+        items += '<item id="figure-'+lesson['id']+'" href="figures/'+lesson['id']+'.png" media-type="image/png"/>'
+    if lesson.get('visualArtifact',{}).get('mechanismPng'):
+        payload['OEBPS/figures/'+lesson['id']+'-mechanism.png'] = (ROOT/'public'/lesson['visualArtifact']['mechanismPng']).read_bytes()
+        items += '<item id="mechanism-'+lesson['id']+'" href="figures/'+lesson['id']+'-mechanism.png" media-type="image/png"/>'
+spine='<itemref idref="intro"/>' + ''.join(f'<itemref idref="p{i}"/>'+''.join(f'<itemref idref="c{lessons.index(l)}"/>' for l in p['lessons'] if l['status']=='authored') for i,p in enumerate(phases)) + '<itemref idref="appendix-workflow"/><itemref idref="appendix-experiments"/><itemref idref="appendix-posttraining-lineage"/><itemref idref="solutions"/>'
+modified = modified_at(release)
+package_template = f'<?xml version="1.0"?><package xmlns="http://www.idpf.org/2007/opf" xmlns:dc="http://purl.org/dc/elements/1.1/" version="3.0" unique-identifier="book-id" prefix="jp: https://www.tahabouhsine.com/jaxpathways/epub-meta#"><metadata><dc:identifier id="book-id">{esc(identity)}</dc:identifier><dc:title>JAX Pathways: course reader {esc(release["version"])} · {esc(release.get("title", ""))}</dc:title><dc:language>en</dc:language><dc:creator>Taha Bouhsine</dc:creator><dc:publisher>JAX Pathways</dc:publisher><dc:description>A free JAX and Flax book with worked math, explained figures, executable Python examples and staged projects.</dc:description><dc:source>https://www.tahabouhsine.com/jaxpathways/book.html</dc:source><dc:date>{esc(release["date"])}</dc:date><meta property="dcterms:modified">{modified}</meta><meta property="belongs-to-collection" id="collection">JAX Pathways</meta><meta refines="#collection" property="group-position">{esc(release["version"])}</meta><meta property="{FINGERPRINT_PROPERTY}">sha256:pending</meta></metadata><manifest><item id="intro" href="intro.xhtml" media-type="application/xhtml+xml"/><item id="nav" href="nav.xhtml" media-type="application/xhtml+xml" properties="nav"/><item id="style" href="style.css" media-type="text/css"/>{items}</manifest><spine>{spine}</spine></package>'
+fingerprint = rendered_fingerprint(payload, package_template.encode())
+package = package_template.replace('sha256:pending', 'sha256:' + fingerprint)
 with ZipFile(OUT / 'jax-foundations.epub','w',compression=ZIP_DEFLATED) as book:
-    book.writestr('mimetype','application/epub+zip',compress_type=ZIP_STORED)
-    book.writestr('META-INF/container.xml','<?xml version="1.0"?><container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container"><rootfiles><rootfile full-path="OEBPS/package.opf" media-type="application/oebps-package+xml"/></rootfiles></container>')
-    book.writestr('OEBPS/style.css',style)
-    book.writestr('OEBPS/intro.xhtml',xhtml(intro))
-    book.writestr('OEBPS/nav.xhtml',xhtml(nav.replace('<nav>','<nav xmlns:epub="http://www.idpf.org/2007/ops" epub:type="toc">',1)))
-    for i,body in enumerate(guide_bodies): book.writestr(f'OEBPS/phase-{i}.xhtml',xhtml(body, f'Phase {phases[i]["number"]}: {phases[i]["title"]}'))
-    for i,body in enumerate(chapters): book.writestr(f'OEBPS/chapter-{i}.xhtml',xhtml(body, lessons[i]['title']))
-    workflow=book_guides['workflow']+'<p><a href="https://www.tahabouhsine.com/jaxpathways/project-workflow.html">Online guide and linked resources</a></p>'
-    workshop=book_guides['experiments']+'<p><a href="https://www.tahabouhsine.com/jaxpathways/project-guides/reproducible-experiments.html">Online workshop and workspace</a></p>'
-    book.writestr('OEBPS/appendix-workflow.xhtml',xhtml('<h1>Appendix: project structure and evidence</h1>'+workflow, 'Appendix: project structure and evidence'))
-    book.writestr('OEBPS/appendix-experiments.xhtml',xhtml('<h1>Appendix: reproducible experiments workshop</h1>'+workshop, 'Appendix: reproducible experiments workshop'))
-    book.writestr('OEBPS/solutions.xhtml',xhtml('<h1>Solutions</h1><p>Attempt each exercise and checkpoint before reading this appendix.</p>'+''.join(solutions), 'Solutions'))
-    items=''.join(f'<item id="p{i}" href="phase-{i}.xhtml" media-type="application/xhtml+xml"'+(' properties="mathml"' if '<math ' in body else '')+'/>' for i,body in enumerate(guide_bodies))
-    items += ''.join(f'<item id="c{i}" href="chapter-{i}.xhtml" media-type="application/xhtml+xml"'+(' properties="mathml"' if '<math ' in body else '')+'/>' for i,body in enumerate(chapters))
-    for name, body in [('appendix-workflow', workflow), ('appendix-experiments', workshop), ('solutions', ''.join(solutions))]:
-        properties = ' properties="mathml"' if '<math ' in body else ''
-        items += f'<item id="{name}" href="{name}.xhtml" media-type="application/xhtml+xml"{properties}/>'
-    for lesson in lessons:
-        if lesson.get('visualArtifact'):
-            book.write(ROOT/'public'/lesson['visualArtifact']['png'], 'OEBPS/figures/'+lesson['id']+'.png')
-            items += '<item id="figure-'+lesson['id']+'" href="figures/'+lesson['id']+'.png" media-type="image/png"/>'
-        if lesson.get('visualArtifact',{}).get('mechanismPng'):
-            book.write(ROOT/'public'/lesson['visualArtifact']['mechanismPng'], 'OEBPS/figures/'+lesson['id']+'-mechanism.png')
-            items += '<item id="mechanism-'+lesson['id']+'" href="figures/'+lesson['id']+'-mechanism.png" media-type="image/png"/>'
-    spine='<itemref idref="intro"/>' + ''.join(f'<itemref idref="p{i}"/>'+''.join(f'<itemref idref="c{lessons.index(l)}"/>' for l in p['lessons'] if l['status']=='authored') for i,p in enumerate(phases)) + '<itemref idref="appendix-workflow"/><itemref idref="appendix-experiments"/><itemref idref="solutions"/>'
-    modified=release['date']+'T00:00:00Z'
-    book.writestr('OEBPS/package.opf',f'<?xml version="1.0"?><package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="book-id"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/"><dc:identifier id="book-id">urn:sha256:{identity}</dc:identifier><dc:title>JAX Pathways: course reader {esc(release["version"])}</dc:title><dc:language>en</dc:language><dc:creator>Taha Bouhsine</dc:creator><dc:publisher>JAX Pathways</dc:publisher><dc:description>A free JAX and Flax book with worked math, explained figures, executable Python examples and staged projects.</dc:description><dc:source>https://www.tahabouhsine.com/jaxpathways/book.html</dc:source><dc:date>{esc(release["date"])}</dc:date><meta property="dcterms:modified">{modified}</meta><meta property="belongs-to-collection" id="collection">JAX Pathways</meta><meta refines="#collection" property="group-position">{esc(release["version"])}</meta></metadata><manifest><item id="intro" href="intro.xhtml" media-type="application/xhtml+xml"/><item id="nav" href="nav.xhtml" media-type="application/xhtml+xml" properties="nav"/><item id="style" href="style.css" media-type="text/css"/>{items}</manifest><spine>{spine}</spine></package>')
+    book.writestr('mimetype', payload.pop('mimetype'), compress_type=ZIP_STORED)
+    for name in sorted(payload):
+        book.writestr(name, payload[name])
+    book.writestr('OEBPS/package.opf', package)
+(OUT / 'jax-foundations.build.json').write_text(json.dumps({
+    'schema': 'jaxpathways-epub-build-v1',
+    'releaseVersion': release['version'],
+    'primaryPublicationId': identity,
+    'renderedEditionFingerprint': 'sha256:' + fingerprint,
+    'modifiedAt': modified,
+}, indent=2, sort_keys=True) + '\n')
 for manifest in json.loads((ROOT/'curriculum/projects.json').read_text()):
     project_path = ROOT/manifest
     project = json.loads(project_path.read_text())
+    validated_extras = (
+        posttraining_parent_files(ROOT)
+        if project['id'] == 'posttraining-audit'
+        else {}
+    )
     with ZipFile(OUT/(project['id']+'.zip'),'w',compression=ZIP_DEFLATED) as bundle:
         included=set()
         for path in sorted(project_path.parent.rglob('*')):
@@ -177,7 +543,7 @@ for manifest in json.loads((ROOT/'curriculum/projects.json').read_text()):
             bundle.write(ROOT/requirements_path,requirements_name)
             included.add(requirements_name)
         for relative in PROJECT_EXTRA_FILES.get(project['id'], ()):
-            extra_path = ROOT / relative
+            extra_path = validated_extras.get(relative, ROOT / relative)
             extra_name = Path(relative).as_posix()
             if extra_name not in included:
                 bundle.write(extra_path, extra_name)
@@ -187,6 +553,26 @@ with ZipFile(OUT/'jax-tutor-skills.zip','w',compression=ZIP_DEFLATED) as bundle:
     for path in sorted((ROOT/'skills').glob('*/references/*.md')): bundle.write(path,path.relative_to(ROOT))
     bundle.write(ROOT/'skills/README.md','README.md')
 print(f'Built offline HTML/EPUB ({len(lessons)} lessons), staged project, and tutor bundles.')
+
+# C01 remains a planned full capstone. This separate source-only ZIP exposes its
+# bounded CPU workflow and only the public, hash-verified reference packet.
+c01_root, c01_index_path, c01_index, c01_files = c01_pilot_packet(ROOT)
+c01_public_paths = {
+    (c01_root / relative).resolve()
+    for relative in c01_index["public_files"]
+}
+c01_public_paths.add(c01_index_path.resolve())
+with ZipFile(OUT / "embedding-model-300m-pilot.zip", "w", compression=ZIP_DEFLATED) as bundle:
+    for path in sorted(c01_files):
+        bundle.write(path, path.relative_to(ROOT).as_posix())
+c02_root, c02_index_path, c02_index, c02_files = c02_pilot_packet(ROOT)
+with ZipFile(OUT / "causal-model-300m-pilot.zip", "w", compression=ZIP_DEFLATED) as bundle:
+    for path in sorted(c02_files):
+        bundle.write(path, path.relative_to(ROOT).as_posix())
+c03_root, c03_manifest_path, c03_manifest, c03_files = c03_pilot_packet(ROOT)
+with ZipFile(OUT / "image-model-300m-pilot.zip", "w", compression=ZIP_DEFLATED) as bundle:
+    for path in sorted(c03_files):
+        bundle.write(path, path.relative_to(ROOT).as_posix())
 
 setup=next(l for l in lessons if l['id']=='welcome-01')
 with ZipFile(OUT/'jax-start-here.zip','w',compression=ZIP_DEFLATED) as bundle:
@@ -206,6 +592,9 @@ workspace_files = {ROOT/'requirements-cpu.txt', ROOT/'requirements-beginner.txt'
 for directory in ('curriculum', 'learning-paths', 'phases', 'projects', 'skills', 'assessments', 'resources/tpu-gcp', 'content/guides'):
     workspace_files.update(path for path in (ROOT/directory).rglob('*')
                            if path.is_file() and path.suffix in ('.md', '.json', '.py', '.ipynb', '.txt', '.svg', '.png')
+                           and not (directory == 'projects' and path.is_relative_to(c01_root / 'reference'))
+                           and not (directory == 'projects' and path.is_relative_to(c02_root / 'reference'))
+                           and not (directory == 'projects' and path.is_relative_to(c03_root))
                            and '__pycache__' not in path.parts)
 # Keep the coordinated multi-host target repository-only. Its rendezvous and shared
 # GCS checkpoint setup are not part of the portable workspace contract.
@@ -216,7 +605,14 @@ workspace_files = {
 # Registered project bundles include their executed binary artifacts and media.
 for manifest in json.loads((ROOT/'curriculum/projects.json').read_text()):
     workspace_files.update(path for path in (ROOT/manifest).parent.rglob('*')
-                           if path.is_file() and '__pycache__' not in path.parts)
+                           if path.is_file() and '__pycache__' not in path.parts
+                           and not (Path(manifest).parts[1] == 'embedding-model-300m' and path.is_relative_to(c01_root / 'reference')))
+workspace_files.update(c01_public_paths)
+workspace_files.update(c02_files)
+workspace_files.update(c03_files)
+# The lesson-level saved-decoder handoffs require the exact already-public parent
+# package, including binary weights excluded by the text-file traversal above.
+workspace_files.update(posttraining_parent_files(ROOT).values())
 for directory in ('public/figures','public/executions','public/guides'):
     workspace_files.update(path for path in (ROOT/directory).glob('*') if path.is_file())
 start_guide = '''# Start JAX Pathways with your agent

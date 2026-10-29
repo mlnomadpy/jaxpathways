@@ -1,0 +1,73 @@
+{
+  "files": {
+    "/Users/tahabsn/Documents/ChatGPT/jaxpathways/projects/audio-model-300m/SOURCES.md": {
+      "bytes": 3219,
+      "sha256": "52aa7ded2b5be2f1b42cbd4fd98d0158d4ab6fb7c6b808163d3d73265b09e1e7"
+    },
+    "/Users/tahabsn/Documents/ChatGPT/jaxpathways/projects/audio-model-300m/prepare_sources.py": {
+      "bytes": 12432,
+      "sha256": "d1ef8b18119837ebac605f0a0b2893521fa797fde4a9a5f76aaffb381cebcf61"
+    },
+    "/Users/tahabsn/Documents/ChatGPT/jaxpathways/projects/audio-model-300m/requirements-audio-lock.txt": {
+      "bytes": 102,
+      "sha256": "2fcf1f71f6fdda82dce4e43ebd5bfdc6fd87cffcbc6673ade3da38e941984f3f"
+    },
+    "/Users/tahabsn/Documents/ChatGPT/jaxpathways/projects/audio-model-300m/tests/check_mechanics.py": {
+      "bytes": 13361,
+      "sha256": "2366afc0e5acc931ea59c651b0f5f58ef07681a0a3dbda4cb97a9293447c9811"
+    },
+    "/Users/tahabsn/Documents/ChatGPT/jaxpathways/projects/audio-model-300m/tests/resume_worker.py": {
+      "bytes": 1698,
+      "sha256": "13194bd4815ef048b1747ded9b0cfc3accba345557b26aa361563da6b6deac82"
+    },
+    "/private/tmp/jaxpathways-c04-luna-20261021/downloads/dev-clean-2.tar.gz": {
+      "bytes": 126046265,
+      "sha256": "176ec501490eced2d6c1f89f4f0ddc7dfe799e649e5322f8ba49fe3ff50c8012"
+    },
+    "/private/tmp/jaxpathways-c04-luna-20261021/downloads/dev-other.tar.gz": {
+      "bytes": 314305928,
+      "sha256": "12661c48e8c3fe1de2c1caa4c3e135193bfb1811584f11f569dd12645aa84365"
+    },
+    "/private/tmp/jaxpathways-c04-luna-20261021/downloads/train-clean-5.tar.gz": {
+      "bytes": 332954390,
+      "sha256": "47805806c8b15f7549f3c51bd6b7da72ec0128a34d32830c8014a88658c0292d"
+    },
+    "/private/tmp/jaxpathways-c04-luna-20261021/inventory/archive-members.json": {
+      "bytes": 1218521,
+      "sha256": "d2790a185e716e05d3f6b1b7d83f1013ec78c2fa70104a0688643c5dc14d7063"
+    },
+    "/private/tmp/jaxpathways-c04-luna-20261021/inventory/components.json": {
+      "bytes": 255120,
+      "sha256": "a0d255da9333fd9863f1334fc0902df9300356ea8ee99a9c191a031f9594ba12"
+    },
+    "/private/tmp/jaxpathways-c04-luna-20261021/inventory/internal-documents.json": {
+      "bytes": 2553,
+      "sha256": "ba5ee92f6cec429b07171e9981ed9408897bcf9a26845771d0d0355e626708f0"
+    },
+    "/private/tmp/jaxpathways-c04-luna-20261021/inventory/source-summary.json": {
+      "bytes": 1538,
+      "sha256": "630e092c0673793befd11e962d532d876106ecfbf0ac423d5fe54d4398e085bf"
+    },
+    "/private/tmp/jaxpathways-c04-luna-20261021/inventory/utterances.jsonl": {
+      "bytes": 7306693,
+      "sha256": "a43b6c27ca04dfc7aebddf26a180362350a96459baa4ee71f9162184941f3751"
+    },
+    "/private/tmp/jaxpathways-c04-luna-20261021/source/slr12-md5sum.txt": {
+      "bytes": 600,
+      "sha256": "efe6522682d078fdcfd2c3b2d418a53a89683b342dd5147a769a41a7e021fe3f"
+    },
+    "/private/tmp/jaxpathways-c04-luna-20261021/source/slr31-md5sum.txt": {
+      "bytes": 108,
+      "sha256": "9ec619c87caa8831a85f16bc6e686dbf2c065a6a1c80a933e1556fdd66ae28c2"
+    },
+    "/private/tmp/jaxpathways-c04-luna-20261021/work/mechanics-check.log": {
+      "bytes": 119,
+      "sha256": "c714cc8a716c3109ea1e421ca556f373fc0d66e7356cb70ebe5fa9025c776045"
+    }
+  },
+  "generated_utc": "2026-10-21",
+  "roles_assigned": false,
+  "root": "/private/tmp/jaxpathways-c04-luna-20261021",
+  "schema": "c04-inventory-handoff-v1",
+  "training_started": false
+}

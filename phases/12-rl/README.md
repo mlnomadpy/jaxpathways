@@ -12,7 +12,9 @@ Keep terminal, timeout and reset behavior explicit. Verify a small enumerated ex
 
 ## Study guide: Is the policy improving under a fixed evaluation protocol?
 
-Environment semantics and data collection define the learning problem. Verify transitions, masks and behavior-policy probabilities before trusting a noisy return curve.
+A policy changes the data it will see next, so learning from interaction requires careful bookkeeping. A transition gives an immediate reward; a return combines later rewards; a value estimates expected return; an advantage compares an outcome with that baseline. Follow one short trajectory before introducing their batched estimators.
+
+Keep episode endings and collection cutoffs distinct when deriving targets. Then connect the sign of an advantage to a policy update, freeze the behavior probabilities needed for PPO comparisons and inspect variation across independent evaluation units. The small environment makes those choices visible before a larger control task.
 
 ### Check your starting point
 
@@ -118,9 +120,9 @@ Status: authored lesson with CPU exercise.
 
 Status: authored lesson with CPU exercise.
 
-**Intended outcome:** Fit a tabular value function from retained trajectories and estimate GAE with terminal and collector-cutoff semantics explicit.
+**Intended outcome:** Fit sampled discounted return targets at gamma=0.9 over at most eight actions, then estimate GAE at gamma=0.9 and lambda=0.95 with terminal and collector-cutoff semantics explicit.
 
-**Evidence:** Keep two seed-specific learned value tables and loss histories, the pre-reset cutoff observation, independent terminal/cutoff calculations, and padding-mask checks.
+**Evidence:** Keep the discounted target definition, seed-313/314 value tables and fit histories, independent two-transition TD residuals, terminal-versus-cutoff bootstrap/trace checks and a note on the position-only approximation. Critic-fit loss is not policy-improvement evidence.
 
 **Checkpoint:** At a continuing-task time limit, which observation supplies the bootstrap, and should the trace cross the reset?
 

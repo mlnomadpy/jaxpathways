@@ -4,6 +4,8 @@ Phase 14: Autodiff & JAX internals · about 120 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [JVPs, VJPs, and higher-order derivatives](https://www.tahabouhsine.com/jaxpathways/lesson-internals-02.html).
+
 ## What you will be able to do
 
 - Implement actual custom_jvp and custom_vjp rules with correct return and residual contracts.
@@ -40,6 +42,8 @@ It can expose a rule that is incorrectly nonlinear in the sensitivity input. Mat
 ## Keep the primal stable before customizing its derivative
 
 Softplus is $s(x)=\log(1+e^x)$. Direct exponentiation overflows for a large positive input, even though the correct output is approximately $x$. logaddexp computes the same mathematical function without forming the dangerous exponential. Its derivative is the sigmoid $\sigma(x)$, and its second derivative is $\sigma(x)(1-\sigma(x))$. We use these identities as checks, not as permission to ignore the primal calculation.
+
+For the executed points $x=-4,0,3$, the custom rule’s slopes are approximately $0.017986,0.5,0.952574$, while the curvatures are $0.017663,0.25,0.045177$. The peak curvature at zero and smaller tail values give a concrete second-derivative check; comparing only one slope could miss an incorrect curvature rule. The separate extreme-value probe returns softplus(1000)=1000 while direct `log(1+exp(x))` overflows to infinity.
 
 $$
 s(x)=\log(1+e^x),\qquad s\prime(x)=\sigma(x),\qquad s\prime\prime(x)=\sigma(x)(1-\sigma(x))
@@ -253,15 +257,11 @@ Expected: Softplus derivatives at zero are 0.5 and 0.25. Stable values at [-1000
 
 ### Read the figure
 
-The upper panel plots the first derivative of the custom softplus against its scalar input. It rises smoothly from near zero to near one and passes through $0.5$ at zero. This is sensitivity, not the softplus value itself.
-
-The lower panel plots the second derivative on the same input range. It reaches $0.25$ at zero and falls to about $0.01766$ at both $-4$ and $4$. The curvature is symmetric even though the first derivative is not.
+The horizontal axis is input $x$ from $-8$ to $8$; the upper vertical axis is slope and the lower is curvature. The custom-rule curves rise from near zero to slope 0.5 and curvature 0.25 at $x=0$; curvature is symmetric and falls to about 0.01766 at $x=\pm4$. That peak is the best place in this fixture to catch a wrong curvature coefficient. In the tails, predict a slope near 0 on the left and near 1 on the right, with curvature near 0 in both.
 
 ### Connect it to the computation
 
-The plotted values come from differentiating the registered custom rule, including differentiating it twice. Independent sigmoid and sigmoid-times-one-minus-sigmoid formulas check the numerical values at named points. The high-curvature central region is useful for detecting a wrong coefficient.
-
-The separate extreme-input test reaches magnitude one thousand, beyond this display, to check overflow behavior. A smooth curve here is distinct from correctness in every transform or dtype; the VJP interface-boundary experiment and changed-size practice test other parts of the contract.
+The plotted derivatives come from differentiating the registered custom JVP rule once and twice; the execution output independently reports slopes $0.017986,0.5,0.952574$ and curvatures $0.017663,0.25,0.045177$ at $-4,0,3$. The extreme test is outside the plot: stable softplus returns 1000 at input 1000, while the naive expression returns infinity. Treat these as separate checks of smooth derivative behavior and primal stability.
 
 ```python
 grid=jnp.linspace(-8.,8.,65)
@@ -275,7 +275,7 @@ visual_data={'panels':[{'kind':'line','x':np.asarray(grid).tolist(),'xlabel':'in
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:08:59.040338+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:08:55.586330+00:00. JAX 0.9.2.
 
 ```text
 Softplus first/second: [0.01798621 0.5        0.95257413] [0.01766271 0.25       0.04517666]

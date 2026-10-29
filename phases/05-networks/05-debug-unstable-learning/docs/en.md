@@ -4,28 +4,32 @@ Phase 05: Neural network training · about 85 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Train a CNN on a small dataset](https://www.tahabouhsine.com/jaxpathways/lesson-networks-04.html).
+
 ## What you will be able to do
 
 - Derive the gradient and curvature on paper
 - Record pre-update and post-update quantities distinctly
 - Use gradient clipping for a bounded symptom, not a diagnosis
 - Change the feature scale and predict the new bound
+- Localize isolated data, hidden-activation, and update-scale faults in an MLP
+- Repair one condition at a time and verify on fixed held-out examples
 
 ## The problem
 
-The loss is growing. Should you immediately lower the learning rate? Let’s first gather evidence. We’ll use a one-weight model whose update we can derive, deliberately make it unstable, and inspect its losses, gradients and weights. You’ll learn how to connect a symptom to a cause.
+The loss is growing. Should you immediately lower the learning rate? Let’s first gather evidence. We’ll use a one-weight model whose update we can derive, deliberately make it unstable, and inspect its losses, gradients and weights. You’ll learn how to connect a symptom to a cause. The scalar example is an analytic warm-up. The added lab below carries the same evidence-first method into an actual two-layer MLP, with one injected cause at a time and held-out comparisons.
 
 ## The idea
 
-Unstable learning is a symptom with several possible causes. Connect the first unexpected value to inputs, forward computation, loss, gradients, optimizer state or the applied update. That ordering turns a vague failure into a testable diagnosis.
+Unstable learning is a symptom with several possible causes. Connect the first unexpected value to inputs, forward computation, loss, gradients, optimizer state or the applied update. That ordering turns a vague failure into a testable diagnosis. In the MLP lab, inspect the first bad boundary and named layer gradient norms instead of inferring a cause from loss alone.
 
 ## Locate the first broken boundary
 
-Start with a reproducible failing batch. Check inputs and forward loss before differentiating. If the loss is finite but gradients are not, inspect derivative-sensitive operations. If gradients are finite but the next loss explodes, inspect update size and parameter change.
+A loss curve tells you that something went wrong. A diagnosis tells you where it first went wrong and why a particular repair should help. We will build that explanation in two stages: a one-weight model whose stability we can calculate exactly, then an MLP where the failure can start in the input, hidden layer or update.
 
-Change one factor at a time and keep the original failing case. Clipping can limit damage without repairing the cause, so test whether the intervention predicts behavior on a changed input or learning rate.
+Follow the computation in order: input, hidden activations, predictions and loss, gradients, then updated parameters. Stop at the first boundary that violates your expectation. A NaN already present in the input calls for a different repair from finite gradients followed by a destructive update.
 
-The loss curve shows when behavior diverges. To explain why, add the relevant evidence: gradient norm, parameter norm, update norm and the first nonfinite intermediate. Keep those quantities distinct; a large parameter norm does not automatically imply a large gradient.
+For each fault, keep the initialization and examples fixed. Predict the observation, change one factor, then compare the repaired run on the same training and held-out data. This turns debugging into a small causal experiment rather than a search for a hyperparameter that happens to make the curve look better.
 
 ### Pause and reason
 
@@ -57,12 +61,143 @@ Clipping a scalar gradient to magnitude one limits each rate-0.3 update to at mo
 
 Multiply every $x$ and $y$ by ten while keeping the true weight two. The loss and curvature multiply by $100$, and the stable learning-rate ceiling divides by $100$. A rate of $0.1$ that was stable on the original data is now unstable. This demonstrates why a copied learning rate can fail after preprocessing changes. Standardization, objective normalization, adaptive optimizers, and clipping affect update behavior in different ways. Preserve an independent analytic check when possible, then instrument real networks with finite checks, gradient norms, prediction ranges, class balance, and evaluation isolation. Do not apply the quadratic bound to an unrelated model.
 
-## 1. Define the controlled objective
+## Localize failures inside a small MLP
+
+Now use the same reasoning on the two-layer tanh classifier. It has 128 training rows and 96 separately generated held-out rows. The reference run lowers training BCE from $0.6258$ to $0.5295$, and held-out BCE from $0.6397$ to $0.5417$. Keep this reference initialization so each fault has a clear comparison.
+
+Start with the data fault. One feature at row 7, column 1 is NaN. The input check finds it before the forward pass. Lowering the learning rate cannot repair a missing numerical value; restoring the original source row can. Locate the earliest invalid value before inspecting the optimizer.
+
+Next add $20$ to every hidden bias. The tanh outputs saturate: all measured magnitudes exceed $0.99$. Because tanh is almost flat there, the hidden-layer gradient norm becomes zero while the output-layer norm remains $0.19231$. This contrast localizes the blocked learning signal. Restoring only the hidden bias lowers held-out loss from $0.69029$ to $0.63973$; clipping an already zero hidden gradient would not address the cause.
+
+Finally compare learning rates $100$ and $0.03$ for three updates. The oversized run has finite gradients, yet its first update raises training loss from $0.6258$ to $1.6054$, and its held-out loss reaches about $71.85$ by update three. With rate $0.03$, training and held-out losses both fall. Here the update size is the changed cause. The independent NumPy `logaddexp` calculation checks that the held-out BCE itself is being measured correctly.
+
+Before moving on, name the earliest failing boundary for all three cases and the single change that repaired it. The exact quadratic stability bound from the warm-up belongs to that quadratic; the MLP diagnosis comes from these controlled observations.
+
+### Pause and reason
+
+The MLP has finite forward values and finite gradients, but held-out loss rises after each oversized update. Which boundary should you inspect first?
+
+<details><summary>Compare your reasoning</summary>
+
+The update: compare the learning rate times gradient with the parameter scale and verify the post-update held-out loss. Finite autodiff does not guarantee a safe step.
+
+</details>
+
+## 1. Localize and repair three isolated MLP faults
+
+Append the MLP lab. Before each diagnostic, predict the earliest failing boundary, the one measurement that will identify it, and which single changed condition should repair it. The fixed held-out arrays remain untouched by training.
+
+```python
+# MLP failure-localization lab : each case changes one condition and uses the same held-out rows.
+import jax
+import jax.numpy as jnp
+import numpy as np
+rng = np.random.default_rng(8)
+train_np = rng.normal(size=(128, 2)).astype(np.float32)
+test_np = rng.normal(size=(96, 2)).astype(np.float32)
+train_labels_np = (train_np[:, 0] - 0.6 * train_np[:, 1] > 0.1).astype(np.float32)
+test_labels_np = (test_np[:, 0] - 0.6 * test_np[:, 1] > 0.1).astype(np.float32)
+train_x, train_y = jnp.asarray(train_np), jnp.asarray(train_labels_np)
+test_x, test_y = jnp.asarray(test_np), jnp.asarray(test_labels_np)
+k1, k2 = jax.random.split(jax.random.key(4))
+initial = {'w1': jax.random.normal(k1, (2, 8)) * 0.5, 'b1': jnp.zeros((8,)),
+           'w2': jax.random.normal(k2, (8, 1)) * 0.5, 'b2': jnp.zeros((1,))}
+def mlp_forward(params, x, input_scale=1.0):
+    preactivation = (input_scale * x) @ params['w1'] + params['b1']
+    hidden = jnp.tanh(preactivation)
+    logits = (hidden @ params['w2'] + params['b2']).squeeze(-1)
+    return logits, (preactivation, hidden)
+def mlp_loss(params, x, y, input_scale=1.0):
+    logits, _ = mlp_forward(params, x, input_scale)
+    return jnp.mean(jax.nn.softplus(logits) - y * logits)
+def tree_l2(tree):
+    return jnp.sqrt(sum(jnp.sum(value * value) for value in jax.tree.leaves(tree)))
+def train_mlp(params, rate, steps, x=train_x, y=train_y):
+    losses = []
+    for _ in range(steps):
+        value, grads = jax.value_and_grad(mlp_loss)(params, x, y)
+        assert np.isfinite(float(value)) and np.isfinite(float(tree_l2(grads)))
+        params = jax.tree.map(lambda p, g: p - rate * g, params, grads)
+        losses.append(float(value))
+    return params, np.asarray(losses)
+# Sound reference: one MLP run improves a distinct held-out set; NumPy computes BCE independently.
+reference_model, reference_curve = train_mlp(initial, 0.03, 20)
+reference_logits, _ = mlp_forward(reference_model, test_x)
+reference_test = float(mlp_loss(reference_model, test_x, test_y))
+np.testing.assert_allclose(reference_test,
+    np.mean(np.logaddexp(0.0, np.asarray(reference_logits)) - test_labels_np * np.asarray(reference_logits)),
+    rtol=1e-5, atol=1e-6)
+assert reference_curve[-1] < reference_curve[0] and reference_test < float(mlp_loss(initial, test_x, test_y))
+# Fault A: one corrupted feature. Predict the first failing boundary before running a forward pass.
+initial_heldout = float(mlp_loss(initial, test_x, test_y))
+corrupt_x = train_x.at[7, 1].set(jnp.nan)
+first_bad_input = np.argwhere(~np.isfinite(np.asarray(corrupt_x)))
+assert first_bad_input.tolist() == [[7, 1]]
+bad_data_loss = mlp_loss(initial, corrupt_x, train_y)
+assert not np.isfinite(float(bad_data_loss))
+# Repair only the source row by restoring its known clean feature value.
+repaired_x = corrupt_x.at[7, 1].set(train_x[7, 1])
+assert np.isfinite(float(mlp_loss(initial, repaired_x, train_y)))
+data_repaired_heldout = float(mlp_loss(initial, test_x, test_y))
+np.testing.assert_allclose(data_repaired_heldout, initial_heldout, rtol=1e-6)
+np.testing.assert_array_equal(repaired_x, train_x)
+# Fault B: change only the input scale entering the first layer. Locate tanh saturation and its gradients.
+saturation_params = {**initial, 'b1': jnp.full((8,), 20.0)}
+_, (preact_bad, hidden_bad) = mlp_forward(saturation_params, train_x)
+saturated = jnp.mean(jnp.abs(hidden_bad) > 0.99)
+grad_bad = jax.grad(mlp_loss)(saturation_params, train_x, train_y)
+grad_by_layer = {'hidden (w1,b1)': tree_l2({'w1': grad_bad['w1'], 'b1': grad_bad['b1']}),
+                 'output (w2,b2)': tree_l2({'w2': grad_bad['w2'], 'b2': grad_bad['b2']})}
+assert float(saturated) > 0.99
+assert np.all(np.isfinite([float(value) for value in grad_by_layer.values()]))
+saturated_test = float(mlp_loss(saturation_params, test_x, test_y))
+base_test = float(mlp_loss(initial, test_x, test_y))
+saturation_repaired = {**saturation_params, 'b1': initial['b1']}
+np.testing.assert_allclose(mlp_loss(saturation_repaired, test_x, test_y), base_test, rtol=1e-6)
+assert saturated_test > base_test
+# Fault C: leave data, initialization, and gradient calculation fixed; use a grossly oversized learning rate.
+large_rate_model, large_rate_curve = train_mlp(initial, 100.0, 3)
+small_rate_model, small_rate_curve = train_mlp(initial, 0.03, 3)
+large_test = float(mlp_loss(large_rate_model, test_x, test_y))
+small_test = float(mlp_loss(small_rate_model, test_x, test_y))
+assert large_rate_curve[1] > large_rate_curve[0] and large_rate_curve[2] > large_rate_curve[1]
+assert large_test > float(mlp_loss(initial, test_x, test_y))
+assert small_rate_curve[-1] < small_rate_curve[0] and small_test < float(mlp_loss(initial, test_x, test_y))
+# Plot values are computed from each actual update; x=0 is the initialized model.
+def loss_path(rate, steps=3):
+    params = initial
+    train_values = [float(mlp_loss(params, train_x, train_y))]
+    heldout_values = [float(mlp_loss(params, test_x, test_y))]
+    for _ in range(steps):
+        _, grads = jax.value_and_grad(mlp_loss)(params, train_x, train_y)
+        params = jax.tree.map(lambda value, grad: value - rate * grad, params, grads)
+        train_values.append(float(mlp_loss(params, train_x, train_y)))
+        heldout_values.append(float(mlp_loss(params, test_x, test_y)))
+    return train_values, heldout_values
+safe_train_path, safe_test_path = loss_path(0.03)
+fast_train_path, fast_test_path = loss_path(100.0)
+visual_data = {'kind': 'line', 'x': [0, 1, 2, 3], 'xlabel': 'completed full-batch updates (0 = initialized model)',
+ 'ylabel': 'binary cross-entropy (natural log units)', 'series': [
+  {'label': 'training, lr=0.03', 'y': safe_train_path},
+  {'label': 'held-out, lr=0.03', 'y': safe_test_path},
+  {'label': 'training, lr=100', 'y': fast_train_path},
+  {'label': 'held-out, lr=100', 'y': fast_test_path}]}
+assert fast_train_path[1] > fast_train_path[0] and fast_test_path[-1] > fast_test_path[0]
+assert safe_train_path[-1] < safe_train_path[0] and safe_test_path[-1] < safe_test_path[0]
+print('Reference MLP: train loss %.4f -> %.4f; held-out loss %.4f -> %.4f' % (reference_curve[0], reference_curve[-1], float(mlp_loss(initial, test_x, test_y)), reference_test))
+print('Data fault: earliest invalid input at row 7, feature 1; repair restored source row and held-out BCE %.4f.' % data_repaired_heldout)
+print('Saturation fault: %.1f%% |tanh(h)| > .99; hidden gradient %.5f, output gradient %.5f; held-out loss %.4f versus %.4f after restoring the hidden bias.' % (100 * float(saturated), float(grad_by_layer['hidden (w1,b1)']), float(grad_by_layer['output (w2,b2)']), saturated_test, base_test))
+print('Update fault: lr=100 loss %.4f -> %.4f -> %.4f, held-out %.4f; repair lr=.03 ends train %.4f, held-out %.4f.' % (large_rate_curve[0], large_rate_curve[1], large_rate_curve[2], large_test, small_rate_curve[-1], small_test))
+```
+
+The failures are independent experiments from the same initialized MLP. The NaN is detected at input ingestion; activation scaling is localized by the tanh saturation fraction and per-layer gradients; the oversized rate is localized after finite gradients by its update trajectory and held-out loss. The repair checks hold the remaining conditions fixed.
+
+## Analytic reference 1. Define the controlled objective
 
 Create main.py. Calculate $\operatorname{mean}(x^2)$ and the gradient at $w=0$ before running this block.
 
 ```python
-# Step 1 — 1. Define the controlled objective: The initial loss is 56/3 and the initial gradient is -56/3.
+# Step 1 : 1. Define the controlled objective: The initial loss is 56/3 and the initial gradient is -56/3.
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -76,12 +211,12 @@ np.testing.assert_allclose(jax.grad(loss)(0.),-56/3,rtol=1e-6)
 
 The initial loss is $56/3$ and the initial gradient is $-56/3$. These values independently anchor the autodiff trace.
 
-## 2. Instrument the update loop
+## Analytic reference 2. Instrument the update loop
 
 Append the runner. Each history row stores pre-update weight, loss, and gradient magnitude; no optimizer library hides the update.
 
 ```python
-# Step 2 — 2. Instrument the update loop: The rate changes while initial state, data, and objective stay fixed.
+# Step 2 : 2. Instrument the update loop: The rate changes while initial state, data, and objective stay fixed.
 def run(rate,steps,features=x,targets=y,clip=None):
     w=jnp.array(0.)
     history=[]
@@ -100,12 +235,12 @@ assert abs(stable-2)<1e-5 and bad[-1,1]>bad[0,1]*100
 
 The rate changes while initial state, data, and objective stay fixed. This isolates the intervention.
 
-## 3. Match the recorded failure to the exact recurrence
+## Analytic reference 3. Match the recorded failure to the exact recurrence
 
 Append analytic comparisons for every recorded iteration, then print the finite divergence trace.
 
 ```python
-# Step 3 — 3. Match the recorded failure to the exact recurrence
+# Step 3 : 3. Match the recorded failure to the exact recurrence
 for rate,history in [(.1,good),(.3,bad)]:
     expected_w=2-2*(1-rate*28/3)**np.arange(len(history))
     expected_loss=(14/3)*(expected_w-2)**2
@@ -120,7 +255,7 @@ An alternating parameter error and a $3.24$ loss multiplier support the learning
 ## Run the example
 
 ```python
-# Step 1 — 1. Define the controlled objective: The initial loss is 56/3 and the initial gradient is -56/3.
+# Step 1 : 1. Define the controlled objective: The initial loss is 56/3 and the initial gradient is -56/3.
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -131,7 +266,7 @@ def analytic_gradient(w):return (28/3)*(w-2)
 np.testing.assert_allclose(loss(0.),56/3,rtol=1e-6)
 np.testing.assert_allclose(jax.grad(loss)(0.),-56/3,rtol=1e-6)
 
-# Step 2 — 2. Instrument the update loop: The rate changes while initial state, data, and objective stay fixed.
+# Step 2 : 2. Instrument the update loop: The rate changes while initial state, data, and objective stay fixed.
 def run(rate,steps,features=x,targets=y,clip=None):
     w=jnp.array(0.)
     history=[]
@@ -147,7 +282,7 @@ stable,good=run(.1,6)
 unstable,bad=run(.3,6)
 assert abs(stable-2)<1e-5 and bad[-1,1]>bad[0,1]*100
 
-# Step 3 — 3. Match the recorded failure to the exact recurrence
+# Step 3 : 3. Match the recorded failure to the exact recurrence
 for rate,history in [(.1,good),(.3,bad)]:
     expected_w=2-2*(1-rate*28/3)**np.arange(len(history))
     expected_loss=(14/3)*(expected_w-2)**2
@@ -155,39 +290,162 @@ for rate,history in [(.1,good),(.3,bad)]:
     np.testing.assert_allclose(history[:,1],expected_loss,rtol=2e-5,atol=1e-8)
 np.testing.assert_allclose(bad[1:,1]/bad[:-1,1],3.24,rtol=1e-5)
 print('Stable final weight:',stable,'unstable pre-update [weight,loss,|gradient|]:\n',bad)
+
+# MLP failure-localization lab : each case changes one condition and uses the same held-out rows.
+import jax
+import jax.numpy as jnp
+import numpy as np
+rng = np.random.default_rng(8)
+train_np = rng.normal(size=(128, 2)).astype(np.float32)
+test_np = rng.normal(size=(96, 2)).astype(np.float32)
+train_labels_np = (train_np[:, 0] - 0.6 * train_np[:, 1] > 0.1).astype(np.float32)
+test_labels_np = (test_np[:, 0] - 0.6 * test_np[:, 1] > 0.1).astype(np.float32)
+train_x, train_y = jnp.asarray(train_np), jnp.asarray(train_labels_np)
+test_x, test_y = jnp.asarray(test_np), jnp.asarray(test_labels_np)
+k1, k2 = jax.random.split(jax.random.key(4))
+initial = {'w1': jax.random.normal(k1, (2, 8)) * 0.5, 'b1': jnp.zeros((8,)),
+           'w2': jax.random.normal(k2, (8, 1)) * 0.5, 'b2': jnp.zeros((1,))}
+def mlp_forward(params, x, input_scale=1.0):
+    preactivation = (input_scale * x) @ params['w1'] + params['b1']
+    hidden = jnp.tanh(preactivation)
+    logits = (hidden @ params['w2'] + params['b2']).squeeze(-1)
+    return logits, (preactivation, hidden)
+def mlp_loss(params, x, y, input_scale=1.0):
+    logits, _ = mlp_forward(params, x, input_scale)
+    return jnp.mean(jax.nn.softplus(logits) - y * logits)
+def tree_l2(tree):
+    return jnp.sqrt(sum(jnp.sum(value * value) for value in jax.tree.leaves(tree)))
+def train_mlp(params, rate, steps, x=train_x, y=train_y):
+    losses = []
+    for _ in range(steps):
+        value, grads = jax.value_and_grad(mlp_loss)(params, x, y)
+        assert np.isfinite(float(value)) and np.isfinite(float(tree_l2(grads)))
+        params = jax.tree.map(lambda p, g: p - rate * g, params, grads)
+        losses.append(float(value))
+    return params, np.asarray(losses)
+# Sound reference: one MLP run improves a distinct held-out set; NumPy computes BCE independently.
+reference_model, reference_curve = train_mlp(initial, 0.03, 20)
+reference_logits, _ = mlp_forward(reference_model, test_x)
+reference_test = float(mlp_loss(reference_model, test_x, test_y))
+np.testing.assert_allclose(reference_test,
+    np.mean(np.logaddexp(0.0, np.asarray(reference_logits)) - test_labels_np * np.asarray(reference_logits)),
+    rtol=1e-5, atol=1e-6)
+assert reference_curve[-1] < reference_curve[0] and reference_test < float(mlp_loss(initial, test_x, test_y))
+# Fault A: one corrupted feature. Predict the first failing boundary before running a forward pass.
+initial_heldout = float(mlp_loss(initial, test_x, test_y))
+corrupt_x = train_x.at[7, 1].set(jnp.nan)
+first_bad_input = np.argwhere(~np.isfinite(np.asarray(corrupt_x)))
+assert first_bad_input.tolist() == [[7, 1]]
+bad_data_loss = mlp_loss(initial, corrupt_x, train_y)
+assert not np.isfinite(float(bad_data_loss))
+# Repair only the source row by restoring its known clean feature value.
+repaired_x = corrupt_x.at[7, 1].set(train_x[7, 1])
+assert np.isfinite(float(mlp_loss(initial, repaired_x, train_y)))
+data_repaired_heldout = float(mlp_loss(initial, test_x, test_y))
+np.testing.assert_allclose(data_repaired_heldout, initial_heldout, rtol=1e-6)
+np.testing.assert_array_equal(repaired_x, train_x)
+# Fault B: change only the input scale entering the first layer. Locate tanh saturation and its gradients.
+saturation_params = {**initial, 'b1': jnp.full((8,), 20.0)}
+_, (preact_bad, hidden_bad) = mlp_forward(saturation_params, train_x)
+saturated = jnp.mean(jnp.abs(hidden_bad) > 0.99)
+grad_bad = jax.grad(mlp_loss)(saturation_params, train_x, train_y)
+grad_by_layer = {'hidden (w1,b1)': tree_l2({'w1': grad_bad['w1'], 'b1': grad_bad['b1']}),
+                 'output (w2,b2)': tree_l2({'w2': grad_bad['w2'], 'b2': grad_bad['b2']})}
+assert float(saturated) > 0.99
+assert np.all(np.isfinite([float(value) for value in grad_by_layer.values()]))
+saturated_test = float(mlp_loss(saturation_params, test_x, test_y))
+base_test = float(mlp_loss(initial, test_x, test_y))
+saturation_repaired = {**saturation_params, 'b1': initial['b1']}
+np.testing.assert_allclose(mlp_loss(saturation_repaired, test_x, test_y), base_test, rtol=1e-6)
+assert saturated_test > base_test
+# Fault C: leave data, initialization, and gradient calculation fixed; use a grossly oversized learning rate.
+large_rate_model, large_rate_curve = train_mlp(initial, 100.0, 3)
+small_rate_model, small_rate_curve = train_mlp(initial, 0.03, 3)
+large_test = float(mlp_loss(large_rate_model, test_x, test_y))
+small_test = float(mlp_loss(small_rate_model, test_x, test_y))
+assert large_rate_curve[1] > large_rate_curve[0] and large_rate_curve[2] > large_rate_curve[1]
+assert large_test > float(mlp_loss(initial, test_x, test_y))
+assert small_rate_curve[-1] < small_rate_curve[0] and small_test < float(mlp_loss(initial, test_x, test_y))
+# Plot values are computed from each actual update; x=0 is the initialized model.
+def loss_path(rate, steps=3):
+    params = initial
+    train_values = [float(mlp_loss(params, train_x, train_y))]
+    heldout_values = [float(mlp_loss(params, test_x, test_y))]
+    for _ in range(steps):
+        _, grads = jax.value_and_grad(mlp_loss)(params, train_x, train_y)
+        params = jax.tree.map(lambda value, grad: value - rate * grad, params, grads)
+        train_values.append(float(mlp_loss(params, train_x, train_y)))
+        heldout_values.append(float(mlp_loss(params, test_x, test_y)))
+    return train_values, heldout_values
+safe_train_path, safe_test_path = loss_path(0.03)
+fast_train_path, fast_test_path = loss_path(100.0)
+visual_data = {'kind': 'line', 'x': [0, 1, 2, 3], 'xlabel': 'completed full-batch updates (0 = initialized model)',
+ 'ylabel': 'binary cross-entropy (natural log units)', 'series': [
+  {'label': 'training, lr=0.03', 'y': safe_train_path},
+  {'label': 'held-out, lr=0.03', 'y': safe_test_path},
+  {'label': 'training, lr=100', 'y': fast_train_path},
+  {'label': 'held-out, lr=100', 'y': fast_test_path}]}
+assert fast_train_path[1] > fast_train_path[0] and fast_test_path[-1] > fast_test_path[0]
+assert safe_train_path[-1] < safe_train_path[0] and safe_test_path[-1] < safe_test_path[0]
+print('Reference MLP: train loss %.4f -> %.4f; held-out loss %.4f -> %.4f' % (reference_curve[0], reference_curve[-1], float(mlp_loss(initial, test_x, test_y)), reference_test))
+print('Data fault: earliest invalid input at row 7, feature 1; repair restored source row and held-out BCE %.4f.' % data_repaired_heldout)
+print('Saturation fault: %.1f%% |tanh(h)| > .99; hidden gradient %.5f, output gradient %.5f; held-out loss %.4f versus %.4f after restoring the hidden bias.' % (100 * float(saturated), float(grad_by_layer['hidden (w1,b1)']), float(grad_by_layer['output (w2,b2)']), saturated_test, base_test))
+print('Update fault: lr=100 loss %.4f -> %.4f -> %.4f, held-out %.4f; repair lr=.03 ends train %.4f, held-out %.4f.' % (large_rate_curve[0], large_rate_curve[1], large_rate_curve[2], large_test, small_rate_curve[-1], small_test))
 ```
 
-Expected: Rate $0.1$ approaches weight $2$. Rate $0.3$ produces alternating growing errors; consecutive unstable losses have ratio $3.24$ before overflow.
+Expected: Rate $0.1$ approaches weight $2$. Rate $0.3$ produces alternating growing errors; consecutive unstable losses have ratio $3.24$ before overflow. The additional MLP lab prints its actual held-out comparison, exact corrupted coordinate, saturation fraction, layer gradient norms, and three-step loss traces.
 
-## Correct gradients can still produce unstable training
+## MLP fault localization: loss after each update
 
-**Predict:** Which learning rate crosses the stability limit?
+**Predict:** At which completed update does the rate-100 held-out loss first exceed its starting value, while the rate-0.03 run improves?
 
-![Correct gradients can still produce unstable training](../outputs/figure.svg)
+![MLP fault localization: loss after each update](../outputs/figure.svg)
 
 **Recorded CPU computation**
 
 ### Read the figure
 
-The horizontal axis is the pre-update step: step $0$ shows the initial loss before training. The vertical axis is mean squared loss on a logarithmic scale. Both runs start at approximately $18.67$, but the solid rate-$0.1$ curve falls while the dashed rate-$0.3$ curve rises.
+Read left to right from update zero, which is the initialized MLP. Each line reports BCE after the indicated number of full-batch updates, using the same training or held-out rows throughout. The vertical axis uses a logarithmic scale so the small safe-run improvement and the much larger unstable-run increase are both visible. Equal vertical distances represent equal ratios of loss, not equal absolute differences.
 
-After the first update, the smaller rate gives loss about $0.083$, whereas the larger rate gives about $60.48$. By the last plotted step, the losses differ by many orders of magnitude. Equal vertical distances represent equal ratios, not equal absolute changes.
+With rate $100$, training loss rises from $0.6258$ to $1.6054$ after the first update; by update three, held-out loss is about $71.85$. Both rate-$0.03$ lines instead move downward. Compare the direction of training and held-out lines together: the high-rate failure harms the fitted data as well as unseen rows. This is an update-scale failure, rather than a training-only gain accompanied by worse generalization.
 
 ### Connect it to the computation
 
-The loss here has curvature $28/3$. A step multiplies the weight error by $1-\eta(28/3)$. At rate $0.1$, this factor is $1/15$; at rate $0.3$, it is $-1.8$. The larger rate crosses the optimum and increases the error’s magnitude, so squared loss grows by a factor of $3.24$ per update.
-
-The derivative can be correct while the update is unstable. That is the diagnosis this comparison isolates: change the step size before assuming a rising loss proves broken autodiff. The loss curve itself hides the sign alternation; the update equation explains it.
+The plot answers when the oversized update fails. The diagnostic measurements answer where the other faults begin: the NaN appears at the input, while saturation blocks the hidden-layer gradient even though the output layer still receives a signal. Keep the plot beside those measurements. A finite loss or gradient alone cannot tell you whether the next update will be useful.
 
 ```python
-visual_data = {'kind': 'line', 'x': list(range(len(good))), 'xlabel': 'pre-update step', 'ylabel': 'mean squared loss', 'yscale': 'log', 'series': [{'label': 'rate 0.1', 'y': good[:, 1].tolist()}, {'label': 'rate 0.3', 'y': bad[:, 1].tolist()}]}
+# Plot values are computed from each actual update; x=0 is the initialized model.
+def loss_path(rate, steps=3):
+    params = initial
+    train_values = [float(mlp_loss(params, train_x, train_y))]
+    heldout_values = [float(mlp_loss(params, test_x, test_y))]
+    for _ in range(steps):
+        _, grads = jax.value_and_grad(mlp_loss)(params, train_x, train_y)
+        params = jax.tree.map(lambda value, grad: value - rate * grad, params, grads)
+        train_values.append(float(mlp_loss(params, train_x, train_y)))
+        heldout_values.append(float(mlp_loss(params, test_x, test_y)))
+    return train_values, heldout_values
+safe_train_path, safe_test_path = loss_path(0.03)
+fast_train_path, fast_test_path = loss_path(100.0)
+visual_data = {'kind': 'line', 'x': [0, 1, 2, 3], 'xlabel': 'completed full-batch updates (0 = initialized model)',
+ 'ylabel': 'binary cross-entropy (nats; log axis)', 'yscale': 'log', 'series': [
+  {'label': 'training, lr=0.03', 'y': safe_train_path},
+  {'label': 'held-out, lr=0.03', 'y': safe_test_path},
+  {'label': 'training, lr=100', 'y': fast_train_path},
+  {'label': 'held-out, lr=100', 'y': fast_test_path}]}
+assert fast_train_path[1] > fast_train_path[0] and fast_test_path[-1] > fast_test_path[0]
+assert safe_train_path[-1] < safe_train_path[0] and safe_test_path[-1] < safe_test_path[0]
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:05:16.983668+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T16:11:08.806464+00:00. JAX 0.9.2.
 
 ```text
+Reference MLP: train loss 0.6258 -> 0.5295; held-out loss 0.6397 -> 0.5417
+Data fault: earliest invalid input at row 7, feature 1; repair restored source row and held-out BCE 0.6397.
+Saturation fault: 100.0% |tanh(h)| > .99; hidden gradient 0.00000, output gradient 0.19231; held-out loss 0.6903 versus 0.6397 after restoring the hidden bias.
+Update fault: lr=100 loss 0.6258 -> 1.6054 -> 32.9974, held-out 71.8487; repair lr=.03 ends train 0.6142, held-out 0.6230.
 Stable final weight: 1.999999761581421 unstable pre-update [weight,loss,|gradient|]:
  [[ 0.00000000e+00  1.86666679e+01  1.86666679e+01]
  [ 5.60000038e+00  6.04800110e+01  3.36000061e+01]
@@ -202,6 +460,11 @@ Stable final weight: 1.999999761581421 unstable pre-update [weight,loss,|gradien
  [ 1.36640034e+01  6.34895264e+02  1.08864037e+02]
  [-1.89952106e+01  2.05706152e+03  1.95955322e+02]
  [ 3.97913895e+01  6.66488281e+03  3.52719635e+02]]
+Reference MLP: train loss 0.6258 -> 0.5295; held-out loss 0.6397 -> 0.5417
+Data fault: earliest invalid input at row 7, feature 1; repair restored source row and held-out BCE 0.6397.
+Saturation fault: 100.0% |tanh(h)| > .99; hidden gradient 0.00000, output gradient 0.19231; held-out loss 0.6903 versus 0.6397 after restoring the hidden bias.
+Update fault: lr=100 loss 0.6258 -> 1.6054 -> 32.9974, held-out 71.8487; repair lr=.03 ends train 0.6142, held-out 0.6230.
+Each isolated MLP failure was localized and its one-factor repair passed the held-out check.
 Reference / compensated / unchanged-rate updates: 1.8833334 1.8833332 8.416667
 PASS: networks-05
 
@@ -212,7 +475,7 @@ PASS: networks-05
 **Predict before running:** At rate $0.3$ with clipping threshold one, how far can one scalar update move?
 
 ```python
-# Experiment — Bounded clipped updates: Clipping changes the effective update.
+# Experiment : Bounded clipped updates: Clipping changes the effective update.
 clipped,clipped_history=run(.3,6,clip=1.)
 assert np.all(np.abs(np.diff(clipped_history[:,0]))<=.300001)
 assert clipped_history[-1,1]<clipped_history[0,1]
@@ -228,7 +491,7 @@ Clipping changes the effective update. Its boundedness is a useful invariant, no
 **Predict before running:** Scale both features and targets by ten. Does the original stable rate remain stable?
 
 ```python
-# Experiment — Feature scaling changes curvature
+# Experiment : Feature scaling changes curvature
 scaled_final,scaled=run(.1,3,x*10,y*10)
 assert scaled[-1,1]>scaled[0,1]
 adjusted_final,adjusted=run(.001,6,x*10,y*10)
@@ -242,7 +505,7 @@ The gradient multiplies by $100$ because both prediction and target are scaled; 
 
 ## Make it yours
 
-Use features $[1, 1, 1]$ and targets $2$. Predict the new stability ceiling. Compare stable rate $0.5$ and unstable rate $1.1$.
+In the MLP lab, compare the corrupted batch, the +20 hidden-bias saturation, and the rate-100 run. Write the expected first diagnostic for each before executing it. Then repair exactly one condition in each case and verify finite or decreasing held-out loss with the fixed held-out arrays.
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
@@ -274,13 +537,14 @@ def compare_learning_rates(features, targets, initial_weight, rates):
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Use features [1, 1, 1] and targets 2.
-ones=jnp.ones(3)
-exact,history=run(.5,3,ones,2*ones)
-divergent,divergent_history=run(1.1,6,ones,2*ones)
-np.testing.assert_allclose(exact,2.,atol=1e-6)
-assert divergent_history[-1,1]>divergent_history[0,1]
-np.testing.assert_allclose(divergent_history[1:,1]/divergent_history[:-1,1],1.44,rtol=1e-5)
+# Exercise solution: use the exact fixture and diagnostics defined in first MLP build step.
+assert first_bad_input.tolist() == [[7, 1]]
+assert np.isfinite(float(mlp_loss(initial, repaired_x, train_y)))
+assert float(saturated) > 0.99
+assert large_test > float(mlp_loss(initial, test_x, test_y))
+assert small_test < float(mlp_loss(initial, test_x, test_y))
+np.testing.assert_array_equal(repaired_x, train_x)
+print('Each isolated MLP failure was localized and its one-factor repair passed the held-out check.')
 ```
 
 </details>
@@ -424,7 +688,7 @@ Multiplying values does not add observations. Compare the data shape with the sc
 
 ## Diagnose the result
 
-Start with finite input and loss checks, then inspect shape contracts and independent objective values. Record gradient norm, parameter norm, learning rate, and step index. Alternating growing errors can support a curvature diagnosis; NaNs from corrupted inputs require data repair. Preserve separate train and held-out metrics before declaring the fix successful.
+Start with finite input and loss checks, then inspect shape contracts and independent objective values. Record gradient norm, parameter norm, learning rate, and step index. Alternating growing errors can support a curvature diagnosis; NaNs from corrupted inputs require data repair. Preserve separate train and held-out metrics before declaring the fix successful. In an MLP, name the boundary and layer: finite inputs → finite logits/loss → activation distribution → per-layer gradient norms → update and parameter displacement → held-out loss. For the supplied lab, the data fault first appears at `(row 7, feature 1)`, the activation fault sets the hidden bias to 20 and saturates all hidden tanh outputs beyond 0.99, and only the rate-100 run has finite gradients followed by rising held-out loss. Do not infer one of these causes from a scalar curve alone.
 
 ## Carry forward
 
@@ -432,10 +696,12 @@ Start with finite input and loss checks, then inspect shape contracts and indepe
 - Record pre-update and post-update quantities distinctly
 - Use gradient clipping for a bounded symptom, not a diagnosis
 - Change the feature scale and predict the new bound
+- Trace the first invalid MLP input and measure activation/gradient distributions by layer
+- Compare a one-factor repair on held-out rows
 
 ## Keep your evidence
 
-Keep the analytic error recurrence, per-step weight/loss/gradient norm for rates 0.1 and 0.3, observed 3.24 loss multiplier, changed-scale comparison, clipping bound, and one repaired nonfinite-input case.
+Keep the NaN input diagnosis, saturation and excessive-rate controls, per-layer gradient/activation evidence and held-out comparisons for each one-factor repair.
 
 Save your predictions, modified code, terminal outputs, and reasoning in your engineering portfolio.
 

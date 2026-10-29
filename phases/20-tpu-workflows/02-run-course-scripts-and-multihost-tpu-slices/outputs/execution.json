@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "tpu-05",
-  "contentHash": "41970c23328f45832f31d6283685e8346a6a2c75e663b55fcbca0eaf9da4e212",
-  "executedAt": "2026-10-21T16:11:48.366949+00:00",
+  "contentHash": "63d6fa8e8f2ed8838972d25160008b34a7970c62b9556b4d3ee9f93209020289",
+  "executedAt": "2026-10-27T17:27:06.513981+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -60,7 +60,7 @@
       "outputs": []
     },
     {
-      "sourceHash": "25df6d662f9d3f0c4e984c6a201f79fa0cfd7a2633dc4b0773dfba6c2dd4ee6c",
+      "sourceHash": "53dc08a479da44f2b1718bf964cd5c4d3e3305811c536df9d501b1833a6e3476",
       "outputs": [
         {
           "output_type": "display_data",

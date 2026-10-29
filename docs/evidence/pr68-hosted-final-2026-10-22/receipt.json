@@ -1,0 +1,10 @@
+{
+  "observedAt": "2026-10-22T00:49:13.016268+00:00",
+  "head": "7090e02890b7e3e7f42e46247396a32b510c9e30",
+  "url": "https://github.com/mlnomadpy/jaxpathways/pull/68",
+  "draft": true,
+  "checks": 15,
+  "allSuccess": true,
+  "rawResultSha256": "99c0f014656ae39a568308298d39c7f76325081e99ad4aa5900fd0de57d36593",
+  "scope": "Hosted verification of unchanged 0.15.1 candidate only. Workflow success does not establish model-quality floors, native reading, teaching review or completion of full capstones."
+}

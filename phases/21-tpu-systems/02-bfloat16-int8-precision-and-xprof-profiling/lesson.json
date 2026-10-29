@@ -3,10 +3,10 @@
   "id": "tpu-06",
   "minutes": 25,
   "content": {
-    "problem": "Compare BF16 operand rounding and a per-column INT8 weight-quantization reference on CPU, while distinguishing stored values, dequantized operands, accumulation type, and device-kernel execution. Retain a trace of the actual worked workload in a user-selected directory so its events can be inspected.",
-    "idea": "This lesson measures numerical error for a BF16 matmul and an FP32 dequantization reference for INT8 weights. The INT8 path stores quantized weights plus scale metadata, then casts and rescales them to FP32 before the dot; it does not demonstrate a native INT8 kernel, packed runtime storage, or reduced device-memory traffic. The FP32 result is a finite-precision reference, not exact arithmetic. Keep the generated XProf directory after the example returns.",
+    "problem": "Measure how BF16 operand rounding and the requested dot result dtype affect a fixed CPU matmul, and compare a per-column INT8 weight-quantization reference. Verify the returned dtypes and distinguish observable outputs from backend arithmetic details. Retain a trace of the actual worked workload in a user-selected directory so its events can be inspected.",
+    "idea": "This lesson measures numerical error for BF16 operands with requested FP32 and BF16 dot result dtypes, plus an FP32 dequantization reference for INT8 weights. The JAX API documents `preferred_element_type` as controlling the returned dtype; for the generic dot path it also serves as a compiler hint for accumulation. A returned dtype and output error do not reveal the precision of every internal partial sum. The FP32 result is a finite-precision reference, not exact arithmetic. The INT8 path stores quantized weights plus scale metadata, then casts and rescales them to FP32 before the dot; it does not demonstrate a native INT8 kernel, packed runtime storage, or reduced device-memory traffic. Keep the generated XProf directory after the example returns.",
     "objectives": [
-      "Measure numerical error for `bfloat16` matmuls with `float32` accumulation versus `bfloat16` accumulation.",
+      "Measure error for BF16 operands with requested FP32 and BF16 dot result dtypes, verify the actual returned dtypes, and avoid inferring internal partial-sum precision from output values.",
       "Implement per-column INT8 weight quantization and an FP32 dequantization reference; account for scales and test a zero-valued channel.",
       "Capture a warmed `jax.profiler.trace` (`*.xplane.pb`) on a Cloud TPU VM (or local CPU rehearsal) after synchronizing warmup.",
       "Download the trace directory with `gcloud compute tpus tpu-vm scp --recurse` and inspect it in TensorBoard / XProf."
@@ -14,73 +14,97 @@
     "sections": [
       {
         "id": "guided-reasoning",
-        "title": "Why TPU matmuls use `bfloat16` operands with `float32` accumulation",
-        "body": "BF16 has the same exponent width as FP32, but its shorter significand still rounds values; this does not eliminate all underflow, overflow, or accuracy problems. `preferred_element_type=jnp.float32` requests a FP32 result/accumulation type through the JAX dot API, but a CPU run does not establish a TPU kernel’s internal implementation.\n\nThe INT8 example quantizes each output column using `scale = max(abs(W[:, j])) / 127`, stores one signed byte per weight plus one FP32 scale per column, and then dequantizes to FP32 before the dot. A zero column uses scale zero and must produce a zero quantized column without division by zero. This is a numerical reference only: it does not show a native INT8 dot, packed storage, activation quantization, or reduced device memory traffic. Compare against the FP32 JAX computation, which is finite precision. The measured error is specific to the fixed input and weight arrays.",
+        "title": "What does `preferred_element_type` establish for BF16 dot products?",
+        "body": "Lower precision asks two separate questions: how much space does an array occupy, and how much does the computed answer change? This lesson keeps the input matrix and weights fixed so you can compare three paths: BF16 operands returning FP32, BF16 operands returning BF16, and stored INT8 weight codes dequantized to FP32 before the dot.\n\nStart with the returned answer. The recorded CPU run has maximum absolute errors \\(0.03718\\), \\(0.05545\\) and \\(0.12516\\), respectively, against the same FP32 reference. The corresponding mean errors are \\(0.00756\\), \\(0.00912\\) and \\(0.02322\\). The maximum asks about the worst output element; the mean summarizes all elements. A small mean can hide a larger error at a particular output, so inspect both before deciding whether a task can tolerate a precision change.\n\nNow follow one INT8 weight column. Its scale is the largest absolute weight in that column divided by \\(127\\). Dividing weights by that scale and rounding produces signed integer codes; multiplying the codes by the scale reconstructs approximate weights. A zero column needs a safe scale and all-zero codes so the calculation never divides by zero. Each output column gets its own scale because columns can have different ranges.\n\nFor the \\((256,64)\\) weight matrix, BF16 storage takes \\(32768\\) bytes. INT8 codes take \\(16384\\) bytes plus \\(256\\) bytes for 64 FP32 scales. That is a smaller stored representation. However, this reference then materializes FP32 weights, which take \\(65536\\) bytes, before multiplying them. Saving checkpoint bytes therefore does not by itself establish a lower-memory or faster dot product. For the \\((64,256)\\) input, FP32 and BF16 take \\(65536\\) and \\(32768\\) bytes; the \\((64,64)\\) result takes \\(16384\\) or \\(8192\\) bytes. Temporary lifetimes and other live arrays still matter for peak device memory.\n\nFinally separate a returned dtype from an internal reduction. `preferred_element_type` requests a result element type and, on the generic lower-level dot path, supplies a compiler hint about accumulation. The retained CPU HLO widens BF16 operands to FP32, performs an FP32 dot and converts the requested BF16 result afterward. That is evidence about this compiled graph. It does not identify the physical partial-sum rounding order or establish TPU lowering. The probe command below lets you inspect those artifacts instead of inferring internal arithmetic from the output label.",
         "check": {
-          "prompt": "Why does accumulating a dot product in `bfloat16` (`preferred_element_type=jnp.bfloat16`) have higher error than `preferred_element_type=jnp.float32` even when both inputs are `bfloat16`?",
-          "answer": "When accumulating in `bfloat16`, every partial sum across the inner dimension `K` is rounded to 7 mantissa bits, whereas `float32` accumulation retains 23 mantissa bits for the entire reduction."
+          "prompt": "What can the lesson infer from `jnp.dot(x_bf16, w_bf16, preferred_element_type=jnp.bfloat16)` and its measured output error?",
+          "answer": "The call requests a BF16 returned dtype, and this run verifies that dtype and compares the output against a finite-precision reference. For the generic dot path, `preferred_element_type` is also a compiler hint about accumulation. These results do not establish that every partial sum is rounded to BF16; that requires backend-specific implementation evidence."
         },
-        "math": "\\text{Cost per } 10^6 \\text{ tokens} = \\frac{C_{\\text{chip\\_hour}} \\times N_{\\text{chips}} \\times (T_{\\text{run}} / 3600)}{\\text{Tokens}_{\\text{processed}} / 10^6}"
+        "math": "B_{\\text{stored}} = N_w b_w + N_s b_s; \\quad B_{\\text{runtime operands}} = N_x b_x + N_w b_w; \\quad B_{\\text{result}} = N_y b_y",
+        "commands": [
+          {
+            "label": "Run the source-bound CPU dtype and compiler-IR probe",
+            "shell": "bash",
+            "code": "JAX_PLATFORMS=cpu python phases/21-tpu-systems/02-bfloat16-int8-precision-and-xprof-profiling/labs/precision_contract_probe.py --output-dir ./tpu06-precision-output",
+            "expected": "Retains the original and BF16 operands, FP32 reference, both requested-result arrays, explicit FP32-result-to-BF16 cast, seed-zero and seed-42 fixtures, plus seed 7 as a changed-seed check. The receipt records environment and source/data hashes and points to a result summary with returned dtypes, computed errors, and equality counts. StableHLO and optimized HLO are compiler evidence; they do not establish physical partial-sum precision or TPU lowering."
+          }
+        ]
       },
       {
-        "title": "1. Capture a warmed XProf trace on your Cloud TPU VM and inspect in TensorBoard",
-        "body": "The worked CPU example warms the exact function it profiles and writes its trace under `TPU_TRACE_DIR` (default `./tpu-xprof-trace`). The directory remains after the function returns. Open that directory in TensorBoard/XProf and inspect the actual event names, timestamp units, host dispatch, compilation boundary, device work, synchronization, and input stalls that are present in your trace. A CPU trace teaches event reading; it does not establish TPU performance. For timing comparisons, measure synchronized steps outside the profiler.",
+        "title": "Capture a bounded CPU rehearsal or TPU trace",
+        "body": "A useful trace needs a question. Here it is: what events occur while a warmed, fixed-signature BF16 matrix dot is repeatedly dispatched and synchronized? The function allocates its bounded input once, warms that signature, then profiles a fixed number of calls. Every result is checked for finiteness so a broken workload cannot produce an apparently successful timing receipt.\n\nRead the backend and step count first. Then inspect the actual host and device lanes. A host span around dispatch and `block_until_ready` includes the time spent submitting and waiting; it is not automatically an isolated device kernel. This workload has no collective, so a gap between calls is not evidence of collective communication.\n\nThe separate unprofiled run measures wall-clock time for the same loop, including dispatch and synchronization. Comparing it with the profiled interval helps you notice instrumentation overhead. Keep CPU rehearsal and TPU receipts separately labelled, since the event names and execution behavior can differ. The commands below retain the target trace for that inspection.",
         "commands": [
           {
             "label": "Run tpu-06.py and capture a 5-step warmed XProf trace on the Cloud TPU VM",
             "shell": "bash",
-            "code": "gcloud compute tpus tpu-vm scp public/exercises/tpu-06.py \"$TPU_NAME\":~/jax-tpu-lab/ --zone=\"$ZONE\"\ngcloud compute tpus tpu-vm ssh \"$TPU_NAME\" --zone=\"$ZONE\" --command=\"set -euo pipefail; source ~/jax-tpu-lab/.venv/bin/activate; export TPU_TRACE_DIR=~/jax-tpu-lab/tpu-xprof-trace; JAX_PLATFORMS=tpu python ~/jax-tpu-lab/tpu-06.py\"\nmkdir -p ./tpu-xprof-trace\ngcloud compute tpus tpu-vm scp --recurse \"$TPU_NAME\":~/jax-tpu-lab/tpu-xprof-trace ./ --zone=\"$ZONE\"",
+            "code": "gcloud compute tpus tpu-vm ssh \"$TPU_NAME\" --zone=\"$ZONE\" --command=\"mkdir -p ~/jax-tpu-lab\"\ngcloud compute tpus tpu-vm scp public/exercises/tpu-06.py \"$TPU_NAME\":~/jax-tpu-lab/ --zone=\"$ZONE\"\ngcloud compute tpus tpu-vm ssh \"$TPU_NAME\" --zone=\"$ZONE\" --command=\"set -euo pipefail; source ~/jax-tpu-lab/.venv/bin/activate; export TPU_TRACE_DIR=~/jax-tpu-lab/tpu-xprof-trace; JAX_PLATFORMS=tpu python ~/jax-tpu-lab/tpu-06.py\"\nmkdir -p ./tpu-xprof-trace\ngcloud compute tpus tpu-vm scp --recurse \"$TPU_NAME\":~/jax-tpu-lab/tpu-xprof-trace ./ --zone=\"$ZONE\"",
             "expected": "Runs the lesson workload, captures that workload in the persistent TPU_TRACE_DIR, then copies the retained trace directory back. Inspect actual events in XProf; CPU and TPU traces remain separately identified."
           },
           {
             "label": "Launch TensorBoard with the XProf profile plugin on your workstation",
             "shell": "bash",
-            "code": "# Launch TensorBoard with the XProf profile plugin on your workstation\npip install tensorboard tensorboard-plugin-profile xprof\ntensorboard --logdir ./tpu-xprof-trace --port 6006",
-            "expected": "Serves the XProf Trace Viewer, Overview Page, and Memory Viewer at http://localhost:6006."
+            "code": "# Use the reviewed logger environment from projects/reproducible-experiments/requirements-loggers.txt, then start TensorBoard.\ntensorboard --logdir ./tpu-xprof-trace --port 6006",
+            "expected": "Starts TensorBoard from the pinned logger environment. XProf must already be present in the reviewed target environment; do not install an unpinned plugin during the lesson."
           }
         ]
-      }
-    ],
-    "code": "# Step 1 — Compare BF16 (FP32 vs BF16 accumulation) and per-channel INT8 matmul errors\nfrom pathlib import Path\nimport os\nimport time\nimport jax\nimport jax.numpy as jnp\nimport numpy as np\n\n\ndef evaluate_precision_policies(seed=0):\n    # Create or split explicit PRNG key(s) (`(k1, k2)`) for reproducible randomness.\n    k1, k2 = jax.random.split(jax.random.PRNGKey(seed))\n    # Sample deterministic random values into `x` using an explicit PRNG key.\n    x = jax.random.normal(k1, (64, 256), dtype=jnp.float32)\n    # Sample deterministic random values into `w` using an explicit PRNG key.\n    w = jax.random.normal(k2, (256, 64), dtype=jnp.float32) * 0.25\n    # Keep the reference matrix product in float32 for comparison.\n    ref_fp32 = jnp.dot(x, w, preferred_element_type=jnp.float32)\n    # Round both inputs to BF16, but accumulate and return the dot product in float32.\n    out_bf16_fp32acc = jnp.dot(\n        x.astype(jnp.bfloat16), w.astype(jnp.bfloat16), preferred_element_type=jnp.float32\n    )\n    # Accumulate this BF16 dot product in BF16, then cast back for a same-dtype comparison.\n    out_bf16_bf16acc = jnp.dot(\n        x.astype(jnp.bfloat16), w.astype(jnp.bfloat16), preferred_element_type=jnp.bfloat16\n    ).astype(jnp.float32)\n    # Take one maximum per output column so each column gets its own quantization scale.\n    column_max = jnp.max(jnp.abs(w), axis=0, keepdims=True)\n    scale = jnp.where(column_max == 0, 1.0, column_max / 127.0)\n    # The scale of 1 for a zero column avoids division by zero; its quantized values remain zero.\n    w_int8 = jnp.clip(jnp.round(w / scale), -127, 127).astype(jnp.int8)\n    # Dequantize the int8 weights before a float32-accumulation dot product.\n    out_int8_fp32acc = jnp.dot(x, w_int8.astype(jnp.float32) * scale, preferred_element_type=jnp.float32)\n    policies = [\n        (\"bf16 (fp32 accum)\", out_bf16_fp32acc),\n        (\"bf16 (bf16 accum)\", out_bf16_bf16acc),\n        (\"int8 per-col (fp32 accum)\", out_int8_fp32acc),\n    ]\n    results = []\n    # Loop over `(label, tensor)` in `policies`:\n    for label, tensor in policies:\n        diff = jnp.abs(tensor - ref_fp32)\n        # Append the computed value via `results.append({`.\n        results.append({\n            \"policy\": label,\n            \"max_abs_err\": round(float(jnp.max(diff)), 5),\n            \"mean_abs_err\": round(float(jnp.mean(diff)), 5),\n            \"weight_bytes\": int(w_int8.size),\n            \"scale_bytes\": int(scale.size * 4),\n        })\n    return results\n\n\n\n# Step 2 — Capture a warmed XProf trace and verify *.xplane.pb output\ndef capture_warmed_trace(steps=4, trace_dir=None):\n    x = jnp.ones((256, 256), dtype=jnp.bfloat16)\n    # Wrap with `jax.jit` (`step_fn`) so XLA traces and compiles the function.\n    step_fn = jax.jit(lambda a: jnp.dot(a, a, preferred_element_type=jnp.float32).astype(jnp.bfloat16))\n    t0 = time.perf_counter()\n    # Wait for device work to finish before timing it or comparing its result on the host.\n    jax.block_until_ready(step_fn(x))\n    warmup_ms = (time.perf_counter() - t0) * 1000.0\n    trace_dir = Path(trace_dir or os.environ.get(\"TPU_TRACE_DIR\", \"./tpu-xprof-trace\")).expanduser().resolve()\n    trace_dir.mkdir(parents=True, exist_ok=True)\n    with jax.profiler.trace(str(trace_dir)):\n        t1 = time.perf_counter()\n        # Repeat the update loop over `range(steps)` steps:\n        for _ in range(steps):\n            x = step_fn(x)\n        # Wait for device work to finish before timing it or comparing its result on the host.\n        jax.block_until_ready(x)\n        steady_ms = (time.perf_counter() - t1) * 1000.0 / steps\n    # Collect files from the retained trace directory.\n    xplane_files = list(trace_dir.rglob(\"*.xplane.pb\"))\n    return {\"warmup_ms\": warmup_ms, \"steady_ms\": steady_ms, \"xplane_count\": len(xplane_files), \"trace_dir\": str(trace_dir)}\n\n\n\nprec_table = evaluate_precision_policies()\ntrace_info = capture_warmed_trace()\n# Assert invariant `trace_info[\"xplane_count\"] >= 1` holds\nassert trace_info[\"xplane_count\"] >= 1\n# Assert invariant `prec_table[0][\"max_abs_err\"] < prec_table[1][\"max_abs_err\"]` holds\nassert prec_table[0][\"max_abs_err\"] < prec_table[1][\"max_abs_err\"]\nprint(\"Precision comparison:\", prec_table)\nprint(\"Retained trace directory:\", trace_info[\"trace_dir\"])\nprint(\"Captured *.xplane.pb trace count:\", trace_info[\"xplane_count\"], \"steady_ms:\", round(trace_info[\"steady_ms\"], 4))",
-    "buildSteps": [
-      {
-        "title": "Compare BF16 (FP32 vs BF16 accumulation) and per-channel INT8 matmul errors",
-        "instruction": "Create main.py with evaluate_precision_policies.",
-        "code": "# Step 1 — Compare BF16 (FP32 vs BF16 accumulation) and per-channel INT8 matmul errors\nfrom pathlib import Path\nimport os\nimport tempfile\nimport time\nimport jax\nimport jax.numpy as jnp\nimport numpy as np\n\n\ndef evaluate_precision_policies(seed=0):\n    # Create or split explicit PRNG key(s) (`(k1, k2)`) for reproducible randomness.\n    k1, k2 = jax.random.split(jax.random.PRNGKey(seed))\n    # Sample deterministic random values into `x` using an explicit PRNG key.\n    x = jax.random.normal(k1, (64, 256), dtype=jnp.float32)\n    # Sample deterministic random values into `w` using an explicit PRNG key.\n    w = jax.random.normal(k2, (256, 64), dtype=jnp.float32) * 0.25\n    # Cast or evaluate `ref_fp32` in explicit floating-point precision.\n    ref_fp32 = jnp.dot(x, w, preferred_element_type=jnp.float32)\n    # Cast or evaluate `out_bf16_fp32acc` in explicit floating-point precision.\n    out_bf16_fp32acc = jnp.dot(\n        x.astype(jnp.bfloat16), w.astype(jnp.bfloat16), preferred_element_type=jnp.float32\n    )\n    # Cast or evaluate `out_bf16_bf16acc` in explicit floating-point precision.\n    out_bf16_bf16acc = jnp.dot(\n        x.astype(jnp.bfloat16), w.astype(jnp.bfloat16), preferred_element_type=jnp.bfloat16\n    ).astype(jnp.float32)\n    # Reduce across the target axis to summarize `scale`.\n    column_max = jnp.max(jnp.abs(w), axis=0, keepdims=True)\n    scale = jnp.where(column_max == 0, 1.0, column_max / 127.0)\n    # The scale of 1 for a zero column avoids division by zero; its quantized values remain zero.\n    w_int8 = jnp.clip(jnp.round(w / scale), -127, 127).astype(jnp.int8)\n    # Cast or evaluate `out_int8_fp32acc` in explicit floating-point precision.\n    out_int8_fp32acc = jnp.dot(x, w_int8.astype(jnp.float32) * scale, preferred_element_type=jnp.float32)\n    policies = [\n        (\"bf16 (fp32 accum)\", out_bf16_fp32acc),\n        (\"bf16 (bf16 accum)\", out_bf16_bf16acc),\n        (\"int8 per-col (fp32 accum)\", out_int8_fp32acc),\n    ]\n    results = []\n    # Loop over `(label, tensor)` in `policies`:\n    for label, tensor in policies:\n        diff = jnp.abs(tensor - ref_fp32)\n        # Append the computed value via `results.append({`.\n        results.append({\n            \"policy\": label,\n            \"max_abs_err\": round(float(jnp.max(diff)), 5),\n            \"mean_abs_err\": round(float(jnp.mean(diff)), 5),\n            \"weight_bytes\": int(w_int8.size),\n            \"scale_bytes\": int(scale.size * 4),\n        })\n    return results\n",
-        "explanation": "Measuring both max and mean absolute error across accumulation dtypes quantifies why FP32 accumulation is standard on TPU MXUs."
       },
       {
-        "title": "Capture a warmed XProf trace and verify *.xplane.pb output",
-        "instruction": "Append capture_warmed_trace and the verification assertions to main.py.",
-        "code": "# Step 2 — Capture a warmed XProf trace and verify *.xplane.pb output\ndef capture_warmed_trace(steps=4, trace_dir=None):\n    x = jnp.ones((256, 256), dtype=jnp.bfloat16)\n    # Wrap with `jax.jit` (`step_fn`) so XLA traces and compiles the function.\n    step_fn = jax.jit(lambda a: jnp.dot(a, a, preferred_element_type=jnp.float32).astype(jnp.bfloat16))\n    t0 = time.perf_counter()\n    # Wait for device work to finish before timing it or comparing its result on the host.\n    jax.block_until_ready(step_fn(x))\n    warmup_ms = (time.perf_counter() - t0) * 1000.0\n    # Enter managed runtime/context scope for this block:\n    trace_dir = Path(trace_dir or os.environ.get(\"TPU_TRACE_DIR\", \"./tpu-xprof-trace\")).expanduser().resolve()\n    trace_dir.mkdir(parents=True, exist_ok=True)\n    with jax.profiler.trace(str(trace_dir)):\n        t1 = time.perf_counter()\n        # Repeat the update loop over `range(steps)` steps:\n        for _ in range(steps):\n            x = step_fn(x)\n        # Wait for device work to finish before timing it or comparing its result on the host.\n        jax.block_until_ready(x)\n        steady_ms = (time.perf_counter() - t1) * 1000.0 / steps\n    # Collect files from the retained trace directory.\n    xplane_files = list(trace_dir.rglob(\"*.xplane.pb\"))\n    return {\"warmup_ms\": warmup_ms, \"steady_ms\": steady_ms, \"xplane_count\": len(xplane_files), \"trace_dir\": str(trace_dir)}\n\n\n\nprec_table = evaluate_precision_policies()\ntrace_info = capture_warmed_trace()\n# Assert invariant `trace_info[\"xplane_count\"] >= 1` holds\nassert trace_info[\"xplane_count\"] >= 1\n# Assert invariant `prec_table[0][\"max_abs_err\"] < prec_table[1][\"max_abs_err\"]` holds\nassert prec_table[0][\"max_abs_err\"] < prec_table[1][\"max_abs_err\"]\nprint(\"Precision comparison:\", prec_table)\nprint(\"Captured *.xplane.pb trace count:\", trace_info[\"xplane_count\"], \"steady_ms:\", round(trace_info[\"steady_ms\"], 4))",
+        "id": "retained-profile-reading",
+        "title": "Practice reading a real trace before attributing TPU time",
+        "body": "Before interpreting the trace you capture here, work through the [retained CPU event example](https://www.tahabouhsine.com/jaxpathways/lesson-performance-03.html). It includes actual event start/end timestamps, a parent span with two children, a double-counting counterexample and a measured change to an injected input wait. Apply the same event-accounting steps to your own trace, then identify its actual backend, event names and lanes. This dot-product fixture has no collective, so do not label any interval as collective communication. A target TPU trace may contain different events; retain that target evidence separately from the CPU worked example.",
+        "check": {
+          "prompt": "A host annotation contains a dot dispatch and block_until_ready. Is its duration isolated TPU kernel time?",
+          "answer": "No. It includes host dispatch and waiting within the declared annotation. Inspect the actual device lanes and synchronization structure before making a device-kernel or critical-path claim."
+        }
+      }
+    ],
+    "code": "# Step 1 \u2014 Compare BF16 operands with requested FP32 or BF16 dot result dtypes, plus per-column INT8 reference error\nfrom pathlib import Path\nimport os\nimport tempfile\nimport time\nimport jax\nimport jax.numpy as jnp\nimport numpy as np\n\n\ndef evaluate_precision_policies(seed=0):\n    # Create or split explicit PRNG key(s) (`(k1, k2)`) for reproducible randomness.\n    k1, k2 = jax.random.split(jax.random.PRNGKey(seed))\n    # Sample deterministic random values into `x` using an explicit PRNG key.\n    x = jax.random.normal(k1, (64, 256), dtype=jnp.float32)\n    # Sample deterministic random values into `w` using an explicit PRNG key.\n    w = jax.random.normal(k2, (256, 64), dtype=jnp.float32) * 0.25\n    # Keep the reference matrix product in float32 for comparison.\n    ref_fp32 = jnp.dot(x, w, preferred_element_type=jnp.float32)\n    # Round both operands to BF16, then request a float32 result dtype from the dot.\n    out_bf16_requested_fp32 = jnp.dot(\n        x.astype(jnp.bfloat16), w.astype(jnp.bfloat16), preferred_element_type=jnp.float32\n    )\n    # Request a BF16 dot result, then widen returned values to FP32 for error measurement.\n    out_bf16_requested_bf16 = jnp.dot(\n        x.astype(jnp.bfloat16), w.astype(jnp.bfloat16), preferred_element_type=jnp.bfloat16\n    )\n    # Take one maximum per output column so each column gets its own quantization scale.\n    column_max = jnp.max(jnp.abs(w), axis=0, keepdims=True)\n    scale = jnp.where(column_max == 0, 1.0, column_max / 127.0)\n    # The scale of 1 for a zero column avoids division by zero; its quantized values remain zero.\n    w_int8 = jnp.clip(jnp.round(w / scale), -127, 127).astype(jnp.int8)\n    # Dequantize int8 weights to FP32, then request an FP32 result from the dot.\n    out_int8_dequant_requested_fp32 = jnp.dot(x, w_int8.astype(jnp.float32) * scale, preferred_element_type=jnp.float32)\n    result_dtype_cases = [\n        (\"BF16 operands / requested FP32 result\", out_bf16_requested_fp32),\n        (\"BF16 operands / requested BF16 result\", out_bf16_requested_bf16),\n        (\"INT8 per-column / FP32 dequantized dot result\", out_int8_dequant_requested_fp32),\n    ]\n    results = []\n    # Loop over each requested-result-dtype comparison:\n    for label, tensor in result_dtype_cases:\n        diff = jnp.abs(tensor - ref_fp32)\n        # Append the computed value via `results.append({`.\n        results.append({\n            \"result_dtype_setting\": label,\n            \"returned_dtype\": str(tensor.dtype),\n            \"max_abs_err\": round(float(jnp.max(diff)), 5),\n            \"mean_abs_err\": round(float(jnp.mean(diff)), 5),\n            \"input_shape\": list(x.shape), \"weight_shape\": list(w.shape), \"result_shape\": list(tensor.shape),\n            \"stored_weight_bytes\": int((w.astype(jnp.bfloat16).size * 2) if \"BF16\" in label else w_int8.size),\n            \"scale_metadata_bytes\": int(0 if \"BF16\" in label else scale.size * 4),\n            \"runtime_input_bytes\": int(x.size * (2 if \"BF16\" in label else 4)),\n            \"runtime_weight_operand_bytes\": int(w.astype(jnp.bfloat16).size * 2 if \"BF16\" in label else w.size * 4),\n            \"dequantized_fp32_workspace_bytes\": int(w.size * 4 if \"INT8\" in label else 0),\n            \"result_bytes\": int(tensor.size * (2 if tensor.dtype == jnp.bfloat16 else 4)),\n            \"storage_note\": \"logical array sizes; not peak HBM or measured traffic\",\n        })\n    return results\n\n\n\n# Step 2 \u2014 Capture a warmed XProf trace and verify *.xplane.pb output\ndef capture_warmed_trace(steps=5, trace_dir=None):\n    if not isinstance(steps, int) or not 1 <= steps <= 16:\n        raise ValueError(\"steps must be an integer in [1, 16]\")\n    # Reuse the same bounded input each iteration. For this 128x128 matrix of 0.125,\n    # every dot entry is 128 * 0.125 * 0.125 = 2.0, so repeated calls cannot grow the values.\n    x = jnp.full((128, 128), 0.125, dtype=jnp.bfloat16)\n    step_fn = jax.jit(lambda a: jnp.dot(a, a, preferred_element_type=jnp.float32).astype(jnp.bfloat16))\n\n    warm = jax.block_until_ready(step_fn(x))\n    if not bool(np.isfinite(np.asarray(warm)).all()):\n        raise FloatingPointError(\"warmup output contains a non-finite value\")\n\n    trace_dir = Path(trace_dir or os.environ.get(\"TPU_TRACE_DIR\", \"./tpu-xprof-trace\")).expanduser().resolve()\n    trace_dir.mkdir(parents=True, exist_ok=True)\n    with jax.profiler.trace(str(trace_dir)):\n        for _ in range(steps):\n            profiled_result = jax.block_until_ready(step_fn(x))\n            if not bool(np.isfinite(np.asarray(profiled_result)).all()):\n                raise FloatingPointError(\"profiled output contains a non-finite value\")\n\n    # Measure the same fixed-signature work outside the profiler. This includes host dispatch\n    # and synchronization, and is separate from trace duration or profiler event durations.\n    t0 = time.perf_counter()\n    for _ in range(steps):\n        unprofiled_result = jax.block_until_ready(step_fn(x))\n    unprofiled_ms = (time.perf_counter() - t0) * 1000.0\n    if not bool(np.isfinite(np.asarray(unprofiled_result)).all()):\n        raise FloatingPointError(\"unprofiled output contains a non-finite value\")\n\n    xplane_files = list(trace_dir.rglob(\"*.xplane.pb\"))\n    return {\n        \"backend\": jax.default_backend(), \"jax_version\": jax.__version__, \"input_shape\": list(x.shape), \"steps\": steps,\n        \"warmup_finite\": True, \"all_finite\": True, \"profiled_xplane_count\": len(xplane_files),\n        \"trace_dir\": str(trace_dir), \"unprofiled_total_ms\": unprofiled_ms,\n        \"unprofiled_ms_per_step\": unprofiled_ms / steps,\n        \"measurement_note\": \"unprofiled wall time includes host dispatch and synchronization; not a device-only duration\",\n        \"workload_note\": \"fixed-input BF16 dot; no collective communication in this function\",\n    }\n\n\n\nprec_table = evaluate_precision_policies()\ntrace_info = capture_warmed_trace(steps=5)\n# Assert invariant `trace_info[\"profiled_xplane_count\"] >= 1` holds\nassert trace_info[\"profiled_xplane_count\"] >= 1\nassert prec_table[0][\"returned_dtype\"] == \"float32\"\nassert prec_table[1][\"returned_dtype\"] == \"bfloat16\"\nassert all(np.isfinite(row[\"max_abs_err\"]) and np.isfinite(row[\"mean_abs_err\"]) for row in prec_table)\nprint(\"Precision comparison:\", prec_table)\nprint(\"Retained trace directory:\", trace_info[\"trace_dir\"])\nprint(\"Observed backend:\", trace_info[\"backend\"], \"profiled steps:\", trace_info[\"steps\"], \"XPlane files:\", trace_info[\"profiled_xplane_count\"], \"unprofiled ms/step:\", round(trace_info[\"unprofiled_ms_per_step\"], 4))",
+    "buildSteps": [
+      {
+        "title": "Compare BF16 operands with requested FP32 or BF16 dot result dtypes, plus per-column INT8 reference error",
+        "instruction": "Create main.py with evaluate_precision_policies.",
+        "code": "# Step 1 \u2014 Compare BF16 operands with requested FP32 or BF16 dot result dtypes, plus per-column INT8 reference error\nfrom pathlib import Path\nimport os\nimport tempfile\nimport tempfile\nimport time\nimport jax\nimport jax.numpy as jnp\nimport numpy as np\n\n\ndef evaluate_precision_policies(seed=0):\n    # Create or split explicit PRNG key(s) (`(k1, k2)`) for reproducible randomness.\n    k1, k2 = jax.random.split(jax.random.PRNGKey(seed))\n    # Sample deterministic random values into `x` using an explicit PRNG key.\n    x = jax.random.normal(k1, (64, 256), dtype=jnp.float32)\n    # Sample deterministic random values into `w` using an explicit PRNG key.\n    w = jax.random.normal(k2, (256, 64), dtype=jnp.float32) * 0.25\n    # Cast or evaluate `ref_fp32` in explicit floating-point precision.\n    ref_fp32 = jnp.dot(x, w, preferred_element_type=jnp.float32)\n    # Cast or evaluate `out_bf16_requested_fp32` in explicit floating-point precision.\n    out_bf16_requested_fp32 = jnp.dot(\n        x.astype(jnp.bfloat16), w.astype(jnp.bfloat16), preferred_element_type=jnp.float32\n    )\n    # Cast or evaluate `out_bf16_requested_bf16` in explicit floating-point precision.\n    out_bf16_requested_bf16 = jnp.dot(\n        x.astype(jnp.bfloat16), w.astype(jnp.bfloat16), preferred_element_type=jnp.bfloat16\n    )\n    # Reduce across the target axis to summarize `scale`.\n    column_max = jnp.max(jnp.abs(w), axis=0, keepdims=True)\n    scale = jnp.where(column_max == 0, 1.0, column_max / 127.0)\n    # The scale of 1 for a zero column avoids division by zero; its quantized values remain zero.\n    w_int8 = jnp.clip(jnp.round(w / scale), -127, 127).astype(jnp.int8)\n    # Cast or evaluate `out_int8_dequant_requested_fp32` in explicit floating-point precision.\n    out_int8_dequant_requested_fp32 = jnp.dot(x, w_int8.astype(jnp.float32) * scale, preferred_element_type=jnp.float32)\n    result_dtype_cases = [\n        (\"BF16 operands / requested FP32 result\", out_bf16_requested_fp32),\n        (\"BF16 operands / requested BF16 result\", out_bf16_requested_bf16),\n        (\"INT8 per-column / FP32 dequantized dot result\", out_int8_dequant_requested_fp32),\n    ]\n    results = []\n    # Loop over each requested-result-dtype comparison:\n    for label, tensor in result_dtype_cases:\n        diff = jnp.abs(tensor - ref_fp32)\n        # Append the computed value via `results.append({`.\n        results.append({\n            \"result_dtype_setting\": label,\n            \"returned_dtype\": str(tensor.dtype),\n            \"max_abs_err\": round(float(jnp.max(diff)), 5),\n            \"mean_abs_err\": round(float(jnp.mean(diff)), 5),\n            \"input_shape\": list(x.shape), \"weight_shape\": list(w.shape), \"result_shape\": list(tensor.shape),\n            \"stored_weight_bytes\": int((w.astype(jnp.bfloat16).size * 2) if \"BF16\" in label else w_int8.size),\n            \"scale_metadata_bytes\": int(0 if \"BF16\" in label else scale.size * 4),\n            \"runtime_input_bytes\": int(x.size * (2 if \"BF16\" in label else 4)),\n            \"runtime_weight_operand_bytes\": int(w.astype(jnp.bfloat16).size * 2 if \"BF16\" in label else w.size * 4),\n            \"dequantized_fp32_workspace_bytes\": int(w.size * 4 if \"INT8\" in label else 0),\n            \"result_bytes\": int(tensor.size * (2 if tensor.dtype == jnp.bfloat16 else 4)),\n            \"storage_note\": \"logical array sizes; not peak HBM or measured traffic\",\n        })\n    return results\n",
+        "explanation": "Measuring both max and mean absolute error across requested result dtypes quantifies why requested FP32 result dtype is standard on TPU MXUs."
+      },
+      {
+        "title": "Capture a bounded fixed-input XProf trace and measure unprofiled work",
+        "instruction": "Warm and synchronize the fixed signature, profile a bounded number of identical finite dots, then separately measure the same work without the profiler. Report observed backend and retained files; do not infer collectives.",
+        "code": "# Step 2 \u2014 Capture a warmed XProf trace and verify *.xplane.pb output\ndef capture_warmed_trace(steps=5, trace_dir=None):\n    if not isinstance(steps, int) or not 1 <= steps <= 16:\n        raise ValueError(\"steps must be an integer in [1, 16]\")\n    # Reuse the same bounded input each iteration. For this 128x128 matrix of 0.125,\n    # every dot entry is 128 * 0.125 * 0.125 = 2.0, so repeated calls cannot grow the values.\n    x = jnp.full((128, 128), 0.125, dtype=jnp.bfloat16)\n    step_fn = jax.jit(lambda a: jnp.dot(a, a, preferred_element_type=jnp.float32).astype(jnp.bfloat16))\n\n    warm = jax.block_until_ready(step_fn(x))\n    if not bool(np.isfinite(np.asarray(warm)).all()):\n        raise FloatingPointError(\"warmup output contains a non-finite value\")\n\n    trace_dir = Path(trace_dir or os.environ.get(\"TPU_TRACE_DIR\", \"./tpu-xprof-trace\")).expanduser().resolve()\n    trace_dir.mkdir(parents=True, exist_ok=True)\n    with jax.profiler.trace(str(trace_dir)):\n        for _ in range(steps):\n            profiled_result = jax.block_until_ready(step_fn(x))\n            if not bool(np.isfinite(np.asarray(profiled_result)).all()):\n                raise FloatingPointError(\"profiled output contains a non-finite value\")\n\n    # Measure the same fixed-signature work outside the profiler. This includes host dispatch\n    # and synchronization, and is separate from trace duration or profiler event durations.\n    t0 = time.perf_counter()\n    for _ in range(steps):\n        unprofiled_result = jax.block_until_ready(step_fn(x))\n    unprofiled_ms = (time.perf_counter() - t0) * 1000.0\n    if not bool(np.isfinite(np.asarray(unprofiled_result)).all()):\n        raise FloatingPointError(\"unprofiled output contains a non-finite value\")\n\n    xplane_files = list(trace_dir.rglob(\"*.xplane.pb\"))\n    return {\n        \"backend\": jax.default_backend(), \"jax_version\": jax.__version__, \"input_shape\": list(x.shape), \"steps\": steps,\n        \"warmup_finite\": True, \"all_finite\": True, \"profiled_xplane_count\": len(xplane_files),\n        \"trace_dir\": str(trace_dir), \"unprofiled_total_ms\": unprofiled_ms,\n        \"unprofiled_ms_per_step\": unprofiled_ms / steps,\n        \"measurement_note\": \"unprofiled wall time includes host dispatch and synchronization; not a device-only duration\",\n        \"workload_note\": \"fixed-input BF16 dot; no collective communication in this function\",\n    }\n\n\n\nprec_table = evaluate_precision_policies()\ntrace_info = capture_warmed_trace(steps=5)\n# Assert invariant `trace_info[\"profiled_xplane_count\"] >= 1` holds\nassert trace_info[\"profiled_xplane_count\"] >= 1\nassert prec_table[0][\"returned_dtype\"] == \"float32\"\nassert prec_table[1][\"returned_dtype\"] == \"bfloat16\"\nassert all(np.isfinite(row[\"max_abs_err\"]) and np.isfinite(row[\"mean_abs_err\"]) for row in prec_table)\nprint(\"Precision comparison:\", prec_table)\nprint(\"Observed backend:\", trace_info[\"backend\"], \"profiled steps:\", trace_info[\"steps\"], \"XPlane files:\", trace_info[\"profiled_xplane_count\"], \"unprofiled ms/step:\", round(trace_info[\"unprofiled_ms_per_step\"], 4))",
         "explanation": "Warming up before entering jax.profiler.trace ensures the captured *.xplane.pb file records steady-state execution rather than first-call compilation."
       },
       {
         "title": "Step 3: Verify invariants on the completed state",
         "instruction": "Run the final shape and numerical assertions to confirm the state built in Steps 1 and 2.",
-        "code": "assert trace_info[\"xplane_count\"] >= 1\nassert prec_table[0][\"max_abs_err\"] < prec_table[1][\"max_abs_err\"]",
+        "code": "assert trace_info[\"profiled_xplane_count\"] >= 1\nassert prec_table[0][\"returned_dtype\"] == \"float32\"\nassert prec_table[1][\"returned_dtype\"] == \"bfloat16\"\nassert all(np.isfinite(row[\"max_abs_err\"]) and np.isfinite(row[\"mean_abs_err\"]) for row in prec_table)",
         "explanation": "Checking these invariants confirms the computation is ready for the full worked experiment."
       }
     ],
-    "output": "Prints the precision error table (showing lower error for fp32 accumulation than bf16 accumulation) and confirms that at least one *.xplane.pb trace file was captured.",
+    "output": "Prints precision errors and policy-specific bytes, then records the observed backend and JAX version, warmup/profile finite-check status, bounded profiled step count, retained XPlane file count, and separate unprofiled wall time per step. The timing includes host dispatch and synchronization. No collective is present in the profiled function.",
     "experiments": [
       {
-        "title": "Compare FP32 accumulation vs BF16 accumulation error ratio",
-        "prediction": "How much larger is the maximum absolute error when accumulating BF16 matmuls in BF16 instead of FP32?",
-        "code": "# Experiment — Compare FP32 accumulation vs BF16 accumulation error ratio\nfp32_acc_err = prec_table[0][\"max_abs_err\"]\nbf16_acc_err = prec_table[1][\"max_abs_err\"]\nratio = round(bf16_acc_err / fp32_acc_err, 2)\nprint(\"BF16-accum / FP32-accum max error ratio:\", ratio)\n# Assert invariant `ratio > 1.3` holds\nassert ratio > 1.3",
-        "output": "Accumulating in BF16 increases maximum absolute error by roughly \\(1.5\\times\\) compared to FP32 accumulation.",
-        "explanation": "Passing `preferred_element_type=jnp.float32` to `jnp.dot` or `lax.dot_general` preserves FP32 accumulation on TPU."
+        "title": "Compare requested FP32 vs BF16 result dtype error ratio",
+        "prediction": "For the seed-zero CPU fixture, what is the ratio of the maximum error for the requested BF16 result to the requested FP32 result?",
+        "code": "# Experiment \u2014 Compare requested FP32 vs BF16 result dtype error ratio\nrequested_fp32_err = prec_table[0][\"max_abs_err\"]\nrequested_bf16_err = prec_table[1][\"max_abs_err\"]\nratio = round(requested_bf16_err / requested_fp32_err, 2)\nprint(\"Requested BF16 / FP32 result max-error ratio for seed 0:\", ratio)\n# This reports the measured ratio for the current backend and fixed seed-zero fixture.\nassert np.isfinite(ratio)",
+        "output": "For this seed-zero CPU fixture, the requested BF16 result has about 1.49 times the maximum error of the requested FP32 result. This is an output comparison, not evidence about every internal partial sum.",
+        "explanation": "The ratio is computed from this fixed seed-zero fixture and the current CPU backend. `preferred_element_type` requests the returned dtype and acts as an accumulation hint for this generic dot path; it does not independently certify backend internals."
       },
       {
-        "title": "Compare warmup duration vs traced steady-state step duration",
-        "prediction": "Does the warmup step outside the profiler take longer than the traced steady-state steps?",
-        "code": "# Experiment — Compare warmup duration vs traced steady-state step duration\nprint(\"Warmup ms:\", round(trace_info[\"warmup_ms\"], 3), \"Traced steady step ms:\", round(trace_info[\"steady_ms\"], 4))\n# Assert invariant `trace_info[\"warmup_ms\"] > trace_info[\"steady_ms\"]` holds\nassert trace_info[\"warmup_ms\"] > trace_info[\"steady_ms\"]",
-        "output": "Warmup takes significantly longer than a single steady-state step inside the profiler block.",
-        "explanation": "Keeping warmup outside `jax.profiler.trace` prevents XLA compilation from dominating the captured XProf timeline."
+        "title": "Check finite output under a changed bounded trace count",
+        "prediction": "Will five profiled dots remain finite when the same input is reused, and are requests above the maximum rejected?",
+        "code": "import tempfile\nwith tempfile.TemporaryDirectory(prefix=\"tpu-trace-steps-\") as tmp:\n    five = capture_warmed_trace(steps=5, trace_dir=tmp)\nprint(\"Observed backend:\", five[\"backend\"], \"steps:\", five[\"steps\"], \"finite:\", five[\"all_finite\"], \"XPlane files:\", five[\"profiled_xplane_count\"])\nassert five[\"all_finite\"] and five[\"steps\"] == 5 and five[\"profiled_xplane_count\"] >= 1\ntry:\n    capture_warmed_trace(steps=17, trace_dir=tmp)\nexcept ValueError:\n    print(\"Rejected steps above the fixed maximum before tracing\")\nelse:\n    raise AssertionError(\"trace step count must be bounded\")",
+        "output": "Five repeated fixed-input dots remain finite and produce an XPlane file; 17 steps are rejected before tracing.",
+        "explanation": "The output is not fed back as input, so magnitudes do not grow between repetitions. The explicit upper bound keeps this teaching trace workload finite and bounded."
+      },
+      {
+        "title": "Check shape-dependent byte accounting and a zero output column",
+        "prediction": "How do stored bytes and scale bytes change for a 128\u00d732 weight matrix, and what happens when one full output column is zero?",
+        "code": "# Shape ledger: BF16 weights are 128*32*2 B; INT8 codes are 128*32 B and 32 FP32 scales.\nshape = (128, 32)\nbf16_weight_bytes = shape[0] * shape[1] * 2\nint8_code_bytes = shape[0] * shape[1]\nscale_bytes = shape[1] * 4\nzero_column = jnp.zeros((shape[0], 1), dtype=jnp.float32)\nzero_scale = jnp.where(jnp.max(jnp.abs(zero_column), axis=0, keepdims=True) == 0, 1.0, jnp.max(jnp.abs(zero_column), axis=0, keepdims=True) / 127.0)\nzero_codes = jnp.clip(jnp.round(zero_column / zero_scale), -127, 127).astype(jnp.int8)\nprint({\"bf16_weight_bytes\": bf16_weight_bytes, \"int8_code_bytes\": int8_code_bytes, \"scale_bytes\": scale_bytes, \"zero_column_scale\": float(zero_scale[0,0]), \"zero_codes\": int(jnp.count_nonzero(zero_codes))})\nassert (bf16_weight_bytes, int8_code_bytes, scale_bytes) == (8192, 4096, 128)\nassert float(zero_scale[0,0]) == 1.0 and int(jnp.count_nonzero(zero_codes)) == 0",
+        "output": "For 128\u00d732 weights, BF16 storage is 8,192 B; INT8 codes plus FP32 scales are 4,096 B + 128 B. A zero column uses scale 1 and remains all zero.",
+        "explanation": "Storage bytes depend on actual shape and dtype. The zero-column case confirms safe metadata without changing its all-zero codes."
       }
     ],
-    "exercise": "Run `evaluate_precision_policies(seed=42)` and `capture_warmed_trace(steps=3)`, then verify that `bf16 (fp32 accum)` has strictly lower `mean_abs_err` than `bf16 (bf16 accum)` and that `xplane_count >= 1`.",
-    "solution": "# Exercise solution\np42 = evaluate_precision_policies(seed=42)\nt3 = capture_warmed_trace(steps=3)\nprint(\"Seed 42 mean errors:\", {r[\"policy\"]: r[\"mean_abs_err\"] for r in p42}, \"xplane files:\", t3[\"xplane_count\"])\nassert p42[0][\"mean_abs_err\"] < p42[1][\"mean_abs_err\"] and t3[\"xplane_count\"] >= 1",
+    "exercise": "Run `evaluate_precision_policies(seed=42)` and `capture_warmed_trace(steps=3)`. Report the observed backend, each of the three returned dtypes, and all three mean errors. State that the displayed precision comparison uses the CPU rehearsal when the backend is CPU, and that this trace workload contains no collective. Report JAX version and confirm warmup, profiled and unprofiled outputs are finite, and `profiled_xplane_count >= 1`; predict and check that `steps=5` keeps the output finite because each iteration reuses the same input.",
+    "solution": "p42 = evaluate_precision_policies(seed=42)\nt3 = capture_warmed_trace(steps=3)\nprint(\"Observed backend and JAX version:\", t3[\"backend\"], t3[\"jax_version\"])\nprint(\"Three returned dtypes:\", [r[\"returned_dtype\"] for r in p42])\nprint(\"Three mean absolute errors:\", [r[\"mean_abs_err\"] for r in p42])\nprint(\"Trace steps/files:\", t3[\"steps\"], t3[\"profiled_xplane_count\"], \"unprofiled ms/step:\", t3[\"unprofiled_ms_per_step\"])\nassert t3[\"warmup_finite\"] and t3[\"all_finite\"] and t3[\"profiled_xplane_count\"] >= 1\nassert [r[\"returned_dtype\"] for r in p42] == [\"float32\", \"bfloat16\", \"float32\"]\n# Changed-step-count check: five repeats remain finite because input is not fed back as output.\nt5 = capture_warmed_trace(steps=5)\nassert t5[\"all_finite\"] and t5[\"steps\"] == 5",
     "practice": [
       {
         "title": "Compare per-channel vs per-tensor INT8 quantization error",
@@ -111,7 +135,7 @@
         "difficulty": "Transfer / diagnosis",
         "prompt": "Capture a trace in a temporary directory and verify that the generated `*.xplane.pb` file has `stat().st_size > 0`.",
         "hint": "Check `xplane_files[0].stat().st_size > 0`.",
-        "solution": "# Verify non-empty XProf *.xplane.pb byte size (Transfer / diagnosis)\n# Keep this run’s database and artifacts in a scratch directory removed on exit.\nwith tempfile.TemporaryDirectory(prefix=\"tpu-xplane-size-\") as d:\n    a = jnp.ones((128, 128), dtype=jnp.bfloat16)\n    # Wrap with `jax.jit` (`fn`) so XLA traces and compiles the function.\n    fn = jax.jit(lambda z: z @ z)\n    # Wait for device work to finish before timing it or comparing its result on the host.\n    jax.block_until_ready(fn(a))\n    # Enter managed runtime/context scope for this block:\n    with jax.profiler.trace(d):\n        # Wait for device work to finish before timing it or comparing its result on the host.\n        jax.block_until_ready(fn(a))\n    pb = list(Path(d).rglob(\"*.xplane.pb\"))[0]\n    size_bytes = pb.stat().st_size\nprint(\"xplane.pb bytes:\", size_bytes)\n# Assert invariant `size_bytes > 0` holds\nassert size_bytes > 0",
+        "solution": "# Verify non-empty XProf *.xplane.pb byte size (Transfer / diagnosis)\n# Keep this run\u2019s database and artifacts in a scratch directory removed on exit.\nwith tempfile.TemporaryDirectory(prefix=\"tpu-xplane-size-\") as d:\n    a = jnp.ones((128, 128), dtype=jnp.bfloat16)\n    # Wrap with `jax.jit` (`fn`) so XLA traces and compiles the function.\n    fn = jax.jit(lambda z: z @ z)\n    # Wait for device work to finish before timing it or comparing its result on the host.\n    jax.block_until_ready(fn(a))\n    # Enter managed runtime/context scope for this block:\n    with jax.profiler.trace(d):\n        # Wait for device work to finish before timing it or comparing its result on the host.\n        jax.block_until_ready(fn(a))\n    pb = list(Path(d).rglob(\"*.xplane.pb\"))[0]\n    size_bytes = pb.stat().st_size\nprint(\"xplane.pb bytes:\", size_bytes)\n# Assert invariant `size_bytes > 0` holds\nassert size_bytes > 0",
         "explanation": "Verifying a non-empty `*.xplane.pb` file confirms the profiler flushed device and host events before closing.",
         "learnerStarter": {
           "inputs": [
@@ -131,18 +155,18 @@
         }
       }
     ],
-    "question": "Why should you run and synchronize at least one warmup step before entering `with jax.profiler.trace(trace_dir):` on a TPU VM?",
+    "question": "Why does the code warm and synchronize before entering the trace, then measure a separate unprofiled loop?",
     "options": [
-      "Because `jax.profiler.trace` deletes all model weights if warmup is skipped",
-      "So the captured `*.xplane.pb` trace measures steady-state TPU execution and collective communication rather than one-time Python tracing and XLA HLO compilation",
-      "Because `bfloat16` only works inside a profiler context"
+      "Warmup removes all host activity, so the trace contains only accelerator instructions",
+      "The fixed-signature warmup moves initial compilation out of the captured window; the trace still records whatever host, device, synchronization and profiler events occur, while the unprofiled loop supplies a separate wall-time measurement",
+      "A matrix dot automatically inserts a cross-device collective, which the profiler needs to show"
     ],
     "answer": 1,
-    "explanation": "Warming and synchronizing the same signature reduces initial compilation in the recorded window. Inspect the trace to confirm: new shapes or static arguments can still compile, and cache state can still affect timing. Record target latency outside profiler overhead too.",
+    "explanation": "The synchronized warmup prepares the tested signature before tracing. The captured function is one fixed-input dot and includes no collective, so it cannot support a communication claim. Trace event durations may nest or overlap and include runtime/profiler activity. The separate unprofiled measurement includes host dispatch and synchronization; it is not a device-only latency.",
     "diagnosis": "If XProf shows large gaps between device steps on your TPU VM, check for un-jitted Python work, host-side NumPy conversions, or synchronous `print(array)` calls inside the training step.",
     "takeaways": [
-      "Use `bfloat16` matmul operands with `preferred_element_type=jnp.float32` accumulation, and use per-channel scales when quantizing weights to `int8`.",
-      "Capture warmed `jax.profiler.trace` (`*.xplane.pb`) artifacts on the TPU VM and copy them back with `gcloud compute tpus tpu-vm scp --recurse` before deleting the VM."
+      "Use BF16 operands when appropriate, request the desired result dtype with `preferred_element_type`, and verify the actual returned dtype. Treat internal accumulation behavior as backend-specific unless a supported explicit dot algorithm or target evidence establishes it. Use per-column scales when quantizing weights to `int8`.",
+      "Capture the same bounded workload after synchronized warmup. Interpret the events that the trace contains; this fixed-input dot has no collective. Label CPU rehearsal and TPU target traces by their observed backend, and report unprofiled wall time separately from profiler event timing."
     ],
     "references": [
       {
@@ -152,40 +176,118 @@
       {
         "title": "Cloud TPU performance guide",
         "url": "https://cloud.google.com/tpu/docs/performance-guide"
+      },
+      {
+        "title": "jax.numpy.dot: preferred_element_type and returned dtype",
+        "url": "https://docs.jax.dev/en/latest/_autosummary/jax.numpy.dot.html"
+      },
+      {
+        "title": "jax.lax.dot: output dtype and compiler accumulation hint",
+        "url": "https://docs.jax.dev/en/latest/_autosummary/jax.lax.dot.html"
+      },
+      {
+        "title": "jax.lax.DotAlgorithm: explicit operand and accumulation types",
+        "url": "https://docs.jax.dev/en/latest/jax.lax.html#jax.lax.DotAlgorithm"
       }
     ],
     "visual": {
-      "title": "Measured numerical error for BF16 and an FP32 INT8 dequantization reference",
+      "title": "Measured output error for BF16 inputs and an FP32 INT8 dequantization reference",
       "kind": "executed",
-      "prediction": "How do `bf16 (fp32 accum)`, `bf16 (bf16 accum)`, and `int8 per-col (fp32 accum)` compare in maximum and mean absolute error against an `fp32` reference?",
-      "reading": "Errors are measured against the finite-precision FP32 JAX dot for this seeded input. The INT8 row quantizes weights, then dequantizes to FP32 before the dot; it is not a native INT8 kernel result.",
-      "connection": "The measured INT8 error belongs to this fixed example. Its storage estimate must include one FP32 scale per output column, and this code does not demonstrate runtime memory traffic savings.",
-      "alt": "Maximum and mean absolute error for BF16 matmuls and a per-column INT8 weight quantization followed by FP32 dequantization; comparison uses a finite-precision FP32 JAX reference.",
-      "code": "# Perform matrix contraction / projection to compute `visual_data`.\nvisual_data = {\n    'kind': 'bar',\n    'labels': [r['policy'] for r in prec_table],\n    'xlabel': 'matmul precision policy',\n    'ylabel': 'absolute error vs fp32 reference',\n    'series': [\n        {'label': 'max abs error', 'y': [float(r['max_abs_err']) for r in prec_table]},\n        {'label': 'mean abs error', 'y': [float(r['mean_abs_err']) for r in prec_table]},\n    ],\n}"
+      "prediction": "How do BF16 operands with requested FP32 or BF16 result dtypes, and the per-column INT8 dequantization reference, compare in error against a finite-precision FP32 JAX result?",
+      "reading": "Read the three operand paths along the horizontal axis. Each pair of bars compares one returned result with the same finite-precision FP32 CPU reference. The maximum-error bar asks how far the worst output element moved; the mean-error bar asks about the average absolute change across the output matrix.\n\nIn this run, requesting an FP32 result from BF16 operands gives mean error \\(0.00756\\), while requesting BF16 gives \\(0.00912\\). The INT8 dequantization path gives \\(0.02322\\). This ordering describes these seeded inputs and this backend. To choose a policy for a model, repeat the comparison on representative activations and evaluate the model's actual task metric as well as tensor error.",
+      "connection": "Compare the error bars with the storage calculation. INT8 codes use fewer stored bytes, yet this reference expands them to FP32 for the dot and has the largest output error of the three paths. You can therefore support a checkpoint-storage claim from the byte counts, but need separate runtime and quality evidence for a deployment decision. The profiler artifact answers timing questions; these bars answer numerical ones.",
+      "alt": "Maximum and mean output error for BF16 operand dots with requested FP32 and BF16 result dtypes, plus per-column INT8 weight quantization followed by FP32 dequantization; comparison uses a finite-precision FP32 JAX reference.",
+      "code": "# Perform matrix contraction / projection to compute `visual_data`.\nvisual_data = {\n    'kind': 'bar',\n    'labels': ['BF16 inputs / FP32 result', 'BF16 inputs / BF16 result', 'INT8 weights / FP32 dequantized dot'],\n    'xlabel': 'requested result dtype / operand path',\n    'ylabel': 'absolute error vs fp32 reference',\n    'series': [\n        {'label': 'max abs error', 'y': [float(r['max_abs_err']) for r in prec_table]},\n        {'label': 'mean abs error', 'y': [float(r['mean_abs_err']) for r in prec_table]},\n    ],\n}"
     },
     "runtime": {
       "kind": "cpu"
     },
     "optionFeedback": [
-      "Tracing should observe execution, not delete model state. Warmup prepares the tested executable before the recorded window.",
-      "Warming and synchronizing the same signature reduces initial compilation in the recorded window. Inspect the trace to confirm: new shapes or static arguments can still compile, and cache state can still affect timing. Record target latency outside profiler overhead too.",
-      "Profiling is not restricted to BF16. Record the precision used and the actual operations in the captured target workload."
+      "Warmup excludes the first invocation from the trace but does not remove host dispatch, synchronization, other compilation events, or profiler overhead from captured work.",
+      "The synchronized warmup prepares the tested signature before tracing. The captured function is one fixed-input dot and includes no collective, so it cannot support a communication claim. Trace event durations may nest or overlap and include runtime/profiler activity. The separate unprofiled measurement includes host dispatch and synchronization; it is not a device-only latency.",
+      "A dot call on one array does not imply a distributed collective. Communication appears only if the actual workload and trace contain such operations."
     ],
     "learnerStarter": {
       "inputs": [
         "The seeded precision-policy evaluator and warmed trace capture helper."
       ],
       "outputs": [
-        "Seed-42 policy error measurements, trace receipt, and the observed backend."
+        "For seed 42, measured max and mean errors, requested-result labels, actual returned dtypes, and the trace receipt."
       ],
       "invariants": [
-        "The stated BF16 error ordering holds for this run, and the trace receipt records at least one XPlane file; report the backend that actually ran."
+        "Report the actual backend and returned dtypes; do not treat a requested result dtype or measured error as proof of internal partial-sum precision.",
+        "Keep the error comparison tied to the seed-42 fixture and confirm the trace receipt contains an XPlane file."
       ],
       "hints": [
-        "Compare rows by policy name rather than relying on incidental table formatting.",
-        "A CPU trace is a valid local exercise result; reserve TPU-performance claims for a TPU receipt."
+        "Compare rows by the literal requested-result-dtype labels, then inspect each output array dtype.",
+        "A CPU trace is a valid local exercise result; reserve TPU implementation and performance claims for matching target evidence."
       ],
       "code": "import jax\n\ndef compare_precision_run(evaluate_precision_policies, capture_warmed_trace):\n    # TODO: Run the seeded comparison and trace, then validate the requested results and backend.\n    raise NotImplementedError\n"
+    },
+    "diagram": {
+      "title": "Warmup, profiled calls, synchronization and unprofiled measurement boundaries",
+      "prediction": "Which work is outside the trace, what may appear inside it, and does the shown source contain a collective?",
+      "reading": "Conceptual flow, not drawn to time scale: synchronized warmup runs before the trace. The profiled region repeats a fixed-input matrix dot and synchronizes each result, so a captured timeline can include host dispatch, runtime/device work, synchronization and profiler activity. No collective appears in this function. A separate unprofiled loop measures wall time including host dispatch and synchronization.",
+      "alt": "Flow diagram with warmup outside the profiler, a fixed-input dot and synchronization inside the trace, then a separate unprofiled wall-time loop. The trace flow contains no collective and has no duration scale.",
+      "scope": "Conceptual execution boundary schematic; durations and event nesting depend on the retained trace.",
+      "height": 6,
+      "panel": {
+        "kind": "graph",
+        "nodes": [
+          {
+            "id": "0",
+            "x": 5,
+            "y": 1,
+            "label": "Outside trace: compile/warm fixed signature; block_until_ready; finite check",
+            "tone": "state",
+            "w": 9.4,
+            "h": 1
+          },
+          {
+            "id": "1",
+            "x": 5,
+            "y": 2.5,
+            "label": "Profiler starts: repeat fixed-input 128x128 BF16 dot; no collective",
+            "tone": "data",
+            "w": 9.4,
+            "h": 1
+          },
+          {
+            "id": "2",
+            "x": 5,
+            "y": 4,
+            "label": "Captured work may include host dispatch, runtime/device spans, sync and profiler activity",
+            "tone": "result",
+            "w": 9.4,
+            "h": 1
+          },
+          {
+            "id": "3",
+            "x": 5,
+            "y": 5.5,
+            "label": "Profiler ends; separate unprofiled loop reports synchronized wall time",
+            "tone": "warning",
+            "w": 9.4,
+            "h": 1
+          }
+        ],
+        "edges": [
+          {
+            "from": "0",
+            "to": "1"
+          },
+          {
+            "from": "1",
+            "to": "2"
+          },
+          {
+            "from": "2",
+            "to": "3"
+          }
+        ],
+        "height": 6.5,
+        "width": 11
+      }
     }
   }
 }

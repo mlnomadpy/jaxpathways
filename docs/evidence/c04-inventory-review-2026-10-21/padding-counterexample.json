@@ -1,0 +1,10 @@
+{
+  "model_sha256": "26cb9300893d106be011eee96c0caac6e4d860325a4225bfe69ad205044560e7",
+  "valid_frames": 11,
+  "padded_widths": [
+    19,
+    20
+  ],
+  "max_valid_logit_delta": 2.2848336696624756,
+  "same_valid_input_and_length": true
+}

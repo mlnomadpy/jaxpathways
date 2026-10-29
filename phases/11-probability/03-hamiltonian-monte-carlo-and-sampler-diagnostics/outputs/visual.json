@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "probability-03",
-  "contentHash": "4281e8b1c0c7a9e27242557230d9769b6c05315f43c024743289f026bf8437b6",
-  "rendererHash": "a1bd5b648f4731ae5d5f0a24811c2540d1a0a132149ce589d17c4113509cbedf",
+  "contentHash": "773b57ed52a15f1178bdf3faaabb6588937790d393770f6571f712197d215c37",
+  "rendererHash": "17e3bbad72ee4c43425845aaee76b86b85e84750551278be03d8c16842f4dc63",
   "kind": "executed",
-  "generatedAt": "2026-10-21T16:05:06.758101+00:00",
+  "generatedAt": "2026-10-27T17:02:18.628625+00:00",
   "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",

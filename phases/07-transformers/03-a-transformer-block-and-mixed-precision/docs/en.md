@@ -4,6 +4,8 @@ Phase 07: Transformers & language models · about 90 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Masking, tokenization, and sequence packing](https://www.tahabouhsine.com/jaxpathways/lesson-transformers-02.html).
+
 ## What you will be able to do
 
 - Follow the two residual paths
@@ -21,14 +23,12 @@ A Transformer block adds learned corrections to token representations. This less
 
 ## Follow the residual stream through the actual block
 
-Four token positions each carry eight features. Query/key scores therefore form a four-by-four matrix. Weighted values and the output projection return to eight features, allowing the attention correction to be added to the input.
+A transformer block must both mix context and preserve a route for the original representation. Here four token rows each have eight features. Attention forms four-by-four scores, mixes eligible value rows, and projects the result back to width eight so it can be added to the input. The feed-forward branch acts on each token independently, expanding 8 to 16 features and back to 8 before the second residual addition.
 
-The feed-forward branch expands eight features to sixteen, applies GELU and returns to eight. It processes each token's feature vector; attention is the part that mixes eligible positions. Each residual addition requires matching shapes.
-
-The saved output-minus-input heatmap shows the combined correction. Its equal rows arise from this fixture's constant-offset input and normalization behavior. They are not a universal property of attention. Use the architecture to identify which input change would test that explanation.
+The recorded block returns shape $(4,8)$. Its heatmap shows output minus input, not the raw token representation. The nearly repeated correction has a fixture-specific cause: input rows differ by constant feature offsets, which per-token normalization removes. Change one feature of one row to test whether that pattern persists.
 
 $$
-\operatorname{LN}(x)_i = \gamma_i \frac{x_i - \mu}{\sqrt{\sigma^2 + \epsilon}} + \beta_i, \qquad h^{(\ell+1)} = h^{(\ell)} + f_\ell(\operatorname{LN}(h^{(\ell)}))
+N(x)_i=\frac{x_i-\mu(x)}{\sqrt{\operatorname{var}(x)+\epsilon}},\qquad h^{\prime}=h+f(N(h)),\quad\epsilon=10^{-5}
 $$
 
 ### The actual single-head pre-LN block
@@ -39,7 +39,7 @@ $$
 
 *Architecture and dataflow mechanism diagram.*
 
-The center path carries four positions with eight features. Attention mixes eligible positions through four-by-four weights. The feed-forward branch changes each token from eight to sixteen features and back. Curved bypasses carry residual values to additions. No multihead or cache component is implied.
+Follow the downward arrows: $X$ is normalized to form Q/K/V, Q/K scores become a causal four-by-four weight matrix, and the weighted values are projected back to a four-by-eight correction. The curved left bypass carries $X$ directly to the first residual addition. The next path normalizes that sum, expands each token from 8 to 16 features, applies GELU, contracts back to 8, and adds a second correction; the curved right bypass carries the intermediate residual to this addition. Every arrow carries four token rows, while the feature width changes only inside the MLP. The side arrow labeled $V$ routes values into the weighted-value step.
 
 ### Pause and reason
 
@@ -53,9 +53,9 @@ The block returns its input: both correction branches are zero and the residual 
 
 ## Follow the two residual paths
 
-The first sublayer normalizes each token’s features, creates Q/K/V projections, performs causal attention and projects back to the model width. Add that result to the original $x$. The second sublayer normalizes the intermediate residual, expands feature width, applies GELU, contracts back and adds again.
+Read the diagram down the center for the main computation: normalize, form Q/K/V, apply causal attention, project a correction, and add it to the carried input. The next normalization and MLP produce another correction before the second addition. The curved arrows are skip paths carrying the original $X$ to the first add and the intermediate residual to the second; each add preserves shape $(4,8)$.
 
-Every residual addition needs matching shapes. Zeroing all six projection matrices makes both sublayers contribute zero, so the block must return $x$ exactly. This is an independent boundary case that catches many incorrect residual connections.
+If all six projection matrices are zero, both learned branches contribute zero and the output must equal $X$. This makes a useful prediction before inspecting the implementation.
 
 ```text
 x → norm → Q/K/V → causal attention → output projection
@@ -66,21 +66,27 @@ residual → norm → expansion → GELU → contraction
 
 ## Normalize features rather than examples
 
-For each token, compute the mean and variance over its feature axis. Subtracting the mean and dividing by `sqrt(variance+epsilon)` makes this sublayer insensitive to a shared finite feature shift, within numerical tolerance. Epsilon prevents division by zero for a constant feature row.
+Layer normalization computes mean and variance across the feature axis of each token row, then divides by $\sqrt{\mathrm{variance}+\epsilon}$. For $[1,3]$, the mean is 2, variance is 1, and the normalized values are approximately $[-1,1]$. A shared finite offset across one row disappears within tolerance, while a change to one feature need not.
 
-Layer normalization here does not compute statistics across the batch or sequence. Its result has the same shape as its input, and it has no running statistics. Batch normalization and learned affine normalization introduce different state or parameters; do not swap them without revisiting the contract.
+This minimal function has no learned scale or bias and does not aggregate across batch or sequence. Its output shape matches its input, so the following residual addition stays well-formed.
 
 ## Test causal independence and differentiation
 
-Perturb the last token heavily and verify that the first three output rows stay the same. Pre-normalization and the MLP act per token, while the attention mask prevents earlier queries from reading the last key. A full gradient with respect to the parameter pytree should retain each leaf’s shape and remain finite for this input.
+The causal mask gives a direct independence test: heavily perturb the final token and the first three output rows should remain fixed. Normalization and the MLP work per token; the mask prevents earlier queries from reading the last key. Then check that the gradient pytree has the same leaf shapes as the parameters and finite values for this input.
 
-Finite gradients are necessary but not sufficient evidence of a correct block. Check known cases, changed inputs, residual identity and eager/compiled agreement together. The loss reduction determines the gradient scale.
+Finite gradients alone do not validate the block. Pair them with the zero-projection identity case and eager/compiled agreement; interpret gradient magnitude in light of the loss reduction.
 
 ## Separate storage precision from sensitive arithmetic
 
-Casting every parameter and input to bfloat16 is a simple controlled low-precision experiment, not a complete mixed-precision training policy. A common policy stores selected tensors at lower precision while computing reductions and normalization in float32. The second experiment compares fully cast bfloat16 computation with a policy that keeps feature normalization and score softmax in float32, while casting their outputs back for the lower-precision projections.
+Casting every input and parameter to bfloat16 is a controlled low-precision comparison, not a full mixed-precision training recipe. The second policy keeps normalization and score softmax reductions in float32, then casts results back for lower-precision projections. Compare both against the float32 output on this fixed input.
 
-Record maximum absolute error for the supplied small input; do not require bitwise agreement. Precision affects both small denominators and accumulated dot products. If a comparison fails, inspect normalization and input scale before increasing the tolerance. Real models require workload-specific accuracy and performance qualification.
+The recorded maximum absolute error is about $0.01346$ for each policy. That shared value does not establish equal behavior on other inputs or workloads. Inspect which operations retain precision and evaluate an error tolerance against the intended task before choosing a policy.
+
+## Configure depth without changing the block contract
+
+This worked function remains one eight-wide block. The separate foundations model config varies width, depth, head count, MLP width, context, dropout and tied-output policy; it checks the parameter-count formula against the actual parameter tree. Its small CPU pilot uses a two-layer FP32 decoder, finite padding rows excluded from loss, and per-block projected keys and values for cached decoding.
+
+A formula for a larger model is a sizing estimate, not an allocated model or a training result. Inspect the configuration and evidence together before transferring conclusions from this four-token example.
 
 ## 1. Prepare the experiment
 
@@ -211,15 +217,11 @@ Expected: Output shape $(4, 8)$; finite values, zero-projection identity, compil
 
 ### Read the figure
 
-Rows are token positions and columns are features. Every cell shows output minus input at that location, so this is a map of the block’s correction, not its raw output. Purple indicates a positive correction, brown a negative correction, and near-white little change.
-
-Feature $3$ increases by about $0.0897$, while feature $7$ decreases by about $0.385$. Those same column patterns repeat across all four rows, up to floating-point rounding. The strongest color marks the largest change in magnitude, not the feature with the largest original activation.
+Rows are the four token positions; columns are features 0–7. Each cell is the signed correction $\mathrm{output}-X$, with the diverging colors showing positive versus negative values and near-white showing a small change. Feature 3 increases by about $0.0897$, while feature 7 decreases by about $0.3853$; those values repeat across rows to floating-point precision.
 
 ### Connect it to the computation
 
-Why do the rows look identical? The example builds input rows that differ only by a constant offset across their features. Per-token layer normalization removes that offset, so the normalized rows match. Their projected values match too, so attention’s weighted average is the same even when the causal mask allows different numbers of tokens. The subsequent normalized feed-forward branch preserves this symmetry.
-
-The block therefore adds almost the same correction to different input rows; the final rows themselves are still different. This repeated pattern comes from the chosen input, not a rule that transformers treat every token identically. Change one feature of one token, rather than shifting the entire row, to break the symmetry and inspect how the correction changes.
+The code subtracts the input from the block output for this plot, so a large color means a large correction, not a large final activation. The repeated rows follow from the chosen constant-offset inputs and per-token normalization; they are not a general property of attention. Predict how changing feature 3 in only token 1 will affect its row and later causal rows, then compare the new correction map.
 
 ```python
 visual_data = {'kind': 'heatmap', 'values': (output - x).tolist(), 'rows': ['token ' + str(i) for i in range(4)], 'columns': ['f' + str(i) for i in range(8)], 'unit': 'output minus input', 'diverging': True}
@@ -227,7 +229,7 @@ visual_data = {'kind': 'heatmap', 'values': (output - x).tolist(), 'rows': ['tok
 
 ## Recorded reference execution
 
-CPU run: 2026-10-29T12:43:48.226397+00:00. JAX 0.9.2.
+CPU run: 2026-10-29T13:57:38.941064+00:00. JAX 0.9.2.
 
 ```text
 Block shape: (4, 8)

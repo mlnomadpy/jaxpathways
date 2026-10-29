@@ -1,6 +1,6 @@
 """Accelerator jobs and runtime lifecycle · learner-only exercises (3/3 contracts ready)"""
 
-# Exercise: Launch a changed job with \(3\) updates and batch size \(5\). Verify the observed progress steps and completion event rather than relying only on its exit code.
+# Exercise: Change the request to 3 updates and batch size 5. Use the actual events to report the last observed transition, completed updates and final outcome. Then set min_devices=999 and explain why a nonzero exit is not the only evidence of rejection.
 
 # Inputs:
 # - A local child-process command, a finite timeout, and a serialized run configuration.

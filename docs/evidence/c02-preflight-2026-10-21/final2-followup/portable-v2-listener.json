@@ -1,0 +1,80 @@
+{
+  "package": "/private/tmp/jaxpathways-c02-consumer-portable-deadline-v2-20261021",
+  "port": 48129,
+  "sourceSha256": {
+    "serve_local.py": "8cccbda21bb5e6a085c17dd0aaf08f521d0d0dd8990c55a3f252e80b90c6e806",
+    "consumer.py": "1b0934337eb746c1c6e1039b13fbf006cc2acc4dd43ea505464b3a65734fbc9a",
+    "model.py": "efec0774f84e19f870368f7965e3e779641935f4670140065226ec8a27e71932",
+    "config.py": "53e0990fcf6d8fb08486398097919a9430f768cda54540740b3a453a21ed1db9"
+  },
+  "scope": "Actual loopback listener smoke and one partial-header isolation probe; not production or target qualification.",
+  "ownedPid": 48967,
+  "health": {
+    "status": 200,
+    "body": {
+      "status": "ready",
+      "model_status": "bounded pilot consumer; not full capstone or release qualification",
+      "branch": "sft_full_from_domain",
+      "manifest_sha256": "8a44debff5a58a7640f40e0404f955d38190df45b3c92ab962c8f74d82044220",
+      "request_limits": {
+        "body_bytes": 8192,
+        "active_requests": 2,
+        "lifetime_seconds": 30.0,
+        "cancellation": "cooperative-between-generation-steps",
+        "max_new_tokens": 32
+      }
+    }
+  },
+  "invalidType": {
+    "status": 400,
+    "body": {
+      "error": "max_new_tokens must be an integer from 0 through 32"
+    }
+  },
+  "valid": {
+    "status": 200,
+    "body": {
+      "text": "inin",
+      "token_ids": [
+        263,
+        263
+      ],
+      "finish_reason": "length",
+      "prompt_tokens": 43
+    }
+  },
+  "healthDuringPartialHeader": {
+    "status": 200,
+    "body": {
+      "status": "ready",
+      "model_status": "bounded pilot consumer; not full capstone or release qualification",
+      "branch": "sft_full_from_domain",
+      "manifest_sha256": "8a44debff5a58a7640f40e0404f955d38190df45b3c92ab962c8f74d82044220",
+      "request_limits": {
+        "body_bytes": 8192,
+        "active_requests": 2,
+        "lifetime_seconds": 30.0,
+        "cancellation": "cooperative-between-generation-steps",
+        "max_new_tokens": 32
+      }
+    }
+  },
+  "healthAfterRelease": {
+    "status": 200,
+    "body": {
+      "status": "ready",
+      "model_status": "bounded pilot consumer; not full capstone or release qualification",
+      "branch": "sft_full_from_domain",
+      "manifest_sha256": "8a44debff5a58a7640f40e0404f955d38190df45b3c92ab962c8f74d82044220",
+      "request_limits": {
+        "body_bytes": 8192,
+        "active_requests": 2,
+        "lifetime_seconds": 30.0,
+        "cancellation": "cooperative-between-generation-steps",
+        "max_new_tokens": 32
+      }
+    }
+  },
+  "ownedServerStopped": true,
+  "sourceUnchanged": true
+}

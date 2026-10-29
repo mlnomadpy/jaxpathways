@@ -20,3 +20,6 @@ mlflow==3.16.1
 
 # Actual PyTorch-to-Flax CPU architecture conversion lab
 torch==2.11.0
+
+# Saved-decoder SFT and preference transfer exercises use the pinned processor.
+tokenizers==0.22.2

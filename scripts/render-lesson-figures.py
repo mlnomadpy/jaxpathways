@@ -84,6 +84,20 @@ def draw_panel(ax, data):
         for boundary in data.get('boundaries', []): ax.axvline(boundary, color='#716e7b', linestyle=':', linewidth=1)
         ax.grid(axis='y', alpha=0.2)
         ax.legend(fontsize=11, loc='best')
+    elif kind == 'table':
+        headers = data['headers']
+        rows = data['rows']
+        assert headers and rows and all(len(row) == len(headers) for row in rows)
+        ax.axis('off')
+        table = ax.table(cellText=rows, colLabels=headers, cellLoc='center',
+                         loc='center', colWidths=data.get('widths'))
+        table.auto_set_font_size(False)
+        table.set_fontsize(11)
+        table.scale(1, 2.7)
+        for (row, _), cell in table.get_celld().items():
+            cell.set_edgecolor('#ccd3df')
+            cell.set_facecolor('#e9e4f5' if row == 0 else ('#f4f7fb' if row % 2 else '#ffffff'))
+            cell.set_text_props(color='#172334', weight='bold' if row == 0 else 'normal')
     elif kind == 'vectors':
         for i, arrow in enumerate(data['arrows']):
             start = np.asarray(arrow['start']); end = np.asarray(arrow['end'])

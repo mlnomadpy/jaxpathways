@@ -4,6 +4,8 @@ Phase 08: Performance diagnosis · about 100 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Diagnose recompilation and host synchronization](https://www.tahabouhsine.com/jaxpathways/lesson-performance-02.html).
+
 ## What you will be able to do
 
 - Capture an actual warmed CPU trace with named steps.
@@ -13,7 +15,7 @@ This worked reference is validated on CPU. Accelerator compatibility requires a 
 
 ## The problem
 
-Your timer says a training step is slow, but it cannot show whether the time was spent waiting for input or computing. We will capture a real JAX trace, add names that match the code, and read four steps from the recorded events before proposing an optimization.
+Your timer says a training step is slow, but it cannot show whether the time was spent waiting for input or computing. We will capture a real JAX trace, add names that match the code, and read four steps from the recorded events before proposing an optimization. A retained CPU excerpt provides actual event timestamps so we can account for nesting without counting the parent twice.
 
 ## The idea
 
@@ -21,15 +23,23 @@ A trace places events on a shared timeline so we can inspect order, waiting and 
 
 ## Do not add nested durations twice
 
-An outer step lasting $10$ milliseconds can contain a preprocessing region lasting $3$ milliseconds. Their sum is not $13$ milliseconds of elapsed work: the smaller region is already inside the larger one.
+A parent span already contains its children. In the retained 2 ms step, `learner_step` lasts 2665 microseconds; `input_wait` and `model_and_wait` occupy 2520 and 119 microseconds within it. Their union is 2639 microseconds, leaving 26 microseconds of the parent outside those annotations. Adding parent and children would count the same time twice.
 
-Inspect event starts, ends, nesting and lanes before aggregating durations. A gap may be waiting or uninstrumented work; it needs context before being assigned a cause.
-
-The host-region plot summarizes recorded annotations, not GPU kernel execution. State a hypothesis, change one workload component and collect a comparable trace. A useful explanation predicts which interval changes and why, rather than only celebrating a shorter bar.
+Inspect event start, end, nesting and thread before summing. The remainder is unannotated host span, not evidence of another kernel.
 
 $$
-T_{\text{step}} = T_{\text{host\_input}} + T_{\text{device\_compute}} + T_{\text{sync}}
+T_{\rm outer}=T_{\rm input\ wait}+T_{\rm model\ and\ wait}+T_{\rm other}\quad\text{(disjoint serial host regions only)}
 $$
+
+### Measured CPU trace event timeline
+
+**Predict:** Which nested named event occupies most of the enclosing step?
+
+![Measured CPU trace event timeline](../../phases/08-performance/03-read-an-xprof-trace/outputs/mechanism.svg)
+
+*Actual retained CPU host event timestamps and durations. No accelerator-kernel or collective rows are present.*
+
+The table's rows are `learner_step`, `input_wait`, and `model_and_wait`; the columns give condition, event start, duration and end, all in microseconds. In the 2 ms row, the parent runs 122–2787 us, containing `input_wait` from 125–2645 us and then `model_and_wait` from 2668–2787 us on the same host thread. The arrow/order is temporal nesting: the parent contains both children, and the children occur consecutively. The accompanying line plot compares child durations across the two sleep settings.
 
 ### Pause and reason
 
@@ -43,21 +53,47 @@ The event boundary, comparable workload, specific intervention and repeated comp
 
 ## Give the timeline a question
 
-We want to know where this particular step spends time. Input creation and compilation happen before tracing. Each recorded step then contains an explicitly injected host sleep and a compiled model call that waits for its output. The sleep is a controlled stand-in for a stalled input stage; it is not a measurement of Grain, network storage or a real dataset.
+The trace asks where this example's step time falls. Input creation and compilation happen before capture; inside each step the code injects a host sleep, then dispatches a compiled model and waits for its result. The sleep is a deliberate stand-in for a stalled input stage, not a measurement of a real loader or storage system.
 
-Before running, predict which named interval should contain the wait. If the annotation surrounds the wrong code, a polished timeline will answer the wrong question. Keep the code region and annotation name together.
+Predict that reducing the requested sleep should shorten `input_wait`, then compare the named host intervals.
 
 ## Capture warmed work without hiding completion
 
-Warm the exact shape and dtype before the trace. A model annotation ends after block_until_ready, so it includes host dispatch and waiting for the requested result. Without that wait, the host region might end while device work remains queued.
+The exact shape and dtype are warmed before capture. `model_and_wait` ends after `block_until_ready`, so its span includes host dispatch and waiting for the requested CPU result. Without that wait, device work could remain pending after the host annotation ends.
 
-The four step annotations surround both inner regions. We check that each inner interval falls inside its step and that input wait precedes model execution. These temporal checks establish a relationship in the actual trace, not a simulated schedule.
+The recorded `input_wait` comes before `model_and_wait`, and both fit inside `learner_step`. Those observed boundaries establish the order in this trace, not a simulated device schedule.
+
+## Read the retained CPU timeline as nested intervals
+
+The retained file contains six named host events from a synchronized CPU JIT workload, with timestamps and durations in microseconds. In the 2 ms condition, `learner_step` runs from 122 to 2787 us (2665 us); nested `input_wait` runs 125–2645 us (2520 us), followed by `model_and_wait` 2668–2787 us (119 us). The children share one host thread and do not overlap.
+
+When requested sleep changes to 0.5 ms, the retained `input_wait` is 642 us and `model_and_wait` is 79 us; the enclosing step is 732 us. The input span falls by 1878 us. This comparison shows the controlled host wait changing in the expected direction; the smaller model span also varies, so do not read this single profiled pair as a performance guarantee. No accelerator device rows or collectives are present.
+
+**Capture the small retained CPU timeline example**
+
+```bash
+python phases/08-performance/03-read-an-xprof-trace/code/capture_retained_cpu_timeline_p2_81.py
+```
+
+**Expected:** Writes a numeric-only excerpt of six named events, with source hash and backend/version labels. The capture warms and checks a finite tiny workload before profiling.
+
+$$
+T_{\rm step}=2665\,\mu s,\quad |[125,2645]\cup[2668,2787]|=2639\,\mu s,\quad T_{\rm remainder}=26\,\mu s
+$$
+
+### Pause and reason
+
+Which event dominates the measured path in the retained 2 ms condition, and what can you conclude about its critical path?
+
+<details><summary>Compare your reasoning</summary>
+
+The 2520 us injected input_wait dominates these named host spans in this one CPU step. It is on this annotated serial host path before model_and_wait, but it does not establish that a real input source or accelerator is the bottleneck.
+
+</details>
 
 ## Read a trace without adding the same time twice
 
-An outer step includes its inner wait and model regions. Adding all three durations would double-count most of the step. Instead compare the inner intervals and calculate the remaining outer time as annotation and host overhead. Small timing rounding differences deserve an explicit tolerance; a large negative remainder means your events were not matched correctly.
-
-The exported trace’s complete events express timestamps and durations in microseconds. Convert to seconds before comparing with a perf_counter report. An event lasting a thousand microseconds lasts one millisecond; a unit mistake can overwhelm any optimization effect.
+The event timestamps and durations use microseconds, so 1000 us is 1 ms. For the first retained step, subtracting the child union from the 2665-us parent leaves 26 us; it does not add a new duration to the total. Convert units before comparing with a `perf_counter` report, which is usually expressed in seconds.
 
 ## Open the same evidence in XProf and on a TPU VM
 
@@ -90,9 +126,9 @@ xprof --port 8791 ./tpu-trace
 
 ## Make one change and repeat the same question
 
-To investigate a real input bottleneck, replace the injected sleep with the actual input fetch while retaining the annotation boundary. Capture both versions under comparable load. Do not report a speedup from deleting a synthetic delay as if it optimized real model computation.
+To investigate a real input path, replace the synthetic sleep with the actual fetch while keeping the annotation boundary and comparable load. Then predict which host span should move and capture another trace. Removing the synthetic delay only shows that the stand-in was removed; it does not establish a model or production input speedup.
 
-For compilation problems, capture a separate first-call trace and keep it labeled. Mixing cold and warm steps hides the distinction the previous lessons established. Small traces reduce observer overhead, but any profiler can perturb timings; confirm an improvement with an independent synchronized benchmark.
+Keep a cold-start trace separate from warmed steps, and confirm any timing hypothesis with an independent synchronized benchmark.
 
 ## Prepare a traceable workload
 
@@ -233,85 +269,102 @@ print(json.dumps({'input_wait_us':input_us,'model_and_wait_us':model_us,'step_us
 print('Four named steps verified; host annotations are not isolated device kernels.')
 ```
 
-Expected: A real trace directory, four input-wait intervals, four model-and-wait intervals and four step intervals in microseconds. Values vary by run and include profiler overhead.
+Expected: A real trace directory, four named intervals from the lesson capture, plus a retained two-condition CPU excerpt with event timestamps, durations, non-double-counted union accounting and a checked injected-wait prediction. Values include profiler overhead.
 
-## Where four annotated steps spent host time
+## Actual CPU trace: named spans and changed wait
 
-**Predict:** Which line should reflect the deliberately injected host wait?
+**Predict:** If the requested sleep falls from 2 ms to 0.5 ms, which retained host span should shrink, and which should stay in a similar range?
 
-![Where four annotated steps spent host time](../../phases/08-performance/03-read-an-xprof-trace/outputs/figure.svg)
+![Actual CPU trace: named spans and changed wait](../../phases/08-performance/03-read-an-xprof-trace/outputs/figure.svg)
 
 **Recorded CPU computation**
 
 ### Read the figure
 
-The horizontal axis identifies the four captured steps. The vertical axis reports microseconds from actual trace events. The input-wait series contains a requested one-millisecond host sleep, so its duration should be interpreted around that scale with scheduler and profiler overhead; it is not a fixed measured constant.
-
-The model-and-wait series covers dispatch through result readiness. Compare the numeric ticks and the recorded sample list to see which region takes longer in this run. Variation between steps can reflect scheduling or profiling overhead; it does not by itself demonstrate changing model work.
+The x-axis is requested injected sleep in milliseconds (2.0 then 0.5); the y-axis is actual host annotation duration in microseconds. The `input_wait` series falls from 2520 to 642 us, while `model_and_wait` moves from 119 to 79 us. These are named CPU host spans from the retained Perfetto excerpt, not kernel timings.
 
 ### Connect it to the computation
 
-Both plotted series are child regions within a learner_step annotation. They do not include warmup and they are not two isolated accelerator kernels. The code verifies their temporal order and checks the model output independently before interpreting the trace.
-
-The outer step also contains small amounts of other host work. Do not add the outer duration to these inner durations, or call the injected sleep a measured production data stall. Replace the sleep with a real input fetch to investigate an actual pipeline.
+The requested sleep reduction corresponds to a 1878-us shorter `input_wait`. The model span includes dispatch and waiting for the CPU result and also changed by 40 us in this two-step trace; that small movement is not a stable estimate. Both child spans sit inside `learner_step`, whose 2 ms-condition duration is 2665 us, so compare children within the parent rather than adding all three. Next test a real fetch under comparable conditions before using this shape of evidence to locate an input bottleneck.
 
 ```python
-visual_data={'kind':'line','x':[0,1,2,3],'xlabel':'captured step','ylabel':'host annotation duration (microseconds)','series':[{'label':'injected input wait','y':input_us},{'label':'model call and completion wait','y':model_us}]}
+from pathlib import Path
+import json
+retained_events = [{'condition': '2 ms injected wait', 'name': 'learner_step', 'start_us': 122, 'duration_us': 2665, 'end_us': 2787, 'pid': 701, 'tid': 164376313}, {'condition': '2 ms injected wait', 'name': 'input_wait', 'start_us': 125, 'duration_us': 2520, 'end_us': 2645, 'pid': 701, 'tid': 164376313}, {'condition': '2 ms injected wait', 'name': 'model_and_wait', 'start_us': 2668, 'duration_us': 119, 'end_us': 2787, 'pid': 701, 'tid': 164376313}, {'condition': '0.5 ms injected wait', 'name': 'learner_step', 'start_us': 2796, 'duration_us': 732, 'end_us': 3528, 'pid': 701, 'tid': 164376313}, {'condition': '0.5 ms injected wait', 'name': 'input_wait', 'start_us': 2798, 'duration_us': 642, 'end_us': 3440, 'pid': 701, 'tid': 164376313}, {'condition': '0.5 ms injected wait', 'name': 'model_and_wait', 'start_us': 3448, 'duration_us': 79, 'end_us': 3527, 'pid': 701, 'tid': 164376313}]
+# Use embedded measured rows for downloaded standalone lesson scripts. When the
+# workspace excerpt is present, verify that its event records match exactly.
+excerpt_path = Path('phases/08-performance/03-read-an-xprof-trace/data/retained_cpu_timeline_p2_81.json')
+if excerpt_path.exists():
+    excerpt = json.loads(excerpt_path.read_text())
+    assert excerpt['events'] == retained_events
+conditions = ['2 ms injected wait', '0.5 ms injected wait']
+lookup = {(e['condition'], e['name']): e['duration_us'] for e in retained_events}
+visual_data = {
+    'kind': 'line',
+    'x': [2.0, 0.5],
+    'xlabel': 'requested injected sleep (milliseconds)',
+    'ylabel': 'actual host annotation duration (microseconds)',
+    'series': [
+        {'label': 'input_wait', 'y': [lookup[(condition, 'input_wait')] for condition in conditions]},
+        {'label': 'model_and_wait', 'y': [lookup[(condition, 'model_and_wait')] for condition in conditions]},
+    ],
+}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:06:26.096930+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:05:55.689675+00:00. JAX 0.9.2.
 
 ```text
-Trace directory: /private/var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-course-trace-3amanmzr
+Trace directory: /private/var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-course-trace-0uym5n49
 {
   "input_wait_us": [
-    1262,
-    1287,
-    1258,
-    1270
+    1201,
+    1268,
+    1026,
+    1104
   ],
   "model_and_wait_us": [
-    81,
-    104,
-    66,
-    75
+    113,
+    1078,
+    108,
+    94
   ],
   "step_us": [
-    1352,
-    1405,
-    1329,
-    1353
+    1328,
+    2355,
+    1145,
+    1206
   ]
 }
 Four named steps verified; host annotations are not isolated device kernels.
-Trace directory: /private/var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-course-trace-em9_0u6i
+Trace directory: /private/var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-course-trace-yt3veneq
 {
   "input_wait_us": [
     1272,
-    1261,
-    1248,
-    1261
+    1273,
+    1492,
+    1539
   ],
   "model_and_wait_us": [
-    77,
-    47,
-    51,
-    113
+    96,
+    192,
+    858,
+    1040
   ],
   "step_us": [
-    1358,
-    1313,
-    1306,
-    1379
+    1380,
+    1500,
+    2362,
+    2589
   ]
 }
 Four named steps verified; host annotations are not isolated device kernels.
-Unattributed outer time, microseconds: [9, 5, 7, 5]
-Wrong double-counted totals: [2707, 2621, 2605, 2753]
-{'minimum_ms': 0.047, 'median_ms': 0.064, 'maximum_ms': 0.113}
-Hypothetical union: 12 microseconds; summed duration: 19.
+Unattributed outer time, microseconds: [12, 35, 12, 10]
+Wrong double-counted totals: [2748, 2965, 4712, 5168]
+{'input_wait_drop_us': 1878, 'model_before_us': 119, 'model_after_us': 79}
+{'minimum_ms': 0.096, 'median_ms': 0.525, 'maximum_ms': 1.04}
+{'outer_us': 2665, 'children_union_us': 2639, 'remainder_us': 26, 'wrong_parent_plus_children_us': 5304}
 PASS: performance-03
 
 ```
@@ -334,6 +387,25 @@ print('Wrong double-counted totals:',wrong.tolist())
 **Expected:** The remainder is nonnegative within rounding; the double-counted totals exceed the step durations.
 
 Outer and child intervals describe nested boundaries. The remainder is host/annotation work inside the step but outside its two children; it is not automatically device idle time.
+
+## Predict and check a changed input wait
+
+**Predict before running:** Reducing the requested host sleep from 2 ms to 0.5 ms should shorten input_wait by about 1.5 ms while model_and_wait stays in roughly the same range.
+
+```python
+baseline_wait_us=2520
+changed_wait_us=642
+baseline_model_us=119
+changed_model_us=79
+measured_wait_drop_us=baseline_wait_us-changed_wait_us
+assert measured_wait_drop_us==1878
+assert abs(baseline_model_us-changed_model_us)<100
+print({'input_wait_drop_us':measured_wait_drop_us,'model_before_us':baseline_model_us,'model_after_us':changed_model_us})
+```
+
+**Expected:** In this captured trace, input_wait fell by 1878 us; model_and_wait changed from 119 to 79 us.
+
+The predicted direction appears in the retained named host events. This is a single trace with an injected sleep and profiler overhead, not evidence of a production pipeline speedup or a repeatable model latency improvement.
 
 ## Make it yours
 
@@ -380,65 +452,61 @@ print(summary)
 
 </details>
 
-## Compute a union instead of summing overlap
+## Account for the actual nested timeline
 
 **Transfer**
 
-For hypothetical intervals [0,10], [2,7] and [8,12] microseconds, calculate their union duration and compare with their summed durations. Explain why this matters for nested host events.
+Use the retained 2 ms condition: learner_step [122,2787] us, input_wait [125,2645] us, model_and_wait [2668,2787] us. Compute the union of the child intervals, the outer remainder, and the naive sum that adds the parent to both children. Explain which interval is the measured host-path bottleneck and what this trace cannot establish.
 
 <details><summary>Hint</summary>
 
-Sort endpoints and merge intervals that intersect.
+Merge child intervals for child-union time. For total observed wall time, the parent already covers both children.
 
 </details>
 
-### How to write: Compute a union instead of summing overlap — Step-by-step recipe & starter scaffold
+### How to write: Account for the actual nested timeline — Step-by-step recipe & starter scaffold
 
 **Inputs:**
-- For hypothetical intervals [0,10], [2,7] and [8,12] microseconds, calculate their union duration and compare with their summed durations. Explain why this matters for nested host events.
+- Read phases/08-performance/03-read-an-xprof-trace/data/retained_cpu_timeline_p2_81.json.
 
 **Outputs:**
-- Union duration and naive sum in microseconds.
+- Child interval union, enclosing-step remainder, naive nested sum, and bounded critical-path interpretation.
 
 **Invariants to check:**
-- Overlapping time is counted once in wall-clock union duration.
+- Intervals use microseconds; timestamps plus duration equal end time; nested parent is not independent work.
 
 **Hints:**
-- Sort endpoints and merge intervals that intersect.
+- The children in the 2 ms condition are ordered and disjoint. The parent contains both.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-import gzip
 import json
 from pathlib import Path
 
-def practice_compute_a_union_instead_of_summing_overlap(intervals):
-    """Implement the compute a union instead of summing overlap check."""
-    # TODO: Sort the three intervals, merge overlaps, and compare union duration with the sum of individual durations.
+def interpret_retained_cpu_timeline(path):
+    data=json.loads(Path(path).read_text())
+    events={e['name']:e for e in data['events'] if e['condition']=='2 ms injected wait'}
+    # TODO: Verify start + duration = end; calculate child union and remainder;
+    # then demonstrate the incorrect parent + child sum as a negative control.
     raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-def union_duration(intervals):
-    total=0
-    left=right=None
-    for start,end in sorted(intervals):
-        if end<start:raise ValueError('negative interval')
-        if right is None:left,right=start,end
-        elif start<=right:right=max(right,end)
-        else:
-            total+=right-left
-            left,right=start,end
-    return total+(0 if right is None else right-left)
-assert union_duration([(0,10),(2,7),(8,12)])==12
-assert sum(b-a for a,b in [(0,10),(2,7),(8,12)])==19
-print('Hypothetical union: 12 microseconds; summed duration: 19.')
+intervals=[('learner_step',122,2787),('input_wait',125,2645),('model_and_wait',2668,2787)]
+children=[(125,2645),(2668,2787)]
+child_union=(2645-125)+(2787-2668)
+outer=2787-122
+remainder=outer-child_union
+negative_control=outer+(2645-125)+(2787-2668)
+assert (outer,child_union,remainder,negative_control)==(2665,2639,26,5304)
+assert max(children[0][1]-children[0][0],children[1][1]-children[1][0])==2520
+print({'outer_us':outer,'children_union_us':child_union,'remainder_us':remainder,'wrong_parent_plus_children_us':negative_control})
 ```
 
-A union describes time covered by any interval. A sum counts overlap repeatedly. Neither alone says which device was busy; lane and dependency information still matter.
+The retained Perfetto timestamps show a single host thread with an injected 2520 us wait followed by a 119 us synchronized model annotation. Adding the parent to its children double-counts nested elapsed time. The synthetic wait dominates only this controlled annotated CPU path; it does not diagnose a production input pipeline or accelerator.
 
 </details>
 

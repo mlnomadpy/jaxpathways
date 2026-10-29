@@ -12,7 +12,9 @@ Start with each lesson’s recorded CPU baseline. For first physical TPU practic
 
 ## Study guide: Can someone else reproduce your first result?
 
-Start with one saved program and a known answer. The terminal, interpreter and working folder are part of the experiment: a notebook that imports a package is not yet proof that the downloaded script uses the same environment.
+Your first goal is to make one saved program produce an answer you can predict. When a notebook and a terminal disagree, the cause may be the interpreter, working folder or input file before JAX itself enters the picture. Record those choices beside the result so you can explain what actually ran.
+
+Follow the local CPU route first. The optional virtual-device branch later makes array ownership visible; the cloud branch adds an explicitly requested target and its runtime receipt. A matching answer establishes the checked arithmetic, while the backend and device fields explain where it happened.
 
 ### Check your starting point
 
@@ -20,7 +22,7 @@ You saved a script in your course folder, but the terminal reports that the file
 
 <details><summary>Compare your reasoning</summary>
 
-Check the terminal’s current folder and the exact filename, including its extension. Then run the environment’s Python explicitly. Reinstalling JAX will not repair a wrong path.
+Check the terminal’s current folder and the exact filename, including its extension. Then run the environment’s Python explicitly. Reinstalling JAX will not repair a wrong path. After the first array lesson, a CPU learner can continue to Arrays & pure functions. Virtual-device and cloud setup can wait until the placement and transformation concepts are familiar.
 
 </details>
 
@@ -32,7 +34,7 @@ Review: [Set up your learning workspace](01-set-up-your-learning-workspace/docs/
 
    Lessons: [Set up your learning workspace](01-set-up-your-learning-workspace/docs/en.md) · [Meet your arrays and devices](02-meet-your-arrays-and-devices/docs/en.md).
 
-2. **Separate local practice from parallel TPU execution.** Start a fresh process for virtual CPU devices and compare its device receipt with the ordinary process. Then learn how to get a TPU running (hosted TPU or single-host Cloud TPU VM), launch your experiment over SSH with explicit backend checks, and run subsequent course phases on TPU in parallel.
+2. **Separate local practice from parallel TPU execution.** Optional advanced branch: start a fresh process for virtual CPU devices and compare row-sharded versus replicated placement receipts. Beginners can continue directly from welcome-02 to Arrays & pure functions on CPU, then return after the transformation and sharding lessons. For physical TPU practice use only the named source-reviewed targets, pinned environments and explicit expected backend/topology checks; classify any additional script before staging it.
 
    Lessons: [Practice with four virtual CPU devices](03-virtual-cpu-devices/docs/en.md) · [Move your experiment to a TPU](03-move-your-experiment-to-a-tpu/docs/en.md).
 
@@ -56,7 +58,7 @@ Keep a saved script, its command and actual output, plus an explanation of one r
 
 ### Further work
 
-Fresh-machine Windows/Linux/macOS walkthroughs and novice usability sessions remain unverified; accelerator setup needs a separately observed device run.
+Fresh-machine Windows/Linux/macOS walkthroughs and novice usability sessions remain unverified; accelerator setup needs a separately observed device run. The optional placement branch is not a prerequisite for ordinary CPU lessons. Before taking it, explain which axis is split, what a replica holds and why jit input shapes affect specialization.
 
 ## Lesson sequence
 

@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "transformers-03",
-  "contentHash": "a704dc96cd5390e9fdbc72908206fb47cfa3ff8c5e63e637dcdd0c9ff92a734f",
-  "rendererHash": "a1bd5b648f4731ae5d5f0a24811c2540d1a0a132149ce589d17c4113509cbedf",
+  "contentHash": "1c91b2a28f9bcf80ded32b9cfaca6dae48f792a855cc6528bf469c3f1c21ee13",
+  "rendererHash": "17e3bbad72ee4c43425845aaee76b86b85e84750551278be03d8c16842f4dc63",
   "kind": "executed",
-  "generatedAt": "2026-10-29T12:43:23.070268+00:00",
+  "generatedAt": "2026-10-29T13:57:00.655803+00:00",
   "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",
@@ -80,7 +80,7 @@
   "diagram": {
     "title": "The actual single-head pre-LN block",
     "prediction": "What should happen when every learned projection is zero?",
-    "reading": "The center path carries four positions with eight features. Attention mixes eligible positions through four-by-four weights. The feed-forward branch changes each token from eight to sixteen features and back. Curved bypasses carry residual values to additions. No multihead or cache component is implied.",
+    "reading": "Follow the downward arrows: \\(X\\) is normalized to form Q/K/V, Q/K scores become a causal four-by-four weight matrix, and the weighted values are projected back to a four-by-eight correction. The curved left bypass carries \\(X\\) directly to the first residual addition. The next path normalizes that sum, expands each token from 8 to 16 features, applies GELU, contracts back to 8, and adds a second correction; the curved right bypass carries the intermediate residual to this addition. Every arrow carries four token rows, while the feature width changes only inside the MLP. The side arrow labeled \\(V\\) routes values into the weighted-value step.",
     "alt": "The center path carries four positions with eight features. Attention mixes eligible positions through four-by-four weights. The feed-forward branch changes each token from eight to sixteen features and back. Curved bypasses carry residual values to additions. No multihead or cache component is implied.",
     "scope": "Architecture and dataflow mechanism diagram.",
     "height": 8.7,

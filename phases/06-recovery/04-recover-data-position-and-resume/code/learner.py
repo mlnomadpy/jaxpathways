@@ -1,6 +1,6 @@
 """Recover data position and resume · learner-only exercises (3/3 contracts ready)"""
 
-# Exercise: Repeat the protocol after one batch and compare the next five batches through step six. Save to a distinct directory.
+# Exercise: Repeat the protocol after one batch and compare the next five batches through step six. Before running, predict the next batch IDs from the saved cursor. Then interpret the replayed IDs and losses, including the epoch transition, and explain why the reader-only negative control repeats earlier IDs. Save to a distinct directory.
 
 # Inputs:
 # - A saved data/training contract and proposed resume configuration.

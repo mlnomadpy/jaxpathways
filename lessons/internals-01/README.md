@@ -28,6 +28,8 @@ Then connect each primitive to the corresponding part of the original expression
 
 The intermediate-value heatmap is a numerical aid. Pair it with the typed dependency graph to explain how those values were produced. Lowering and compilation can change representation later; a primitive count alone does not predict executed kernel count or runtime.
 
+The executed trace makes the shape change visible: `add` and `mul` each return `f32[3]`, then `reduce_sum[axes=(0,)]` returns `f32[]`. For the recorded input, the scalar is 29 and `grad` returns `[4, 6, 8]`. When inspecting a trace, check the output shape at each equation before interpreting its value; this catches a mistaken reduction axis immediately.
+
 $$
 f(x) \;\xrightarrow{\text{trace}}\; \texttt{ClosedJaxpr}(\text{invars}, \text{eqns}, \text{outvars})
 $$
@@ -191,15 +193,11 @@ Expected: Forward operations include add, mul and reduce_sum, with output shapes
 
 ### Read the figure
 
-Columns track the three array coordinates, while rows track stages of a computation. The first row is input $(1,2,3)$. Adding $1$ produces $(2,3,4)$, and multiplying those values by themselves produces $(4,9,16)$.
-
-Follow one column downward: the final coordinate changes from $3$ to $4$ to $16$. Its darker bottom cell reflects a larger intermediate value, not a more expensive operation or longer runtime.
+Read columns as coordinates 0–2 and rows as the input, add-one result, and elementwise square; the cell unit is the intermediate numeric value. The rows are $ [1,2,3] $, $ [2,3,4] $, and $ [4,9,16] $. Coordinate 2 grows from 3 to 4 to 16, while coordinate 0 grows from 1 to 2 to 4. Shading encodes value magnitude, not cost. Predict the next operation: summing the last row removes the coordinate axis and yields scalar 29.
 
 ### Connect it to the computation
 
-The final reduction adds the bottom row to obtain $4+9+16=29$. That scalar is not another row in the heatmap because it no longer has three separate coordinates. This change of shape connects the elementwise operations to the reduction in the jaxpr.
-
-A jaxpr describes operations and abstract values. The figure supplies concrete intermediate values for this one input, making that program easier to trace by hand. Changing the input changes these numbers without necessarily changing the jaxpr’s structure.
+The trace confirms the same path: add and multiply produce shape $ (3,) $, and reduce-sum produces $ () $ with value 29. Differentiating this scalar gives $2(x+1)=[4,6,8]$, as recorded by the execution output. Use the heatmap to check the primal intermediates and the derivative output to check the transformed program; neither equation count nor color predicts runtime.
 
 ```python
 visual_data = {'kind': 'heatmap', 'values': jnp.stack([x, x + 1, (x + 1) ** 2]).tolist(), 'rows': ['input', 'add 1', 'multiply by self'], 'columns': ['coordinate 0', 'coordinate 1', 'coordinate 2'], 'unit': 'intermediate value'}
@@ -207,7 +205,7 @@ visual_data = {'kind': 'heatmap', 'values': jnp.stack([x, x + 1, (x + 1) ** 2]).
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:08:49.882055+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:08:44.132480+00:00. JAX 0.9.2.
 
 ```text
 Forward program:

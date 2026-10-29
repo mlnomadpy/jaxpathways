@@ -4,6 +4,8 @@ Phase 04: Math & optimization · about 80 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Curvature, Hessians, and learning rates](https://www.tahabouhsine.com/jaxpathways/lesson-optimization-08.html).
+
 ## What you will be able to do
 
 - Derive one update before writing the loop
@@ -44,6 +46,8 @@ Starting at $w=0$, our gradient is $-4$. Subtracting $0.1$ times $-4$ gives $w=0
 
 Define the error $e=w-2$. The next error is $(1-2\eta)e$. This recurrence explains the whole trajectory for this quadratic. An optimizer update must follow the negative gradient; adding it moves away from the minimum. The subscript $k$ counts updates. The symbol $\eta$ is the learning rate, and $e_k=w_k-2$ is the remaining error. Focus on the multiplier $1-2\eta$: its magnitude tells us whether this particular error shrinks.
 
+The update is current weight minus eta times 2 times (weight minus 2), so the error from the minimizer is multiplied by $1-2\eta$. Starting at weight $0$ means the initial error is $-2$. At $\eta=0.1$, the next error is $-1.6$, hence weight $0.4$ and loss $1.6^2=2.56$. Loss is squared distance to the minimizer, while the derivative is signed local slope; the update uses that slope with a minus sign.
+
 $$
 \begin{aligned}w_{k+1}&=w_k-\eta\,2(w_k-2)\\0&\longrightarrow0.4\longrightarrow0.72\quad(\eta=0.1)\\e_k&=(1-2\eta)^k e_0\end{aligned}
 $$
@@ -53,6 +57,8 @@ $$
 Rates between $0$ and $0.5$ approach the optimum without crossing it. A rate of $0.5$ reaches it in one ideal step. Rates between $0.5$ and $1$ alternate around the optimum with shrinking error. A rate of $1$ alternates forever; values above $1$ grow in magnitude. These statements follow from the error multiplier for this specific loss.
 
 For $L=a(w-c)^2$ with positive a, the stable interval is $0<\eta<\frac{1}{a}$. Scaling a loss changes the curvature and the safe update scale. There is no universal threshold such as $0.1$ for neural networks.
+
+For L=a(w-c)^2, the derivative is 2a(w-c), so the error multiplier is 1-2a eta. Requiring its magnitude below one gives $0<\eta<1/a$. That bound belongs to this one-dimensional quadratic and follows from its curvature 2a, not from an optimizer default.
 
 ## Make the trajectory part of the state contract
 
@@ -160,6 +166,8 @@ Here the loss is $(w-2)^2$. One update multiplies the weight error $w-2$ by $1-2
 
 The large rate crosses the optimum and lands farther away on each step. The loss plot shows the growing distance, while the sign change follows from the update equation; loss alone does not reveal which side the weight is on. The one-step success of rate $0.5$ depends on this simple quadratic’s curvature and is not a universal best learning rate.
 
+Before running another rate, compute 1-2 eta: its sign predicts crossing, and its magnitude predicts whether this quadratic error shrinks.
+
 ```python
 rates = [0.1, 0.5, 1.1]
 series = []
@@ -175,7 +183,7 @@ visual_data = {'kind': 'line', 'x': list(range(12)), 'xlabel': 'completed update
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:04:24.340793+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:13:27.750021+00:00. JAX 0.9.2.
 
 ```text
 Final weight: 1.9999969005584717

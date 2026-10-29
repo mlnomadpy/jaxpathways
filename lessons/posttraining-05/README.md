@@ -4,11 +4,14 @@ Phase 18: Post-training: SFT, LoRA, reward models and RLHF · about 105 minutes 
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Learn a reward model from pairwise preferences](https://www.tahabouhsine.com/jaxpathways/lesson-posttraining-03.html).
+
 ## What you will be able to do
 
 - Compare chosen and rejected response log probabilities
 - Subtract the reference preference
 - Verify the changed-condition exercise and explain the limits of this fixture.
+- Carry a checksum-matched saved decoder through masked sequence scoring, one bounded preference update, and fixed held-out and retention checks.
 
 ## The problem
 
@@ -20,11 +23,9 @@ DPO uses chosen/rejected preferences and a fixed reference to optimize a policy 
 
 ## A better relative margin need not raise chosen probability
 
-Suppose chosen probability falls from $0.4$ to $0.3$ while rejected probability falls from $0.2$ to $0.1$. The chosen-to-rejected ratio rises from $2$ to $3$, even though the chosen probability decreased. Relative preference improvement and absolute likelihood improvement are different claims.
+DPO improves a chosen response relative to its paired rejected response after accounting for the reference model's own preference. That is why the objective uses a corrected log-ratio rather than a chosen score alone. For example, chosen probability can fall from $0.4$ to $0.3$ while rejected falls from $0.2$ to $0.1$: the ratio rises from $2$ to $3$, even though the chosen probability fell.
 
-The reference corrects that log-ratio margin, and beta scales it in the loss. Keep the reference checkpoint and any cached reference probabilities bound to the same examples and preprocessing.
-
-Read the margin plot alongside individual probabilities when diagnosing behavior. A growing training margin is separate from held-out preference quality or generation quality. The categorical fixture teaches the objective; sequence integration also needs token masking and log-probability aggregation checks.
+The recorded three-action fit lowers its preference loss from $0.69315$ to $0.27228$ and ends with corrected margins $3.089$, $6.178$, and $3.089$. These show improved relative fit on the synthetic training comparisons. Inspect chosen and rejected probabilities separately before making any absolute-likelihood claim.
 
 ### DPO corrects a policy margin with a reference
 
@@ -34,7 +35,7 @@ Read the margin plot alongside individual probabilities when diagnosing behavior
 
 *Architecture and dataflow mechanism diagram.*
 
-Both models score the same chosen/rejected pair. Their log-probability differences form a reference-corrected margin, which beta scales before the stable preference loss. The reference is frozen. There is no reward-model call or on-policy rollout in this step.
+Trace both policy and frozen-reference scores into the corrected margin, then compare the plotted training margins with separate chosen/rejected probabilities. The host softplus calculation and zero reference-gradient check validate the objective mechanics; the held-out slice and source-retention readout are the next checks for transfer.
 
 ### Pause and reason
 
@@ -48,17 +49,15 @@ Inspect chosen probabilities or sequence log probabilities directly under a fixe
 
 ## Before coding: compare changes in preference, not raw scores
 
-Consider a prompt with one chosen and one rejected response. The reference already prefers one of them to some degree. DPO asks how the current policy changes that relative preference. Write four log probabilities: current chosen, current rejected, reference chosen and reference rejected. Take a within-model difference first, then subtract the reference difference.
-
-When current and reference models are identical, both differences cancel even if neither response has high probability. The loss starts at $\log2$. This cancellation is a precise implementation check, not evidence that the initial model is indifferent between the two responses.
+For one prompt, write down current-policy log probabilities for chosen and rejected, then the same two values under the reference. DPO compares the policy's chosen-minus-rejected gap with the reference's gap. If policy and reference are initially identical, those gaps cancel and the corrected margin is zero, so the loss is $\log2$, even when the reference strongly favors one response. This gives a useful initialization check before optimizing anything.
 
 ## Compare chosen and rejected response log probabilities
 
-Both responses belong to the same prompt. Compute their sequence log probabilities under current and reference policies. Exclude prompt and padding tokens consistently. Keep lengths, tokenization and special-token rules visible because they determine the probability of the represented response.
+Score chosen and rejected continuations under both models, conditioning on their shared prompt. For sequences, sum log probabilities over response and end tokens while excluding prompt targets and padding. The same tokenization, template, ordering, and valid-target rules must be used for policy and reference; otherwise their differences no longer compare the same event. The categorical exercise begins with one-token actions so the score components are easy to inspect.
 
 ## Subtract the reference preference
 
-The reference-corrected margin subtracts what the reference already preferred. At initialization when current policy equals reference, the corrected margin is zero and the loss is $\log2$, even if the reference assigns unequal response probabilities.
+First compute $\log p_\pi(y_w|x)-\log p_\pi(y_l|x)$, then subtract the corresponding reference gap. When $\pi=\pi_{ref}$, the corrected margin is zero even if the reference assigns unequal probabilities. The recorded reference-gradient check is zero at this point, confirming that the unchanged policy receives no update from an already-cancelled pair.
 
 $$
 L_{\mathrm{DPO}}=\mathbb E\left[\operatorname{softplus}\!\left(-\beta\left[\log\frac{\pi_\theta(y^+|x)}{\pi_\theta(y^-|x)}-\log\frac{\pi_{\mathrm{ref}}(y^+|x)}{\pi_{\mathrm{ref}}(y^-|x)}\right]\right)\right]
@@ -66,9 +65,7 @@ $$
 
 ## Work through a numeric margin and its gradient
 
-Suppose current chosen/rejected log probabilities are $-2$ and $-4$, while reference values are $-3$ and $-4$. The current gap is $2$, the reference gap is $1$, and the corrected margin is $1$. With $\beta=0.3$, the loss is $\log(1+e^{-0.3})$, about $0.554$. Reversing chosen and rejected flips the corrected margin.
-
-Let $m$ denote the corrected margin. Its derivative below is negative for finite $m$, so gradient descent increases the chosen-versus-rejected gap on this pair. The underlying model shares parameters across many responses, so this local pressure does not guarantee every chosen response’s absolute probability rises.
+For current log probabilities $(-2,-4)$ and reference values $(-3,-4)$, the policy gap is $2$, the reference gap is $1$, and the corrected margin is $1$. With $\beta=0.3$, the loss is $\log(1+e^{-0.3})\approx0.554$. Reversing chosen and rejected flips the sign. The derivative with respect to the margin is negative, so gradient descent increases this pair's relative chosen gap; shared model parameters mean it does not guarantee the chosen response's absolute probability rises.
 
 $$
 \frac{\partial L}{\partial m}=-\beta\,\sigma(-\beta m)
@@ -76,27 +73,43 @@ $$
 
 ## A rising preference ratio can hide falling chosen probability
 
-Imagine reference probabilities $[0.4,0.4,0.2]$ for chosen, rejected and another response. A new policy $[0.3,0.1,0.6]$ lowers the chosen probability but lowers the rejected probability even more. The chosen/rejected ratio grows from one to three, so the DPO loss improves for this comparison.
-
-Track chosen and rejected sequence log probabilities separately, not only the margin. Also evaluate useful task behavior, response length and diversity on held-out prompts. Pairwise training is a relative objective; it does not directly specify the probability allocated to every unpaired response.
+A second probability vector makes the distinction concrete. With reference probabilities $[0.4,0.4,0.2]$, and policy probabilities $[0.3,0.1,0.6]$, chosen probability falls from $0.4$ to $0.3$ while the chosen/rejected ratio rises from $1$ to $3$. DPO can improve on this pairwise comparison while shifting mass elsewhere. Track chosen and rejected sequence scores as well as margins, then inspect held-out outputs, task behavior, length, and diversity.
 
 ## Keep the algorithm distinction visible
 
-This loop updates from fixed preference pairs; it has no separately trained reward model or on-policy rollout stage. That does not make it PPO with a different optimizer. Both methods need a base/reference identity and reliable preference data, but their estimators, data freshness and failure modes differ.
+DPO updates from a fixed set of preference pairs using a frozen reference. This step has no separately trained reward model and no on-policy rollout. That describes the mechanics; it does not remove the need to identify the base/reference and inspect the preference data. The next section makes the objective's beta and sequence aggregation explicit.
 
 ## Treat beta and length as part of the objective
 
-Beta scales the corrected margin and changes update behavior; it is not interchangeable with every explicit KL coefficient in a PPO implementation. Response sums and response means also differ. Make comparisons under a declared objective and evaluation protocol instead of selecting hyperparameters from a training-loss curve alone.
+Beta multiplies the reference-corrected margin before the preference loss, so changing beta changes the update scale. It is not interchangeable with every explicit KL coefficient in a PPO objective. Likewise, summing response log probabilities and averaging them over length define different preferences: the sequence-sum objective assigns a two-token response twice the log-probability contribution of one equally likely token. Record the convention and compare runs under the same one.
 
 ## Evaluate beyond chosen-pair fit
 
-Frozen-pair optimization can overfit or reduce useful response diversity. Retain held-out prompts, independent task metrics and reviewed outputs; inspect slices rather than only average preference accuracy. Synthetic action preferences establish an objective implementation test, not an aligned language model.
+Use the frozen-pair loss to check the update, then inspect evidence beyond its training comparisons. The recorded synthetic run's held-out unanimous slice was already at $1.0$ hard accuracy and barely moved; the disagreement slice has a $0.5$ vote fraction, so hard accuracy is undefined, and its predicted probability changed only from about $0.002515$ to $0.002514$. Source-retention score moved from $-17.61117$ to $-17.61102$. These small changes do not establish improved language responses. Human review and task-specific evaluation are separate evidence.
 
 ## Carry sequence bookkeeping and reference identity into a real model
 
-For language responses, add log probabilities over valid answer and end tokens while conditioning on the prompt. Exclude padding and prompt targets consistently. A mean over response length changes the objective: two equally likely tokens have twice the negative log probability of one. Decide which objective you intend rather than introducing normalization as an innocent convenience.
+For language responses, sum valid answer and EOS log probabilities while conditioning on prompt tokens; exclude prompt targets and right padding. In the hand calculation, the three-token and eight-token responses have summed log probabilities $-17.5879$ and -$47.0626$, with target counts $3$ and $8$. Those totals should not be divided by length under the declared sequence-sum objective. Bind cached reference scores to the exact checkpoint, tokenizer, template, example order, and mask so the subtraction stays aligned. The categorical mechanics and sequence handoff are separate from the earlier PPO lesson's reward-model and rollout loop.
 
-Reference caches must bind prompt text, chosen/rejected ordering, tokenizer, chat template, mask and checkpoint revision. A frozen array can still be wrong if its examples were reordered. Split prompt groups before fitting, compare fixed decoding on held-out tasks, and retain the actual reference artifact so a later run can reproduce the correction. This categorical lab supplies objective checks, not the sequence trainer.
+## Required handoff: carry a saved decoder into sequence preferences
+
+Use the saved inference package from the [Decoder foundations project guide](https://www.tahabouhsine.com/jaxpathways/project-guides/text-harness-foundations.html), after completing its causal-decoder/tokenizer checks. The [saved-decoder PPO project guide](https://www.tahabouhsine.com/jaxpathways/project-guides/posttraining-audit.html) is an optional reference for shared sequence-scoring mechanics; this DPO path branches from reward and sequence-scoring basics and does not require PPO. Verify the parameter digest `271cb6457de5da3f727c343c64b7bd350c00e503ea7ac847eecf51fbd5558802` and tokenizer digest `c92b534443cc6a1eacd5e78406b2c42e59553df704a07102a03c639d3694f586`; vocabulary size alone does not prove tokenizer identity. This is an inference package, so it supplies no optimizer state to resume.
+
+The sequence handoff proceeds through four inspectable stages: verify the package and fixed prompt/preference split; score summed response log probabilities under policy and frozen reference; take one bounded DPO update with declared beta; then report held-out preference, disagreement-slice, and source-retention changes separately. Shift logits at `[:-1]` against targets at `[1:]`; include response EOS, exclude prompt and padding targets, and sum without length normalization. Keep package identity, tokenizer, pair ordering, and mask convention with any cached scores.
+
+The recorded one-step transfer starts from loss $0.69315$. Its held-out unanimous slice stays at $1.0$ hard accuracy, while the disagreement slice remains ambiguous at vote fraction $0.5$ and predicted probability shifts from $0.002515$ to $0.002514$. Source retention changes from $-17.611167$ to $-17.611021$. The adjacent PPO analysis retains its strict held-out reward-floor failure at all tested reward scales ($0.5$, $1$, $2$), with $8$/$8$ response matches. These are bookkeeping and mechanics results; they do not support a response-quality claim.
+
+This route requires the full repository, foundation source files and retained `package.json`, `params.npz`, and `tokenizer.json`, with JAX/JAXlib $\text{0.9.2}$, NumPy $\text{2.4.4}$, and Tokenizers $\text{0.22.2}$. The standalone categorical DPO `main.py` exercise runs without that saved-decoder package.
+
+### Pause and reason
+
+If a two-token response has summed log probability -5 and a one-token response has -3, which one has larger sequence probability under this objective?
+
+<details><summary>Compare your reasoning</summary>
+
+The one-token response, because -3 is greater than -5. Replacing sums with means changes the objective and must be called out explicitly.
+
+</details>
 
 ## 1. Define the reference-corrected pair objective
 
@@ -236,13 +249,11 @@ Expected: Reference-corrected margins become positive and the initial equal-poli
 
 ### Read the figure
 
-The line records preference loss before each update, starting at $0.693$ and falling to about $0.272$. It measures fit to the same three synthetic action comparisons. Its numerical scale depends on beta and does not directly compare with reward-model NLL or PPO reward.
-
-The second panel shows final reference-corrected margins for each comparison. All positive bars mean those pairwise ratios improved relative to the reference. The zero-versus-two margin combines the other two gaps. A positive bar does not by itself prove the absolute probability of the chosen response increased; the separate three-action counterexample demonstrates why. Read these as log-ratio differences, not probabilities or human preference scores.
+The training curve starts at $0.69315$ and ends at $0.27228$ on the same three synthetic comparisons. The final corrected-margin bars are $3.089$, $6.178$, and $3.089$. A positive margin means the policy's chosen-versus-rejected ratio improved relative to the reference for that pair; it is not an absolute probability or a human preference score. The recorded counterexample shows why: chosen probability can fall while the ratio rises.
 
 ### Connect it to the computation
 
-Positive final corrected margins mean the policy favors each chosen action more strongly relative to the reference. The independent host softplus calculation and reference-gradient check establish objective behavior; separate generation and human review would be needed for a language application.
+Trace both policy and frozen-reference scores into the corrected margin, then compare the plotted training margins with separate chosen/rejected probabilities. The host softplus calculation and zero reference-gradient check validate the objective mechanics; the held-out slice and source-retention readout are the next checks for transfer.
 
 ```python
 visual_data={'kind':'line','xlabel':'completed parameter updates before measurement','ylabel':'DPO preference loss (nats)','series':[{'label':'recorded CPU training loss','x':list(range(len(history))),'y':history}]}
@@ -255,7 +266,7 @@ visual_data={"panels":[*visual_data.get("panels",[visual_data]),extra_panel]}
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:11:40.972155+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T16:12:25.808407+00:00. JAX 0.9.2.
 
 ```text
 DPO initial/final: 0.6931471824645996 0.27227783203125 ; reference-corrected margins: [3.0890286  6.17805719 3.08902884]
@@ -265,6 +276,17 @@ Loss before/after: 0.6931471824645996 0.5418724417686462 ; chosen probability: 0
 Reversed-label loss: 1.5064733028411865
 Reference gradient is zero.
 One-pair logit gradient agrees with independent margin derivative.
+hand sum terms: [-5.877766, -5.884814, -5.825323] sum: -17.58790268250536
+scoring: summed response logps -17.587902069091797 -47.06261873245239 ; response token counts 3 8
+DPO loss before one update: 0.6931471824645996
+heldout preference baseline/after: [{'margin': 11.944979667663574, 'predicted_probability': np.float64(0.999993508300255), 'vote_fraction': 1.0, 'slice': 'unanimous', 'ambiguous': False, 'hard_accuracy': 1.0, 'expected_annotator_agreement': 1.0}, {'margin': -5.983144283294678, 'predicted_probability': np.float64(0.0025145485396998223), 'vote_fraction': 0.5, 'slice': 'disagreement', 'ambiguous': True, 'hard_accuracy': None, 'expected_annotator_agreement': 0.5}] [{'margin': 11.9453444480896, 'predicted_probability': np.float64(0.9999935106678529), 'vote_fraction': 1.0, 'slice': 'unanimous', 'ambiguous': False, 'hard_accuracy': 1.0, 'expected_annotator_agreement': 1.0}, {'margin': -5.983484745025635, 'predicted_probability': np.float64(0.00251369472949755), 'vote_fraction': 0.5, 'slice': 'disagreement', 'ambiguous': True, 'hard_accuracy': None, 'expected_annotator_agreement': 0.5}]
+disagreement slice baseline/after: [{'margin': -5.983144283294678, 'predicted_probability': np.float64(0.0025145485396998223), 'vote_fraction': 0.5, 'slice': 'disagreement', 'ambiguous': True, 'hard_accuracy': None, 'expected_annotator_agreement': 0.5}] [{'margin': -5.983484745025635, 'predicted_probability': np.float64(0.00251369472949755), 'vote_fraction': 0.5, 'slice': 'disagreement', 'ambiguous': True, 'hard_accuracy': None, 'expected_annotator_agreement': 0.5}]
+source retention baseline/after: -17.611167430877686 -17.611021518707275
+recorded PPO heldout reward scale / child-minus-parent: 0.5 0.0
+recorded PPO heldout reward scale / child-minus-parent: 1.0 0.0
+recorded PPO heldout reward scale / child-minus-parent: 2.0 0.0
+recorded heldout response matches: 8 / 8 ; strict heldout reward floor remains FAILED at every scale
+Synthetic objective check only. No human preference or response-quality claim.
 PASS: posttraining-05
 
 ```
@@ -468,6 +490,243 @@ The unpaired logit is absent from this categorical difference, yet its normalize
 
 </details>
 
+## Full-workspace transfer: score saved sequences and run one preference update
+
+**Transfer**
+
+Load the retained foundations inference package after verifying its pinned parameter and tokenizer hashes. Implement summed response log probabilities with shifted targets, a prompt-excluding response mask, EOS included, and right-padding excluded. Compare one pair by hand and against NumPy. Use two synthetic training pairs for one small DPO gradient step. Record held-out preference and disagreement-slice baselines plus a source-retention baseline before updating; report their changes afterward. This is a bounded teaching fixture, not quality evidence. This advanced practice needs the full repository checkout and the package/source files listed in the required handoff section; the regular lesson baseline is still self-contained.
+
+<details><summary>Hint</summary>
+
+Tokenize the prompt and response separately with the pinned tokenizer and concatenate IDs, so the prompt boundary is explicit. The logit at input position t predicts target token t+1. The response mask indexes target positions, not input positions.
+
+</details>
+
+### How to write: Full-workspace transfer: score saved sequences and run one preference update — Step-by-step recipe & starter scaffold
+
+**Inputs:**
+- The retained foundation inference package and its package manifest
+- Pinned tokenizer bytes and model configuration
+- Two synthetic training preference pairs with exact prompt, chosen and rejected strings
+- Held-out unanimous and disagreement pairs plus a source-retention prompt/response, all fixed before the update
+
+**Outputs:**
+- Summed chosen/rejected response-plus-EOS log probabilities from shifted logits
+- Independent NumPy aggregation for an unequal-length pair
+- Pre-update and post-update held-out preference, disagreement-slice and retention results
+- A no-update replay of the saved PPO held-out record at reward scales 0.5, 1 and 2, retaining the failed strict reward floor and response-match count.
+- An ambiguous-slice metric that does not assign a 50/50 vote to either hard label.
+
+**Invariants to check:**
+- Verify both pinned params and tokenizer hashes before loading
+- Keep the saved model and tokenizer identity matched
+- Mask target positions only, beginning at the first response token and including EOS
+- Exclude prompt targets and PAD targets; sum rather than average response log probabilities
+- Use the identical frozen reference for all reference scores
+- Capture evaluation baselines before the single training update
+- For a 0.5 vote, mark the pair ambiguous and omit hard accuracy; report probability or expected agreement against the vote fraction.
+
+**Hints:**
+- Use model.logits on right-padded full prompt-plus-response token IDs with PAD=0 as invalid positions.
+- Shift target IDs to tokens[:, 1:] and logits to logits[:, :-1].
+- Compute the response mask over target positions, not token input positions.
+- Implement one fixed DPO update and print held-out, disagreement and retention deltas separately.
+
+**Starter code scaffold (fill in the TODOs):**
+
+```python
+# Follow the runnable reference solution above, then change only one declared choice: beta or step size.
+# Keep the same package hashes, fixed pair split, masks, and before-update baselines.
+raise NotImplementedError
+```
+
+<details><summary>Reference solution and reasoning</summary>
+
+```python
+# Saved-sequence preference handoff. Run from the repository root in the foundations CPU environment.
+import hashlib, json, sys
+from pathlib import Path
+import jax
+import jax.numpy as jnp
+import numpy as np
+from tokenizers import Tokenizer
+
+ROOT = Path.cwd()
+FOUNDATIONS = ROOT / "projects/text-harness/foundations"
+PACKAGE = FOUNDATIONS / "reference/run/inference-package"
+sys.path.insert(0, str(FOUNDATIONS))
+import model as decoder
+import train
+
+manifest = json.loads((PACKAGE / "package.json").read_text())
+expected_source_hashes = {'model.py': '94a88ae7fd6a251b5b190b4631496e04bb71a31c1bfe418511fdd37ffef034c9', 'config.py': '5c05801a7ec1a15b3978c87c77ac4e64d1b056c60487cbcff3cdf72475c8bb64', 'train.py': 'ee9f3bc73505ce8e00fe9680589d97805593e5c8c035cba4709b5f334eb27a2b'}
+for name, expected in expected_source_hashes.items():
+    actual = hashlib.sha256((FOUNDATIONS / name).read_bytes()).hexdigest()
+    assert actual == expected == manifest["identity"]["code_sha256"][name], (name, actual)
+
+assert manifest["params_sha256"] == "271cb6457de5da3f727c343c64b7bd350c00e503ea7ac847eecf51fbd5558802"
+assert manifest["processor_sha256"] == "c92b534443cc6a1eacd5e78406b2c42e59553df704a07102a03c639d3694f586"
+params, config, loaded = train.load_model_package(PACKAGE, manifest["identity"])
+tokenizer = Tokenizer.from_file(str(PACKAGE / "tokenizer.json"))
+assert hashlib.sha256((PACKAGE / "tokenizer.json").read_bytes()).hexdigest() == loaded["processor_sha256"]
+reference = jax.tree.map(lambda x: jnp.array(x), params)
+PAD, EOS = 0, 2
+
+def encode(text):
+    return tokenizer.encode(text, add_special_tokens=False).ids
+
+def score_jax(model_params, prompt, response):
+    prefix = [1] + encode(prompt)  # Explicit BOS; exact prefix IDs are part of the example.
+    answer = encode(response) + [EOS]
+    full = prefix + answer
+    if len(full) > config.context:
+        raise ValueError("fixture example exceeds the saved model context")
+    padded = np.full((1, config.context), PAD, dtype=np.int32)
+    padded[0, :len(full)] = full
+    valid = padded != PAD
+    logits = decoder.logits(model_params, jnp.asarray(padded), config,
+                            valid_mask=jnp.asarray(valid))
+    targets = jnp.asarray(padded[:, 1:])
+    log_probs = jax.nn.log_softmax(logits[:, :-1].astype(jnp.float32), axis=-1)
+    selected = jnp.take_along_axis(log_probs, targets[..., None], axis=-1)[..., 0][0]
+    target_positions = jnp.arange(1, padded.shape[1])
+    mask = (target_positions >= len(prefix)) & (target_positions < len(full))
+    mask = mask & (targets[0] != PAD)
+    return jnp.sum(jnp.where(mask, selected, 0.0))
+
+def score_one(model_params, prompt, response):
+    prefix = [1] + encode(prompt)  # Explicit BOS; exact prefix IDs are part of the example.
+    answer = encode(response) + [EOS]
+    full = prefix + answer
+    if len(full) > config.context:
+        raise ValueError("fixture example exceeds the saved model context")
+    padded = np.full((1, config.context), PAD, dtype=np.int32)
+    padded[0, :len(full)] = full
+    valid = padded != PAD
+    logits = decoder.logits(model_params, jnp.asarray(padded), config,
+                            valid_mask=jnp.asarray(valid))
+    target_ids = padded[:, 1:]
+    logp = np.asarray(jax.nn.log_softmax(logits[:, :-1].astype(jnp.float32), axis=-1))
+    selected = np.take_along_axis(logp, target_ids[..., None], axis=-1)[..., 0][0]
+    target_positions = np.arange(1, padded.shape[1])
+    response_mask = (target_positions >= len(prefix)) & (target_positions < len(full))
+    response_mask &= target_ids[0] != PAD
+    return float(np.sum(selected[response_mask], dtype=np.float64)), selected, response_mask, full
+
+# Hand check and independent NumPy aggregation on an unequal-length pair.
+prompt = "Q: "
+short = score_one(reference, prompt, "yes")
+long = score_one(reference, prompt, "I do not know")
+assert int(short[2].sum()) == len(encode("yes")) + 1
+assert int(long[2].sum()) == len(encode("I do not know")) + 1
+np.testing.assert_allclose(short[0], np.sum(short[1][short[2]], dtype=np.float64), atol=1e-6)
+# Independently recompute log-softmax and the shifted sum in host NumPy.
+def numpy_reference_score(prompt_text, response_text):
+    prefix_ids = [1] + encode(prompt_text)
+    answer_ids = encode(response_text) + [EOS]
+    tokens = prefix_ids + answer_ids
+    batch = np.full((1, config.context), PAD, dtype=np.int32)
+    batch[0, :len(tokens)] = tokens
+    logits = np.asarray(decoder.logits(reference, jnp.asarray(batch), config,
+                                       valid_mask=jnp.asarray(batch != PAD)), dtype=np.float64)[0, :-1]
+    targets = batch[0, 1:]
+    positions = np.arange(1, batch.shape[1])
+    mask = (positions >= len(prefix_ids)) & (positions < len(tokens)) & (targets != PAD)
+    terms=[]
+    for t in np.flatnonzero(mask):
+        row=logits[t]
+        peak=np.max(row)
+        terms.append(row[targets[t]] - peak - np.log(np.exp(row - peak).sum()))
+    return float(np.sum(terms, dtype=np.float64)), terms, mask
+numpy_short, hand_terms, independent_mask = numpy_reference_score(prompt, "yes")
+np.testing.assert_array_equal(independent_mask, short[2])
+np.testing.assert_allclose(short[0], numpy_short, rtol=1e-6, atol=1e-6)
+print("hand sum terms:", np.round(hand_terms, 6).tolist(), "sum:", float(np.sum(hand_terms)))
+# A deliberately shifted-mask canary: position len(prefix)-1 predicts the first answer token.
+assert short[2][len([1] + encode(prompt)) - 1]
+assert not short[2][0]  # The first shifted target is still inside the prompt.
+
+train_pairs = [
+    ("Q: ", "yes", "no"),
+    ("A: ", "I can help", "I cannot tell"),
+]
+# Freeze before-update baselines on separate held-out preference cases and a source-retention case.
+heldout = [
+    ("R: ", "clear", "unclear", 1.0, "unanimous"),
+    ("R: ", "unknown", "maybe", 0.5, "disagreement"),
+]
+retention = [("Alice", "yes")]
+
+def evaluate(model_params, pairs):
+    rows=[]
+    for p, good, bad, vote, slice_name in pairs:
+        good_lp=score_one(model_params,p,good)[0]
+        bad_lp=score_one(model_params,p,bad)[0]
+        margin = good_lp - bad_lp
+        predicted_probability = 1.0 / (1.0 + np.exp(-margin))
+        predicted_chosen = float(predicted_probability > 0.5)
+        hard_accuracy = None if vote == 0.5 else float(predicted_chosen == float(vote > 0.5))
+        expected_annotator_agreement = vote * predicted_chosen + (1.0 - vote) * (1.0 - predicted_chosen)
+        rows.append({"margin":margin,"predicted_probability":predicted_probability,
+                     "vote_fraction":vote,"slice":slice_name,"ambiguous":vote == 0.5,
+                     "hard_accuracy":hard_accuracy,
+                     "expected_annotator_agreement":expected_annotator_agreement})
+    return rows
+
+def retention_score(model_params):
+    return float(np.mean([score_one(model_params,p,r)[0] for p,r in retention]))
+
+heldout_before=evaluate(reference, heldout)
+retention_before=retention_score(reference)
+train_scores=[(score_one(params,p,a)[0],score_one(params,p,b)[0]) for p,a,b in train_pairs]
+
+def dpo_loss(candidate):
+    margins=[]
+    for p,good,bad in train_pairs:
+        pi_good=score_jax(candidate,p,good)
+        pi_bad=score_jax(candidate,p,bad)
+        ref_good=score_jax(reference,p,good)
+        ref_bad=score_jax(reference,p,bad)
+        margins.append((pi_good-pi_bad)-(ref_good-ref_bad))
+    return jnp.mean(jax.nn.softplus(-0.1*jnp.stack(margins)))
+
+loss, grads = jax.value_and_grad(dpo_loss)(params)
+# One small, declared learner-controlled update; reference and held-out records are unchanged.
+params = jax.tree.map(lambda w,g: w - 1e-4*g, params, grads)
+heldout_after=evaluate(params, heldout)
+retention_after=retention_score(params)
+# NumPy is the independent host aggregation oracle, not a separate model implementation.
+np.testing.assert_allclose(float(loss), float(np.logaddexp(0, -0.1*np.zeros(2)).mean()), atol=1e-5)
+assert all(np.isfinite(row["margin"]) for row in heldout_after)
+assert all(row["hard_accuracy"] is None and row["ambiguous"] for row in heldout_after if row["vote_fraction"] == 0.5)
+print("scoring: summed response logps", short[0], long[0], "; response token counts", int(short[2].sum()), int(long[2].sum()))
+print("DPO loss before one update:", float(loss))
+print("heldout preference baseline/after:", heldout_before, heldout_after)
+print("disagreement slice baseline/after:", [x for x in heldout_before if x['slice']=='disagreement'], [x for x in heldout_after if x['slice']=='disagreement'])
+print("source retention baseline/after:", retention_before, retention_after)
+
+# Changed-condition replay of the existing sequence-PPO appendix evidence.
+# No model update or retuning: keep recorded held-out prompts and responses fixed.
+ppo_path = ROOT / "projects/posttraining-audit/transformer_lineage/teaching/v5/evaluation.json"
+ppo = json.loads(ppo_path.read_text())
+heldout_ppo = ppo["splits"]["heldout"]["episodes"]
+parent_rewards = np.asarray([r["parentFittedRewardScore"] for r in heldout_ppo], np.float64)
+child_rewards = np.asarray([r["childFittedRewardScore"] for r in heldout_ppo], np.float64)
+matched_responses = np.asarray([r["parentActionIds"] == r["childActionIds"] for r in heldout_ppo])
+assert len(heldout_ppo) == 8 and int(matched_responses.sum()) == 8
+for scale in (0.5, 1.0, 2.0):
+    delta = float(np.mean(scale * child_rewards) - np.mean(scale * parent_rewards))
+    print("recorded PPO heldout reward scale / child-minus-parent:", scale, delta)
+assert ppo["qualityGate"]["heldoutRewardFloorPassed"] is False
+print("recorded heldout response matches:", int(matched_responses.sum()), "/", len(heldout_ppo),
+      "; strict heldout reward floor remains FAILED at every scale")
+print("Synthetic objective check only. No human preference or response-quality claim.")
+```
+
+The sequence score is a sum over response and EOS targets only. The first answer token is predicted by the final prompt logit, so the response mask is shifted by one relative to the token input. Right padding and prompt targets contribute zero. The independent NumPy reduction checks that exact mask and sum. The update is intentionally one tiny step from the saved pilot weights; held-out and retention baselines are recorded first and the reference remains frozen. Report disagreement separately because a 0.5 vote is not a unanimous target. The saved PPO appendix remains a separate changed-objective analysis and its strict held-out reward floor remains failed. The final replay rescales the already-recorded held-out reward values without rerunning PPO. Because child and parent scores are equal, the strict floor stays failed at all positive scales; the eight matching sampled responses are a separate metric and do not establish usefulness. The 0.5-vote case is marked ambiguous, receives no hard-accuracy value, and is reported through its predicted probability, expected annotator agreement, and fractional vote rather than a false incorrect label.
+
+</details>
+
 ## Check your understanding
 
 Does this DPO loop require a separately trained reward model and fresh policy rollouts?
@@ -503,7 +762,7 @@ If initial loss is not log(2) when current equals reference, inspect the subtrac
 
 ## Keep your evidence
 
-Keep reference identity, response log-probability conventions, log(2) initialization, independent margin loss, reversed labels and frozen-reference checks.
+Keep reference-cancellation and falling-chosen-probability counterexamples, exact tokenizer/model identity, summed shifted response log probabilities with EOS/padding checks, pre/post held-out and retention records and the unchanged failed PPO quality result.
 
 Save your predictions, modified code, terminal outputs, and reasoning in your engineering portfolio.
 

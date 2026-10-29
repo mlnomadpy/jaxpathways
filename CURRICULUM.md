@@ -277,7 +277,7 @@ Training systems. Start after: 17: Self-supervised pretraining: masked and contr
 - RLHF mechanics: a frozen reward and PPO policy updates (lesson and exercise available)
 - Direct preference optimization and reference-corrected margins (lesson and exercise available)
 
-**Build:** Audit response-token SFT masking and preference-pair loss.
+**Build:** Audit SFT, DPO and sequence PPO.
 
 **Checkpoint:** Complete stages 4–8 of training-methods. Retain shifted token-mask checks, frozen-base/merge evidence, preference oracles, signed PPO clipping and fixed-reference DPO comparisons.
 
@@ -312,7 +312,7 @@ Start here. Start after: 20: TPU Workflows: Launching Jobs & Checkpointed Experi
 
 **Build:** Estimate optimizer-state bytes and calculate supplied-rate scaling efficiency.
 
-**Checkpoint:** Compare TPU v5e, v5p, and v6e ridge points, budget training and KV-cache HBM, measure BF16/INT8 matmul error with FP32 accumulation, and capture a warmed XProf trace.
+**Checkpoint:** Compare published TPU roofline estimates, budget training and KV-cache HBM, compare BF16 result-dtype policies and an INT8 weight-dequantization reference, and retain a warmed profiler trace with its observed backend.
 
 ## Choose the work you want to do
 

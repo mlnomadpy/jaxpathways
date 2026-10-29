@@ -1,6 +1,6 @@
 """Debug unstable learning · learner-only exercises (3/3 contracts ready)"""
 
-# Exercise: Use features \([1, 1, 1]\) and targets \(2\). Predict the new stability ceiling. Compare stable rate \(0.5\) and unstable rate \(1.1\).
+# Exercise: In the MLP lab, compare the corrupted batch, the +20 hidden-bias saturation, and the rate-100 run. Write the expected first diagnostic for each before executing it. Then repair exactly one condition in each case and verify finite or decreasing held-out loss with the fixed held-out arrays.
 
 # Inputs:
 # - A scalar linear model features, targets, initial weight, and candidate rates.

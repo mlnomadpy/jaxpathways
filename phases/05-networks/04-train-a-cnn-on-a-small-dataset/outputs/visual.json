@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "networks-04",
-  "contentHash": "155a7aea7a1911e1f05afabe59c6069018cacaeb748ab92b8d4744dc4fb70bbd",
-  "rendererHash": "a1bd5b648f4731ae5d5f0a24811c2540d1a0a132149ce589d17c4113509cbedf",
+  "contentHash": "305792be86afd114aaf0798b688035be36b03cc382b22956db29539c17a3d672",
+  "rendererHash": "17e3bbad72ee4c43425845aaee76b86b85e84750551278be03d8c16842f4dc63",
   "kind": "executed",
-  "generatedAt": "2026-10-21T16:04:04.216704+00:00",
+  "generatedAt": "2026-10-27T17:26:15.223015+00:00",
   "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",
@@ -132,7 +132,7 @@
   "diagram": {
     "title": "Pixels behind one convolution output",
     "prediction": "What stays shared when the kernel moves?",
-    "reading": "The purple square selects one three-by-three patch within a five-by-five input. Each selected cell contributes to one output under the declared convolution. Moving the patch reuses weights. This separate shape example has three valid positions per axis at stride one without padding; it does not display learned weights.",
+    "reading": "The highlighted purple square is one \\(3\\times3\\) receptive field on a \\(5\\times5\\) input. Its nine selected cells contribute, with their corresponding filter weights, to one output location. Move the square one cell at a time: at stride one and no padding it has three valid positions across and three down, producing a \\(3\\times3\\) map. The filter is reused at each position. Then compare this shape example with the trained \\(8\\times8\\) inputs, which produce \\(6\\times6\\) spatial outputs; the diagram shows the indexing rule, not learned filter values.",
     "alt": "The purple square selects one three-by-three patch within a five-by-five input. Each selected cell contributes to one output under the declared convolution. Moving the patch reuses weights. This separate shape example has three valid positions per axis at stride one without padding; it does not display learned weights.",
     "scope": "Architecture and dataflow mechanism diagram.",
     "height": 5.5,

@@ -152,31 +152,12 @@ np.testing.assert_allclose(actual_b, expected_b, atol=1e-6)
 print('Both LoRA factor gradients match the matrix-calculus oracle at alpha/r = 1.5.')
 
 # Reference solution. Try the exercise before reading this.
-# Exercise solution
-import tempfile
-from pathlib import Path
-
-# Keep this run’s database and artifacts in a scratch directory removed on exit.
-with tempfile.TemporaryDirectory() as folder:
-    path = Path(folder) / 'adapter.npz'
-    # Transfer the device result to the host for an independent NumPy comparison.
-    np.savez(
-        path,
-        a=np.asarray(a),
-        b=np.asarray(b),
-        alpha=np.array(1.0),
-        rank=np.array(1),
-    )
-    with np.load(path, allow_pickle=False) as z:
-        # Check tensor shape invariant: `int(z['rank']) == z['a'].shape[1]`
-        assert int(z['rank']) == z['a'].shape[1]
-        np.testing.assert_allclose(
-            lora_forward(x, base, z['a'], z['b'], float(z['alpha'])),
-            x @ merged,
-            atol=1e-6,
-            rtol=1e-5,
-        )
-print('Adapter round trip and merge checked.')
+# Primary adapter-save exercise.
+# Use the complete following practice: “Enforce base identity in a fresh-process adapter reload.”
+# It writes a base-hash-bound manifest, checks target module/rank/alpha/scaling/dtypes/shapes,
+# validates in a fresh interpreter, compares merged/unmerged predictions on new inputs,
+# and rejects a shape-compatible wrong base before activation.
+# The earlier unbound adapter.npz pattern is not a reusable adapter artifact.
 
 # Reference practice: Check the merge on new inputs
 # Check the merge on new inputs (Transfer)
@@ -206,4 +187,95 @@ np.testing.assert_allclose(
     np.mean((np.eye(2) @ target_update - np.eye(2) @ rank_one) ** 2), 0.25
 )
 print('Nonunit scaling passes; best rank-one identity-input MSE is 0.25.')
+
+# Reference practice: Enforce base identity in a fresh-process adapter reload
+# Fresh-process adapter bundle round trip with base identity and negative controls.
+import hashlib, json, os, subprocess, sys, tempfile
+from pathlib import Path
+import numpy as np
+
+rng = np.random.default_rng(815)
+base2 = np.asarray(base, dtype=np.float32).copy()
+base_before_adapter_fit = base2.copy()
+alpha, rank = 3.0, 2
+scale = alpha / rank
+# A bounded rank-two teaching target; fit the factors before serializing them.
+u2 = jnp.asarray([[0.2, -0.1], [-0.3, 0.1], [0.1, 0.2], [0.2, -0.2], [-0.1, 0.1], [0.4, 0.2]], jnp.float32)
+v2 = jnp.asarray([[0.5, -0.2, 0.3, 0.1], [-0.1, 0.4, 0.2, -0.3]], jnp.float32)
+target2 = x @ (jnp.asarray(base2) + scale * u2 @ v2)
+a2 = jax.random.normal(jax.random.key(815), (6, rank)) * 0.1
+b2 = jnp.zeros((rank, 4), jnp.float32)
+fit2 = jax.jit(jax.value_and_grad(lambda aa, bb: jnp.mean(
+    (lora_forward(x, jnp.asarray(base2), aa, bb, alpha) - target2) ** 2
+), argnums=(0, 1)))
+fit_history = []
+for _ in range(300):
+    fit_loss, (grad_a, grad_b) = fit2(a2, b2)
+    fit_history.append(float(fit_loss))
+    a2 = a2 - 0.2 * grad_a
+    b2 = b2 - 0.2 * grad_b
+assert fit_history[-1] < fit_history[0] * 1e-3
+np.testing.assert_array_equal(base2, base_before_adapter_fit)
+a2 = np.asarray(a2, dtype=np.float32)
+b2 = np.asarray(b2, dtype=np.float32)
+changed_x = rng.normal(size=(5, 6)).astype(np.float32)
+with tempfile.TemporaryDirectory() as tmp:
+    root = Path(tmp)
+    np.save(root / "base.npy", base2, allow_pickle=False)
+    np.savez(root / "adapter.npz", A=a2, B=b2)
+    with np.load(root / "adapter.npz", allow_pickle=False) as trained_bundle:
+        np.testing.assert_array_equal(trained_bundle["A"], a2)
+        np.testing.assert_array_equal(trained_bundle["B"], b2)
+    base_hash = hashlib.sha256((root / "base.npy").read_bytes()).hexdigest()
+    manifest = {
+        "schema": 1, "base_sha256": base_hash,
+        "target_modules": ["decoder.block.0.proj"],
+        "base_shape": list(base2.shape), "base_dtype": str(base2.dtype),
+        "rank": rank, "alpha": alpha, "scaling": "alpha_over_rank",
+        "A_shape": list(a2.shape), "B_shape": list(b2.shape),
+        "A_dtype": str(a2.dtype), "B_dtype": str(b2.dtype),
+    }
+    (root / "manifest.json").write_text(json.dumps(manifest, sort_keys=True))
+    # New interpreter reloads all three artifacts from disk and validates before activation.
+    child = r"""import hashlib,json,sys
+from pathlib import Path
+import numpy as np
+root=Path(sys.argv[1]); m=json.loads((root/'manifest.json').read_text())
+base_path=Path(sys.argv[2]) if len(sys.argv)>2 else root/'base.npy'
+base_bytes=base_path.read_bytes()
+if hashlib.sha256(base_bytes).hexdigest()!=m['base_sha256']: raise ValueError('base checkpoint identity mismatch')
+base=np.load(base_path,allow_pickle=False)
+with np.load(root/'adapter.npz',allow_pickle=False) as z: A=z['A']; B=z['B']
+if list(base.shape)!=m['base_shape'] or str(base.dtype)!=m['base_dtype']: raise ValueError('base shape/dtype mismatch')
+if list(A.shape)!=m['A_shape'] or list(B.shape)!=m['B_shape'] or str(A.dtype)!=m['A_dtype'] or str(B.dtype)!=m['B_dtype']: raise ValueError('adapter tensor metadata mismatch')
+if m['rank']!=A.shape[1] or B.shape[0]!=m['rank'] or m['scaling']!='alpha_over_rank' or m['alpha']!=3.0: raise ValueError('rank/scaling metadata mismatch')
+if m['target_modules']!=['decoder.block.0.proj']: raise ValueError('target module mismatch')
+x=np.load(root/'inputs.npy',allow_pickle=False); scale=m['alpha']/m['rank']
+separate=x@base+scale*(x@A@B); merged=x@(base+scale*A@B)
+np.testing.assert_allclose(separate,merged,rtol=1e-6,atol=1e-6)
+np.save(root/'child-predictions.npy',separate,allow_pickle=False)
+print('fresh-process validated',m['base_sha256'],float(np.max(np.abs(separate-merged))))"""
+    np.save(root / "inputs.npy", changed_x, allow_pickle=False)
+    subprocess.run([sys.executable, "-c", child, str(root)], check=True, capture_output=True, text=True)
+    child_predictions = np.load(root / "child-predictions.npy", allow_pickle=False)
+    np.testing.assert_allclose(child_predictions, changed_x @ base2 + 1.5 * (changed_x @ a2 @ b2), rtol=1e-6, atol=1e-6)
+    # Shape-compatible wrong base must fail on the base digest before activation.
+    wrong = base2.copy(); wrong[0, 0] += 0.25
+    np.save(root / "wrong-base.npy", wrong, allow_pickle=False)
+    result = subprocess.run([sys.executable, "-c", child, str(root), str(root / "wrong-base.npy")], capture_output=True, text=True)
+    assert result.returncode != 0 and "base checkpoint identity mismatch" in result.stderr
+    # Each incompatible metadata edit must fail before predictions are activated.
+    negatives = [
+        ("rank", 1, "rank/scaling metadata mismatch"),
+        ("alpha", 4.0, "rank/scaling metadata mismatch"),
+        ("target_modules", ["decoder.block.1.proj"], "target module mismatch"),
+        ("A_shape", [6, 1], "adapter tensor metadata mismatch"),
+    ]
+    for field, value, message in negatives:
+        bad = dict(manifest, **{field: value})
+        (root / "manifest.json").write_text(json.dumps(bad, sort_keys=True))
+        result = subprocess.run([sys.executable, "-c", child, str(root)], capture_output=True, text=True)
+        assert result.returncode != 0 and message in result.stderr, (field, result.stderr)
+print("rank-two alpha/r=1.5 teaching-fit loss:", fit_history[0], fit_history[-1])
+print("Fresh-process trained-factor round trip passed at alpha/r=1.5; wrong same-shape base and altered rank, alpha, target, and shape metadata were rejected.")
 print("PASS: posttraining-02")

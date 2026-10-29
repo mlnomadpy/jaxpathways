@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "transformers-01",
-  "contentHash": "39fcd1ca11222d1e67abd45bc92d39188253debb016f39efee8e3e1f9bd06c46",
-  "executedAt": "2026-10-29T12:43:38.607004+00:00",
+  "contentHash": "ac8dc0ff7a24dbe21e05f670dcee6b16226a490eca89574d6311c97e5dd1877f",
+  "executedAt": "2026-10-29T13:57:22.821893+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -11,7 +11,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Weights / output: [[0.33333334 0.33333334 0.33333334]\n [0.33333334 0.33333334 0.33333334]] [[2. 2.]\n [2. 2.]]\nWeights / output: [[0.33333334 0.33333334 0.33333334]\n [0.33333334 0.33333334 0.33333334]] [[2. 2.]\n [2. 2.]]\nPASS: transformers-01\n",
+  "stdout": "Weights / output: [[0.33333334 0.33333334 0.33333334]\n [0.33333334 0.33333334 0.33333334]] [[2. 2.]\n [2. 2.]]\nWeights / output: [[0.33333334 0.33333334 0.33333334]\n [0.33333334 0.33333334 0.33333334]] [[2. 2.]\n [2. 2.]]\noriginal / paired / value-only: [[2.6748495 1.3251503]] [[2.6748495 1.3251503]] [[2.        2.6748495]]\nzero-query mean: [[2. 2.]]\nPASS: transformers-01\n",
   "notebookCells": [
     {
       "sourceHash": "fcd73215b448231258c3d15f760c47ec2ee0e1386fbd7545dfec5dd8edb76e06",
@@ -54,7 +54,7 @@
       "outputs": []
     },
     {
-      "sourceHash": "25df6d662f9d3f0c4e984c6a201f79fa0cfd7a2633dc4b0773dfba6c2dd4ee6c",
+      "sourceHash": "53dc08a479da44f2b1718bf964cd5c4d3e3305811c536df9d501b1833a6e3476",
       "outputs": [
         {
           "output_type": "display_data",
@@ -81,8 +81,17 @@
       "outputs": []
     },
     {
-      "sourceHash": "575d427f09e9d40cdf0075ef7d76110889a988418e62a573ed1abdde641702c6",
-      "outputs": []
+      "sourceHash": "9d7a2628176b8266628a821a5ea278e297491cb60aabc37bb04c71850a877fe4",
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "original / paired / value-only: [[2.6748495 1.3251503]] [[2.6748495 1.3251503]] [[2.        2.6748495]]\n",
+            "zero-query mean: [[2. 2.]]\n"
+          ]
+        }
+      ]
     },
     {
       "sourceHash": "22d5d8896e54aecd8b70f9aafa0c68cf3475cdb9799648df8d1bbbd8b53d1ac8",

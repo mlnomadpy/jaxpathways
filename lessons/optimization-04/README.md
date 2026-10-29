@@ -4,6 +4,8 @@ Phase 04: Math & optimization · about 80 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Minibatches, expectation, and gradient noise](https://www.tahabouhsine.com/jaxpathways/lesson-optimization-11.html).
+
 ## What you will be able to do
 
 - Distinguish gradients, updates, and parameters
@@ -44,6 +46,8 @@ A gradient describes local sensitivity; an update is the change the optimizer wa
 
 For our evenly spaced $x$ values, $\operatorname{mean}(x)=0$ and $\operatorname{mean}(x^2)=\frac{11}{30}$. At zero parameters, the weight derivative is $-4\cdot\frac{11}{30}=-\frac{22}{15}$ and the bias derivative is $-2$. With rate $0.2$, the first weight becomes $22/75$ and bias $0.4$. Compute these values before trusting a long run.
 
+For the first update, the initial residual is -y. The slope derivative is therefore -2 mean(xy). In this fixture $\operatorname{mean}(x)=0$ and $\operatorname{mean}(x^2)=11/30$; because $y=2x+1$, $\operatorname{mean}(xy)=2(11/30)+\operatorname{mean}(x)=11/15$, so the gradient is $-22/15$. The bias gradient is -2. SGD multiplies the negative gradient by rate 0.2, giving parameter changes $+22/75$ and +0.4.
+
 ```text
 params → loss → grads
 grads + old optimizer state → updates + new optimizer state
@@ -71,6 +75,8 @@ The 120-step fit is a small CPU regression example, not a TPU throughput benchma
 ## Preserve state when a gradient happens to be zero
 
 Momentum remembers earlier gradients. Under the convention $m_t=\beta m_{t-1}+g_t$, a zero current gradient can still produce a nonzero update. With $\beta=0.9$, a previous trace of $2$ becomes $1.8$ when the new gradient is zero. This is why an optimizer’s behavior cannot be reconstructed from the current gradient and weights alone. The next lesson builds on this state model to explain Adam and learning-rate schedules.
+
+A zero current gradient is not the same thing as zero optimizer state. With momentum trace $m_t=0.9m_{t-1}+g_t$, setting the current gradient to zero after a trace of 2 leaves $m_t=1.8$. At rate 0.1, the next parameter update is still $-0.18$. The gradient describes the present objective at this point; the momentum trace summarizes recent history.
 
 $$
 m_t=\beta m_{t-1}+g_t,\qquad \Delta w_t=-\eta m_t
@@ -176,13 +182,15 @@ Read the learned parameters from the geometry: the intercept is $1$, and increas
 
 This picture shows the final fit across the displayed inputs, not the optimizer’s path or its runtime. Agreement on an exact synthetic linear target is a useful correctness check. It is separate from performance on noisy data or on a different relationship.
 
+Before resuming from a checkpoint, predict the next update from both saved parameters and optimizer state; compare it with an uninterrupted transition.
+
 ```python
 visual_data = {'kind': 'line', 'x': x.tolist(), 'xlabel': 'input', 'ylabel': 'prediction', 'series': [{'label': 'target', 'y': y.tolist()}, {'label': 'initial model', 'y': jnp.zeros_like(x).tolist()}, {'label': 'trained model', 'y': (params['weight'] * x + params['bias']).tolist()}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:04:41.499420+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:04:02.216285+00:00. JAX 0.9.2.
 
 ```text
 Parameters: {'bias': Array(1., dtype=float32), 'weight': Array(1.9999996, dtype=float32)}

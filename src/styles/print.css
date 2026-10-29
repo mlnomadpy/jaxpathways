@@ -43,6 +43,57 @@ h3 {
 .book-description {
   color: var(--muted);
 }
+.reader-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+.reader-actions a {
+  padding: 0.55rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font: 600 15px/1.6 var(--ui);
+  text-decoration: none;
+}
+.reader-actions a:first-child {
+  color: var(--panel);
+  background: var(--blue);
+  border-color: var(--blue);
+}
+.reader-intro,
+.chapter-status {
+  color: var(--muted);
+  font: 15px/1.7 var(--ui);
+}
+.book-toc-phase > summary {
+  min-height: 44px;
+  padding-block: 0.6rem;
+  color: var(--blue);
+}
+.book-toc-phase > p {
+  font: 14px/1.6 var(--ui);
+}
+.reader-table-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  margin-block: 1.5rem;
+}
+.reader-table-scroll:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 4px;
+}
+.reader-table-scroll table {
+  width: 100%;
+  min-width: 30rem;
+  border-collapse: collapse;
+  font: 14px/1.6 var(--ui);
+}
+.reader-table-scroll :is(th, td) {
+  padding: 0.65rem;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
 .chapter-kicker,
 .output-label {
   color: var(--muted);
@@ -168,6 +219,9 @@ svg {
 figure {
   margin-inline: 0;
 }
+.lesson-mechanism > figure.print-visual-intro {
+  margin: 0;
+}
 figcaption {
   font-size: 0.9em;
 }
@@ -183,7 +237,16 @@ figcaption {
 }
 @media print {
   @page {
-    margin: 18mm;
+    margin: 18mm 18mm 24mm;
+
+    @bottom-center {
+      color: #555;
+      content: 'Page ' counter(page);
+      font:
+        9pt/1.2 Arial,
+        sans-serif;
+      padding-top: 3mm;
+    }
   }
   body {
     margin: 0;
@@ -193,6 +256,9 @@ figcaption {
     color: #111;
   }
   nav,
+  .reader-actions,
+  .reader-introduction,
+  .book-routes,
   .copy-snippet,
   html[data-reader-ready] .copy-snippet,
   .copy-feedback {
@@ -221,12 +287,42 @@ figcaption {
   .reasoning-check,
   .learner-starter-contract,
   .expected-output,
-  figure {
+  figure:not(.lesson-mechanism):not(.print-visual-intro) {
     break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .print-visual-intro {
+    break-inside: avoid-page;
+    page-break-inside: avoid;
+  }
+  #appendix-posttraining-lineage p:has(+ pre) {
+    break-after: avoid-page;
+    page-break-after: avoid;
+  }
+  #appendix-posttraining-lineage pre {
+    break-inside: avoid-page;
     page-break-inside: avoid;
   }
   details:not(.solution-reveal) > summary {
     display: none;
+  }
+  details.reading-disclosure > summary {
+    display: block;
+    margin-bottom: 0.4rem;
+    padding: 0;
+    color: #111;
+    font-size: 9pt;
+    list-style: none;
+  }
+  .reading-disclosure {
+    border: 0;
+  }
+  .reader-table-scroll {
+    overflow: visible;
+  }
+  .reader-table-scroll table {
+    min-width: 0;
+    font-size: 8.5pt;
   }
   article {
     break-before: page;
@@ -238,6 +334,29 @@ figcaption {
   h3,
   .code-panel-heading {
     break-after: avoid;
+  }
+  .visual-prediction {
+    break-after: avoid-page;
+    page-break-after: avoid;
+  }
+  .print-visual-intro .figure-scroll {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .print-visual-intro .figure-scroll img {
+    width: auto;
+    min-width: 0;
+    max-width: 100%;
+    max-height: 175mm;
+    height: auto;
+    margin-inline: auto;
+    object-fit: contain;
+  }
+  .print-visual-intro figcaption {
+    color: #222;
+    font-size: 9pt;
+    line-height: 1.35;
   }
   article > h2:last-of-type {
     break-after: avoid-page;

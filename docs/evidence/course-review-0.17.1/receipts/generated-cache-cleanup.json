@@ -1,0 +1,10 @@
+{
+  "timestamp": "2026-10-22T13:07:31.200628+00:00",
+  "scope": "Removed only reproducible generated dist trees from historical working checkouts; immutable frozen review previews, source, evidence, PDFs and environments retained.",
+  "paths": [
+    "/private/tmp/jaxpathways-epub-identity-work/dist",
+    "/private/tmp/jaxpathways-reader-review-fix/dist",
+    "/private/tmp/jaxpathways-api-print-qualification/dist",
+    "/private/tmp/jaxpathways-sequence-ppo-review/dist"
+  ]
+}

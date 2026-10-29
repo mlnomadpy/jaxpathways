@@ -1,0 +1,31 @@
+{
+  "source_id": "gutenberg-11",
+  "title": "Alice's Adventures in Wonderland",
+  "author": "Lewis Carroll",
+  "edition": "Project Gutenberg eBook 11, Millennium Fulcrum Edition 3.0",
+  "source_url": "https://www.gutenberg.org/cache/epub/11/pg11.txt",
+  "metadata_url": "https://www.gutenberg.org/ebooks/11",
+  "retrieved_at": "2026-10-20",
+  "rights": "Project Gutenberg lists this text as public domain in the United States. The included source file retains its terms. Check local copyright law before reuse.",
+  "source_sha256": "01b38ea4c710a84bc18d0bd41271a5a1a92b94e97b2812f4dece97d4a694725e",
+  "split_unit": "chapter",
+  "split_map": {
+    "I": "train",
+    "II": "train",
+    "III": "train",
+    "IV": "train",
+    "V": "validation",
+    "VI": "test",
+    "VII": "test",
+    "VIII": "test"
+  },
+  "excluded_chapters": ["IX", "X", "XI", "XII"],
+  "paragraph_selection": "All non-heading paragraphs with at least 45 UTF-8 bytes and eight whitespace-delimited words from the declared chapters; exact-text duplicates removed before tokenization.",
+  "paragraph_normalization": "Before length filtering, deduplication, tokenization, packing, and byte-denominator measurement, collapse each paragraph's whitespace runs to one ASCII space and trim leading and trailing whitespace. Byte denominators count UTF-8 bytes of these normalized paragraph strings, not byte spans in the original Gutenberg file.",
+  "tokenizer_fit": "Train paragraphs from chapters I-IV only.",
+  "rights_note": "The source is listed as public domain in the United States. Local law can differ; the source file retains the Project Gutenberg terms.",
+  "limitations": [
+    "One public-domain English novel; validation/test chapters share author, characters, setting and style with training.",
+    "This is a small educational CPU pilot and does not qualify language quality or a 300M-parameter run."
+  ]
+}

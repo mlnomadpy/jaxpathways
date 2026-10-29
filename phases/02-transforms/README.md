@@ -12,7 +12,9 @@ Keep eager and transformed outputs plus a deliberately broken assumption.
 
 ## Study guide: What changes when you differentiate, batch or compile a function?
 
-Build one trustworthy scalar calculation before composing transformations. Differentiation changes the quantity, batching adds an axis, and compilation changes execution. Keeping these roles distinct makes later training failures easier to locate.
+Start with one scalar function whose answer and derivative you can work out. Then ask three different questions: what is its local slope, what happens when we apply it to many examples, and how can we execute the same computation as a compiled program? Differentiation, batching and compilation answer those questions in different ways.
+
+Carry the same values through each transformation so a shape change or a reduction cannot silently change the objective. Read loss and derivative as different plotted quantities. Treat tracing observations and synchronized timing as separate evidence when you reach JIT.
 
 ### Check your starting point
 

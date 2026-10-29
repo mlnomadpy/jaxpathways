@@ -4,6 +4,8 @@ Phase 04: Math & optimization · about 75 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Probability, likelihood, and stable losses](https://www.tahabouhsine.com/jaxpathways/lesson-optimization-09.html).
+
 ## What you will be able to do
 
 - Derive a ridge solution, distinguish data loss from penalized loss, and select a penalty using held-out data.
@@ -41,6 +43,8 @@ The test data has influenced model selection. Its score no longer represents a s
 ## State the exact objective
 
 Let $n$ be the training sample count and $\lambda\ge0$ the penalty strength. We use mean squared error plus $\lambda\|w\|_2^2$, without a factor of one half. Differentiating gives $2X^\mathsf{T}(Xw-y)/n+2\lambda w$. Setting it to zero gives the linear system below. Other conventions change the numerical meaning of the same penalty value, so copy the objective along with a reported hyperparameter.
+
+For this fixture, $X=(-1,1)$ and $y=(-3,3)=3X$, so $X^\mathsf{T}X=2$ and $X^\mathsf{T}y=6$. Setting the stated derivative to zero with n=2 gives $2(w-3)+2\lambda w=0$, hence $w=3/(1+\lambda)$. The mean and penalty conventions are explicit; changing either changes the numerical meaning of the same lambda.
 
 $$
 L_\lambda(w)=\frac1n\|Xw-y\|_2^2+\lambda\|w\|_2^2,\qquad (X^\mathsf{T}X+n\lambda I)w=X^\mathsf{T}y
@@ -164,6 +168,8 @@ The fitted weight is $w=3/(1+\lambda)$. The training targets favor slope $3$, wh
 
 Select the penalty using the validation minimum, not the intersection of the curves or the smallest training error. Here that choice is $0.5$. A zero validation error is a property of this tiny synthetic example, not a promise that regularization removes all error on real data.
 
+Before selecting a penalty, predict how fitted slope 3/(1+lambda) compares with validation slope 2; validation error is smallest when these match.
+
 ```python
 grid = jnp.linspace(0.0, 2.0, 41)
 visual_data = {'kind': 'line', 'x': grid.tolist(), 'xlabel': 'ridge penalty', 'ylabel': 'mean squared prediction error', 'series': [{'label': 'training', 'y': [float(mse(ridge(X, y, float(a)), X, y)) for a in grid]}, {'label': 'validation', 'y': [float(mse(ridge(X, y, float(a)), Xv, yv)) for a in grid]}]}
@@ -171,7 +177,7 @@ visual_data = {'kind': 'line', 'x': grid.tolist(), 'xlabel': 'ridge penalty', 'y
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:04:33.960271+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:03:52.414138+00:00. JAX 0.9.2.
 
 ```text
 train / validation / objective: 1.0 0.0 3.0

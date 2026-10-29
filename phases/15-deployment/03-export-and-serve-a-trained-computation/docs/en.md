@@ -4,6 +4,8 @@ Phase 15: Deployment, interoperability & edge AI · about 110 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Convert PyTorch weights to Flax and locate numerical errors](https://www.tahabouhsine.com/jaxpathways/lesson-deployment-08.html).
+
 ## What you will be able to do
 
 - Serialize and reload a fixed-shape JAX inference computation.
@@ -26,6 +28,8 @@ Serialize, load the file again and call the restored computation on new inputs. 
 
 If preprocessing lives outside the export, version it alongside the model. A correct graph can still return wrong application results when the caller normalizes inputs differently. A local round trip does not automatically qualify another runtime, hardware target or version.
 
+The recorded direct and restored artifact outputs are $(3.1,-0.45)$ for the same float32 request. Comparing coordinates separately matters: an aggregate norm could hide a sign or score swap. Keep one hand-calculated input as a readable oracle, then test a changed valid input and an invalid shape to identify whether the failure is numerical or contractual.
+
 $$
 \hat{y}_{\text{deserialized}}(x) = \hat{y}_{\text{eager}}(x), \qquad \forall x \in \mathcal{D}_{\text{canary}}
 $$
@@ -38,7 +42,7 @@ $$
 
 *Architecture and dataflow mechanism diagram.*
 
-Read top to bottom from the raw request to the response. Each row has a distinct contract and a distinct failure. The exported computation handles the numeric call; request fields, artifact identity and response meaning require surrounding checks. The fresh-process experiment exercises loading and calling under the installed CPU runtime.
+Follow the flow from validated raw request through preprocessing and artifact loading to the numeric call and encoded response. The exported object proves only its graph/signature boundary; the wrapper owns request validation and response meaning. The recorded fresh process reloads the bytes and reproduces $ (3.1,-0.45)$, while the $ (2,3)$ shape is rejected. To extend the claim, retain evidence for every new runtime boundary.
 
 ### Pause and reason
 
@@ -179,15 +183,11 @@ Expected: The serialized artifact reloads and returns $[3.1, -0.45]$. File size 
 
 ### Read the figure
 
-Each category is one output score. The paired bars compare the direct computation with the restored serialized artifact on the same input. Both give approximately $3.1$ for score $0$ and $-0.45$ for score $1$.
-
-The matching heights show numerical agreement. The bars are adjacent, rather than one line hiding another. A negative second score is valid because these are raw outputs, not probabilities constrained to lie between zero and one.
+The horizontal axis lists score 0 and score 1; the vertical unit is raw output score. Direct execution and restored bytes overlap at about 3.1 and $-0.45$, respectively. The negative score is valid because these are unconstrained outputs, not probabilities. Agreement establishes this artifact’s numerical round trip on the declared $ (1,3)$ float32 signature; next try the known changed request and confirm a $ (2,3)$ input is rejected.
 
 ### Connect it to the computation
 
-This is the first behavior to check after serialization: does the restored computation preserve the result within the declared tolerance? The figure makes a coordinate-by-coordinate mismatch visible instead of reducing all outputs to one aggregate number.
-
-The example exports a specific float32 input signature with shape $(1,3)$. Agreement for this case is separate from acceptance of arbitrary shapes or support in every serving runtime. Keep the signature and input preprocessing with the artifact, then expand parity checks to the cases your application actually needs.
+Both bars share exact displayed values: 3.0999999 and $-0.45000005$ for direct and restored calls. That coordinate check is the first behavior to verify after serialization. The execution also rejects an incompatible shape and reloads bytes in a fresh interpreter. These checks establish the installed CPU runtime and fixed signature, not another runtime, accelerator or dynamic batch contract.
 
 ```python
 # Transfer the device result to the host for an independent NumPy comparison.
@@ -197,7 +197,7 @@ visual_data = {'kind': 'bar', 'labels': ['score 0', 'score 1'], 'ylabel': 'outpu
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:09:29.454436+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:09:38.856642+00:00. JAX 0.9.2.
 
 ```text
 Verified serialized bytes: 1172

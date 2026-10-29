@@ -38,7 +38,19 @@ Each linked specification inherits these requirements and supplies its own objec
 
 ## Promotion gate for the ten planned specifications
 
-These directories contain plans, not executable model projects. The generic copied `starter/model.py`, `solution/model.py` and `tests/check.py` files were removed because they did not implement the advertised modality. Each project README now names its own implementation gate. Keep all ten entries marked **planned** until a project-specific starter, reference implementation and independent stage checks exist.
+All ten full capstones remain **planned**. The embedding directory also contains
+a separately scoped [SciFact CPU pilot](../projects/embedding-model-300m/README.md),
+with project-specific source, a learner scaffold, independent checks and measured
+retrieval evidence. Its quality floors failed. The pilot makes the workflow
+available for practice; it does not complete the approximately-300M capstone.
+
+Earlier generic copies of `starter/model.py`, `solution/model.py` and
+`tests/check.py` were removed because they did not implement the advertised
+modalities. That removal describes the earlier cleanup, not the current contents
+of every directory. Each project README names its own implementation gate.
+Starter and checker files are necessary teaching artifacts; their existence alone
+cannot promote a full capstone without the relevant data, lineage, quality,
+target, consumer and review evidence below.
 
 Before an individual plan can be marked authored, its evidence bundle must include:
 
@@ -80,7 +92,13 @@ The CLIP and SigLIP projects extend MULTI-1 with distinct objective derivations,
 
 Teach CLIP's symmetric softmax baseline before the SigLIP comparison. Reuse identical data, processors, towers and development budgets where the experiment calls for control. Then carry qualified encoder artifacts into retrieval. Define a common score/embedding contract, but preserve each model's normalization, scale, bias and input semantics.
 
-The [public plan registry](../curriculum/project-plans.json) makes these three new specifications discoverable from Projects and the relevant modality guides. All ten specifications are discoverable from the public plan catalog and remain outside the executable project registry. Two separate tiny CPU pilots, [embedding lineage](../projects/embedding-lineage/README.md) and [causal lineage](../projects/causal-lineage/README.md), demonstrate real-text phase handoffs and retain their weak measured outcomes. Neither completes a target-scale capstone.
+The [public plan registry](../curriculum/project-plans.json) makes these three new specifications discoverable from Projects and the relevant modality guides. All ten specifications are discoverable from the public plan catalog and remain outside the executable project registry. Two separate tiny CPU pilots, [embedding lineage](../projects/embedding-lineage/README.md) and [causal lineage](../projects/causal-lineage/README.md), demonstrate real-text phase handoffs and retain their weak measured outcomes. Neither completes a target-scale capstone. The separately scoped
+[SciFact embedding workflow](../projects/embedding-model-300m/README.md) now adds
+bidirectional masked-token pretraining, matched contrastive continuation branches
+and human-evidence pair fine-tuning. Its retained retrieval results fail the
+precommitted quality floors. It provides local CPU implementation evidence while
+approximately-300M training, target qualification, independent human acceptance
+and a rights-reviewed public trained-model handoff remain open.
 
 ## Implementation sequence
 

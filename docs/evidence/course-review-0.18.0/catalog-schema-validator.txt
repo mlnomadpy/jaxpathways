@@ -1,0 +1,2365 @@
+Browser tab: 1547147095, Title: "Schema Markup Validator", URL: "https://validator.schema.org/".
+0 AXWebArea Schema Markup Validator, URL: validator.schema.org/
+	1 container
+		2 container pagehead1
+			3 link Description: Schema.org, Value: schema.org/
+			4 content list
+				5 link Description: Documentation, Value: schema.org/docs/documents.html
+				6 link Description: Schemas, Value: schema.org/docs/schemas.html
+				7 link Description: Validate, Value: validator.schema.org/
+				8 link Description: About, Value: schema.org/docs/about.html
+			9 container gsc-iw-id1
+				10 text field (settable) Description: search, ID: gsc-i-id1
+		11 container fetch-bar
+			12 text public
+			13 container button-panel
+				14 button Run new test, ID: new-test
+				15 button language_japanese_kana, ID: select-language
+				16 button info, ID: settings-help
+		17 container
+			18 text entry area (settable)
+			19 container
+				25 container (showing 0-500 of 776 items)
+					26 text <!doctype html> < html >< head >< script type = "application/ld+json" > { "@context" :  "https://schema.org" ,  "@graph" : [{ "@type" :  "Person" ,  "@id" :  "https://www.tahabouhsine.com/#author" ,  "name" :  "Taha Bouhsine" ,  "url" :  "https://www.tahabouhsine.com/" }, { "@type" :  "Organization" ,  "@id" :  "https://www.tahabouhsine.com/#project" ,  "name" :  "JAX Pathways" ,  "url" :  "https://www.tahabouhsine.com/" ,  "sameAs" :  "https://github.com/mlnomadpy/jaxpathways" ,  "founder" : { "@id" :  "https://www.tahabouhsine.com/#author" }}, { "@type" :  "WebSite" ,  "@id" :  "https://www.tahabouhsine.com/#website" ,  "name" :  "JAX Pathways" ,  "url" :  "https://www.tahabouhsine.com/" ,  "inLanguage" :  "en" ,  "publisher" : { "@id" :  "https://www.tahabouhsine.com/#project" }}, { "@type" :  "CollectionPage" ,  "@id" :  "https://www.tahabouhsine.com/course.html#webpage" ,  "url" :  "https://www.tahabouhsine.com/course.html" ,  "name" :  "Learn JAX: lessons, projects & training systems \u2014 JAX Pathways" ,  "description" :  "Study JAX arrays, automatic differentiation, optimization, neural networks, distributed training and deployment with worked Python examples and projects." ,  "inLanguage" :  "en" ,  "isPartOf" : { "@id" :  "https://www.tahabouhsine.com/#website" },  "author" : { "@id" :  "https://www.tahabouhsine.com/#author" },  "breadcrumb" : { "@id" :  "https://www.tahabouhsine.com/course.html#breadcrumbs" },  "mainEntity" : { "@id" :  "https://www.tahabouhsine.com/course.html#courses" }}, { "@type" :  "BreadcrumbList" ,  "@id" :  "https://www.tahabouhsine.com/course.html#breadcrumbs" ,  "itemListElement" : [{ "@type" :  "ListItem" ,  "position" :  1 ,  "name" :  "JAX Pathways" ,  "item" :  "https://www.tahabouhsine.com/" }, { "@type" :  "ListItem" ,  "position" :  2 ,  "name" :  "Learn JAX: lessons, projects & training systems" ,  "item" :  "https://www.tahabouhsine.com/course.html" }]}, { "@type" :  "ItemList" ,  "@id" :  "https://www.tahabouhsine.com/course.html#courses" ,  "name" :  "JAX courses and phases" ,  "numberOfItems" :  22 ,  "itemListElement" : [{ "@type" :  "ListItem" ,  "position" :  1 ,  "item" : { "@type" :  "Course" ,  "@id" :  "https://www.tahabouhsine.com/phase-guides/welcome.html#course" ,  "url" :  "https://www.tahabouhsine.com/phase-guides/welcome.html" ,  "name" :  "Setup & first steps" ,  "description" :  "Run and inspect saved programs in a CPU environment, then learn how to prepare and verify explicit, source-reviewed TPU targets. TPU jobs are optional and separate from the course\u2019s CPU practice." ,  "inLanguage" :  "en" ,  "isAccessibleForFree" :  true ,  "author" : { "@id" :  "https://www.tahabouhsine.com/#author" },  "provider" : { "@id" :  "https://www.tahabouhsine.com/#project" },  "teaches" :  "Explain which device ran your code and reproduce the result in a fresh environment." ,  "coursePrerequisites" : [],  "dateModified" :  "2026-10-27" ,  "syllabusSections" : [{ "@type" :  "Syllabus" ,  "@id" :  "https://www.tahabouhsine.com/lesson-welcome-01.html#syllabus" ,  "url" :  "https://www.tahabouhsine.com/lesson-welcome-01.html" ,  "name" :  "Set up your learning workspace" ,  "description" :  "Download a starter workspace, select its Python environment, run a saved program, and verify one deliberate change." }, { "@type" :  "Syllabus" ,  "@id" :  "https://www.tahabouhsine.com/lesson-welcome-02.html#syllabus" ,  "url" :  "https://www.tahabouhsine.com/lesson-welcome-02.html" ,  "name" :  "Meet your arrays and devices" ,  "description" :  "Create an array, inspect its dtype and device, and explain the result." }, { "@type" :  "Syllabus" ,  "@id" :  "https://www.tahabouhsine.com/lesson-welcome-cpu.html#syllabus" ,  "url" :  "https://www.tahabouhsine.com/lesson-welcome-cpu.html" ,  "name" :  "Practice with four virtual CPU devices" ,  "description" :  "Start four logical CPU devices, inspect row-sharded and replicated arrays, and diagnose an indivisible batch." }, { "@type" :  "Syllabus" ,  "@id" :  "https://www.tahabouhsine.com/lesson-welcome-03.html#syllabus" ,  "url" :  "https://www.tahabouhsine.com/lesson-welcome-03.html" ,  "name" :  "Move your experiment to a TPU" ,  "description" :  "Use the recorded CPU reference to check arithmetic and placement, then run only a named, source-reviewed TPU target with pinned dependencies and verify its observed backend receipt." }]}}, { "@type" :  "ListItem" ,  "position" :  2 ,  "item" : { "@type" :  "Course" ,  "@id" :  "https://www.tahabouhsine.com/phase-guides/arrays.html#course" ,  "url" :  "https://www.tahabouhsine.com/phase-guides/arrays.html" ,  "name" :  "Arrays & pure functions" ,  "description" :  "Treat every axis as part of a contract. Work through normalization, broadcasting and immutable updates, then diagnose mistakes that still return plausible numbers." ,  "inLanguage" :  "en" ,  "isAccessibleForFree" :  true ,  "author" : { "@id" :  "https://www.tahabouhsine.com/#author" },  "provider" : { "@id" :  "https://www.tahabouhsine.com/#project" },  "teaches" :  "Predict output shapes and explain why a pure function is easier to transform." ,  "coursePrerequisites" : [ "Setup & first steps" ],  "dateModified" :  "2026-10-27" ,  "syllabusSections" : [{ "@type" :  "Syllabus" ,  "@id" :  "https://www.tahabouhsine.com/lesson-arrays-01.html#syllabus" ,  "url" :  "https://www.tahabouhsine.com/lesson-arrays-01.html" ,  "name" :  "From NumPy to jax.numpy" ,  "description" :  "Build feature-wise preprocessing with fitted statistics and verify behavior on new and constant data." }, { "@type" :  "Syllabus" ,  "@id" :  "https://www.tahabouhsine.com/lesson-arrays-02.html#syllabus" ,  "url" :  "https://www.tahabouhsine.com/lesson-arrays-02.html" ,  "name" :  "Shapes, broadcasting, and dtypes" ,  "description" :  "Specify broadcasting contracts and detect silent pairwise-loss and dtype mistakes." }, { "@type" :  "Syllabus" ,  "@id" :  "https://www.tahabouhsine.com/lesson-arrays-03.html#syllabus" ,  "url" :  "https://www.tahabouhsine.com/lesson-arrays-03.html" ,  "name" :  "Pure functions and explicit inputs" ,  "description" :  "Design an explicit parameter/data interface and return new state without mutating old containers." }, { "@type" :  "Syllabus" ,  "@id" :  "https://www.tahabouhsine.com/lesson-arrays-04.html#syllabus" ,  "url" :  "https://www.tahabouhsine.com/lesson-arrays-04.html" ,  "name" :  "Immutable updates and indexing" ,  "description" :  "Implement functional indexed updates and distinguish accumulated contributions from shape-preserving masks." }]}}, { "@type" :  "ListItem" ,  "position" :  3 ,  "item" : { "@type" :  "Course" ,  "@id" :  "https://www.tahabouhsine.com/phase-guides/transforms.html#course" ,  "url"
+		27 container
+			28 text CollectionPage
+			29 button All (1) arrow_drop_down, ID: filter-menu
+				30 text All (1)
+				31 text arrow_drop_down
+			32 content list
+				33 container
+					34 text CollectionPage ID: https://www.tahabouhsine.com/course.html#webpage 0 ERRORS 0 WARNINGS expand_less
+				35 table (showing 0-500 of 1335 items)
+					36 row
+						37 cell
+							38 text @type
+						39 cell
+							40 text CollectionPage
+					41 row
+						42 cell
+							43 text @id
+						44 cell
+							45 text https://www.tahabouhsine.com/course.html#webpage
+					46 row
+						47 cell
+							48 text url
+						49 cell
+							50 text https://www.tahabouhsine.com/course.html
+					51 row
+						52 cell
+							53 text name
+						54 cell
+							55 text Learn JAX: lessons, projects & training systems — JAX Pathways
+					56 row
+						57 cell
+							58 text description
+						59 cell
+							60 text Study JAX arrays, automatic differentiation, optimization, neural networks, distributed training and deployment with worked Python examples and projects.
+					61 row
+						62 cell
+							63 text inLanguage
+						64 cell
+							65 text en
+					66 row
+						67 cell
+							68 text isPartOf
+					69 row
+						70 cell
+							71 text @type
+						72 cell
+							73 text WebSite
+					74 row
+						75 cell
+							76 text @id
+						77 cell
+							78 text https://www.tahabouhsine.com/#website
+					79 row
+						80 cell
+							81 text name
+						82 cell
+							83 text JAX Pathways
+					84 row
+						85 cell
+							86 text url
+						87 cell
+							88 text https://www.tahabouhsine.com/
+					89 row
+						90 cell
+							91 text inLanguage
+						92 cell
+							93 text en
+					94 row
+						95 cell
+							96 text publisher
+					97 row
+						98 cell
+							99 text @type
+						100 cell
+							101 text Organization
+					102 row
+						103 cell
+							104 text @id
+						105 cell
+							106 text https://www.tahabouhsine.com/#project
+					107 row
+						108 cell
+							109 text name
+						110 cell
+							111 text JAX Pathways
+					112 row
+						113 cell
+							114 text url
+						115 cell
+							116 text https://www.tahabouhsine.com/
+					117 row
+						118 cell
+							119 text sameAs
+						120 cell
+							121 text https://github.com/mlnomadpy/jaxpathways
+					122 row
+						123 cell
+							124 text founder
+					125 row
+						126 cell
+							127 text @type
+						128 cell
+							129 text Person
+					130 row
+						131 cell
+							132 text @id
+						133 cell
+							134 text https://www.tahabouhsine.com/#author
+					135 row
+						136 cell
+							137 text name
+						138 cell
+							139 text Taha Bouhsine
+					140 row
+						141 cell
+							142 text url
+						143 cell
+							144 text https://www.tahabouhsine.com/
+					145 row
+						146 cell
+							147 text author
+					148 row
+						149 cell
+							150 text @type
+						151 cell
+							152 text Person
+					153 row
+						154 cell
+							155 text @id
+						156 cell
+							157 text https://www.tahabouhsine.com/#author
+					158 row
+						159 cell
+							160 text name
+						161 cell
+							162 text Taha Bouhsine
+					163 row
+						164 cell
+							165 text url
+						166 cell
+							167 text https://www.tahabouhsine.com/
+					168 row
+						169 cell
+							170 text breadcrumb
+					171 row
+						172 cell
+							173 text @type
+						174 cell
+							175 text BreadcrumbList
+					176 row
+						177 cell
+							178 text @id
+						179 cell
+							180 text https://www.tahabouhsine.com/course.html#breadcrumbs
+					181 row
+						182 cell
+							183 text itemListElement
+					184 row
+						185 cell
+							186 text @type
+						187 cell
+							188 text ListItem
+					189 row
+						190 cell
+							191 text position
+						192 cell
+							193 text 1
+					194 row
+						195 cell
+							196 text name
+						197 cell
+							198 text JAX Pathways
+					199 row
+						200 cell
+							201 text item
+					202 row
+						203 cell
+							204 text @type
+						205 cell
+							206 text Thing
+					207 row
+						208 cell
+							209 text @id
+						210 cell
+							211 text https://www.tahabouhsine.com/
+					212 row
+						213 cell
+							214 text itemListElement
+					215 row
+						216 cell
+							217 text @type
+						218 cell
+							219 text ListItem
+					220 row
+						221 cell
+							222 text position
+						223 cell
+							224 text 2
+					225 row
+						226 cell
+							227 text name
+						228 cell
+							229 text Learn JAX: lessons, projects & training systems
+					230 row
+						231 cell
+							232 text item
+					233 row
+						234 cell
+							235 text @type
+						236 cell
+							237 text Thing
+					238 row
+						239 cell
+							240 text @id
+						241 cell
+							242 text https://www.tahabouhsine.com/course.html
+					243 row
+						244 cell
+							245 text mainEntity
+					246 row
+						247 cell
+							248 text @type
+						249 cell
+							250 text ItemList
+					251 row
+						252 cell
+							253 text @id
+						254 cell
+							255 text https://www.tahabouhsine.com/course.html#courses
+					256 row
+						257 cell
+							258 text name
+						259 cell
+							260 text JAX courses and phases
+					261 row
+						262 cell
+							263 text numberOfItems
+						264 cell
+							265 text 22
+					266 row
+						267 cell
+							268 text itemListElement
+					269 row
+						270 cell
+							271 text @type
+						272 cell
+							273 text ListItem
+					274 row
+						275 cell
+							276 text position
+						277 cell
+							278 text 1
+					279 row
+						280 cell
+							281 text item
+					282 row
+						283 cell
+							284 text @type
+						285 cell
+							286 text Course
+					287 row
+						288 cell
+							289 text @id
+						290 cell
+							291 text https://www.tahabouhsine.com/phase-guides/welcome.html#course
+					292 row
+						293 cell
+							294 text url
+						295 cell
+							296 text https://www.tahabouhsine.com/phase-guides/welcome.html
+					297 row
+						298 cell
+							299 text name
+						300 cell
+							301 text Setup & first steps
+					302 row
+						303 cell
+							304 text description
+						305 cell
+							306 text Run and inspect saved programs in a CPU environment, then learn how to prepare and verify explicit, source-reviewed TPU targets. TPU jobs are optional and separate from the course’s CPU practice.
+					307 row
+						308 cell
+							309 text inLanguage
+						310 cell
+							311 text en
+					312 row
+						313 cell
+							314 text isAccessibleForFree
+						315 cell
+							316 text http://schema.org/True
+					317 row
+						318 cell
+							319 text teaches
+						320 cell
+							321 text Explain which device ran your code and reproduce the result in a fresh environment.
+					322 row
+						323 cell
+							324 text dateModified
+						325 cell
+							326 text 2026-10-27
+					327 row
+						328 cell
+							329 text author
+					330 row
+						331 cell
+							332 text @type
+						333 cell
+							334 text Person
+					335 row
+						336 cell
+							337 text @id
+						338 cell
+							339 text https://www.tahabouhsine.com/#author
+					340 row
+						341 cell
+							342 text name
+						343 cell
+							344 text Taha Bouhsine
+					345 row
+						346 cell
+							347 text url
+						348 cell
+							349 text https://www.tahabouhsine.com/
+					350 row
+						351 cell
+							352 text provider
+					353 row
+						354 cell
+							355 text @type
+						356 cell
+							357 text Organization
+					358 row
+						359 cell
+							360 text @id
+						361 cell
+							362 text https://www.tahabouhsine.com/#project
+					363 row
+						364 cell
+							365 text name
+						366 cell
+							367 text JAX Pathways
+					368 row
+						369 cell
+							370 text url
+						371 cell
+							372 text https://www.tahabouhsine.com/
+					373 row
+						374 cell
+							375 text sameAs
+						376 cell
+							377 text https://github.com/mlnomadpy/jaxpathways
+					378 row
+						379 cell
+							380 text founder
+					381 row
+						382 cell
+							383 text @type
+						384 cell
+							385 text Person
+					386 row
+						387 cell
+							388 text @id
+						389 cell
+							390 text https://www.tahabouhsine.com/#author
+					391 row
+						392 cell
+							393 text name
+						394 cell
+							395 text Taha Bouhsine
+					396 row
+						397 cell
+							398 text url
+						399 cell
+							400 text https://www.tahabouhsine.com/
+					401 row
+						402 cell
+							403 text syllabusSections
+					404 row
+						405 cell
+							406 text @type
+						407 cell
+							408 text Syllabus
+					409 row
+						410 cell
+							411 text @id
+						412 cell
+							413 text https://www.tahabouhsine.com/lesson-welcome-01.html#syllabus
+					414 row
+						415 cell
+							416 text url
+						417 cell
+							418 text https://www.tahabouhsine.com/lesson-welcome-01.html
+					419 row
+						420 cell
+							421 text name
+						422 cell
+							423 text Set up your learning workspace
+					424 row
+						425 cell
+							426 text description
+						427 cell
+							428 text Download a starter workspace, select its Python environment, run a saved program, and verify one deliberate change.
+					429 row
+						430 cell
+							431 text syllabusSections
+					432 row
+						433 cell
+							434 text @type
+						435 cell
+							436 text Syllabus
+					437 row
+						438 cell
+							439 text @id
+						440 cell
+							441 text https://www.tahabouhsine.com/lesson-welcome-02.html#syllabus
+					442 row
+						443 cell
+							444 text url
+						445 cell
+							446 text https://www.tahabouhsine.com/lesson-welcome-02.html
+					447 row
+						448 cell
+							449 text name
+						450 cell
+							451 text Meet your arrays and devices
+					452 row
+						453 cell
+							454 text description
+						455 cell
+							456 text Create an array, inspect its dtype and device, and explain the result.
+					457 row
+						458 cell
+							459 text syllabusSections
+					460 row
+						461 cell
+							462 text @type
+						463 cell
+							464 text Syllabus
+					465 row
+						466 cell
+							467 text @id
+						468 cell
+							469 text https://www.tahabouhsine.com/lesson-welcome-cpu.html#syllabus
+					470 row
+						471 cell
+							472 text url
+						473 cell
+							474 text https://www.tahabouhsine.com/lesson-welcome-cpu.html
+					475 row
+						476 cell
+							477 text name
+						478 cell
+							479 text Practice with four virtual CPU devices
+					480 row
+						481 cell
+							482 text description
+						483 cell
+							484 text Start four logical CPU devices, inspect row-sharded and replicated arrays, and diagnose an indivisible batch.
+					485 row
+						486 cell
+							487 text syllabusSections
+					488 row
+						489 cell
+							490 text @type
+						491 cell
+							492 text Syllabus
+					493 row
+						494 cell
+							495 text @id
+						496 cell
+							497 text https://www.tahabouhsine.com/lesson-welcome-03.html#syllabus
+					498 row
+						499 cell
+							500 text url
+						501 cell
+							502 text https://www.tahabouhsine.com/lesson-welcome-03.html
+					503 row
+						504 cell
+							505 text name
+						506 cell
+							507 text Move your experiment to a TPU
+					508 row
+						509 cell
+							510 text description
+						511 cell
+							512 text Use the recorded CPU reference to check arithmetic and placement, then run only a named, source-reviewed TPU target with pinned dependencies and verify its observed backend receipt.
+					513 row
+						514 cell
+							515 text itemListElement
+					516 row
+						517 cell
+							518 text @type
+						519 cell
+							520 text ListItem
+					521 row
+						522 cell
+							523 text position
+						524 cell
+							525 text 2
+					526 row
+						527 cell
+							528 text item
+					529 row
+						530 cell
+							531 text @type
+						532 cell
+							533 text Course
+					534 row
+						535 cell
+							536 text @id
+						537 cell
+							538 text https://www.tahabouhsine.com/phase-guides/arrays.html#course
+					539 row
+						540 cell
+							541 text url
+						542 cell
+							543 text https://www.tahabouhsine.com/phase-guides/arrays.html
+					544 row
+						545 cell
+							546 text name
+						547 cell
+							548 text Arrays & pure functions
+					549 row
+						550 cell
+							551 text description
+						552 cell
+							553 text Treat every axis as part of a contract. Work through normalization, broadcasting and immutable updates, then diagnose mistakes that still return plausible numbers.
+					554 row
+						555 cell
+							556 text inLanguage
+						557 cell
+							558 text en
+					559 row
+						560 cell
+							561 text isAccessibleForFree
+						562 cell
+							563 text http://schema.org/True
+					564 row
+						565 cell
+							566 text teaches
+						567 cell
+							568 text Predict output shapes and explain why a pure function is easier to transform.
+					569 row
+						570 cell
+							571 text coursePrerequisites
+						572 cell
+							573 text Setup & first steps
+					574 row
+						575 cell
+							576 text dateModified
+						577 cell
+							578 text 2026-10-27
+					579 row
+						580 cell
+							581 text author
+					582 row
+						583 cell
+							584 text @type
+						585 cell
+							586 text Person
+					587 row
+						588 cell
+							589 text @id
+						590 cell
+							591 text https://www.tahabouhsine.com/#author
+					592 row
+						593 cell
+							594 text name
+						595 cell
+							596 text Taha Bouhsine
+					597 row
+						598 cell
+							599 text url
+						600 cell
+							601 text https://www.tahabouhsine.com/
+					602 row
+						603 cell
+							604 text provider
+					605 row
+						606 cell
+							607 text @type
+						608 cell
+							609 text Organization
+					610 row
+						611 cell
+							612 text @id
+						613 cell
+							614 text https://www.tahabouhsine.com/#project
+					615 row
+						616 cell
+							617 text name
+						618 cell
+							619 text JAX Pathways
+					620 row
+						621 cell
+							622 text url
+						623 cell
+							624 text https://www.tahabouhsine.com/
+					625 row
+						626 cell
+							627 text sameAs
+						628 cell
+							629 text https://github.com/mlnomadpy/jaxpathways
+					630 row
+						631 cell
+							632 text founder
+					633 row
+						634 cell
+							635 text @type
+						636 cell
+							637 text Person
+					638 row
+						639 cell
+							640 text @id
+						641 cell
+							642 text https://www.tahabouhsine.com/#author
+					643 row
+						644 cell
+							645 text name
+						646 cell
+							647 text Taha Bouhsine
+					648 row
+						649 cell
+							650 text url
+						651 cell
+							652 text https://www.tahabouhsine.com/
+					653 row
+						654 cell
+							655 text syllabusSections
+					656 row
+						657 cell
+							658 text @type
+						659 cell
+							660 text Syllabus
+					661 row
+						662 cell
+							663 text @id
+						664 cell
+							665 text https://www.tahabouhsine.com/lesson-arrays-01.html#syllabus
+					666 row
+						667 cell
+							668 text url
+						669 cell
+							670 text https://www.tahabouhsine.com/lesson-arrays-01.html
+					671 row
+						672 cell
+							673 text name
+						674 cell
+							675 text From NumPy to jax.numpy
+					676 row
+						677 cell
+							678 text description
+						679 cell
+							680 text Build feature-wise preprocessing with fitted statistics and verify behavior on new and constant data.
+					681 row
+						682 cell
+							683 text syllabusSections
+					684 row
+						685 cell
+							686 text @type
+						687 cell
+							688 text Syllabus
+					689 row
+						690 cell
+							691 text @id
+						692 cell
+							693 text https://www.tahabouhsine.com/lesson-arrays-02.html#syllabus
+					694 row
+						695 cell
+							696 text url
+						697 cell
+							698 text https://www.tahabouhsine.com/lesson-arrays-02.html
+					699 row
+						700 cell
+							701 text name
+						702 cell
+							703 text Shapes, broadcasting, and dtypes
+					704 row
+						705 cell
+							706 text description
+						707 cell
+							708 text Specify broadcasting contracts and detect silent pairwise-loss and dtype mistakes.
+					709 row
+						710 cell
+							711 text syllabusSections
+					712 row
+						713 cell
+							714 text @type
+						715 cell
+							716 text Syllabus
+					717 row
+						718 cell
+							719 text @id
+						720 cell
+							721 text https://www.tahabouhsine.com/lesson-arrays-03.html#syllabus
+					722 row
+						723 cell
+							724 text url
+						725 cell
+							726 text https://www.tahabouhsine.com/lesson-arrays-03.html
+					727 row
+						728 cell
+							729 text name
+						730 cell
+							731 text Pure functions and explicit inputs
+					732 row
+						733 cell
+							734 text description
+						735 cell
+							736 text Design an explicit parameter/data interface and return new state without mutating old containers.
+					737 row
+						738 cell
+							739 text syllabusSections
+					740 row
+						741 cell
+							742 text @type
+						743 cell
+							744 text Syllabus
+					745 row
+						746 cell
+							747 text @id
+						748 cell
+							749 text https://www.tahabouhsine.com/lesson-arrays-04.html#syllabus
+					750 row
+						751 cell
+							752 text url
+						753 cell
+							754 text https://www.tahabouhsine.com/lesson-arrays-04.html
+					755 row
+						756 cell
+							757 text name
+						758 cell
+							759 text Immutable updates and indexing
+					760 row
+						761 cell
+							762 text description
+						763 cell
+							764 text Implement functional indexed updates and distinguish accumulated contributions from shape-preserving masks.
+					765 row
+						766 cell
+							767 text itemListElement
+					768 row
+						769 cell
+							770 text @type
+						771 cell
+							772 text ListItem
+					773 row
+						774 cell
+							775 text position
+						776 cell
+							777 text 3
+					778 row
+						779 cell
+							780 text item
+					781 row
+						782 cell
+							783 text @type
+						784 cell
+							785 text Course
+					786 row
+						787 cell
+							788 text @id
+						789 cell
+							790 text https://www.tahabouhsine.com/phase-guides/transforms.html#course
+					791 row
+						792 cell
+							793 text url
+						794 cell
+							795 text https://www.tahabouhsine.com/phase-guides/transforms.html
+					796 row
+						797 cell
+							798 text name
+						799 cell
+							800 text JAX transformations
+					801 row
+						802 cell
+							803 text description
+						804 cell
+							805 text Begin with a scalar function, then differentiate it, batch it and compile it. Compare each transformed result with a simple reference so you can explain what changed.
+					806 row
+						807 cell
+							808 text inLanguage
+						809 cell
+							810 text en
+					811 row
+						812 cell
+							813 text isAccessibleForFree
+						814 cell
+							815 text http://schema.org/True
+					816 row
+						817 cell
+							818 text teaches
+						819 cell
+							820 text Compose grad, vmap, and jit; explain what each transformation changes.
+					821 row
+						822 cell
+							823 text coursePrerequisites
+						824 cell
+							825 text Arrays & pure functions
+					826 row
+						827 cell
+							828 text dateModified
+						829 cell
+							830 text 2026-10-27
+					831 row
+						832 cell
+							833 text author
+					834 row
+						835 cell
+							836 text @type
+						837 cell
+							838 text Person
+					839 row
+						840 cell
+							841 text @id
+						842 cell
+							843 text https://www.tahabouhsine.com/#author
+					844 row
+						845 cell
+							846 text name
+						847 cell
+							848 text Taha Bouhsine
+					849 row
+						850 cell
+							851 text url
+						852 cell
+							853 text https://www.tahabouhsine.com/
+					854 row
+						855 cell
+							856 text provider
+					857 row
+						858 cell
+							859 text @type
+						860 cell
+							861 text Organization
+					862 row
+						863 cell
+							864 text @id
+						865 cell
+							866 text https://www.tahabouhsine.com/#project
+					867 row
+						868 cell
+							869 text name
+						870 cell
+							871 text JAX Pathways
+					872 row
+						873 cell
+							874 text url
+						875 cell
+							876 text https://www.tahabouhsine.com/
+					877 row
+						878 cell
+							879 text sameAs
+						880 cell
+							881 text https://github.com/mlnomadpy/jaxpathways
+					882 row
+						883 cell
+							884 text founder
+					885 row
+						886 cell
+							887 text @type
+						888 cell
+							889 text Person
+					890 row
+						891 cell
+							892 text @id
+						893 cell
+							894 text https://www.tahabouhsine.com/#author
+					895 row
+						896 cell
+							897 text name
+						898 cell
+							899 text Taha Bouhsine
+					900 row
+						901 cell
+							902 text url
+						903 cell
+							904 text https://www.tahabouhsine.com/
+					905 row
+						906 cell
+							907 text syllabusSections
+					908 row
+						909 cell
+							910 text @type
+						911 cell
+							912 text Syllabus
+					913 row
+						914 cell
+							915 text @id
+						916 cell
+							917 text https://www.tahabouhsine.com/lesson-first-gradient.html#syllabus
+					918 row
+						919 cell
+							920 text url
+						921 cell
+							922 text https://www.tahabouhsine.com/lesson-first-gradient.html
+					923 row
+						924 cell
+							925 text name
+						926 cell
+							927 text Your first gradient
+					928 row
+						929 cell
+							930 text description
+						931 cell
+							932 text Explain local sensitivity and the chain rule, then compare analytic, numerical, and automatic derivatives.
+					933 row
+						934 cell
+							935 text syllabusSections
+					936 row
+						937 cell
+							938 text @type
+						939 cell
+							940 text Syllabus
+					941 row
+						942 cell
+							943 text @id
+						944 cell
+							945 text https://www.tahabouhsine.com/lesson-transforms-02.html#syllabus
+					946 row
+						947 cell
+							948 text url
+						949 cell
+							950 text https://www.tahabouhsine.com/lesson-transforms-02.html
+					951 row
+						952 cell
+							953 text name
+						954 cell
+							955 text Losses and value_and_grad
+					956 row
+						957 cell
+							958 text description
+						959 cell
+							960 text Derive and audit a scalar loss, its parameter gradient, and stable versus unstable updates.
+					961 row
+						962 cell
+							963 text syllabusSections
+					964 row
+						965 cell
+							966 text @type
+						967 cell
+							968 text Syllabus
+					969 row
+						970 cell
+							971 text @id
+						972 cell
+							973 text https://www.tahabouhsine.com/lesson-transforms-03.html#syllabus
+					974 row
+						975 cell
+							976 text url
+						977 cell
+							978 text https://www.tahabouhsine.com/lesson-transforms-03.html
+					979 row
+						980 cell
+							981 text name
+						982 cell
+							983 text Batch a function with vmap
+					984 row
+						985 cell
+							986 text description
+						987 cell
+							988 text Specify batching axes and connect per-example gradients to a reduced batch objective.
+					989 row
+						990 cell
+							991 text syllabusSections
+					992 row
+						993 cell
+							994 text @type
+						995 cell
+							996 text Syllabus
+					997 row
+						998 cell
+							999 text @id
+						1000 cell
+							1001 text https://www.tahabouhsine.com/lesson-transforms-04.html#syllabus
+					1002 row
+						1003 cell
+							1004 text url
+						1005 cell
+							1006 text https://www.tahabouhsine.com/lesson-transforms-04.html
+					1007 row
+						1008 cell
+							1009 text name
+						1010 cell
+							1011 text Compile a function with jit
+					1012 row
+						1013 cell
+							1014 text description
+						1015 cell
+							1016 text Validate compiled loss/gradient values and produce a correctly synchronized latency report.
+					1017 row
+						1018 cell
+							1019 text syllabusSections
+					1020 row
+						1021 cell
+							1022 text @type
+						1023 cell
+							1024 text Syllabus
+					1025 row
+						1026 cell
+							1027 text @id
+						1028 cell
+							1029 text https://www.tahabouhsine.com/lesson-transforms-05.html#syllabus
+					1030 row
+						1031 cell
+							1032 text url
+						1033 cell
+							1034 text https://www.tahabouhsine.com/lesson-transforms-05.html
+					1035 row
+						1036 cell
+							1037 text name
+						1038 cell
+							1039 text Tracing, static arguments, and recompilation
+					1040 row
+						1041 cell
+							1042 text description
+						1043 cell
+							1044 text Explain the staging boundary and repair configuration versus runtime-control-flow mistakes.
+					1045 row
+						1046 cell
+							1047 text itemListElement
+					1048 row
+						1049 cell
+							1050 text @type
+						1051 cell
+							1052 text ListItem
+					1053 row
+						1054 cell
+							1055 text position
+						1056 cell
+							1057 text 4
+					1058 row
+						1059 cell
+							1060 text item
+					1061 row
+						1062 cell
+							1063 text @type
+						1064 cell
+							1065 text Course
+					1066 row
+						1067 cell
+							1068 text @id
+						1069 cell
+							1070 text https://www.tahabouhsine.com/phase-guides/state.html#course
+					1071 row
+						1072 cell
+							1073 text url
+						1074 cell
+							1075 text https://www.tahabouhsine.com/phase-guides/state.html
+					1076 row
+						1077 cell
+							1078 text name
+						1079 cell
+							1080 text State, randomness & control flow
+					1081 row
+						1082 cell
+							1083 text description
+						1084 cell
+							1085 text Make randomness, parameters and loop state explicit. Learn how to repeat an experiment without accidentally reusing randomness or mutating a caller’s state.
+					1086 row
+						1087 cell
+							1088 text inLanguage
+						1089 cell
+							1090 text en
+					1091 row
+						1092 cell
+							1093 text isAccessibleForFree
+						1094 cell
+							1095 text http://schema.org/True
+					1096 row
+						1097 cell
+							1098 text teaches
+						1099 cell
+							1100 text Replay the same experiment with saved state and keys; explain the update order.
+					1101 row
+						1102 cell
+							1103 text coursePrerequisites
+						1104 cell
+							1105 text JAX transformations
+					1106 row
+						1107 cell
+							1108 text dateModified
+						1109 cell
+							1110 text 2026-10-27
+					1111 row
+						1112 cell
+							1113 text author
+					1114 row
+						1115 cell
+							1116 text @type
+						1117 cell
+							1118 text Person
+					1119 row
+						1120 cell
+							1121 text @id
+						1122 cell
+							1123 text https://www.tahabouhsine.com/#author
+					1124 row
+						1125 cell
+							1126 text name
+						1127 cell
+							1128 text Taha Bouhsine
+					1129 row
+						1130 cell
+							1131 text url
+						1132 cell
+							1133 text https://www.tahabouhsine.com/
+					1134 row
+						1135 cell
+							1136 text provider
+					1137 row
+						1138 cell
+							1139 text @type
+						1140 cell
+							1141 text Organization
+					1142 row
+						1143 cell
+							1144 text @id
+						1145 cell
+							1146 text https://www.tahabouhsine.com/#project
+					1147 row
+						1148 cell
+							1149 text name
+						1150 cell
+							1151 text JAX Pathways
+					1152 row
+						1153 cell
+							1154 text url
+						1155 cell
+							1156 text https://www.tahabouhsine.com/
+					1157 row
+						1158 cell
+							1159 text sameAs
+						1160 cell
+							1161 text https://github.com/mlnomadpy/jaxpathways
+					1162 row
+						1163 cell
+							1164 text founder
+					1165 row
+						1166 cell
+							1167 text @type
+						1168 cell
+							1169 text Person
+					1170 row
+						1171 cell
+							1172 text @id
+						1173 cell
+							1174 text https://www.tahabouhsine.com/#author
+					1175 row
+						1176 cell
+							1177 text name
+						1178 cell
+							1179 text Taha Bouhsine
+					1180 row
+						1181 cell
+							1182 text url
+						1183 cell
+							1184 text https://www.tahabouhsine.com/
+					1185 row
+						1186 cell
+							1187 text syllabusSections
+					1188 row
+						1189 cell
+							1190 text @type
+						1191 cell
+							1192 text Syllabus
+					1193 row
+						1194 cell
+							1195 text @id
+						1196 cell
+							1197 text https://www.tahabouhsine.com/lesson-state-01.html#syllabus
+					1198 row
+						1199 cell
+							1200 text url
+						1201 cell
+							1202 text https://www.tahabouhsine.com/lesson-state-01.html
+					1203 row
+						1204 cell
+							1205 text name
+						1206 cell
+							1207 text Random keys without surprises
+					1208 row
+						1209 cell
+							1210 text description
+						1211 cell
+							1212 text Split keys and show reproducibility without accidental key reuse.
+					1213 row
+						1214 cell
+							1215 text syllabusSections
+					1216 row
+						1217 cell
+							1218 text @type
+						1219 cell
+							1220 text Syllabus
+					1221 row
+						1222 cell
+							1223 text @id
+						1224 cell
+							1225 text https://www.tahabouhsine.com/lesson-state-02.html#syllabus
+					1226 row
+						1227 cell
+							1228 text url
+						1229 cell
+							1230 text https://www.tahabouhsine.com/lesson-state-02.html
+					1231 row
+						1232 cell
+							1233 text name
+						1234 cell
+							1235 text Pytrees and structured parameters
+					1236 row
+						1237 cell
+							1238 text description
+						1239 cell
+							1240 text Represent parameters and state in a nested structure and transform its leaves.
+					1241 row
+						1242 cell
+							1243 text syllabusSections
+					1244 row
+						1245 cell
+							1246 text @type
+						1247 cell
+							1248 text Syllabus
+					1249 row
+						1250 cell
+							1251 text @id
+						1252 cell
+							1253 text https://www.tahabouhsine.com/lesson-state-03.html#syllabus
+					1254 row
+						1255 cell
+							1256 text url
+						1257 cell
+							1258 text https://www.tahabouhsine.com/lesson-state-03.html
+					1259 row
+						1260 cell
+							1261 text name
+						1262 cell
+							1263 text Compiled loops with lax.scan
+					1264 row
+						1265 cell
+							1266 text description
+						1267 cell
+							1268 text Replace a fixed-length Python loop with scan and compare final states.
+					1269 row
+						1270 cell
+							1271 text syllabusSections
+					1272 row
+						1273 cell
+							1274 text @type
+						1275 cell
+							1276 text Syllabus
+					1277 row
+						1278 cell
+							1279 text @id
+						1280 cell
+							1281 text https://www.tahabouhsine.com/lesson-state-04.html#syllabus
+					1282 row
+						1283 cell
+							1284 text url
+						1285 cell
+							1286 text https://www.tahabouhsine.com/lesson-state-04.html
+					1287 row
+						1288 cell
+							1289 text name
+						1290 cell
+							1291 text Branches with lax.cond
+					1292 row
+						1293 cell
+							1294 text description
+						1295 cell
+							1296 text Implement a data-dependent branch that works inside a compiled function.
+					1297 row
+						1298 cell
+							1299 text itemListElement
+					1300 row
+						1301 cell
+							1302 text @type
+						1303 cell
+							1304 text ListItem
+					1305 row
+						1306 cell
+							1307 text position
+						1308 cell
+							1309 text 5
+					1310 row
+						1311 cell
+							1312 text item
+					1313 row
+						1314 cell
+							1315 text @type
+						1316 cell
+							1317 text Course
+					1318 row
+						1319 cell
+							1320 text @id
+						1321 cell
+							1322 text https://www.tahabouhsine.com/phase-guides/optimization.html#course
+					1323 row
+						1324 cell
+							1325 text url
+						1326 cell
+							1327 text https://www.tahabouhsine.com/phase-guides/optimization.html
+					1328 row
+						1329 cell
+							1330 text name
+						1331 cell
+							1332 text Math & optimization
+					1333 row
+						1334 cell
+							1335 text description
+						1336 cell
+							1337 text Connect geometry and probability to the updates in a training loop. Begin with linear algebra, gradient checks and gradient descent, then investigate conditioning, curvature, likelihoods, regularization and optimizer behavior.
+					1338 row
+						1339 cell
+							1340 text inLanguage
+						1341 cell
+							1342 text en
+					1343 row
+						1344 cell
+							1345 text isAccessibleForFree
+						1346 cell
+							1347 text http://schema.org/True
+					1348 row
+						1349 cell
+							1350 text teaches
+						1351 cell
+							1352 text Explain prediction geometry and loss assumptions; verify derivatives; diagnose conditioning, curvature and gradient noise; justify an optimizer using held-out evidence.
+					1353 row
+						1354 cell
+							1355 text coursePrerequisites
+						1356 cell
+							1357 text State, randomness & control flow
+					1358 row
+						1359 cell
+							1360 text dateModified
+						1361 cell
+							1362 text 2026-10-21
+					1363 row
+						1364 cell
+							1365 text author
+					1366 row
+						1367 cell
+							1368 text @type
+						1369 cell
+							1370 text Person
+					1371 row
+						1372 cell
+							1373 text @id
+						1374 cell
+							1375 text https://www.tahabouhsine.com/#author
+					1376 row
+						1377 cell
+							1378 text name
+						1379 cell
+							1380 text Taha Bouhsine
+					1381 row
+						1382 cell
+							1383 text url
+						1384 cell
+							1385 text https://www.tahabouhsine.com/
+					1386 row
+						1387 cell
+							1388 text provider
+					1389 row
+						1390 cell
+							1391 text @type
+						1392 cell
+							1393 text Organization
+					1394 row
+						1395 cell
+							1396 text @id
+						1397 cell
+							1398 text https://www.tahabouhsine.com/#project
+					1399 row
+						1400 cell
+							1401 text name
+						1402 cell
+							1403 text JAX Pathways
+					1404 row
+						1405 cell
+							1406 text url
+						1407 cell
+							1408 text https://www.tahabouhsine.com/
+					1409 row
+						1410 cell
+							1411 text sameAs
+						1412 cell
+							1413 text https://github.com/mlnomadpy/jaxpathways
+					1414 row
+						1415 cell
+							1416 text founder
+					1417 row
+						1418 cell
+							1419 text @type
+						1420 cell
+							1421 text Person
+					1422 row
+						1423 cell
+							1424 text @id
+						1425 cell
+							1426 text https://www.tahabouhsine.com/#author
+					1427 row
+						1428 cell
+							1429 text name
+						1430 cell
+							1431 text Taha Bouhsine
+					1432 row
+						1433 cell
+							1434 text url
+						1435 cell
+							1436 text https://www.tahabouhsine.com/
+					1437 row
+						1438 cell
+							1439 text syllabusSections
+					1440 row
+						1441 cell
+							1442 text @type
+						1443 cell
+							1444 text Syllabus
+					1445 row
+						1446 cell
+							1447 text @id
+						1448 cell
+							1449 text https://www.tahabouhsine.com/lesson-optimization-05.html#syllabus
+					1450 row
+						1451 cell
+							1452 text url
+						1453 cell
+							1454 text https://www.tahabouhsine.com/lesson-optimization-05.html
+					1455 row
+						1456 cell
+							1457 text name
+						1458 cell
+							1459 text Vectors, norms, and projections
+					1460 row
+						1461 cell
+							1462 text description
+						1463 cell
+							1464 text Read a dot product geometrically and separate a vector into a projection and an orthogonal residual.
+					1465 row
+						1466 cell
+							1467 text syllabusSections
+					1468 row
+						1469 cell
+							1470 text @type
+						1471 cell
+							1472 text Syllabus
+					1473 row
+						1474 cell
+							1475 text @id
+						1476 cell
+							1477 text https://www.tahabouhsine.com/lesson-optimization-01.html#syllabus
+					1478 row
+						1479 cell
+							1480 text url
+						1481 cell
+							1482 text https://www.tahabouhsine.com/lesson-optimization-01.html
+					1483 row
+						1484 cell
+							1485 text name
+						1486 cell
+							1487 text Linear algebra and loss intuition
+					1488 row
+						1489 cell
+							1490 text description
+						1491 cell
+							1492 text Connect a matrix-vector product to predictions and a scalar regression loss.
+					1493 row
+						1494 cell
+							1495 text syllabusSections
+					1496 row
+						1497 cell
+							1498 text @type
+						1499 cell
+							1500 text Syllabus
+					1501 row
+						1502 cell
+							1503 text @id
+						1504 cell
+							1505 text https://www.tahabouhsine.com/lesson-optimization-06.html#syllabus
+					1506 row
+						1507 cell
+							1508 text url
+						1509 cell
+							1510 text https://www.tahabouhsine.com/lesson-optimization-06.html
+					1511 row
+						1512 cell
+							1513 text name
+						1514 cell
+							1515 text Least squares, rank, and conditioning
+					1516 row
+						1517 cell
+							1518 text description
+						1519 cell
+							1520 text Fit a linear model with a direct solver and diagnose nonunique or sensitive coefficients.
+					1521 row
+						1522 cell
+							1523 text syllabusSections
+					1524 row
+						1525 cell
+							1526 text @type
+						1527 cell
+							1528 text Syllabus
+					1529 row
+						1530 cell
+							1531 text @id
+						1532 cell
+							1533 text https://www.tahabouhsine.com/lesson-optimization-07.html#syllabus
+					1534 row
+						1535 cell
+							1536 text url
+						1537 cell
+							1538 text https://www.tahabouhsine.com/lesson-optimization-07.html
+					1539 row
+						1540 cell
+							1541 text name
+						1542 cell
+							1543 text The chain rule, Jacobians, and directions
+					1544 row
+						1545 cell
+							1546 text description
+						1547 cell
+							1548 text Compute a small Jacobian by hand and connect forward sensitivities to reverse-mode gradients.
+					1549 row
+						1550 cell
+							1551 text syllabusSections
+					1552 row
+						1553 cell
+							1554 text @type
+						1555 cell
+							1556 text Syllabus
+					1557 row
+						1558 cell
+							1559 text @id
+						1560 cell
+							1561 text https://www.tahabouhsine.com/lesson-optimization-02.html#syllabus
+					1562 row
+						1563 cell
+							1564 text url
+						1565 cell
+							1566 text https://www.tahabouhsine.com/lesson-optimization-02.html
+					1567 row
+						1568 cell
+							1569 text name
+						1570 cell
+							1571 text Gradient checking and numerical accuracy
+					1572 row
+						1573 cell
+							1574 text description
+						1575 cell
+							1576 text Compare autodiff with finite differences over several step sizes.
+					1577 row
+						1578 cell
+							1579 text syllabusSections
+					1580 row
+						1581 cell
+							1582 text @type
+						1583 cell
+							1584 text Syllabus
+					1585 row
+						1586 cell
+							1587 text @id
+						1588 cell
+							1589 text https://www.tahabouhsine.com/lesson-optimization-08.html#syllabus
+					1590 row
+						1591 cell
+							1592 text url
+						1593 cell
+							1594 text https://www.tahabouhsine.com/lesson-optimization-08.html
+					1595 row
+						1596 cell
+							1597 text name
+						1598 cell
+							1599 text Curvature, Hessians, and learning rates
+					1600 row
+						1601 cell
+							1602 text description
+						1603 cell
+							1604 text Use curvature to explain learning-rate stability, slow directions and why a zero gradient need not be a minimum.
+					1605 row
+						1606 cell
+							1607 text syllabusSections
+					1608 row
+						1609 cell
+							1610 text @type
+						1611 cell
+							1612 text Syllabus
+					1613 row
+						1614 cell
+							1615 text @id
+						1616 cell
+							1617 text https://www.tahabouhsine.com/lesson-optimization-03.html#syllabus
+					1618 row
+						1619 cell
+							1620 text url
+						1621 cell
+							1622 text https://www.tahabouhsine.com/lesson-optimization-03.html
+					1623 row
+						1624 cell
+							1625 text name
+						1626 cell
+							1627 text Write gradient descent yourself
+					1628 row
+						1629 cell
+							1630 text description
+						1631 cell
+							1632 text Fit a regression model using explicit parameter updates.
+					1633 row
+						1634 cell
+							1635 text syllabusSections
+					1636 row
+						1637 cell
+							1638 text @type
+						1639 cell
+							1640 text Syllabus
+					1641 row
+						1642 cell
+							1643 text @id
+						1644 cell
+							1645 text https://www.tahabouhsine.com/lesson-optimization-09.html#syllabus
+					1646 row
+						1647 cell
+							1648 text url
+						1649 cell
+							1650 text https://www.tahabouhsine.com/lesson-optimization-09.html
+					1651 row
+						1652 cell
+							1653 text name
+						1654 cell
+							1655 text Probability, likelihood, and stable losses
+					1656 row
+						1657 cell
+							1658 text description
+						1659 cell
+							1660 text Derive binary cross-entropy from a probability model and compute it safely from logits.
+					1661 row
+						1662 cell
+							1663 text syllabusSections
+					1664 row
+						1665 cell
+							1666 text @type
+						1667 cell
+							1668 text Syllabus
+					1669 row
+						1670 cell
+							1671 text @id
+						1672 cell
+							1673 text https://www.tahabouhsine.com/lesson-optimization-10.html#syllabus
+					1674 row
+						1675 cell
+							1676 text url
+						1677 cell
+							1678 text https://www.tahabouhsine.com/lesson-optimization-10.html
+					1679 row
+						1680 cell
+							1681 text name
+						1682 cell
+							1683 text Regularization and honest validation
+					1684 row
+						1685 cell
+							1686 text description
+						1687 cell
+							1688 text Derive a ridge solution, distinguish data loss from penalized loss, and select a penalty using held-out data.
+					1689 row
+						1690 cell
+							1691 text syllabusSections
+					1692 row
+						1693 cell
+							1694 text @type
+						1695 cell
+							1696 text Syllabus
+					1697 row
+						1698 cell
+							1699 text @id
+						1700 cell
+							1701 text https://www.tahabouhsine.com/lesson-optimization-11.html#syllabus
+					1702 row
+						1703 cell
+							1704 text url
+						1705 cell
+							1706 text https://www.tahabouhsine.com/lesson-optimization-11.html
+					1707 row
+						1708 cell
+							1709 text name
+						1710 cell
+							1711 text Minibatches, expectation, and gradient noise
+					1712 row
+						1713 cell
+							1714 text description
+						1715 cell
+							1716 text Explain an unbiased minibatch gradient and verify how sampling and reduction affect its variance.
+					1717 row
+						1718 cell
+							1719 text syllabusSections
+					1720 row
+						1721 cell
+							1722 text @type
+						1723 cell
+							1724 text Syllabus
+					1725 row
+						1726 cell
+							1727 text @id
+						1728 cell
+							1729 text https://www.tahabouhsine.com/lesson-optimization-04.html#syllabus
+					1730 row
+						1731 cell
+							1732 text url
+						1733 cell
+							1734 text https://www.tahabouhsine.com/lesson-optimization-04.html
+					1735 row
+						1736 cell
+							1737 text name
+						1738 cell
+							1739 text Optimize with Optax
+					1740 row
+						1741 cell
+							1742 text description
+						1743 cell
+							1744 text Replace the handwritten update with an optimizer and track its state.
+					1745 row
+						1746 cell
+							1747 text syllabusSections
+					1748 row
+						1749 cell
+							1750 text @type
+						1751 cell
+							1752 text Syllabus
+					1753 row
+						1754 cell
+							1755 text @id
+						1756 cell
+							1757 text https://www.tahabouhsine.com/lesson-optimization-12.html#syllabus
+					1758 row
+						1759 cell
+							1760 text url
+						1761 cell
+							1762 text https://www.tahabouhsine.com/lesson-optimization-12.html
+					1763 row
+						1764 cell
+							1765 text name
+						1766 cell
+							1767 text Adam, clipping, and learning-rate schedules
+					1768 row
+						1769 cell
+							1770 text description
+						1771 cell
+							1772 text Explain Adam’s moments, inspect clipping and schedule order, and compare optimizers with a controlled update budget.
+					1773 row
+						1774 cell
+							1775 text itemListElement
+					1776 row
+						1777 cell
+							1778 text @type
+						1779 cell
+							1780 text ListItem
+					1781 row
+						1782 cell
+							1783 text position
+						1784 cell
+							1785 text 6
+					1786 row
+						1787 cell
+							1788 text item
+					1789 row
+						1790 cell
+							1791 text @type
+						1792 cell
+							1793 text Course
+					1794 row
+						1795 cell
+							1796 text @id
+						1797 cell
+							1798 text https://www.tahabouhsine.com/phase-guides/networks.html#course
+					1799 row
+						1800 cell
+							1801 text url
+						1802 cell
+							1803 text https://www.tahabouhsine.com/phase-guides/networks.html
+					1804 row
+						1805 cell
+							1806 text name
+						1807 cell
+							1808 text Neural network training
+					1809 row
+						1810 cell
+							1811 text description
+						1812 cell
+							1813 text Build the same ideas into small neural networks. Understand hidden layers, parameter state, stable objectives and evaluation before moving to a small image classifier.
+					1814 row
+						1815 cell
+							1816 text inLanguage
+						1817 cell
+							1818 text en
+					1819 row
+						1820 cell
+							1821 text isAccessibleForFree
+						1822 cell
+							1823 text http://schema.org/True
+					1824 row
+						1825 cell
+							1826 text teaches
+						1827 cell
+							1828 text Keep train and evaluation behavior separate and reproduce metrics from a saved configuration.
+					1829 row
+						1830 cell
+							1831 text coursePrerequisites
+						1832 cell
+							1833 text Math & optimization
+					1834 row
+						1835 cell
+							1836 text dateModified
+						1837 cell
+							1838 text 2026-10-27
+					1839 row
+						1840 cell
+							1841 text author
+					1842 row
+						1843 cell
+							1844 text @type
+						1845 cell
+							1846 text Person
+					1847 row
+						1848 cell
+							1849 text @id
+						1850 cell
+							1851 text https://www.tahabouhsine.com/#author
+					1852 row
+						1853 cell
+							1854 text name
+						1855 cell
+							1856 text Taha Bouhsine
+					1857 row
+						1858 cell
+							1859 text url
+						1860 cell
+							1861 text https://www.tahabouhsine.com/
+					1862 row
+						1863 cell
+							1864 text provider
+					1865 row
+						1866 cell
+							1867 text @type
+						1868 cell
+							1869 text Organization
+					1870 row
+						1871 cell
+							1872 text @id
+						1873 cell
+							1874 text https://www.tahabouhsine.com/#project
+					1875 row
+						1876 cell
+							1877 text name
+						1878 cell
+							1879 text JAX Pathways
+					1880 row
+						1881 cell
+							1882 text url
+						1883 cell
+							1884 text https://www.tahabouhsine.com/
+					1885 row
+						1886 cell
+							1887 text sameAs
+						1888 cell
+							1889 text https://github.com/mlnomadpy/jaxpathways
+					1890 row
+						1891 cell
+							1892 text founder
+					1893 row
+						1894 cell
+							1895 text @type
+						1896 cell
+							1897 text Person
+					1898 row
+						1899 cell
+							1900 text @id
+						1901 cell
+							1902 text https://www.tahabouhsine.com/#author
+					1903 row
+						1904 cell
+							1905 text name
+						1906 cell
+							1907 text Taha Bouhsine
+					1908 row
+						1909 cell
+							1910 text url
+						1911 cell
+							1912 text https://www.tahabouhsine.com/
+					1913 row
+						1914 cell
+							1915 text syllabusSections
+					1916 row
+						1917 cell
+							1918 text @type
+						1919 cell
+							1920 text Syllabus
+					1921 row
+						1922 cell
+							1923 text @id
+						1924 cell
+							1925 text https://www.tahabouhsine.com/lesson-networks-01.html#syllabus
+					1926 row
+						1927 cell
+							1928 text url
+						1929 cell
+							1930 text https://www.tahabouhsine.com/lesson-networks-01.html
+					1931 row
+						1932 cell
+							1933 text name
+						1934 cell
+							1935 text Build a tiny multilayer perceptron
+					1936 row
+						1937 cell
+							1938 text description
+						1939 cell
+							1940 text Implement a small model with explicit parameters before adding a model library.
+					1941 row
+						1942 cell
+							1943 text syllabusSections
+					1944 row
+						1945 cell
+							1946 text @type
+						1947 cell
+							1948 text Syllabus
+					1949 row
+						1950 cell
+							1951 text @id
+						1952 cell
+							1953 text https://www.tahabouhsine.com/lesson-networks-02.html#syllabus
+					1954 row
+						1955 cell
+							1956 text url
+						1957 cell
+							1958 text https://www.tahabouhsine.com/lesson-networks-02.html
+					1959 row
+						1960 cell
+							1961 text name
+						1962 cell
+							1963 text Model and state with Flax NNX
+					1964 row
+						1965 cell
+							1966 text description
+						1967 cell
+							1968 text Express a model and inspect the distinction between parameters and other state.
+					1969 row
+						1970 cell
+							1971 text syllabusSections
+					1972 row
+						1973 cell
+							1974 text @type
+						1975 cell
+							1976 text Syllabus
+					1977 row
+						1978 cell
+							1979 text @id
+						1980 cell
+							1981 text https://www.tahabouhsine.com/lesson-networks-03.html#syllabus
+					1982 row
+						1983 cell
+							1984 text url
+						1985 cell
+							1986 text https://www.tahabouhsine.com/lesson-networks-03.html
+					1987 row
+						1988 cell
+							1989 text name
+						1990 cell
+							1991 text A compiled train and evaluation step
+					1992 row
+						1993 cell
+							1994 text description
+						1995 cell
+							1996 text Build train and eval steps and check that evaluation does not update weights.
+					1997 row
+						1998 cell
+							1999 text syllabusSections
+					2000 row
+						2001 cell
+							2002 text @type
+						2003 cell
+							2004 text Syllabus
+					2005 row
+						2006 cell
+							2007 text @id
+						2008 cell
+							2009 text https://www.tahabouhsine.com/lesson-networks-04.html#syllabus
+					2010 row
+						2011 cell
+							2012 text url
+						2013 cell
+							2014 text https://www.tahabouhsine.com/lesson-networks-04.html
+					2015 row
+						2016 cell
+							2017 text name
+						2018 cell
+							2019 text Train a CNN on a small dataset
+					2020 row
+						2021 cell
+							2022 text description
+						2023 cell
+							2024 text Train a classifier with a fixed data split and report held-out metrics.
+					2025 row
+						2026 cell
+							2027 text syllabusSections
+					2028 row
+						2029 cell
+							2030 text @type
+						2031 cell
+							2032 text Syllabus
+					2033 row
+						2034 cell
+							2035 text @id
+						2036 cell
+							2037 text https://www.tahabouhsine.com/lesson-networks-05.html#syllabus
+					2038 row
+						2039 cell
+							2040 text url
+						2041 cell
+							2042 text https://www.tahabouhsine.com/lesson-networks-05.html
+					2043 row
+						2044 cell
+							2045 text name
+						2046 cell
+							2047 text Debug unstable learning
+					2048 row
+						2049 cell
+							2050 text description
+						2051 cell
+							2052 text Localize a multilayer model failure in data, activations, gradients or update scale, then repair one cause and compare held-out loss.
+					2053 row
+						2054 cell
+							2055 text itemListElement
+					2056 row
+						2057 cell
+							2058 text @type
+						2059 cell
+							2060 text ListItem
+					2061 row
+						2062 cell
+							2063 text position
+						2064 cell
+							2065 text 7
+					2066 row
+						2067 cell
+							2068 text item
+					2069 row
+						2070 cell
+							2071 text @type
+						2072 cell
+							2073 text Course
+					2074 row
+						2075 cell
+							2076 text @id
+						2077 cell
+							2078 text https://www.tahabouhsine.com/phase-guides/recovery.html#course
+					2079 row
+						2080 cell
+							2081 text url
+						2082 cell
+							2083 text https://www.tahabouhsine.com/phase-guides/recovery.html
+					2084 row
+						2085 cell
+							2086 text name
+						2087 cell
+							2088 text Data & checkpoint recovery
+					2089 row
+						2090 cell
+							2091 text description
+						2092 cell
+							2093 text Follow examples from the dataset into a training update, then save enough information to reproduce the next update after interruption. Track experiment configuration, data identity and metric histories with MLflow alongside complete checkpoints.
+					2094 row
+						2095 cell
+							2096 text inLanguage
+						2097 cell
+							2098 text en
+					2099 row
+						2100 cell
+							2101 text isAccessibleForFree
+						2102 cell
+							2103 text http://schema.org/True
+					2104 row
+						2105 cell
+							2106 text teaches
+						2107 cell
+							2108 text Compare resumed and uninterrupted runs under a stated determinism tolerance.
+					2109 row
+						2110 cell
+							2111 text coursePrerequisites
+						2112 cell
+							2113 text Neural network training
+					2114 row
+						2115 cell
+							2116 text dateModified
+						2117 cell
+							2118 text 2026-10-27
+					2119 row
+						2120 cell
+							2121 text author
+					2122 row
+						2123 cell
+							2124 text @type
+						2125 cell
+							2126 text Person
+					2127 row
+						2128 cell
+							2129 text @id
+						2130 cell
+							2131 text https://www.tahabouhsine.com/#author
+					2132 row
+						2133 cell
+							2134 text name
+						2135 cell
+							2136 text Taha Bouhsine
+					2137 row
+						2138 cell
+							2139 text url
+						2140 cell
+							2141 text https://www.tahabouhsine.com/
+					2142 row
+						2143 cell
+							2144 text provider
+					2145 row
+						2146 cell
+							2147 text @type
+						2148 cell
+							2149 text Organization
+					2150 row
+						2151 cell
+							2152 text @id
+						2153 cell
+							2154 text https://www.tahabouhsine.com/#project
+					2155 row
+						2156 cell
+							2157 text name
+						2158 cell
+							2159 text JAX Pathways
+					2160 row
+						2161 cell
+							2162 text url
+						2163 cell
+							2164 text https://www.tahabouhsine.com/
+					2165 row
+						2166 cell
+							2167 text sameAs
+						2168 cell
+							2169 text https://github.com/mlnomadpy/jaxpathways
+					2170 row
+						2171 cell
+							2172 text founder
+					2173 row
+						2174 cell
+							2175 text @type
+						2176 cell
+							2177 text Person
+					2178 row
+						2179 cell
+							2180 text @id
+						2181 cell
+							2182 text https://www.tahabouhsine.com/#author
+					2183 row
+						2184 cell
+							2185 text name
+						2186 cell
+							2187 text Taha Bouhsine
+					2188 row
+						2189 cell
+							2190 text url
+						2191 cell
+							2192 text https://www.tahabouhsine.com/
+					2193 row
+						2194 cell
+							2195 text syllabusSections
+					2196 row
+						2197 cell
+							2198 text @type
+						2199 cell
+							2200 text Syllabus
+					2201 row
+						2202 cell
+							2203 text @id
+						2204 cell
+							2205 text https://www.tahabouhsine.com/lesson-recovery-01.html#syllabus
+					2206 row
+						2207 cell
+							2208 text url
+						2209 cell
+							2210 text https://www.tahabouhsine.com/lesson-recovery-01.html
+					2211 row
+						2212 cell
+							2213 text name
+						2214 cell
+							2215 text Design an input pipeline
+					2216 row
+						2217 cell
+							2218 text description
+						2219 cell
+							2220 text Build and audit a deterministic batched host pipeline.
+					2221 row
+						2222 cell
+							2223 text syllabusSections
+					2224 row
+						2225 cell
+							2226 text @type
+						2227 cell
+							2228 text Syllabus
+					2229 row
+						2230 cell
+							2231 text @id
+						2232 cell
+							2233 text https://www.tahabouhsine.com/lesson-recovery-02.html#syllabus
+					2234 row
+						2235 cell
+							2236 text url
+						2237 cell
+							2238 text https://www.tahabouhsine.com/lesson-recovery-02.html
+					2239 row
+						2240 cell
+							2241 text name
+						2242 cell
+							2243 text Load, batch, and checkpoint order with Grain
+					2244 row
+						2245 cell
+							2246 text description
+						2247 cell
+							2248 text Build a Grain source/sampler/batch pipeline and verify its record order.
+					2249 row
+						2250 cell
+							2251 text syllabusSections
+					2252 row
+						2253 cell
+							2254 text @type
+						2255 cell
+							2256 text Syllabus
+					2257 row
+						2258 cell
+							2259 text @id
+						2260 cell
+							2261 text https://www.tahabouhsine.com/lesson-recovery-03.html#syllabus
+					2262 row
+						2263 cell
+							2264 text url
+						2265 cell
+							2266 text https://www.tahabouhsine.com/lesson-recovery-03.html
+					2267 row
+						2268 cell
+							2269 text name
+						2270 cell
+							2271 text Save model, optimizer, and random state
+					2272 row
+						2273 cell
+							2274 text description
+						2275 cell
+							2276 text Checkpoint complete training state with Orbax and replay the next update.
+					2277 row
+						2278 cell
+							2279 text syllabusSections
+					2280 row
+						2281 cell
+							2282 text @type
+						2283 cell
+							2284 text Syllabus
+					2285 row
+						2286 cell
+							2287 text @id
+						2288 cell
+							2289 text https://www.tahabouhsine.com/lesson-recovery-04.html#syllabus
+					2290 row
+						2291 cell
+							2292 text url
+						2293 cell
+							2294 text https://www.tahabouhsine.com/lesson-recovery-04.html
+					2295 row
+						2296 cell
+							2297 text name
+						2298 cell
+							2299 text Recover data position and resume
+					2300 row
+						2301 cell
+							2302 text description
+						2303 cell
+							2304 text Persist model/optimizer/key and Grain iterator position at one boundary.
+					2305 row
+						2306 cell
+							2307 text syllabusSections
+					2308 row
+						2309 cell
+							2310 text @type
+						2311 cell
+							2312 text Syllabus
+					2313 row
+						2314 cell
+							2315 text @id
+						2316 cell
+							2317 text https://www.tahabouhsine.com/lesson-recovery-05.html#syllabus
+					2318 row
+						2319 cell
+							2320 text url
+						2321 cell
+							2322 text https://www.tahabouhsine.com/lesson-recovery-05.html
+					2323 row
+						2324 cell
+							2325 text name
+						2326 cell
+							2327 text Asynchronous checkpoints and failure boundaries
+					2328 row
+						2329 cell
+							2330 text description
+						2331 cell
+							2332 text Distinguish requested, completed, verified and published checkpoint state. Continue a functional update while an asynchronous writer is alive.
+					2333 row
+						2334 cell
+							2335 text syllabusSections
+					2336 row
+						2337 cell
+							2338 text @type
+						2339 cell
+							2340 text Syllabus
+					2341 row
+						2342 cell
+							2343 text @id
+						2344 cell
+							2345 text https://www.tahabouhsine.com/lesson-recovery-06.html#syllabus
+					2346 row
+						2347 cell
+							2348 text url
+						2349 cell
+							2350 text https://www.tahabouhsine.com/lesson-recovery-06.html
+					2351 row
+						2352 cell
+							2353 text name
+						2354 cell
+							2355 text Track experiments and lineage with MLflow
+					2356 row
+						2357 cell
+							2358 text description
+						2359 cell
+							2360 text Track, retrieve and compare two JAX experiments using explicit data identity, metric steps and downloaded model artifacts.
+					2361 row
+						2362 cell
+							2363 text itemListElement
+		22 button (disabled) play_arrow, ID: validate-button
+			23 text play_arrow
+		24 text VALIDATE
+
+The focused UI element is 0 AXWebArea Schema Markup Validator, URL: validator.schema.org/

@@ -1,0 +1,42 @@
+{
+  "recipe_sha256": "ff133eabfa11b001bdcf66be2a14e94fe8d0398600ac3451cd9ebff272010568",
+  "manifest_sha256": "8dbba316320889596cecef1f06d58b479125f7c14d30bfba24aed5fe60a9b67c",
+  "verifier_sha256": "2d792d937816ab873f8a188e87c97037cc07456321c21e4b0fe0d95e024c3bd9",
+  "verified_source_files": 27,
+  "split_rows": {
+    "splits/final.json": {
+      "sha256": "08263b79af6fee906a6028ea38386c2456cdb5fe949c5c7506afd45fedf6a08c",
+      "bytes": 231978,
+      "row_count": 547
+    },
+    "splits/fit.json": {
+      "sha256": "6dc2496a9c3b8cb52a148620a5b22cadb318ca1250e7a635d154a1126df48cc5",
+      "bytes": 1092148,
+      "row_count": 2562
+    },
+    "splits/recipe_dev.json": {
+      "sha256": "05a90fe1e78517faa0668401aaecbf85beecdf568a43646f573c0848be028e8c",
+      "bytes": 233063,
+      "row_count": 548
+    }
+  },
+  "results": {
+    "valid_control": "pass",
+    "same_class_row_swap_rewrite_manifest_False": {
+      "accepted": false,
+      "error": "split identity metadata differs from its source-bound bytes: splits/fit.json"
+    },
+    "same_class_row_swap_rewrite_manifest_True": {
+      "accepted": false,
+      "error": "prepared source manifest differs from recipe"
+    },
+    "forged_creator_source_component_rewrite_manifest_False": {
+      "accepted": false,
+      "error": "split identity metadata differs from its source-bound bytes: splits/fit.json"
+    },
+    "forged_creator_source_component_rewrite_manifest_True": {
+      "accepted": false,
+      "error": "prepared source manifest differs from recipe"
+    }
+  }
+}

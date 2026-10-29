@@ -12,7 +12,9 @@ Use a bounded failure drill and retain its raw event log. Check state and data i
 
 ## Study guide: Can you detect, explain and safely recover a failed model release?
 
-Operational evidence connects work done to user-visible behavior. Separate worker health, model quality and release ownership so an alert leads to a specific investigation rather than automatic retraining.
+An operational signal is useful when it leads to a specific question and action. A stalled worker, a degraded data slice and an unapproved artifact can all hurt users, but each requires different evidence. Trace the work, the candidate and the selected release rather than collapsing them into one green status.
+
+Begin with a bounded worker and structured events, then rehearse recovery and a rejected change. Follow that foundation into capacity, data quality, retrieval traces and model ownership. At each transition, ask which artifact a consumer would actually load and which observations justify changing it.
 
 ### Check your starting point
 
@@ -106,9 +108,9 @@ Status: authored lesson with CPU exercise.
 
 Status: authored lesson with CPU exercise.
 
-**Intended outcome:** Separate content identity, validation evidence and active selection. Reject corrupt or failed artifacts before a pointer change.
+**Intended outcome:** Activate and roll back identified local model bundles, verify consumer predictions and preserve the active model after a rejected selection.
 
-**Evidence:** Keep source/configuration/data hashes, actual held-out candidate predictions, the rejected degraded release and unchanged active pointer, followed by verified rollback.
+**Evidence:** Keep model/checkpoint identities, observed predictions before activation, after activation and after rollback, and unchanged selection/behavior on rejection.
 
 **Checkpoint:** What does a matching artifact digest establish?
 
@@ -130,9 +132,9 @@ Status: authored lesson with CPU exercise.
 
 Status: authored lesson with CPU exercise.
 
-**Intended outcome:** Reject data leakage and incomplete evaluation, compute count-weighted slice metrics and distinguish drift investigation from model promotion.
+**Intended outcome:** Evaluate predictions from a reloaded local artifact and apply group-safe, count-weighted slice and release rules.
 
-**Evidence:** Keep the leaking-group rejection, data fingerprint, slice counts and MSEs, aggregate/slice gate disagreement, changed-population calculation and a written response to drift without labels.
+**Evidence:** Keep reloaded predictions, target/case identities, per-example and slice metrics, independent weighted aggregation and an explicit release decision with leakage and drift caveats.
 
 **Checkpoint:** An input drift alert fired before new labels arrived. What follows?
 
@@ -142,9 +144,9 @@ Status: authored lesson with CPU exercise.
 
 Status: authored lesson with CPU exercise.
 
-**Intended outcome:** Evaluate a versioned text application with a complete case inventory, slice-level answer contracts and inspectable MLflow traces.
+**Intended outcome:** Trace an executed local retrieval, prompt and answer workflow, pair responses by case ID and diagnose component failures before comparing candidates.
 
-**Evidence:** Keep all case IDs and per-slice replay scores, missing/duplicate-response rejections, the retained failed case, trace identities and application-version fields. Explain what requires separate live-model evaluation.
+**Evidence:** Keep heterogeneous case IDs, actual local-stage traces and retrieved context, missing/duplicate/out-of-order controls, component diagnoses and a same-case candidate comparison. The local adapter is not an LLM quality benchmark.
 
 **Checkpoint:** The controlled replay suite passes every case. What is established?
 
@@ -154,9 +156,9 @@ Status: authored lesson with CPU exercise.
 
 Status: authored lesson with CPU exercise.
 
-**Intended outcome:** Bind a release decision to immutable evidence, reject changed or expired approvals and preserve active selection after failure.
+**Intended outcome:** Bind approval to a model bundle, verify consumer activation/rollback, and enforce retired-target and fallback policies.
 
-**Evidence:** Keep the reviewed bundle hash, owner and target, expiry boundary, failed-transition pointer equality and changed-owner rejection. Explain why the local reviewer field is not authenticated approval.
+**Evidence:** Keep approval/bundle identity, predictions across activation and rollback, retirement/cache/reload behavior, stale/expired/retired-target failures and an audit trail. Scope is a local single-writer policy fixture.
 
 **Checkpoint:** An approval record contains a reviewer name and a matching hash. Does that authenticate the reviewer?
 

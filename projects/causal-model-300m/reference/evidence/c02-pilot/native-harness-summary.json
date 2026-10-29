@@ -1,0 +1,66 @@
+{
+  "protocol": {
+    "adapter_sha256": "6968ebe1a71ce9f46bcdbff203f7465de0cb856bb71e1575c7534124747deb97",
+    "fewshot": 0,
+    "lm_eval_distribution": {
+      "distribution": "lm_eval",
+      "distribution_location": "/private/tmp/jaxpathways-c02-lm-eval-venv/lib/python3.14/site-packages",
+      "identity_note": "The installed PyPI distribution is identified by its RECORD and installed-file digest. A repository commit declared for task definitions is reported separately and is not inferred from lm_eval's returned git_hash.",
+      "installed_file_count": 16341,
+      "installed_files_manifest_sha256": "5dab3b667c073352b714ed62a63735117792028c58fc94210bf7fca34160fdb5",
+      "record_file_sha256": "93929b4acc5d74b05f61527944eafe1b6e40d3183297fe0a2751da13ef51c322",
+      "version": "0.4.13"
+    },
+    "lm_eval_returned_working_directory_git_hash": "v0.2.0-42-g68b771f0",
+    "lm_eval_runner_sha256": "2ac22a0f233760d1d125defd9f2e66154532e4b7f983c76a9f9e597a633e7324",
+    "lm_eval_version": "0.4.13",
+    "package_manifest_sha256": "74dd30790e8fb95293ed91a0f4e3aef56c45ddf9b18247abeca23bdd18ab088d",
+    "selection": "indices 0 through 7 from each frozen split",
+    "task_files": {
+      "arc_easy": {
+        "yaml": "/Users/tahabsn/Documents/ChatGPT/jaxpathways/projects/causal-model-300m/data/lm_eval_tasks/arc_easy/arc_easy.yaml",
+        "yaml_sha256": "3ce21576ac078164025714cd87d88a0362d6d66b058a72a5c9118b03cc6d501e"
+      },
+      "hellaswag": {
+        "preprocess_sha256": "61a9347e30cd375161502aed3396c3a8d6ac1e7436d0b29683b662752948fd88",
+        "yaml": "/Users/tahabsn/Documents/ChatGPT/jaxpathways/projects/causal-model-300m/data/lm_eval_tasks/hellaswag/hellaswag.yaml",
+        "yaml_sha256": "d9f8b06f195cdf0d90d3508b3642d4f34d4553bf1bebbbc4cdb6f426156e86a2"
+      }
+    },
+    "task_source_commit_declared_by_frozen_recipe": "ddd67220430a2470529f25fd5c05a576ca1057a0",
+    "tasks": {
+      "arc_easy": {
+        "dataset": "allenai/ai2_arc",
+        "revision": "210d026faf9955653af8916fad021475a3f00453",
+        "split": "test"
+      },
+      "hellaswag": {
+        "dataset": "Rowan/hellaswag",
+        "revision": "218ec52e09a7e7462a5400043bb9a69a41d06b76",
+        "split": "validation"
+      }
+    }
+  },
+  "raw_report_sha256": "85286f687723fe48d782d8eab64993a571a6af45939e7baf4b7866e356dee3a0",
+  "scope": "First eight records per pinned task; execution smoke, not benchmark qualification.",
+  "task_results": {
+    "arc_easy": {
+      "acc,none": 0.125,
+      "acc_norm,none": 0.25,
+      "acc_norm_stderr,none": 0.16366341767699427,
+      "acc_stderr,none": 0.125,
+      "alias": "arc_easy",
+      "name": "arc_easy",
+      "sample_len": 8
+    },
+    "hellaswag": {
+      "acc,none": 0.25,
+      "acc_norm,none": 0.375,
+      "acc_norm_stderr,none": 0.18298126367784995,
+      "acc_stderr,none": 0.16366341767699427,
+      "alias": "hellaswag",
+      "name": "hellaswag",
+      "sample_len": 8
+    }
+  }
+}

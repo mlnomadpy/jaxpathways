@@ -20,11 +20,9 @@ A numerical solver approximates a continuous process with discrete steps. A prog
 
 ## Separate a correct program from an accurate solver
 
-For $y'=-y$, start at $y=1$. One Euler step of size $0.5$ gives $0.5$. The exact value at that time is $e^{-0.5}\approx0.6065$. The difference is expected discretization error, not necessarily an indexing bug.
+For $y'=-y$, one Euler step from $y_0=1$ with $h=0.5$ gives $y_1=1-0.5=0.5$, while the continuous solution at the same time is $e^{-0.5}\approx0.6065$. That gap is the expected error from holding the starting slope fixed over the interval; it is not by itself evidence of a coding mistake.
 
-Two Euler steps of size $0.25$ give $0.75^2=0.5625$ at the same final time. Comparing at equal physical time matters: taking the same number of smaller steps would change the question.
-
-Read the trajectory plot by matching time coordinates and the analytic reference. Then reduce the step size and inspect the error trend. A finer step often improves this example, but stability, precision and compute cost still constrain a useful solver.
+Two steps of $h=0.25$ give $0.75^2=0.5625$ at the same time. The finer result is closer here because the slope is refreshed more often. Compare values at equal physical time, then compare the program with the exact discrete recurrence to catch implementation errors separately from solver error.
 
 ### Pause and reason
 
@@ -50,7 +48,7 @@ The transition receives rate, current state and step length. It never changes a 
 
 ## Use two references because they answer different questions
 
-Repeated multiplication gives the exact answer for our discrete algorithm: $u_n=u_0(1-kh)^n$. It detects an implementation error without another loop. The differential equation has the continuous solution $u(t)=u_0e^{-kt}$. The discrepancy between those references measures discretization error. At two seconds the coarse Euler result is about $0.3570$, while the physical reference is $0.4932$. Both can be correct descriptions of their respective calculations.
+Repeated multiplication gives the exact answer for the implemented Euler recurrence, $u_n=u_0(1-kh)^n$, so it can detect an indexing or update bug without using a second loop. The physical equation instead has solution $u(t)=u_0e^{-kt}$. At two seconds in the recorded run, Euler with $h=0.5$ gives $0.3570$, while the continuous reference gives $0.4932$. The program matches its discrete oracle, yet the solver underestimates the remaining excess temperature.
 
 $$
 u(t)=u_0e^{-kt},\qquad e_N=\left|u_N-u_0e^{-kNh}\right|
@@ -178,15 +176,11 @@ Expected: Euler final 0.3570125; analytic final 0.49319393. The endpoint errors 
 
 ### Read the figure
 
-The horizontal axis is time in seconds; the vertical axis is excess temperature. All curves start at $2$. The solid coarse-grid curve takes four steps of $0.5$ seconds; the finer curve takes eight steps of $0.25$ seconds. The analytic exponential is evaluated at the same displayed times.
-
-At two seconds, coarse Euler ends at $0.3570$, finer Euler at $0.4292$, and the analytic model at $0.4932$. Both discrete curves lie below the exponential here. A larger step keeps an overly negative slope active for longer, so the object appears to cool too quickly.
+The horizontal axis is elapsed time in seconds and the vertical axis is excess temperature. The coarse Euler curve takes four 0.5-second steps; the finer Euler curve takes eight 0.25-second steps and is sampled at the coarse curve's times. The analytic exponential is evaluated at those same times. All three start at 2. At 2 seconds the plotted endpoints are 0.3570, 0.4292 and 0.4932 for coarse Euler, finer Euler and the analytic curve, respectively.
 
 ### Connect it to the computation
 
-The code checks the coarse curve against the exact geometric sequence for Euler. That comparison passes even though the plot shows a visible physical approximation error. The separate refinement table quantifies that gap at a fixed endpoint.
-
-These curves describe a stable, positive parameter choice. They are separate from accuracy for every time step or equation. The instability experiment changes the multiplier until the numerical behavior no longer resembles cooling.
+The gap from coarse Euler to the analytic endpoint is about 0.1362; halving the step reduces it to about 0.0640, roughly the expected first-order trend. The geometric Euler oracle verifies the update was implemented as specified, while the exponential measures the continuous-model error. If the step were made so large that $kh>2$, the numerical multiplier would have magnitude above one and the plotted values would grow even though the physical solution decays.
 
 ```python
 fine = np.asarray(euler_solve(0.7, jnp.array(2.0), 8, 0.25))[::2]
@@ -196,7 +190,7 @@ visual_data = {'kind':'line','x':times.tolist(),'xlabel':'time (seconds)','ylabe
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:06:51.212821+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:06:12.551779+00:00. JAX 0.9.2.
 
 ```text
 Euler final: 0.3570125000000001 analytic final: 0.493193927883213

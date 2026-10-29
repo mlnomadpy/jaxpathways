@@ -1,0 +1,56 @@
+{
+  "observed_at": "2026-10-21T23:37:37.726519+00:00",
+  "frozen_pr": {
+    "baseRefName": "codex/causal-image-review",
+    "headRefName": "codex/review-qualification-followups",
+    "headRefOid": "615be5fda0bda99e39292447a94508117b3accd2",
+    "isDraft": true,
+    "number": 67,
+    "state": "OPEN",
+    "url": "https://github.com/mlnomadpy/jaxpathways/pull/67"
+  },
+  "hosted_checks": {
+    "total": 15,
+    "all_success": true
+  },
+  "browser": {
+    "edition": "0.14.1",
+    "url": "http://127.0.0.1:4197/downloads/jax-foundations.html#chapter-19",
+    "method": "CUA native in-app browser screenshot and semantic click",
+    "sample": "Least squares, rank, and conditioning",
+    "reasoning_disclosure": {
+      "before_open": false,
+      "after_open": true,
+      "answer_visible": true
+    },
+    "screenshot": "browser-reasoning-expanded.png",
+    "viewport_capture": [
+      1280,
+      720
+    ]
+  },
+  "apple_books_followup": {
+    "edition": "0.14.0",
+    "reader_page": "468",
+    "method": "CUA accessibility and screenshot",
+    "result": "disclosure interaction remains unqualified",
+    "observations": [
+      "Reader title and content were exposed through accessibility.",
+      "A Compare your reasoning click changed the accessibility representation but did not expose the answer.",
+      "Repeated capture including a native Raise action returned a white image."
+    ],
+    "limitation": "This follow-up does not supersede the earlier bounded rendering success or demonstrate a content defect."
+  },
+  "not_qualified": [
+    "Every lesson or reader setting",
+    "Second EPUB engine",
+    "Native assistive-technology speech",
+    "Print layout",
+    "Independent teaching acceptance"
+  ],
+  "files": {
+    "pr67-checks.json": "5c086bf7a2a310ca26fdcaa2c5bd7f11fef05e20a03d71ee35aa57506b1759c2",
+    "pr67-identity.json": "b382b61d1496b51ae86cba0435755a57a9fb5f215d18a07c17e5c4e941f70059",
+    "browser-reasoning-expanded.png": "29d94f5f04e836e1f8261dfc38aa2df71026fc0b5d831b04bba7cb98f4dc7411"
+  }
+}

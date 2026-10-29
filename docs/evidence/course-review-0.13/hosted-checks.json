@@ -1,0 +1,151 @@
+{
+  "headRefOid": "ae4f1499e63885da6a9bd83dd651bdc45d16c4d0",
+  "isDraft": true,
+  "number": 65,
+  "state": "OPEN",
+  "statusCheckRollup": [
+    {
+      "__typename": "CheckRun",
+      "completedAt": "2026-10-21T19:29:36Z",
+      "conclusion": "SUCCESS",
+      "detailsUrl": "https://github.com/mlnomadpy/jaxpathways/actions/runs/39661971522/job/119437064532",
+      "name": "tpu-dependencies",
+      "startedAt": "2026-10-21T19:28:45Z",
+      "status": "COMPLETED",
+      "workflowName": "Course checks"
+    },
+    {
+      "__typename": "CheckRun",
+      "completedAt": "2026-10-21T19:30:24Z",
+      "conclusion": "SUCCESS",
+      "detailsUrl": "https://github.com/mlnomadpy/jaxpathways/actions/runs/39661971628/job/119437064256",
+      "name": "powershell",
+      "startedAt": "2026-10-21T19:28:45Z",
+      "status": "COMPLETED",
+      "workflowName": "Windows beginner workspace"
+    },
+    {
+      "__typename": "CheckRun",
+      "completedAt": "2026-10-21T19:33:19Z",
+      "conclusion": "SUCCESS",
+      "detailsUrl": "https://github.com/mlnomadpy/jaxpathways/actions/runs/39661971522/job/119437064326",
+      "name": "site",
+      "startedAt": "2026-10-21T19:28:45Z",
+      "status": "COMPLETED",
+      "workflowName": "Course checks"
+    },
+    {
+      "__typename": "CheckRun",
+      "completedAt": "2026-10-21T19:30:41Z",
+      "conclusion": "SUCCESS",
+      "detailsUrl": "https://github.com/mlnomadpy/jaxpathways/actions/runs/39661971522/job/119437064483",
+      "name": "browser",
+      "startedAt": "2026-10-21T19:28:45Z",
+      "status": "COMPLETED",
+      "workflowName": "Course checks"
+    },
+    {
+      "__typename": "CheckRun",
+      "completedAt": "2026-10-21T19:44:09Z",
+      "conclusion": "SUCCESS",
+      "detailsUrl": "https://github.com/mlnomadpy/jaxpathways/actions/runs/39661971522/job/119437064595",
+      "name": "lessons",
+      "startedAt": "2026-10-21T19:28:45Z",
+      "status": "COMPLETED",
+      "workflowName": "Course checks"
+    },
+    {
+      "__typename": "CheckRun",
+      "completedAt": "2026-10-21T19:32:40Z",
+      "conclusion": "SUCCESS",
+      "detailsUrl": "https://github.com/mlnomadpy/jaxpathways/actions/runs/39661971522/job/119437064479",
+      "name": "projects (0)",
+      "startedAt": "2026-10-21T19:28:45Z",
+      "status": "COMPLETED",
+      "workflowName": "Course checks"
+    },
+    {
+      "__typename": "CheckRun",
+      "completedAt": "2026-10-21T19:32:24Z",
+      "conclusion": "SUCCESS",
+      "detailsUrl": "https://github.com/mlnomadpy/jaxpathways/actions/runs/39661971522/job/119437064616",
+      "name": "projects (1)",
+      "startedAt": "2026-10-21T19:28:45Z",
+      "status": "COMPLETED",
+      "workflowName": "Course checks"
+    },
+    {
+      "__typename": "CheckRun",
+      "completedAt": "2026-10-21T19:34:24Z",
+      "conclusion": "SUCCESS",
+      "detailsUrl": "https://github.com/mlnomadpy/jaxpathways/actions/runs/39661971522/job/119437064407",
+      "name": "projects (2)",
+      "startedAt": "2026-10-21T19:28:44Z",
+      "status": "COMPLETED",
+      "workflowName": "Course checks"
+    },
+    {
+      "__typename": "CheckRun",
+      "completedAt": "2026-10-21T19:32:05Z",
+      "conclusion": "SUCCESS",
+      "detailsUrl": "https://github.com/mlnomadpy/jaxpathways/actions/runs/39661971522/job/119437064782",
+      "name": "projects (3)",
+      "startedAt": "2026-10-21T19:28:45Z",
+      "status": "COMPLETED",
+      "workflowName": "Course checks"
+    },
+    {
+      "__typename": "CheckRun",
+      "completedAt": "2026-10-21T19:43:42Z",
+      "conclusion": "SUCCESS",
+      "detailsUrl": "https://github.com/mlnomadpy/jaxpathways/actions/runs/39661971522/job/119437064626",
+      "name": "c01-embedding-pilot",
+      "startedAt": "2026-10-21T19:28:45Z",
+      "status": "COMPLETED",
+      "workflowName": "Course checks"
+    },
+    {
+      "__typename": "CheckRun",
+      "completedAt": "2026-10-21T19:31:50Z",
+      "conclusion": "SUCCESS",
+      "detailsUrl": "https://github.com/mlnomadpy/jaxpathways/actions/runs/39661971522/job/119437063933",
+      "name": "loggers",
+      "startedAt": "2026-10-21T19:28:45Z",
+      "status": "COMPLETED",
+      "workflowName": "Course checks"
+    },
+    {
+      "__typename": "CheckRun",
+      "completedAt": "2026-10-21T19:30:25Z",
+      "conclusion": "SUCCESS",
+      "detailsUrl": "https://github.com/mlnomadpy/jaxpathways/actions/runs/39661971522/job/119437065017",
+      "name": "numpyro",
+      "startedAt": "2026-10-21T19:28:45Z",
+      "status": "COMPLETED",
+      "workflowName": "Course checks"
+    },
+    {
+      "__typename": "CheckRun",
+      "completedAt": "2026-10-21T19:30:27Z",
+      "conclusion": "SUCCESS",
+      "detailsUrl": "https://github.com/mlnomadpy/jaxpathways/actions/runs/39661971522/job/119437064814",
+      "name": "diffrax",
+      "startedAt": "2026-10-21T19:28:45Z",
+      "status": "COMPLETED",
+      "workflowName": "Course checks"
+    },
+    {
+      "__typename": "CheckRun",
+      "completedAt": "2026-10-21T19:30:56Z",
+      "conclusion": "SUCCESS",
+      "detailsUrl": "https://github.com/mlnomadpy/jaxpathways/actions/runs/39661971522/job/119437064405",
+      "name": "decoder-foundations",
+      "startedAt": "2026-10-21T19:28:45Z",
+      "status": "COMPLETED",
+      "workflowName": "Course checks"
+    }
+  ],
+  "url": "https://github.com/mlnomadpy/jaxpathways/pull/65",
+  "recordedAt": "2026-10-21T19:47:26.384369+00:00",
+  "scope": "All 14 hosted checks passed for frozen PR65 commit. This does not establish learner, native EPUB, target-scale or model-quality acceptance."
+}

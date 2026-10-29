@@ -1,5 +1,6 @@
 ---
 import { course } from '../../lib/course-data.js';
+import projectPlans from '../../../curriculum/project-plans.json';
 import MaterialStatus from '../shared/MaterialStatus.astro';
 import { inlineMath } from '../../lib/math.js';
 import { siteUrl } from '../../lib/urls.js';
@@ -18,6 +19,9 @@ const pathwayTitle = course.pathways.find((path) => path.id === project.pathwayI
 const prerequisitePhases = course.phases.filter((phase) =>
   phase.lessons.some((lesson) => project.requiredLessonIds.includes(lesson.id)),
 );
+const optionalPilotGuide = projectPlans.find(
+  (plan) => plan.harnessId === project.id && plan.pilot?.guide,
+)?.pilot?.guide;
 ---
 
 <article
@@ -42,6 +46,26 @@ const prerequisitePhases = course.phases.filter((phase) =>
       <a class="button primary" href={siteUrl(`project.html?id=${project.id}`)}>
         Open project
       </a>
+      {project.id === 'text-harness' && (
+        <a class="button" href={siteUrl('project-guides/text-harness-foundations.html')}>
+          Natural-text decoder workflow
+        </a>
+      )}
+      {project.id === 'sharded-training' && (
+        <a class="button" href={siteUrl('project-guides/sharded-training-multiprocess.html')}>
+          Two-controller recovery exercise
+        </a>
+      )}
+      {project.id === 'posttraining-audit' && (
+        <a class="button" href={siteUrl('project-guides/posttraining-transformer-lineage.html')}>
+          Saved decoder PPO appendix
+        </a>
+      )}
+      {optionalPilotGuide && (
+        <a class="button" href={siteUrl(optionalPilotGuide.path)}>
+          {optionalPilotGuide.label}
+        </a>
+      )}
     </div>
   </div>
   <details class="project-details">

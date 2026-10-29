@@ -4,6 +4,8 @@ Phase 02: JAX transformations · about 60 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Losses and value_and_grad](https://www.tahabouhsine.com/jaxpathways/lesson-transforms-02.html).
+
 ## What you will be able to do
 
 - Write and check a single-example function before batching it.
@@ -21,11 +23,9 @@ Vectorization lets us describe one example clearly and then apply that rule acro
 
 ## Map examples without changing the single-example rule
 
-Imagine three observations that use one common weight vector. Each row enters the same dot-product rule, producing one scalar, and the three scalars are stacked. Mapping the observation axis while keeping weights shared means the model is the same for every observation.
+A single-example function is easier to reason about than a hand-written batch version, but training data arrive as rows. `vmap` applies the same rule to each selected row and stacks the answers. The key design choice is which arguments vary across examples and which remain common.
 
-Now imagine three different weight vectors, one per observation. Mapping both arguments would answer a different question: three input/model pairs rather than one model applied to a batch. Neither choice is automatically wrong, but only one matches the intended task.
-
-The existing output bars show the lesson's three results, $1,1,8$. Their heights check the values; the axis diagram explains how the rows produced them. Compare against an explicit stack of single-row calls, then permute the rows and predict the same permutation of outputs.
+Here the shared weights are $(2,-1)$, and the three inputs are $(1,1)$, $(2,3)$, and $(4,0)$. Their dot products are $1,1,8$. The bar chart’s horizontal positions name rows and its vertical axis is prediction; the first two rows differ even though their predictions match. Use the values to check row mapping, not to infer runtime or hardware parallelism.
 
 $$
 \operatorname{vmap}(f)(X)_i = f(X_i), \qquad i = 0, \dots, B-1
@@ -39,7 +39,7 @@ $$
 
 *Architecture and dataflow mechanism diagram.*
 
-Each row enters the same single-example rule with one shared weight vector. The scalar results are stacked in row order. This is a mathematical mapping, not a hardware-thread allocation. Reordering observations should reorder outputs identically.
+Read the graph left to right as the shared-parameter computation. Each input-row node feeds its corresponding single-example step; the one shared weight vector is used by all three steps. Each step sends one scalar down to its output node, giving $1,1,8$ in row order. The links describe mapped dataflow, not allocated hardware threads.
 
 ### Pause and reason
 
@@ -53,9 +53,9 @@ The duplicated row should produce the same deterministic output. If it does not,
 
 ## Write down the axis contract
 
-There are three independent questions: which dimension represents examples, which inputs should be repeated unchanged, and where should the collected output axis go? $B$ and $D$ are labels for your reasoning, not named dimensions enforced by JAX.
+An axis contract prevents a batch dimension from being confused with a feature dimension. The single-example function accepts one feature vector of shape $(D,)$ and one shared weight vector of shape $(D,)$, then returns a scalar. For a batch of $B$ rows, map only the data’s leading axis and keep the weights unmapped.
 
-For the worked example, shared weight is $(2,)$, data is $(3, 2)$, and predictions are $(3,)$. The first row $[1, 1]$ produces $2\cdot1-1\cdot1=1$. The second row $[2, 3]$ also produces $1$. The third $[4, 0]$ produces $8$. Calculate those values before reading the batched call.
+In this example, $D=2$ and $B=3$: data shape is $(3,2)$, weights shape $(2,)$, and the result shape is $(3,)$. Check a row explicitly: $(2,3)\cdot(2,-1)=1$. Write the input and output shapes before setting `in_axes` or `out_axes`; those options describe how existing axes are interpreted and where results are stacked.
 
 ```text
 single: (D,), (D,) → ()
@@ -64,33 +64,33 @@ batched: shared (D,), mapped (B,D) → (B,)
 
 ## Build a reference that is easy to trust
 
-A small Python loop makes the mapping literal: select each data row, call the original function, and stack its results. Keep that reference for tests even if it is not the production implementation. A matrix-vector product is a second independent formulation for this linear model.
+A loop is a useful reference because it spells out what mapping means: select row zero, call the single-example function, repeat, then stack. The matrix product gives a second formulation for this linear example.
 
-Agreement among the loop, vmap, and matrix product checks different ways of describing the same computation. It does not prove that arbitrary future nonlinear models or new axis conventions are correct. Include asymmetric shapes and distinct row values so a transposition or accidentally shared example is easy to detect.
+The retained execution output is $[1,1,8]$ for the loop, `vmap`, and matrix product. Matching these checks catches an axis mistake more effectively than comparing two calls built from the same mistaken convention. Try reordering the rows: the output should reorder in the same way. That permutation check tests the row-to-result relationship directly.
 
 ## Shared does not mean copied or frozen
 
-None in in_axes tells the transformation that an argument has no mapped axis at this level. Every logical example sees the same parameter value. It is still an argument: you can pass a different weight on the next call. It is not a static compilation argument, and None says nothing about whether a gradient can be computed with respect to it.
+An unmapped argument is shared across the mapped examples, not frozen as compile-time configuration. In `in_axes`, `None` means there is no batch axis to slice from that argument at this level. The weight vector remains an ordinary runtime argument and can still be differentiated.
 
-Setting both arguments to axis $0$ would pair one weight row with one example row. That is useful for an ensemble or a collection of separate models, but it is a different computation from a single shared model. All mapped axes at the same vmap level must have compatible sizes.
+If both data and weights are mapped on axis zero, each row is paired with its own weight vector. That can represent an ensemble, but it is a different computation from one shared model applied to a batch. To verify the distinction, change the shared weights on a later call: all row predictions should respond to that one new vector.
 
 ## Change layout without changing semantics
 
-Some data arrive with examples in columns: shape $(D, B)$. Mapping axis $1$ selects one column at a time and restores the same single-example shape $(D,)$. in_axes describes that layout. out_axes controls where the new output batch axis is inserted; it does not automatically transpose existing feature dimensions.
+Sometimes examples are stored as columns, giving data shape $(D,B)$ rather than $(B,D)$. Mapping axis $1$ selects a column of shape $(D,)$; it does not change the single-example function. `out_axes` places the newly collected result axis, and does not transpose feature dimensions by itself.
 
-For a scalar prediction, output collection gives a vector either way. For a vector-valued feature function, the default produces $(B, K)$; `out_axes=1` gives $(K, B)$. Keep these distinctions explicit at boundaries between a data loader, model, and loss.
+For scalar predictions, mapping columns still produces three outputs in batch order. Compare the column-mapped result with the row-mapped result after transposing the same data. This is a layout check: equal values show that changing where examples live in the array did not change which example each call receives.
 
 ## Separate per-example and aggregate gradients
 
-The gradient of a single prediction with respect to its weights is just the input vector. That is a useful first test but not a training loss gradient. A per-example squared error contributes $2(\hat y-y)$ times the input vector. Mapping grad over examples produces an array of shape $(B, D)$.
+The gradient of a per-example loss and the gradient of an aggregate batch loss answer different questions. Mapping `grad` over examples retains one gradient per row, while differentiating a mean over those losses reduces the example axis.
 
-The gradient of the mean loss has shape $(D,)$. For independent example losses and a plain mean reduction, it equals the mean of the per-example gradients. This equivalence is an important check, and it explains why storing all per-example gradients is not necessary for ordinary mean-loss training. Those arrays can be much larger than the aggregate gradient.
+If there are $B$ examples and $D$ shared weights, the per-example gradient has shape $(B,D)$; the mean-loss gradient has shape $(D,)$. For equally weighted examples, the latter equals the mean of the former. Check this on two different target sets so the equality is not accidentally relying on identical residuals.
 
 ## Compose transformations around the question
 
-`vmap(grad(single_loss))` asks for a gradient per example. `grad(mean(vmap(single_loss)))` asks for the gradient of a batch objective. Both can be useful, but their output shapes and memory needs differ. Once values match independent references, jit can compile the batched transformed function.
+Compose transformations in the order that matches the quantity you need. `vmap(grad(single_loss))` asks for one parameter gradient per example; `grad(mean(vmap(single_loss)))` asks for the gradient of one batch mean. They are related by averaging here, but have different output shapes and can have different memory costs.
 
-Choose the mathematical quantity first and the transformation order second. Do not copy a composition from a tutorial without checking whether it returns predictions, sensitivities, per-example gradients, or a reduced parameter update.
+The practical sequence is to validate the single-row rule, batch it, then reduce if the objective calls for an aggregate. Only after those values and shapes match the loop reference should you add `jit`. Each transformation has a distinct job: differentiation changes the requested quantity, mapping adds a batch axis, and compilation stages that resulting computation.
 
 ## Import JAX array and transformation APIs
 
@@ -156,15 +156,11 @@ Expected: [$1$. $1$. $8$.]
 
 ### Read the figure
 
-Each bar belongs to one input row, and its height is that row’s scalar prediction. Reading left to right gives $1$, $1$, and $8$. The horizontal positions are row labels, not successive training steps.
-
-The same weights $(2,-1)$ are used for every row. The first input $(1,1)$ gives $2-1=1$; the second $(2,3)$ gives $4-3=1$; the third $(4,0)$ gives $8-0=8$.
+Each bar is one example’s scalar prediction; horizontal positions are row labels and the vertical axis is prediction value. Reading left to right gives $1,1,8$, computed from rows $(1,1),(2,3),(4,0)$ with shared weights $(2,-1)$. For instance, the last row gives $4(2)+0(-1)=8$. Compare the first two equal bars: equal outputs do not imply equal inputs.
 
 ### Connect it to the computation
 
-`vmap` applies the single-example dot product across the batch and keeps one answer per row. Equal heights for the first two bars do not mean those inputs were equal; different inputs can have the same dot product.
-
-There are three outputs because there are three observations. Summing across the whole batch would instead collapse these answers into one scalar. The figure verifies what vectorization computes; the bar heights say nothing about how long it takes.
+There are three bars because mapping the single-row rule retains one result for each of the three rows. Reordering rows should reorder bars in the same way. This checks the batch-to-result correspondence; bar height is numerical output and does not represent execution time or hardware work.
 
 ```python
 visual_data = {'kind': 'bar', 'labels': ['row 0', 'row 1', 'row 2'], 'ylabel': 'prediction', 'series': [{'label': 'vmap output', 'y': batched(weight, batch).tolist()}]}
@@ -172,7 +168,7 @@ visual_data = {'kind': 'bar', 'labels': ['row 0', 'row 1', 'row 2'], 'ylabel': '
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:03:36.085578+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:02:54.395352+00:00. JAX 0.9.2.
 
 ```text
 [1. 1. 8.]

@@ -1,0 +1,51 @@
+{
+  "recordedAt": "2026-10-22T02:46:52.651179+00:00",
+  "status": "changes-requested",
+  "sourceHtmlSha256": "81a19750ea7f872340d63de3fd549de6fe82b4894c05892d6d14246ae95fe807",
+  "privateSourceCopy": "/private/tmp/jaxpathways-full-print-candidate/source-book.html",
+  "edition": "Unversioned working API/print candidate based on 0.16.0; not the final 0.16.1 edition",
+  "passed": [
+    "Every one of 1302 A4 and 1445 Letter pages has its matching Page N footer.",
+    "All-page geometry: no glyph outside either media box, no empty text page.",
+    "Former least-squares orphan case now co-locates on Letter page 232."
+  ],
+  "independentReviewFindings": {
+    "letterOrphanPages": [
+      384,
+      488,
+      545,
+      598,
+      614,
+      642,
+      713,
+      882,
+      927,
+      940,
+      987,
+      1031,
+      1062,
+      1165,
+      1220,
+      1237,
+      1253,
+      1270,
+      1285,
+      1300,
+      1316,
+      1333,
+      1409
+    ],
+    "a4OrphanPages": [
+      412,
+      1187,
+      1270
+    ],
+    "reviewer": "Sol internal independent review; root directly raster-inspected Letter 384 and 385."
+  },
+  "limits": [
+    "This candidate is not qualified for figure grouping.",
+    "Footer and glyph bounds do not prove whole-book layout quality.",
+    "Do not replace failed artifacts or reuse this receipt for the forthcoming wrapper/dimension repair.",
+    "Native EPUB and assistive-technology acceptance remain open."
+  ]
+}

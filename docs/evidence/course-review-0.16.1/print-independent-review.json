@@ -1,0 +1,42 @@
+{
+  "artifacts": {
+    "A4": {
+      "folioCount": 1268,
+      "pageCount": 1268,
+      "pdfSha256": "d7cc1ced9838aa4a63b0dd2641b0d1edccf521711f009a1c9ffe8188bf92051a",
+      "verifiedMechanismIntros": 29,
+      "verifiedVisualIntros": 104
+    },
+    "Letter": {
+      "folioCount": 1391,
+      "pageCount": 1391,
+      "pdfSha256": "b9a242d9f186af9e8f9ea9a437f4014fcd4b9c31c365ca104bfa58a0e4b862fd",
+      "verifiedMechanismIntros": 29,
+      "verifiedVisualIntros": 104
+    }
+  },
+  "geometryReceiptSha256": "7a0d9ad8de9644e835e93a7acd35579e4ab82256f6b855f6e2d7d45695715993",
+  "independentChecks": [
+    "pdftotext -layout full-page scan: 104 predictions and 104 captions paired on same page, zero orphan/stray for each format",
+    "29 distinct mechanism titles co-located with Predict and scope caption for each format",
+    "Page N independently matched every page number in both formats",
+    "actual tall former Letter-384/385 case raster inspected at new Letter-381 and A4-345: title, prediction, two plotted panels, axes/color bars and caption on same page, labels readable",
+    "geometry receipt asserts zero out-of-media-box glyphs and zero empty-text pages across both full books"
+  ],
+  "kind": "sol-print-0161-bounded-independent-acceptance",
+  "limits": [
+    "Chromium PDF print sub-scope only",
+    "not native two-engine rendering, assistive speech, human usability or full G09 completion",
+    "historical first candidate 3 A4 and 23 Letter orphans remains failed"
+  ],
+  "printReceiptSha256": "080abdf631544eadef18d141dbc982b4cb3df55d6d863d500acc4e6b5cd445af",
+  "sourceHtmlSha256": "a1be409d553d7f19d2567a7bd8b9f2d0b145c2dacfa0e3f5c748bbf194c1f7b1",
+  "sourceSha256": {
+    ".github/workflows/course-check.yml": "fae6d1d1387320d62d1b98e73da31d322c6cd31dd3afb136c6ad4aeace021954",
+    "scripts/qualify-book-print.mjs": "4353be7b5ece347056b4cb3cb2d68541c156f1692e0803603c2276ec3ffc492a",
+    "src/lib/lesson-visuals.js": "431f08c4d2c8c407c9567e2c8f2a1bca339f45a1d4aaf00c1e69e00d883e79fb",
+    "src/styles/print.css": "138956d941d49cfb4ced1780efc261c61c096f1c855cdee9f6e3f20b0be16a51",
+    "tests/book-print-qualification.test.mjs": "68289f1be268259c584c2a3cde01b42c16fb33578a38ad766e69a3db4d96b54d"
+  },
+  "status": "accepted-chromium-a4-letter-full-book-subscope"
+}

@@ -21,14 +21,12 @@ An input pipeline decides which examples reach the model and in what order. Pres
 
 ## Preserve identity through shuffling and batching
 
-Imagine IDs A, B, C, D shuffled into C, A, D, B. Membership stays the same while order changes. A batch size of three leaves one example after the first batch. Dropping it, padding it or emitting a smaller batch are different policies.
+Treat each record as a small tuple $(id,x,y)$, not as three independent arrays that can drift apart. A shuffle permutes the tuple order; batching groups tuples but should not change which label belongs to which feature. Here a seed gives order $[9,10,4,1,0,7,6,8,2,5,3]$, with batch sizes $[4,4,3]$.
 
-Padding requires a validity mask so an artificial slot does not become another observation. Dropping requires acknowledging the lost coverage. Fixed shape should not silently choose the statistical meaning of an epoch.
-
-Read the existing sample-ID plot as an ordering check. The height of an ID is not a physical measurement. Compare membership and multiplicities, then inspect exact order where continuation requires it.
+Check both membership and alignment after every transform: IDs (0) through (10) appear exactly once, and each label still matches its record's feature rule. A duplicate/drop audit catches a pipeline that returns the right total length while silently repeating one record and omitting another. Preserve the data identity as well as the ordering seed when you need to replay it.
 
 $$
-\mathcal{C}_t = (\Theta_t,\; M_t,\; k_t,\; t), \qquad \text{restore}(\mathcal{C}_t) \implies \Theta_{t+k}^{\text{resumed}} = \Theta_{t+k}^{\text{uninterrupted}}
+\operatorname{multiset}(\pi(0),\ldots,\pi(N-1))=\operatorname{multiset}(0,\ldots,N-1),\qquad \bar\ell=\frac{\sum_i m_i\ell_i}{\sum_i m_i}
 $$
 
 ### Pause and reason
@@ -43,9 +41,9 @@ No. A duplicate and an omission preserve the count. Check identities and multipl
 
 ## Preserve identity across every transformation
 
-The dataset has IDs $0$ through $10$. Each ID maps to $x=\mathrm{id}/10$ and $y=2x-1$, giving a direct alignment reference. Shuffle indices, then use the same indices for IDs, features and labels. Shuffling feature and target arrays separately creates plausible shapes with the wrong learning problem.
+Carry the record ID beside each feature and label through shuffle, map, and batch. In the retained run, the batch boundaries are after positions 3 and 7; the final batch has only IDs $[2,5,3]$. The full sequence still covers all eleven records once.
 
-An ID can identify an original record even when a transform changes its values. For a real dataset, choose stable identifiers and retain the data revision. Our digest includes shape, dtype and bytes of features and labels. It detects changes to this exact tiny dataset; it is not a substitute for a versioned data source contract.
+For a padded batch, a mask must travel with the padded rows. Otherwise the padding can affect a loss or mean as though it were a real observation. The hand calculation compares masked and unmasked label means to show where this changes the result.
 
 ```text
 record identity → shared index → {id,x,y}
@@ -54,15 +52,15 @@ shuffle index, not independent x and y arrays
 
 ## Make epoch ordering a pure decision
 
-epoch_order takes seed and epoch as inputs. `SeedSequence([seed,epoch])` supplies a deterministic generator state for that epoch. Reconstructing epoch $0$ with the same versions gives the same permutation; epoch $1$ is a separate decision. We do not hardcode a specific permutation as a cross-version promise.
+The seed determines a permutation, not a continuation cursor. Repeating the same seed reproduces the same first epoch order. A second epoch applies the declared ordering procedure again and produces $[4,0,5,10,6,2,1,9,7,3,8]$ in the retained run.
 
-A seed alone cannot express how much of an epoch has been consumed. To resume mid-epoch, you also need position or a stateful iterator snapshot. Changing batch size changes how a position measured in batches maps to records. The final recovery lesson saves the actual Grain iterator state and checks the next IDs rather than guessing from step count.
+A digest over data values detects content edits, while a seed and sampler rule explain ordering. The output's repeated SHA-256 for a copied dataset and changed fingerprint for reordered or relabeled data separate those two questions. A digest identifies bytes; it does not establish that the data are valid.
 
 ## Choose a deliberate policy for the last batch
 
-Eleven observations grouped by four produce lengths $4$,$4$,$3$. Keeping the final partial batch preserves all examples but changes its shape, which can matter for compilation caching. drop_last instead produces $4$,$4$ and omits three examples. Neither policy is automatically correct: choose based on training/evaluation needs and report what was excluded.
+Eleven examples divided into batches of four produce two full batches and a three-example remainder. The retained sizes are $[4,4,3]$, and the figure's dotted separators fall after positions 3 and 7. Keeping the remainder preserves all IDs; dropping it omits three examples this epoch.
 
-Another option pads the last batch to a fixed shape and carries a mask. A mean must then divide by the number of real observations, not padded length. The practice checks this with known labels. Do not introduce artificial repeated examples without accounting for their statistical weight.
+If the model requires fixed shapes, choose padding plus a mask and apply that mask to losses and reductions. Do not simply count padded rows as real records. For resume, the policy is part of the input contract because it changes where the next epoch begins.
 
 ```text
 11 records → [4] [4] [3]
@@ -72,9 +70,7 @@ pad/mask → [4] [4] [3 real + 1 masked]
 
 ## Measure what the stopwatch surrounds
 
-The local perf_counter interval covers shuffling, host indexing and materializing three NumPy batches. It does not include compilation, device execution, storage I/O, decoding or asynchronous transfer. This microsecond-scale toy observation may be dominated by overhead and is not a throughput benchmark.
-
-For a useful pipeline benchmark, first define a representative dataset and transforms. Warm up caches deliberately, measure multiple windows, and report examples per second together with batch shapes, worker settings and storage conditions. Here the useful result is the audited membership and order, not a claim that this sampler is fast.
+The printed preparation time measures only this local in-memory setup and varies between runs; it is not a sustained input-throughput benchmark. The measured interval also excludes any device training workload. Treat the digest and exact ID order as reproducibility evidence, and use a representative synchronized workload if you need to compare pipeline speed.
 
 ## Prepare the data and state
 
@@ -208,15 +204,11 @@ Expected: Batch sizes $[4,4,3]$; eleven distinct IDs exactly once, aligned label
 
 ### Read the figure
 
-The horizontal axis is position within a shuffled epoch. The vertical axis is the example ID encountered at that position. The line begins with IDs $9,10,4,1$; its zigzags show a changed ordering, not increases and decreases in loss or example quality.
-
-The dotted separators fall between positions $3$ and $4$, and between $7$ and $8$. They divide the sequence into batches of sizes $4$, $4$, and $3$. The final, shorter batch contains IDs $2,5,3$.
+The horizontal axis is position in the shuffled epoch and the vertical axis is example ID, not loss or a quality score. The line visits IDs (9,10,4,1,0,7,6,8,2,5,3); dotted dividers after positions 3 and 7 create batches of (4,4,3). The last batch is IDs (2,5,3).
 
 ### Connect it to the computation
 
-All IDs from $0$ through $10$ appear once, so shuffling preserves membership while changing order. The final batch is shorter because $11$ examples do not divide evenly into groups of $4$. Dropping that batch would omit three examples from this epoch.
-
-The connected segments are a visual aid for following the sequence; an ID halfway between two plotted IDs is not a generated example. For recovery, record the ordering rule and the iterator’s position, so the resumed run consumes the same remaining examples.
+Every ID from 0 through 10 appears once, so the plot shows order changing while membership stays fixed. Before fitting, verify the labels remain aligned with these IDs and decide whether to keep or mask the three-example remainder. For recovery, preserve both the ordering rule and the next unread position.
 
 ```python
 visual_data = {'kind': 'line', 'x': list(range(len(seen))), 'xlabel': 'position in epoch', 'ylabel': 'example ID', 'series': [{'label': 'shuffled order', 'y': seen.tolist()}], 'boundaries': [3.5, 7.5]}
@@ -224,16 +216,16 @@ visual_data = {'kind': 'line', 'x': list(range(len(seen))), 'xlabel': 'position 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:05:18.574146+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:04:40.833518+00:00. JAX 0.9.2.
 
 ```text
 Batch sizes: [4, 4, 3]
 Example order: [9, 10, 4, 1, 0, 7, 6, 8, 2, 5, 3]
-Preparation seconds (local observation only): 0.01423758314922452
+Preparation seconds (local observation only): 0.010051334276795387
 Dataset SHA256: 1a81451a8fb32a1bf0ad6307ea19198153ab1603b37174c76c4d498e343e6892
 Batch sizes: [4, 4, 3]
 Example order: [9, 10, 4, 1, 0, 7, 6, 8, 2, 5, 3]
-Preparation seconds (local observation only): 2.0207837224006653e-05
+Preparation seconds (local observation only): 2.258317545056343e-05
 Dataset SHA256: 1a81451a8fb32a1bf0ad6307ea19198153ab1603b37174c76c4d498e343e6892
 Epoch one order: [4, 0, 5, 10, 6, 2, 1, 9, 7, 3, 8]
 Omitted IDs: [2, 3, 5]

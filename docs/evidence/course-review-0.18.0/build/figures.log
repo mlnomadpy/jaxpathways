@@ -1,0 +1,127 @@
+PASS welcome-01
+PASS welcome-02
+PASS welcome-cpu
+PASS welcome-03
+PASS arrays-01
+PASS arrays-02
+PASS arrays-03
+PASS arrays-04
+PASS first-gradient
+PASS transforms-02
+PASS transforms-03
+PASS transforms-04
+PASS transforms-05
+PASS state-01
+PASS state-02
+PASS state-03
+PASS state-04
+PASS optimization-05
+PASS optimization-01
+PASS optimization-06
+PASS optimization-07
+PASS optimization-02
+PASS optimization-08
+PASS optimization-03
+PASS optimization-09
+PASS optimization-10
+PASS optimization-11
+PASS optimization-04
+PASS optimization-12
+PASS networks-01
+PASS networks-02
+PASS networks-03
+PASS networks-04
+PASS networks-05
+PASS recovery-01
+PASS recovery-02
+PASS recovery-03
+PASS recovery-04
+PASS recovery-05
+PASS recovery-06
+PASS transformers-01
+PASS transformers-02
+PASS transformers-03
+PASS transformers-04
+PASS performance-01
+PASS performance-02
+PASS performance-03
+PASS performance-04
+PASS performance-05
+PASS distributed-01
+PASS distributed-02
+PASS distributed-03
+PASS distributed-04
+PASS science-01
+PASS science-02
+PASS science-03
+PASS science-04
+PASS probability-01
+PASS probability-02
+PASS probability-03
+PASS probability-04
+PASS rl-01
+PASS rl-02
+PASS rl-03
+PASS rl-04
+PASS rl-05
+PASS kernels-01
+PASS kernels-02
+PASS kernels-03
+PASS kernels-04
+PASS internals-01
+PASS internals-02
+PASS internals-03
+PASS internals-04
+PASS deployment-02
+PASS deployment-01
+PASS deployment-08
+PASS deployment-03
+PASS deployment-05
+PASS deployment-07
+PASS deployment-04
+PASS deployment-06
+PASS operations-01
+PASS operations-02
+PASS operations-03
+PASS operations-04
+PASS operations-05
+PASS operations-06
+PASS operations-07
+PASS operations-08
+PASS pretraining-01
+PASS pretraining-02
+PASS pretraining-03
+PASS posttraining-01
+PASS posttraining-02
+PASS posttraining-03
+PASS posttraining-04
+PASS posttraining-05
+FAIL tpu-01
+ Traceback (most recent call last):
+  File "/private/tmp/jaxpathways-content-repairs-review/scripts/render-lesson-figures.py", line 274, in <module>
+    assert len(lessons)==1;worker(lessons[0],args.output_dir)
+                           ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/jaxpathways-content-repairs-review/scripts/render-lesson-figures.py", line 225, in worker
+    exec(compile(source['code'],lesson['id']+'-example','exec'),namespace)
+    ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "tpu-01-example", line 55, in <module>
+  File "tpu-01-example", line 24, in verify_runtime_contract
+NameError: name '__file__' is not defined. Did you mean: '__name__'?
+
+FAIL tpu-04
+ Traceback (most recent call last):
+  File "/private/tmp/jaxpathways-content-repairs-review/scripts/render-lesson-figures.py", line 274, in <module>
+    assert len(lessons)==1;worker(lessons[0],args.output_dir)
+                           ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/jaxpathways-content-repairs-review/scripts/render-lesson-figures.py", line 225, in worker
+    exec(compile(source['code'],lesson['id']+'-example','exec'),namespace)
+    ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "tpu-04-example", line 54, in <module>
+  File "tpu-04-example", line 30, in build_runtime_receipt
+NameError: name '__file__' is not defined. Did you mean: '__name__'?
+
+PASS tpu-02
+PASS tpu-05
+PASS tpu-03
+PASS tpu-06
+Failed figures: tpu-01, tpu-04

@@ -1,4 +1,4 @@
-"""Supervised fine-tuning with response-only token loss · learner-only exercises (3/3 contracts ready)"""
+"""Supervised fine-tuning with response-only token loss · learner-only exercises (4/4 contracts ready)"""
 
 # Exercise: Score only the first response token in each sequence and compare the resulting count and objective.
 
@@ -71,3 +71,36 @@ import numpy as np
 def expose_context_aliasing(context_a, context_b, labels, transition_table):
     # TODO: compare next-token distributions for contexts sharing the same final token.
     raise NotImplementedError
+
+
+
+# Run one response-masked SFT update from the saved foundations decoder (Transfer):
+# In the full workspace, verify the retained foundations package hashes, then run one small SFT update on fixed synthetic prompt/response pairs with prompt-group-disjoint training and held-out splits. Use shifted targets with a response-only mask, EOS included and padding excluded. Record a held-out response NLL before the update and after it. Save the child inference parameters with a manifest binding them to the parent package identity. Do not treat a held-out NLL change as proof of useful responses.
+
+# Inputs:
+# - The foundations inference package: package.json, params.npz and tokenizer.json
+# - Verified model.py, config.py and train.py source files
+# - Fixed synthetic train pairs and held-out prompt/response pairs
+
+# Outputs:
+# - Verified parent and tokenizer identity
+# - Response-masked SFT objective and one child parameter update
+# - Before/after train and held-out response NLL
+# - A child inference parameter archive and parent-bound manifest
+
+# Invariants to check:
+# - Do not resume optimizer state from the inference package; initialize it anew
+# - Shift logits and targets by one position
+# - Score response tokens and EOS only; exclude prompt and PAD targets
+# - Use the same held-out pairs before and after
+# - Record the exact parent and tokenizer digests in the child manifest
+# - Train and held-out prompt token sequences are disjoint; assert the prompt-group split before fitting.
+
+# Hints:
+# - Load via train.load_model_package with the manifest identity, then verify the pinned hashes.
+# - Use the target-side mask with `target_positions >= len(prefix)` and `< len(ids)`.
+# - Use one declared step size and report metrics even when they do not improve.
+# - The full-workspace package is required for this transfer practice; the ordinary SFT table example remains self-contained.
+
+# Full-workspace practice; follow the saved-model loader and response-mask contract.
+raise NotImplementedError

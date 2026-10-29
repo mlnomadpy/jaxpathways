@@ -2,7 +2,7 @@
 * text=auto eol=lf
 
 # Preserve original downloaded corpora and csv.writer's recorded CRLF bytes.
-projects/*/data/source/* -text
+projects/**/data/source/** -text
 *.csv -text
 
 # Preserve the retained Orbax checkpoint bytes across every checkout platform.

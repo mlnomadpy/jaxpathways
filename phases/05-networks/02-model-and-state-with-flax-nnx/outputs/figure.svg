@@ -6,7 +6,7 @@
   <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
    <cc:Work>
     <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
-    <dc:description>Layer parameter counts across the NNX module tree</dc:description>
+    <dc:description>Trainable values at named NNX paths</dc:description>
     <dc:format>image/svg+xml</dc:format>
     <dc:creator>
      <cc:Agent>
@@ -40,32 +40,32 @@ z
    <g id="patch_3">
     <path d="M 59.314266 292.036635
 L 160.265308 292.036635
-L 160.265308 170.280706
-L 59.314266 170.280706
+L 160.265308 48.524776
+L 59.314266 48.524776
 z
 " clip-path="url(#p7efe33a1ea)" style="fill: #6240ad"/>
    </g>
    <g id="patch_4">
     <path d="M 188.738679 292.036635
 L 289.689721 292.036635
-L 289.689721 48.524776
-L 188.738679 48.524776
+L 289.689721 170.280706
+L 188.738679 170.280706
 z
 " clip-path="url(#p7efe33a1ea)" style="fill: #6240ad"/>
    </g>
    <g id="patch_5">
     <path d="M 318.163092 292.036635
 L 419.114133 292.036635
-L 419.114133 251.451325
-L 318.163092 251.451325
+L 419.114133 170.280706
+L 318.163092 170.280706
 z
 " clip-path="url(#p7efe33a1ea)" style="fill: #6240ad"/>
    </g>
    <g id="patch_6">
     <path d="M 447.587504 292.036635
 L 548.538546 292.036635
-L 548.538546 170.280706
-L 447.587504 170.280706
+L 548.538546 251.451325
+L 447.587504 251.451325
 z
 " clip-path="url(#p7efe33a1ea)" style="fill: #6240ad"/>
    </g>
@@ -82,7 +82,7 @@ L 0 3.5
       </g>
      </g>
      <g id="text_1">
-      <text style="font-size: 13px; font-family: 'DejaVu Sans'; text-anchor: middle" x="109.789787" y="308.914604" transform="rotate(-0 109.789787 308.914604)">leaf 0</text>
+      <text style="font-size: 13px; font-family: 'DejaVu Sans'; text-anchor: middle" x="109.789787" y="308.914604" transform="rotate(-0 109.789787 308.914604)">hidden.kernel</text>
      </g>
     </g>
     <g id="xtick_2">
@@ -92,7 +92,7 @@ L 0 3.5
       </g>
      </g>
      <g id="text_2">
-      <text style="font-size: 13px; font-family: 'DejaVu Sans'; text-anchor: middle" x="239.2142" y="308.914604" transform="rotate(-0 239.2142 308.914604)">leaf 1</text>
+      <text style="font-size: 13px; font-family: 'DejaVu Sans'; text-anchor: middle" x="239.2142" y="308.914604" transform="rotate(-0 239.2142 308.914604)">hidden.bias</text>
      </g>
     </g>
     <g id="xtick_3">
@@ -102,7 +102,7 @@ L 0 3.5
       </g>
      </g>
      <g id="text_3">
-      <text style="font-size: 13px; font-family: 'DejaVu Sans'; text-anchor: middle" x="368.638613" y="308.914604" transform="rotate(-0 368.638613 308.914604)">leaf 2</text>
+      <text style="font-size: 13px; font-family: 'DejaVu Sans'; text-anchor: middle" x="368.638613" y="308.914604" transform="rotate(-0 368.638613 308.914604)">out.kernel</text>
      </g>
     </g>
     <g id="xtick_4">
@@ -112,11 +112,11 @@ L 0 3.5
       </g>
      </g>
      <g id="text_4">
-      <text style="font-size: 13px; font-family: 'DejaVu Sans'; text-anchor: middle" x="498.063025" y="308.914604" transform="rotate(-0 498.063025 308.914604)">leaf 3</text>
+      <text style="font-size: 13px; font-family: 'DejaVu Sans'; text-anchor: middle" x="498.063025" y="308.914604" transform="rotate(-0 498.063025 308.914604)">out.bias</text>
      </g>
     </g>
     <g id="text_5">
-     <text style="font-size: 13px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #30273e" x="303.926406" y="325.496166" transform="rotate(-0 303.926406 325.496166)">NNX state parameter leaf index</text>
+     <text style="font-size: 13px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #30273e" x="303.926406" y="325.496166" transform="rotate(-0 303.926406 325.496166)">NNX module path</text>
     </g>
    </g>
    <g id="matplotlib.axis_2">
@@ -246,7 +246,7 @@ L 572.99976 7.939466
      </g>
     </g>
     <g id="text_14">
-     <text style="font-size: 13px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #30273e" x="12.878209" y="149.582198" transform="rotate(-90 12.878209 149.582198)">element count</text>
+     <text style="font-size: 13px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #30273e" x="12.878209" y="149.582198" transform="rotate(-90 12.878209 149.582198)">parameter elements</text>
     </g>
    </g>
    <g id="patch_7">
@@ -260,41 +260,41 @@ L 572.99976 292.036635
 " style="fill: none; stroke: #000000; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
    </g>
    <g id="text_15">
-    <text style="font-size: 10px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #30273e" x="109.789787" y="165.201018" transform="rotate(-0 109.789787 165.201018)">3</text>
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #30273e" x="109.789787" y="43.445089" transform="rotate(-0 109.789787 43.445089)">6</text>
    </g>
    <g id="text_16">
-    <text style="font-size: 10px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #30273e" x="239.2142" y="43.445089" transform="rotate(-0 239.2142 43.445089)">6</text>
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #30273e" x="239.2142" y="165.201018" transform="rotate(-0 239.2142 165.201018)">3</text>
    </g>
    <g id="text_17">
-    <text style="font-size: 10px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #30273e" x="368.638613" y="246.371638" transform="rotate(-0 368.638613 246.371638)">1</text>
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #30273e" x="368.638613" y="165.201018" transform="rotate(-0 368.638613 165.201018)">3</text>
    </g>
    <g id="text_18">
-    <text style="font-size: 10px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #30273e" x="498.063025" y="165.201018" transform="rotate(-0 498.063025 165.201018)">3</text>
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #30273e" x="498.063025" y="246.371638" transform="rotate(-0 498.063025 246.371638)">1</text>
    </g>
    <g id="legend_1">
     <g id="patch_9">
-     <path d="M 417.440854 32.073698
+     <path d="M 441.675229 32.073698
 L 565.29976 32.073698
 Q 567.49976 32.073698 567.49976 29.873698
 L 567.49976 14.82776
 Q 567.49976 12.62776 565.29976 12.62776
-L 417.440854 12.62776
-Q 415.240854 12.62776 415.240854 14.82776
-L 415.240854 29.873698
-Q 415.240854 32.073698 417.440854 32.073698
+L 441.675229 12.62776
+Q 439.475229 12.62776 439.475229 14.82776
+L 439.475229 29.873698
+Q 439.475229 32.073698 441.675229 32.073698
 z
 " style="fill: #ffffff; opacity: 0.8; stroke: #cccccc; stroke-linejoin: miter"/>
     </g>
     <g id="patch_10">
-     <path d="M 419.640854 25.386041
-L 441.640854 25.386041
-L 441.640854 17.686041
-L 419.640854 17.686041
+     <path d="M 443.875229 25.386041
+L 465.875229 25.386041
+L 465.875229 17.686041
+L 443.875229 17.686041
 z
 " style="fill: #6240ad"/>
     </g>
     <g id="text_19">
-     <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #30273e" x="450.440854" y="25.386041" transform="rotate(-0 450.440854 25.386041)">parameter elements</text>
+     <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #30273e" x="474.675229" y="25.386041" transform="rotate(-0 474.675229 25.386041)">trainable values</text>
     </g>
    </g>
   </g>

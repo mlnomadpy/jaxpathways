@@ -1,0 +1,63 @@
+{
+  "scope": "Actual loopback parser admission/header/body deadline with a controlled 150 ms budget and no inference. Does not establish an interruptible native JAX operation.",
+  "serve_source_sha256": "aa2923a37bdcf1b31ac074ea82368a0ded9b3b197b5128cb8c39430b84807335",
+  "cases": [
+    {
+      "name": "incomplete_body",
+      "elapsed_seconds": 0.15561233321204782,
+      "response": "HTTP/1.0 408 Request Timeout\r\nServer: C02PilotLocal/1 Python/3.14.3\r\nDate: Wed, 21 Oct 2026 20:16:43 GMT\r\nContent-Type: application/json; charset=utf-8\r\nContent-Length: 38\r\nCache-Control: no-store\r\nConnection: close\r\n\r\n{\"error\": \"request lifetime exceeded\"}",
+      "recovery_health": {
+        "status": "ready",
+        "model_status": "parser-only probe",
+        "branch": "none",
+        "manifest_sha256": "7b9bce32ebce23e1c397667fd6b9f28d8a2a037fc1f76db28d8a4ee184115e0d",
+        "request_limits": {
+          "body_bytes": 8192,
+          "active_requests": 2,
+          "lifetime_seconds": 0.15,
+          "cancellation": "cooperative-between-generation-steps",
+          "max_new_tokens": 32
+        }
+      }
+    },
+    {
+      "name": "incomplete_header",
+      "elapsed_seconds": 0.15122104110196233,
+      "response": "HTTP/1.0 408 Request Timeout\r\nServer: C02PilotLocal/1 Python/3.14.3\r\nDate: Wed, 21 Oct 2026 20:16:44 GMT\r\nContent-Type: application/json; charset=utf-8\r\nContent-Length: 38\r\nCache-Control: no-store\r\nConnection: close\r\n\r\n{\"error\": \"request lifetime exceeded\"}",
+      "recovery_health": {
+        "status": "ready",
+        "model_status": "parser-only probe",
+        "branch": "none",
+        "manifest_sha256": "7b9bce32ebce23e1c397667fd6b9f28d8a2a037fc1f76db28d8a4ee184115e0d",
+        "request_limits": {
+          "body_bytes": 8192,
+          "active_requests": 2,
+          "lifetime_seconds": 0.15,
+          "cancellation": "cooperative-between-generation-steps",
+          "max_new_tokens": 32
+        }
+      }
+    }
+  ],
+  "overload": {
+    "status": 503,
+    "body": {
+      "error": "request capacity full"
+    }
+  },
+  "final_health": {
+    "status": "ready",
+    "model_status": "parser-only probe",
+    "branch": "none",
+    "manifest_sha256": "7b9bce32ebce23e1c397667fd6b9f28d8a2a037fc1f76db28d8a4ee184115e0d",
+    "request_limits": {
+      "body_bytes": 8192,
+      "active_requests": 2,
+      "lifetime_seconds": 0.15,
+      "cancellation": "cooperative-between-generation-steps",
+      "max_new_tokens": 32
+    }
+  },
+  "status": "pass",
+  "owned_server_stopped": true
+}

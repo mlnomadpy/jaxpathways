@@ -154,10 +154,10 @@
       ],
       "studyGuide": {
         "question": "Can someone else reproduce your first result?",
-        "why": "Start with one saved program and a known answer. The terminal, interpreter and working folder are part of the experiment: a notebook that imports a package is not yet proof that the downloaded script uses the same environment.",
+        "why": "Your first goal is to make one saved program produce an answer you can predict. When a notebook and a terminal disagree, the cause may be the interpreter, working folder or input file before JAX itself enters the picture. Record those choices beside the result so you can explain what actually ran.\n\nFollow the local CPU route first. The optional virtual-device branch later makes array ownership visible; the cloud branch adds an explicitly requested target and its runtime receipt. A matching answer establishes the checked arithmetic, while the backend and device fields explain where it happened.",
         "readiness": {
           "prompt": "You saved a script in your course folder, but the terminal reports that the file does not exist. Which observation should you check first?",
-          "answer": "Check the terminal’s current folder and the exact filename, including its extension. Then run the environment’s Python explicitly. Reinstalling JAX will not repair a wrong path.",
+          "answer": "Check the terminal’s current folder and the exact filename, including its extension. Then run the environment’s Python explicitly. Reinstalling JAX will not repair a wrong path. After the first array lesson, a CPU learner can continue to Arrays & pure functions. Virtual-device and cloud setup can wait until the placement and transformation concepts are familiar.",
           "lessonId": "welcome-01"
         },
         "milestones": [
@@ -175,7 +175,7 @@
               "welcome-03"
             ],
             "title": "Separate local practice from parallel TPU execution",
-            "task": "Start a fresh process for virtual CPU devices and compare its device receipt with the ordinary process. Then learn how to get a TPU running (hosted TPU or single-host Cloud TPU VM), launch your experiment over SSH with explicit backend checks, and run subsequent course phases on TPU in parallel."
+            "task": "Optional advanced branch: start a fresh process for virtual CPU devices and compare row-sharded versus replicated placement receipts. Beginners can continue directly from welcome-02 to Arrays & pure functions on CPU, then return after the transformation and sharding lessons. For physical TPU practice use only the named source-reviewed targets, pinned environments and explicit expected backend/topology checks; classify any additional script before staging it."
           }
         ],
         "transfer": {
@@ -187,7 +187,7 @@
           "check": "Compare interpreter paths before changing packages; launch both from the intended environment."
         },
         "completion": "Keep a saved script, its command and actual output, plus an explanation of one repaired setup error. Use foundation-toolkit stage 1. A screenshot without a rerunnable file is incomplete.",
-        "furtherWork": "Fresh-machine Windows/Linux/macOS walkthroughs and novice usability sessions remain unverified; accelerator setup needs a separately observed device run."
+        "furtherWork": "Fresh-machine Windows/Linux/macOS walkthroughs and novice usability sessions remain unverified; accelerator setup needs a separately observed device run. The optional placement branch is not a prerequisite for ordinary CPU lessons. Before taking it, explain which axis is split, what a replica holds and why jit input shapes affect specialization."
       },
       "projectNote": "Work in projects/welcome-audit/starter/model.py. Complete stages 1 and 2 for independent calculations and changed-condition diagnosis, then retain the stage 3 evidence with --evidence-dir runs/welcome-audit. Stage 4 integrates the checks. Learner commands explicitly select the starter; --implementation solution is instructor reference execution. This bounded practice does not certify the entire phase or target hardware.",
       "additionalProjectIds": [
@@ -329,7 +329,7 @@
       ],
       "studyGuide": {
         "question": "Can you spot a wrong axis even when the program runs?",
-        "why": "Array bugs often return plausible numbers. Use unequal dimensions and hand-computed rows so that a successful operation cannot hide a mistaken meaning. Carry that habit into preprocessing and model inputs.",
+        "why": "An array carries a meaning as well as a shape. If rows are observations and columns are features, a mean over rows answers a different question from a mean over columns. Broadcasting can complete successfully while adding an observation bias where a feature bias was intended.\n\nUse unequal dimensions and one hand-computed row throughout this chapter. Follow training statistics into a new batch, keep the caller's inputs intact, and distinguish replacing an indexed value from accumulating repeated contributions. These habits become the input contract for every later model.",
         "readiness": {
           "prompt": "A matrix has three observations and two features. You need one mean per feature. Which axis should be reduced, and how many values remain?",
           "answer": "Reduce the observation axis, axis 0. Two feature means remain. Reducing axis 1 instead returns three observation means, which answers a different question.",
@@ -472,7 +472,7 @@
           "prerequisites": [
             "transforms-03"
           ],
-          "exercise": "Foundation · Compile value_and_grad(loss), check the loss and gradient against both the eager transform and the manual matrix formula, and explain how you would synchronize a benchmark of its two outputs.",
+          "exercise": "Foundation · Compile `value_and_grad(loss)`, check the loss and gradient against both the eager transform and the manual matrix formula, and explain how you would synchronize a benchmark of its two outputs.",
           "evidence": "Keep the independent loss/gradient calculation, backend/shapes/dtype, first-call interval, warmup/repeat policy, median/range samples, and synchronization of every output leaf. State what the benchmark excludes.",
           "check": "Why wait with block_until_ready when timing a computation?",
           "artifacts": {
@@ -532,7 +532,7 @@
       ],
       "studyGuide": {
         "question": "What changes when you differentiate, batch or compile a function?",
-        "why": "Build one trustworthy scalar calculation before composing transformations. Differentiation changes the quantity, batching adds an axis, and compilation changes execution. Keeping these roles distinct makes later training failures easier to locate.",
+        "why": "Start with one scalar function whose answer and derivative you can work out. Then ask three different questions: what is its local slope, what happens when we apply it to many examples, and how can we execute the same computation as a compiled program? Differentiation, batching and compilation answer those questions in different ways.\n\nCarry the same values through each transformation so a shape change or a reduction cannot silently change the objective. Read loss and derivative as different plotted quantities. Treat tracing observations and synchronized timing as separate evidence when you reach JIT.",
         "readiness": {
           "prompt": "For a squared residual, is the gradient of the average loss the same shape as the stack of per-example gradients?",
           "answer": "No. A stack retains the examples axis; the gradient of the average reduces that axis. Their mean agrees for the same equally weighted differentiable objective.",
@@ -705,7 +705,7 @@
       ],
       "studyGuide": {
         "question": "Have you saved everything needed to determine the next step?",
-        "why": "A program’s state includes random keys, counters and structured values as well as model parameters. Explicit ownership lets you reproduce a transition, run a batch safely, and later recover an interrupted experiment.",
+        "why": "A training step does more than change weights. It also consumes randomness, advances counters and may update running statistics. Writing those values as explicit inputs and outputs lets you ask exactly which transition occurred and which values are needed to repeat the next one.\n\nFollow a key and a carry through one step before studying a whole loop. The key tree explains ownership of random draws; the pytree explains how corresponding state leaves travel together; scan and conditional branches explain how those structures remain compatible across execution paths.",
         "readiness": {
           "prompt": "Two simulated examples receive the same random key and run the same sampling function. Should you expect independently allocated draws?",
           "answer": "No. The same key and operation replay the same draw in the tested environment. Split or derive distinct keys at the ownership boundary; unequal observed samples alone do not prove independence.",
@@ -1110,7 +1110,7 @@
       "projectNote": "Complete the regression audit after the four core lessons. This deeper project follows all twelve optimization lessons and connects curvature, conditioning, gradient noise, optimizer state and regularization. Copy `projects/optimizer-audit/starter/optimization.py` to `projects/optimizer-audit/my_optimization.py` and write your code in `projects/optimizer-audit/my_optimization.py`. Run `python3 projects/optimizer-audit/tests/check.py --implementation projects/optimizer-audit/my_optimization.py --stage 1` from the top-level folder to verify stages 1, 2, 3, 4, 5.",
       "studyGuide": {
         "question": "Can you explain an optimizer’s behavior from the objective and data?",
-        "why": "Use a model small enough to solve independently. Connect residuals, gradients, curvature and update state before comparing optimizer names. A lower training loss is useful evidence, but it does not by itself establish better held-out predictions.",
+        "why": "A learning curve is easier to understand when you can derive the update that produced it. Begin with vectors and residuals, then connect the gradient's direction to curvature and step size. A least-squares solve, a directional derivative and a finite-difference sweep provide different ways to challenge your answer.\n\nRead every optimizer experiment as a controlled comparison: what objective, data reduction, initialization and update budget stayed fixed? Work through one numerical step before interpreting a trajectory. Keep training fit, validation selection and final held-out reporting distinct as the examples become richer.",
         "readiness": {
           "prompt": "A model predicts one value for each observation. Targets accidentally have an extra trailing singleton axis. Why might mean squared error still run?",
           "answer": "Broadcasting can construct a pairwise residual matrix instead of one residual per observation. Assert identical prediction and target shapes, then compute one residual by hand before reducing.",
@@ -1287,12 +1287,12 @@
           "id": "networks-05",
           "title": "Debug unstable learning",
           "status": "authored",
-          "objective": "Introduce a bad learning rate and diagnose it using loss and gradient evidence.",
+          "objective": "Localize a multilayer model failure in data, activations, gradients or update scale, then repair one cause and compare held-out loss.",
           "prerequisites": [
             "networks-04"
           ],
-          "exercise": "Derive the curvature-dependent stable rate, reproduce an alternating divergent trajectory, and distinguish scaled features and corrupted inputs.",
-          "evidence": "Keep the analytic error recurrence, per-step weight/loss/gradient norm for rates 0.1 and 0.3, observed 3.24 loss multiplier, changed-scale comparison, clipping bound, and one repaired nonfinite-input case.",
+          "exercise": "In the MLP lab, compare the corrupted batch, the +20 hidden-bias saturation, and the rate-100 run. Write the expected first diagnostic for each before executing it. Then repair exactly one condition in each case and verify finite or decreasing held-out loss with the fixed held-out arrays.",
+          "evidence": "Keep the NaN input diagnosis, saturation and excessive-rate controls, per-layer gradient/activation evidence and held-out comparisons for each one-factor repair.",
           "check": "Derive why scaling features and targets by ten changes this squared-loss curvature by 100 without treating that bound as universal.",
           "path": "phases/05-networks/05-debug-unstable-learning",
           "runtime": {
@@ -1317,7 +1317,7 @@
       "learningAdvice": "Explain a loss curve together with held-out errors; a lower training loss alone is not sufficient.",
       "studyGuide": {
         "question": "Did the network learn the task, or exploit an evaluation mistake?",
-        "why": "Move from explicit matrix operations to stateful modules while preserving independent checks. Learn to distinguish capacity, optimization, data quality and evaluation errors before adding layers.",
+        "why": "A neural network combines familiar matrix operations, but several new sources of error arrive together: nonlinear activations, trainable module state, optimizer state and different training/evaluation behavior. Follow one example from features to prediction and loss before reasoning about a whole training curve.\n\nThe chapter moves from a small nonlinear task to NNX state, train/eval isolation, a CNN and controlled fault diagnosis. Use the decision regions and confusion counts to ask which examples the model gets wrong. Pair those observations with state snapshots and layer diagnostics to explain the cause.",
         "readiness": {
           "prompt": "A classifier predicts the majority class on every example and reports high accuracy. What information is missing?",
           "answer": "Class counts and per-class errors are missing. A majority baseline can score highly on imbalanced data while missing every rare example. Inspect the confusion matrix and the denominator for each class.",
@@ -1523,8 +1523,8 @@
           "prerequisites": [
             "recovery-05"
           ],
-          "exercise": "Add a third, deliberately wrong model artifact and show why the smallest training loss alone is insufficient to select a release.",
-          "evidence": "Keep both MLflow run IDs, source/data hashes, complete loss histories, the selection metric and predictions independently recomputed from the downloaded artifact.",
+          "exercise": "Replay the two saved linear candidates in a fresh local MLflow experiment and add a third training-lookup model. The lookup stores each training x/y pair and predicts zero for an unseen x. Compute and log actual training and validation MSE for all three, save and reload every artifact, then show which model a training-only rule selects and which one the held-out rule selects.",
+          "evidence": "Keep retrieved metric histories and data tags, all three model artifacts, actual train/validation predictions after reload, and the different training-only versus held-out selections. Explain the memorizer's zero training MSE and validation MSE of 6.",
           "check": "A run is tagged champion. What does that establish?",
           "path": "phases/06-recovery/06-track-experiments-and-lineage-with-mlflow",
           "runtime": {
@@ -1561,7 +1561,7 @@
       ],
       "studyGuide": {
         "question": "Can an interrupted run make exactly the same next update?",
-        "why": "Recovery is a contract between data order, model state and publication. Tracking explains which run produced an artifact; a checkpoint supplies the values needed to continue it. Neither replaces the other.",
+        "why": "Imagine a run stops just after an update. Loading the weights is only part of continuing: the optimizer, next random draw and next data record must correspond to the same boundary. A seed can replay a sequence from its beginning, while iterator state identifies where to continue it.\n\nTrace record IDs and complete training state across a save, interruption and fresh restore. Then distinguish a requested save from a completed, verified and accepted checkpoint. Experiment tracking supplies the source and data lineage around that continuation; it does not replace the state required to resume.",
         "readiness": {
           "prompt": "The weights restore exactly, but the next loss differs. Which state should you inspect before blaming numerical nondeterminism?",
           "answer": "Compare optimizer moments and count, random keys, data permutation/cursor, preprocessing and configuration. The same weights with a different next batch are a different transition.",
@@ -1624,8 +1624,8 @@
           "status": "authored",
           "objective": "Implement scaled dot-product attention and test its output shape.",
           "prerequisites": [],
-          "exercise": "Permute the three key/value pairs together, then permute only values. Verify invariance for the paired permutation and a changed result for the mismatched pairing.",
-          "evidence": "Save the Q/K/V axis diagram, uniform hand calculation, NumPy nonuniform reference, paired permutation check, and wrong-axis repair.",
+          "exercise": "Start from the explicit independent fixture below: q_ex = [[2, 0]], k_ex = [[1, 0], [0, 1], [1, 1]], and v_ex = [[2, 0], [0, 4], [4, 2]]. Implement `attend` using the declared starter. Show algebraically why permuting keys and their paired values together preserves the weighted sum. Then test order [2, 0, 1] for both the paired permutation and a value-only permutation. Compare each result to the original output with NumPy. State why the separate zero-query worked example cannot show a value-only change.",
+          "evidence": "Keep the Q/K/V axis diagram, zero-query hand mean, independent nonuniform fixture and NumPy output, paired permutation invariance and one value-only permutation result. Explain the zero-query exception and repair a wrong softmax axis.",
           "check": "Which dimension should softmax normalize for one query to combine all key/value pairs?",
           "path": "phases/07-transformers/01-attention-from-small-pieces",
           "runtime": {
@@ -1741,7 +1741,7 @@
       "projectNote": "Begin with token contracts and training. Complete the linked performance and deployment prerequisites before cache, export and profiling checks. Copy `projects/text-harness/starter/model.py` to `projects/text-harness/my_model.py` and write your code in `projects/text-harness/my_model.py`. Run `python3 projects/text-harness/tests/check.py --implementation projects/text-harness/my_model.py --stage 1` from the top-level folder to verify stages 1, 2, 3, 4.",
       "studyGuide": {
         "question": "Can you prove that a predicted token cannot see its future?",
-        "why": "Attention is a weighted mixing operation whose axes and masks are testable. Build a causal model from these contracts before interpreting a generated sentence as evidence of learning.",
+        "why": "Attention lets each query mix values according to its relationship with the keys. Its matrix looks abstract until you follow one row: which positions are allowed, what probabilities do they receive, and which values are combined? Shapes, masks and target shifts determine the meaning of that calculation.\n\nBuild the causal model from those local contracts. Change a future token and check an earlier output, trace the prompt-to-answer target boundary, and keep padding or packed documents out of valid comparisons. Read generation as the result of both a model and a declared decoding policy.",
         "readiness": {
           "prompt": "A query has equal scores for three allowed keys. What are the attention weights, and what happens if one key is masked?",
           "answer": "The weights are equal thirds. Masking one key leaves equal halves on the two allowed keys and zero on the masked key. Normalize over keys, not queries.",
@@ -1944,7 +1944,7 @@
       "projectNote": "Work in projects/performance-audit/starter/model.py. Complete stages 1 and 2 for independent calculations and changed-condition diagnosis, then retain the stage 3 evidence with --evidence-dir runs/performance-audit. Stage 4 integrates the checks. Learner commands explicitly select the starter; --implementation solution is instructor reference execution. This bounded practice does not certify the entire phase or target hardware.",
       "studyGuide": {
         "question": "What measured evidence identifies the bottleneck?",
-        "why": "Optimize a verified computation and a named timing boundary. Trace events, compiler estimates and wall-clock samples answer different questions; connect them before proposing a change.",
+        "why": "Before changing an implementation, decide which part of the user's wait you are trying to reduce. Compilation, dispatch, transfer, device execution and synchronization can occupy different portions of a run. A fast return from a Python call may measure submission rather than completed work.\n\nFirst establish numerical equivalence, then choose a repeatable timing boundary. Read a retained trace by its named events and nesting, and use roofline or rematerialization calculations as hypotheses about a tradeoff. Connect a proposed change to the operation's share of the complete workload before expecting a large end-to-end gain.",
         "readiness": {
           "prompt": "A JAX call returns an array handle almost immediately. Does a timer ending there necessarily measure completed computation?",
           "answer": "No. Synchronize the result inside the measured boundary. Report first-call setup separately from warmed execution and keep inputs, dtype and output checks fixed.",
@@ -2035,12 +2035,12 @@
           "id": "distributed-02",
           "title": "A sharded training step",
           "status": "authored",
-          "objective": "Run a training step with explicit data and parameter placement.",
+          "objective": "Compute global count-weighted gradients and verify a 2x2 data/model mesh forward, backward and momentum update against an unsharded oracle.",
           "prerequisites": [
             "distributed-01"
           ],
           "exercise": "Run a changed target/initial-state update, then diagnose the factor-of-four local-mean bug and repair uneven-batch aggregation.",
-          "evidence": "Each local gradient already divides by its local count. Summing four equal local means omits division by four. For unequal counts, an unweighted mean also misrepresents examples; sum count-weighted local means and divide by total count.",
+          "evidence": "Keep 1D and 2D shard ownership, per-device parameter/momentum bytes, asymmetric-input forward/backward/update comparisons, unequal and empty valid-count cases and the wrong local-mean control.",
           "check": "Four equal-size shards compute local mean gradients. Which aggregation gives the global mean gradient?",
           "path": "phases/09-distributed/02-a-sharded-training-step",
           "runtime": {
@@ -2131,7 +2131,7 @@
       "projectNote": "This connected project also uses performance and distributed lessons. Work through its prerequisites before the full integration check; return here with the completed evidence. Copy `projects/sharded-training/starter/model.py` to `projects/sharded-training/my_model.py` and write your code in `projects/sharded-training/my_model.py`. Run `python3 projects/sharded-training/tests/check.py --implementation projects/sharded-training/my_model.py --stage 1` from the top-level folder to verify stages 1, 2, 3, 4.",
       "studyGuide": {
         "question": "Is the distributed update still optimizing the same objective?",
-        "why": "Start with the global mathematical operation, then specify ownership and communication. Logical CPU devices help expose placement and reduction mistakes before you spend accelerator time.",
+        "why": "Distribution changes where arrays and computations live; it should preserve the intended global objective. Begin by drawing which rows and parameter columns each device owns. Then derive how distinct contributions and valid counts combine into one loss and update.\n\nUse logical CPU devices to make ownership and unequal partitions inspectable. The unsharded calculation gives you a numerical reference; shard indices and local byte counts give you a placement reference. Communication and recovery add separate questions about coordinated work, which require their own receipts.",
         "readiness": {
           "prompt": "Two devices see one and three valid examples. Should their mean gradients receive equal weight?",
           "answer": "No. Weight by valid example counts. Sum local gradient numerators and valid counts, then divide once. Padding and empty partitions must not silently change the denominator.",
@@ -2152,7 +2152,7 @@
               "distributed-04"
             ],
             "title": "Connect communication and recovery",
-            "task": "Inspect collectives without inferring network speed from payload size. Restore data position and optimizer state before comparing subsequent global steps."
+            "task": "Inspect collectives without inferring network speed from payload size. Restore data position and optimizer state before comparing subsequent global steps. Continue to the 2x2 data/model mesh: predict parameter and momentum slices and per-device bytes, then compare one forward/backward/update with an unsharded NumPy oracle under uneven and empty valid counts."
           }
         ],
         "transfer": {
@@ -2296,7 +2296,7 @@
       "projectId": "scientific-inverse",
       "studyGuide": {
         "question": "Are you fitting the physical model or the solver’s error?",
-        "why": "Use an analytic system to separate simulation correctness, numerical discretization and parameter inference. An accurate autodiff derivative can still belong to an inaccurate discretized model.",
+        "why": "A simulation has at least three layers of meaning: a model of the physical process, a numerical discretization of that model, and an inference procedure that fits unknown parameters. An exact derivative of the numerical program can still describe an inaccurate approximation to the continuous process.\n\nUse a solvable system to separate those layers. Predict one integration step, refine the grid at a fixed horizon and inspect convergence before fitting a parameter. Then compare predictions at held-out times and ask whether a shifted estimate comes from observation noise, weak identifiability or solver error.",
         "readiness": {
           "prompt": "A solver’s output is differentiable. Does that establish that its gradient matches the continuous differential equation?",
           "answer": "No. Autodiff follows the implemented discrete steps. Compare a discrete reference and refine the step size toward an analytic or higher-accuracy continuous reference.",
@@ -2462,7 +2462,7 @@
       "projectId": "bayesian-regression",
       "studyGuide": {
         "question": "Which uncertainty does your model actually represent?",
-        "why": "Use an exactly solvable Bayesian regression to check inference. Separate uncertainty about weights, uncertainty about a future observation, and mismatch between the assumed likelihood and the data.",
+        "why": "A point estimate answers which parameters fit, but it leaves open how uncertain they are and how uncertain a future observation should be. A small solvable Bayesian regression lets you calculate those quantities separately and compare an approximate method with a known target.\n\nRead distribution plots by their units: density height is not the probability of one value, and latent-function uncertainty does not include all observation noise. Follow the mean, covariance and predictive intervals through sampling or variational inference. Use residuals to question the assumed likelihood as well as the inference algorithm.",
         "readiness": {
           "prompt": "Should an interval for a new noisy observation equal an interval for the latent mean prediction?",
           "answer": "No. The observation includes additional likelihood noise. Under the independent Gaussian model, add its variance to the latent predictive variance before taking a square root.",
@@ -2626,12 +2626,12 @@
           "id": "rl-05",
           "title": "Learn value functions and generalized advantage estimation",
           "status": "authored",
-          "objective": "Fit a tabular value function from retained trajectories and estimate GAE with terminal and collector-cutoff semantics explicit.",
+          "objective": "Fit sampled discounted return targets at gamma=0.9 over at most eight actions, then estimate GAE at gamma=0.9 and lambda=0.95 with terminal and collector-cutoff semantics explicit.",
           "prerequisites": [
             "rl-04"
           ],
-          "exercise": "Change the collection key, retain the value-fit error history, and check a hand-computed multi-step GAE trace across a reset.",
-          "evidence": "Keep two seed-specific learned value tables and loss histories, the pre-reset cutoff observation, independent terminal/cutoff calculations, and padding-mask checks.",
+          "exercise": "The task lasts at most eight actions and the value target is discounted return with gamma=0.9, matching GAE gamma. Change the collection key from 313 to 314. Before running, predict which of the fitted values and final MSE should remain identical. Then retain both error histories and explain why changed trajectories should change the fitted table.",
+          "evidence": "Keep the discounted target definition, seed-313/314 value tables and fit histories, independent two-transition TD residuals, terminal-versus-cutoff bootstrap/trace checks and a note on the position-only approximation. Critic-fit loss is not policy-improvement evidence.",
           "check": "At a continuing-task time limit, which observation supplies the bootstrap, and should the trace cross the reset?",
           "path": "phases/12-rl/05-learn-values-and-gae",
           "runtime": {
@@ -2656,7 +2656,7 @@
       "projectId": "policy-evaluation",
       "studyGuide": {
         "question": "Is the policy improving under a fixed evaluation protocol?",
-        "why": "Environment semantics and data collection define the learning problem. Verify transitions, masks and behavior-policy probabilities before trusting a noisy return curve.",
+        "why": "A policy changes the data it will see next, so learning from interaction requires careful bookkeeping. A transition gives an immediate reward; a return combines later rewards; a value estimates expected return; an advantage compares an outcome with that baseline. Follow one short trajectory before introducing their batched estimators.\n\nKeep episode endings and collection cutoffs distinct when deriving targets. Then connect the sign of an advantage to a policy update, freeze the behavior probabilities needed for PPO comparisons and inspect variation across independent evaluation units. The small environment makes those choices visible before a larger control task.",
         "readiness": {
           "prompt": "An episode stops because its time budget expires. Must its bootstrap value be zero?",
           "answer": "Not necessarily. Distinguish truncation from genuine terminal states and state whether the task is finite-horizon or continuing. A timeout alone does not imply that future value is zero.",
@@ -2829,7 +2829,7 @@
       "projectId": "kernel-audit",
       "studyGuide": {
         "question": "Does a custom kernel earn its complexity?",
-        "why": "A lower-level implementation first owes you the same numerical contract. Use hostile shapes, independent references and explicit target limits before attempting a speed claim.",
+        "why": "A lower-level kernel replaces an operation the learner already understands. Its first responsibility is to compute the same result for every supported element, including the last partial tile. Draw the relationship among a program coordinate, its operand slices and its output before changing block sizes.\n\nThe chapter moves from indexing to contraction and buffer lifetimes, then to a measured decision about whether an optimization is worthwhile. Treat boundary cases and independent numerical references as explanations of the contract. CPU interpretation illustrates semantics; target execution is needed to judge a performance tradeoff.",
         "readiness": {
           "prompt": "A matrix dimension is not divisible by the tile size. What must the last tile do?",
           "answer": "Mask or pad out-of-range loads and stores under a declared policy. Valid elements still need exactly one correct output; fewer launched programs do not excuse missing boundary elements.",
@@ -2995,7 +2995,7 @@
       "projectId": "derivative-audit",
       "studyGuide": {
         "question": "Which mathematical operation does the transformed program represent?",
-        "why": "Use internal representations to explain and verify transformations, not to memorize printed variable names. Separate primal values, tangent directions, cotangents and compiled artifacts.",
+        "why": "Transformations become less mysterious when you follow the quantities they carry. A primal is the ordinary value, a tangent describes change in an input direction, and a cotangent weights changes in outputs. Their shapes and roles explain why forward- and reverse-mode products answer different questions.\n\nRead one transformed equation with an independent derivative beside it. Check the adjoint relationship, then challenge a custom rule at a different base point and direction. Internal printed names are incidental; the mathematical relationship and the supported primitive boundary are what you need to understand.",
         "readiness": {
           "prompt": "A function maps an input vector to an output vector. Does a JVP multiply by the Jacobian or its transpose?",
           "answer": "A JVP maps an input tangent through the Jacobian. A VJP maps an output cotangent through its transpose. Check the spaces and the adjoint inner-product identity.",
@@ -3104,12 +3104,12 @@
           "id": "deployment-08",
           "title": "Convert PyTorch weights to Flax and locate numerical errors",
           "status": "authored",
-          "objective": "Convert a real PyTorch state dictionary to Flax NNX and validate intermediate outputs, gradients and reloaded artifacts with explicit numerical tolerances.",
+          "objective": "Map actual PyTorch parameters to Flax NNX and localize the first layer or gradient mismatch, then transfer to the optional small saved decoder.",
           "prerequisites": [
             "deployment-01"
           ],
           "exercise": "Compare a near-zero reference against two candidate errors. Verify that the absolute tolerance accepts rounding noise but rejects a meaningful discrepancy.",
-          "evidence": "Keep source checkpoint and architecture identity, complete parameter mapping, per-layer max-absolute/relative-L2 errors, elementwise tolerances, input-gradient comparisons, wrong-epsilon diagnosis and a fresh-process converted-artifact receipt.",
+          "evidence": "Keep MLP normalization/activation parity, first-divergence evidence, the optional QKV/head layout and mask canaries, nonuniform VJP, processor/position identity and fresh-process reload results.",
           "check": "The first linear layer agrees, but LayerNorm is the first mismatch. What should you inspect next?",
           "path": "phases/15-deployment/08-pytorch-to-flax-numerical-parity",
           "runtime": {
@@ -3278,7 +3278,7 @@
       ],
       "studyGuide": {
         "question": "Does the exported service preserve the model’s complete contract?",
-        "why": "A deployment includes preprocessing, parameter layout, numeric policy and runtime behavior. Verify the same raw examples across each boundary before comparing memory or speed.",
+        "why": "A deployed model begins with a raw request and ends with a response, not with a weight file alone. Preprocessing, parameter layout, precision, serialization and runtime execution must preserve the meaning of that request across each boundary.\n\nCarry the same examples through adaptation, framework conversion, export and inference so the first changed result is easy to locate. Then ask what storage savings, queue calculations or edge budgets actually imply for this runtime. Keep numerical fidelity, held-out task behavior and measured service work as separate parts of a deployment decision.",
         "readiness": {
           "prompt": "Weights match after conversion, but predictions differ. What besides weights must be compared?",
           "answer": "Compare input normalization, feature/channel order, operation semantics, non-trainable state, output labels, dtype and shape. Start with a hand-computed asymmetric example to expose layout mistakes.",
@@ -3320,7 +3320,7 @@
           "symptom": "A smaller model file produces no lower request latency.",
           "check": "Inspect load-time expansion, fallback operators, transfers and preprocessing on the named runtime. File size is not a kernel or latency measurement."
         },
-        "completion": "Use deployment-audit and engineering-release to assemble one release dossier: candidate selection and retention criteria; a named feature and parameter mapping; source/export and layerwise parity; full precision policy and calibration identity; raw-request validation; artifact and process receipts; measured request samples; and a queue/deadline analysis. Mark container and target-device evidence unmeasured unless you actually ran those environments. Another learner should be able to reproduce each claimed check from the recorded inputs and command.",
+        "completion": "Use deployment-audit and engineering-release to assemble one release dossier: candidate selection and retention criteria; a named feature and parameter mapping; source/export and layerwise parity; full precision policy and calibration identity; raw-request validation; artifact and process receipts; measured request samples; and a queue/deadline analysis. Mark container and target-device evidence unmeasured unless you actually ran those environments. Another learner should be able to reproduce each claimed check from the recorded inputs and command. For framework transfer, run the optional bounded saved-decoder parity lab: map QKV/head layouts, masks, positions and tied embeddings, locate both deliberate attention failures, and compare a nonuniform VJP after fresh-process reload.",
         "furtherWork": "Actual edge-device delegates, thermal/energy budgets, packed low-bit kernels and production serving loads remain unqualified. The revised sequence moves adaptation before export and containerization before service capacity planning."
       },
       "projectNote": "Copy `projects/deployment-audit/starter/model.py` to `projects/deployment-audit/my_model.py` and write your code in `projects/deployment-audit/my_model.py`. Run `python3 projects/deployment-audit/tests/check.py --implementation projects/deployment-audit/my_model.py --stage 1` from the top-level folder to verify all 3 stages."
@@ -3424,12 +3424,12 @@
           "id": "operations-04",
           "title": "Changes, rollback, and artifact provenance",
           "status": "authored",
-          "objective": "Separate content identity, validation evidence and active selection. Reject corrupt or failed artifacts before a pointer change.",
+          "objective": "Activate and roll back identified local model bundles, verify consumer predictions and preserve the active model after a rejected selection.",
           "prerequisites": [
             "operations-03"
           ],
-          "exercise": "Publish two compatible validated artifacts that differ in an explicit release note. Activate both in sequence, then rollback and verify the exact selected ID and content.",
-          "evidence": "Keep source/configuration/data hashes, actual held-out candidate predictions, the rejected degraded release and unchanged active pointer, followed by verified rollback.",
+          "exercise": "Publish two validated models with distinct predictions at x=1. Record the consumer prediction while A is selected, after B activation, after a rejected candidate and after rollback. Change B’s slope while keeping the fixture validation threshold satisfied. Explain why publication alone does not change behavior and why the rejection must leave both selection and output unchanged.",
+          "evidence": "Keep model/checkpoint identities, observed predictions before activation, after activation and after rollback, and unchanged selection/behavior on rejection.",
           "check": "What does a matching artifact digest establish?",
           "path": "phases/16-operations/04-changes-rollback-and-artifact-provenance",
           "runtime": {
@@ -3456,7 +3456,7 @@
           "prerequisites": [
             "operations-04"
           ],
-          "exercise": "Using the measured service-time input, calculate the minimum worker count for \\(1200\\) arrivals per hour with \\(40\\)% reserve, then independently verify that the chosen count satisfies the load bound.",
+          "exercise": "Using the measured duration input, compute workers for 1,200 arrivals/hour, 40% reserve and a \\(1.5\\times\\) planning factor. Change arrivals to 2,400 while holding measured service time fixed. Interpret the resulting load and cost assumptions from the actual report.",
           "evidence": "Keep measured job/update samples and independent unit calculations. Label demand, reserve and price assumptions as hypothetical before deriving a resource plan.",
           "check": "Which claim is supported by the measured update duty fraction?",
           "path": "phases/16-operations/05-capacity-utilization-and-operating-cost",
@@ -3480,12 +3480,12 @@
           "id": "operations-06",
           "title": "MLOps: data contracts, CI gates and monitoring",
           "status": "authored",
-          "objective": "Reject data leakage and incomplete evaluation, compute count-weighted slice metrics and distinguish drift investigation from model promotion.",
+          "objective": "Evaluate predictions from a reloaded local artifact and apply group-safe, count-weighted slice and release rules.",
           "prerequisites": [
             "operations-05"
           ],
-          "exercise": "Show that averaging slice means without counts changes the overall error.",
-          "evidence": "Keep the leaking-group rejection, data fingerprint, slice counts and MSEs, aggregate/slice gate disagreement, changed-population calculation and a written response to drift without labels.",
+          "exercise": "Compare the two reloaded artifacts at the same ten held-out IDs and fixed policy. Change only candidate B’s high-slice offset from 1.9 to 0.5, then report its per-example high-slice error and gate result. Distinguish that candidate comparison from the separate label-correction sensitivity check.",
+          "evidence": "Keep reloaded predictions, target/case identities, per-example and slice metrics, independent weighted aggregation and an explicit release decision with leakage and drift caveats.",
           "check": "An input drift alert fired before new labels arrived. What follows?",
           "path": "phases/16-operations/06-mlops-data-contracts-and-release-pipelines",
           "runtime": {
@@ -3508,12 +3508,12 @@
           "id": "operations-07",
           "title": "LLMOps: version prompts, evaluate behavior and trace requests",
           "status": "authored",
-          "objective": "Evaluate a versioned text application with a complete case inventory, slice-level answer contracts and inspectable MLflow traces.",
+          "objective": "Trace an executed local retrieval, prompt and answer workflow, pair responses by case ID and diagnose component failures before comparing candidates.",
           "prerequisites": [
             "operations-06"
           ],
-          "exercise": "Add a response with an invented citation and require the evaluator to fail it.",
-          "evidence": "Keep all case IDs and per-slice replay scores, missing/duplicate-response rejections, the retained failed case, trace identities and application-version fields. Explain what requires separate live-model evaluation.",
+          "exercise": "Inspect case-sensitive-refund-77 in the baseline trace. Identify the correct retrieval evidence and the prompt behavior that caused the answer to fail, then change only the prompt policy and compare on all five IDs.",
+          "evidence": "Keep heterogeneous case IDs, actual local-stage traces and retrieved context, missing/duplicate/out-of-order controls, component diagnoses and a same-case candidate comparison. The local adapter is not an LLM quality benchmark.",
           "check": "The controlled replay suite passes every case. What is established?",
           "path": "phases/16-operations/07-llmops-prompts-evaluation-and-traces",
           "runtime": {
@@ -3536,12 +3536,12 @@
           "id": "operations-08",
           "title": "ModelOps: own, approve, roll back and retire a model",
           "status": "authored",
-          "objective": "Bind a release decision to immutable evidence, reject changed or expired approvals and preserve active selection after failure.",
+          "objective": "Bind approval to a model bundle, verify consumer activation/rollback, and enforce retired-target and fallback policies.",
           "prerequisites": [
             "operations-07"
           ],
-          "exercise": "Change the evaluation hash while keeping the model unchanged, and prove the old approval no longer applies.",
-          "evidence": "Keep the reviewed bundle hash, owner and target, expiry boundary, failed-transition pointer equality and changed-owner rejection. Explain why the local reviewer field is not authenticated approval.",
+          "exercise": "With C selected, try activating C with B’s valid bundle and approval. Then replace C’s artifact file with slope 99 and force a consumer reload. Finally corrupt the cache entry. Verify every rejection happens before prediction and preserves pointer and cache state. Explain how this differs from rollback to a retired target.",
+          "evidence": "Keep approval/bundle identity, predictions across activation and rollback, retirement/cache/reload behavior, stale/expired/retired-target failures and an audit trail. Scope is a local single-writer policy fixture.",
           "check": "An approval record contains a reviewer name and a matching hash. Does that authenticate the reviewer?",
           "path": "phases/16-operations/08-modelops-ownership-approval-and-retirement",
           "runtime": {
@@ -3569,7 +3569,7 @@
       ],
       "studyGuide": {
         "question": "Can you detect, explain and safely recover a failed model release?",
-        "why": "Operational evidence connects work done to user-visible behavior. Separate worker health, model quality and release ownership so an alert leads to a specific investigation rather than automatic retraining.",
+        "why": "An operational signal is useful when it leads to a specific question and action. A stalled worker, a degraded data slice and an unapproved artifact can all hurt users, but each requires different evidence. Trace the work, the candidate and the selected release rather than collapsing them into one green status.\n\nBegin with a bounded worker and structured events, then rehearse recovery and a rejected change. Follow that foundation into capacity, data quality, retrieval traces and model ownership. At each transition, ask which artifact a consumer would actually load and which observations justify changing it.",
         "readiness": {
           "prompt": "A worker process is alive but has emitted no progress for a long time. Is it healthy?",
           "answer": "Liveness only establishes that the process exists or responds. Check readiness, last completed work, expected duration and checkpoint freshness before choosing a bounded timeout or recovery action.",
@@ -3633,10 +3633,10 @@
           "id": "pretraining-01",
           "title": "Masked language modeling: predict hidden tokens",
           "status": "authored",
-          "objective": "Separate the clean targets from the corrupted input. Normalize over selected target positions.",
+          "objective": "Audit selected-token MLM loss and transfer a saved small encoder to held-out masks and a frozen representation probe.",
           "prerequisites": [],
           "exercise": "Select the first position instead of the second and evaluate the trained model without updating it.",
-          "evidence": "Keep corrupted inputs, selected-target counts, the log-vocabulary baseline, independent masked-loss checks, trained parameters and changed-mask results.",
+          "evidence": "Keep clean/corrupted masks, selected-position denominators and independent gradients, plus saved encoder/processor identity, held-out loss versus uniform baseline, a frozen probe and honest changed-condition failures.",
           "check": "Why are visible input tokens useful even when their output positions are excluded from the loss?",
           "path": "phases/17-pretraining/01-mlm",
           "runtime": {
@@ -3659,12 +3659,12 @@
           "id": "pretraining-02",
           "title": "Masked image modeling: reconstruct missing patches",
           "status": "authored",
-          "objective": "Preserve patch order and pixel order. Keep hidden pixels out of the encoder.",
+          "objective": "Audit visible-only masked reconstruction and compare a saved small encoder across changed masks and a frozen representation probe.",
           "prerequisites": [
             "pretraining-01"
           ],
           "exercise": "Verify the bottom-right patch against a direct slice and explain why a whole-array reshape can hide a spatial permutation.",
-          "evidence": "Keep patch-order slices, visible-only feature shapes, hidden-patch counts, independent MSE and held-amplitude reconstruction results.",
+          "evidence": "Keep patch-order and ambiguity controls, saved encoder/mask/transform identity, changed-mask held-out reconstruction against a visible-mean baseline and the frozen probe. Separate objective mechanics from representation quality.",
           "check": "Why must the encoder input be inspected separately from reconstruction loss?",
           "path": "phases/17-pretraining/02-mim",
           "runtime": {
@@ -3687,12 +3687,12 @@
           "id": "pretraining-03",
           "title": "Contrastive learning: views, positives and negatives",
           "status": "authored",
-          "objective": "Define the positive pair before augmenting. Normalize embeddings and introduce temperature.",
+          "objective": "Train a bounded contrastive objective and check held-out grouped retrieval with multiple positives and a saved encoder identity.",
           "prerequisites": [
             "pretraining-02"
           ],
           "exercise": "Permute only the right-hand embeddings after training and demonstrate the effect of broken pair identity.",
-          "evidence": "Keep source pairing, temperature, stable two-direction loss checks, collapse and duplicate baselines, training outputs and broken-pair diagnosis.",
+          "evidence": "Keep pair/temperature/false-negative checks, held-out source-group membership, saved encoder identity, multiple-positive Recall@k and mAP calculations against an independent ranking oracle.",
           "check": "What does successful retrieval on the training pairs establish?",
           "path": "phases/17-pretraining/03-contrastive",
           "runtime": {
@@ -3722,7 +3722,7 @@
       ],
       "studyGuide": {
         "question": "What learning signal can unlabelled data provide?",
-        "why": "Train small masked-token, hidden-patch and paired-view models. Audit information leakage, reduction counts and pair identity before interpreting a falling objective.",
+        "why": "Self-supervised learning creates targets from the data itself. That makes the information boundary especially important: a hidden token or patch must remain a target rather than leaking into the input, and a contrastive positive must keep its source identity when views move around a batch.\n\nWork through one selected token, one patch and one row of a similarity matrix. Then read the recorded objectives beside their baselines and held-out checks. Saving and reloading an encoder gives the next exercise a concrete starting point; the evaluation determines whether the learned representation helps under a changed condition.",
         "readiness": {
           "prompt": "If an image reconstruction is perfect before training, what boundary should you inspect?",
           "answer": "Check whether hidden pixels entered the encoder or were copied into the prediction. A valid objective can still be defeated by leaked inputs.",
@@ -3759,7 +3759,7 @@
           "symptom": "A low masked loss does not transfer to the downstream task.",
           "check": "Check target leakage, mask distribution, encoder-versus-projection features and a held-out downstream protocol."
         },
-        "completion": "Complete stages 1–3 of training-methods with independent loss references, real training curves, changed masks or pairs and explicit synthetic-data limits. Add the new lesson evidence: unequal-count gradient oracle, rectangular patch/intervention checks, irreducible ambiguity example and temperature/ranking comparison. Explain each saved figure without copying its caption.",
+        "completion": "Complete stages 1–3 of training-methods with independent loss references, real training curves, changed masks or pairs and explicit synthetic-data limits. Add the new lesson evidence: unequal-count gradient oracle, rectangular patch/intervention checks, irreducible ambiguity example and temperature/ranking comparison. Explain each saved figure without copying its caption. Complete the saved-encoder handoffs: record data/mask/processor identities, reload the artifacts, evaluate held-out groups and report frozen probes against independent baselines. Keep the demonstrated MLM and MIM limitations visible rather than calling objective completion a quality pass.",
         "furtherWork": "Full BERT/ViT masked autoencoders, natural corpora, augmentation studies and downstream probe benchmarks remain extensions. The current labs execute small attention, linear reconstruction and embedding models."
       },
       "projectNote": "Copy `projects/training-methods/starter/methods.py` to `projects/training-methods/my_methods.py` and write your code in `projects/training-methods/my_methods.py`. Run `python3 projects/training-methods/tests/check.py --implementation projects/training-methods/my_methods.py --stage 1` from the top-level folder to verify stages 1, 2, 3.",
@@ -3776,7 +3776,7 @@
         "pretraining"
       ],
       "hardware": "Executed CPU synthetic objectives; large-scale and human-feedback evaluation remain separate",
-      "project": "Audit response-token SFT masking and preference-pair loss",
+      "project": "Audit SFT, DPO and sequence PPO",
       "checkpoint": "Complete stages 4–8 of training-methods. Retain shifted token-mask checks, frozen-base/merge evidence, preference oracles, signed PPO clipping and fixed-reference DPO comparisons.",
       "source": "https://docs.jax.dev/en/latest/",
       "lessons": [
@@ -3784,10 +3784,10 @@
           "id": "posttraining-01",
           "title": "Supervised fine-tuning with response-only token loss",
           "status": "authored",
-          "objective": "Align predictions with their target tokens. Separate the attention mask from the loss mask.",
+          "objective": "Align response-only shifted targets, then apply a bounded saved-decoder SFT transfer with frozen baselines, tokenizer identity and held-out reporting.",
           "prerequisites": [],
           "exercise": "Score only the first response token in each sequence and compare the resulting count and objective.",
-          "evidence": "Keep shifted target/role masks, valid response-token counts, gradient support and the changed target-selection result.",
+          "evidence": "Keep ragged mask/gradient oracles and saved-decoder/tokenizer identities, declared one-step SFT budget, pre/post held-out response NLL and the parent-bound child manifest. This is synthetic transfer evidence.",
           "check": "Should prompt inputs disappear when using response-only loss?",
           "path": "phases/18-posttraining/01-sft",
           "runtime": {
@@ -3810,12 +3810,12 @@
           "id": "posttraining-02",
           "title": "LoRA: adapt, save and merge low-rank updates",
           "status": "authored",
-          "objective": "Separate the frozen base from trainable adapters. Understand initialization and the first gradient.",
+          "objective": "Separate frozen-base and low-rank updates, then save and reload a base-bound adapter with nonunit scaling and wrong-base rejection.",
           "prerequisites": [
             "posttraining-01"
           ],
-          "exercise": "Save both adapter factors and their rank/scaling metadata, reload them and check merged versus unmerged predictions.",
-          "evidence": "Keep base-training evidence, unchanged base arrays, adapter factors/rank/alpha, initial-gradient checks and reloaded/new-input merge parity.",
+          "exercise": "Run “Enforce base identity in a fresh-process adapter reload.” Save base bytes, adapter factors and a full manifest, then verify a fresh-process merge and rejection of a same-shape wrong base plus altered metadata.",
+          "evidence": "Keep frozen-base and gradient asymmetry checks, rank/alpha scaling, the serialized base digest and target/tensor manifest, fresh-process merge parity on new inputs and incompatible-base/metadata rejections.",
           "check": "Does LoRA require updating the base weights during adapter training?",
           "path": "phases/18-posttraining/02-lora",
           "runtime": {
@@ -3838,12 +3838,12 @@
           "id": "posttraining-03",
           "title": "Learn a reward model from pairwise preferences",
           "status": "authored",
-          "objective": "Represent a preference as a comparison. Fit score differences with a stable likelihood.",
+          "objective": "Fit pairwise reward differences and evaluate unchanged held-out unanimous and disagreement cases against a pre-fit baseline.",
           "prerequisites": [
             "posttraining-02"
           ],
           "exercise": "Calculate the initial loss for tied reward scores independently and verify the trained ordering.",
-          "evidence": "Keep synthetic label provenance, stable preference-loss and gradient references, offset/scale tests and the learned ordering.",
+          "evidence": "Keep stable likelihood and gradient checks, contradictory preference controls, pre-fit and post-fit held-out probability/Brier metrics, separate disagreement slices and score-offset/scale limitations.",
           "check": "What do pairwise preferences identify directly?",
           "path": "phases/18-posttraining/03-reward",
           "runtime": {
@@ -3868,7 +3868,11 @@
           "status": "authored",
           "objective": "Keep three identities separate. Collect actions before optimizing them.",
           "prerequisites": [
-            "posttraining-03"
+            "posttraining-03",
+            "rl-01",
+            "rl-02",
+            "rl-03",
+            "rl-04"
           ],
           "exercise": "Check the KL at the fixed reference and compare it with the final policy’s exact KL.",
           "evidence": "Keep reward/reference identity, collected old probabilities, signed clipping checks, exact reward/KL history and detached behavior information.",
@@ -3894,12 +3898,12 @@
           "id": "posttraining-05",
           "title": "Direct preference optimization and reference-corrected margins",
           "status": "authored",
-          "objective": "Compare chosen and rejected response log probabilities. Subtract the reference preference.",
+          "objective": "Compare reference-corrected preference margins, then score unequal-length saved-decoder responses with explicit masks and a bounded sequence update.",
           "prerequisites": [
-            "posttraining-04"
+            "posttraining-03"
           ],
           "exercise": "Swap chosen and rejected IDs after training and verify that the loss rises.",
-          "evidence": "Keep reference identity, response log-probability conventions, log(2) initialization, independent margin loss, reversed labels and frozen-reference checks.",
+          "evidence": "Keep reference-cancellation and falling-chosen-probability counterexamples, exact tokenizer/model identity, summed shifted response log probabilities with EOS/padding checks, pre/post held-out and retention records and the unchanged failed PPO quality result.",
           "check": "Does this DPO loop require a separately trained reward model and fresh policy rollouts?",
           "path": "phases/18-posttraining/05-dpo",
           "runtime": {
@@ -3920,20 +3924,21 @@
         }
       ],
       "description": "Connect supervised demonstrations, frozen-base LoRA, reward modeling, sampled PPO and direct preference optimization. Keep the reference, behavior policy, reward model and dataset identities separate.",
-      "learningAdvice": "Predict the mask, denominator or preference direction before training. Keep independent objective checks and changed-condition evidence.",
+      "learningAdvice": "Predict the mask, denominator or preference direction before training. Keep independent objective checks and changed-condition evidence. SFT, LoRA, reward ranking and DPO can follow the supervised route. Before the PPO lesson, complete the explicitly linked RL rollout, policy and evaluation preparation. DPO branches from reward learning and does not require completing PPO.",
       "projectId": "posttraining-audit",
       "projectStageIds": [
         "1",
         "2",
         "3",
-        "4"
+        "4",
+        "5"
       ],
       "studyGuide": {
         "question": "Which parameters and signals change during adaptation?",
-        "why": "Connect supervised demonstrations, frozen-base LoRA, reward modeling, sampled PPO and direct preference optimization. Keep the reference, behavior policy, reward model and dataset identities separate.",
+        "why": "A pretrained model can be adapted with demonstrations, low-rank updates or preference evidence, but these methods ask different questions of the data. Response-only SFT scores demonstrated tokens; LoRA restricts which parameter changes are available; reward learning and preference objectives use comparisons between alternatives.\n\nKeep the base, reference, behavior policy and reward model identities separate as you follow a concrete example through each objective. Derive the scored positions and likelihood reductions before comparing curves. The PPO route needs its RL preparation, while DPO follows its own reference-scoring branch; shared bookkeeping does not make the algorithms interchangeable.",
         "readiness": {
           "prompt": "Should response-only loss remove prompt tokens from the model context?",
-          "answer": "No. Prompt inputs remain visible under the causal attention contract; the shifted response mask controls which targets receive loss.",
+          "answer": "No. Prompt inputs remain visible under the causal attention contract; the shifted response mask controls which targets receive loss. The PPO branch additionally requires the declared RL lessons. Test your readiness by explaining why old behavior log probabilities stay frozen during multiple optimizer epochs. SFT, LoRA and DPO can be studied without taking that branch.",
           "lessonId": "posttraining-01"
         },
         "milestones": [
@@ -3960,7 +3965,7 @@
           },
           {
             "title": "RLHF mechanics: a frozen reward and PPO policy updates",
-            "task": "Identify current, behavior, reference and reward states; work both clipping signs; verify baseline cancellation by enumeration; and compare the trained bandit with its regularized optimum and probability plot.",
+            "task": "First complete rl-01 through rl-04. Explain which mask stops reset leakage, how a frozen behavior log probability differs from the current policy, and which unit is an evaluation replicate. Then identify current, behavior, reference and reward states; work both clipping signs and verify the small bandit against its exact optimum. The optional saved-decoder appendix remains a separate mechanics/replay result with a failed quality gate.",
             "lessonIds": [
               "posttraining-04"
             ]
@@ -3981,10 +3986,10 @@
           "symptom": "A PPO ratio is always one during multiple optimizer epochs.",
           "check": "Check whether old log probabilities are incorrectly recomputed from the changing policy."
         },
-        "completion": "Complete stages 4–8 of training-methods. Retain shifted token-mask checks, frozen-base/merge evidence, preference oracles, signed PPO clipping and fixed-reference DPO comparisons. Add the new lesson evidence: ragged likelihood oracle, rank-capacity counterexample, conflicting preferences, exact bandit optimum and a DPO ratio improvement with lower chosen probability. State which model integrations remain absent.",
-        "furtherWork": "The PPO lab is a terminal synthetic preference bandit, not full language-model RLHF. Human preference collection, sequence PPO/value models, large-model PEFT and held-out human evaluation remain separate work. For the learned-reward PPO lesson, complete rl-01 through rl-04 first. Response-only SFT and dense LoRA do not require the RL phase."
+        "completion": "Complete stages 4–8 of training-methods. Retain shifted token-mask checks, frozen-base/merge evidence, preference oracles, signed PPO clipping and fixed-reference DPO comparisons. Add the new lesson evidence: ragged likelihood oracle, rank-capacity counterexample, conflicting preferences, exact bandit optimum and a DPO ratio improvement with lower chosen probability. State which model integrations remain absent. Complete the saved-decoder SFT and sequence-scoring handoffs with a frozen reference, held-out preference/disagreement cases and source retention. Use the full course workspace for the pinned inference package and tokenizer. Enforce the LoRA base manifest on reload.",
+        "furtherWork": "The PPO lesson uses a terminal synthetic preference bandit. The optional, registered project Stage 5 table-policy exercise adds a separate synthetic sequence PPO exercise with a learned table critic and a declared deterministic continuation target at the collection boundary. The [optional saved-decoder appendix](https://www.tahabouhsine.com/jaxpathways/project-guides/posttraining-transformer-lineage.html) demonstrates bounded sequence-PPO mechanics and replay, but its strict heldout reward quality floor failed; this is not evidence of language-model quality. Keep it separate from registered Stage 5. Neither exercise is full language-model RLHF. Real preference provenance, large-model PEFT, task quality, retention and held-out human evaluation remain separate work. Complete rl-01 through rl-04 before the learned-reward PPO lesson; rl-05 is useful optional preparation for project Stage 5. Response-only SFT and dense LoRA do not require the RL phase."
       },
-      "projectNote": "Work in projects/posttraining-audit/starter/model.py. Complete stages 1 and 2 for independent calculations and changed-condition diagnosis, then retain the stage 3 evidence with --evidence-dir runs/posttraining-audit. Stage 4 integrates the checks. Learner commands explicitly select the starter; --implementation solution is instructor reference execution. This bounded practice does not certify the entire phase or target hardware.",
+      "projectNote": "Begin in projects/posttraining-audit/starter/model.py for the response-mask and preference-pair checks. Stages 1 and 2 compare independent calculations and changed conditions; stage 3 retains evidence, and stage 4 integrates those checks. Stage 5 uses starter/sequence_ppo.py to collect synthetic responses, fit a critic, distinguish EOS from truncation, freeze rollout snapshots across PPO epochs and retain token-level evidence. Each stage lists its own edit file and command. This local mechanics exercise does not qualify a Transformer, human preferences, the full capstone or target hardware.",
       "additionalProjectIds": [
         "training-methods"
       ]
@@ -4006,10 +4011,10 @@
           "id": "tpu-01",
           "title": "Select a TPU slice and provision your Cloud TPU VM",
           "status": "authored",
-          "objective": "Choose a single-host TPU topology, create a Cloud TPU VM with gcloud (or connect to a Colab TPU), verify SSH access, and rehearse clean VM deletion.",
+          "objective": "Choose and identify a named single-host TPU topology, distinguish physical chips from JAX devices, compare per-device memory-fit assumptions and verify a requested-target receipt before a route-owned teardown.",
           "prerequisites": [],
-          "exercise": "Compute the chip count and total HBM GiB for v5litepod-4 and v6e-4, verify both are single-host slices (hosts == 1), and list all single-host slices with at least 64 GiB of HBM.",
-          "evidence": "Keep the slice HBM capacity table, single-host vs Pod classification, and gcloud create/describe/delete command log.",
+          "exercise": "Use the Foundations ledger for a 48 GiB state on four 16 GiB v5e chips. Report replicated and ideal-sharded state per chip, the 12.8 GiB usable budget, and the result with a 1 GiB activation allowance. Then inspect the selected v5litepod-4 receipt: report observed process count and JAX device count separately from the requested physical chip count, plus the API and machine type. On CPU, arithmetic should pass while requested_target_ready remains false.",
+          "evidence": "Keep the 48 GiB replicated versus ideal-sharded ledger with headroom/activation assumptions, requested API/machine/chip/process identity, observed process/device/backend receipt and source/environment identity where available. Retain absence checks only for the named owned VM or queued resource.",
           "check": "Which command sequence proves that your Cloud TPU VM is READY when you start and no longer billing when you finish?",
           "path": "phases/19-tpu/01-get-a-tpu-running-and-verify-the-runtime",
           "runtime": {
@@ -4032,13 +4037,13 @@
           "id": "tpu-04",
           "title": "Bootstrap .venv and verify a TPU runtime receipt",
           "status": "authored",
-          "objective": "Create ~/jax-tpu-lab/.venv on the TPU VM, install jax[tpu], run a synchronized pmap runtime contract check, and download the signed JSON receipt before deleting the VM.",
+          "objective": "Use the pinned TPU runtime, compare synchronized arithmetic with its oracle and distinguish requested backend/device readiness from a CPU rehearsal; retrieve the receipt and clean up only named owned resources.",
           "prerequisites": [
             "tpu-01"
           ],
-          "exercise": "Call verify_runtime_contract for the active backend with min_devices=1, verify contract_ok is True, and compute expected_pmap_sum_of_squares(4, 8) for a 4-chip v5litepod-4 slice.",
-          "evidence": "Keep the JSON runtime receipt (observed_backend, device_count, pmap_sum_of_squares, receipt_sha256) and the 1-chip vs 4-chip vs 8-chip pmap reference values.",
-          "check": "Why must verify_runtime_contract check both jax.default_backend() and a synchronized pmap reduction rather than only checking that import jax succeeds?",
+          "exercise": "Compute the 4-device and 8-device oracle values. On the available runtime, assert arithmetic_ok; assert requested_target_ready only when observed_backend is tpu and device_count is exactly 4.",
+          "evidence": "Keep arithmetic_ok, expected_backend_ok, expected_topology_ok, requested_target_ready, expected/observed backend and counts, source identity or its explicit absence, observed/expected reduction and receipt digest. Separate calculated 4-/8-device expectations from observed execution and require the gated target preflight to fail closed.",
+          "check": "Why does build_runtime_receipt() synchronize the pmap reduction and compare observed_total with closed_form_sum_of_squares(local_device_count, 8)?",
           "path": "phases/19-tpu/02-bootstrap-venv-and-verify-tpu-runtime-receipt",
           "runtime": {
             "kind": "cpu"
@@ -4069,7 +4074,7 @@
       "projectNote": "Work in projects/tpu-runtime-audit/starter/model.py. Complete stages 1 and 2 for independent calculations and changed-condition diagnosis, then retain the stage 3 evidence with --evidence-dir runs/tpu-runtime-audit. Stage 4 integrates the checks. Learner commands explicitly select the starter; --implementation solution is instructor reference execution. This bounded practice does not certify the entire phase or target hardware.",
       "studyGuide": {
         "question": "Can you provision a Cloud TPU VM, verify that JAX actually executes on its chips, and prove clean teardown?",
-        "why": "Every accelerator experiment starts with knowing how many hosts and GiB of HBM your slice provides, verifying that libtpu is active inside an isolated .venv, and deleting billable VMs when finished.",
+        "why": "Choosing an accelerator begins with a workload and a per-device capacity calculation. Aggregate HBM can look sufficient while a replicated parameter or optimizer array still exceeds the memory available to one device. Work through the placement and headroom assumptions before creating a resource.\n\nThen compare the requested runtime with the observed backend and topology. A numerical check answers whether the tested arithmetic agrees; the receipt answers which environment ran it. Keep the named creation route and its matching cleanup steps together so the experiment has a clear beginning and end.",
         "readiness": {
           "prompt": "You created a Cloud TPU VM and gcloud says READY. What still has to happen before you trust a JAX run on it?",
           "answer": "Bootstrap ~/jax-tpu-lab/.venv with jax[tpu], verify inside Python that jax.default_backend() == 'tpu' and jax.device_count() matches your slice, and run a synchronized pmap reduction receipt.",
@@ -4081,14 +4086,14 @@
               "tpu-01"
             ],
             "title": "Select a single-host TPU topology and provision the VM",
-            "task": "Compare v5litepod-1, v5litepod-4, v5litepod-8, and v6e-4 HBM totals, distinguish single-host VMs from multi-host Pod slices, and run gcloud create/describe/delete."
+            "task": "Identify the requested API and machine type independently from observed JAX devices/processes. Calculate the 48 GiB replicated and ideal-sharded state ledger on four 16 GiB chips, include the 80% budget and assumed activation cost, and explain why aggregate capacity is insufficient. Keep the named resource create/describe/cleanup log."
           },
           {
             "lessonIds": [
               "tpu-04"
             ],
             "title": "Bootstrap .venv and verify the runtime contract receipt",
-            "task": "Install jax[tpu] in ~/jax-tpu-lab/.venv, run verify_runtime_contract with a synchronized pmap sum of squares, and copy back the SHA-256 receipt."
+            "task": "Install the pinned runtime, run build_runtime_receipt(), compare arithmetic_ok with the local closed-form oracle, and inspect expected backend/count flags and requested_target_ready. Calculate separate 4-/8-device expectations. The target-only TPU_REQUIRE_TARGET path must reject CPU, wrong count or missing saved-source identity. Retrieve the receipt and identify its digest as an integrity field, not a signature."
           }
         ],
         "transfer": {
@@ -4097,9 +4102,9 @@
         },
         "pitfall": {
           "symptom": "You closed your SSH terminal after finishing a run, assuming the Cloud TPU VM stopped billing.",
-          "check": "Run gcloud compute tpus tpu-vm delete and confirm gcloud compute tpus tpu-vm list returns 0 items."
+          "check": "Use the cleanup command for the route that created the named resource. A queued resource must be deleted through its owning route. Confirm those exact resource names are absent; leave unrelated project resources alone."
         },
-        "completion": "Retain the slice HBM table from tpu-01, the verified JSON runtime receipt from tpu-04, and the empty gcloud compute tpus tpu-vm list confirmation.",
+        "completion": "Keep the per-device ledger, requested-versus-observed runtime/source/environment identity, synchronized arithmetic and fail-closed target checks. Record absence of the exact named owned VM and queued resource after route-specific cleanup; a project-wide empty list is not required.",
         "furtherWork": "Continue immediately to Phase 20 (TPU Workflows: Launching Jobs & Checkpointed Experiments) to stage code and run resumable training loops."
       },
       "additionalProjectIds": [
@@ -4186,7 +4191,7 @@
       "projectNote": "Work in projects/tpu-workflow-audit/starter/model.py. Complete stages 1 and 2 for independent calculations and changed-condition diagnosis, then retain the stage 3 evidence with --evidence-dir runs/tpu-workflow-audit. Stage 4 integrates the checks. Learner commands explicitly select the starter; --implementation solution is instructor reference execution. This bounded practice does not certify the entire phase or target hardware.",
       "studyGuide": {
         "question": "Can you launch a JAX job over SSH, separate XLA warmup from steady-state timing, and resume cleanly after interruption?",
-        "why": "Cloud TPU VMs can be preempted and multi-host Pod slices require lockstep execution across all workers. A reliable workflow saves atomic checkpoints, logs JSONL events, and copies artifacts back before teardown.",
+        "why": "A cloud training job needs a repeatable path from local source to running process to retained result. Follow which files and dependencies reach each worker, when warmup ends, which state is checkpointed and where the resulting evidence is copied before teardown.\n\nThe single-host exercise establishes a bounded continuation. Multi-host work additionally requires agreement across participants about topology, global steps and accepted checkpoint boundaries. A topology-discovery command and a collective training receipt answer different questions; use the observed state to decide what the next experiment can safely assume.",
         "readiness": {
           "prompt": "Step 1 of your TPU job takes 14 seconds while steps 2–50 take 11 milliseconds each. How should your launcher record timing?",
           "answer": "Run and synchronize one warmup call before the timed loop and log it as a separate warmup event so XLA compilation does not pollute steady-state step latency.",
@@ -4233,18 +4238,18 @@
       ],
       "hardware": "CPU numerical & profiler harness; Cloud TPU VM for target XProf traces",
       "project": "Estimate optimizer-state bytes and calculate supplied-rate scaling efficiency",
-      "checkpoint": "Compare TPU v5e, v5p, and v6e ridge points, budget training and KV-cache HBM, measure BF16/INT8 matmul error with FP32 accumulation, and capture a warmed XProf trace.",
+      "checkpoint": "Compare published TPU roofline estimates, budget training and KV-cache HBM, compare BF16 result-dtype policies and an INT8 weight-dequantization reference, and retain a warmed profiler trace with its observed backend.",
       "source": "https://openxla.org/xprof",
       "lessons": [
         {
           "id": "tpu-03",
           "title": "TPU generations and HBM memory budgeting",
           "status": "authored",
-          "objective": "Compare TPU v5e, v5p, and v6e specifications and roofline ridge points, budget FP32 vs mixed-BF16 training state and KV-cache HBM, and size the minimum chip count for a model.",
+          "objective": "Compare TPU generation tradeoffs, prove per-device replicated versus sharded memory fit, and budget training state separately from inference KV cache.",
           "prerequisites": [],
-          "exercise": "Compute estimate_memory_gib for a 1.5B parameter model with 4096 KV tokens and verify that its mixed-precision training state fits comfortably inside a single-host v5litepod-4 (64 GiB total HBM).",
-          "evidence": "Keep the TPU ridge-point table, 7B and 1.5B training/KV-cache HBM budgets, and minimum chip count calculation at an 80% HBM ceiling.",
-          "check": "Why does mixed-precision Adam training still require ~12 bytes per parameter in HBM even when forward and backward matmuls use 2-byte bfloat16?",
+          "exercise": "For a 7B mixed-BF16 training state, compare ideal evenly sharded v6e-4 and v6e-8 plans at 80% HBM per chip. Report per-chip state and remaining HBM before activations, then decide whether each can fit under an additional 8 GiB/device activation-and-temporary allowance. Separately report the BF16 inference KV cache at 8192 tokens. State the placement assumption and do not add inference KV cache to training state.",
+          "evidence": "Keep aggregate and per-device state ledgers, replication/sharding/headroom assumptions, invalid aggregate-fit counterexamples and separate training-versus-inference capacity decisions.",
+          "check": "Under this lesson's ledger, why does mixed-BF16 Adam training require 18 bytes per parameter before activations and temporary buffers are counted?",
           "path": "phases/21-tpu-systems/01-tpu-generations-and-hbm-memory-budgeting",
           "runtime": {
             "kind": "cpu"
@@ -4266,12 +4271,12 @@
           "id": "tpu-06",
           "title": "bfloat16, int8 precision, and XProf profiling on TPU",
           "status": "authored",
-          "objective": "Measure bfloat16 and symmetric int8 matrix multiplication error against float32, verify float32 accumulator precision, and capture a warmed XProf (*.xplane.pb) trace.",
+          "objective": "Measure BF16 operand and requested result-dtype error against a finite-precision FP32 JAX reference, inspect CPU dtype and compiler evidence, and retain a warmed XProf trace with its observed backend.",
           "prerequisites": [
             "tpu-03"
           ],
-          "exercise": "Run capture_warmed_xprof_trace for 4 steps of size 96 on the active backend, verify trace_file_count >= 1, and assert that bf16_max_abs_err is smaller than int8_max_abs_err.",
-          "evidence": "Keep the BF16 vs INT8 error summary, FP32-vs-BF16 accumulator drift comparison, and captured *.xplane.pb trace receipt.",
+          "exercise": "Run `evaluate_precision_policies(seed=42)` and `capture_warmed_trace(steps=3)`. Report the observed backend, each of the three returned dtypes, and all three mean errors. State that the displayed precision comparison uses the CPU rehearsal when the backend is CPU, and that this trace workload contains no collective. Report JAX version and confirm warmup, profiled and unprofiled outputs are finite, and `profiled_xplane_count >= 1`; predict and check that `steps=5` keeps the output finite because each iteration reuses the same input.",
+          "evidence": "Keep the returned-dtype/error table, seeded cast comparisons, source-bound CPU compiler IR and captured *.xplane.pb trace receipt. State the observed backend and the limits of each artifact.",
           "check": "Why should you run and synchronize at least one warmup step before entering with jax.profiler.trace(trace_dir): on a TPU VM?",
           "path": "phases/21-tpu-systems/02-bfloat16-int8-precision-and-xprof-profiling",
           "runtime": {
@@ -4303,10 +4308,10 @@
       "projectNote": "Work in projects/tpu-systems-audit/starter/model.py. Complete stages 1 and 2 for independent calculations and changed-condition diagnosis, then retain the stage 3 evidence with --evidence-dir runs/tpu-systems-audit. Stage 4 integrates the checks. Learner commands explicitly select the starter; --implementation solution is instructor reference execution. This bounded practice does not certify the entire phase or target hardware.",
       "studyGuide": {
         "question": "How do you size TPU HBM capacity, bound BF16/INT8 precision error, and capture a clean XProf trace?",
-        "why": "Provisioning a TPU slice without budgeting HBM wastes time on out-of-memory crashes, and profiling without warming up measures compiler overhead instead of MXU execution.",
+        "why": "Hardware specifications become useful only after you connect them to the workload. Training-state memory, inference KV-cache growth, arithmetic intensity and numerical precision place different demands on a device. Calculate those demands under explicit storage and placement assumptions before comparing theoretical ceilings.\n\nThen separate three observations: how many bytes are represented, how the numerical result changes and where execution time is spent. The memory ledger, precision chart and XProf trace each answer one of these questions. Read them together to form a target-specific hypothesis, and retain the actual target evidence when testing it.",
         "readiness": {
           "prompt": "A matrix multiplication has arithmetic intensity 170 FLOP/byte on TPU v5e (ridge point 240.5 FLOP/byte). Is it compute-bound or HBM bandwidth-bound?",
-          "answer": "HBM bandwidth-bound, because its arithmetic intensity (170 FLOP/byte) is below the TPU v5e ridge point (240.5 FLOP/byte). Increasing batch size or sequence length raises operational intensity toward the MXU ceiling.",
+          "answer": "Under this ideal roofline model, 170 FLOP/byte is below the TPU v5e ridge of 240.5 FLOP/byte, so the HBM bandwidth ceiling is lower. Changing batch or sequence length can change data reuse and operational intensity; recompute the traffic assumptions and measure the actual workload before claiming a bottleneck or speedup.",
           "lessonId": "tpu-03"
         },
         "milestones": [
@@ -4315,14 +4320,14 @@
               "tpu-03"
             ],
             "title": "Compare TPU generations and budget HBM capacity",
-            "task": "Compute TPU v5e, v5p, and v6e ridge points, calculate FP32 vs mixed-BF16 training state and KV-cache GiB, and determine the minimum chip count at an 80% HBM budget."
+            "task": "Compute the v5e/v5p/v6e ideal ridge points and separate training-state from inference KV-cache bytes. Compare replicated and explicitly sharded per-device ledgers under headroom and temporary/activation assumptions before deriving any conditional minimum chip count."
           },
           {
             "lessonIds": [
               "tpu-06"
             ],
             "title": "Audit BF16/INT8 precision and capture a warmed XProf trace",
-            "task": "Compare BF16 and symmetric INT8 matmul errors against FP32, verify FP32 accumulation inside jax.lax.dot_general, and capture a warmed *.xplane.pb trace."
+            "task": "Compare BF16 operand/requested-result policies and an INT8 weight-dequantization reference against FP32, inspect returned dtypes and retained CPU compiler IR, and capture a warmed *.xplane.pb trace with its backend recorded."
           }
         ],
         "transfer": {
@@ -4330,8 +4335,8 @@
           "approach": "The operation is above v5e’s ideal intersection and below v6e’s. That selects the lower of theoretical ceilings, not measured bottlenecks or a device ranking. Record actual precision, output bytes and traffic assumptions; validate the hypothesis with target timing and a trace before claiming a speedup."
         },
         "pitfall": {
-          "symptom": "Accumulating a long bfloat16 dot product directly in bfloat16 produces much larger drift than expected.",
-          "check": "Pass preferred_element_type=jnp.float32 to jax.lax.dot_general so the TPU MXU accumulates products in FP32 before any output cast."
+          "symptom": "A BF16 result differs from a requested FP32 result even when both dots receive the same BF16-rounded operands.",
+          "check": "Compare actual returned dtypes and an explicit FP32-result-to-BF16 cast, then inspect compiler evidence on the named backend. A result dtype or larger output error does not prove that every partial sum used that dtype."
         },
         "completion": "Retain the TPU ridge-point and HBM budget tables from tpu-03, plus the BF16/INT8 error summary and *.xplane.pb trace receipt from tpu-06.",
         "furtherWork": "Use the reviewed execution matrix before staging code on a TPU. CPU-only lesson companions stay on CPU; only source-reviewed targets with matching dependencies and topology should be launched. The retained v5e receipts qualify their named workloads, not every course script or a production model."

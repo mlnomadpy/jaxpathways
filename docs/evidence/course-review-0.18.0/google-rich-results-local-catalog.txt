@@ -1,0 +1,52 @@
+Browser tab: 1547147108, Title: "Rich Results Test - Google Search Console", URL: "https://search.google.com/test/rich-results/result?id=bJ3x9HZRb1qBlCDBv898DQ".
+0 AXWebArea Rich Results Test - Google Search Console, URL: search.google.com/test/rich-results/result?id=bJ3x9HZRb1qBlCDBv898DQ
+	1 container
+		2 container yDmH0d
+			3 container gb
+				4 container
+					34 button Go back
+						35 image
+					5 heading Rich Results Test, Value: 1
+						36 text Rich Results Test
+					7 pop up button (collapsed) Secondary Actions: Expand
+					8 button (collapsed) Description: Google apps, Secondary Actions: Expand
+					9 button (collapsed) Description: Google Account: Taha Bouhsine ([redacted account]), Google membership, Secondary Actions: Expand
+			37 container
+				38 container
+					39 text Code input
+					40 container
+						41 button Open search dialog
+						42 button Copy editor content
+						43 text entry area
+						44 container
+							45 container
+								46 container (showing 0-500 of 776 items)
+									47 text <!doctype html> < html >< head >< script type = "application/ld+json" > { "@context" :  "https://schema.org" ,  "@graph" : [{ "@type" :  "Person" ,  "@id" :  "https://www.tahabouhsine.com/#author" ,  "name" :  "Taha Bouhsine" ,  "url" :  "https://www.tahabouhsine.com/" }, { "@type" :  "Organization" ,  "@id" :  "https://www.tahabouhsine.com/#project" ,  "name" :  "JAX Pathways" ,  "url" :  "https://www.tahabouhsine.com/" ,  "sameAs" :  "https://github.com/mlnomadpy/jaxpathways" ,  "founder" : { "@id" :  "https://www.tahabouhsine.com/#author" }}, { "@type" :  "WebSite" ,  "@id" :  "https://www.tahabouhsine.com/#website" ,  "name" :  "JAX Pathways" ,  "url" :  "https://www.tahabouhsine.com/" ,  "inLanguage" :  "en" ,  "publisher" : { "@id" :  "https://www.tahabouhsine.com/#project" }}, { "@type" :  "CollectionPage" ,  "@id" :  "https://www.tahabouhsine.com/course.html#webpage" ,  "url" :  "https://www.tahabouhsine.com/course.html" ,  "name" :  "Learn JAX: lessons, projects & training systems \u2014 JAX Pathways" ,  "description" :  "Study JAX arrays, automatic differentiation, optimization, neural networks, distributed training and deployment with worked Python examples and projects." ,  "inLanguage" :  "en" ,  "isPartOf" : { "@id" :  "https://www.tahabouhsine.com/#website" },  "author" : { "@id" :  "https://www.tahabouhsine.com/#author" },  "breadcrumb" : { "@id" :  "https://www.tahabouhsine.com/course.html#breadcrumbs" },  "mainEntity" : { "@id" :  "https://www.tahabouhsine.com/course.html#courses" }}, { "@type" :  "BreadcrumbList" ,  "@id" :  "https://www.tahabouhsine.com/course.html#breadcrumbs" ,  "itemListElement" : [{ "@type" :  "ListItem" ,  "position" :  1 ,  "name" :  "JAX Pathways" ,  "item" :  "https://www.tahabouhsine.com/" }, { "@type" :  "ListItem" ,  "position" :  2 ,  "name" :  "Learn JAX: lessons, projects & training systems" ,  "item" :  "https://www.tahabouhsine.com/course.html" }]}, { "@type" :  "ItemList" ,  "@id" :  "https://www.tahabouhsine.com/course.html#courses" ,  "name" :  "JAX courses and phases" ,  "numberOfItems" :  22 ,  "itemListElement" : [{ "@type" :  "ListItem" ,  "position" :  1 ,  "item" : { "@type" :  "Course" ,  "@id" :  "https://www.tahabouhsine.com/phase-guides/welcome.html#course" ,  "url" :  "https://www.tahabouhsine.com/phase-guides/welcome.html" ,  "name" :  "Setup & first steps" ,  "description" :  "Run and inspect saved programs in a CPU environment, then learn how to prepare and verify explicit, source-reviewed TPU targets. TPU jobs are optional and separate from the course\u2019s CPU practice." ,  "inLanguage" :  "en" ,  "isAccessibleForFree" :  true ,  "author" : { "@id" :  "https://www.tahabouhsine.com/#author" },  "provider" : { "@id" :  "https://www.tahabouhsine.com/#project" },  "teaches" :  "Explain which device ran your code and reproduce the result in a fresh environment." ,  "coursePrerequisites" : [],  "dateModified" :  "2026-10-27" ,  "syllabusSections" : [{ "@type" :  "Syllabus" ,  "@id" :  "https://www.tahabouhsine.com/lesson-welcome-01.html#syllabus" ,  "url" :  "https://www.tahabouhsine.com/lesson-welcome-01.html" ,  "name" :  "Set up your learning workspace" ,  "description" :  "Download a starter workspace, select its Python environment, run a saved program, and verify one deliberate change." }, { "@type" :  "Syllabus" ,  "@id" :  "https://www.tahabouhsine.com/lesson-welcome-02.html#syllabus" ,  "url" :  "https://www.tahabouhsine.com/lesson-welcome-02.html" ,  "name" :  "Meet your arrays and devices" ,  "description" :  "Create an array, inspect its dtype and device, and explain the result." }, { "@type" :  "Syllabus" ,  "@id" :  "https://www.tahabouhsine.com/lesson-welcome-cpu.html#syllabus" ,  "url" :  "https://www.tahabouhsine.com/lesson-welcome-cpu.html" ,  "name" :  "Practice with four virtual CPU devices" ,  "description" :  "Start four logical CPU devices, inspect row-sharded and replicated arrays, and diagnose an indivisible batch." }, { "@type" :  "Syllabus" ,  "@id" :  "https://www.tahabouhsine.com/lesson-welcome-03.html#syllabus" ,  "url" :  "https://www.tahabouhsine.com/lesson-welcome-03.html" ,  "name" :  "Move your experiment to a TPU" ,  "description" :  "Use the recorded CPU reference to check arithmetic and placement, then run only a named, source-reviewed TPU target with pinned dependencies and verify its observed backend receipt." }]}}, { "@type" :  "ListItem" ,  "position" :  2 ,  "item" : { "@type" :  "Course" ,  "@id" :  "https://www.tahabouhsine.com/phase-guides/arrays.html#course" ,  "url" :  "https://www.tahabouhsine.com/phase-guides/arrays.html" ,  "name" :  "Arrays & pure functions" ,  "description" :  "Treat every axis as part of a contract. Work through normalization, broadcasting and immutable updates, then diagnose mistakes that still return plausible numbers." ,  "inLanguage" :  "en" ,  "isAccessibleForFree" :  true ,  "author" : { "@id" :  "https://www.tahabouhsine.com/#author" },  "provider" : { "@id" :  "https://www.tahabouhsine.com/#project" },  "teaches" :  "Predict output shapes and explain why a pure function is easier to transform." ,  "coursePrerequisites" : [ "Setup & first steps" ],  "dateModified" :  "2026-10-27" ,  "syllabusSections" : [{ "@type" :  "Syllabus" ,  "@id" :  "https://www.tahabouhsine.com/lesson-arrays-01.html#syllabus" ,  "url" :  "https://www.tahabouhsine.com/lesson-arrays-01.html" ,  "name" :  "From NumPy to jax.numpy" ,  "description" :  "Build feature-wise preprocessing with fitted statistics and verify behavior on new and constant data." }, { "@type" :  "Syllabus" ,  "@id" :  "https://www.tahabouhsine.com/lesson-arrays-02.html#syllabus" ,  "url" :  "https://www.tahabouhsine.com/lesson-arrays-02.html" ,  "name" :  "Shapes, broadcasting, and dtypes" ,  "description" :  "Specify broadcasting contracts and detect silent pairwise-loss and dtype mistakes." }, { "@type" :  "Syllabus" ,  "@id" :  "https://www.tahabouhsine.com/lesson-arrays-03.html#syllabus" ,  "url" :  "https://www.tahabouhsine.com/lesson-arrays-03.html" ,  "name" :  "Pure functions and explicit inputs" ,  "description" :  "Design an explicit parameter/data interface and return new state without mutating old containers." }, { "@type" :  "Syllabus" ,  "@id" :  "https://www.tahabouhsine.com/lesson-arrays-04.html#syllabus" ,  "url" :  "https://www.tahabouhsine.com/lesson-arrays-04.html" ,  "name" :  "Immutable updates and indexing" ,  "description" :  "Implement functional indexed updates and distinguish accumulated contributions from shape-preserving masks." }]}}, { "@type" :  "ListItem" ,  "position" :  3 ,  "item" : { "@type" :  "Course" ,  "@id" :  "https://www.tahabouhsine.com/phase-guides/transforms.html#course" ,  "url"
+				48 container
+					49 container Breadcrumbs
+						50 heading Test results, Value: 1
+							51 text Test results
+					52 button SHARE
+						53 text SHARE
+					54 container
+						55 container
+							56 text 45 valid items detected Valid items are eligible for Google Search's rich results. 
+							57 link Description: Learn more, Value: support.google.com/webmasters/answer/9012289#enhancements
+						58 button View tested page
+							59 text VIEW TESTED PAGE
+						60 button See preview of your URL on Google Search
+							61 text PREVIEW RESULTS
+						62 text Detected structured data
+						63 link Description: Breadcrumbs 1 valid item detected, Value: search.google.com/test/rich-results/result/r%2Fbreadcrumbs?id=bJ3x9HZRb1qBlCDBv898DQ
+						64 link Description: Course list item 22 valid items detected, Value: search.google.com/test/rich-results/result/r%2Fcourses?id=bJ3x9HZRb1qBlCDBv898DQ
+						65 link Description: Paywalled Content 22 valid items detected, Value: search.google.com/test/rich-results/result/r%2Fpaywalled-content?id=bJ3x9HZRb1qBlCDBv898DQ
+						66 text Additional resources
+						67 link Description: Monitor Rich Results for your entire site GO TO SEARCH CONSOLE, Value: search.google.com/search-console/welcome
+						68 link Description: Privacy, Value: myaccount.google.com/privacypolicy?hl=en
+						69 link Description: Terms, Value: myaccount.google.com/termsofservice?hl=en
+		30 container reCAPTCHA
+			31 AXWebArea reCAPTCHA, URL: google.com/recaptcha/api2/anchor?ar=1&k=6LeKMsIjAAAAAGP5PskdMId0tLXc7dL3LiO07Avf&co=aHR0cHM6Ly9zZWFyY2guZ29vZ2xlLmNvbTo0NDM.&hl=en&v=NhfdZHzre16wrc2m6BxEdu7J&size=invisible&anchor-ms=20000&execute-ms=30000&cb=a7v35zdjphs2
+				32 text protected by 
+				33 text reCAPTCHA
+
+The focused UI element is 0 AXWebArea Rich Results Test - Google Search Console, URL: search.google.com/test/rich-results/result?id=bJ3x9HZRb1qBlCDBv898DQ

@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "deployment-03",
-  "contentHash": "63457d83e24b92d1ee48a4dcbb0ed2e9c2456632af61906ee7639dcd1ba785dc",
-  "executedAt": "2026-10-21T16:09:29.454436+00:00",
+  "contentHash": "6bb75e8e9fd5aa37040e40e6514c54146bc1bd33d2d9f6b5f7e574a0277d02b7",
+  "executedAt": "2026-10-27T17:09:38.856642+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -28,7 +28,7 @@
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "Verified serialized bytes: 1540\n"
+            "Verified serialized bytes: 1552\n"
           ]
         }
       ]
@@ -40,7 +40,7 @@
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "Verified serialized bytes: 1396\n"
+            "Verified serialized bytes: 1404\n"
           ]
         }
       ]
@@ -50,7 +50,7 @@
       "outputs": []
     },
     {
-      "sourceHash": "25df6d662f9d3f0c4e984c6a201f79fa0cfd7a2633dc4b0773dfba6c2dd4ee6c",
+      "sourceHash": "53dc08a479da44f2b1718bf964cd5c4d3e3305811c536df9d501b1833a6e3476",
       "outputs": [
         {
           "output_type": "display_data",

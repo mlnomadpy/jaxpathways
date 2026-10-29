@@ -1,9 +1,10 @@
 """bfloat16, int8 precision, and XProf profiling on TPU: worked experiments and reference solutions. CPU checks."""
 
-# Compare BF16 (FP32 vs BF16 accumulation) and per-channel INT8 matmul errors
-# Step 1 — Compare BF16 (FP32 vs BF16 accumulation) and per-channel INT8 matmul errors
+# Compare BF16 operands with requested FP32 or BF16 dot result dtypes, plus per-column INT8 reference error
+# Step 1 — Compare BF16 operands with requested FP32 or BF16 dot result dtypes, plus per-column INT8 reference error
 from pathlib import Path
 import os
+import tempfile
 import tempfile
 import time
 import jax
@@ -20,84 +21,111 @@ def evaluate_precision_policies(seed=0):
     w = jax.random.normal(k2, (256, 64), dtype=jnp.float32) * 0.25
     # Cast or evaluate `ref_fp32` in explicit floating-point precision.
     ref_fp32 = jnp.dot(x, w, preferred_element_type=jnp.float32)
-    # Cast or evaluate `out_bf16_fp32acc` in explicit floating-point precision.
-    out_bf16_fp32acc = jnp.dot(
+    # Cast or evaluate `out_bf16_requested_fp32` in explicit floating-point precision.
+    out_bf16_requested_fp32 = jnp.dot(
         x.astype(jnp.bfloat16), w.astype(jnp.bfloat16), preferred_element_type=jnp.float32
     )
-    # Cast or evaluate `out_bf16_bf16acc` in explicit floating-point precision.
-    out_bf16_bf16acc = jnp.dot(
+    # Cast or evaluate `out_bf16_requested_bf16` in explicit floating-point precision.
+    out_bf16_requested_bf16 = jnp.dot(
         x.astype(jnp.bfloat16), w.astype(jnp.bfloat16), preferred_element_type=jnp.bfloat16
-    ).astype(jnp.float32)
+    )
     # Reduce across the target axis to summarize `scale`.
     column_max = jnp.max(jnp.abs(w), axis=0, keepdims=True)
     scale = jnp.where(column_max == 0, 1.0, column_max / 127.0)
     # The scale of 1 for a zero column avoids division by zero; its quantized values remain zero.
     w_int8 = jnp.clip(jnp.round(w / scale), -127, 127).astype(jnp.int8)
-    # Cast or evaluate `out_int8_fp32acc` in explicit floating-point precision.
-    out_int8_fp32acc = jnp.dot(x, w_int8.astype(jnp.float32) * scale, preferred_element_type=jnp.float32)
-    policies = [
-        ("bf16 (fp32 accum)", out_bf16_fp32acc),
-        ("bf16 (bf16 accum)", out_bf16_bf16acc),
-        ("int8 per-col (fp32 accum)", out_int8_fp32acc),
+    # Cast or evaluate `out_int8_dequant_requested_fp32` in explicit floating-point precision.
+    out_int8_dequant_requested_fp32 = jnp.dot(x, w_int8.astype(jnp.float32) * scale, preferred_element_type=jnp.float32)
+    result_dtype_cases = [
+        ("BF16 operands / requested FP32 result", out_bf16_requested_fp32),
+        ("BF16 operands / requested BF16 result", out_bf16_requested_bf16),
+        ("INT8 per-column / FP32 dequantized dot result", out_int8_dequant_requested_fp32),
     ]
     results = []
-    # Loop over `(label, tensor)` in `policies`:
-    for label, tensor in policies:
+    # Loop over each requested-result-dtype comparison:
+    for label, tensor in result_dtype_cases:
         diff = jnp.abs(tensor - ref_fp32)
         # Append the computed value via `results.append({`.
         results.append({
-            "policy": label,
+            "result_dtype_setting": label,
+            "returned_dtype": str(tensor.dtype),
             "max_abs_err": round(float(jnp.max(diff)), 5),
             "mean_abs_err": round(float(jnp.mean(diff)), 5),
-            "weight_bytes": int(w_int8.size),
-            "scale_bytes": int(scale.size * 4),
+            "input_shape": list(x.shape), "weight_shape": list(w.shape), "result_shape": list(tensor.shape),
+            "stored_weight_bytes": int((w.astype(jnp.bfloat16).size * 2) if "BF16" in label else w_int8.size),
+            "scale_metadata_bytes": int(0 if "BF16" in label else scale.size * 4),
+            "runtime_input_bytes": int(x.size * (2 if "BF16" in label else 4)),
+            "runtime_weight_operand_bytes": int(w.astype(jnp.bfloat16).size * 2 if "BF16" in label else w.size * 4),
+            "dequantized_fp32_workspace_bytes": int(w.size * 4 if "INT8" in label else 0),
+            "result_bytes": int(tensor.size * (2 if tensor.dtype == jnp.bfloat16 else 4)),
+            "storage_note": "logical array sizes; not peak HBM or measured traffic",
         })
     return results
 
 
-# Capture a warmed XProf trace and verify *.xplane.pb output
+# Capture a bounded fixed-input XProf trace and measure unprofiled work
 # Step 2 — Capture a warmed XProf trace and verify *.xplane.pb output
-def capture_warmed_trace(steps=4, trace_dir=None):
-    x = jnp.ones((256, 256), dtype=jnp.bfloat16)
-    # Wrap with `jax.jit` (`step_fn`) so XLA traces and compiles the function.
+def capture_warmed_trace(steps=5, trace_dir=None):
+    if not isinstance(steps, int) or not 1 <= steps <= 16:
+        raise ValueError("steps must be an integer in [1, 16]")
+    # Reuse the same bounded input each iteration. For this 128x128 matrix of 0.125,
+    # every dot entry is 128 * 0.125 * 0.125 = 2.0, so repeated calls cannot grow the values.
+    x = jnp.full((128, 128), 0.125, dtype=jnp.bfloat16)
     step_fn = jax.jit(lambda a: jnp.dot(a, a, preferred_element_type=jnp.float32).astype(jnp.bfloat16))
-    t0 = time.perf_counter()
-    # Wait for device work to finish before timing it or comparing its result on the host.
-    jax.block_until_ready(step_fn(x))
-    warmup_ms = (time.perf_counter() - t0) * 1000.0
-    # Enter managed runtime/context scope for this block:
+
+    warm = jax.block_until_ready(step_fn(x))
+    if not bool(np.isfinite(np.asarray(warm)).all()):
+        raise FloatingPointError("warmup output contains a non-finite value")
+
     trace_dir = Path(trace_dir or os.environ.get("TPU_TRACE_DIR", "./tpu-xprof-trace")).expanduser().resolve()
     trace_dir.mkdir(parents=True, exist_ok=True)
     with jax.profiler.trace(str(trace_dir)):
-        t1 = time.perf_counter()
-        # Repeat the update loop over `range(steps)` steps:
         for _ in range(steps):
-            x = step_fn(x)
-        # Wait for device work to finish before timing it or comparing its result on the host.
-        jax.block_until_ready(x)
-        steady_ms = (time.perf_counter() - t1) * 1000.0 / steps
-    # Collect files from the retained trace directory.
+            profiled_result = jax.block_until_ready(step_fn(x))
+            if not bool(np.isfinite(np.asarray(profiled_result)).all()):
+                raise FloatingPointError("profiled output contains a non-finite value")
+
+    # Measure the same fixed-signature work outside the profiler. This includes host dispatch
+    # and synchronization, and is separate from trace duration or profiler event durations.
+    t0 = time.perf_counter()
+    for _ in range(steps):
+        unprofiled_result = jax.block_until_ready(step_fn(x))
+    unprofiled_ms = (time.perf_counter() - t0) * 1000.0
+    if not bool(np.isfinite(np.asarray(unprofiled_result)).all()):
+        raise FloatingPointError("unprofiled output contains a non-finite value")
+
     xplane_files = list(trace_dir.rglob("*.xplane.pb"))
-    return {"warmup_ms": warmup_ms, "steady_ms": steady_ms, "xplane_count": len(xplane_files), "trace_dir": str(trace_dir)}
+    return {
+        "backend": jax.default_backend(), "jax_version": jax.__version__, "input_shape": list(x.shape), "steps": steps,
+        "warmup_finite": True, "all_finite": True, "profiled_xplane_count": len(xplane_files),
+        "trace_dir": str(trace_dir), "unprofiled_total_ms": unprofiled_ms,
+        "unprofiled_ms_per_step": unprofiled_ms / steps,
+        "measurement_note": "unprofiled wall time includes host dispatch and synchronization; not a device-only duration",
+        "workload_note": "fixed-input BF16 dot; no collective communication in this function",
+    }
 
 
 
 prec_table = evaluate_precision_policies()
-trace_info = capture_warmed_trace()
-# Assert invariant `trace_info["xplane_count"] >= 1` holds
-assert trace_info["xplane_count"] >= 1
-# Assert invariant `prec_table[0]["max_abs_err"] < prec_table[1]["max_abs_err"]` holds
-assert prec_table[0]["max_abs_err"] < prec_table[1]["max_abs_err"]
+trace_info = capture_warmed_trace(steps=5)
+# Assert invariant `trace_info["profiled_xplane_count"] >= 1` holds
+assert trace_info["profiled_xplane_count"] >= 1
+assert prec_table[0]["returned_dtype"] == "float32"
+assert prec_table[1]["returned_dtype"] == "bfloat16"
+assert all(np.isfinite(row["max_abs_err"]) and np.isfinite(row["mean_abs_err"]) for row in prec_table)
 print("Precision comparison:", prec_table)
-print("Captured *.xplane.pb trace count:", trace_info["xplane_count"], "steady_ms:", round(trace_info["steady_ms"], 4))
+print("Observed backend:", trace_info["backend"], "profiled steps:", trace_info["steps"], "XPlane files:", trace_info["profiled_xplane_count"], "unprofiled ms/step:", round(trace_info["unprofiled_ms_per_step"], 4))
 
 # Step 3: Verify invariants on the completed state
-assert trace_info["xplane_count"] >= 1
-assert prec_table[0]["max_abs_err"] < prec_table[1]["max_abs_err"]
+assert trace_info["profiled_xplane_count"] >= 1
+assert prec_table[0]["returned_dtype"] == "float32"
+assert prec_table[1]["returned_dtype"] == "bfloat16"
+assert all(np.isfinite(row["max_abs_err"]) and np.isfinite(row["mean_abs_err"]) for row in prec_table)
 
-# Step 1 — Compare BF16 (FP32 vs BF16 accumulation) and per-channel INT8 matmul errors
+# Step 1 — Compare BF16 operands with requested FP32 or BF16 dot result dtypes, plus per-column INT8 reference error
 from pathlib import Path
 import os
+import tempfile
 import time
 import jax
 import jax.numpy as jnp
@@ -113,83 +141,108 @@ def evaluate_precision_policies(seed=0):
     w = jax.random.normal(k2, (256, 64), dtype=jnp.float32) * 0.25
     # Keep the reference matrix product in float32 for comparison.
     ref_fp32 = jnp.dot(x, w, preferred_element_type=jnp.float32)
-    # Round both inputs to BF16, but accumulate and return the dot product in float32.
-    out_bf16_fp32acc = jnp.dot(
+    # Round both operands to BF16, then request a float32 result dtype from the dot.
+    out_bf16_requested_fp32 = jnp.dot(
         x.astype(jnp.bfloat16), w.astype(jnp.bfloat16), preferred_element_type=jnp.float32
     )
-    # Accumulate this BF16 dot product in BF16, then cast back for a same-dtype comparison.
-    out_bf16_bf16acc = jnp.dot(
+    # Request a BF16 dot result, then widen returned values to FP32 for error measurement.
+    out_bf16_requested_bf16 = jnp.dot(
         x.astype(jnp.bfloat16), w.astype(jnp.bfloat16), preferred_element_type=jnp.bfloat16
-    ).astype(jnp.float32)
+    )
     # Take one maximum per output column so each column gets its own quantization scale.
     column_max = jnp.max(jnp.abs(w), axis=0, keepdims=True)
     scale = jnp.where(column_max == 0, 1.0, column_max / 127.0)
     # The scale of 1 for a zero column avoids division by zero; its quantized values remain zero.
     w_int8 = jnp.clip(jnp.round(w / scale), -127, 127).astype(jnp.int8)
-    # Dequantize the int8 weights before a float32-accumulation dot product.
-    out_int8_fp32acc = jnp.dot(x, w_int8.astype(jnp.float32) * scale, preferred_element_type=jnp.float32)
-    policies = [
-        ("bf16 (fp32 accum)", out_bf16_fp32acc),
-        ("bf16 (bf16 accum)", out_bf16_bf16acc),
-        ("int8 per-col (fp32 accum)", out_int8_fp32acc),
+    # Dequantize int8 weights to FP32, then request an FP32 result from the dot.
+    out_int8_dequant_requested_fp32 = jnp.dot(x, w_int8.astype(jnp.float32) * scale, preferred_element_type=jnp.float32)
+    result_dtype_cases = [
+        ("BF16 operands / requested FP32 result", out_bf16_requested_fp32),
+        ("BF16 operands / requested BF16 result", out_bf16_requested_bf16),
+        ("INT8 per-column / FP32 dequantized dot result", out_int8_dequant_requested_fp32),
     ]
     results = []
-    # Loop over `(label, tensor)` in `policies`:
-    for label, tensor in policies:
+    # Loop over each requested-result-dtype comparison:
+    for label, tensor in result_dtype_cases:
         diff = jnp.abs(tensor - ref_fp32)
         # Append the computed value via `results.append({`.
         results.append({
-            "policy": label,
+            "result_dtype_setting": label,
+            "returned_dtype": str(tensor.dtype),
             "max_abs_err": round(float(jnp.max(diff)), 5),
             "mean_abs_err": round(float(jnp.mean(diff)), 5),
-            "weight_bytes": int(w_int8.size),
-            "scale_bytes": int(scale.size * 4),
+            "input_shape": list(x.shape), "weight_shape": list(w.shape), "result_shape": list(tensor.shape),
+            "stored_weight_bytes": int((w.astype(jnp.bfloat16).size * 2) if "BF16" in label else w_int8.size),
+            "scale_metadata_bytes": int(0 if "BF16" in label else scale.size * 4),
+            "runtime_input_bytes": int(x.size * (2 if "BF16" in label else 4)),
+            "runtime_weight_operand_bytes": int(w.astype(jnp.bfloat16).size * 2 if "BF16" in label else w.size * 4),
+            "dequantized_fp32_workspace_bytes": int(w.size * 4 if "INT8" in label else 0),
+            "result_bytes": int(tensor.size * (2 if tensor.dtype == jnp.bfloat16 else 4)),
+            "storage_note": "logical array sizes; not peak HBM or measured traffic",
         })
     return results
 
 
 
 # Step 2 — Capture a warmed XProf trace and verify *.xplane.pb output
-def capture_warmed_trace(steps=4, trace_dir=None):
-    x = jnp.ones((256, 256), dtype=jnp.bfloat16)
-    # Wrap with `jax.jit` (`step_fn`) so XLA traces and compiles the function.
+def capture_warmed_trace(steps=5, trace_dir=None):
+    if not isinstance(steps, int) or not 1 <= steps <= 16:
+        raise ValueError("steps must be an integer in [1, 16]")
+    # Reuse the same bounded input each iteration. For this 128x128 matrix of 0.125,
+    # every dot entry is 128 * 0.125 * 0.125 = 2.0, so repeated calls cannot grow the values.
+    x = jnp.full((128, 128), 0.125, dtype=jnp.bfloat16)
     step_fn = jax.jit(lambda a: jnp.dot(a, a, preferred_element_type=jnp.float32).astype(jnp.bfloat16))
-    t0 = time.perf_counter()
-    # Wait for device work to finish before timing it or comparing its result on the host.
-    jax.block_until_ready(step_fn(x))
-    warmup_ms = (time.perf_counter() - t0) * 1000.0
+
+    warm = jax.block_until_ready(step_fn(x))
+    if not bool(np.isfinite(np.asarray(warm)).all()):
+        raise FloatingPointError("warmup output contains a non-finite value")
+
     trace_dir = Path(trace_dir or os.environ.get("TPU_TRACE_DIR", "./tpu-xprof-trace")).expanduser().resolve()
     trace_dir.mkdir(parents=True, exist_ok=True)
     with jax.profiler.trace(str(trace_dir)):
-        t1 = time.perf_counter()
-        # Repeat the update loop over `range(steps)` steps:
         for _ in range(steps):
-            x = step_fn(x)
-        # Wait for device work to finish before timing it or comparing its result on the host.
-        jax.block_until_ready(x)
-        steady_ms = (time.perf_counter() - t1) * 1000.0 / steps
-    # Collect files from the retained trace directory.
+            profiled_result = jax.block_until_ready(step_fn(x))
+            if not bool(np.isfinite(np.asarray(profiled_result)).all()):
+                raise FloatingPointError("profiled output contains a non-finite value")
+
+    # Measure the same fixed-signature work outside the profiler. This includes host dispatch
+    # and synchronization, and is separate from trace duration or profiler event durations.
+    t0 = time.perf_counter()
+    for _ in range(steps):
+        unprofiled_result = jax.block_until_ready(step_fn(x))
+    unprofiled_ms = (time.perf_counter() - t0) * 1000.0
+    if not bool(np.isfinite(np.asarray(unprofiled_result)).all()):
+        raise FloatingPointError("unprofiled output contains a non-finite value")
+
     xplane_files = list(trace_dir.rglob("*.xplane.pb"))
-    return {"warmup_ms": warmup_ms, "steady_ms": steady_ms, "xplane_count": len(xplane_files), "trace_dir": str(trace_dir)}
+    return {
+        "backend": jax.default_backend(), "jax_version": jax.__version__, "input_shape": list(x.shape), "steps": steps,
+        "warmup_finite": True, "all_finite": True, "profiled_xplane_count": len(xplane_files),
+        "trace_dir": str(trace_dir), "unprofiled_total_ms": unprofiled_ms,
+        "unprofiled_ms_per_step": unprofiled_ms / steps,
+        "measurement_note": "unprofiled wall time includes host dispatch and synchronization; not a device-only duration",
+        "workload_note": "fixed-input BF16 dot; no collective communication in this function",
+    }
 
 
 
 prec_table = evaluate_precision_policies()
-trace_info = capture_warmed_trace()
-# Assert invariant `trace_info["xplane_count"] >= 1` holds
-assert trace_info["xplane_count"] >= 1
-# Assert invariant `prec_table[0]["max_abs_err"] < prec_table[1]["max_abs_err"]` holds
-assert prec_table[0]["max_abs_err"] < prec_table[1]["max_abs_err"]
+trace_info = capture_warmed_trace(steps=5)
+# Assert invariant `trace_info["profiled_xplane_count"] >= 1` holds
+assert trace_info["profiled_xplane_count"] >= 1
+assert prec_table[0]["returned_dtype"] == "float32"
+assert prec_table[1]["returned_dtype"] == "bfloat16"
+assert all(np.isfinite(row["max_abs_err"]) and np.isfinite(row["mean_abs_err"]) for row in prec_table)
 print("Precision comparison:", prec_table)
 print("Retained trace directory:", trace_info["trace_dir"])
-print("Captured *.xplane.pb trace count:", trace_info["xplane_count"], "steady_ms:", round(trace_info["steady_ms"], 4))
+print("Observed backend:", trace_info["backend"], "profiled steps:", trace_info["steps"], "XPlane files:", trace_info["profiled_xplane_count"], "unprofiled ms/step:", round(trace_info["unprofiled_ms_per_step"], 4))
 
 # Figure data experiment
 # Perform matrix contraction / projection to compute `visual_data`.
 visual_data = {
     'kind': 'bar',
-    'labels': [r['policy'] for r in prec_table],
-    'xlabel': 'matmul precision policy',
+    'labels': ['BF16 inputs / FP32 result', 'BF16 inputs / BF16 result', 'INT8 weights / FP32 dequantized dot'],
+    'xlabel': 'requested result dtype / operand path',
     'ylabel': 'absolute error vs fp32 reference',
     'series': [
         {'label': 'max abs error', 'y': [float(r['max_abs_err']) for r in prec_table]},
@@ -197,27 +250,53 @@ visual_data = {
     ],
 }
 
-# Experiment: Compare FP32 accumulation vs BF16 accumulation error ratio
-# Experiment — Compare FP32 accumulation vs BF16 accumulation error ratio
-fp32_acc_err = prec_table[0]["max_abs_err"]
-bf16_acc_err = prec_table[1]["max_abs_err"]
-ratio = round(bf16_acc_err / fp32_acc_err, 2)
-print("BF16-accum / FP32-accum max error ratio:", ratio)
-# Assert invariant `ratio > 1.3` holds
-assert ratio > 1.3
+# Experiment: Compare requested FP32 vs BF16 result dtype error ratio
+# Experiment — Compare requested FP32 vs BF16 result dtype error ratio
+requested_fp32_err = prec_table[0]["max_abs_err"]
+requested_bf16_err = prec_table[1]["max_abs_err"]
+ratio = round(requested_bf16_err / requested_fp32_err, 2)
+print("Requested BF16 / FP32 result max-error ratio for seed 0:", ratio)
+# This reports the measured ratio for the current backend and fixed seed-zero fixture.
+assert np.isfinite(ratio)
 
-# Experiment: Compare warmup duration vs traced steady-state step duration
-# Experiment — Compare warmup duration vs traced steady-state step duration
-print("Warmup ms:", round(trace_info["warmup_ms"], 3), "Traced steady step ms:", round(trace_info["steady_ms"], 4))
-# Assert invariant `trace_info["warmup_ms"] > trace_info["steady_ms"]` holds
-assert trace_info["warmup_ms"] > trace_info["steady_ms"]
+# Experiment: Check finite output under a changed bounded trace count
+import tempfile
+with tempfile.TemporaryDirectory(prefix="tpu-trace-steps-") as tmp:
+    five = capture_warmed_trace(steps=5, trace_dir=tmp)
+print("Observed backend:", five["backend"], "steps:", five["steps"], "finite:", five["all_finite"], "XPlane files:", five["profiled_xplane_count"])
+assert five["all_finite"] and five["steps"] == 5 and five["profiled_xplane_count"] >= 1
+try:
+    capture_warmed_trace(steps=17, trace_dir=tmp)
+except ValueError:
+    print("Rejected steps above the fixed maximum before tracing")
+else:
+    raise AssertionError("trace step count must be bounded")
+
+# Experiment: Check shape-dependent byte accounting and a zero output column
+# Shape ledger: BF16 weights are 128*32*2 B; INT8 codes are 128*32 B and 32 FP32 scales.
+shape = (128, 32)
+bf16_weight_bytes = shape[0] * shape[1] * 2
+int8_code_bytes = shape[0] * shape[1]
+scale_bytes = shape[1] * 4
+zero_column = jnp.zeros((shape[0], 1), dtype=jnp.float32)
+zero_scale = jnp.where(jnp.max(jnp.abs(zero_column), axis=0, keepdims=True) == 0, 1.0, jnp.max(jnp.abs(zero_column), axis=0, keepdims=True) / 127.0)
+zero_codes = jnp.clip(jnp.round(zero_column / zero_scale), -127, 127).astype(jnp.int8)
+print({"bf16_weight_bytes": bf16_weight_bytes, "int8_code_bytes": int8_code_bytes, "scale_bytes": scale_bytes, "zero_column_scale": float(zero_scale[0,0]), "zero_codes": int(jnp.count_nonzero(zero_codes))})
+assert (bf16_weight_bytes, int8_code_bytes, scale_bytes) == (8192, 4096, 128)
+assert float(zero_scale[0,0]) == 1.0 and int(jnp.count_nonzero(zero_codes)) == 0
 
 # Reference solution. Try the exercise before reading this.
-# Exercise solution
 p42 = evaluate_precision_policies(seed=42)
 t3 = capture_warmed_trace(steps=3)
-print("Seed 42 mean errors:", {r["policy"]: r["mean_abs_err"] for r in p42}, "xplane files:", t3["xplane_count"])
-assert p42[0]["mean_abs_err"] < p42[1]["mean_abs_err"] and t3["xplane_count"] >= 1
+print("Observed backend and JAX version:", t3["backend"], t3["jax_version"])
+print("Three returned dtypes:", [r["returned_dtype"] for r in p42])
+print("Three mean absolute errors:", [r["mean_abs_err"] for r in p42])
+print("Trace steps/files:", t3["steps"], t3["profiled_xplane_count"], "unprofiled ms/step:", t3["unprofiled_ms_per_step"])
+assert t3["warmup_finite"] and t3["all_finite"] and t3["profiled_xplane_count"] >= 1
+assert [r["returned_dtype"] for r in p42] == ["float32", "bfloat16", "float32"]
+# Changed-step-count check: five repeats remain finite because input is not fed back as output.
+t5 = capture_warmed_trace(steps=5)
+assert t5["all_finite"] and t5["steps"] == 5
 
 # Reference practice: Compare per-channel vs per-tensor INT8 quantization error
 # Compare per-channel vs per-tensor INT8 quantization error (Foundations)

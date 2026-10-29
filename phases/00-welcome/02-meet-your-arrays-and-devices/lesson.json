@@ -4,7 +4,7 @@
   "minutes": 45,
   "content": {
     "idea": "An array is a collection of values with a shape, a dtype and a device. Shape tells us how to index the values; dtype tells us how they are represented; device tells us where the computation lives. Start by predicting a small reduction before asking JAX to perform it.",
-    "code": "# Step 1 — Prepare the inputs\nimport jax\nimport jax.numpy as jnp\n# Step 2 — Build the computation: x has two observations and three features.\nx = jnp.arange(6, dtype=jnp.float32).reshape(2, 3)\n# Step 3 — Run and check the result\nprint(\"Shape:\", x.shape)\nprint(\"Dtype:\", x.dtype)\nprint(\"Devices:\", x.devices())\nprint(\"Row sums:\", x.sum(axis=1))\n# Check tensor shape invariant: `x.shape == (2, 3)`\nassert x.shape == (2, 3)\nassert jnp.allclose(x.sum(axis=1), jnp.array([3., 12.]))",
+    "code": "# Step 1 \u2014 Prepare the inputs\nimport jax\nimport jax.numpy as jnp\n# Step 2 \u2014 Build the computation: x has two observations and three features.\nx = jnp.arange(6, dtype=jnp.float32).reshape(2, 3)\n# Step 3 \u2014 Run and check the result\nprint(\"Shape:\", x.shape)\nprint(\"Dtype:\", x.dtype)\nprint(\"Devices:\", x.devices())\nprint(\"Row sums:\", x.sum(axis=1))\n# Check tensor shape invariant: `x.shape == (2, 3)`\nassert x.shape == (2, 3)\nassert jnp.allclose(x.sum(axis=1), jnp.array([3., 12.]))",
     "output": "Shape: \\((2, 3)\\); Dtype: float32; Row sums: [ \\(3\\). \\(12\\).]. Device names vary.",
     "exercise": "Compute column sums instead. State the resulting shape before running the code.",
     "solution": "# Exercise solution: Compute column sums instead.\n# Reduce along axis=0 to compute `column_sums`.\ncolumn_sums = x.sum(axis=0)\n# Check tensor shape invariant: `column_sums.shape == (3,)`\nassert column_sums.shape == (3,)\nassert jnp.allclose(column_sums, jnp.array([3., 5., 7.]))",
@@ -16,26 +16,26 @@
     ],
     "answer": 1,
     "explanation": "Axis \\(0\\) is reduced. The three columns remain, so the result has shape \\((3,)\\).",
-    "problem": "Imagine a small table: two observations, with three measurements in each row. If we ask JAX to add the values, should it add across the rows or down the columns? Let’s work out both answers before running any code. You’ll learn to check an array’s shape, number format and device, so a plausible-looking result does not hide a mistake.",
+    "problem": "Imagine a small table: two observations, with three measurements in each row. If we ask JAX to add the values, should it add across the rows or down the columns? Let\u2019s work out both answers before running any code. You\u2019ll learn to check an array\u2019s shape, number format and device, so a plausible-looking result does not hide a mistake.",
     "sections": [
       {
         "id": "guided-reasoning",
         "title": "Read one array two ways",
-        "body": "Take the two rows \\([1,2,3]\\) and \\([4,5,6]\\). Summing across each row gives \\([6,15]\\): one answer per observation. Summing down the rows gives \\([5,7,9]\\): one answer per feature. The values are the same; the question determines the axis.\n\nIn Python, the row sums use `axis=1`, because the feature axis is reduced. The feature sums use `axis=0`, because the observation axis is reduced. The axis you name is the one you consume, not the one you keep.\n\nRead the heatmap by locating one row and one column before looking at its color. Color helps compare values, but labels establish which observation and feature you are comparing. A device label is a separate property; moving the same values to another device does not change what a row means.",
+        "body": "Take the two rows \\([0,1,2]\\) and \\([3,4,5]\\) from the program below. Summing across each row gives \\([3,12]\\): one answer per observation. Summing down the rows gives \\([3,5,7]\\): one answer per feature. The values stay fixed; the question determines the axis.\n\nThe row sums use `axis=1`, because the feature axis is reduced. The feature sums use `axis=0`, because the observation axis is reduced. The axis you name is the one you consume, not the one you keep. Check this in the heatmap by pointing to the cells that contribute to one output.\n\nNow predict a changed input. If every entry increases by \\(1\\), each three-feature row sum increases by \\(3\\), while each two-observation column sum increases by \\(2\\). The new outputs are \\([6,15]\\) and \\([5,7,9]\\). Use the different increments to explain the reduction instead of memorizing axis numbers.",
         "check": {
           "prompt": "If the batch gains a third observation with the same three features, which reduction still returns three values?",
           "answer": "The feature sums still return three values because `axis=0` removes the observation axis. Row sums now return three values too, but for a different reason. This is why unequal axis sizes make debugging easier."
         },
-        "math": "Y_{i,j} = \\alpha X_{i,j} + \\beta, \\qquad X \\in \\mathbb{R}^{M \\times N}"
+        "math": "r_i=\\sum_{j=0}^{2}X_{ij},\\qquad c_j=\\sum_{i=0}^{1}X_{ij},\\qquad X=\\begin{bmatrix}0&1&2\\\\3&4&5\\end{bmatrix}"
       },
       {
         "title": "Read the table before using an API",
         "body": "Start with the six values \\(0\\) through \\(5\\). Reshape them into two rows: \\([0, 1, 2]\\) and \\([3, 4, 5]\\). The first axis selects an observation; the second selects a measurement. Shape \\((2, 3)\\) describes that organization, not the numerical values. Reshape preserves element count and ordering here; it does not create new measurements.\n\nA length-six array and a two-by-three array contain the same values but invite different operations. In your notebook, write an axis label beside each dimension. This becomes important when a later model expects one prediction per row.",
-        "formula": "flat [0,1,2,3,4,5] → rows [[0,1,2],[3,4,5]]\naxis 0: observations (2)\naxis 1: measurements (3)"
+        "formula": "flat [0,1,2,3,4,5] \u2192 rows [[0,1,2],[3,4,5]]\naxis 0: observations (2)\naxis 1: measurements (3)"
       },
       {
         "title": "Derive a reduction and its output shape",
-        "body": "Summing along axis \\(1\\) removes the measurement axis and leaves one number per observation. The first row sums to \\(3\\), the second to \\(12\\), so the result has shape \\((2,)\\). Summing along axis \\(0\\) instead combines observations and leaves three measurement totals: \\([3, 5, 7]\\).\n\nA reduction can also keep the reduced axis with `keepdims=True.` Column means then have shape \\((1, 3)\\), which states explicitly that the same three means are subtracted from every row. Derive the numbers and shape before using sum or mean.",
+        "body": "Summing along axis \\(1\\) consumes the feature axis and leaves one total per observation. From the displayed rows \\([0,1,2]\\) and \\([3,4,5]\\), calculate \\(0+1+2=3\\) and \\(3+4+5=12\\); the result \\([3,12]\\) has shape \\((2,)\\). Summing along axis \\(0\\) consumes the observation axis instead, leaving one total per feature: \\([3,5,7]\\), shape \\((3,)\\).\n\nWith `keepdims=True`, the column means retain a leading singleton dimension, shape \\((1,3)\\). That shape makes the intended reuse across both rows visible when centering. Before running your exercise, write the output shape next to the axis you plan to reduce; if you need one value per observation, the answer should have two entries.",
         "formula": "(2,3) --sum(axis=1)--> (2,) : [3,12]\n(2,3) --sum(axis=0)--> (3,) : [3,5,7]"
       },
       {
@@ -51,14 +51,14 @@
       {
         "title": "Center each measurement",
         "prediction": "Predict the three column means and every centered value. Which mean is shared by the two observations?",
-        "code": "# Experiment — Center each measurement: The calculation reuses one mean per column.\n# Reduce along axis=0 to compute `means`.\nmeans=x.mean(axis=0,keepdims=True)\ncentered=x-means\nprint(\"Means:\",means)\nprint(\"Centered:\",centered)\n# Check tensor shape invariant: `means.shape==(1,3)`\nassert means.shape==(1,3)\nassert jnp.allclose(centered,jnp.array([[-1.5,-1.5,-1.5],[1.5,1.5,1.5]]))",
+        "code": "# Experiment \u2014 Center each measurement: The calculation reuses one mean per column.\n# Reduce along axis=0 to compute `means`.\nmeans=x.mean(axis=0,keepdims=True)\ncentered=x-means\nprint(\"Means:\",means)\nprint(\"Centered:\",centered)\n# Check tensor shape invariant: `means.shape==(1,3)`\nassert means.shape==(1,3)\nassert jnp.allclose(centered,jnp.array([[-1.5,-1.5,-1.5],[1.5,1.5,1.5]]))",
         "output": "Means \\([[1.5,2.5,3.5]]\\); centered rows are \\(-1.5\\) and \\(+1.5\\).",
         "explanation": "The calculation reuses one mean per column. An explicit hand calculation verifies both the values and the meaning of the reduction."
       },
       {
         "title": "Keep a host reference",
         "prediction": "Will copying to NumPy preserve values and shape? Does that copy describe device-resident computation?",
-        "code": "# Experiment — Keep a host reference: The host reference is an inspection copy.\nimport numpy as np\n# Transfer the device result to the host for an independent NumPy comparison.\nhost=np.asarray(x)\n# Check tensor shape invariant: `host.shape==(2,3)`\nassert host.shape==(2,3)\nnp.testing.assert_array_equal(host,np.arange(6).reshape(2,3))\nprint(\"Host dtype:\",host.dtype)",
+        "code": "# Experiment \u2014 Keep a host reference: The host reference is an inspection copy.\nimport numpy as np\n# Transfer the device result to the host for an independent NumPy comparison.\nhost=np.asarray(x)\n# Check tensor shape invariant: `host.shape==(2,3)`\nassert host.shape==(2,3)\nnp.testing.assert_array_equal(host,np.arange(6).reshape(2,3))\nprint(\"Host dtype:\",host.dtype)",
         "output": "A NumPy array with the same two-by-three values.",
         "explanation": "The host reference is an inspection copy. Its existence says nothing about accelerator throughput."
       }
@@ -141,19 +141,19 @@
       {
         "title": "Prepare the inputs",
         "instruction": "Create main.py in your lesson workspace. Add this first block; use the environment from setup.",
-        "code": "# Step 1 — Prepare the inputs\nimport jax\nimport jax.numpy as jnp",
+        "code": "# Step 1 \u2014 Prepare the inputs\nimport jax\nimport jax.numpy as jnp",
         "explanation": "These explicit inputs define the case that the later checks will verify."
       },
       {
         "title": "Build the computation",
         "instruction": "Append this block below the inputs in the same file.",
-        "code": "# Step 2 — Build the computation: x has two observations and three features.\nx = jnp.arange(6, dtype=jnp.float32).reshape(2, 3)",
+        "code": "# Step 2 \u2014 Build the computation: x has two observations and three features.\nx = jnp.arange(6, dtype=jnp.float32).reshape(2, 3)",
         "explanation": "\\(x\\) has two observations and three features. `axis=0` removes the observation dimension, so the means describe features; the centered result retains both axes."
       },
       {
         "title": "Run and check the result",
         "instruction": "Append the checks, save main.py, and run python main.py from this folder using your course environment.",
-        "code": "# Step 3 — Run and check the result\nprint(\"Shape:\", x.shape)\nprint(\"Dtype:\", x.dtype)\nprint(\"Devices:\", x.devices())\nprint(\"Row sums:\", x.sum(axis=1))\n# Check tensor shape invariant: `x.shape == (2, 3)`\nassert x.shape == (2, 3)\nassert jnp.allclose(x.sum(axis=1), jnp.array([3., 12.]))",
+        "code": "# Step 3 \u2014 Run and check the result\nprint(\"Shape:\", x.shape)\nprint(\"Dtype:\", x.dtype)\nprint(\"Devices:\", x.devices())\nprint(\"Row sums:\", x.sum(axis=1))\n# Check tensor shape invariant: `x.shape == (2, 3)`\nassert x.shape == (2, 3)\nassert jnp.allclose(x.sum(axis=1), jnp.array([3., 12.]))",
         "explanation": "Compare the output to the expected result below before making the exercise change."
       }
     ],

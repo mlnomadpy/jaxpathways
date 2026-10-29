@@ -1,0 +1,194 @@
+{
+  "letter": {
+    "pageCount": 1391,
+    "formerOrphans": [
+      {
+        "oldPage": 384,
+        "prediction": "Predict before looking: Which axis of the confusion matrix is the actual label?",
+        "newPages": [
+          381
+        ]
+      },
+      {
+        "oldPage": 488,
+        "prediction": "Predict before looking: Why do the initial rows have equal weights?",
+        "newPages": [
+          481
+        ]
+      },
+      {
+        "oldPage": 545,
+        "prediction": "Predict before looking: Why should the first call not be averaged into steady-state latency?",
+        "newPages": [
+          536
+        ]
+      },
+      {
+        "oldPage": 598,
+        "prediction": "Predict before looking: Must the two panels tell the same story about memory?",
+        "newPages": [
+          587
+        ]
+      },
+      {
+        "oldPage": 614,
+        "prediction": "Predict before looking: Which dimension is split across devices in each panel?",
+        "newPages": [
+          601
+        ]
+      },
+      {
+        "oldPage": 642,
+        "prediction": "Predict before looking: Will equal global gradients imply equal numbers of stored values on each device?",
+        "newPages": [
+          628
+        ]
+      },
+      {
+        "oldPage": 713,
+        "prediction": "Predict before looking: Does a falling loss alone prove that the recovered rate is physically correct?",
+        "newPages": [
+          695
+        ]
+      },
+      {
+        "oldPage": 882,
+        "prediction": "Predict before looking: Will the tile configuration with the fewest programs also minimize padding and buffer footprint?",
+        "newPages": [
+          858
+        ]
+      },
+      {
+        "oldPage": 927,
+        "prediction": "Predict before looking: Should a JVP and VJP have equal coordinates just because this example has two inputs and two outputs?",
+        "newPages": [
+          902
+        ]
+      },
+      {
+        "oldPage": 940,
+        "prediction": "Predict before looking: Where should softplus have the greatest curvature, and what happens far into either tail?",
+        "newPages": [
+          914
+        ]
+      },
+      {
+        "oldPage": 987,
+        "prediction": "Predict before looking: Which axis names swap between the two parameter layouts?",
+        "newPages": [
+          959
+        ]
+      },
+      {
+        "oldPage": 1031,
+        "prediction": "Predict before looking: Must two low-precision formats have the same error?",
+        "newPages": [
+          1002
+        ]
+      },
+      {
+        "oldPage": 1062,
+        "prediction": "Predict before looking: Can a queue grow even when the duration of each individual model call is unchanged?",
+        "newPages": [
+          1030
+        ]
+      },
+      {
+        "oldPage": 1165,
+        "prediction": "Predict before looking: Will doubling the number of updates double total process time?",
+        "newPages": [
+          1131
+        ]
+      },
+      {
+        "oldPage": 1220,
+        "prediction": "Predict before looking: Which cell should dominate each row of final masked-token probabilities, and what would a bright wrong cell tell you?",
+        "newPages": [
+          1183
+        ]
+      },
+      {
+        "oldPage": 1237,
+        "prediction": "Predict before looking: Will every predicted pixel match its target exactly? Which output patches were never trained?",
+        "newPages": [
+          1198
+        ]
+      },
+      {
+        "oldPage": 1253,
+        "prediction": "Predict before looking: Predict where the largest similarity should appear in each row. What would a one-sided permutation do?",
+        "newPages": [
+          1211
+        ]
+      },
+      {
+        "oldPage": 1270,
+        "prediction": "Predict before looking: Predict the zero-gradient column before looking at the heatmap. Does a prompt input position necessarily have zero gradient?",
+        "newPages": [
+          1226
+        ]
+      },
+      {
+        "oldPage": 1285,
+        "prediction": "Predict before looking: Which initial adapter-gradient bar is zero, and why can training still begin?",
+        "newPages": [
+          1239
+        ]
+      },
+      {
+        "oldPage": 1300,
+        "prediction": "Predict before looking: Which final comparison margin should be the largest given the ordering zero above one above two?",
+        "newPages": [
+          1252
+        ]
+      },
+      {
+        "oldPage": 1316,
+        "prediction": "Predict before looking: Which action gains probability as reward rises, and why does that also change reference KL?",
+        "newPages": [
+          1266
+        ]
+      },
+      {
+        "oldPage": 1333,
+        "prediction": "Predict before looking: What does a positive corrected margin establish, and what does it leave unknown about absolute probabilities?",
+        "newPages": [
+          1281
+        ]
+      },
+      {
+        "oldPage": 1409,
+        "prediction": "Predict before looking: How do per-chip HBM capacity (GiB) and the compute-to-memory ridge point (FLOP/byte) change across TPU v5e , v5p , and",
+        "newPages": [
+          1357
+        ]
+      }
+    ]
+  },
+  "a4": {
+    "pageCount": 1268,
+    "formerOrphans": [
+      {
+        "oldPage": 412,
+        "prediction": "Predict before looking: Predict whether resuming training at step 2 with restored optimizer, iterator, and PRNG state matches an uninterrupted",
+        "newPages": [
+          405
+        ]
+      },
+      {
+        "oldPage": 1187,
+        "prediction": "Predict before looking: Which action gains probability as reward rises, and why does that also change reference KL?",
+        "newPages": [
+          1158
+        ]
+      },
+      {
+        "oldPage": 1270,
+        "prediction": "Predict before looking: How do per-chip HBM capacity (GiB) and the compute-to-memory ridge point (FLOP/byte) change across TPU v5e , v5p ,",
+        "newPages": [
+          1237
+        ]
+      }
+    ]
+  }
+}

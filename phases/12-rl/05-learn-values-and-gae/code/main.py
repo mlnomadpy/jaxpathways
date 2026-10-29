@@ -40,9 +40,11 @@ def rollout(theta, key, batch_size=512, horizon=8):
     final_state, records = jax.lax.scan(collect, (position, elapsed, done), time_keys)
     return final_state, records
 
-def returns_to_go(rewards):
-    """Compute undiscounted finite-horizon returns along the time axis."""
-    return jnp.cumsum(rewards[::-1], axis=0)[::-1]
+def discounted_returns_to_go(rewards, gamma):
+    """Compute finite-horizon discounted returns along the time axis."""
+    discounts = gamma ** jnp.arange(rewards.shape[0], dtype=rewards.dtype)
+    weighted = rewards * discounts.reshape((-1,) + (1,) * (rewards.ndim - 1))
+    return jnp.cumsum(weighted[::-1], axis=0)[::-1] / discounts.reshape((-1,) + (1,) * (rewards.ndim - 1))
 
 # Define and fit the tabular value function
 def value_loss(value_table, records, targets):
@@ -100,7 +102,7 @@ theta = jnp.array([-.7, .3, 1.1])
 
 # Collect a rollout and fit values
 _, rollout_records = rollout(theta, jax.random.key(313), batch_size=512, horizon=8)
-targets = returns_to_go(rollout_records["reward"])
+targets = discounted_returns_to_go(rollout_records["reward"], gamma=.9)
 
 value_table, loss_history = fit_value_function(rollout_records, targets)
 
@@ -164,9 +166,11 @@ def rollout(theta, key, batch_size=512, horizon=8):
     final_state, records = jax.lax.scan(collect, (position, elapsed, done), time_keys)
     return final_state, records
 
-def returns_to_go(rewards):
-    """Compute undiscounted finite-horizon returns along the time axis."""
-    return jnp.cumsum(rewards[::-1], axis=0)[::-1]
+def discounted_returns_to_go(rewards, gamma):
+    """Compute finite-horizon discounted returns along the time axis."""
+    discounts = gamma ** jnp.arange(rewards.shape[0], dtype=rewards.dtype)
+    weighted = rewards * discounts.reshape((-1,) + (1,) * (rewards.ndim - 1))
+    return jnp.cumsum(weighted[::-1], axis=0)[::-1] / discounts.reshape((-1,) + (1,) * (rewards.ndim - 1))
 
 def value_loss(value_table, records, targets):
     """Masked MSE with fixed targets and padding sanitized before arithmetic."""
@@ -221,7 +225,7 @@ def generalized_advantage_estimate(records, value_table, gamma=.9, lam=.95,
 theta = jnp.array([-.7, .3, 1.1])
 
 _, rollout_records = rollout(theta, jax.random.key(313), batch_size=512, horizon=8)
-targets = returns_to_go(rollout_records["reward"])
+targets = discounted_returns_to_go(rollout_records["reward"], gamma=.9)
 
 value_table, loss_history = fit_value_function(rollout_records, targets)
 
@@ -247,6 +251,20 @@ visual_data = {
 # Figure data experiment
 visual_data = {'kind':'line','x':list(range(len(loss_history))),'xlabel':'gradient updates','ylabel':'masked value prediction MSE','series':[{'label':'sampled rollout, seed 313','y':np.asarray(loss_history).tolist()}]}
 
+# Experiment: Match value targets to the GAE discount
+gamma = .9
+rewards = np.array([1., 1.])
+undiscounted_v = np.array([2., 1., 0.])
+discounted_v = np.array([1.9, 1., 0.])
+undiscounted_delta = rewards[0] + gamma * undiscounted_v[1] - undiscounted_v[0]
+discounted_delta = rewards[0] + gamma * discounted_v[1] - discounted_v[0]
+terminal_delta = rewards[1] + gamma * 0. - discounted_v[1]
+cutoff_delta = 2. + gamma * 4. - 1.
+np.testing.assert_allclose([undiscounted_delta, terminal_delta], [-.1, 0.])
+np.testing.assert_allclose([discounted_delta, terminal_delta], [0., 0.])
+np.testing.assert_allclose(cutoff_delta, 4.6)
+print("undiscounted / matched / terminal / continuing-cutoff:", [undiscounted_delta, discounted_delta, terminal_delta, cutoff_delta])
+
 # Experiment: Predict the time-limit target
 gamma = .5
 reward, current_value, final_value = 2., 1., 4.
@@ -256,7 +274,7 @@ print('cutoff residual:', delta)
 
 # Experiment: Train the value table on a retained rollout
 _, value_records = rollout(jnp.array([-.7,.3,1.1]), jax.random.key(313), 512, 8)
-value_targets = returns_to_go(value_records['reward'])
+value_targets = discounted_returns_to_go(value_records['reward'], gamma=.9)
 value_table, value_history = fit_value_function(value_records, value_targets, 250, .1)
 assert value_history[-1] < value_history[0] * .7
 print('initial / final MSE:', float(value_history[0]), float(value_history[-1]))
@@ -271,7 +289,7 @@ seed313_history = loss_history
 seed314_final_state, seed314_records = rollout(
     theta, jax.random.key(314), batch_size=512, horizon=8
 )
-seed314_targets = returns_to_go(seed314_records["reward"])
+seed314_targets = discounted_returns_to_go(seed314_records["reward"], gamma=.9)
 seed314_table, seed314_history = fit_value_function(
     seed314_records, seed314_targets, updates=250, learning_rate=.1
 )
@@ -310,6 +328,38 @@ print("seed 313 fitted table:", np.asarray(seed313_table).round(4).tolist())
 print("seed 314 initial/final MSE:", float(seed314_history[0]), float(seed314_history[-1]))
 print("seed 314 fitted table:", np.asarray(seed314_table).round(4).tolist())
 
+# Exact two-transition discount-mismatch example and boundary bootstrap check.
+gamma = .9
+rewards_np = np.array([1., 1.])
+undiscounted_v = np.array([2., 1., 0.])
+discounted_v = np.array([1.9, 1., 0.])
+undiscounted_deltas = np.array([
+    rewards_np[0] + gamma * undiscounted_v[1] - undiscounted_v[0],
+    rewards_np[1] + gamma * undiscounted_v[2] - undiscounted_v[1],
+])
+matched_deltas = np.array([
+    rewards_np[0] + gamma * discounted_v[1] - discounted_v[0],
+    rewards_np[1] + gamma * discounted_v[2] - discounted_v[1],
+])
+np.testing.assert_allclose(undiscounted_deltas, [-.1, 0.])
+np.testing.assert_allclose(matched_deltas, [0., 0.])
+terminal_delta = 2. + gamma * 0. - 1.
+continuing_cutoff_delta = 2. + gamma * 4. - 1.
+np.testing.assert_allclose([terminal_delta, continuing_cutoff_delta], [1., 4.6])
+terminal_records = {
+    "observation": jnp.array([[1]], dtype=jnp.int32),
+    "next_observation": jnp.array([[3]], dtype=jnp.int32),
+    "reward": jnp.array([[2.]]),
+    "active": jnp.array([[True]]),
+    "terminated": jnp.array([[True]]),
+    "truncated": jnp.array([[False]]),
+}
+terminal_advantage = generalized_advantage_estimate(
+    terminal_records, jnp.array([.5, 1., 2., 4.]), gamma=.9, lam=.95,
+    bootstrap_on_truncation=True
+)
+np.testing.assert_allclose(np.asarray(terminal_advantage), [[1.]], atol=1e-6)
+
 # Hand-check a two-transition episode followed by a reset observation.
 hand_table = jnp.array([.5, 1., 2., 4.])
 hand_records = {
@@ -318,7 +368,7 @@ hand_records = {
     "reward": jnp.array([[1.], [2.], [0.]]),
     "active": jnp.array([[True], [True], [True]]),
     "terminated": jnp.array([[False], [False], [False]]),
-    "truncated": jnp.array([[False], [True], [True]]),
+    "truncated": jnp.array([[False], [True], [False]]),
 }
 continuing_cutoff_advantages = generalized_advantage_estimate(
     hand_records, hand_table, gamma=.5, lam=.5, bootstrap_on_truncation=True
@@ -340,7 +390,7 @@ finite_horizon_advantages = generalized_advantage_estimate(
     hand_records, hand_table, gamma=.5, lam=.5, bootstrap_on_truncation=False
 )
 np.testing.assert_allclose(
-    np.asarray(finite_horizon_advantages[:, 0]), np.array([1.25, 1., -.5]), atol=1e-6
+    np.asarray(finite_horizon_advantages[:, 0]), np.array([1.25, 1., 0.]), atol=1e-6
 )
 print("continuing cutoff GAE:", np.asarray(continuing_cutoff_advantages[:, 0]).tolist())
 print("finite-horizon GAE:", np.asarray(finite_horizon_advantages[:, 0]).tolist())
@@ -365,7 +415,7 @@ finite_horizon_advantage = generalized_advantage_estimate(
 continuing_task_advantage = generalized_advantage_estimate(
     hand_records, hand_table, gamma=.5, lam=.5, bootstrap_on_truncation=True
 )
-np.testing.assert_allclose(np.asarray(finite_horizon_advantage[:, 0]), [1.25, 1., -.5], atol=1e-6)
+np.testing.assert_allclose(np.asarray(finite_horizon_advantage[:, 0]), [1.25, 1., 0.], atol=1e-6)
 np.testing.assert_allclose(np.asarray(continuing_task_advantage[:, 0]), [1.75, 3., 0.], atol=1e-6)
 assert not np.allclose(np.asarray(finite_horizon_advantage), np.asarray(continuing_task_advantage))
 print("finite-horizon/cutoff GAE at first transition:", float(finite_horizon_advantage[0, 0]), float(continuing_task_advantage[0, 0]))

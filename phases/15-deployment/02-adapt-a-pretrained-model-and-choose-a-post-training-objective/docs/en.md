@@ -71,6 +71,8 @@ A lower target loss can be useful while still causing an unacceptable regression
 
 In this synthetic exercise the source evaluation reuses the source inputs, so it is only a retention proxy. A real release needs a separate held-out source set as well as a held-out target set. Record every candidate, including candidates rejected by the gate. If none satisfies the predeclared budget, keep the base or change the training recipe; do not quietly relax the budget after seeing the answer.
 
+In the recorded run, baseline held target cross-entropy is 0.978 nats and source loss is 0.545. Supervised adaptation reaches 0.555 target loss with source loss 0.790; teacher distillation reaches 0.524 target loss with source loss 1.005. The declared retention gate accepts the supervised increase of 0.245 but rejects the teacher increase of 0.459, so the selected candidate is supervised despite its slightly higher target loss. These are results for this seeded synthetic fixture, not a general ranking.
+
 $$
 \mathrm{accept}(m)=\left[L_t(m)<L_t(m_0)\right]\land\left[L_s(m)-L_s(m_0)\leq\delta\right]
 $$
@@ -291,11 +293,11 @@ Expected: Both adapted branches reduce the common held-out target cross-entropy 
 
 ### Read the figure
 
-The horizontal categories are the reloaded pretrained model, supervised adaptation and teacher distillation. The vertical axis is mean cross-entropy in nats. One series evaluates the same held-out target probabilities for every model; the other evaluates source-task probabilities. Lower is better within each series. The two adapted models improve target-task loss while their source-task loss increases. These bars are evaluations of the resulting weights, not the branches’ incomparable training objectives. In this seeded run the held-out target bars are approximately $0.978,0.555,0.524$, while the source bars are $0.545,0.790,1.005$, in the same model order. Teacher adaptation gives the lowest target loss here but also the largest source-retention loss.
+The horizontal axis lists pretrained, supervised, and teacher candidates; the vertical axis is mean cross-entropy in nats, with lower better. On held-out target data the bars are about 0.978, 0.555, and 0.524; on source data they are 0.545, 0.790, and 1.005. Teacher gives the lowest target loss but largest source regression. Apply the predeclared source-retention gate before choosing: this run accepts supervised and rejects teacher.
 
 ### Connect it to the computation
 
-The teacher exactly matches the declared synthetic target generator, making this an especially favorable distillation case. The held-out comparison demonstrates an objective tradeoff on this fixture. It neither establishes that a real teacher is correct nor that one adaptation recipe is generally best. The failure experiment makes the teacher wrong and rechecks the target criterion.
+The teacher exactly matches this synthetic target generator, which makes distillation unusually favorable. Even so, its source loss rises by about 0.459 from baseline, beyond the declared budget; supervised rises by about 0.245 and passes. The plotted metrics share evaluation definitions, while the branches’ training objectives do not. Next vary the teacher quality or target sample and rerun the same fixed gate before generalizing.
 
 ```python
 names=["pretrained","supervised","teacher"]
@@ -304,7 +306,7 @@ visual_data={"kind":"bar","x":[0,1,2],"labels":names,"xlabel":"model after train
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:09:08.192541+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:09:07.033011+00:00. JAX 0.9.2.
 
 ```text
 {

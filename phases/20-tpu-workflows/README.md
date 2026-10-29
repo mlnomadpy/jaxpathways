@@ -12,7 +12,9 @@ Do not run arbitrary lesson scripts on TPU. `distributed-02` is CPU-only; inspec
 
 ## Study guide: Can you launch a JAX job over SSH, separate XLA warmup from steady-state timing, and resume cleanly after interruption?
 
-Cloud TPU VMs can be preempted and multi-host Pod slices require lockstep execution across all workers. A reliable workflow saves atomic checkpoints, logs JSONL events, and copies artifacts back before teardown.
+A cloud training job needs a repeatable path from local source to running process to retained result. Follow which files and dependencies reach each worker, when warmup ends, which state is checkpointed and where the resulting evidence is copied before teardown.
+
+The single-host exercise establishes a bounded continuation. Multi-host work additionally requires agreement across participants about topology, global steps and accepted checkpoint boundaries. A topology-discovery command and a collective training receipt answer different questions; use the observed state to decide what the next experiment can safely assume.
 
 ### Check your starting point
 

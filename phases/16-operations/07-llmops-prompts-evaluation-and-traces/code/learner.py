@@ -1,6 +1,6 @@
 """LLMOps: version prompts, evaluate behavior and trace requests · learner-only exercises (3/3 contracts ready)"""
 
-# Exercise: Add a response with an invented citation and require the evaluator to fail it.
+# Exercise: Inspect case-sensitive-refund-77 in the baseline trace. Identify the correct retrieval evidence and the prompt behavior that caused the answer to fail, then change only the prompt policy and compare on all five IDs.
 
 # Inputs:
 # - The lesson’s answerable case, its allowed citations, and a response containing an invented citation.
@@ -38,17 +38,14 @@ def reject_invented_citation(case, response, allowed_citations):
 # - The fixture contract requires both empty answer text and no citations.
 # - Validate response form and evidence support independently.
 
-import os
-import tempfile
-from pathlib import Path
-import mlflow
-from mlflow import MlflowClient
-
-def practice_check_abstention_structure(response, allowed_evidence):
-    """Complete the check abstention structure check."""
-    # TODO: ('Parse an abstaining response that still contains an unsupported claim and fail the structured response check.', 'A rejected malformed abstention with its case ID retained.', 'An abstention response contains no answer claim unsupported by the evidence.')
+def practice_check_abstention_structure(case_id, response, supported):
+    # Return (case ID, pass flag, failure reason). Keep the ID even when invalid.
+    # TODO: an unsupported case passes only when response is an empty abstention.
     raise NotImplementedError
 
+result=practice_check_abstention_structure('unsupported-tax-2',
+    {'response':'Tax is 15 percent','citations':[],'abstain':True},False)
+print(result)
 
 
 
@@ -65,17 +62,11 @@ def practice_check_abstention_structure(response, allowed_evidence):
 # - The failed case ID remains in the denominator after its answer is replaced.
 
 # Hints:
-# - Use the contract-aware replies as the starting point. An empty abstention is correct for the unsupported case but wrong for the selected answerable case.
+# - Start with the grounded candidate responses. An empty abstention is correct for the unsupported case but wrong for the selected answerable case.
 # - Do not drop failed or abstained responses.
 
-import os
-import tempfile
-from pathlib import Path
-import mlflow
-from mlflow import MlflowClient
-
 def practice_keep_failed_work_in_the_evaluation_inventory(cases, responses):
-    """Complete the keep failed work in the evaluation inventory check."""
-    # TODO: ('Replace the first answerable case output with an empty abstention while retaining its ID, then recompute full-suite score.', 'Complete case inventory and changed full-suite score.', 'Failed and abstained cases remain in the denominator and cannot be dropped.')
+    # Replace the first supported case with an empty abstention, retain its ID,
+    # then call score(cases, responses) so the original denominator remains.
+    # TODO: preserve all case IDs and return the updated result inventory.
     raise NotImplementedError
-

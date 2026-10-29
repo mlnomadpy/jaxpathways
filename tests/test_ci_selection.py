@@ -45,6 +45,8 @@ class PathSelectionTests(unittest.TestCase):
         for project, check in (
             ("reproducible-experiments/tests/loggers_check.py", "loggers"),
             ("bayesian-regression/solution/numpyro_workflow.py", "numpyro"),
+            ("scientific-inverse/solution/diffrax_workflow.py", "diffrax"),
+            ("text-harness/foundations/model.py", "decoder"),
         ):
             with self.subTest(project=project):
                 self.assertEqual(
@@ -53,13 +55,36 @@ class PathSelectionTests(unittest.TestCase):
                 )
         self.assertEqual(
             selection.checks_for_path("projects/causal-model-300m/training.py"),
-            {"browser", "projects"},
+            {"browser", "projects", "c02"},
         )
+
+    def test_pilots_follow_their_own_code_data_and_dependency_trees(self):
+        for project, check in (
+            ("embedding-model-300m", "c01"),
+            ("causal-model-300m", "c02"),
+        ):
+            for relative in (
+                "model.py",
+                "data/frozen_recipe.json",
+                "requirements-lock.txt",
+                "tests/check.py",
+                "reference/report.json",
+            ):
+                path = f"projects/{project}/{relative}"
+                with self.subTest(path=path):
+                    self.assertEqual(
+                        selection.checks_for_path(path), {"browser", "projects", check}
+                    )
+
+    def test_isolated_test_selection_tools_do_not_start_pilot_training(self):
+        for path in selection.SELECTION_TOOLS:
+            with self.subTest(path=path):
+                self.assertEqual(selection.checks_for_path(path), ALL - {"c01", "c02"})
 
     def test_shared_or_unknown_changes_keep_every_check(self):
         for path in (
-            "scripts/run-tests.mjs",
-            "tests/test_ci_selection.py",
+            "scripts/new-shared-runner.py",
+            "tests/new-shared-check.py",
             "tests/suites.mjs",
             ".github/workflows/course-check.yml",
             "package-lock.json",
@@ -95,11 +120,16 @@ class EventSelectionTests(unittest.TestCase):
         ) as diff:
             self.assertEqual(
                 selection.select_checks(self.environment),
-                {"browser", "projects"},
+                {"browser", "projects", "diffrax"},
             )
         diff.assert_called_once_with(
             ["git", "diff", "--name-only", "-z", "--no-renames", "base", "head"]
         )
+
+    def test_selection_tools_and_changed_pilot_only_run_that_pilot(self):
+        paths = b"scripts/run-tests.mjs\0projects/embedding-model-300m/model.py\0"
+        with patch.object(selection.subprocess, "check_output", return_value=paths):
+            self.assertEqual(selection.select_checks(self.environment), ALL - {"c02"})
 
     def test_documentation_only_and_empty_diff_skip_specialized_checks(self):
         for paths in (b"docs/testing.md\0", b""):

@@ -4,7 +4,7 @@ Copy this template into your own portfolio and fill it after running your modifi
 
 ## Evidence required
 
-Keep base-training evidence, unchanged base arrays, adapter factors/rank/alpha, initial-gradient checks and reloaded/new-input merge parity.
+Keep frozen-base and gradient asymmetry checks, rank/alpha scaling, the serialized base digest and target/tensor manifest, fresh-process merge parity on new inputs and incompatible-base/metadata rejections.
 
 - Command: `python3 phases/18-posttraining/02-lora/code/main.py`
 - Working directory: Repository root

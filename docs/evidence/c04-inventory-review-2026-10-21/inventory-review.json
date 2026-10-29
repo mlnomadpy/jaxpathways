@@ -1,0 +1,131 @@
+{
+  "lock_sha256": "3a9e4e014dbc10796a57eed4f7caf7f379cd270d8d12b201a6ff858084eb6e9a",
+  "verified_lock_files": 16,
+  "archive_checksums": {
+    "train-clean-5.tar.gz": {
+      "bytes": 332954390,
+      "sha256": "47805806c8b15f7549f3c51bd6b7da72ec0128a34d32830c8014a88658c0292d",
+      "md5": "5df7d4e78065366204ca6845bb08f490"
+    },
+    "dev-clean-2.tar.gz": {
+      "bytes": 126046265,
+      "sha256": "176ec501490eced2d6c1f89f4f0ddc7dfe799e649e5322f8ba49fe3ff50c8012",
+      "md5": "6d7ab67ac6a1d2c993d050e16d61080d"
+    },
+    "dev-other.tar.gz": {
+      "bytes": 314305928,
+      "sha256": "12661c48e8c3fe1de2c1caa4c3e135193bfb1811584f11f569dd12645aa84365",
+      "md5": "c8d0bcc9cca99d4f8b62fcc847357931"
+    }
+  },
+  "verified_member_files": 5639,
+  "verified_decoded_transcribed_utterances": 5472,
+  "wrong_book_id_rows": 5472,
+  "examples": [
+    {
+      "id": "1088-134315-0000",
+      "claimed_book_id": "12.93",
+      "correct_book_id": "2688",
+      "correct_book_title": "The Clue of the Twisted Candle"
+    },
+    {
+      "id": "1088-134315-0001",
+      "claimed_book_id": "12.93",
+      "correct_book_id": "2688",
+      "correct_book_title": "The Clue of the Twisted Candle"
+    },
+    {
+      "id": "1088-134315-0002",
+      "claimed_book_id": "12.93",
+      "correct_book_id": "2688",
+      "correct_book_title": "The Clue of the Twisted Candle"
+    },
+    {
+      "id": "1088-134315-0003",
+      "claimed_book_id": "12.93",
+      "correct_book_id": "2688",
+      "correct_book_title": "The Clue of the Twisted Candle"
+    }
+  ],
+  "corrected_components": 79,
+  "cross_source_components": [
+    {
+      "id": "173cb27458edd295284809a9ef76697331396895f88c170d7ee9d1cae5c2fb53",
+      "sources": [
+        "slr12-dev-other",
+        "slr31-train-clean-5"
+      ],
+      "speakers": [
+        "3947",
+        "4323"
+      ],
+      "books": [
+        "362",
+        "4540",
+        "7498"
+      ],
+      "utterances": 167,
+      "eligible": 104,
+      "eligible_seconds": 459.4000625,
+      "eligible_by_source": {
+        "slr12-dev-other": {
+          "n": 99,
+          "seconds": 428.0250625
+        },
+        "slr31-train-clean-5": {
+          "n": 5,
+          "seconds": 31.375
+        }
+      }
+    },
+    {
+      "id": "4c20d61770618525a4603c02405dd434f08d67ee5b159a827b08fb5c7f4bc994",
+      "sources": [
+        "slr31-dev-clean-2",
+        "slr31-train-clean-5"
+      ],
+      "speakers": [
+        "174",
+        "4640",
+        "4680"
+      ],
+      "books": [
+        "135"
+      ],
+      "utterances": 104,
+      "eligible": 27,
+      "eligible_seconds": 137.5600625,
+      "eligible_by_source": {
+        "slr31-dev-clean-2": {
+          "n": 15,
+          "seconds": 79.2450625
+        },
+        "slr31-train-clean-5": {
+          "n": 12,
+          "seconds": 58.315
+        }
+      }
+    }
+  ],
+  "source_feasibility": {
+    "slr12-dev-other": {
+      "eligible": 2158,
+      "seconds": 9693.28,
+      "eligible_components": 30,
+      "exclusive_eligible_components": 29
+    },
+    "slr31-dev-clean-2": {
+      "eligible": 759,
+      "seconds": 3438.1301875,
+      "eligible_components": 24,
+      "exclusive_eligible_components": 23
+    },
+    "slr31-train-clean-5": {
+      "eligible": 212,
+      "seconds": 1046.654875,
+      "eligible_components": 26,
+      "exclusive_eligible_components": 24
+    }
+  },
+  "corrected_eligible_components": 78
+}

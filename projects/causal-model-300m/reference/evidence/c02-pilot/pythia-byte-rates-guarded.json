@@ -1,0 +1,40 @@
+{
+  "status": "external pretrained baseline; local Pythia weights were not trained or modified",
+  "model": "EleutherAI/pythia-14m",
+  "revision": "d31f659f077f9ea500c4d7faa999893d7f28cbdf",
+  "snapshot_files_sha256": {
+    "README.md": "faea6edf8dbdc9ea6a2ed558e091aa810aeecf2b3804cd1235b48f526044cae8",
+    "config.json": "f97f966a66c444890ed461fff2a51eefb15d74303df05b948124719f199b0b17",
+    "generation_config.json": "494cbba887cc299273f0c54d7612596918e74c7881a27cbd95e4e7e2464ea090",
+    "model.safetensors": "116a02532db461f91386a5b20f942ff2c8d4de7341e21b55caafc3d7b25f49a1",
+    "special_tokens_map.json": "10b8c8852c1e1f70b54d9aff61728408c28971c0e97a6c5a7b2debbd1d3e9c0c",
+    "tokenizer.json": "870f4e2baa6b683221fa52004d5d6f40ab8c9d31961617304b78c910c2c3caf2",
+    "tokenizer_config.json": "eee017c5bd133137f45907bd0a6e781e2ccd1a533734b7ed2a2f2f4446659809"
+  },
+  "checkpoint_sha256": "116a02532db461f91386a5b20f942ff2c8d4de7341e21b55caafc3d7b25f49a1",
+  "tokenizer_sha256": "870f4e2baa6b683221fa52004d5d6f40ab8c9d31961617304b78c910c2c3caf2",
+  "evaluator_sha256": "42697688e4e0cfc9896664c1b69aa75ed19a39875251073e336da57e10623f88",
+  "pin_verifier_sha256": "f866c000ecfc4b32040bfc6d4d726df6a00d19d0f931f903dd988289165b34c5",
+  "device": "CPU FP32",
+  "context": 512,
+  "window_contract": "per-record EOS start; next-token targets are covered exactly once in contiguous context-512 windows; no cross-record target; final EOS is included",
+  "byte_denominator": "UTF-8 bytes after the frozen whitespace collapse and trim; tokenizer targets and normalized bytes are reported separately",
+  "general_wikitext_heldout": {
+    "nll_sum_nats": 2616685.1459960938,
+    "valid_token_targets": 530604,
+    "nll_nats_per_token": 4.931521711099226,
+    "normalized_utf8_bytes": 2421070,
+    "nll_bits_per_normalized_utf8_byte": 1.559260444223578,
+    "records": 122,
+    "windows": 1097
+  },
+  "domain_squad_final_contexts": {
+    "nll_sum_nats": 72852.87353515625,
+    "valid_token_targets": 16407,
+    "nll_nats_per_token": 4.440353113619568,
+    "normalized_utf8_bytes": 79198,
+    "nll_bits_per_normalized_utf8_byte": 1.3271102725281032,
+    "records": 126,
+    "windows": 126
+  }
+}

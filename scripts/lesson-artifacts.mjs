@@ -60,6 +60,10 @@ export function lessonMarkdown(lesson, phase) {
   let out=`# ${lesson.title}\n\nPhase ${phase.number}: ${phase.title} · about ${lesson.minutes} minutes · ${c.runtime?.kind==='virtual-cpu'?`${c.runtime.deviceCount} logical CPU devices`:'CPU'}\n\n`;
   const scope=executionScope(lesson);
   out+=scope.description+' '+scope.target+'\n\n';
+  if (lesson.prerequisites?.length) out += '**Before this lesson:** ' + lesson.prerequisites.map(id => {
+    const title = phase.lessons.find(item => item.id === id)?.title || id;
+    return `[${title}](https://www.tahabouhsine.com/jaxpathways/lesson-${id}.html)`;
+  }).join('; ') + '.\n\n';
   if(c.setupBundle)out+=`${c.setupBundle.title}: public/${c.setupBundle.url}\n\nIn the lesson reader, use the beginner workspace download button. In a local checkout, the bundle is under public/downloads/.\n\n`;
   if(c.objectives)out+=paragraphs('What you will be able to do',c.objectives.map(o=>`- ${o}`).join('\n'));
   if(c.problem)out+=paragraphs('The problem',c.problem);

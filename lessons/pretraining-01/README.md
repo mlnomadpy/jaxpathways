@@ -9,6 +9,7 @@ This worked reference is validated on CPU. Accelerator compatibility requires a 
 - Separate the clean targets from the corrupted input
 - Normalize over selected target positions
 - Verify the changed-condition exercise and explain the limits of this fixture.
+- Save a small mask-aware encoder with its tokenizer and source-split identity, then evaluate a changed corruption condition and a frozen linear probe.
 
 ## The problem
 
@@ -20,11 +21,9 @@ Masked language modeling removes selected token information from the model's inp
 
 ## Hide the input without hiding the teaching target
 
-Draw a clean sequence splitting into two paths. One supplies labels; the other is corrupted before entering the encoder. Selected-position logits meet the clean labels only at the loss. An arrow from a hidden clean target directly into encoder input would leak the answer.
+A masked language model has two views of the same example: the clean sequence supplies answers, while a corrupted copy is the encoder input. In the diagram, follow each path to see where they meet: only selected-position logits are compared with clean labels in the loss. If a clean hidden token reaches the encoder, the model can copy its answer.
 
-Bidirectional context means an unmasked token on either side can help prediction. It is separate from the loss-selection mask, which decides which outputs are scored. The current fixture masks selected positions; it is not an implementation of every corruption choice used in BERT.
-
-The loss curve shows learning on the small repeated-token fixture. The probability panel shows which target receives mass at the selected positions. A low fixture loss is separate from robust embeddings or language understanding; changed masks and held-out data test different capabilities.
+The loss curve falls on the repeated-token training fixture, and the probability panel shows the selected target gaining probability. Those pictures show optimization and a correct information boundary; they do not establish transfer. The recorded two-slot held-out check is a useful counterexample, read below.
 
 ### Keep clean targets out of encoder inputs
 
@@ -48,17 +47,17 @@ It makes the objective easy and inspectable, but does not test rich contextual l
 
 ## Before coding: follow one hidden token
 
-You should be able to turn logits into probabilities and differentiate a scalar loss. Begin with the first clean sequence, $[0,0,0,0]$. Selecting its second position produces input $[0,3,0,0]$, while the target remains $0$. The mask ID $3$ is an input symbol, not a fourth output class. The other visible zeros supply evidence about the missing token. Write down these three objects separately: clean targets, corrupted inputs and the Boolean selection mask. If you cannot say which one enters the encoder, stop before training.
+Take the first clean sequence, $[0,0,0,0]$. If its second position is selected, replace only that input position to get $[0,3,0,0]$; keep the target at that position equal to $0$. The ID $3$ means MASK and is not an output class. The visible zeros are context; the clean zero is the answer. Before training, write down the clean targets, corrupted input and Boolean selection mask separately.
 
-The fixture repeats each token so you can inspect information flow without needing a tokenizer or a large corpus. This simplicity is also its main limitation: a model can solve repetition without learning syntax, word order or meaning.
+Because every example repeats one token, visible context makes this exercise easy to inspect. It cannot tell us whether the model learned syntax, word order or meaning.
 
 ## Separate the clean targets from the corrupted input
 
-Keep an immutable copy of the original token IDs. The selection mask identifies positions to predict; corruption changes the input tokens, not the targets. Here the extra token ID $3$ means hidden, while output classes are $0,1,2$. Passing clean targets into the encoder would leak the answer. Check the corrupted arrays before the first update.
+The selection mask answers which positions receive supervision. Corruption answers what the encoder sees at those positions. Keep the original IDs unchanged for labels, and replace selected input IDs with $3$. Here the prediction classes remain $0,1,2$. Inspect the arrays together: under this lesson’s always-MASK policy, replace the original value at each selected input position. Copies of that same token at unselected positions remain valid visible context. If an unselected target is scored, the loss mask is wrong.
 
 ## Normalize over selected target positions
 
-Compute log-softmax over vocabulary, gather the log probability of each original target, then average only selected positions. For uniform predictions over three classes, the initial loss is $\log 3$, regardless of how many valid positions are selected. Reject an empty mask before entering the jitted step; silently dividing by zero creates an undefined objective.
+For each position, take log-softmax over the three vocabulary classes, gather the probability assigned to the original token, and average the negative log probabilities only where the selection mask is true. Uniform predictions give loss $\log 3\approx1.099$, whether one position or several are selected. The implementation rejects an empty mask because there is no selected-token mean to compute.
 
 $$
 L=-\frac{\sum_{b,t}m_{bt}\log p_\theta(x_{bt}\mid\widetilde x_b)}{\sum_{b,t}m_{bt}}
@@ -66,9 +65,9 @@ $$
 
 ## Trace the axes and the gradient
 
-The input IDs have shape $(3,4)$. Looking them up in an embedding table with shape $(4,6)$ produces $(3,4,6)$. Attention scores have shape $(3,4,4)$: the last two axes are query and key positions, not vocabulary classes. The head maps the contextual vectors to logits with shape $(3,4,3)$. Softmax over the final axis now means vocabulary probability. Mixing these two softmax axes gives plausible shapes with the wrong meaning.
+Trace the shapes to keep the two softmax operations distinct. Token embeddings have shape $(3,4,6)$, attention scores have shape $(3,4,4)$ over query and key positions, and vocabulary logits have shape $(3,4,3)$. Only the final axis of the logits is a choice among token classes.
 
-Let $M$ be the selected-token count, $p_{btv}$ the vocabulary probability and $x_{bt}$ the original target ID. The derivative below is zero at an unselected output position. It does not say the visible input embeddings have zero gradient: they help predict selected positions through attention.
+In the derivative, $M$ is the number of selected targets. An unselected output has zero direct loss gradient. A visible input embedding can still receive gradient because attention uses it to predict a selected position.
 
 $$
 \frac{\partial L}{\partial z_{btv}}=\frac{m_{bt}}{M}\left(p_{btv}-\mathbf{1}[v=x_{bt}]\right)
@@ -76,27 +75,31 @@ $$
 
 ## Work out unequal masks before batching
 
-Imagine one sequence contributes one selected token with loss $2$, and another contributes three selected tokens with losses $1,1,1$. The selected-token mean is $(2+3)/4=1.25$. Averaging the two sequence means gives $(2+1)/2=1.5$. Both are well-defined objectives, but they assign different influence to the sequences. Accumulating microbatch losses requires sums and selected counts if you intend to reproduce the token-weighted objective.
+Suppose one sequence has one selected-token loss of $2$, and a second has three selected-token losses of $1$ each. Averaging selected tokens gives $(2+1+1+1)/4=1.25$. Averaging the two sequence means gives $(2+1)/2=1.5$. The second reduction weights examples equally; the first weights selected tokens equally. The code uses the latter, so distributed accumulation must combine loss sums and selected counts.
 
-Predict which answer appears before running the unequal-mask experiment. Then perturb only unselected target IDs. A correctly reduced objective stays fixed. Next perturb one selected target; the loss should respond unless the competing classes happen to have equal probability.
+The audit also perturbs unselected logits. The loss and their direct gradients remain unchanged, as expected.
 
 ## Use both sides without using the hidden value
 
-The encoder forms attention scores across every input position. There is no causal triangle: a later visible token is useful evidence here. This tiny model has one attention head, no positional encoding and a linear vocabulary head. Repeated token sequences deliberately avoid word-order ambiguity; a realistic encoder also needs positions, padding handling, residual blocks and a tokenizer.
+Bidirectional attention lets a selected position use visible tokens on either side. There is no causal triangle in this encoder. That is useful for filling a missing word from both directions, but attention still sees only the corrupted input. This one-head model has no positional encoding, padding logic or tokenizer, so the fixture isolates information flow rather than a complete text encoder.
 
 ## Distinguish selection from replacement policy
 
-This lab always replaces selected tokens with the mask ID so information flow is easy to inspect. BERT-style training can mix mask replacement, random replacement and unchanged selected tokens; selection still determines the supervised positions. Keep special/padding tokens ineligible. Track a masking key and regenerate masks under a stated schedule rather than accidentally fixing one easy corruption forever.
+Selection and replacement are separate choices. This lab always writes MASK at selected positions, making the input path easy to inspect. Other MLM recipes may replace a selected token with MASK, a random token or leave it unchanged; each selected position still contributes its original clean token as the target. In a corpus, exclude padding and special tokens from selection and make the corruption schedule reproducible.
 
 ## Test a different corruption before claiming progress
 
-The training curve uses one selected position. The code evaluates a second position without additional updates and checks that changing target labels changes the loss. This supports the bounded repeated-token task, not language understanding. A real corpus needs document-separated splits, a frozen tokenizer, mask provenance and downstream evaluation against random initialization.
+On the training fixture, loss moves from $1.0986$ to $0.0106$. Moving the single mask to another slot without training gives $0.0105$, showing that this repeated-token task transfers across positions. The broader handoff changes to two selected positions and three held-out source groups: its loss is $3.5711$, above the uniform baseline $\log 3=1.0986$, and the frozen probe reaches $2/3$ accuracy. That is a failure of this changed-condition transfer check, not evidence of general language ability.
 
 ## Move from this fixture to a corpus deliberately
 
-Keep the objective checker when replacing repeated IDs with tokenized documents. Split by document/source, freeze tokenizer and special-token IDs, exclude padding from selection, and keep an explicit random key for corruption. A full encoder also needs positional information and a tested padding mask. Do not infer these capabilities from this one-head model.
+A useful next experiment is a document-separated corpus with a frozen tokenizer, explicit padding exclusion and a documented mask schedule. Compare random initialization and the trained checkpoint on the same held-out task, and report the summed token loss and selected-token count. Keep a failure example alongside the average so you can tell whether a bad prediction comes from the objective, a missing dependency or the data split. Moving a mask among these three repeated-token sequences is not a held-out-language test.
 
-Evaluate a fixed held-out corpus with a documented mask schedule and an aggregate numerator/count. Compare random initialization and a trained checkpoint on the same downstream task. Save one failure case showing a missing dependency, not just an average loss. Moving a mask inside the same three sequences tests corruption transfer; it is not a held-out-language evaluation.
+## Route the bounded experiment into a frozen transfer check
+
+Use this bounded CPU handoff to check whether the encoder survives saving and a stricter synthetic condition. It records vocabulary and source identity, saves and reloads the embedding and head with hashes, then evaluates two selected slots on groups g4–g6 against uniform loss $\log 3$. A ridge probe is fit only on g0–g2 and evaluated on g4–g6. The recorded two-slot loss is $3.5711$ and probe accuracy is $0.6667$; report these results as synthetic fixture evidence.
+
+The project pilot files listed here are reading references. The public packet contains neither a loadable pilot checkpoint nor its tokenizer, and these synthetic groups are not SciFact or language-quality evidence.
 
 ## 1. Define corruption and the selected-token objective
 
@@ -185,6 +188,81 @@ print('MLM initial/final/changed-mask:', history[0], history[-1], held_loss)
 ```
 
 The loop measures loss before each update. The final held-mask test uses the updated parameters; do not compare it as if it were the final recorded pre-update point.
+
+## 4. Save the encoder, change one condition, and probe it
+
+Run the preceding build cells first, then continue with this saved-encoder handoff. Run this block in a fresh Python process. It starts by recreating this lesson’s canonical synthetic fixture, then saves/reloads it, changes one declared condition, and runs the transfer check. The duplicated setup is intentional because generated scripts place staged blocks before the main example.
+
+```python
+# Changed condition + saved-encoder handoff + frozen probe (synthetic teaching fixture)
+import hashlib, json, tempfile
+from pathlib import Path
+
+def digest_arrays(*arrays):
+    h = hashlib.sha256()
+    for a in arrays:
+        h.update(np.ascontiguousarray(a).tobytes())
+    return h.hexdigest()
+
+# A changed corruption schedule selects two slots. Same clean targets and tokenizer.
+changed_mask = jnp.array([[True, False, True, False]] * 3)
+changed_input = corrupt_tokens(tokens, changed_mask, 3)
+changed_loss = float(masked_ce(mlm_logits(p, changed_input), tokens, changed_mask))
+uniform_baseline = float(np.log(3.0))
+assert np.isfinite(changed_loss) and changed_mask.sum() == 6
+
+# Source groups are explicit and disjoint; each held-out source repeats the frozen token map.
+train_group_ids, heldout_group_ids = ['g0','g1','g2'], ['g4','g5','g6']
+assert set(train_group_ids).isdisjoint(heldout_group_ids)
+processor_id = 'lesson-vocab:0=zero,1=one,2=two,3=MASK'
+source_split_id = 'synthetic-repeated-token-v1:g0-g2/g4-g6'
+encoder_before = np.asarray(p['embedding']).copy()
+head_before = np.asarray(p['head']).copy()
+parameter_hash = digest_arrays(encoder_before, head_before)
+manifest = {'model_id':'mlm-attention-4x6-v1','processor_id':processor_id,
+            'source_split_id':source_split_id,'objective':'selected-token-CE',
+            'mask_schedule':'two-of-four; positions 0 and 2','fit_group_ids':train_group_ids,'heldout_group_ids':['g4','g5','g6'],'seed':7,'parameter_sha256':parameter_hash}
+output_dir = Path(tempfile.mkdtemp(prefix='jaxpathways-mlm-transfer-'))
+artifact = output_dir / 'encoder.npz'
+
+np.savez(artifact, embedding=encoder_before, head=head_before,
+         manifest=np.array(json.dumps(manifest, sort_keys=True)))
+with np.load(artifact, allow_pickle=False) as saved:
+    loaded_manifest = json.loads(str(saved['manifest']))
+    loaded_encoder = saved['embedding'].copy()
+    loaded_head = saved['head'].copy()
+assert loaded_manifest == manifest
+assert digest_arrays(loaded_encoder, loaded_head) == manifest['parameter_sha256']
+checkpoint_hash=hashlib.sha256(artifact.read_bytes()).hexdigest()
+identity_path=output_dir/'identity.json'
+identity={**manifest,'checkpoint_sha256':checkpoint_hash}
+identity_path.write_text(json.dumps(identity,sort_keys=True))
+assert hashlib.sha256(artifact.read_bytes()).hexdigest()==identity['checkpoint_sha256']
+held_group_ids = ['g4','g5','g6']
+assert set(train_group_ids).isdisjoint(held_group_ids)
+held_tokens = jnp.array([[0,1,0,1],[1,2,1,2],[2,0,2,0]],jnp.int32)
+held_input = corrupt_tokens(held_tokens, changed_mask, 3)
+loaded_model = {'embedding':jnp.asarray(loaded_encoder),'head':jnp.asarray(loaded_head)}
+changed_loss = float(masked_ce(mlm_logits(loaded_model,held_input),held_tokens,changed_mask))
+# Frozen mean-token encoder representation. Fit probe weights on train groups only.
+x = np.asarray(tokens)
+features = loaded_encoder[x].mean(axis=1)
+y = np.asarray([0,1,2])
+design = np.c_[features, np.ones(len(features))]
+probe = np.linalg.solve(design.T @ design + 1e-3*np.eye(design.shape[1]), design.T @ y)
+held_tokens = np.asarray([[0,1,0,1],[1,2,1,2],[2,0,2,0]])
+held_features = loaded_encoder[held_tokens].mean(axis=1)
+held_pred = np.rint(np.c_[held_features, np.ones(3)] @ probe).astype(int)
+held_accuracy = float(np.mean(held_pred == y))
+assert np.allclose(loaded_encoder, encoder_before)
+print('MLM changed-mask loss / uniform baseline / frozen held-out probe accuracy:',
+      changed_loss, uniform_baseline, held_accuracy)
+print('Artifact path:', artifact)
+print('Identity sidecar:', identity_path)
+print('Saved identity:', manifest['model_id'], manifest['processor_id'], manifest['source_split_id'])
+```
+
+This changed-condition run is deliberately a tiny synthetic extension of the lesson. The saved identity is checked before scoring. Only the probe coefficients are fit after load; the encoder arrays are compared byte-for-byte before and after.
 
 ## Run the example
 
@@ -287,13 +365,21 @@ visual_data={"panels":[*visual_data.get("panels",[visual_data]),extra_panel]}
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:11:10.763127+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T16:11:23.672853+00:00. JAX 0.9.2.
 
 ```text
 MLM initial/final/changed-mask: 1.0986123085021973 0.010633035562932491 0.010457751341164112
+MLM changed-mask loss / uniform baseline / frozen held-out probe accuracy: 3.571091890335083 1.0986122886681098 0.6666666666666666
+Artifact path: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jaxpathways-mlm-transfer-9wnh3y8w/encoder.npz
+Identity sidecar: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jaxpathways-mlm-transfer-9wnh3y8w/identity.json
+Saved identity: mlm-attention-4x6-v1 lesson-vocab:0=zero,1=one,2=two,3=MASK synthetic-repeated-token-v1:g0-g2/g4-g6
 MLM initial/final/changed-mask: 1.0986123085021973 0.010633035562932491 0.010457751341164112
 Unselected output logits have zero direct loss gradient.
 Token-weighted / sequence-weighted: 0.6577723026275635 0.51289606
+MLM changed-mask loss / uniform baseline / frozen held-out probe accuracy: 3.571091890335083 1.0986122886681098 0.6666666666666666
+Artifact path: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jaxpathways-mlm-transfer-pue6iqn6/encoder.npz
+Identity sidecar: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jaxpathways-mlm-transfer-pue6iqn6/identity.json
+Saved identity: mlm-attention-4x6-v1 lesson-vocab:0=zero,1=one,2=two,3=MASK synthetic-repeated-token-v1:g0-g2/g4-g6
 Changed position loss: 0.010457751341164112
 Empty mask rejected
 Independent masked softmax gradient agrees.
@@ -357,6 +443,83 @@ print('Token-weighted / sequence-weighted:', observed, sequence_mean)
 **Expected:** The independent selected-token mean agrees; the sequence-weighted mean differs.
 
 The second sequence supplies three of four selected tokens. Equal sequence weighting gives the first sequence half of the influence instead of one quarter.
+
+## Change the corruption schedule, reload the encoder, and fit a frozen probe
+
+**Predict before running:** Does a checkpoint preserve its vocabulary/split identity, and what do two selected positions and a held-out frozen probe measure?
+
+```python
+# Changed condition + saved-encoder handoff + frozen probe (synthetic teaching fixture)
+import hashlib, json, tempfile
+from pathlib import Path
+
+def digest_arrays(*arrays):
+    h = hashlib.sha256()
+    for a in arrays:
+        h.update(np.ascontiguousarray(a).tobytes())
+    return h.hexdigest()
+
+# A changed corruption schedule selects two slots. Same clean targets and tokenizer.
+changed_mask = jnp.array([[True, False, True, False]] * 3)
+changed_input = corrupt_tokens(tokens, changed_mask, 3)
+changed_loss = float(masked_ce(mlm_logits(p, changed_input), tokens, changed_mask))
+uniform_baseline = float(np.log(3.0))
+assert np.isfinite(changed_loss) and changed_mask.sum() == 6
+
+# Source groups are explicit and disjoint; each held-out source repeats the frozen token map.
+train_group_ids, heldout_group_ids = ['g0','g1','g2'], ['g4','g5','g6']
+assert set(train_group_ids).isdisjoint(heldout_group_ids)
+processor_id = 'lesson-vocab:0=zero,1=one,2=two,3=MASK'
+source_split_id = 'synthetic-repeated-token-v1:g0-g2/g4-g6'
+encoder_before = np.asarray(p['embedding']).copy()
+head_before = np.asarray(p['head']).copy()
+parameter_hash = digest_arrays(encoder_before, head_before)
+manifest = {'model_id':'mlm-attention-4x6-v1','processor_id':processor_id,
+            'source_split_id':source_split_id,'objective':'selected-token-CE',
+            'mask_schedule':'two-of-four; positions 0 and 2','fit_group_ids':train_group_ids,'heldout_group_ids':['g4','g5','g6'],'seed':7,'parameter_sha256':parameter_hash}
+output_dir = Path(tempfile.mkdtemp(prefix='jaxpathways-mlm-transfer-'))
+artifact = output_dir / 'encoder.npz'
+
+np.savez(artifact, embedding=encoder_before, head=head_before,
+         manifest=np.array(json.dumps(manifest, sort_keys=True)))
+with np.load(artifact, allow_pickle=False) as saved:
+    loaded_manifest = json.loads(str(saved['manifest']))
+    loaded_encoder = saved['embedding'].copy()
+    loaded_head = saved['head'].copy()
+assert loaded_manifest == manifest
+assert digest_arrays(loaded_encoder, loaded_head) == manifest['parameter_sha256']
+checkpoint_hash=hashlib.sha256(artifact.read_bytes()).hexdigest()
+identity_path=output_dir/'identity.json'
+identity={**manifest,'checkpoint_sha256':checkpoint_hash}
+identity_path.write_text(json.dumps(identity,sort_keys=True))
+assert hashlib.sha256(artifact.read_bytes()).hexdigest()==identity['checkpoint_sha256']
+held_group_ids = ['g4','g5','g6']
+assert set(train_group_ids).isdisjoint(held_group_ids)
+held_tokens = jnp.array([[0,1,0,1],[1,2,1,2],[2,0,2,0]],jnp.int32)
+held_input = corrupt_tokens(held_tokens, changed_mask, 3)
+loaded_model = {'embedding':jnp.asarray(loaded_encoder),'head':jnp.asarray(loaded_head)}
+changed_loss = float(masked_ce(mlm_logits(loaded_model,held_input),held_tokens,changed_mask))
+# Frozen mean-token encoder representation. Fit probe weights on train groups only.
+x = np.asarray(tokens)
+features = loaded_encoder[x].mean(axis=1)
+y = np.asarray([0,1,2])
+design = np.c_[features, np.ones(len(features))]
+probe = np.linalg.solve(design.T @ design + 1e-3*np.eye(design.shape[1]), design.T @ y)
+held_tokens = np.asarray([[0,1,0,1],[1,2,1,2],[2,0,2,0]])
+held_features = loaded_encoder[held_tokens].mean(axis=1)
+held_pred = np.rint(np.c_[held_features, np.ones(3)] @ probe).astype(int)
+held_accuracy = float(np.mean(held_pred == y))
+assert np.allclose(loaded_encoder, encoder_before)
+print('MLM changed-mask loss / uniform baseline / frozen held-out probe accuracy:',
+      changed_loss, uniform_baseline, held_accuracy)
+print('Artifact path:', artifact)
+print('Identity sidecar:', identity_path)
+print('Saved identity:', manifest['model_id'], manifest['processor_id'], manifest['source_split_id'])
+```
+
+**Expected:** The checkpoint and identity sidecar round-trip. The changed-mask held-out loss is compared with uniform log(3), and the frozen probe is evaluated without encoder updates.
+
+In this run, changed-mask held-out loss is about 3.57 nats, above the uniform baseline of 1.10, and the three-row probe scores 2/3. These are clear failure signals for changed-condition transfer on this synthetic fixture. Do not summarize the low training loss as transfer success; a natural-language task needs its own split and baseline.
 
 ## Make it yours
 
@@ -547,14 +710,18 @@ If loss is suspiciously perfect at initialization, inspect target leakage and th
 
 - Keep the input-corruption boundary separate from the loss mask: corrupted inputs with shape $(3,4)$ enter the encoder, while clean targets meet vocabulary logits of shape $(3,4,3)$ only inside the selected-token cross-entropy.
 - Normalize masked loss by the count of selected tokens $\sum_{b,t} m_{bt}$, reject empty masks before entering a jitted step, and carry numerator and selected-token counts explicitly when accumulating across unequal batches.
+- The lesson-level checkpoint is an auditable synthetic handoff, not the omitted final8 pilot weights. A held-out masked loss and frozen probe are separate measurements and neither overturns the pilot’s failed SciFact floors.
 
 ## Keep your evidence
 
-Keep corrupted inputs, selected-target counts, the log-vocabulary baseline, independent masked-loss checks, trained parameters and changed-mask results.
+Keep clean/corrupted masks, selected-position denominators and independent gradients, plus saved encoder/processor identity, held-out loss versus uniform baseline, a frozen probe and honest changed-condition failures.
 
 Save your predictions, modified code, terminal outputs, and reasoning in your engineering portfolio.
 
 ## Primary references
 
 - [BERT: masked language pretraining](https://arxiv.org/abs/1810.04805)
+- [Saved embedding pilot: model and tokenizer/data contract](https://github.com/mlnomadpy/jaxpathways/blob/15bf7aa4fbd4460501cc4d6d7802324673a89f6f/projects/embedding-model-300m/model.py)
+- [Saved embedding pilot: frozen data recipe](https://github.com/mlnomadpy/jaxpathways/blob/15bf7aa4fbd4460501cc4d6d7802324673a89f6f/projects/embedding-model-300m/data/frozen_recipe.json)
+- [Saved embedding pilot evidence and limits](https://github.com/mlnomadpy/jaxpathways/blob/15bf7aa4fbd4460501cc4d6d7802324673a89f6f/projects/embedding-model-300m/reference/README.md)
 

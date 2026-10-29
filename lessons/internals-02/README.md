@@ -4,6 +4,8 @@ Phase 14: Autodiff & JAX internals · about 105 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Read your first jaxpr](https://www.tahabouhsine.com/jaxpathways/lesson-internals-01.html).
+
 ## What you will be able to do
 
 - Compute and interpret JVP and VJP products with correct domains and shapes.
@@ -26,6 +28,8 @@ Check the adjoint relation $u^T(Jv)=(J^Tu)^Tv$ using independent dot products. I
 
 When reading product bars, name the vector's space before interpreting its coordinates. A square example can hide a transpose mistake because both vectors have the same length. Add an unequal-dimension case to expose that ambiguity.
 
+At the recorded point $x=(0.4,-0.7)$, the Jacobian is $J=[[-0.7,0.4],[0.92106,-1.4]]$, with rows for outputs and columns for inputs. Thus the plotted JVP for $v=(1.2,-0.3)$ is $(-0.96,1.52527)$, a vector in output space. Keep that row/column convention beside the shapes: it makes a transposition error easier to spot than a square-shaped label alone.
+
 ### JVP and VJP use different vector spaces
 
 **Predict:** Does a VJP simply return the same vector as a JVP?
@@ -34,7 +38,7 @@ When reading product bars, name the vector's space before interpreting its coord
 
 *Architecture and dataflow mechanism diagram.*
 
-The top row pushes a three-component direction into two output components. The bottom pulls a two-component sensitivity back to three inputs. Shapes disambiguate the two products even when a square worked example would not. The adjoint identity checks their relationship.
+Read each row as a map between spaces: JVP takes $v\in\mathbb R^3$ through $J\in\mathbb R^{2\times3}$ to $Jv\in\mathbb R^2$; VJP takes $u\in\mathbb R^2$ through $J^T$ to $J^Tu\in\mathbb R^3$. The diagram’s three-to-two shape example is a shape lesson, while the executed numerical fixture happens to be two-to-two. Preserve that distinction; a nonsquare check is what catches swapped spaces.
 
 ### Pause and reason
 
@@ -214,15 +218,11 @@ Expected: JVP [-0.96, 1.52527319], VJP [1.49212199, -2.6], adjoint scalar approx
 
 ### Read the figure
 
-The first panel compares the JVP with the explicit product $Jv$, one bar per output coordinate. The matched values are about $-0.96$ and $1.5253$. These are predicted output changes for the selected input direction, not the function outputs themselves.
-
-The second panel compares the VJP with $J^\mathsf{T}u$, one bar per input coordinate. Its matched values are about $1.4921$ and $-2.6$. Both plots happen to contain two coordinates, but their axes refer to different vector spaces.
+The upper panel’s horizontal labels are output coordinates and its vertical unit is directional output change; JAX and analytic $Jv$ overlap at $(-0.96,1.52527)$. The lower panel labels input coordinates and measures input cotangents; JAX and analytic $J^Tu$ overlap at $(1.49212,-2.6)$. The two pairs agree within their own spaces, but their vectors are not interchangeable. Next check the scalar adjoint products, both about 2.57055.
 
 ### Connect it to the computation
 
-The bars agree within each panel because the hand-derived Jacobian verifies the corresponding JAX product. The two panels should not agree with each other: their seed vectors and meanings differ. Multiplying by the opposite seed gives the common adjoint scalar, about $2.5705$.
-
-An adjoint equality checks compatibility between two linear maps. The independent Jacobian and changed-point exercises protect against a shared wrong map. The figure does not compare runtime or memory use.
+The recorded Jacobian $[[-0.7,0.4],[0.92106,-1.4]]$ maps a two-coordinate input direction to two output coordinates here, so shape alone cannot expose a transpose mistake. The independent products do: $u^T Jv=(J^T u)^T v\approx2.57055$. Use an unequal input/output-size example when teaching the shape contract, then retain this fixture’s explicit Jacobian as the numerical check. These bars show derivative values, not execution cost.
 
 ```python
 # Transfer the device result to the host for an independent NumPy comparison.
@@ -231,7 +231,7 @@ visual_data={'panels':[{'kind':'bar','labels':['output 0','output 1'],'ylabel':'
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:08:53.670272+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:08:48.748449+00:00. JAX 0.9.2.
 
 ```text
 Jacobian: [[-0.7         0.4       ]

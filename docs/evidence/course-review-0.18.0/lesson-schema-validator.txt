@@ -1,0 +1,617 @@
+Browser tab: 1547147095, Title: "Schema Markup Validator", URL: "https://validator.schema.org/".
+0 AXWebArea Schema Markup Validator, URL: validator.schema.org/
+	1 container
+		2 container pagehead1
+			3 link Description: Schema.org, Value: schema.org/
+			4 content list
+				5 link Description: Documentation, Value: schema.org/docs/documents.html
+				6 link Description: Schemas, Value: schema.org/docs/schemas.html
+				7 link Description: Validate, Value: validator.schema.org/
+				8 link Description: About, Value: schema.org/docs/about.html
+			9 container gsc-iw-id1
+				10 text field (settable) Description: search, ID: gsc-i-id1
+		11 container fetch-bar
+			12 text public
+			13 container button-panel
+				14 button Run new test, ID: new-test
+				15 button language_japanese_kana, ID: select-language
+				16 button info, ID: settings-help
+		17 container
+			18 text entry area (settable)
+			19 container
+				24 text <!doctype html> < html >< head >< script type = "application/ld+json" > { "@context" :  "https://schema.org" ,  "@graph" : [{ "@type" :  "Person" ,  "@id" :  "https://www.tahabouhsine.com/#author" ,  "name" :  "Taha Bouhsine" ,  "url" :  "https://www.tahabouhsine.com/" }, { "@type" :  "Organization" ,  "@id" :  "https://www.tahabouhsine.com/#project" ,  "name" :  "JAX Pathways" ,  "url" :  "https://www.tahabouhsine.com/" ,  "sameAs" :  "https://github.com/mlnomadpy/jaxpathways" ,  "founder" : { "@id" :  "https://www.tahabouhsine.com/#author" }}, { "@type" :  "WebSite" ,  "@id" :  "https://www.tahabouhsine.com/#website" ,  "name" :  "JAX Pathways" ,  "url" :  "https://www.tahabouhsine.com/" ,  "inLanguage" :  "en" ,  "publisher" : { "@id" :  "https://www.tahabouhsine.com/#project" }}, { "@type" :  "WebPage" ,  "@id" :  "https://www.tahabouhsine.com/lesson-posttraining-04.html#webpage" ,  "url" :  "https://www.tahabouhsine.com/lesson-posttraining-04.html" ,  "name" :  "RLHF mechanics: a frozen reward and PPO policy updates \u2014 JAX Pathways" ,  "description" :  "Keep three identities separate. Collect actions before optimizing them." ,  "inLanguage" :  "en" ,  "isPartOf" : { "@id" :  "https://www.tahabouhsine.com/#website" },  "author" : { "@id" :  "https://www.tahabouhsine.com/#author" },  "breadcrumb" : { "@id" :  "https://www.tahabouhsine.com/lesson-posttraining-04.html#breadcrumbs" },  "mainEntity" : { "@id" :  "https://www.tahabouhsine.com/lesson-posttraining-04.html#lesson" }}, { "@type" :  "BreadcrumbList" ,  "@id" :  "https://www.tahabouhsine.com/lesson-posttraining-04.html#breadcrumbs" ,  "itemListElement" : [{ "@type" :  "ListItem" ,  "position" :  1 ,  "name" :  "JAX Pathways" ,  "item" :  "https://www.tahabouhsine.com/" }, { "@type" :  "ListItem" ,  "position" :  2 ,  "name" :  "Course catalog" ,  "item" :  "https://www.tahabouhsine.com/course.html" }, { "@type" :  "ListItem" ,  "position" :  3 ,  "name" :  "RLHF mechanics: a frozen reward and PPO policy updates" ,  "item" :  "https://www.tahabouhsine.com/lesson-posttraining-04.html" }]}, { "@type" :  "Course" ,  "@id" :  "https://www.tahabouhsine.com/phase-guides/posttraining.html#course" ,  "url" :  "https://www.tahabouhsine.com/phase-guides/posttraining.html" ,  "name" :  "Post-training: SFT, LoRA, reward models and RLHF" ,  "description" :  "Connect supervised demonstrations, frozen-base LoRA, reward modeling, sampled PPO and direct preference optimization. Keep the reference, behavior policy, reward model and dataset identities separate." ,  "inLanguage" :  "en" ,  "isAccessibleForFree" :  true ,  "author" : { "@id" :  "https://www.tahabouhsine.com/#author" },  "provider" : { "@id" :  "https://www.tahabouhsine.com/#project" },  "teaches" :  "Complete stages 4\u20138 of training-methods. Retain shifted token-mask checks, frozen-base/merge evidence, preference oracles, signed PPO clipping and fixed-reference DPO comparisons." ,  "coursePrerequisites" : [ "Self-supervised pretraining: masked and contrastive learning" ],  "dateModified" :  "2026-10-27" ,  "syllabusSections" : [{ "@type" :  "Syllabus" ,  "@id" :  "https://www.tahabouhsine.com/lesson-posttraining-01.html#syllabus" ,  "url" :  "https://www.tahabouhsine.com/lesson-posttraining-01.html" ,  "name" :  "Supervised fine-tuning with response-only token loss" ,  "description" :  "Align response-only shifted targets, then apply a bounded saved-decoder SFT transfer with frozen baselines, tokenizer identity and held-out reporting." }, { "@type" :  "Syllabus" ,  "@id" :  "https://www.tahabouhsine.com/lesson-posttraining-02.html#syllabus" ,  "url" :  "https://www.tahabouhsine.com/lesson-posttraining-02.html" ,  "name" :  "LoRA: adapt, save and merge low-rank updates" ,  "description" :  "Separate frozen-base and low-rank updates, then save and reload a base-bound adapter with nonunit scaling and wrong-base rejection." }, { "@type" :  "Syllabus" ,  "@id" :  "https://www.tahabouhsine.com/lesson-posttraining-03.html#syllabus" ,  "url" :  "https://www.tahabouhsine.com/lesson-posttraining-03.html" ,  "name" :  "Learn a reward model from pairwise preferences" ,  "description" :  "Fit pairwise reward differences and evaluate unchanged held-out unanimous and disagreement cases against a pre-fit baseline." }, { "@type" :  "Syllabus" ,  "@id" :  "https://www.tahabouhsine.com/lesson-posttraining-04.html#syllabus" ,  "url" :  "https://www.tahabouhsine.com/lesson-posttraining-04.html" ,  "name" :  "RLHF mechanics: a frozen reward and PPO policy updates" ,  "description" :  "Keep three identities separate. Collect actions before optimizing them." }, { "@type" :  "Syllabus" ,  "@id" :  "https://www.tahabouhsine.com/lesson-posttraining-05.html#syllabus" ,  "url" :  "https://www.tahabouhsine.com/lesson-posttraining-05.html" ,  "name" :  "Direct preference optimization and reference-corrected margins" ,  "description" :  "Compare reference-corrected preference margins, then score unequal-length saved-decoder responses with explicit masks and a bounded sequence update." }]}, { "@context" :  "https://schema.org" ,  "@type" :  "LearningResource" ,  "@id" :  "https://www.tahabouhsine.com/lesson-posttraining-04.html#lesson" ,  "url" :  "https://www.tahabouhsine.com/lesson-posttraining-04.html" ,  "name" :  "RLHF mechanics: a frozen reward and PPO policy updates" ,  "description" :  "Keep three identities separate. Collect actions before optimizing them." ,  "learningResourceType" :  "Lesson" ,  "inLanguage" :  "en" ,  "isAccessibleForFree" :  true ,  "author" : { "@id" :  "https://www.tahabouhsine.com/#author" },  "teaches" :  "Keep three identities separate. Collect actions before optimizing them." ,  "dateModified" :  "2026-10-27" ,  "isPartOf" : { "@type" :  "Course" ,  "@id" :  "https://www.tahabouhsine.com/phase-guides/posttraining.html#course" ,  "name" :  "Post-training: SFT, LoRA, reward models and RLHF" ,  "url" :  "https://www.tahabouhsine.com/phase-guides/posttraining.html" }}]} </ script ></ head >< body >< h1 > JAX Pathways </ h1 ></ body ></ html >
+		25 container
+			26 text WebPage
+			27 button All (1) arrow_drop_down, ID: filter-menu
+				28 text All (1)
+				29 text arrow_drop_down
+			30 content list
+				31 container
+					32 text WebPage ID: https://www.tahabouhsine.com/lesson-posttraining-04.html#webpage 0 ERRORS 0 WARNINGS expand_less
+				33 table
+					34 row
+						35 cell
+							36 text @type
+						37 cell
+							38 text WebPage
+					39 row
+						40 cell
+							41 text @id
+						42 cell
+							43 text https://www.tahabouhsine.com/lesson-posttraining-04.html#webpage
+					44 row
+						45 cell
+							46 text url
+						47 cell
+							48 text https://www.tahabouhsine.com/lesson-posttraining-04.html
+					49 row
+						50 cell
+							51 text name
+						52 cell
+							53 text RLHF mechanics: a frozen reward and PPO policy updates — JAX Pathways
+					54 row
+						55 cell
+							56 text description
+						57 cell
+							58 text Keep three identities separate. Collect actions before optimizing them.
+					59 row
+						60 cell
+							61 text inLanguage
+						62 cell
+							63 text en
+					64 row
+						65 cell
+							66 text isPartOf
+					67 row
+						68 cell
+							69 text @type
+						70 cell
+							71 text WebSite
+					72 row
+						73 cell
+							74 text @id
+						75 cell
+							76 text https://www.tahabouhsine.com/#website
+					77 row
+						78 cell
+							79 text name
+						80 cell
+							81 text JAX Pathways
+					82 row
+						83 cell
+							84 text url
+						85 cell
+							86 text https://www.tahabouhsine.com/
+					87 row
+						88 cell
+							89 text inLanguage
+						90 cell
+							91 text en
+					92 row
+						93 cell
+							94 text publisher
+					95 row
+						96 cell
+							97 text @type
+						98 cell
+							99 text Organization
+					100 row
+						101 cell
+							102 text @id
+						103 cell
+							104 text https://www.tahabouhsine.com/#project
+					105 row
+						106 cell
+							107 text name
+						108 cell
+							109 text JAX Pathways
+					110 row
+						111 cell
+							112 text url
+						113 cell
+							114 text https://www.tahabouhsine.com/
+					115 row
+						116 cell
+							117 text sameAs
+						118 cell
+							119 text https://github.com/mlnomadpy/jaxpathways
+					120 row
+						121 cell
+							122 text founder
+					123 row
+						124 cell
+							125 text @type
+						126 cell
+							127 text Person
+					128 row
+						129 cell
+							130 text @id
+						131 cell
+							132 text https://www.tahabouhsine.com/#author
+					133 row
+						134 cell
+							135 text name
+						136 cell
+							137 text Taha Bouhsine
+					138 row
+						139 cell
+							140 text url
+						141 cell
+							142 text https://www.tahabouhsine.com/
+					143 row
+						144 cell
+							145 text author
+					146 row
+						147 cell
+							148 text @type
+						149 cell
+							150 text Person
+					151 row
+						152 cell
+							153 text @id
+						154 cell
+							155 text https://www.tahabouhsine.com/#author
+					156 row
+						157 cell
+							158 text name
+						159 cell
+							160 text Taha Bouhsine
+					161 row
+						162 cell
+							163 text url
+						164 cell
+							165 text https://www.tahabouhsine.com/
+					166 row
+						167 cell
+							168 text breadcrumb
+					169 row
+						170 cell
+							171 text @type
+						172 cell
+							173 text BreadcrumbList
+					174 row
+						175 cell
+							176 text @id
+						177 cell
+							178 text https://www.tahabouhsine.com/lesson-posttraining-04.html#breadcrumbs
+					179 row
+						180 cell
+							181 text itemListElement
+					182 row
+						183 cell
+							184 text @type
+						185 cell
+							186 text ListItem
+					187 row
+						188 cell
+							189 text position
+						190 cell
+							191 text 1
+					192 row
+						193 cell
+							194 text name
+						195 cell
+							196 text JAX Pathways
+					197 row
+						198 cell
+							199 text item
+					200 row
+						201 cell
+							202 text @type
+						203 cell
+							204 text Thing
+					205 row
+						206 cell
+							207 text @id
+						208 cell
+							209 text https://www.tahabouhsine.com/
+					210 row
+						211 cell
+							212 text itemListElement
+					213 row
+						214 cell
+							215 text @type
+						216 cell
+							217 text ListItem
+					218 row
+						219 cell
+							220 text position
+						221 cell
+							222 text 2
+					223 row
+						224 cell
+							225 text name
+						226 cell
+							227 text Course catalog
+					228 row
+						229 cell
+							230 text item
+					231 row
+						232 cell
+							233 text @type
+						234 cell
+							235 text Thing
+					236 row
+						237 cell
+							238 text @id
+						239 cell
+							240 text https://www.tahabouhsine.com/course.html
+					241 row
+						242 cell
+							243 text itemListElement
+					244 row
+						245 cell
+							246 text @type
+						247 cell
+							248 text ListItem
+					249 row
+						250 cell
+							251 text position
+						252 cell
+							253 text 3
+					254 row
+						255 cell
+							256 text name
+						257 cell
+							258 text RLHF mechanics: a frozen reward and PPO policy updates
+					259 row
+						260 cell
+							261 text item
+					262 row
+						263 cell
+							264 text @type
+						265 cell
+							266 text Thing
+					267 row
+						268 cell
+							269 text @id
+						270 cell
+							271 text https://www.tahabouhsine.com/lesson-posttraining-04.html
+					272 row
+						273 cell
+							274 text mainEntity
+					275 row
+						276 cell
+							277 text @type
+						278 cell
+							279 text LearningResource
+					280 row
+						281 cell
+							282 text @id
+						283 cell
+							284 text https://www.tahabouhsine.com/lesson-posttraining-04.html#lesson
+					285 row
+						286 cell
+							287 text url
+						288 cell
+							289 text https://www.tahabouhsine.com/lesson-posttraining-04.html
+					290 row
+						291 cell
+							292 text name
+						293 cell
+							294 text RLHF mechanics: a frozen reward and PPO policy updates
+					295 row
+						296 cell
+							297 text description
+						298 cell
+							299 text Keep three identities separate. Collect actions before optimizing them.
+					300 row
+						301 cell
+							302 text learningResourceType
+						303 cell
+							304 text Lesson
+					305 row
+						306 cell
+							307 text inLanguage
+						308 cell
+							309 text en
+					310 row
+						311 cell
+							312 text isAccessibleForFree
+						313 cell
+							314 text http://schema.org/True
+					315 row
+						316 cell
+							317 text teaches
+						318 cell
+							319 text Keep three identities separate. Collect actions before optimizing them.
+					320 row
+						321 cell
+							322 text dateModified
+						323 cell
+							324 text 2026-10-27
+					325 row
+						326 cell
+							327 text author
+					328 row
+						329 cell
+							330 text @type
+						331 cell
+							332 text Person
+					333 row
+						334 cell
+							335 text @id
+						336 cell
+							337 text https://www.tahabouhsine.com/#author
+					338 row
+						339 cell
+							340 text name
+						341 cell
+							342 text Taha Bouhsine
+					343 row
+						344 cell
+							345 text url
+						346 cell
+							347 text https://www.tahabouhsine.com/
+					348 row
+						349 cell
+							350 text isPartOf
+					351 row
+						352 cell
+							353 text @type
+						354 cell
+							355 text Course
+					356 row
+						357 cell
+							358 text @id
+						359 cell
+							360 text https://www.tahabouhsine.com/phase-guides/posttraining.html#course
+					361 row
+						362 cell
+							363 text url
+						364 cell
+							365 text https://www.tahabouhsine.com/phase-guides/posttraining.html
+					366 row
+						367 cell
+							368 text name
+						369 cell
+							370 text Post-training: SFT, LoRA, reward models and RLHF
+					371 row
+						372 cell
+							373 text description
+						374 cell
+							375 text Connect supervised demonstrations, frozen-base LoRA, reward modeling, sampled PPO and direct preference optimization. Keep the reference, behavior policy, reward model and dataset identities separate.
+					376 row
+						377 cell
+							378 text inLanguage
+						379 cell
+							380 text en
+					381 row
+						382 cell
+							383 text isAccessibleForFree
+						384 cell
+							385 text http://schema.org/True
+					386 row
+						387 cell
+							388 text teaches
+						389 cell
+							390 text Complete stages 4–8 of training-methods. Retain shifted token-mask checks, frozen-base/merge evidence, preference oracles, signed PPO clipping and fixed-reference DPO comparisons.
+					391 row
+						392 cell
+							393 text coursePrerequisites
+						394 cell
+							395 text Self-supervised pretraining: masked and contrastive learning
+					396 row
+						397 cell
+							398 text dateModified
+						399 cell
+							400 text 2026-10-27
+					401 row
+						402 cell
+							403 text author
+					404 row
+						405 cell
+							406 text @type
+						407 cell
+							408 text Person
+					409 row
+						410 cell
+							411 text @id
+						412 cell
+							413 text https://www.tahabouhsine.com/#author
+					414 row
+						415 cell
+							416 text name
+						417 cell
+							418 text Taha Bouhsine
+					419 row
+						420 cell
+							421 text url
+						422 cell
+							423 text https://www.tahabouhsine.com/
+					424 row
+						425 cell
+							426 text provider
+					427 row
+						428 cell
+							429 text @type
+						430 cell
+							431 text Organization
+					432 row
+						433 cell
+							434 text @id
+						435 cell
+							436 text https://www.tahabouhsine.com/#project
+					437 row
+						438 cell
+							439 text name
+						440 cell
+							441 text JAX Pathways
+					442 row
+						443 cell
+							444 text url
+						445 cell
+							446 text https://www.tahabouhsine.com/
+					447 row
+						448 cell
+							449 text sameAs
+						450 cell
+							451 text https://github.com/mlnomadpy/jaxpathways
+					452 row
+						453 cell
+							454 text founder
+					455 row
+						456 cell
+							457 text @type
+						458 cell
+							459 text Person
+					460 row
+						461 cell
+							462 text @id
+						463 cell
+							464 text https://www.tahabouhsine.com/#author
+					465 row
+						466 cell
+							467 text name
+						468 cell
+							469 text Taha Bouhsine
+					470 row
+						471 cell
+							472 text url
+						473 cell
+							474 text https://www.tahabouhsine.com/
+					475 row
+						476 cell
+							477 text syllabusSections
+					478 row
+						479 cell
+							480 text @type
+						481 cell
+							482 text Syllabus
+					483 row
+						484 cell
+							485 text @id
+						486 cell
+							487 text https://www.tahabouhsine.com/lesson-posttraining-01.html#syllabus
+					488 row
+						489 cell
+							490 text url
+						491 cell
+							492 text https://www.tahabouhsine.com/lesson-posttraining-01.html
+					493 row
+						494 cell
+							495 text name
+						496 cell
+							497 text Supervised fine-tuning with response-only token loss
+					498 row
+						499 cell
+							500 text description
+						501 cell
+							502 text Align response-only shifted targets, then apply a bounded saved-decoder SFT transfer with frozen baselines, tokenizer identity and held-out reporting.
+					503 row
+						504 cell
+							505 text syllabusSections
+					506 row
+						507 cell
+							508 text @type
+						509 cell
+							510 text Syllabus
+					511 row
+						512 cell
+							513 text @id
+						514 cell
+							515 text https://www.tahabouhsine.com/lesson-posttraining-02.html#syllabus
+					516 row
+						517 cell
+							518 text url
+						519 cell
+							520 text https://www.tahabouhsine.com/lesson-posttraining-02.html
+					521 row
+						522 cell
+							523 text name
+						524 cell
+							525 text LoRA: adapt, save and merge low-rank updates
+					526 row
+						527 cell
+							528 text description
+						529 cell
+							530 text Separate frozen-base and low-rank updates, then save and reload a base-bound adapter with nonunit scaling and wrong-base rejection.
+					531 row
+						532 cell
+							533 text syllabusSections
+					534 row
+						535 cell
+							536 text @type
+						537 cell
+							538 text Syllabus
+					539 row
+						540 cell
+							541 text @id
+						542 cell
+							543 text https://www.tahabouhsine.com/lesson-posttraining-03.html#syllabus
+					544 row
+						545 cell
+							546 text url
+						547 cell
+							548 text https://www.tahabouhsine.com/lesson-posttraining-03.html
+					549 row
+						550 cell
+							551 text name
+						552 cell
+							553 text Learn a reward model from pairwise preferences
+					554 row
+						555 cell
+							556 text description
+						557 cell
+							558 text Fit pairwise reward differences and evaluate unchanged held-out unanimous and disagreement cases against a pre-fit baseline.
+					559 row
+						560 cell
+							561 text syllabusSections
+					562 row
+						563 cell
+							564 text @type
+						565 cell
+							566 text Syllabus
+					567 row
+						568 cell
+							569 text @id
+						570 cell
+							571 text https://www.tahabouhsine.com/lesson-posttraining-04.html#syllabus
+					572 row
+						573 cell
+							574 text url
+						575 cell
+							576 text https://www.tahabouhsine.com/lesson-posttraining-04.html
+					577 row
+						578 cell
+							579 text name
+						580 cell
+							581 text RLHF mechanics: a frozen reward and PPO policy updates
+					582 row
+						583 cell
+							584 text description
+						585 cell
+							586 text Keep three identities separate. Collect actions before optimizing them.
+					587 row
+						588 cell
+							589 text syllabusSections
+					590 row
+						591 cell
+							592 text @type
+						593 cell
+							594 text Syllabus
+					595 row
+						596 cell
+							597 text @id
+						598 cell
+							599 text https://www.tahabouhsine.com/lesson-posttraining-05.html#syllabus
+					600 row
+						601 cell
+							602 text url
+						603 cell
+							604 text https://www.tahabouhsine.com/lesson-posttraining-05.html
+					605 row
+						606 cell
+							607 text name
+						608 cell
+							609 text Direct preference optimization and reference-corrected margins
+					610 row
+						611 cell
+							612 text description
+						613 cell
+							614 text Compare reference-corrected preference margins, then score unequal-length saved-decoder responses with explicit masks and a bounded sequence update.
+		21 button (disabled) play_arrow, ID: validate-button
+			22 text play_arrow
+		23 text VALIDATE
+
+The focused UI element is 0 AXWebArea Schema Markup Validator, URL: validator.schema.org/

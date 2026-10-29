@@ -1,0 +1,114 @@
+{
+  "schemaVersion": 1,
+  "description": "Raw, source-bound evidence for one fixed synthetic Transformer sequence-PPO run.",
+  "identity": [
+    "recipe_sha256",
+    "fixture_sha256",
+    "approval_sha256",
+    "candidate_source_sha256",
+    "parent_package_files_sha256",
+    "parent_foundation_source_sha256",
+    "parent_identity",
+    "parent_parameter_tree_sha256",
+    "child_parameter_tree_sha256",
+    "processor_sha256",
+    "jax_version",
+    "numpy_version",
+    "optax_version",
+    "tokenizers_version",
+    "backend"
+  ],
+  "perUpdateArrays": [
+    "prompt_ids",
+    "prefix_token_ids",
+    "actions",
+    "target_role_mask",
+    "input_role_mask",
+    "padding_mask",
+    "terminated",
+    "truncated",
+    "old_logps",
+    "parent_logps",
+    "old_restricted_probabilities",
+    "parent_restricted_probabilities",
+    "eligible_action_mask",
+    "sampling_key",
+    "new_logps_per_epoch",
+    "pre_update_logps_per_epoch",
+    "pre_update_values_per_epoch",
+    "sampled_kl",
+    "terminal_reward",
+    "shaped_rewards",
+    "old_values",
+    "post_action_values",
+    "advantages",
+    "value_targets",
+    "policy_loss_by_epoch",
+    "critic_loss_by_epoch",
+    "exact_restricted_conditional_kl_by_context"
+  ],
+  "checkpoint": [
+    "actor_parameters",
+    "critic_parameters",
+    "actor_adam_moments",
+    "critic_adam_moments",
+    "rng_key",
+    "training_prompt_cursor",
+    "update_clock",
+    "inner_epoch_clock",
+    "recipe_sha256",
+    "fixture_sha256",
+    "approval_sha256",
+    "parent_package_sha256",
+    "processor_sha256",
+    "candidate_source_sha256"
+  ],
+  "resumeVerification": {
+    "actorUpdateExecutions": 16,
+    "rewardHeadFitCount": 1,
+    "primaryLane": "8 uninterrupted updates and the only lane used for predeclared quality floors",
+    "replayLane": "4 updates, full checkpoint save and fresh-process restore, then 4 updates; diagnostics only",
+    "equalAtSplitAndFinalClocks": [
+      "actor and critic parameters",
+      "actor and critic Adam moments",
+      "PRNG key and prompt cursor",
+      "next prompt IDs",
+      "old and parent selected log probabilities",
+      "epoch losses and metrics"
+    ]
+  },
+  "evaluation": [
+    "matched_prompt_ids_and_seeds",
+    "unique_matched_episode_count_and_sampling_keys",
+    "mean_child_reward_per_sequence",
+    "mean_parent_reward_per_sequence",
+    "sampled_kl_per_valid_action",
+    "exact_conditional_kl_at_sampled_visited_contexts_per_valid_action",
+    "dev_pairwise_diagnostic_rows_and_margins",
+    "heldout_pairwise_diagnostic_rows_and_margins",
+    "predeclared_floor_results_and_failure_reasons"
+  ],
+  "rewardFit": {
+    "fit_updates": 120,
+    "fit_trace": "Initial 3 by 4 reward-head weights followed by one 3 by 4 matrix after each declared Adam step; kept with the fixed campaign metrics so the objective path can be audited.",
+    "training_pair_margins": "Raw signed margins for the four fixed training pairs only."
+  },
+  "learnerVerification": {
+    "kind": "separate mechanics-only candidate check; not campaign quality evidence",
+    "perInvocationBudget": {"outer_updates": 1, "inner_epochs": 2, "reward_fit_updates": 4},
+    "candidateSha256": "Caller-supplied exact candidate source SHA checked before import and written to private evidence; candidate hashes are not allowlisted.",
+    "independentOracles": [
+      "Four reward-head Adam steps from fixed pair rows and frozen parent features",
+      "Two actor PPO and critic value-clipping Adam epochs from one raw first rollout",
+      "Actual parent decoder selected probabilities, critic values, masks, GAE, targets and loss denominators"
+    ]
+  },
+  "prohibitedPayloads": [
+    "Alice corpus text",
+    "hidden-state tensors",
+    "unrestricted full-vocabulary logits",
+    "unbounded conversation prompts",
+    "claim of human preference evidence",
+    "claim of natural-language alignment"
+  ]
+}

@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "recovery-05",
-  "contentHash": "aae7622d4463a28b13c2ddc5123290f82643ef5d69473e19b31657068df3c483",
-  "rendererHash": "a1bd5b648f4731ae5d5f0a24811c2540d1a0a132149ce589d17c4113509cbedf",
+  "contentHash": "248cedaf3925b06137bf282210376af77f72c52e536ccfa5ed77b63c3973da49",
+  "rendererHash": "17e3bbad72ee4c43425845aaee76b86b85e84750551278be03d8c16842f4dc63",
   "kind": "executed",
-  "generatedAt": "2026-10-21T16:04:21.229359+00:00",
+  "generatedAt": "2026-10-27T17:01:46.261884+00:00",
   "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",
@@ -13,7 +13,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Checkpoint workspace: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-async-lesson-vgn6l_m_\n{\n  \"save_call_seconds\": 0.004990667104721069,\n  \"remaining_work_and_wait_seconds\": 0.02059841714799404,\n  \"accepted_step\": 1,\n  \"live_step\": 2\n}\nUnpublished step 2 exists; application recovery still selects verified step 1.\n",
+  "stdout": "Checkpoint workspace: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-async-lesson-74ca9hhm\n{\n  \"save_call_seconds\": 0.006039374973624945,\n  \"remaining_work_and_wait_seconds\": 0.02186249988153577,\n  \"accepted_step\": 1,\n  \"live_step\": 2\n}\nUnpublished step 2 exists; application recovery still selects verified step 1.\n",
   "data": {
     "kind": "bar",
     "labels": [

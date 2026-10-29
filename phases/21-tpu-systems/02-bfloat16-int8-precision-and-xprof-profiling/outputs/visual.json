@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "tpu-06",
-  "contentHash": "694ea9a2b1e1b702348cf837eab4f61c58c02361417965a65c1f19be6a2aebe2",
-  "rendererHash": "a1bd5b648f4731ae5d5f0a24811c2540d1a0a132149ce589d17c4113509cbedf",
+  "contentHash": "bbd23fe0c43338ab439410614b87af238ebf737a6f37e455483972e756c87afd",
+  "rendererHash": "17e3bbad72ee4c43425845aaee76b86b85e84750551278be03d8c16842f4dc63",
   "kind": "executed",
-  "generatedAt": "2026-10-29T12:43:35.947806+00:00",
+  "generatedAt": "2026-10-29T13:57:18.495837+00:00",
   "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",
@@ -13,15 +13,15 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Precision comparison: [{'policy': 'bf16 (fp32 accum)', 'max_abs_err': 0.03718, 'mean_abs_err': 0.00756, 'weight_bytes': 16384, 'scale_bytes': 256}, {'policy': 'bf16 (bf16 accum)', 'max_abs_err': 0.05545, 'mean_abs_err': 0.00912, 'weight_bytes': 16384, 'scale_bytes': 256}, {'policy': 'int8 per-col (fp32 accum)', 'max_abs_err': 0.12516, 'mean_abs_err': 0.02322, 'weight_bytes': 16384, 'scale_bytes': 256}]\nRetained trace directory: /Users/tahabsn/.codex/worktrees/testing-artifact-fixes/jaxpathways/tpu-xprof-trace\nCaptured *.xplane.pb trace count: 1 steady_ms: 0.1125\n",
+  "stdout": "Precision comparison: [{'result_dtype_setting': 'BF16 operands / requested FP32 result', 'returned_dtype': 'float32', 'max_abs_err': 0.03718, 'mean_abs_err': 0.00756, 'input_shape': [64, 256], 'weight_shape': [256, 64], 'result_shape': [64, 64], 'stored_weight_bytes': 32768, 'scale_metadata_bytes': 0, 'runtime_input_bytes': 32768, 'runtime_weight_operand_bytes': 32768, 'dequantized_fp32_workspace_bytes': 0, 'result_bytes': 16384, 'storage_note': 'logical array sizes; not peak HBM or measured traffic'}, {'result_dtype_setting': 'BF16 operands / requested BF16 result', 'returned_dtype': 'bfloat16', 'max_abs_err': 0.05545, 'mean_abs_err': 0.00912, 'input_shape': [64, 256], 'weight_shape': [256, 64], 'result_shape': [64, 64], 'stored_weight_bytes': 32768, 'scale_metadata_bytes': 0, 'runtime_input_bytes': 32768, 'runtime_weight_operand_bytes': 32768, 'dequantized_fp32_workspace_bytes': 0, 'result_bytes': 8192, 'storage_note': 'logical array sizes; not peak HBM or measured traffic'}, {'result_dtype_setting': 'INT8 per-column / FP32 dequantized dot result', 'returned_dtype': 'float32', 'max_abs_err': 0.12516, 'mean_abs_err': 0.02322, 'input_shape': [64, 256], 'weight_shape': [256, 64], 'result_shape': [64, 64], 'stored_weight_bytes': 16384, 'scale_metadata_bytes': 256, 'runtime_input_bytes': 65536, 'runtime_weight_operand_bytes': 65536, 'dequantized_fp32_workspace_bytes': 65536, 'result_bytes': 16384, 'storage_note': 'logical array sizes; not peak HBM or measured traffic'}]\nRetained trace directory: /Users/tahabsn/.codex/worktrees/testing-artifact-fixes/jaxpathways/tpu-xprof-trace\nObserved backend: cpu profiled steps: 5 XPlane files: 4 unprofiled ms/step: 0.0351\n",
   "data": {
     "kind": "bar",
     "labels": [
-      "bf16 (fp32 accum)",
-      "bf16 (bf16 accum)",
-      "int8 per-col (fp32 accum)"
+      "BF16 inputs / FP32 result",
+      "BF16 inputs / BF16 result",
+      "INT8 weights / FP32 dequantized dot"
     ],
-    "xlabel": "matmul precision policy",
+    "xlabel": "requested result dtype / operand path",
     "ylabel": "absolute error vs fp32 reference",
     "series": [
       {
@@ -41,5 +41,70 @@
         ]
       }
     ]
+  },
+  "diagram": {
+    "title": "Warmup, profiled calls, synchronization and unprofiled measurement boundaries",
+    "prediction": "Which work is outside the trace, what may appear inside it, and does the shown source contain a collective?",
+    "reading": "Conceptual flow, not drawn to time scale: synchronized warmup runs before the trace. The profiled region repeats a fixed-input matrix dot and synchronizes each result, so a captured timeline can include host dispatch, runtime/device work, synchronization and profiler activity. No collective appears in this function. A separate unprofiled loop measures wall time including host dispatch and synchronization.",
+    "alt": "Flow diagram with warmup outside the profiler, a fixed-input dot and synchronization inside the trace, then a separate unprofiled wall-time loop. The trace flow contains no collective and has no duration scale.",
+    "scope": "Conceptual execution boundary schematic; durations and event nesting depend on the retained trace.",
+    "height": 6,
+    "panel": {
+      "kind": "graph",
+      "nodes": [
+        {
+          "id": "0",
+          "x": 5,
+          "y": 1,
+          "label": "Outside trace: compile/warm fixed signature; block_until_ready; finite check",
+          "tone": "state",
+          "w": 9.4,
+          "h": 1
+        },
+        {
+          "id": "1",
+          "x": 5,
+          "y": 2.5,
+          "label": "Profiler starts: repeat fixed-input 128x128 BF16 dot; no collective",
+          "tone": "data",
+          "w": 9.4,
+          "h": 1
+        },
+        {
+          "id": "2",
+          "x": 5,
+          "y": 4,
+          "label": "Captured work may include host dispatch, runtime/device spans, sync and profiler activity",
+          "tone": "result",
+          "w": 9.4,
+          "h": 1
+        },
+        {
+          "id": "3",
+          "x": 5,
+          "y": 5.5,
+          "label": "Profiler ends; separate unprofiled loop reports synchronized wall time",
+          "tone": "warning",
+          "w": 9.4,
+          "h": 1
+        }
+      ],
+      "edges": [
+        {
+          "from": "0",
+          "to": "1"
+        },
+        {
+          "from": "1",
+          "to": "2"
+        },
+        {
+          "from": "2",
+          "to": "3"
+        }
+      ],
+      "height": 6.5,
+      "width": 11
+    }
   }
 }

@@ -4,6 +4,8 @@ Phase 06: Data & checkpoint recovery · about 70 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Asynchronous checkpoints and failure boundaries](https://www.tahabouhsine.com/jaxpathways/lesson-recovery-05.html).
+
 ## What you will be able to do
 
 - Decide what makes runs comparable
@@ -21,11 +23,9 @@ A tracker is useful when a plotted point leads back to the data, source, configu
 
 ## Make every metric point traceable
 
-Two runs may log validation loss at step 100 using different splits or denominators. The matching metric name and step do not make the values comparable. Record what was averaged and which examples contributed.
+A metric record needs its run, data identity, reduction, and measurement boundary. Two `validation_mse` values at step 30 are comparable here because both runs use the same four validation rows and mean-squared-error definition, and the training curve records post-update values. A name and step alone would not establish that.
 
-Link a selection decision to the precise checkpoint and evaluation. A run often contains many checkpoints, so selecting a run is not the same as selecting weights. Keep the model artifact's identity even if a dashboard display name changes.
-
-The MLflow curves are recorded observations. Read configuration and metric definitions before ranking them. Tracking preserves a comparison's evidence; it cannot repair incompatible evaluation contracts. The same principle applies to Weights & Biases and other experiment trackers.
+The example logs training history and a coefficient artifact, then retrieves the recorded metrics and artifact through `MlflowClient`. Selecting a run identifies a candidate run; retain the exact artifact identity too, since a run can contain more than one checkpoint or model file.
 
 ### Pause and reason
 
@@ -39,15 +39,21 @@ Its artifact identity, dataset revision, metric definition, step convention, sou
 
 ## Decide what makes runs comparable
 
-We reuse a known regression problem so the engineering does not hide behind model complexity. Training inputs and validation inputs are separate. The target is $y=2x+1$, and the learned parameters are a weight and bias. Both runs start from zero, use the same examples and receive $30$ updates. Only the learning rate changes. Log those choices as parameters. Never compare two metrics with the same name when one is a sum and the other a mean, or one was measured before the update and the other afterward.
+Both runs fit $y=2x+1$ from zero-initialized weight and bias on the same five training points for $30$ updates. Only the learning rate changes: $0.02$ or $0.15$. The validation set has four separate input values, and the code calculates its mean squared error after the final update.
+
+The retrieved validation MSEs are about $0.11994$ and $5.05\times10^{-10}$, respectively. This controlled comparison supports choosing the latter on this fixture. It does not establish an optimal rate across wall-clock budgets or data distributions.
 
 ## Give data and code an identity
 
-A path such as data.csv is a location, not a version. Hash the actual bytes, record the split IDs, and preserve preprocessing configuration. For this tiny fixture the hash covers the training arrays; a real dataset manifest should additionally identify schema, split/group rules and transformations. A Git commit is useful for clean code, but uncommitted edits require a source hash or captured diff. A checkpoint and an MLflow run should refer to the same identities; neither replaces the other.
+The SHA-256 tag covers the bytes of the five training features and targets. Changing one target produces a different digest in the practice check. This makes a content change visible even when the filename, shape, and row count stay the same.
+
+For a larger dataset, also record split IDs, schema, preprocessing, and source revision. A hash identifies the checked bytes but does not describe how examples were selected or prove the data are correct. Tie the model artifact and run to the same data and code identities.
 
 ## Use a database and a deliberate artifact location
 
-The companion creates a temporary SQLite database and local artifact directory. SQLite stores run metadata; the artifacts contain the learned coefficients and preprocessing note. MlflowClient reads the records back, so a print statement is not our only evidence that logging occurred. These local examples use MLflow 3.16.1. A shared server needs supported database storage, artifact access, authentication, backup and retention; do not expose this local exercise as a public service.
+The exercise creates a temporary SQLite tracking database and local artifact directory. Run parameters and metric histories live in the database; each candidate's `model.json` stores its coefficients and preprocessing note. The client then retrieves metric steps and downloads the selected artifact, so the visible curve corresponds to recorded data.
+
+This is a local MLflow 3.16.1 example. A shared tracking service adds requirements for database support, artifact access, authentication, backups, and retention that this temporary setup does not test.
 
 **From the course workspace, install the tested CPU dependencies**
 
@@ -60,7 +66,9 @@ python -m pip install -r requirements-cpu.txt
 
 ## Log at a useful boundary
 
-JAX dispatch is asynchronous. Converting a scalar loss to a Python float waits for it; logging every update is acceptable for this small demonstration but can slow a real training loop. Choose a reporting cadence, log the completed step, and separate checkpoint cadence from logging cadence. Here every training MSE is measured after its update. The validation MSE is computed on a fixed four-row set, with a second Python calculation checking the denominator.
+JAX dispatch can be asynchronous; converting the loss to a Python float waits for that scalar before MLflow records it. Here each of 30 points is measured after its update, and validation MSE is computed at step 30 on four rows. The independent host calculation confirms the validation denominator and target values.
+
+Logging every update makes the curve easy to retrieve in this small run. For larger jobs, choose a reporting cadence and keep it distinct from checkpoint cadence so metric collection does not become the training schedule.
 
 $$
 \operatorname{MSE}=\frac{1}{n}\sum_{i=1}^{n}(\hat y_i-y_i)^2
@@ -68,11 +76,13 @@ $$
 
 ## Retrieve before trusting the dashboard
 
-The checker fetches all thirty metric steps, compares their stored values with the actual trajectory, checks the data tag and queries runs ordered by validation MSE. The faster-learning candidate wins this fixture. That is validation selection, not a final test result or a universal learning-rate recommendation. Finally we download the selected artifact and inspect its coefficients. Autologging can help supported frameworks, but explicit logging makes the boundary of this custom JAX loop visible.
+The client fetches all 30 training points for each run, checks their step numbers and values against the local histories, verifies the data tag, and orders candidates by retrieved validation MSE. It then downloads and inspects the selected coefficient artifact. The plotted rate (0.15) curve falls faster and ends lower than rate (0.02), matching the retrieved values.
+
+Training curves alone do not choose a release: in this same comparison the validation result provides the selection measure, and a final untouched test plus runtime/release checks remain separate. The plot is evidence of these two configurations, not a general recommendation.
 
 ## Continue into a real registry
 
-Run the connected project lab to log two pyfunc models, register immutable versions, move a champion alias, reload the selected version and retain prompt/trace evidence. An alias is a mutable lookup; resolve it to a version for a deployment record. Setting champion does not roll out a service and MLflow does not enforce this course’s quality policy for you.
+A registry alias such as `champion` is a mutable pointer to a registered model version. Resolve it to the immutable version and artifact identity when recording a release. Moving that pointer does not deploy a service, validate the artifact in a runtime, or make a validation set into a final test set.
 
 **Keep the local database and artifacts in a new output folder**
 
@@ -82,6 +92,22 @@ python projects/engineering-release/mlflow_lab.py --output ./engineering-run
 ```
 
 **Expected:** Two training runs, two registered versions, one prompt version, one three-span trace and a model.json artifact are written. Use a fresh folder for another independent run.
+
+## A zero training error can be the wrong release
+
+The training-lookup artifact stores all five $x,y$ pairs and returns zero for unseen inputs. It therefore gets training MSE (0), but all four validation x values are unseen. Its reloaded predictions are $[0,0,0,0]$ against $[-2,0,2,4]$, giving validation MSE (6). The retrieved linear candidates have much smaller held-out errors on the same split.
+
+The exercise computes both metrics from reloaded artifacts, so the contrast is about model behavior rather than a fabricated record. A training-only selection picks the lookup; the validation-based selection rejects it. Keep the evaluation split separate from fitting and do not infer performance outside this small regression fixture.
+
+### Pause and reason
+
+Would a memorizer still expose this problem if validation reused the training x values?
+
+<details><summary>Compare your reasoning</summary>
+
+No. That split would reward memorization. Use genuinely separate input identities and preserve the validation contract before comparing candidates.
+
+</details>
 
 ## Set MLflow options and load hashing and serialization tools
 
@@ -127,6 +153,7 @@ update = jax.jit(lambda p, rate: p - rate * jax.grad(objective)(p))
 # Transfer the device result to the host for an independent NumPy comparison.
 data_hash = hashlib.sha256(np.asarray(x).tobytes() + np.asarray(y).tobytes()).hexdigest()
 curves, validation, run_ids = [], [], []
+candidate_artifacts = []
 # Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory(prefix='tracking-lesson-') as folder:
     root = Path(folder)
@@ -150,7 +177,9 @@ with tempfile.TemporaryDirectory(prefix='tracking-lesson-') as folder:
             oracle = sum((float(p[0]) * t + float(p[1]) - (2 * t + 1)) ** 2 for t in [-1.5, -.5, .5, 1.5]) / 4
             assert abs(held - oracle) < 1e-6
             mlflow.log_metric('validation_mse', held, step=30)
-            mlflow.log_dict({'weight': float(p[0]), 'bias': float(p[1]), 'preprocessing': 'one unscaled scalar feature'}, 'model.json')
+            model_record = {'kind': 'linear', 'weight': float(p[0]), 'bias': float(p[1]), 'preprocessing': 'one unscaled scalar feature'}
+            candidate_artifacts.append(model_record)
+            mlflow.log_dict(model_record, 'model.json')
             run_ids.append(run.info.run_id)
         curves.append(history)
         validation.append(held)
@@ -192,6 +221,7 @@ update = jax.jit(lambda p, rate: p - rate * jax.grad(objective)(p))
 # Transfer the device result to the host for an independent NumPy comparison.
 data_hash = hashlib.sha256(np.asarray(x).tobytes() + np.asarray(y).tobytes()).hexdigest()
 curves, validation, run_ids = [], [], []
+candidate_artifacts = []
 # Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory(prefix='tracking-lesson-') as folder:
     root = Path(folder)
@@ -215,7 +245,9 @@ with tempfile.TemporaryDirectory(prefix='tracking-lesson-') as folder:
             oracle = sum((float(p[0]) * t + float(p[1]) - (2 * t + 1)) ** 2 for t in [-1.5, -.5, .5, 1.5]) / 4
             assert abs(held - oracle) < 1e-6
             mlflow.log_metric('validation_mse', held, step=30)
-            mlflow.log_dict({'weight': float(p[0]), 'bias': float(p[1]), 'preprocessing': 'one unscaled scalar feature'}, 'model.json')
+            model_record = {'kind': 'linear', 'weight': float(p[0]), 'bias': float(p[1]), 'preprocessing': 'one unscaled scalar feature'}
+            candidate_artifacts.append(model_record)
+            mlflow.log_dict(model_record, 'model.json')
             run_ids.append(run.info.run_id)
         curves.append(history)
         validation.append(held)
@@ -245,11 +277,11 @@ Verified 30 logged steps per run; selected and reloaded the better validation ca
 
 ### Read the figure
 
-The horizontal axis counts completed updates, from $1$ to $30$. The vertical axis is post-update training MSE on a logarithmic scale: equal vertical distances represent ratios. The rate $0.15$ curve drops more quickly and ends far below the rate $0.02$ curve. The companion independently retrieves every plotted metric from MLflow. The final validation errors are about $0.11994$ and $5.05\times10^{-10}$, respectively; they are not plotted as a fabricated validation trajectory.
+The horizontal axis is completed update $1$ through $30$; the vertical axis is post-update training MSE on a logarithmic scale, so equal vertical distances correspond to multiplicative ratios. Both runs start from zero and share the same training data; rate $0.15$ falls faster and ends near $5.05\times10^{-10}$, while rate $0.02$ ends near $0.1401$.
 
 ### Connect it to the computation
 
-The comparison is controlled by shared data, initialization and update budget. It illustrates tracking and retrieval of evidence, not a general optimizer ranking. A separately held-out test and release checks still belong after validation selection.
+The retrieved MLflow history confirms each plotted training point, while the separately logged validation MSEs are about $5.05\times10^{-10}$ and $0.11994$. For this fixed fixture, both measures favor rate $0.15$; inspect the retrieved artifact and validation protocol before selection. The graph is not a universal rate ranking or a final test result.
 
 ```python
 visual_data={'kind':'line','x':list(range(1,31)),'xlabel':'completed update','ylabel':'post-update training MSE (log scale)','yscale':'log','series':[{'label':'rate 0.02','y':curves[0]},{'label':'rate 0.15','y':curves[1]}]}
@@ -257,13 +289,15 @@ visual_data={'kind':'line','x':list(range(1,31)),'xlabel':'completed update','yl
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:05:53.428377+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:26:53.719843+00:00. JAX 0.9.2.
 
 ```text
 Validation MSE by learning rate: {0.02: 0.11994461715221405, 0.15: 5.049471951679152e-10}
 Verified 30 logged steps per run; selected and reloaded the better validation candidate.
 Validation difference: 0.11994461664726686
-Wrong zero model validation MSE: 6.0
+Actual training MSE: {'linear-rate-0.02': 0.1401000006160622, 'linear-rate-0.15': 5.076259412817308e-10, 'training-lookup': 0.0}
+Actual held-out MSE: {'linear-rate-0.02': 0.11994461629745246, 'linear-rate-0.15': 5.076259412817308e-10, 'training-lookup': 6.0}
+Training-only selects the memorizer; held-out selection rejects it.
 Changed target changes dataset identity.
 PASS: recovery-06
 
@@ -285,40 +319,91 @@ Both runs share initialization, data and update count. This isolates a configura
 
 ## Make it yours
 
-Add a third, deliberately wrong model artifact and show why the smallest training loss alone is insufficient to select a release.
+Replay the two saved linear candidates in a fresh local MLflow experiment and add a third training-lookup model. The lookup stores each training x/y pair and predicts zero for an unseen x. Compute and log actual training and validation MSE for all three, save and reload every artifact, then show which model a training-only rule selects and which one the held-out rule selects.
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
 **Inputs:**
-- The fitted candidate parameters, held-out inputs and labels, and the current release candidate selected from the two trained runs.
+- The two fitted linear artifact dictionaries from the example, training and untouched validation arrays.
+- A third training-lookup model with zero as its unseen-input default.
 
 **Outputs:**
-- The deliberately wrong third candidate’s held-out loss and a decision that rejects it despite its low training loss.
+- Three local MLflow runs, each with actual training and held-out MSE and a model.json artifact.
+- Reloaded-prediction checks and distinct training-only versus validation-based selections.
 
 **Invariants to check:**
-- Release selection uses held-out evidence; a low training loss alone cannot override the candidate’s worse validation result.
+- The third candidate has zero actual training MSE and validation MSE 6.
+- All comparisons use the same split and data identity; validation is not used to fit any candidate.
+- The selection uses retrieved run records and every artifact is reloaded.
 
 **Hints:**
-- Evaluate the zero-weight, zero-bias candidate on the existing held-out set.
-- Compare its validation error with the selected candidate and record why it is not released.
+- Represent lookup inference explicitly and calculate both metrics from predictions.
+- Keep the exercise experiment in its own TemporaryDirectory and log all three model artifacts.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-import jax.numpy as jnp
+import numpy as np
 
-def evaluate_third_release_candidate(candidate_params, heldout_inputs, heldout_targets, selected_validation_loss):
-    # TODO: Measure the deliberately wrong candidate on held-out rows and decide whether it passes release selection.
+def compare_three_saved_candidates(candidates, train_x, train_y, validation_x, validation_y):
+    # TODO: log, reload and evaluate three candidates; compare selection rules.
     raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution
-bad_validation = sum((0. * t + 0. - (2*t+1))**2 for t in [-1.5,-.5,.5,1.5])/4
-assert bad_validation > min(validation)
-print('Wrong zero model validation MSE:',bad_validation)
+# Exercise solution: a memorizer can win training loss and fail held-out selection.
+def predict_artifact(record, values):
+    values = np.asarray(values, dtype=np.float64)
+    if record['kind'] == 'linear':
+        return record['weight'] * values + record['bias']
+    if record['kind'] == 'training-lookup':
+        mapping = dict(zip(record['training_x'], record['training_y']))
+        return np.array([mapping.get(float(value), record['unseen_default']) for value in values])
+    raise ValueError('Unknown model artifact kind')
+
+lookup = {'kind': 'training-lookup', 'training_x': np.asarray(x).tolist(),
+          'training_y': np.asarray(y).tolist(), 'unseen_default': 0.0}
+models = candidate_artifacts + [lookup]
+names = ['linear-rate-0.02', 'linear-rate-0.15', 'training-lookup']
+assert len(models) == 3
+train_errors, held_errors, replay_ids = [], [], []
+with tempfile.TemporaryDirectory(prefix='selection-exercise-') as folder:
+    selection_root = Path(folder)
+    mlflow.set_tracking_uri('sqlite:///' + str(selection_root / 'tracking.db'))
+    selection_client = MlflowClient()
+    selection_experiment = selection_client.create_experiment(
+        'three-candidate-selection', artifact_location=(selection_root / 'artifacts').as_uri())
+    for name, record in zip(names, models):
+        train_error = float(np.mean((predict_artifact(record, x) - np.asarray(y)) ** 2))
+        held_error = float(np.mean((predict_artifact(record, vx) - np.asarray(vy)) ** 2))
+        with mlflow.start_run(experiment_id=selection_experiment) as run:
+            mlflow.log_params({'candidate': name, 'model_kind': record['kind']})
+            mlflow.set_tags({'data_sha256': data_hash,
+                             'scope': 'same synthetic data; validation never used to fit lookup or linear candidates'})
+            mlflow.log_metric('train_mse', train_error)
+            mlflow.log_metric('validation_mse', held_error)
+            mlflow.log_dict(record, 'model.json')
+            replay_ids.append(run.info.run_id)
+        loaded_path = selection_client.download_artifacts(replay_ids[-1], 'model.json')
+        loaded_record = json.loads(Path(loaded_path).read_text())
+        np.testing.assert_array_equal(predict_artifact(loaded_record, vx), predict_artifact(record, vx))
+        train_errors.append(train_error)
+        held_errors.append(held_error)
+    assert len(selection_client.search_runs([selection_experiment])) == 3
+    training_pick = selection_client.search_runs([selection_experiment], order_by=['metrics.train_mse ASC'])[0]
+    validation_pick = selection_client.search_runs([selection_experiment], order_by=['metrics.validation_mse ASC'])[0]
+    assert training_pick.info.run_id == replay_ids[2]
+    assert validation_pick.info.run_id == replay_ids[int(np.argmin(held_errors))]
+    assert validation_pick.info.run_id != training_pick.info.run_id
+    assert train_errors[2] == 0.0
+    np.testing.assert_allclose(held_errors[2], 6.0)
+    assert held_errors[2] > min(held_errors)
+print('Actual training MSE:', dict(zip(names, train_errors)))
+print('Actual held-out MSE:', dict(zip(names, held_errors)))
+print('Training-only selects the memorizer; held-out selection rejects it.')
+
 ```
 
 </details>
@@ -417,7 +502,7 @@ If a run is missing, inspect the tracking URI and experiment ID before repeating
 
 ## Keep your evidence
 
-Keep both MLflow run IDs, source/data hashes, complete loss histories, the selection metric and predictions independently recomputed from the downloaded artifact.
+Keep retrieved metric histories and data tags, all three model artifacts, actual train/validation predictions after reload, and the different training-only versus held-out selections. Explain the memorizer's zero training MSE and validation MSE of 6.
 
 Save your predictions, modified code, terminal outputs, and reasoning in your engineering portfolio.
 

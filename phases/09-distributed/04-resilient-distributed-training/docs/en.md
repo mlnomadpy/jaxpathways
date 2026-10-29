@@ -4,6 +4,8 @@ Phase 09: Distributed training · about 105 minutes · 4 logical CPU devices
 
 This reference configures logical CPU devices to practice placement and sharding. Logical devices do not measure TPU performance. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Communication-efficient algorithms](https://www.tahabouhsine.com/jaxpathways/lesson-distributed-03.html).
+
 ## What you will be able to do
 
 - Restore a complete training state with explicit target sharding.
@@ -52,11 +54,9 @@ The dataset is a deterministic tiny NumPy fixture. Every controller can reconstr
 
 ## Prove the next updates, including the next epoch
 
-After restoring step one, run the uninterrupted and resumed states through three transitions. Compare sample IDs before comparing losses. Then compare every state leaf after each transition. The first resumed batch finishes the existing epoch, and the next transition draws a new permutation; this exercises saved random state as well as the current data cursor.
+After restoring step 1, compare the next three transitions in order. The recorded sample IDs are $[12,5,4,1,8,13,2,11]$, then $[9,0,7,15,11,13,8,14]$, then $[1,6,5,4,3,12,2,10]$. The second batch begins a new shuffled epoch, so matching it checks the saved random key as well as the current permutation and cursor.
 
-Each update also checks the global gradient with a separate NumPy formula. Agreement between two runs would not detect an identical bug in both runs. Independent arithmetic establishes the update; replay establishes the restore boundary. Float32 reduction order can vary, so numerical arrays use a stated tolerance while sample order must match exactly.
-
-To check a real new process on CPU, save the assembled program as main.py, run it once and copy the printed checkpoint parent folder. Run `COURSE_RESUME=1 COURSE_CHECKPOINT_DIR=/your/printed/folder python main.py` from a new terminal process. This loads the existing file; it does not save a replacement. An incorrect path is rejected. Keep both reports.
+The pre-update batch losses match at about $0.5070, 0.1964, 0.1798$, and every state leaf is also compared after each update. A separate NumPy gradient formula checks the update itself, since two runs could reproduce the same bug. If momentum were omitted, the same next sample IDs would still appear but the weights would differ; if the key were wrong, the current-epoch batch could match and the next-epoch IDs would expose it.
 
 ## Move the protocol to multiple controllers explicitly
 
@@ -87,9 +87,9 @@ gcloud compute tpus tpu-vm ssh $TPU_NAME --zone=$ZONE --worker=all \
 
 ## Reject an inconsistent recovery point
 
-An existing checkpoint directory is rejected to avoid overwriting evidence from a previous experiment. Use a new directory for each drill. In a production system, the accepted checkpoint also needs a matching code/configuration version and data manifest. A readable checkpoint with the wrong schema, data stream or step counter must not become a successful recovery report.
+The fault-injection checks change one restored value at a time. Removing momentum changes weights by about $0.0195$ on the next update despite matching sample IDs; replacing the key preserves the current batch but changes the next epoch's permutation. Those outcomes show why a checkpoint boundary includes optimizer and random state, not only parameters.
 
-The controlled failures below replace only momentum or only the random key. The first changes the very next update; the second can remain hidden until an epoch transition. These are fault-injected restore experiments, not claims that a live multi-host process failure was tested. The operations project separately exercises real local worker termination and a restart runbook.
+This replay uses one controller and four logical CPU devices. It validates the saved fixture and its next transitions; it does not exercise a worker crash, shared-storage durability or elastic membership. For a multi-controller run, all workers must restore the same accepted step and data identity before any update, then compare a global reference rather than treating readable local files as proof of a consistent checkpoint.
 
 ## Initialize the runtime before device access
 
@@ -415,11 +415,11 @@ Expected: On the four-device CPU fixture, restoration starts at completed step 1
 
 ### Read the figure
 
-The horizontal axis counts the three updates after the checkpoint, starting at $1$. The vertical axis is the batch mean squared loss before each update. The uninterrupted and restored lines overlap at about $0.5070$, $0.1964$ and $0.1798$ on the recorded CPU fixture. These are different mini-batches, so the downward sequence should not be interpreted as a full-data convergence guarantee.
+The horizontal axis counts the first, second and third updates after the saved step. The vertical axis is batch mean squared loss in squared target units before each update. The uninterrupted and restored lines overlap at $0.50696$, $0.19637$ and $0.17984$ on this CPU fixture. The second point is the first batch of a newly shuffled epoch, so its match follows a new-key transition, not merely a continuation through the old permutation.
 
 ### Connect it to the computation
 
-The second plotted update begins a newly shuffled epoch. Its agreement exercises the restored key in addition to the saved order and cursor. The code checks sample IDs and complete state; line overlap alone would not establish those facts. The wrong-key practice deliberately reproduces the first batch and then diverges at the next shuffle. No device throughput or multi-host failure timing is shown.
+The line comparison is a quick replay check; the code also matches sample IDs and every state leaf, and compares each update against an independent NumPy gradient. If the random key were wrong, the first point could still match but the second batch and its loss would diverge. If momentum were missing, IDs would match while the updated state would not. The plot says nothing about multi-host failure recovery or throughput.
 
 ```python
 visual_data={'kind':'line','x':[1,2,3],'xlabel':'update after checkpoint','ylabel':'batch mean squared loss','series':[{'label':'uninterrupted','y':baseline_losses},{'label':'restored','y':resumed_losses}]}
@@ -427,7 +427,7 @@ visual_data={'kind':'line','x':[1,2,3],'xlabel':'update after checkpoint','ylabe
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:06:46.320262+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:06:09.581751+00:00. JAX 0.9.2.
 
 ```text
 Recorded backend/processes/devices: cpu 1 4
@@ -435,13 +435,13 @@ Restored step/cursor: 1 8
 Next sample IDs across epoch boundary: [[12, 5, 4, 1, 8, 13, 2, 11], [9, 0, 7, 15, 11, 13, 8, 14], [1, 6, 5, 4, 3, 12, 2, 10]]
 Uninterrupted losses: [0.5069587826728821, 0.19637340307235718, 0.1798383891582489]
 Restored losses: [0.5069587826728821, 0.19637340307235718, 0.1798383891582489]
-Checkpoint: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-distributed-recovery-z_x8a3i8/step-one
+Checkpoint: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-distributed-recovery-9_msq6j2/step-one
 Recorded backend/processes/devices: cpu 1 4
 Restored step/cursor: 1 8
 Next sample IDs across epoch boundary: [[12, 5, 4, 1, 8, 13, 2, 11], [9, 0, 7, 15, 11, 13, 8, 14], [1, 6, 5, 4, 3, 12, 2, 10]]
 Uninterrupted losses: [0.5069587826728821, 0.19637340307235718, 0.1798383891582489]
 Restored losses: [0.5069587826728821, 0.19637340307235718, 0.1798383891582489]
-Checkpoint: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-distributed-recovery-6pawiuyy/step-one
+Checkpoint: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-distributed-recovery-yxa817hp/step-one
 Same next sample IDs, different weights after missing momentum: 0.0195157527923584
 Five resumed transitions and all addressable parameter replicas agree.
 Current-epoch batch matches; next-epoch batch exposes the wrong key.

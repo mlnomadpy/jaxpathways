@@ -21,11 +21,9 @@ A derivative tells us how an output changes near a particular input. We can unde
 
 ## Use a slope to predict a nearby change
 
-For a separate hand calculation, let $f(x)=x^2$. At $x=3$, the derivative is $6$. Moving to $3.01$ gives a first-order prediction of $9+6(0.01)=9.06$. The exact value is $9.0601$; the small difference comes from curvature.
+A derivative is useful because it predicts the effect of a small adjustment before we make it. For $f(x)=x^2$, the slope at $x=3$ is $6$. Increasing the input by $0.01$ predicts an output increase of $6(0.01)=0.06$, from $9$ to $9.06$; the exact output is $9.0601$. The extra $0.0001$ is curvature, not an autodiff error.
 
-In the tangent figure, the tangent agrees with the curve at the selected point and has the same local slope. It need not follow the curve far away. Move the point and watch the slope change; then move only a small distance from that point to judge the linear approximation.
-
-Autodiff computes the derivative of the operations you wrote. It does not choose a meaningful objective for you. A gradient of the wrong loss can be numerically correct, which is why later lessons check both the formula and its derivative.
+The tangent plot uses input on the horizontal axis and function or predicted value on the vertical axis. At $x=3$, both curves pass through $(3,9)$. At $x=2$, the square is $4$ while the tangent predicts $3$; at $x=0$, they are $0$ and $-9$. Use the tangent only nearby: its negative value at zero is not a negative square.
 
 ### Pause and reason
 
@@ -39,11 +37,9 @@ No. The derivative describes local change. For $f(x)=x-10$ at $x=0$, the value i
 
 ## Read a slope before you compute it
 
-Let’s start at $x=3$. If we move right by $\delta=0.01$, the score changes from $9$ to $9.0601$. That is an increase of $0.0601$. The slope predicts an increase of about $6\times0.01=0.06$, which is close.
+Use a negative input to check what the sign means. At $x=-3$, the derivative of the square is $-6$. A move right by $0.01$ therefore predicts a change of $-0.06$, from $9$ to $8.94$. The exact value at $-2.99$ is $8.9401$. A negative slope means the output decreases when the input increases locally; it does not mean that the output itself is negative.
 
-Here $\delta$ means a small change in the input, and $f\prime(x)$ means the slope at that input. Expanding the square gives the exact change below. The term $\delta^2$ is what the straight-line approximation leaves out. As the change gets smaller, that term becomes small compared with the linear term when the slope is nonzero.
-
-Before running the code, try a negative input. At $x=-3$, moving a little to the right reduces the score. The slope should therefore be negative. At zero, the slope is zero even though moving away in either direction increases the square.
+At zero, the derivative is zero, so the linear prediction is no change. Yet moving to $0.01$ gives $0.0001$. This is consistent: the first-order change vanishes, leaving the smaller squared term. A zero derivative at one point does not mean the function is constant around it. Compare positive, negative and zero inputs before checking the derivative rule with JAX.
 
 $$
 \begin{aligned}f(x+\delta)-f(x)&=2x\delta+\delta^2\\f\prime(x)&=2x\end{aligned}
@@ -51,15 +47,15 @@ $$
 
 ## Three ways to obtain a derivative
 
-An analytic derivative comes from reasoning about the mathematical function. A finite difference approximates a derivative by evaluating the function at nearby inputs. Automatic differentiation applies derivative rules to the operations that execute in the program and composes those rules with the chain rule.
+There are three ways to answer the same local-change question, and comparing them catches mistakes. Algebra gives the exact derivative; finite differences estimate it from nearby function values; autodiff composes derivative rules for the operations in the program.
 
-Autodiff is not estimating a slope with a hidden step size, and it is not a symbolic algebra system simplifying a formula. Your program still runs floating-point operations. Those operations can overflow, lose precision, or evaluate a function whose mathematical derivative is not well-defined at the chosen point. Agreement among independent approaches is stronger evidence than merely printing one number.
+For the executed check at $x=3$, autodiff and the analytic result are both $6$, while a finite difference with step $10^{-3}$ is about $6$. With a much smaller step, floating-point subtraction can lose useful digits; the recorded sweep for the composed function shows error growing again at $10^{-5}$ and a zero estimate at $10^{-7}$. Autodiff does not have a hidden finite-difference step, but it still differentiates the numerical program you wrote, including any poorly conditioned or unintended calculation.
 
 ## Follow the chain rule through the program
 
-Now split the calculation into two small steps. First compute $u=3x+1$, then square it to get $y=u^2$. A small change in $x$ first changes $u$; that change in $u$ then changes $y$. The chain rule multiplies the two local slopes.
+The chain rule matters when a program is built from multiple operations: a change to the input passes through each intermediate value. Let $u=3x+1$, then $y=u^2$. The first operation changes $u$ three times as fast as $x$; the square changes $y$ at rate $2u$.
 
-The first slope is $3$. The second is $2u$. Multiplying gives $6(3x+1)$. At $x=2$, we have $u=7$, so the derivative is $42$. This gives us a hand-calculated answer for the JAX check. Autodiff follows the operations in the program; it is not estimating the derivative by repeatedly nudging the input.
+At $x=2$, the code’s intermediate is $u=7$, so the total slope is $2(7)\cdot3=42$. The execution receipt also checks $x=-1$ and $x=0$, giving $-12$ and $6$. These values make a concrete reference for `grad`: it follows the same operation sequence and chain rule rather than nudging the input repeatedly.
 
 $$
 \begin{aligned}u&=3x+1,\qquad y=u^2\\\frac{dy}{dx}&=\frac{dy}{du}\frac{du}{dx}=2u\cdot3\end{aligned}
@@ -67,15 +63,15 @@ $$
 
 ## Know the contract of grad
 
-The default grad transformation differentiates the first positional argument. Its differentiated inputs must have an appropriate inexact dtype, such as a floating-point array, and its output must be scalar: shape $()$, not shape $(1,)$. A Python float like $3.0$ works; the integer $3$ is a different input type.
+`grad` is designed for a scalar objective because it returns one derivative value per differentiated input value. Its default target is the first positional argument, and that argument needs an inexact type such as a floating-point scalar or array. A vector output such as residuals is not yet one objective; choose a sum or mean, or use a Jacobian when every output derivative is wanted.
 
-A vector of residuals is useful model output, but it does not yet specify a single objective. Reducing the residuals to a sum or a mean chooses an objective and its scaling. A Jacobian is the more appropriate object when you really want the derivatives of every vector output. We will first learn scalar objectives, then return to batching and derivative structure.
+A scalar array has shape $()$, while a one-element vector has shape $(1,)$. Those are different contracts even if both display one number. Likewise, Python `3.0` is a floating-point input while `3` is an integer. Check argument position, dtype and output shape when a valid-looking function cannot be differentiated.
 
 ## A zero gradient is a question, not a verdict
 
-Both $x^2$ and $x^3$ have derivative zero at $x=0$. The square has a minimum there; the cubic keeps decreasing toward the left. The constant function $x\mapsto5$ also has zero derivative everywhere. A gradient is local first-order information, so it does not by itself prove optimality, global quality, or a correct implementation.
+A zero gradient only says the first-order change is zero at that point; it does not classify the point. For $x^2$, zero is a minimum; for $x^3$, the derivative is also zero there although the function continues decreasing to the left; a constant function has zero slope everywhere.
 
-When a model produces a surprising zero gradient, ask whether the loss actually depends on the parameter, whether you differentiated the intended argument, and whether the chosen point is stationary. Checking nearby points and a simple analytic case is often more informative than immediately changing the optimizer.
+When a model unexpectedly reports zero, first check whether the objective depends on the parameter and whether `grad` received the intended argument. Then compare the function at nearby points and hand-check a simple case. Changing an optimizer cannot repair a derivative of the wrong objective.
 
 ## Import JAX automatic differentiation
 
@@ -154,15 +150,11 @@ Expected: $6.0$
 
 ### Read the figure
 
-The solid curve is $f(x)=x^2$. The dashed line is its tangent at the marked point $(3,9)$. The horizontal axis measures the input; the vertical axis shows either the function value or the tangent’s predicted value.
-
-Near the marked point the two almost coincide. Farther away they separate: at $x=2$, the curve is $4$ and the tangent is $3$. At $x=0$, the curve is $0$, but the tangent has fallen to $-9$.
+The horizontal axis is input $x$, and both plotted vertical values are function or tangent predictions. The solid square curve and dashed tangent meet at the marked $(3,9)$. At $x=2$, compare $4$ with $3$; at $x=0$, compare $0$ with $-9$. These coordinates show where a local slope prediction begins to separate from the curved function.
 
 ### Connect it to the computation
 
-The derivative at $x=3$ is $6$, so the local prediction is $f(3+\Delta x)\approx9+6\Delta x$. The exact value also contains $(\Delta x)^2$. That omitted term explains why the approximation is good for small changes and increasingly poor for large ones.
-
-The negative part of the dashed line does not mean a square became negative. It means a local linear approximation was extended beyond the neighborhood where it is useful. A gradient describes local change, not the complete function.
+The tangent slope at $x=3$ is $6$, so for a small change $\Delta x$, it predicts $9+6\Delta x$. The exact square adds $(\Delta x)^2$. Use the plotted gap as a reminder that a derivative predicts nearby change, not the entire function; then try a small move on either side of the marked input.
 
 ```python
 grid = jnp.linspace(-4.0, 4.0, 81)
@@ -175,7 +167,7 @@ visual_data['markers'] = [{'x': point, 'y': float(f(point)), 'label': 'selected 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:03:30.867688+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:02:47.265557+00:00. JAX 0.9.2.
 
 ```text
 Finite-difference estimate: 5.999999999999339

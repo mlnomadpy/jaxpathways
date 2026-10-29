@@ -21,12 +21,16 @@ jobs:
       - uses: actions/setup-python@v7
         with:
           python-version: '3.14'
+      - name: Install numerical verification dependency
+        # The complete verification command includes independent NumPy checks.
+        run: python -m pip install numpy==2.4.4
+      - name: Install PDF text inspection tools
+        run: sudo apt-get update && sudo apt-get install -y poppler-utils
       - uses: withastro/action@v6
         with:
           node-version: '24'
-          # The verify job already ran the complete suite and subpath checks.
-          # Check this final deployment output without rebuilding it a second time.
-          build-cmd: npm run build && python3 scripts/check-distribution.py && npm run check:site
+          # check builds the deployment output once and runs EPUB/print verification.
+          build-cmd: npx playwright install --with-deps chromium && npm run check
         env:
           BASE_PATH: /jaxpathways
           SITE_URL: https://www.tahabouhsine.com

@@ -14,6 +14,7 @@
 # - Validate numerical results before interpreting speed.
 # - Wait for every result leaf before stopping the timer.
 # - Do not infer a universal speedup.
+# - Compare the value and every gradient entry to an independent host matrix calculation; benchmark completion includes both returned arrays.
 
 # Hints:
 # - Keep shape and dtype fixed for equivalence.

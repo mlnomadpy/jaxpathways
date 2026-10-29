@@ -1,6 +1,21 @@
 # Tooling for complete model projects
 
-Status: planned curriculum additions, 2026-10-06. Existing JAX, MLflow, Docker and framework labs retain their recorded scope. W&B and the other extensions below have not been installed, connected to an account or executed by this planning change.
+The original proposal below was written on 2026-10-06. Since then, the
+[reproducible experiments workshop](../projects/reproducible-experiments/README.md#4-log-the-same-observations-to-real-tools)
+has implemented local tracking with CSV, TensorBoard, offline Weights & Biases
+and SQLite MLflow. Its [adapters](../projects/reproducible-experiments/loggers.py)
+receive observations from the same Flax training run. The
+[executed verifier](../projects/reproducible-experiments/tests/loggers_check.py)
+reads all four metric histories back, compares completed steps and values, and
+checks that MLflow retains the local checkpoint, configuration, environment and
+metric artifacts. The [optional dependency file](../projects/reproducible-experiments/requirements-loggers.txt)
+records the tested SDK versions. W&B runs offline; this workflow needs no hosted
+account and performs no synchronization.
+
+The broader capstone integrations and extensions below remain planned. Local
+metric readback does not establish W&B artifact retrieval, interruption buffering
+and retry, hosted synchronization, bounded sweeps or recovery of a hosted service.
+Existing JAX, MLflow, Docker and framework labs retain their own recorded scope.
 
 Choose tools for a specific experiment or release problem. The recommended core stays small: JAX/Flax/Optax, the existing input/checkpoint libraries, **one** tracking backend, a versioned evaluation runner, a container and a tested Hub package. Advanced alternatives are optional labs with a concrete comparison, not a list of mandatory services.
 
@@ -18,7 +33,18 @@ Teach W&B as a supported experiment-tracking option, with an equivalent exercise
 
 For JAX, log summarized values outside compiled numerical functions and profile synchronization overhead. Aggregate counts correctly across workers; normally one designated process writes global metrics, with rank-tagged diagnostics when needed. Do not call a tracking SDK inside `jit` or serialize a huge parameter tree every step.
 
-Keep a small proposed tracking interface—start run, log aggregated metrics, record artifact reference, close run—with JSONL/local files as the canonical fallback and separate MLflow/W&B adapters. It is not yet implemented. Test adapter consistency on the same **recorded** numerical run, not on two differently seeded trainings. Specify retry IDs and monotonic logging counters; a tracker retry must never reapply an optimizer update.
+The workshop's `Loggers` class implements initialization, post-update metric
+logging and close operations for its fixed regression schema. CSV is the required
+local history; TensorBoard, W&B and MLflow are optional adapters. Its comparison
+uses observations from the same recorded training, rather than differently seeded
+runs.
+
+For the model capstones, extend that pattern with objective-specific counts and
+immutable artifact references. A general capstone metric/artifact contract,
+retrieval of versioned tracking artifacts, retry identifiers and outage recovery
+remain to be implemented and qualified. Keep JSONL or equivalent local records as
+the authoritative fallback. A tracker retry must never reapply an optimizer
+update.
 
 A tracker outage may allow training to continue under a tested local-buffer policy, but missing experiment artifacts block release promotion. Checkpoint durability remains the checkpoint system's responsibility. Choose MLflow or W&B as the primary tracker for a run; dual logging is an optional parity exercise, not a production requirement. Reuse the existing MLflow registry/release examples and show how equivalent immutable evidence is recorded with a different backend.
 

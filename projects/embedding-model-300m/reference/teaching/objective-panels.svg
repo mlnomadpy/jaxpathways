@@ -1,0 +1,183 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1240" height="862" viewBox="0 0 1240 862" role="img" aria-labelledby="title desc">
+<title id="title">Training objectives by phase</title>
+<desc id="desc">Each observed phase has an independent update axis and a vertical axis starting at zero. Objective units differ by phase, so compare values within a panel only.</desc>
+<rect width="100%" height="100%" fill="#fbfbf9"/>
+<text x="54" y="38" font-size="23" font-family="sans-serif" font-weight="700" fill="#202626">Training objectives, separated by phase</text>
+<text x="54" y="64" font-size="13" font-family="sans-serif" fill="#596563">Each panel uses its own phase-local update axis and zero-based loss scale.</text>
+<rect x="50" y="104" width="545" height="340" rx="10" fill="#ffffff" stroke="#b8c8ca"/>
+<text x="68" y="133" font-family="sans-serif" font-size="16" font-weight="700" fill="#182b30">Phase 1 · masked language modeling</text>
+<text x="68" y="155" font-family="sans-serif" font-size="12" fill="#435b61">nats per selected masked token · 8 updates</text>
+<line x1="130" y1="371.00" x2="571" y2="371.00" stroke="#dbe4e4"/>
+<text x="120" y="375.00" text-anchor="end" font-family="sans-serif" font-size="11" fill="#435b61">0</text>
+<line x1="130" y1="322.25" x2="571" y2="322.25" stroke="#dbe4e4"/>
+<text x="120" y="326.25" text-anchor="end" font-family="sans-serif" font-size="11" fill="#435b61">1.77</text>
+<line x1="130" y1="273.50" x2="571" y2="273.50" stroke="#dbe4e4"/>
+<text x="120" y="277.50" text-anchor="end" font-family="sans-serif" font-size="11" fill="#435b61">3.55</text>
+<line x1="130" y1="224.75" x2="571" y2="224.75" stroke="#dbe4e4"/>
+<text x="120" y="228.75" text-anchor="end" font-family="sans-serif" font-size="11" fill="#435b61">5.32</text>
+<line x1="130" y1="176.00" x2="571" y2="176.00" stroke="#dbe4e4"/>
+<text x="120" y="180.00" text-anchor="end" font-family="sans-serif" font-size="11" fill="#435b61">7.1</text>
+<line x1="130" y1="176" x2="130" y2="371" stroke="#526a70"/>
+<line x1="130" y1="371" x2="571" y2="371" stroke="#526a70"/>
+<polyline points="130.00,199.19 193.00,199.87 256.00,199.23 319.00,198.61 382.00,199.98 445.00,200.49 508.00,199.98 571.00,199.26" fill="none" stroke="#286b8e" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="130.00" cy="199.19" r="3.2" fill="#286b8e"><title>Update 1: 6.2557993</title></circle>
+<circle cx="193.00" cy="199.87" r="3.2" fill="#286b8e"><title>Update 2: 6.2309165</title></circle>
+<circle cx="256.00" cy="199.23" r="3.2" fill="#286b8e"><title>Update 3: 6.2543344</title></circle>
+<circle cx="319.00" cy="198.61" r="3.2" fill="#286b8e"><title>Update 4: 6.2766514</title></circle>
+<circle cx="382.00" cy="199.98" r="3.2" fill="#286b8e"><title>Update 5: 6.2270522</title></circle>
+<circle cx="445.00" cy="200.49" r="3.2" fill="#286b8e"><title>Update 6: 6.2081866</title></circle>
+<circle cx="508.00" cy="199.98" r="3.2" fill="#286b8e"><title>Update 7: 6.2269192</title></circle>
+<circle cx="571.00" cy="199.26" r="3.2" fill="#286b8e"><title>Update 8: 6.2531748</title></circle>
+<text x="130.00" y="389" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#435b61">1</text>
+<text x="382.00" y="389" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#435b61">5</text>
+<text x="571.00" y="389" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#435b61">8</text>
+<text x="350.50" y="414" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#263c41">Update within phase (1–8)</text>
+<rect x="645" y="104" width="545" height="340" rx="10" fill="#ffffff" stroke="#b8c8ca"/>
+<text x="663" y="133" font-family="sans-serif" font-size="16" font-weight="700" fill="#182b30">Phase 2 · contrastive-only</text>
+<text x="663" y="155" font-family="sans-serif" font-size="12" fill="#435b61">contrastive objective units · 8 updates</text>
+<line x1="725" y1="371.00" x2="1166" y2="371.00" stroke="#dbe4e4"/>
+<text x="715" y="375.00" text-anchor="end" font-family="sans-serif" font-size="11" fill="#435b61">0</text>
+<line x1="725" y1="322.25" x2="1166" y2="322.25" stroke="#dbe4e4"/>
+<text x="715" y="326.25" text-anchor="end" font-family="sans-serif" font-size="11" fill="#435b61">1.5</text>
+<line x1="725" y1="273.50" x2="1166" y2="273.50" stroke="#dbe4e4"/>
+<text x="715" y="277.50" text-anchor="end" font-family="sans-serif" font-size="11" fill="#435b61">3</text>
+<line x1="725" y1="224.75" x2="1166" y2="224.75" stroke="#dbe4e4"/>
+<text x="715" y="228.75" text-anchor="end" font-family="sans-serif" font-size="11" fill="#435b61">4.5</text>
+<line x1="725" y1="176.00" x2="1166" y2="176.00" stroke="#dbe4e4"/>
+<text x="715" y="180.00" text-anchor="end" font-family="sans-serif" font-size="11" fill="#435b61">6</text>
+<line x1="725" y1="176" x2="725" y2="371" stroke="#526a70"/>
+<line x1="725" y1="371" x2="1166" y2="371" stroke="#526a70"/>
+<polyline points="725.00,340.03 788.00,207.09 851.00,277.31 914.00,197.95 977.00,302.36 1040.00,353.07 1103.00,326.21 1166.00,259.97" fill="none" stroke="#b46c2a" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="725.00" cy="340.03" r="3.2" fill="#b46c2a"><title>Update 1: 0.95307684</title></circle>
+<circle cx="788.00" cy="207.09" r="3.2" fill="#b46c2a"><title>Update 2: 5.0433645</title></circle>
+<circle cx="851.00" cy="277.31" r="3.2" fill="#b46c2a"><title>Update 3: 2.8827221</title></circle>
+<circle cx="914.00" cy="197.95" r="3.2" fill="#b46c2a"><title>Update 4: 5.3247566</title></circle>
+<circle cx="977.00" cy="302.36" r="3.2" fill="#b46c2a"><title>Update 5: 2.111963</title></circle>
+<circle cx="1040.00" cy="353.07" r="3.2" fill="#b46c2a"><title>Update 6: 0.5515542</title></circle>
+<circle cx="1103.00" cy="326.21" r="3.2" fill="#b46c2a"><title>Update 7: 1.3782747</title></circle>
+<circle cx="1166.00" cy="259.97" r="3.2" fill="#b46c2a"><title>Update 8: 3.4164267</title></circle>
+<text x="725.00" y="389" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#435b61">1</text>
+<text x="977.00" y="389" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#435b61">5</text>
+<text x="1166.00" y="389" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#435b61">8</text>
+<text x="945.50" y="414" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#263c41">Update within phase (1–8)</text>
+<rect x="50" y="464" width="545" height="340" rx="10" fill="#ffffff" stroke="#b8c8ca"/>
+<text x="68" y="493" font-family="sans-serif" font-size="16" font-weight="700" fill="#182b30">Phase 2 · contrastive + retained MLM</text>
+<text x="68" y="515" font-family="sans-serif" font-size="12" fill="#435b61">mixed contrastive + weighted MLM units · 8 updates</text>
+<line x1="130" y1="731.00" x2="571" y2="731.00" stroke="#dbe4e4"/>
+<text x="120" y="735.00" text-anchor="end" font-family="sans-serif" font-size="11" fill="#435b61">0</text>
+<line x1="130" y1="682.25" x2="571" y2="682.25" stroke="#dbe4e4"/>
+<text x="120" y="686.25" text-anchor="end" font-family="sans-serif" font-size="11" fill="#435b61">1.68</text>
+<line x1="130" y1="633.50" x2="571" y2="633.50" stroke="#dbe4e4"/>
+<text x="120" y="637.50" text-anchor="end" font-family="sans-serif" font-size="11" fill="#435b61">3.35</text>
+<line x1="130" y1="584.75" x2="571" y2="584.75" stroke="#dbe4e4"/>
+<text x="120" y="588.75" text-anchor="end" font-family="sans-serif" font-size="11" fill="#435b61">5.03</text>
+<line x1="130" y1="536.00" x2="571" y2="536.00" stroke="#dbe4e4"/>
+<text x="120" y="540.00" text-anchor="end" font-family="sans-serif" font-size="11" fill="#435b61">6.7</text>
+<line x1="130" y1="536" x2="130" y2="731" stroke="#526a70"/>
+<line x1="130" y1="731" x2="571" y2="731" stroke="#526a70"/>
+<polyline points="130.00,685.14 193.00,565.75 256.00,629.06 319.00,558.55 382.00,650.07 445.00,696.88 508.00,672.68 571.00,613.16" fill="none" stroke="#49835d" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="130.00" cy="685.14" r="3.2" fill="#49835d"><title>Update 1: 1.5757082</title></circle>
+<circle cx="193.00" cy="565.75" r="3.2" fill="#49835d"><title>Update 2: 5.6778579</title></circle>
+<circle cx="256.00" cy="629.06" r="3.2" fill="#49835d"><title>Update 3: 3.5025373</title></circle>
+<circle cx="319.00" cy="558.55" r="3.2" fill="#49835d"><title>Update 4: 5.9250922</title></circle>
+<circle cx="382.00" cy="650.07" r="3.2" fill="#49835d"><title>Update 5: 2.7805185</title></circle>
+<circle cx="445.00" cy="696.88" r="3.2" fill="#49835d"><title>Update 6: 1.1722112</title></circle>
+<circle cx="508.00" cy="672.68" r="3.2" fill="#49835d"><title>Update 7: 2.0038114</title></circle>
+<circle cx="571.00" cy="613.16" r="3.2" fill="#49835d"><title>Update 8: 4.048872</title></circle>
+<text x="130.00" y="749" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#435b61">1</text>
+<text x="382.00" y="749" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#435b61">5</text>
+<text x="571.00" y="749" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#435b61">8</text>
+<text x="350.50" y="774" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#263c41">Update within phase (1–8)</text>
+<rect x="645" y="464" width="545" height="340" rx="10" fill="#ffffff" stroke="#b8c8ca"/>
+<text x="663" y="493" font-family="sans-serif" font-size="16" font-weight="700" fill="#182b30">Phase 3 · human-evidence pairs</text>
+<text x="663" y="515" font-family="sans-serif" font-size="12" fill="#435b61">multi-positive contrastive objective units · 71 updates</text>
+<line x1="725" y1="731.00" x2="1166" y2="731.00" stroke="#dbe4e4"/>
+<text x="715" y="735.00" text-anchor="end" font-family="sans-serif" font-size="11" fill="#435b61">0</text>
+<line x1="725" y1="682.25" x2="1166" y2="682.25" stroke="#dbe4e4"/>
+<text x="715" y="686.25" text-anchor="end" font-family="sans-serif" font-size="11" fill="#435b61">1.18</text>
+<line x1="725" y1="633.50" x2="1166" y2="633.50" stroke="#dbe4e4"/>
+<text x="715" y="637.50" text-anchor="end" font-family="sans-serif" font-size="11" fill="#435b61">2.35</text>
+<line x1="725" y1="584.75" x2="1166" y2="584.75" stroke="#dbe4e4"/>
+<text x="715" y="588.75" text-anchor="end" font-family="sans-serif" font-size="11" fill="#435b61">3.53</text>
+<line x1="725" y1="536.00" x2="1166" y2="536.00" stroke="#dbe4e4"/>
+<text x="715" y="540.00" text-anchor="end" font-family="sans-serif" font-size="11" fill="#435b61">4.7</text>
+<line x1="725" y1="536" x2="725" y2="731" stroke="#526a70"/>
+<line x1="725" y1="731" x2="1166" y2="731" stroke="#526a70"/>
+<polyline points="725.00,600.16 731.30,675.33 737.60,557.34 743.90,640.03 750.20,687.57 756.50,649.84 762.80,665.22 769.10,624.76 775.40,641.65 781.70,685.20 788.00,581.63 794.30,675.62 800.60,644.43 806.90,642.13 813.20,631.66 819.50,684.60 825.80,645.94 832.10,661.85 838.40,709.21 844.70,604.51 851.00,697.28 857.30,609.67 863.60,678.59 869.90,688.13 876.20,661.98 882.50,702.79 888.80,666.89 895.10,618.15 901.40,686.97 907.70,641.70 914.00,672.19 920.30,695.70 926.60,655.60 932.90,638.49 939.20,579.08 945.50,677.24 951.80,719.74 958.10,642.45 964.40,657.05 970.70,654.52 977.00,666.24 983.30,658.67 989.60,610.34 995.90,571.74 1002.20,671.70 1008.50,686.08 1014.80,704.42 1021.10,577.49 1027.40,676.04 1033.70,699.44 1040.00,697.86 1046.30,690.72 1052.60,691.87 1058.90,670.22 1065.20,664.83 1071.50,633.98 1077.80,682.34 1084.10,593.83 1090.40,617.51 1096.70,652.56 1103.00,694.63 1109.30,636.81 1115.60,616.85 1121.90,659.64 1128.20,678.55 1134.50,672.52 1140.80,693.71 1147.10,621.06 1153.40,570.62 1159.70,621.16 1166.00,731.00" fill="none" stroke="#884c79" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="725.00" cy="600.16" r="3.2" fill="#884c79"><title>Update 1: 3.153547</title></circle>
+<circle cx="731.30" cy="675.33" r="3.2" fill="#884c79"><title>Update 2: 1.3416939</title></circle>
+<circle cx="737.60" cy="557.34" r="3.2" fill="#884c79"><title>Update 3: 4.1856441</title></circle>
+<circle cx="743.90" cy="640.03" r="3.2" fill="#884c79"><title>Update 4: 2.1926529</title></circle>
+<circle cx="750.20" cy="687.57" r="3.2" fill="#884c79"><title>Update 5: 1.046737</title></circle>
+<circle cx="756.50" cy="649.84" r="3.2" fill="#884c79"><title>Update 6: 1.9561877</title></circle>
+<circle cx="762.80" cy="665.22" r="3.2" fill="#884c79"><title>Update 7: 1.5853951</title></circle>
+<circle cx="769.10" cy="624.76" r="3.2" fill="#884c79"><title>Update 8: 2.5607526</title></circle>
+<circle cx="775.40" cy="641.65" r="3.2" fill="#884c79"><title>Update 9: 2.1534445</title></circle>
+<circle cx="781.70" cy="685.20" r="3.2" fill="#884c79"><title>Update 10: 1.1039867</title></circle>
+<circle cx="788.00" cy="581.63" r="3.2" fill="#884c79"><title>Update 11: 3.6001327</title></circle>
+<circle cx="794.30" cy="675.62" r="3.2" fill="#884c79"><title>Update 12: 1.3348122</title></circle>
+<circle cx="800.60" cy="644.43" r="3.2" fill="#884c79"><title>Update 13: 2.0865684</title></circle>
+<circle cx="806.90" cy="642.13" r="3.2" fill="#884c79"><title>Update 14: 2.1420608</title></circle>
+<circle cx="813.20" cy="631.66" r="3.2" fill="#884c79"><title>Update 15: 2.394275</title></circle>
+<circle cx="819.50" cy="684.60" r="3.2" fill="#884c79"><title>Update 16: 1.1184053</title></circle>
+<circle cx="825.80" cy="645.94" r="3.2" fill="#884c79"><title>Update 17: 2.0501411</title></circle>
+<circle cx="832.10" cy="661.85" r="3.2" fill="#884c79"><title>Update 18: 1.6667149</title></circle>
+<circle cx="838.40" cy="709.21" r="3.2" fill="#884c79"><title>Update 19: 0.52527165</title></circle>
+<circle cx="844.70" cy="604.51" r="3.2" fill="#884c79"><title>Update 20: 3.0487592</title></circle>
+<circle cx="851.00" cy="697.28" r="3.2" fill="#884c79"><title>Update 21: 0.81282926</title></circle>
+<circle cx="857.30" cy="609.67" r="3.2" fill="#884c79"><title>Update 22: 2.9244537</title></circle>
+<circle cx="863.60" cy="678.59" r="3.2" fill="#884c79"><title>Update 23: 1.2632043</title></circle>
+<circle cx="869.90" cy="688.13" r="3.2" fill="#884c79"><title>Update 24: 1.0331635</title></circle>
+<circle cx="876.20" cy="661.98" r="3.2" fill="#884c79"><title>Update 25: 1.6635439</title></circle>
+<circle cx="882.50" cy="702.79" r="3.2" fill="#884c79"><title>Update 26: 0.67986345</title></circle>
+<circle cx="888.80" cy="666.89" r="3.2" fill="#884c79"><title>Update 27: 1.5452418</title></circle>
+<circle cx="895.10" cy="618.15" r="3.2" fill="#884c79"><title>Update 28: 2.7199149</title></circle>
+<circle cx="901.40" cy="686.97" r="3.2" fill="#884c79"><title>Update 29: 1.0613437</title></circle>
+<circle cx="907.70" cy="641.70" r="3.2" fill="#884c79"><title>Update 30: 2.1524532</title></circle>
+<circle cx="914.00" cy="672.19" r="3.2" fill="#884c79"><title>Update 31: 1.4174683</title></circle>
+<circle cx="920.30" cy="695.70" r="3.2" fill="#884c79"><title>Update 32: 0.85076714</title></circle>
+<circle cx="926.60" cy="655.60" r="3.2" fill="#884c79"><title>Update 33: 1.8173873</title></circle>
+<circle cx="932.90" cy="638.49" r="3.2" fill="#884c79"><title>Update 34: 2.2297421</title></circle>
+<circle cx="939.20" cy="579.08" r="3.2" fill="#884c79"><title>Update 35: 3.6616216</title></circle>
+<circle cx="945.50" cy="677.24" r="3.2" fill="#884c79"><title>Update 36: 1.2958622</title></circle>
+<circle cx="951.80" cy="719.74" r="3.2" fill="#884c79"><title>Update 37: 0.27145433</title></circle>
+<circle cx="958.10" cy="642.45" r="3.2" fill="#884c79"><title>Update 38: 2.1341746</title></circle>
+<circle cx="964.40" cy="657.05" r="3.2" fill="#884c79"><title>Update 39: 1.7825038</title></circle>
+<circle cx="970.70" cy="654.52" r="3.2" fill="#884c79"><title>Update 40: 1.8432515</title></circle>
+<circle cx="977.00" cy="666.24" r="3.2" fill="#884c79"><title>Update 41: 1.5608275</title></circle>
+<circle cx="983.30" cy="658.67" r="3.2" fill="#884c79"><title>Update 42: 1.7434242</title></circle>
+<circle cx="989.60" cy="610.34" r="3.2" fill="#884c79"><title>Update 43: 2.9081821</title></circle>
+<circle cx="995.90" cy="571.74" r="3.2" fill="#884c79"><title>Update 44: 3.8386228</title></circle>
+<circle cx="1002.20" cy="671.70" r="3.2" fill="#884c79"><title>Update 45: 1.4293175</title></circle>
+<circle cx="1008.50" cy="686.08" r="3.2" fill="#884c79"><title>Update 46: 1.0826011</title></circle>
+<circle cx="1014.80" cy="704.42" r="3.2" fill="#884c79"><title>Update 47: 0.64066744</title></circle>
+<circle cx="1021.10" cy="577.49" r="3.2" fill="#884c79"><title>Update 48: 3.699873</title></circle>
+<circle cx="1027.40" cy="676.04" r="3.2" fill="#884c79"><title>Update 49: 1.3247814</title></circle>
+<circle cx="1033.70" cy="699.44" r="3.2" fill="#884c79"><title>Update 50: 0.76059437</title></circle>
+<circle cx="1040.00" cy="697.86" r="3.2" fill="#884c79"><title>Update 51: 0.79887342</title></circle>
+<circle cx="1046.30" cy="690.72" r="3.2" fill="#884c79"><title>Update 52: 0.97088671</title></circle>
+<circle cx="1052.60" cy="691.87" r="3.2" fill="#884c79"><title>Update 53: 0.94304156</title></circle>
+<circle cx="1058.90" cy="670.22" r="3.2" fill="#884c79"><title>Update 54: 1.4650004</title></circle>
+<circle cx="1065.20" cy="664.83" r="3.2" fill="#884c79"><title>Update 55: 1.5949814</title></circle>
+<circle cx="1071.50" cy="633.98" r="3.2" fill="#884c79"><title>Update 56: 2.3383265</title></circle>
+<circle cx="1077.80" cy="682.34" r="3.2" fill="#884c79"><title>Update 57: 1.1728337</title></circle>
+<circle cx="1084.10" cy="593.83" r="3.2" fill="#884c79"><title>Update 58: 3.3061588</title></circle>
+<circle cx="1090.40" cy="617.51" r="3.2" fill="#884c79"><title>Update 59: 2.7353082</title></circle>
+<circle cx="1096.70" cy="652.56" r="3.2" fill="#884c79"><title>Update 60: 1.8906202</title></circle>
+<circle cx="1103.00" cy="694.63" r="3.2" fill="#884c79"><title>Update 61: 0.87669325</title></circle>
+<circle cx="1109.30" cy="636.81" r="3.2" fill="#884c79"><title>Update 62: 2.2701328</title></circle>
+<circle cx="1115.60" cy="616.85" r="3.2" fill="#884c79"><title>Update 63: 2.7512441</title></circle>
+<circle cx="1121.90" cy="659.64" r="3.2" fill="#884c79"><title>Update 64: 1.7200532</title></circle>
+<circle cx="1128.20" cy="678.55" r="3.2" fill="#884c79"><title>Update 65: 1.2642808</title></circle>
+<circle cx="1134.50" cy="672.52" r="3.2" fill="#884c79"><title>Update 66: 1.4095793</title></circle>
+<circle cx="1140.80" cy="693.71" r="3.2" fill="#884c79"><title>Update 67: 0.89884806</title></circle>
+<circle cx="1147.10" cy="621.06" r="3.2" fill="#884c79"><title>Update 68: 2.6497777</title></circle>
+<circle cx="1153.40" cy="570.62" r="3.2" fill="#884c79"><title>Update 69: 3.8655267</title></circle>
+<circle cx="1159.70" cy="621.16" r="3.2" fill="#884c79"><title>Update 70: 2.6473093</title></circle>
+<circle cx="1166.00" cy="731.00" r="3.2" fill="#884c79"><title>Update 71: 0</title></circle>
+<text x="725.00" y="749" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#435b61">1</text>
+<text x="945.50" y="749" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#435b61">36</text>
+<text x="1166.00" y="749" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#435b61">71</text>
+<text x="945.50" y="774" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#263c41">Update within phase (1–71)</text>
+<text x="54" y="838" font-family="sans-serif" font-size="12" fill="#713c23">Final phase-3 batch: 1 query, 1 positive pair, and 1 candidate; zero loss is a single-example result, not retrieval-quality evidence.</text>
+</svg>

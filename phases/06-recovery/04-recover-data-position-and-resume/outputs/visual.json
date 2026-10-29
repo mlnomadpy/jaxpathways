@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "recovery-04",
-  "contentHash": "f0bd20bc4fec090f4aa3d4688aaf91b39ff2a078b37a490c2224417d0421c926",
-  "rendererHash": "a1bd5b648f4731ae5d5f0a24811c2540d1a0a132149ce589d17c4113509cbedf",
+  "contentHash": "00789fc8060916c35ee2a1a151a44b49ec5d2df0cbc5b0726b8b7d589b23b547",
+  "rendererHash": "17e3bbad72ee4c43425845aaee76b86b85e84750551278be03d8c16842f4dc63",
   "kind": "executed",
-  "generatedAt": "2026-10-21T16:04:19.304397+00:00",
+  "generatedAt": "2026-10-27T17:01:48.112450+00:00",
   "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",
@@ -48,7 +48,7 @@
   "diagram": {
     "title": "One checkpoint, one completed-step boundary",
     "prediction": "Why reject a resume even when its first loss nearly matches the reference?",
-    "reading": "Read down the middle column: all state describes the same completed update. Across each row is its next use. An older cursor repeats data and a newer cursor skips it. The table shows logical state, not wall-clock timing.",
+    "reading": "Each row names one state value at the accepted boundary and the next transition that consumes it. Read downward to see that parameters and optimizer state belong after update (t), the key is the next unused random value, the iterator is at the next unconsumed batch, and the counter records (t) completed. The horizontal reading across a row explains its next use. An older iterator repeats data and a later iterator skips it. Compare the diagram with the observed step-2 next IDs before restoring; the table represents logical alignment, not elapsed time.",
     "alt": "Read down the middle column: all state describes the same completed update. Across each row is its next use. An older cursor repeats data and a newer cursor skips it. The table shows logical state, not wall-clock timing.",
     "scope": "Architecture and dataflow mechanism diagram.",
     "height": 5,

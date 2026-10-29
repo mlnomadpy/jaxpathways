@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "networks-05",
-  "contentHash": "ab5ea6cd4307680501d01319c555aa25a71aafb80ea99fe2ea883cd94bf19ae3",
-  "rendererHash": "a1bd5b648f4731ae5d5f0a24811c2540d1a0a132149ce589d17c4113509cbedf",
+  "contentHash": "8619f8bb05182089fb1e4e39b276e07c35a4894ffd1e5303f64a934de66eee99",
+  "rendererHash": "17e3bbad72ee4c43425845aaee76b86b85e84750551278be03d8c16842f4dc63",
   "kind": "executed",
-  "generatedAt": "2026-10-21T16:04:05.806550+00:00",
+  "generatedAt": "2026-10-27T16:10:36.278541+00:00",
   "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",
@@ -13,41 +13,53 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Stable final weight: 1.999999761581421 unstable pre-update [weight,loss,|gradient|]:\n [[ 0.00000000e+00  1.86666679e+01  1.86666679e+01]\n [ 5.60000038e+00  6.04800110e+01  3.36000061e+01]\n [-4.48000145e+00  1.95955292e+02  6.04800148e+01]\n [ 1.36640034e+01  6.34895264e+02  1.08864037e+02]\n [-1.89952106e+01  2.05706152e+03  1.95955322e+02]\n [ 3.97913895e+01  6.66488281e+03  3.52719635e+02]]\n",
+  "stdout": "Stable final weight: 1.999999761581421 unstable pre-update [weight,loss,|gradient|]:\n [[ 0.00000000e+00  1.86666679e+01  1.86666679e+01]\n [ 5.60000038e+00  6.04800110e+01  3.36000061e+01]\n [-4.48000145e+00  1.95955292e+02  6.04800148e+01]\n [ 1.36640034e+01  6.34895264e+02  1.08864037e+02]\n [-1.89952106e+01  2.05706152e+03  1.95955322e+02]\n [ 3.97913895e+01  6.66488281e+03  3.52719635e+02]]\nReference MLP: train loss 0.6258 -> 0.5295; held-out loss 0.6397 -> 0.5417\nData fault: earliest invalid input at row 7, feature 1; repair restored source row and held-out BCE 0.6397.\nSaturation fault: 100.0% |tanh(h)| > .99; hidden gradient 0.00000, output gradient 0.19231; held-out loss 0.6903 versus 0.6397 after restoring the hidden bias.\nUpdate fault: lr=100 loss 0.6258 -> 1.6054 -> 32.9974, held-out 71.8487; repair lr=.03 ends train 0.6142, held-out 0.6230.\n",
   "data": {
     "kind": "line",
     "x": [
       0,
       1,
       2,
-      3,
-      4,
-      5
+      3
     ],
-    "xlabel": "pre-update step",
-    "ylabel": "mean squared loss",
+    "xlabel": "completed full-batch updates (0 = initialized model)",
+    "ylabel": "binary cross-entropy (nats; log axis)",
     "yscale": "log",
     "series": [
       {
-        "label": "rate 0.1",
+        "label": "training, lr=0.03",
         "y": [
-          18.666667938232422,
-          0.08296281099319458,
-          0.0003687224234454334,
-          1.6386155721193063e-06,
-          7.309760796658793e-09,
-          3.086597644141875e-11
+          0.6257601380348206,
+          0.6199302673339844,
+          0.6141984462738037,
+          0.6085618734359741
         ]
       },
       {
-        "label": "rate 0.3",
+        "label": "held-out, lr=0.03",
         "y": [
-          18.666667938232422,
-          60.480010986328125,
-          195.95529174804688,
-          634.895263671875,
-          2057.0615234375,
-          6664.8828125
+          0.6397314071655273,
+          0.6340451836585999,
+          0.6284547448158264,
+          0.6229580044746399
+        ]
+      },
+      {
+        "label": "training, lr=100",
+        "y": [
+          0.6257601380348206,
+          1.6054201126098633,
+          32.99742889404297,
+          78.3466796875
+        ]
+      },
+      {
+        "label": "held-out, lr=100",
+        "y": [
+          0.6397314071655273,
+          1.192867636680603,
+          42.581172943115234,
+          71.84870910644531
         ]
       }
     ]

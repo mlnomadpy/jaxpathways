@@ -1,27 +1,35 @@
 """Attention from small pieces · learner-only exercises (3/3 contracts ready)"""
 
-# Exercise: Permute the three key/value pairs together, then permute only values. Verify invariance for the paired permutation and a changed result for the mismatched pairing.
+# Exercise: Start from the explicit independent fixture below: q_ex = [[2, 0]], k_ex = [[1, 0], [0, 1], [1, 1]], and v_ex = [[2, 0], [0, 4], [4, 2]]. Implement `attend` using the declared starter. Show algebraically why permuting keys and their paired values together preserves the weighted sum. Then test order [2, 0, 1] for both the paired permutation and a value-only permutation. Compare each result to the original output with NumPy. State why the separate zero-query worked example cannot show a value-only change.
 
 # Inputs:
-# - Q/K/V arrays with explicit batch, query, key, and feature axes.
+# - Independent nonuniform fixture: q_ex=[[2,0]], k_ex=[[1,0],[0,1],[1,1]], v_ex=[[2,0],[0,4],[4,2]], and permutation order [2,0,1].
 
 # Outputs:
-# - Attention outputs with one result per query and value feature.
+# - Original attention output, paired-permutation output, and value-only-permutation output compared with an independent NumPy reference.
 
 # Invariants to check:
-# - Softmax normalizes over keys; paired key/value permutations preserve the function.
+# - Permuting keys and their paired values together preserves the weighted sum.
+# - A value-only permutation can change the result for this nonuniform fixture; this is not guaranteed for every query/value set.
+# - Zero queries produce a uniform-weight mean that is invariant under value permutations.
 
 # Hints:
-# - Compute score scaling from the key feature width.
-# - Check zero queries against the mean of the values.
+# - Implement scaled scores, softmax over keys, then weights @ values.
+# - Write the paired permutation as a reindexing of the same sum.
+# - Run the full solution using only the fixture declared in this starter.
 
+import jax
 import jax.numpy as jnp
 
-def scaled_dot_product_attention(queries, keys, values):
-    """Attention outputs with one result per query and value feature."""
-    # TODO: Compute scaled query-key scores, normalize along keys, and combine the paired value vectors.
+def attend(q, k, v):
+    """Return attention outputs and normalized key weights."""
+    # TODO: compute scaled query-key scores, normalize over keys, and mix values.
     raise NotImplementedError
 
+q_ex = jnp.array([[2., 0.]])
+k_ex = jnp.array([[1., 0.], [0., 1.], [1., 1.]])
+v_ex = jnp.array([[2., 0.], [0., 4.], [4., 2.]])
+order = jnp.array([2, 0, 1])
 
 
 

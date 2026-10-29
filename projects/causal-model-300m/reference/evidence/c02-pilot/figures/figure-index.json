@@ -1,0 +1,26 @@
+{
+  "status": "plots of the retained bounded CPU run; no additional fit or score selection",
+  "source_sha256": {
+    "pilot_metrics": "8c7b6441c289b33f8bd9fabd963944416ae5af442ed50fc3c4a1ba6527d9d9a1",
+    "pythia_qa": "1f81b79d9cec14c3b3ef831148b7d391614bd8899f8ca5b4efeb4c64eb319089",
+    "pythia_nll": "86230276db9650b7e47bc685d64c6008bcde9b23919e7f35aa2971ce3f56ce46",
+    "supplemental_diagnostics": "3a64103a5a216e4db0b1af3fc41567ce849bdb0b0cb6e82b4f6b5dac5ab6d2bf",
+    "render_script": "c224b8d3d5c11fdf99732fcff110267283273a9b14e94fa3d75986b1a3756bfd",
+    "base_training_trace": "153c81f1743d2569be5f27c80e6cb04fddb3e94587869dd851f328e77108fc23",
+    "continuation_mixture_training_trace": "bf2a8d38315c1fe608992f45a57d8ad802b0da791427d60436db00f843a8a6a8",
+    "continuation_general_control_training_trace": "378c51902dc5b5eccb47ad260550f1ed51e9b927cdcc30d66444178cc3688399",
+    "sft_full_from_domain_training_trace": "d7f5bd95df725491f869510637ac4a0a106f7970cd82ff4a5683ced5c2f1da06",
+    "sft_lora_from_domain_training_trace": "3968e3dff929f6f409afad2b415a71ddf60d3561697f8c4d620655de8ff801de",
+    "sft_full_from_general_training_trace": "26e172666698ef25fe1ab3b40d063d7e6c0ad43462c39bb62c44f7b9c157c28b"
+  },
+  "plots": {
+    "c02-training-and-qa.png": "ad9a1bbe7227d889301f21c6704f9d48f4361264080f89f8ddf68efcf4e9073f",
+    "c02-training-and-qa.svg": "2c00f4e52c86126534b5a4d6d656468df3b3539a08caaf41f0fde361e2cd902b",
+    "c02-byte-rates.png": "2f9ee2453ae4c7dc819ed53ae63be2865abd44db799dda929bc9c924a6c38d63",
+    "c02-byte-rates.svg": "a07f477804671812a4626baf87d5aef451b006e5a9cc05b21bf83be175bac3eb"
+  },
+  "interpretation": {
+    "training_and_qa": "per-update dropout minibatches and fixed-set generated answer metrics use different denominators and are shown in separate panels; dashed lines are precommitted QA floors",
+    "byte_rates": "each model is scored on the same normalized UTF-8 byte denominator within each split; token NLLs across different tokenizers are not plotted together"
+  }
+}

@@ -12,7 +12,9 @@ Complete gradients, explicit state and scan first. Start with analytic reference
 
 ## Study guide: Are you fitting the physical model or the solver’s error?
 
-Use an analytic system to separate simulation correctness, numerical discretization and parameter inference. An accurate autodiff derivative can still belong to an inaccurate discretized model.
+A simulation has at least three layers of meaning: a model of the physical process, a numerical discretization of that model, and an inference procedure that fits unknown parameters. An exact derivative of the numerical program can still describe an inaccurate approximation to the continuous process.
+
+Use a solvable system to separate those layers. Predict one integration step, refine the grid at a fixed horizon and inspect convergence before fitting a parameter. Then compare predictions at held-out times and ask whether a shifted estimate comes from observation noise, weak identifiability or solver error.
 
 ### Check your starting point
 

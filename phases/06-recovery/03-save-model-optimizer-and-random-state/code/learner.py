@@ -32,7 +32,7 @@ def restore_training_state(checkpoint_path, template, contract):
 
 
 # Show what weights-only recovery loses (Transfer):
-# Keep the restored parameters but reset Adam’s memory. Compare the next update with the full-state restore. Keep data and random state identical so the optimizer memory is the only changed factor.
+# Keep the restored parameters but reset Adam’s memory. Before running the check, predict the next optimizer count and whether the parameter update can match. Then compare the next update with the full-state restore while holding the batch and random key fixed; interpret the printed counter and parameter mismatch.
 
 # Inputs:
 # - Keep the restored parameters but reset Adam’s memory. Compare the next update with the full-state restore. Keep data and random state identical so the optimizer memory is the only changed factor.

@@ -12,7 +12,9 @@ Predict the mask, denominator or preference direction before training. Keep inde
 
 ## Study guide: What learning signal can unlabelled data provide?
 
-Train small masked-token, hidden-patch and paired-view models. Audit information leakage, reduction counts and pair identity before interpreting a falling objective.
+Self-supervised learning creates targets from the data itself. That makes the information boundary especially important: a hidden token or patch must remain a target rather than leaking into the input, and a contrastive positive must keep its source identity when views move around a batch.
+
+Work through one selected token, one patch and one row of a similarity matrix. Then read the recorded objectives beside their baselines and held-out checks. Saving and reloading an encoder gives the next exercise a concrete starting point; the evaluation determines whether the learned representation helps under a changed condition.
 
 ### Check your starting point
 
@@ -56,7 +58,7 @@ It assumes one unique positive per row and treats the duplicate positive as a ne
 
 ### Decide what is ready
 
-Complete stages 1–3 of training-methods with independent loss references, real training curves, changed masks or pairs and explicit synthetic-data limits. Add the new lesson evidence: unequal-count gradient oracle, rectangular patch/intervention checks, irreducible ambiguity example and temperature/ranking comparison. Explain each saved figure without copying its caption.
+Complete stages 1–3 of training-methods with independent loss references, real training curves, changed masks or pairs and explicit synthetic-data limits. Add the new lesson evidence: unequal-count gradient oracle, rectangular patch/intervention checks, irreducible ambiguity example and temperature/ranking comparison. Explain each saved figure without copying its caption. Complete the saved-encoder handoffs: record data/mask/processor identities, reload the artifacts, evaluate held-out groups and report frozen probes against independent baselines. Keep the demonstrated MLM and MIM limitations visible rather than calling objective completion a quality pass.
 
 ### Further work
 
@@ -70,9 +72,9 @@ Full BERT/ViT masked autoencoders, natural corpora, augmentation studies and dow
 
 Status: authored lesson with CPU exercise.
 
-**Intended outcome:** Separate the clean targets from the corrupted input. Normalize over selected target positions.
+**Intended outcome:** Audit selected-token MLM loss and transfer a saved small encoder to held-out masks and a frozen representation probe.
 
-**Evidence:** Keep corrupted inputs, selected-target counts, the log-vocabulary baseline, independent masked-loss checks, trained parameters and changed-mask results.
+**Evidence:** Keep clean/corrupted masks, selected-position denominators and independent gradients, plus saved encoder/processor identity, held-out loss versus uniform baseline, a frozen probe and honest changed-condition failures.
 
 **Checkpoint:** Why are visible input tokens useful even when their output positions are excluded from the loss?
 
@@ -82,9 +84,9 @@ Status: authored lesson with CPU exercise.
 
 Status: authored lesson with CPU exercise.
 
-**Intended outcome:** Preserve patch order and pixel order. Keep hidden pixels out of the encoder.
+**Intended outcome:** Audit visible-only masked reconstruction and compare a saved small encoder across changed masks and a frozen representation probe.
 
-**Evidence:** Keep patch-order slices, visible-only feature shapes, hidden-patch counts, independent MSE and held-amplitude reconstruction results.
+**Evidence:** Keep patch-order and ambiguity controls, saved encoder/mask/transform identity, changed-mask held-out reconstruction against a visible-mean baseline and the frozen probe. Separate objective mechanics from representation quality.
 
 **Checkpoint:** Why must the encoder input be inspected separately from reconstruction loss?
 
@@ -94,9 +96,9 @@ Status: authored lesson with CPU exercise.
 
 Status: authored lesson with CPU exercise.
 
-**Intended outcome:** Define the positive pair before augmenting. Normalize embeddings and introduce temperature.
+**Intended outcome:** Train a bounded contrastive objective and check held-out grouped retrieval with multiple positives and a saved encoder identity.
 
-**Evidence:** Keep source pairing, temperature, stable two-direction loss checks, collapse and duplicate baselines, training outputs and broken-pair diagnosis.
+**Evidence:** Keep pair/temperature/false-negative checks, held-out source-group membership, saved encoder identity, multiple-positive Recall@k and mAP calculations against an independent ranking oracle.
 
 **Checkpoint:** What does successful retrieval on the training pairs establish?
 

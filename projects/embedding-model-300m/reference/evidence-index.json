@@ -1,0 +1,1048 @@
+{
+  "checker_amendment": {
+    "path": "reference/evidence/checker-attention-amendment.json",
+    "sha256": "a62c94cc143b18e5d870c65663268cd8f2f724ad3f302af972abbf8161ac2601"
+  },
+  "historical_receipt": {
+    "path": "reference/evidence/final8/sourcebound-receipt.json",
+    "sha256": "514287dcfd125d3127f93c43d0c20540b6325c9d4d39f4a803ea2fa57aa942b8"
+  },
+  "historical_run": {
+    "checker_at_run_sha256": "ea60a601024e75851a9a5fcbb0698a26e01fabbb8fab04e65daad8f76b3bd3d1",
+    "independent_check_sha256": "faa4691334e6cbf73a6dafa35617efb50aa75674c45becdea2670f2fd561bf90",
+    "name": "final8",
+    "result": "Historical final8 passed under the source versions in its immutable receipt. Later checker and plotting executions have separate edition verification records; this historical receipt does not qualify later code."
+  },
+  "mlm_gradient_checker_amendment": {
+    "current_checker_sha256": "a3867129f43df1a1b6d8bf671d449488987e1339f7abfcae0caf35fc88c6d952",
+    "path": "reference/evidence/checker-mlm-gradient-amendment.json",
+    "sha256": "c628a706bcc9422d97d8efba7d491e683a515968d16332f4213e954ed2652a82"
+  },
+  "omitted_files": {
+    "historical-final8/__pycache__/candidate-pool-sentinel.cpython-314.pyc": {
+      "reason": "Ephemeral interpreter or cold-process output; reproducible validation results and numeric canary vector are retained.",
+      "sha256": "3fac111606c1d4f2d053379f848541c98c2be9666c471a125a7d6fbccb154a96",
+      "size_bytes": 18801
+    },
+    "historical-final8/bad-config/README.md": {
+      "reason": "Checker mutation fixture; its acceptance result is summarized by the independent-check record and report.",
+      "sha256": "0fda895c04f0280e8041af01d8afab4a1b98874bfd4e84a251df4425f383a4c8",
+      "size_bytes": 459
+    },
+    "historical-final8/bad-config/__pycache__/config.cpython-314.pyc": {
+      "reason": "Ephemeral interpreter or cold-process output; reproducible validation results and numeric canary vector are retained.",
+      "sha256": "c048d4619647fb14406a962d38947d31b1c5e3a53ea77f48a3c1e47b78d95c10",
+      "size_bytes": 5754
+    },
+    "historical-final8/bad-config/__pycache__/model.cpython-314.pyc": {
+      "reason": "Ephemeral interpreter or cold-process output; reproducible validation results and numeric canary vector are retained.",
+      "sha256": "7f1f882af95aa5aac9a5fddd155e504c3ba83a70cb8ca8fd7d0d589512c1fb7c",
+      "size_bytes": 18501
+    },
+    "historical-final8/bad-config/__pycache__/package_runtime.cpython-314.pyc": {
+      "reason": "Ephemeral interpreter or cold-process output; reproducible validation results and numeric canary vector are retained.",
+      "sha256": "e57489795e5320ab4ddab6a413e1fe1de7a15decae87a0388d44595985cd1539",
+      "size_bytes": 17493
+    },
+    "historical-final8/bad-config/config.json": {
+      "reason": "Checker mutation fixture; its acceptance result is summarized by the independent-check record and report.",
+      "sha256": "51f8308162a84e5fe259b00fff64c0ab0b9a1f51fd69cc9eb4e57af338e2c835",
+      "size_bytes": 197
+    },
+    "historical-final8/bad-config/config.py": {
+      "reason": "Checker mutation fixture; its acceptance result is summarized by the independent-check record and report.",
+      "sha256": "e61e01ad3f56d2fbcdbed72874de727bd9038c042d0070c6b907f5d49fd06a49",
+      "size_bytes": 2574
+    },
+    "historical-final8/bad-config/model.py": {
+      "reason": "Checker mutation fixture; its acceptance result is summarized by the independent-check record and report.",
+      "sha256": "0d50093ea497730be48007265b3db25b9044fa13b88a4485cfce7e4c45266f90",
+      "size_bytes": 9976
+    },
+    "historical-final8/bad-config/model.safetensors": {
+      "reason": "Checker mutation fixture; its acceptance result is summarized by the independent-check record and report.",
+      "sha256": "3da5afe63ecccdca3d04ec06c2400902a18fe937831c8c7b53d9c00c75ca2fd0",
+      "size_bytes": 140944
+    },
+    "historical-final8/bad-config/package.json": {
+      "reason": "Checker mutation fixture; its acceptance result is summarized by the independent-check record and report.",
+      "sha256": "8025421eb4a1583fcacd517dadd8eeabf0cdb5aacd0ce56f96b1e36f3afca530",
+      "size_bytes": 1787
+    },
+    "historical-final8/bad-config/package_runtime.py": {
+      "reason": "Checker mutation fixture; its acceptance result is summarized by the independent-check record and report.",
+      "sha256": "1ab45e32baa18b05af7c651a9c81001b0846e9c8ec5302c88390730a78f60f57",
+      "size_bytes": 11237
+    },
+    "historical-final8/bad-config/tokenizer.json": {
+      "reason": "Checker mutation fixture; its acceptance result is summarized by the independent-check record and report.",
+      "sha256": "c67fad800fed542e3fe28b579a9b30d6aa778ff617885cf4ccb3050bfa0eb131",
+      "size_bytes": 21253
+    },
+    "historical-final8/bad-loader-source/README.md": {
+      "reason": "Checker mutation fixture; its acceptance result is summarized by the independent-check record and report.",
+      "sha256": "0fda895c04f0280e8041af01d8afab4a1b98874bfd4e84a251df4425f383a4c8",
+      "size_bytes": 459
+    },
+    "historical-final8/bad-loader-source/__pycache__/config.cpython-314.pyc": {
+      "reason": "Ephemeral interpreter or cold-process output; reproducible validation results and numeric canary vector are retained.",
+      "sha256": "c048d4619647fb14406a962d38947d31b1c5e3a53ea77f48a3c1e47b78d95c10",
+      "size_bytes": 5754
+    },
+    "historical-final8/bad-loader-source/__pycache__/model.cpython-314.pyc": {
+      "reason": "Ephemeral interpreter or cold-process output; reproducible validation results and numeric canary vector are retained.",
+      "sha256": "7f1f882af95aa5aac9a5fddd155e504c3ba83a70cb8ca8fd7d0d589512c1fb7c",
+      "size_bytes": 18501
+    },
+    "historical-final8/bad-loader-source/__pycache__/package_runtime.cpython-314.pyc": {
+      "reason": "Ephemeral interpreter or cold-process output; reproducible validation results and numeric canary vector are retained.",
+      "sha256": "e57489795e5320ab4ddab6a413e1fe1de7a15decae87a0388d44595985cd1539",
+      "size_bytes": 17493
+    },
+    "historical-final8/bad-loader-source/config.json": {
+      "reason": "Checker mutation fixture; its acceptance result is summarized by the independent-check record and report.",
+      "sha256": "a2fc03f1e6c7465677048ce47059244d7378b7132663ad44de662b2bf1c92805",
+      "size_bytes": 226
+    },
+    "historical-final8/bad-loader-source/config.py": {
+      "reason": "Checker mutation fixture; its acceptance result is summarized by the independent-check record and report.",
+      "sha256": "e61e01ad3f56d2fbcdbed72874de727bd9038c042d0070c6b907f5d49fd06a49",
+      "size_bytes": 2574
+    },
+    "historical-final8/bad-loader-source/model.py": {
+      "reason": "Checker mutation fixture; its acceptance result is summarized by the independent-check record and report.",
+      "sha256": "0d50093ea497730be48007265b3db25b9044fa13b88a4485cfce7e4c45266f90",
+      "size_bytes": 9976
+    },
+    "historical-final8/bad-loader-source/model.safetensors": {
+      "reason": "Checker mutation fixture; its acceptance result is summarized by the independent-check record and report.",
+      "sha256": "3da5afe63ecccdca3d04ec06c2400902a18fe937831c8c7b53d9c00c75ca2fd0",
+      "size_bytes": 140944
+    },
+    "historical-final8/bad-loader-source/package.json": {
+      "reason": "Checker mutation fixture; its acceptance result is summarized by the independent-check record and report.",
+      "sha256": "8025421eb4a1583fcacd517dadd8eeabf0cdb5aacd0ce56f96b1e36f3afca530",
+      "size_bytes": 1787
+    },
+    "historical-final8/bad-loader-source/package_runtime.py": {
+      "reason": "Checker mutation fixture; its acceptance result is summarized by the independent-check record and report.",
+      "sha256": "482151540caa7f8ccc0909b1f189dbb5b2745090bb8d2176bd14dfe62896e7e3",
+      "size_bytes": 11249
+    },
+    "historical-final8/bad-loader-source/tokenizer.json": {
+      "reason": "Checker mutation fixture; its acceptance result is summarized by the independent-check record and report.",
+      "sha256": "c67fad800fed542e3fe28b579a9b30d6aa778ff617885cf4ccb3050bfa0eb131",
+      "size_bytes": 21253
+    },
+    "historical-final8/bad-model-source/README.md": {
+      "reason": "Checker mutation fixture; its acceptance result is summarized by the independent-check record and report.",
+      "sha256": "0fda895c04f0280e8041af01d8afab4a1b98874bfd4e84a251df4425f383a4c8",
+      "size_bytes": 459
+    },
+    "historical-final8/bad-model-source/__pycache__/config.cpython-314.pyc": {
+      "reason": "Ephemeral interpreter or cold-process output; reproducible validation results and numeric canary vector are retained.",
+      "sha256": "c048d4619647fb14406a962d38947d31b1c5e3a53ea77f48a3c1e47b78d95c10",
+      "size_bytes": 5754
+    },
+    "historical-final8/bad-model-source/__pycache__/model.cpython-314.pyc": {
+      "reason": "Ephemeral interpreter or cold-process output; reproducible validation results and numeric canary vector are retained.",
+      "sha256": "7f1f882af95aa5aac9a5fddd155e504c3ba83a70cb8ca8fd7d0d589512c1fb7c",
+      "size_bytes": 18501
+    },
+    "historical-final8/bad-model-source/__pycache__/package_runtime.cpython-314.pyc": {
+      "reason": "Ephemeral interpreter or cold-process output; reproducible validation results and numeric canary vector are retained.",
+      "sha256": "e57489795e5320ab4ddab6a413e1fe1de7a15decae87a0388d44595985cd1539",
+      "size_bytes": 17493
+    },
+    "historical-final8/bad-model-source/config.json": {
+      "reason": "Checker mutation fixture; its acceptance result is summarized by the independent-check record and report.",
+      "sha256": "a2fc03f1e6c7465677048ce47059244d7378b7132663ad44de662b2bf1c92805",
+      "size_bytes": 226
+    },
+    "historical-final8/bad-model-source/config.py": {
+      "reason": "Checker mutation fixture; its acceptance result is summarized by the independent-check record and report.",
+      "sha256": "e61e01ad3f56d2fbcdbed72874de727bd9038c042d0070c6b907f5d49fd06a49",
+      "size_bytes": 2574
+    },
+    "historical-final8/bad-model-source/model.py": {
+      "reason": "Checker mutation fixture; its acceptance result is summarized by the independent-check record and report.",
+      "sha256": "fcf540f0044024f31617dda9dd732164235c18790e066f62108099096d1aa4bf",
+      "size_bytes": 9988
+    },
+    "historical-final8/bad-model-source/model.safetensors": {
+      "reason": "Checker mutation fixture; its acceptance result is summarized by the independent-check record and report.",
+      "sha256": "3da5afe63ecccdca3d04ec06c2400902a18fe937831c8c7b53d9c00c75ca2fd0",
+      "size_bytes": 140944
+    },
+    "historical-final8/bad-model-source/package.json": {
+      "reason": "Checker mutation fixture; its acceptance result is summarized by the independent-check record and report.",
+      "sha256": "8025421eb4a1583fcacd517dadd8eeabf0cdb5aacd0ce56f96b1e36f3afca530",
+      "size_bytes": 1787
+    },
+    "historical-final8/bad-model-source/package_runtime.py": {
+      "reason": "Checker mutation fixture; its acceptance result is summarized by the independent-check record and report.",
+      "sha256": "1ab45e32baa18b05af7c651a9c81001b0846e9c8ec5302c88390730a78f60f57",
+      "size_bytes": 11237
+    },
+    "historical-final8/bad-model-source/tokenizer.json": {
+      "reason": "Checker mutation fixture; its acceptance result is summarized by the independent-check record and report.",
+      "sha256": "c67fad800fed542e3fe28b579a9b30d6aa778ff617885cf4ccb3050bfa0eb131",
+      "size_bytes": 21253
+    },
+    "historical-final8/bad-pooling/README.md": {
+      "reason": "Checker mutation fixture; its acceptance result is summarized by the independent-check record and report.",
+      "sha256": "0fda895c04f0280e8041af01d8afab4a1b98874bfd4e84a251df4425f383a4c8",
+      "size_bytes": 459
+    },
+    "historical-final8/bad-pooling/__pycache__/config.cpython-314.pyc": {
+      "reason": "Ephemeral interpreter or cold-process output; reproducible validation results and numeric canary vector are retained.",
+      "sha256": "c048d4619647fb14406a962d38947d31b1c5e3a53ea77f48a3c1e47b78d95c10",
+      "size_bytes": 5754
+    },
+    "historical-final8/bad-pooling/__pycache__/model.cpython-314.pyc": {
+      "reason": "Ephemeral interpreter or cold-process output; reproducible validation results and numeric canary vector are retained.",
+      "sha256": "7f1f882af95aa5aac9a5fddd155e504c3ba83a70cb8ca8fd7d0d589512c1fb7c",
+      "size_bytes": 18501
+    },
+    "historical-final8/bad-pooling/__pycache__/package_runtime.cpython-314.pyc": {
+      "reason": "Ephemeral interpreter or cold-process output; reproducible validation results and numeric canary vector are retained.",
+      "sha256": "e57489795e5320ab4ddab6a413e1fe1de7a15decae87a0388d44595985cd1539",
+      "size_bytes": 17493
+    },
+    "historical-final8/bad-pooling/config.json": {
+      "reason": "Checker mutation fixture; its acceptance result is summarized by the independent-check record and report.",
+      "sha256": "a2fc03f1e6c7465677048ce47059244d7378b7132663ad44de662b2bf1c92805",
+      "size_bytes": 226
+    },
+    "historical-final8/bad-pooling/config.py": {
+      "reason": "Checker mutation fixture; its acceptance result is summarized by the independent-check record and report.",
+      "sha256": "e61e01ad3f56d2fbcdbed72874de727bd9038c042d0070c6b907f5d49fd06a49",
+      "size_bytes": 2574
+    },
+    "historical-final8/bad-pooling/model.py": {
+      "reason": "Checker mutation fixture; its acceptance result is summarized by the independent-check record and report.",
+      "sha256": "0d50093ea497730be48007265b3db25b9044fa13b88a4485cfce7e4c45266f90",
+      "size_bytes": 9976
+    },
+    "historical-final8/bad-pooling/model.safetensors": {
+      "reason": "Checker mutation fixture; its acceptance result is summarized by the independent-check record and report.",
+      "sha256": "3da5afe63ecccdca3d04ec06c2400902a18fe937831c8c7b53d9c00c75ca2fd0",
+      "size_bytes": 140944
+    },
+    "historical-final8/bad-pooling/package.json": {
+      "reason": "Checker mutation fixture; its acceptance result is summarized by the independent-check record and report.",
+      "sha256": "eb7d1e39f6e100f6879730a62df02f8f10eb83fea4c0912160be79867e49b17c",
+      "size_bytes": 1518
+    },
+    "historical-final8/bad-pooling/package_runtime.py": {
+      "reason": "Checker mutation fixture; its acceptance result is summarized by the independent-check record and report.",
+      "sha256": "1ab45e32baa18b05af7c651a9c81001b0846e9c8ec5302c88390730a78f60f57",
+      "size_bytes": 11237
+    },
+    "historical-final8/bad-pooling/tokenizer.json": {
+      "reason": "Checker mutation fixture; its acceptance result is summarized by the independent-check record and report.",
+      "sha256": "c67fad800fed542e3fe28b579a9b30d6aa778ff617885cf4ccb3050bfa0eb131",
+      "size_bytes": 21253
+    },
+    "historical-final8/bad-tokenizer/README.md": {
+      "reason": "Checker mutation fixture; its acceptance result is summarized by the independent-check record and report.",
+      "sha256": "0fda895c04f0280e8041af01d8afab4a1b98874bfd4e84a251df4425f383a4c8",
+      "size_bytes": 459
+    },
+    "historical-final8/bad-tokenizer/__pycache__/config.cpython-314.pyc": {
+      "reason": "Ephemeral interpreter or cold-process output; reproducible validation results and numeric canary vector are retained.",
+      "sha256": "c048d4619647fb14406a962d38947d31b1c5e3a53ea77f48a3c1e47b78d95c10",
+      "size_bytes": 5754
+    },
+    "historical-final8/bad-tokenizer/__pycache__/model.cpython-314.pyc": {
+      "reason": "Ephemeral interpreter or cold-process output; reproducible validation results and numeric canary vector are retained.",
+      "sha256": "7f1f882af95aa5aac9a5fddd155e504c3ba83a70cb8ca8fd7d0d589512c1fb7c",
+      "size_bytes": 18501
+    },
+    "historical-final8/bad-tokenizer/__pycache__/package_runtime.cpython-314.pyc": {
+      "reason": "Ephemeral interpreter or cold-process output; reproducible validation results and numeric canary vector are retained.",
+      "sha256": "e57489795e5320ab4ddab6a413e1fe1de7a15decae87a0388d44595985cd1539",
+      "size_bytes": 17493
+    },
+    "historical-final8/bad-tokenizer/config.json": {
+      "reason": "Checker mutation fixture; its acceptance result is summarized by the independent-check record and report.",
+      "sha256": "a2fc03f1e6c7465677048ce47059244d7378b7132663ad44de662b2bf1c92805",
+      "size_bytes": 226
+    },
+    "historical-final8/bad-tokenizer/config.py": {
+      "reason": "Checker mutation fixture; its acceptance result is summarized by the independent-check record and report.",
+      "sha256": "e61e01ad3f56d2fbcdbed72874de727bd9038c042d0070c6b907f5d49fd06a49",
+      "size_bytes": 2574
+    },
+    "historical-final8/bad-tokenizer/model.py": {
+      "reason": "Checker mutation fixture; its acceptance result is summarized by the independent-check record and report.",
+      "sha256": "0d50093ea497730be48007265b3db25b9044fa13b88a4485cfce7e4c45266f90",
+      "size_bytes": 9976
+    },
+    "historical-final8/bad-tokenizer/model.safetensors": {
+      "reason": "Checker mutation fixture; its acceptance result is summarized by the independent-check record and report.",
+      "sha256": "3da5afe63ecccdca3d04ec06c2400902a18fe937831c8c7b53d9c00c75ca2fd0",
+      "size_bytes": 140944
+    },
+    "historical-final8/bad-tokenizer/package.json": {
+      "reason": "Checker mutation fixture; its acceptance result is summarized by the independent-check record and report.",
+      "sha256": "8025421eb4a1583fcacd517dadd8eeabf0cdb5aacd0ce56f96b1e36f3afca530",
+      "size_bytes": 1787
+    },
+    "historical-final8/bad-tokenizer/package_runtime.py": {
+      "reason": "Checker mutation fixture; its acceptance result is summarized by the independent-check record and report.",
+      "sha256": "1ab45e32baa18b05af7c651a9c81001b0846e9c8ec5302c88390730a78f60f57",
+      "size_bytes": 11237
+    },
+    "historical-final8/bad-tokenizer/tokenizer.json": {
+      "reason": "Checker mutation fixture; its acceptance result is summarized by the independent-check record and report.",
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "size_bytes": 2
+    },
+    "historical-final8/bad-weights/README.md": {
+      "reason": "Checker mutation fixture; its acceptance result is summarized by the independent-check record and report.",
+      "sha256": "0fda895c04f0280e8041af01d8afab4a1b98874bfd4e84a251df4425f383a4c8",
+      "size_bytes": 459
+    },
+    "historical-final8/bad-weights/__pycache__/config.cpython-314.pyc": {
+      "reason": "Ephemeral interpreter or cold-process output; reproducible validation results and numeric canary vector are retained.",
+      "sha256": "c048d4619647fb14406a962d38947d31b1c5e3a53ea77f48a3c1e47b78d95c10",
+      "size_bytes": 5754
+    },
+    "historical-final8/bad-weights/__pycache__/model.cpython-314.pyc": {
+      "reason": "Ephemeral interpreter or cold-process output; reproducible validation results and numeric canary vector are retained.",
+      "sha256": "7f1f882af95aa5aac9a5fddd155e504c3ba83a70cb8ca8fd7d0d589512c1fb7c",
+      "size_bytes": 18501
+    },
+    "historical-final8/bad-weights/__pycache__/package_runtime.cpython-314.pyc": {
+      "reason": "Ephemeral interpreter or cold-process output; reproducible validation results and numeric canary vector are retained.",
+      "sha256": "e57489795e5320ab4ddab6a413e1fe1de7a15decae87a0388d44595985cd1539",
+      "size_bytes": 17493
+    },
+    "historical-final8/bad-weights/config.json": {
+      "reason": "Checker mutation fixture; its acceptance result is summarized by the independent-check record and report.",
+      "sha256": "a2fc03f1e6c7465677048ce47059244d7378b7132663ad44de662b2bf1c92805",
+      "size_bytes": 226
+    },
+    "historical-final8/bad-weights/config.py": {
+      "reason": "Checker mutation fixture; its acceptance result is summarized by the independent-check record and report.",
+      "sha256": "e61e01ad3f56d2fbcdbed72874de727bd9038c042d0070c6b907f5d49fd06a49",
+      "size_bytes": 2574
+    },
+    "historical-final8/bad-weights/model.py": {
+      "reason": "Checker mutation fixture; its acceptance result is summarized by the independent-check record and report.",
+      "sha256": "0d50093ea497730be48007265b3db25b9044fa13b88a4485cfce7e4c45266f90",
+      "size_bytes": 9976
+    },
+    "historical-final8/bad-weights/model.safetensors": {
+      "reason": "Checker mutation fixture; its acceptance result is summarized by the independent-check record and report.",
+      "sha256": "b93ed876dc8b7211a817ba81fe8b65bcfda8e32e72dd1784b293102e4b760ea5",
+      "size_bytes": 140944
+    },
+    "historical-final8/bad-weights/package.json": {
+      "reason": "Checker mutation fixture; its acceptance result is summarized by the independent-check record and report.",
+      "sha256": "8025421eb4a1583fcacd517dadd8eeabf0cdb5aacd0ce56f96b1e36f3afca530",
+      "size_bytes": 1787
+    },
+    "historical-final8/bad-weights/package_runtime.py": {
+      "reason": "Checker mutation fixture; its acceptance result is summarized by the independent-check record and report.",
+      "sha256": "1ab45e32baa18b05af7c651a9c81001b0846e9c8ec5302c88390730a78f60f57",
+      "size_bytes": 11237
+    },
+    "historical-final8/bad-weights/tokenizer.json": {
+      "reason": "Checker mutation fixture; its acceptance result is summarized by the independent-check record and report.",
+      "sha256": "c67fad800fed542e3fe28b579a9b30d6aa778ff617885cf4ccb3050bfa0eb131",
+      "size_bytes": 21253
+    },
+    "historical-final8/baseline_snapshot/.cache/huggingface/.gitignore": {
+      "reason": "Pinned third-party baseline snapshot omitted; exact revision and every snapshot hash remain in baseline-receipt.json and the source-bound receipt.",
+      "sha256": "684888c0ebb17f374298b65ee2807526c066094c701bcc7ebbe1c1095f494fc1",
+      "size_bytes": 1
+    },
+    "historical-final8/baseline_snapshot/.cache/huggingface/CACHEDIR.TAG": {
+      "reason": "Pinned third-party baseline snapshot omitted; exact revision and every snapshot hash remain in baseline-receipt.json and the source-bound receipt.",
+      "sha256": "f6572428f6d5e1575e73a1502895a8731f10757dfbb634909c6e154b849af91d",
+      "size_bytes": 191
+    },
+    "historical-final8/baseline_snapshot/.cache/huggingface/download/1_Pooling/config.json.lock": {
+      "reason": "Pinned third-party baseline snapshot omitted; exact revision and every snapshot hash remain in baseline-receipt.json and the source-bound receipt.",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    "historical-final8/baseline_snapshot/.cache/huggingface/download/1_Pooling/config.json.metadata": {
+      "reason": "Pinned third-party baseline snapshot omitted; exact revision and every snapshot hash remain in baseline-receipt.json and the source-bound receipt.",
+      "sha256": "b316e0b480cf56ec5f8b186cb77d563c539c4d48753562bc04f6e27a3a9b88ad",
+      "size_bytes": 101
+    },
+    "historical-final8/baseline_snapshot/.cache/huggingface/download/README.md.lock": {
+      "reason": "Pinned third-party baseline snapshot omitted; exact revision and every snapshot hash remain in baseline-receipt.json and the source-bound receipt.",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    "historical-final8/baseline_snapshot/.cache/huggingface/download/README.md.metadata": {
+      "reason": "Pinned third-party baseline snapshot omitted; exact revision and every snapshot hash remain in baseline-receipt.json and the source-bound receipt.",
+      "sha256": "8090cce73fc9f482c786de38577c4a752238f7172c687bdf99abb3c71067e200",
+      "size_bytes": 100
+    },
+    "historical-final8/baseline_snapshot/.cache/huggingface/download/config.json.lock": {
+      "reason": "Pinned third-party baseline snapshot omitted; exact revision and every snapshot hash remain in baseline-receipt.json and the source-bound receipt.",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    "historical-final8/baseline_snapshot/.cache/huggingface/download/config.json.metadata": {
+      "reason": "Pinned third-party baseline snapshot omitted; exact revision and every snapshot hash remain in baseline-receipt.json and the source-bound receipt.",
+      "sha256": "75489f503348cbbc243c9b33a954f6b702d666fe8ef45d074430c075da94436c",
+      "size_bytes": 100
+    },
+    "historical-final8/baseline_snapshot/.cache/huggingface/download/config_sentence_transformers.json.lock": {
+      "reason": "Pinned third-party baseline snapshot omitted; exact revision and every snapshot hash remain in baseline-receipt.json and the source-bound receipt.",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    "historical-final8/baseline_snapshot/.cache/huggingface/download/config_sentence_transformers.json.metadata": {
+      "reason": "Pinned third-party baseline snapshot omitted; exact revision and every snapshot hash remain in baseline-receipt.json and the source-bound receipt.",
+      "sha256": "7f254661ef951cbad37c37590ea37c421e57d50c6e467dd431089be304c9ffed",
+      "size_bytes": 99
+    },
+    "historical-final8/baseline_snapshot/.cache/huggingface/download/model.safetensors.lock": {
+      "reason": "Pinned third-party baseline snapshot omitted; exact revision and every snapshot hash remain in baseline-receipt.json and the source-bound receipt.",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    "historical-final8/baseline_snapshot/.cache/huggingface/download/model.safetensors.metadata": {
+      "reason": "Pinned third-party baseline snapshot omitted; exact revision and every snapshot hash remain in baseline-receipt.json and the source-bound receipt.",
+      "sha256": "f6ebad795dd43383ff4732d41edbbf24f3d62fcd2742ac3cc992aa96bce1d279",
+      "size_bytes": 125
+    },
+    "historical-final8/baseline_snapshot/.cache/huggingface/download/modules.json.lock": {
+      "reason": "Pinned third-party baseline snapshot omitted; exact revision and every snapshot hash remain in baseline-receipt.json and the source-bound receipt.",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    "historical-final8/baseline_snapshot/.cache/huggingface/download/modules.json.metadata": {
+      "reason": "Pinned third-party baseline snapshot omitted; exact revision and every snapshot hash remain in baseline-receipt.json and the source-bound receipt.",
+      "sha256": "d65b8160af79b588c721b30cbde0001ff0352b214dc95de1342666fc1b3684ce",
+      "size_bytes": 100
+    },
+    "historical-final8/baseline_snapshot/.cache/huggingface/download/sentence_bert_config.json.lock": {
+      "reason": "Pinned third-party baseline snapshot omitted; exact revision and every snapshot hash remain in baseline-receipt.json and the source-bound receipt.",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    "historical-final8/baseline_snapshot/.cache/huggingface/download/sentence_bert_config.json.metadata": {
+      "reason": "Pinned third-party baseline snapshot omitted; exact revision and every snapshot hash remain in baseline-receipt.json and the source-bound receipt.",
+      "sha256": "a1c9ec27cad10f025645b96f1642b890a667505b332ed2a38b058f27ffaf34b9",
+      "size_bytes": 100
+    },
+    "historical-final8/baseline_snapshot/.cache/huggingface/download/special_tokens_map.json.lock": {
+      "reason": "Pinned third-party baseline snapshot omitted; exact revision and every snapshot hash remain in baseline-receipt.json and the source-bound receipt.",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    "historical-final8/baseline_snapshot/.cache/huggingface/download/special_tokens_map.json.metadata": {
+      "reason": "Pinned third-party baseline snapshot omitted; exact revision and every snapshot hash remain in baseline-receipt.json and the source-bound receipt.",
+      "sha256": "689aecccda7429c5b4600455e427e74361a15a4de12874f343dc9e7b60f0e142",
+      "size_bytes": 100
+    },
+    "historical-final8/baseline_snapshot/.cache/huggingface/download/tokenizer.json.lock": {
+      "reason": "Pinned third-party baseline snapshot omitted; exact revision and every snapshot hash remain in baseline-receipt.json and the source-bound receipt.",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    "historical-final8/baseline_snapshot/.cache/huggingface/download/tokenizer.json.metadata": {
+      "reason": "Pinned third-party baseline snapshot omitted; exact revision and every snapshot hash remain in baseline-receipt.json and the source-bound receipt.",
+      "sha256": "2784ac3a65b6e0ad50f5ea716edc7b53f470dc9435ef3eb3e061f1ea4f407520",
+      "size_bytes": 101
+    },
+    "historical-final8/baseline_snapshot/.cache/huggingface/download/tokenizer_config.json.lock": {
+      "reason": "Pinned third-party baseline snapshot omitted; exact revision and every snapshot hash remain in baseline-receipt.json and the source-bound receipt.",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    "historical-final8/baseline_snapshot/.cache/huggingface/download/tokenizer_config.json.metadata": {
+      "reason": "Pinned third-party baseline snapshot omitted; exact revision and every snapshot hash remain in baseline-receipt.json and the source-bound receipt.",
+      "sha256": "8441a07e0482f8116951ce6ffa66aa5157866e6aa5c7ccc5738d9c4a702782ed",
+      "size_bytes": 100
+    },
+    "historical-final8/baseline_snapshot/.cache/huggingface/download/vocab.txt.lock": {
+      "reason": "Pinned third-party baseline snapshot omitted; exact revision and every snapshot hash remain in baseline-receipt.json and the source-bound receipt.",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    "historical-final8/baseline_snapshot/.cache/huggingface/download/vocab.txt.metadata": {
+      "reason": "Pinned third-party baseline snapshot omitted; exact revision and every snapshot hash remain in baseline-receipt.json and the source-bound receipt.",
+      "sha256": "ffc71c2d96c16b02c0abb3efa3849a866e6e657940f71656972c78699a2cf150",
+      "size_bytes": 100
+    },
+    "historical-final8/baseline_snapshot/1_Pooling/config.json": {
+      "reason": "Pinned third-party baseline snapshot omitted; exact revision and every snapshot hash remain in baseline-receipt.json and the source-bound receipt.",
+      "sha256": "4be450dde3b0273bb9787637cfbd28fe04a7ba6ab9d36ac48e92b11e350ffc23",
+      "size_bytes": 190
+    },
+    "historical-final8/baseline_snapshot/README.md": {
+      "reason": "Pinned third-party baseline snapshot omitted; exact revision and every snapshot hash remain in baseline-receipt.json and the source-bound receipt.",
+      "sha256": "dcd602d2fd35c203a247304a06fec6654a12f7941b739f9221a064fe8dc3b7f0",
+      "size_bytes": 10502
+    },
+    "historical-final8/baseline_snapshot/config.json": {
+      "reason": "Pinned third-party baseline snapshot omitted; exact revision and every snapshot hash remain in baseline-receipt.json and the source-bound receipt.",
+      "sha256": "953f9c0d463486b10a6871cc2fd59f223b2c70184f49815e7efbcab5d8908b41",
+      "size_bytes": 612
+    },
+    "historical-final8/baseline_snapshot/config_sentence_transformers.json": {
+      "reason": "Pinned third-party baseline snapshot omitted; exact revision and every snapshot hash remain in baseline-receipt.json and the source-bound receipt.",
+      "sha256": "061ca9d39661d6c6d6de5ba27f79a1cd5770ea247f8d46412a68a498dc5ac9f3",
+      "size_bytes": 116
+    },
+    "historical-final8/baseline_snapshot/model.safetensors": {
+      "reason": "Pinned third-party baseline snapshot omitted; exact revision and every snapshot hash remain in baseline-receipt.json and the source-bound receipt.",
+      "sha256": "53aa51172d142c89d9012cce15ae4d6cc0ca6895895114379cacb4fab128d9db",
+      "size_bytes": 90868376
+    },
+    "historical-final8/baseline_snapshot/modules.json": {
+      "reason": "Pinned third-party baseline snapshot omitted; exact revision and every snapshot hash remain in baseline-receipt.json and the source-bound receipt.",
+      "sha256": "84e40c8e006c9b1d6c122e02cba9b02458120b5fb0c87b746c41e0207cf642cf",
+      "size_bytes": 349
+    },
+    "historical-final8/baseline_snapshot/sentence_bert_config.json": {
+      "reason": "Pinned third-party baseline snapshot omitted; exact revision and every snapshot hash remain in baseline-receipt.json and the source-bound receipt.",
+      "sha256": "fc1993fde0a95c24ec6c022539d41cf6e2f7c9721e5415d6fb6897472a9cd4b7",
+      "size_bytes": 53
+    },
+    "historical-final8/baseline_snapshot/special_tokens_map.json": {
+      "reason": "Pinned third-party baseline snapshot omitted; exact revision and every snapshot hash remain in baseline-receipt.json and the source-bound receipt.",
+      "sha256": "303df45a03609e4ead04bc3dc1536d0ab19b5358db685b6f3da123d05ec200e3",
+      "size_bytes": 112
+    },
+    "historical-final8/baseline_snapshot/tokenizer.json": {
+      "reason": "Pinned third-party baseline snapshot omitted; exact revision and every snapshot hash remain in baseline-receipt.json and the source-bound receipt.",
+      "sha256": "be50c3628f2bf5bb5e3a7f17b1f74611b2561a3a27eeab05e5aa30f411572037",
+      "size_bytes": 466247
+    },
+    "historical-final8/baseline_snapshot/tokenizer_config.json": {
+      "reason": "Pinned third-party baseline snapshot omitted; exact revision and every snapshot hash remain in baseline-receipt.json and the source-bound receipt.",
+      "sha256": "acb92769e8195aabd29b7b2137a9e6d6e25c476a4f15aa4355c233426c61576b",
+      "size_bytes": 350
+    },
+    "historical-final8/baseline_snapshot/vocab.txt": {
+      "reason": "Pinned third-party baseline snapshot omitted; exact revision and every snapshot hash remain in baseline-receipt.json and the source-bound receipt.",
+      "sha256": "07eced375cec144d27c900241f3e339478dec958f92fddbc551f295c992038a3",
+      "size_bytes": 231508
+    },
+    "historical-final8/baseline_snapshot_files": {
+      "files": {
+        "1_Pooling/config.json": "4be450dde3b0273bb9787637cfbd28fe04a7ba6ab9d36ac48e92b11e350ffc23",
+        "README.md": "dcd602d2fd35c203a247304a06fec6654a12f7941b739f9221a064fe8dc3b7f0",
+        "config.json": "953f9c0d463486b10a6871cc2fd59f223b2c70184f49815e7efbcab5d8908b41",
+        "config_sentence_transformers.json": "061ca9d39661d6c6d6de5ba27f79a1cd5770ea247f8d46412a68a498dc5ac9f3",
+        "model.safetensors": "53aa51172d142c89d9012cce15ae4d6cc0ca6895895114379cacb4fab128d9db",
+        "modules.json": "84e40c8e006c9b1d6c122e02cba9b02458120b5fb0c87b746c41e0207cf642cf",
+        "sentence_bert_config.json": "fc1993fde0a95c24ec6c022539d41cf6e2f7c9721e5415d6fb6897472a9cd4b7",
+        "special_tokens_map.json": "303df45a03609e4ead04bc3dc1536d0ab19b5358db685b6f3da123d05ec200e3",
+        "tokenizer.json": "be50c3628f2bf5bb5e3a7f17b1f74611b2561a3a27eeab05e5aa30f411572037",
+        "tokenizer_config.json": "acb92769e8195aabd29b7b2137a9e6d6e25c476a4f15aa4355c233426c61576b",
+        "vocab.txt": "07eced375cec144d27c900241f3e339478dec958f92fddbc551f295c992038a3"
+      },
+      "reason": "Pinned external baseline model/tokenizer snapshot is intentionally not included; baseline-receipt.json records revision, license metadata, and content hashes. A rerun must fetch the exact pinned revision or provide the exact external snapshot."
+    },
+    "historical-final8/candidate-pool-sentinel-package/README.md": {
+      "reason": "Checker mutation fixture; its acceptance result is summarized by the independent-check record and report.",
+      "sha256": "0fda895c04f0280e8041af01d8afab4a1b98874bfd4e84a251df4425f383a4c8",
+      "size_bytes": 459
+    },
+    "historical-final8/candidate-pool-sentinel-package/__pycache__/model.cpython-314.pyc": {
+      "reason": "Ephemeral interpreter or cold-process output; reproducible validation results and numeric canary vector are retained.",
+      "sha256": "b63201064ddcb3c89a95f349075f6632931472c6d8454886f67b07b16354daee",
+      "size_bytes": 18815
+    },
+    "historical-final8/candidate-pool-sentinel-package/config.json": {
+      "reason": "Checker mutation fixture; its acceptance result is summarized by the independent-check record and report.",
+      "sha256": "a2fc03f1e6c7465677048ce47059244d7378b7132663ad44de662b2bf1c92805",
+      "size_bytes": 226
+    },
+    "historical-final8/candidate-pool-sentinel-package/config.py": {
+      "reason": "Checker mutation fixture; its acceptance result is summarized by the independent-check record and report.",
+      "sha256": "e61e01ad3f56d2fbcdbed72874de727bd9038c042d0070c6b907f5d49fd06a49",
+      "size_bytes": 2574
+    },
+    "historical-final8/candidate-pool-sentinel-package/model.py": {
+      "reason": "Checker mutation fixture; its acceptance result is summarized by the independent-check record and report.",
+      "sha256": "0b2fc7526fe9723d5c057caebcd7c804cd6eed26565abaaad7b00edc233fb7f9",
+      "size_bytes": 10191
+    },
+    "historical-final8/candidate-pool-sentinel-package/model.safetensors": {
+      "reason": "Checker mutation fixture; its acceptance result is summarized by the independent-check record and report.",
+      "sha256": "3da5afe63ecccdca3d04ec06c2400902a18fe937831c8c7b53d9c00c75ca2fd0",
+      "size_bytes": 140944
+    },
+    "historical-final8/candidate-pool-sentinel-package/package.json": {
+      "reason": "Checker mutation fixture; its acceptance result is summarized by the independent-check record and report.",
+      "sha256": "3f66d29ca7ef9b0e166d3e18acb9cd1956b490edc98d66cab818aaf5cd842e25",
+      "size_bytes": 1791
+    },
+    "historical-final8/candidate-pool-sentinel-package/package_runtime.py": {
+      "reason": "Checker mutation fixture; its acceptance result is summarized by the independent-check record and report.",
+      "sha256": "1ab45e32baa18b05af7c651a9c81001b0846e9c8ec5302c88390730a78f60f57",
+      "size_bytes": 11237
+    },
+    "historical-final8/candidate-pool-sentinel-package/tokenizer.json": {
+      "reason": "Checker mutation fixture; its acceptance result is summarized by the independent-check record and report.",
+      "sha256": "c67fad800fed542e3fe28b579a9b30d6aa778ff617885cf4ccb3050bfa0eb131",
+      "size_bytes": 21253
+    },
+    "historical-final8/candidate-pool-sentinel.py": {
+      "reason": "Checker mutation fixture; its acceptance result is summarized by the independent-check record and report.",
+      "sha256": "0b2fc7526fe9723d5c057caebcd7c804cd6eed26565abaaad7b00edc233fb7f9",
+      "size_bytes": 10191
+    },
+    "historical-final8/checkpoints/phase1-mlm/state.npz": {
+      "reason": "Trained optimizer/model state retained only in the external complete review packet pending a standalone-weight rights review.",
+      "sha256": "24baa016c31894580c6c280dc179192882d7c54e7531a1e9d59eb45e9db22cba",
+      "size_bytes": 440206
+    },
+    "historical-final8/checkpoints/phase2_contrastive_only/state.npz": {
+      "reason": "Trained optimizer/model state retained only in the external complete review packet pending a standalone-weight rights review.",
+      "sha256": "c31c7f8f82e19ac789dd7faf548a8e70d0b11836aa6987aa572f584994d7a6dd",
+      "size_bytes": 439822
+    },
+    "historical-final8/checkpoints/phase2_contrastive_plus_retained_mlm/state.npz": {
+      "reason": "Trained optimizer/model state retained only in the external complete review packet pending a standalone-weight rights review.",
+      "sha256": "340b372e23bfa889ca21ea8df55fefa8ea872f5c7beda0236a6c5ffcefa88a89",
+      "size_bytes": 439822
+    },
+    "historical-final8/checkpoints/phase3-human-pairs/state.npz": {
+      "reason": "Trained optimizer/model state retained only in the external complete review packet pending a standalone-weight rights review.",
+      "sha256": "4f954a1eff2cd570bf597a7468a3028bccaed8b02ea6c8b5cac87800beda91a0",
+      "size_bytes": 440818
+    },
+    "historical-final8/cold-input.json": {
+      "reason": "Original biomedical canary text is omitted; deterministic numeric token IDs and expected vectors are retained with their source hashes.",
+      "sha256": "39b9e6004d9f74a528f4a0ba0651130a5518089dfac935ff551607a1d9aa438b",
+      "size_bytes": 28122
+    },
+    "historical-final8/local-package/__pycache__/config.cpython-314.pyc": {
+      "reason": "Package loader/source payload is not a loadable public package without its reviewed weights and tokenizer; project source remains available separately.",
+      "sha256": "c048d4619647fb14406a962d38947d31b1c5e3a53ea77f48a3c1e47b78d95c10",
+      "size_bytes": 5754
+    },
+    "historical-final8/local-package/__pycache__/model.cpython-314.pyc": {
+      "reason": "Package loader/source payload is not a loadable public package without its reviewed weights and tokenizer; project source remains available separately.",
+      "sha256": "7f1f882af95aa5aac9a5fddd155e504c3ba83a70cb8ca8fd7d0d589512c1fb7c",
+      "size_bytes": 18501
+    },
+    "historical-final8/local-package/__pycache__/package_runtime.cpython-314.pyc": {
+      "reason": "Package loader/source payload is not a loadable public package without its reviewed weights and tokenizer; project source remains available separately.",
+      "sha256": "e57489795e5320ab4ddab6a413e1fe1de7a15decae87a0388d44595985cd1539",
+      "size_bytes": 17493
+    },
+    "historical-final8/local-package/config.py": {
+      "reason": "Package loader/source payload is not a loadable public package without its reviewed weights and tokenizer; project source remains available separately.",
+      "sha256": "e61e01ad3f56d2fbcdbed72874de727bd9038c042d0070c6b907f5d49fd06a49",
+      "size_bytes": 2574
+    },
+    "historical-final8/local-package/model.py": {
+      "reason": "Package loader/source payload is not a loadable public package without its reviewed weights and tokenizer; project source remains available separately.",
+      "sha256": "0d50093ea497730be48007265b3db25b9044fa13b88a4485cfce7e4c45266f90",
+      "size_bytes": 9976
+    },
+    "historical-final8/local-package/model.safetensors": {
+      "reason": "Trained package weight/tokenizer payload omitted pending rights review; source hashes remain in package.json and the immutable receipt.",
+      "sha256": "3da5afe63ecccdca3d04ec06c2400902a18fe937831c8c7b53d9c00c75ca2fd0",
+      "size_bytes": 140944
+    },
+    "historical-final8/local-package/package_runtime.py": {
+      "reason": "Package loader/source payload is not a loadable public package without its reviewed weights and tokenizer; project source remains available separately.",
+      "sha256": "1ab45e32baa18b05af7c651a9c81001b0846e9c8ec5302c88390730a78f60f57",
+      "size_bytes": 11237
+    },
+    "historical-final8/local-package/tokenizer.json": {
+      "reason": "Trained package weight/tokenizer payload omitted pending rights review; source hashes remain in package.json and the immutable receipt.",
+      "sha256": "c67fad800fed542e3fe28b579a9b30d6aa778ff617885cf4ccb3050bfa0eb131",
+      "size_bytes": 21253
+    },
+    "historical-final8/raw/bm25/final_official_dev_custom_protocol/rankings.npz": {
+      "reason": "Full input rank/score/vector file represented by a smaller derived full-order uint16 rank array; original hash retained for provenance.",
+      "sha256": "6e4a49898aa2e99d2a23968383997a0315f9f2c1817adfe4153ceff14cac6c34",
+      "size_bytes": 8128597
+    },
+    "historical-final8/raw/bm25/recipe_development/metrics.json": {
+      "reason": "Recipe-development arrays are summarized in the report and figure data; the compact packet retains final-protocol full rankings only.",
+      "sha256": "dafea40c0a3826ae871ba57e5177970082b9f643010dd233d002bd1123dfc799",
+      "size_bytes": 12589
+    },
+    "historical-final8/raw/bm25/recipe_development/qrels.json": {
+      "reason": "Recipe-development arrays are summarized in the report and figure data; the compact packet retains final-protocol full rankings only.",
+      "sha256": "e0b136d07a35f9867acd1549628f9e7eb250bf68bdecb6e489a4274b18341f8c",
+      "size_bytes": 1273
+    },
+    "historical-final8/raw/bm25/recipe_development/rankings.npz": {
+      "reason": "Recipe-development arrays are summarized in the report and figure data; the compact packet retains final-protocol full rankings only.",
+      "sha256": "278ee762513c933d3610608290f4ea21dbc6c92dff88d668574ab12b37f40657",
+      "size_bytes": 1218010
+    },
+    "historical-final8/raw/external_minilm_l6_v2/final_official_dev_custom_protocol/qrels.json": {
+      "reason": "Byte-identical qrels deduplicated to rankings/shared-qrels.json.",
+      "sha256": "bfa2f5553321cde6c9530951f6bd5a3f474c5d1808e229b3909eb2b3cdcff131",
+      "size_bytes": 7197
+    },
+    "historical-final8/raw/external_minilm_l6_v2/final_official_dev_custom_protocol/retrieval-arrays.npz": {
+      "reason": "Full input rank/score/vector file represented by a smaller derived full-order uint16 rank array; original hash retained for provenance.",
+      "sha256": "419a91c97169f34e235874c20901fe531fb1173271f00983293ba49b60992133",
+      "size_bytes": 16745449
+    },
+    "historical-final8/raw/external_minilm_l6_v2/recipe_development/metrics.json": {
+      "reason": "Recipe-development arrays are summarized in the report and figure data; the compact packet retains final-protocol full rankings only.",
+      "sha256": "138bae5152bd3c3491318f4bfa8769d6f4cd0728f632f1df552ef8846d288334",
+      "size_bytes": 12531
+    },
+    "historical-final8/raw/external_minilm_l6_v2/recipe_development/qrels.json": {
+      "reason": "Recipe-development arrays are summarized in the report and figure data; the compact packet retains final-protocol full rankings only.",
+      "sha256": "e0b136d07a35f9867acd1549628f9e7eb250bf68bdecb6e489a4274b18341f8c",
+      "size_bytes": 1273
+    },
+    "historical-final8/raw/external_minilm_l6_v2/recipe_development/retrieval-arrays.npz": {
+      "reason": "Recipe-development arrays are summarized in the report and figure data; the compact packet retains final-protocol full rankings only.",
+      "sha256": "88aa450b0b80b529a0cd618015729efce0f4ad1d6b93b0c02783496adc69f8d3",
+      "size_bytes": 9058503
+    },
+    "historical-final8/raw/phase1_mlm/final_official_dev_custom_protocol/qrels.json": {
+      "reason": "Byte-identical qrels deduplicated to rankings/shared-qrels.json.",
+      "sha256": "bfa2f5553321cde6c9530951f6bd5a3f474c5d1808e229b3909eb2b3cdcff131",
+      "size_bytes": 7197
+    },
+    "historical-final8/raw/phase1_mlm/final_official_dev_custom_protocol/retrieval-arrays.npz": {
+      "reason": "Full input rank/score/vector file represented by a smaller derived full-order uint16 rank array; original hash retained for provenance.",
+      "sha256": "8803005ac09bd6c9232bafc9ffcaa93a89cc8656cc72ec0bc31c53f659d265c8",
+      "size_bytes": 9388930
+    },
+    "historical-final8/raw/phase1_mlm/recipe_development/metrics.json": {
+      "reason": "Recipe-development arrays are summarized in the report and figure data; the compact packet retains final-protocol full rankings only.",
+      "sha256": "40f1cec6ef9c23684305ee12ae7c30b7379213ff9db51605fd60668e125d01bc",
+      "size_bytes": 12846
+    },
+    "historical-final8/raw/phase1_mlm/recipe_development/qrels.json": {
+      "reason": "Recipe-development arrays are summarized in the report and figure data; the compact packet retains final-protocol full rankings only.",
+      "sha256": "e0b136d07a35f9867acd1549628f9e7eb250bf68bdecb6e489a4274b18341f8c",
+      "size_bytes": 1273
+    },
+    "historical-final8/raw/phase1_mlm/recipe_development/retrieval-arrays.npz": {
+      "reason": "Recipe-development arrays are summarized in the report and figure data; the compact packet retains final-protocol full rankings only.",
+      "sha256": "3f016c51576f33b800503119d1f9d0a16f4906218ffae3bf93fb8ba35d04b6ad",
+      "size_bytes": 2169512
+    },
+    "historical-final8/raw/phase2_contrastive_only/final_official_dev_custom_protocol/qrels.json": {
+      "reason": "Byte-identical qrels deduplicated to rankings/shared-qrels.json.",
+      "sha256": "bfa2f5553321cde6c9530951f6bd5a3f474c5d1808e229b3909eb2b3cdcff131",
+      "size_bytes": 7197
+    },
+    "historical-final8/raw/phase2_contrastive_only/final_official_dev_custom_protocol/retrieval-arrays.npz": {
+      "reason": "Full input rank/score/vector file represented by a smaller derived full-order uint16 rank array; original hash retained for provenance.",
+      "sha256": "6630193d92954b5ee0eaec97bd428e5e7ba72f11e408e6c4ba33ad4f5f340590",
+      "size_bytes": 9354242
+    },
+    "historical-final8/raw/phase2_contrastive_only/recipe_development/metrics.json": {
+      "reason": "Recipe-development arrays are summarized in the report and figure data; the compact packet retains final-protocol full rankings only.",
+      "sha256": "94a4b3ab4606ebbe01d6da4087d22887faf162e4bdb73e62c3a7cf253d73af85",
+      "size_bytes": 12845
+    },
+    "historical-final8/raw/phase2_contrastive_only/recipe_development/qrels.json": {
+      "reason": "Recipe-development arrays are summarized in the report and figure data; the compact packet retains final-protocol full rankings only.",
+      "sha256": "e0b136d07a35f9867acd1549628f9e7eb250bf68bdecb6e489a4274b18341f8c",
+      "size_bytes": 1273
+    },
+    "historical-final8/raw/phase2_contrastive_only/recipe_development/retrieval-arrays.npz": {
+      "reason": "Recipe-development arrays are summarized in the report and figure data; the compact packet retains final-protocol full rankings only.",
+      "sha256": "909271205586d2ea07bff094bd2cbe4b1cebf0401045a48c1039b7b80b5bf0c2",
+      "size_bytes": 2163410
+    },
+    "historical-final8/raw/phase2_contrastive_plus_retained_mlm/final_official_dev_custom_protocol/qrels.json": {
+      "reason": "Byte-identical qrels deduplicated to rankings/shared-qrels.json.",
+      "sha256": "bfa2f5553321cde6c9530951f6bd5a3f474c5d1808e229b3909eb2b3cdcff131",
+      "size_bytes": 7197
+    },
+    "historical-final8/raw/phase2_contrastive_plus_retained_mlm/final_official_dev_custom_protocol/retrieval-arrays.npz": {
+      "reason": "Full input rank/score/vector file represented by a smaller derived full-order uint16 rank array; original hash retained for provenance.",
+      "sha256": "d4f5cf8364df0836b6547b603b69436558b4b9a1dd3e019426a57e1bb7cf64ed",
+      "size_bytes": 9352842
+    },
+    "historical-final8/raw/phase2_contrastive_plus_retained_mlm/recipe_development/metrics.json": {
+      "reason": "Recipe-development arrays are summarized in the report and figure data; the compact packet retains final-protocol full rankings only.",
+      "sha256": "e7231a2e784678771107fd2e4b3c5c4c9719fb6262e86c58da04806c51fe736f",
+      "size_bytes": 12829
+    },
+    "historical-final8/raw/phase2_contrastive_plus_retained_mlm/recipe_development/qrels.json": {
+      "reason": "Recipe-development arrays are summarized in the report and figure data; the compact packet retains final-protocol full rankings only.",
+      "sha256": "e0b136d07a35f9867acd1549628f9e7eb250bf68bdecb6e489a4274b18341f8c",
+      "size_bytes": 1273
+    },
+    "historical-final8/raw/phase2_contrastive_plus_retained_mlm/recipe_development/retrieval-arrays.npz": {
+      "reason": "Recipe-development arrays are summarized in the report and figure data; the compact packet retains final-protocol full rankings only.",
+      "sha256": "721cb45d4f5bfc5a87f7c21154684d982aa5cbe2eaca02f4b0955ff45b336921",
+      "size_bytes": 2162925
+    },
+    "historical-final8/raw/phase3_human_pairs/final_official_dev_custom_protocol/qrels.json": {
+      "reason": "Byte-identical qrels deduplicated to rankings/shared-qrels.json.",
+      "sha256": "bfa2f5553321cde6c9530951f6bd5a3f474c5d1808e229b3909eb2b3cdcff131",
+      "size_bytes": 7197
+    },
+    "historical-final8/raw/phase3_human_pairs/final_official_dev_custom_protocol/retrieval-arrays.npz": {
+      "reason": "Full input rank/score/vector file represented by a smaller derived full-order uint16 rank array; original hash retained for provenance.",
+      "sha256": "d87e88ec28063927b2977c6ed53cfeae7b58e859a873a918f1de43bd7495c600",
+      "size_bytes": 9238945
+    },
+    "historical-final8/raw/phase3_human_pairs/recipe_development/metrics.json": {
+      "reason": "Recipe-development arrays are summarized in the report and figure data; the compact packet retains final-protocol full rankings only.",
+      "sha256": "1477216d8dbde39f5126be65fbf490a9c3a0b7594a0ca218d76bcdf7dc905fc6",
+      "size_bytes": 12833
+    },
+    "historical-final8/raw/phase3_human_pairs/recipe_development/qrels.json": {
+      "reason": "Recipe-development arrays are summarized in the report and figure data; the compact packet retains final-protocol full rankings only.",
+      "sha256": "e0b136d07a35f9867acd1549628f9e7eb250bf68bdecb6e489a4274b18341f8c",
+      "size_bytes": 1273
+    },
+    "historical-final8/raw/phase3_human_pairs/recipe_development/retrieval-arrays.npz": {
+      "reason": "Recipe-development arrays are summarized in the report and figure data; the compact packet retains final-protocol full rankings only.",
+      "sha256": "df0372fa6d2e235595daaff5555e07725d4fd66b4474b1f66f1e2754c9498f2b",
+      "size_bytes": 2141586
+    },
+    "historical-final8/raw/random_initialization/final_official_dev_custom_protocol/qrels.json": {
+      "reason": "Byte-identical qrels deduplicated to rankings/shared-qrels.json.",
+      "sha256": "bfa2f5553321cde6c9530951f6bd5a3f474c5d1808e229b3909eb2b3cdcff131",
+      "size_bytes": 7197
+    },
+    "historical-final8/raw/random_initialization/final_official_dev_custom_protocol/retrieval-arrays.npz": {
+      "reason": "Full input rank/score/vector file represented by a smaller derived full-order uint16 rank array; original hash retained for provenance.",
+      "sha256": "8d0cbedaa5e65dd5f42f68c6b27f5b58f052fd1dfc893d335c95e714e71ae7ca",
+      "size_bytes": 9371882
+    },
+    "historical-final8/raw/random_initialization/recipe_development/metrics.json": {
+      "reason": "Recipe-development arrays are summarized in the report and figure data; the compact packet retains final-protocol full rankings only.",
+      "sha256": "7aebe1cddcaa2c2267cf807cd632e5f88d7ab006a1c27f249f196d4535082ef2",
+      "size_bytes": 12826
+    },
+    "historical-final8/raw/random_initialization/recipe_development/qrels.json": {
+      "reason": "Recipe-development arrays are summarized in the report and figure data; the compact packet retains final-protocol full rankings only.",
+      "sha256": "e0b136d07a35f9867acd1549628f9e7eb250bf68bdecb6e489a4274b18341f8c",
+      "size_bytes": 1273
+    },
+    "historical-final8/raw/random_initialization/recipe_development/retrieval-arrays.npz": {
+      "reason": "Recipe-development arrays are summarized in the report and figure data; the compact packet retains final-protocol full rankings only.",
+      "sha256": "3e6143cdbb95fc9584fa889e5e7199ad9bb6cef1c89a18026b2ddc5fd97fc885",
+      "size_bytes": 2168343
+    },
+    "historical-final8/tokenizer.json": {
+      "reason": "Checker operational artifact not needed to interpret retained metrics, plots, split identities, or checkpoint ancestry.",
+      "sha256": "3ee66ed8d8f87bf2dde100ac9b0ca130fb977ce677c117d10e128306f0c9aac0",
+      "size_bytes": 8628
+    }
+  },
+  "plot_layout_amendment": {
+    "path": "reference/evidence/objective-plot-amendment.json",
+    "sha256": "eec63637b431de2fde9335fb4bf66d2eb250a9444306a7d01002a36703a7b1ee"
+  },
+  "public_files": {
+    "reference/README.md": "5a852d664defd0b21688d566552e10bdc7771b13d7c6a354224f1ef1492515ff",
+    "reference/evidence/checker-attention-amendment.json": "a62c94cc143b18e5d870c65663268cd8f2f724ad3f302af972abbf8161ac2601",
+    "reference/evidence/checker-mlm-gradient-amendment.json": "c628a706bcc9422d97d8efba7d491e683a515968d16332f4213e954ed2652a82",
+    "reference/evidence/cold-load-validation.json": "60ca5b706ffbb6295a1f9401e674af4cc73b5347b7b43af6347d3922acb0a4eb",
+    "reference/evidence/final8/baseline-receipt.json": "713ef55d822fc0b4942b7260385e1920afee324d96c4aaf7eb2ca3541b02a574",
+    "reference/evidence/final8/checkpoints/phase1-mlm/checkpoint.json": "55d3cb7afcb4f051516e7e15195c246517cf7e224bfe8aa5019a6a81dfe76468",
+    "reference/evidence/final8/checkpoints/phase2_contrastive_only/checkpoint.json": "2e857a5ebe327640fd6123236a76ccfd72e7780ed22d0ecc72ac44d568fcee3d",
+    "reference/evidence/final8/checkpoints/phase2_contrastive_plus_retained_mlm/checkpoint.json": "13f457725057a388e182d33af6fc1f6ced7e25f4050332d86fa85f4e08441411",
+    "reference/evidence/final8/checkpoints/phase3-human-pairs/checkpoint.json": "ae1a470d01a54bec06a370220a1d33c19508827196fb746a7c75598320eac9c7",
+    "reference/evidence/final8/cold-token-input.npz": "9c9de010dffe16db03ef05658ddc57ba8f29dd1d3737823df8abca9a403b92f0",
+    "reference/evidence/final8/cold-vectors.npy": "736cb36c84fb8e9f9cba7415ffd37eda8de6fed75e79db3682fa4eafbadef38d",
+    "reference/evidence/final8/figure-data.json": "1ca4d365ca5f1179ecd858647d6eb781cab504bc3c1fd20e23968b79c9ce6766",
+    "reference/evidence/final8/figures/final-retrieval.svg": "e09ef8078857ff911073525626ab6e436dc033c392c7821fe463acea971c385d",
+    "reference/evidence/final8/figures/training-objectives.svg": "485b691ed3ddf9b11239de4d6f4a30a0a31b433d5be5c6330189824776bfed72",
+    "reference/evidence/final8/frozen-recipe-input.json": "70649244860d731f92d09e805b025e05a731dbef90463d62b0428d0cb7e21134",
+    "reference/evidence/final8/independent-check.json": "faa4691334e6cbf73a6dafa35617efb50aa75674c45becdea2670f2fd561bf90",
+    "reference/evidence/final8/local-package/DATA_PROVENANCE.md": "8368ccba9ba230611512c76a1dc8f21c0a20481c6814d9be3e3840a2a0486123",
+    "reference/evidence/final8/local-package/MEASURED_EVIDENCE.json": "ab10f693cfffb041eb40c262db4e72bdc1684440fbd706a03695e7bf7b5251e0",
+    "reference/evidence/final8/local-package/README.md": "cd96b4afc8d38cf3c2a48b84ad92e011182d32574252559d6269837efa281ec0",
+    "reference/evidence/final8/local-package/config.json": "a2fc03f1e6c7465677048ce47059244d7378b7132663ad44de662b2bf1c92805",
+    "reference/evidence/final8/local-package/package.json": "6738f1c87d749e871ee0a721558ae9f4edc50bd840cfe4ee9bc15128011e21d6",
+    "reference/evidence/final8/mlm-input-ids.npy": "9f02948538f0746342a87eedb4f1fcd067266cbd1f267883e3f3aac650089fbc",
+    "reference/evidence/final8/model-config.json": "a2fc03f1e6c7465677048ce47059244d7378b7132663ad44de662b2bf1c92805",
+    "reference/evidence/final8/pilot-report.json": "518b021b576efb34418116286ebcd82efe980703fb2070dec2346fa7775204da",
+    "reference/evidence/final8/rankings/bm25.npz": "902a7ffb49013e8dbf98b58c3b40aa7b628462458608db6620c77900aef7acf4",
+    "reference/evidence/final8/rankings/external_minilm_l6_v2.npz": "0e2c0ff52ac66fc9b5479b334a91db40ca9c0a128d99575015d2e5e294362dab",
+    "reference/evidence/final8/rankings/independent-metric-check.json": "986f6700d39fdb7513d706f01003fa18fd0ee3123683ed2f51ae88f221a97a21",
+    "reference/evidence/final8/rankings/metrics/bm25.json": "65ce3736a0a3cbe7f66bca371bde50b536fb341d94001d4961f1186a82517e8e",
+    "reference/evidence/final8/rankings/metrics/external_minilm_l6_v2.json": "957fa029b15846033df3a970a1fded6b69ce758d95569e86ad5bebf6f081a9d5",
+    "reference/evidence/final8/rankings/metrics/phase1_mlm.json": "e154b2729bff78edc00a433d6e13f74476eb9c01debbefee01c9a3151224da96",
+    "reference/evidence/final8/rankings/metrics/phase2_contrastive_only.json": "dccdfd8e9e26d85e8bf63630ebdeb3eb7665641a2b3243d149a7d90c941019bc",
+    "reference/evidence/final8/rankings/metrics/phase2_contrastive_plus_retained_mlm.json": "8a27d3ecde30f96cf2b4296df9962051553cc2e67c13b7a1199aedc463c731d5",
+    "reference/evidence/final8/rankings/metrics/phase3_human_pairs.json": "313f01c9998a741c5f14671b9ad965aff794405cb15012affddab1f23c45d8a5",
+    "reference/evidence/final8/rankings/metrics/random_initialization.json": "7f113cf2c422b9252e30b79080c6ffc2cb71b6ec3775e872ad3462344a1f20c2",
+    "reference/evidence/final8/rankings/phase1_mlm.npz": "ecbb81d19d614c8544cd2fe4cbcc86426ec71fbcb82aa00a0fcae09edae1fc29",
+    "reference/evidence/final8/rankings/phase2_contrastive_only.npz": "c60c6cb5e0c715c0d060cc51b767c7343caac067c0cbd86a822965167a1abeb0",
+    "reference/evidence/final8/rankings/phase2_contrastive_plus_retained_mlm.npz": "cb6d39c45f02990b6b1ecc8bd518c10b94288cc7213dae4d17b2a9d8cae13603",
+    "reference/evidence/final8/rankings/phase3_human_pairs.npz": "67ed78120def8a0c1461d3398cfde19f82cfb1e75f72c6cd711e3ae5eea78167",
+    "reference/evidence/final8/rankings/random_initialization.npz": "83b37eeba2d682d555798b9ec55f3d7ac413ae478b8ddd61d021912452fa6962",
+    "reference/evidence/final8/rankings/shared-inventory.npz": "a77bb4bde0bd1a391aef1728b439067083f1bb7ca5f3860a481d81695b5ce584",
+    "reference/evidence/final8/rankings/shared-qrels.json": "bfa2f5553321cde6c9530951f6bd5a3f474c5d1808e229b3909eb2b3cdcff131",
+    "reference/evidence/final8/retention-manifest.json": "86bdfde2559ce7bb2b89f42a5a5a92e1e495d8e777333e0842c6081da8a8fbe4",
+    "reference/evidence/final8/sourcebound-receipt.json": "514287dcfd125d3127f93c43d0c20540b6325c9d4d39f4a803ea2fa57aa942b8",
+    "reference/evidence/final8/tokenizer-info.json": "1fad886463f10f48e986a0bb460e0dbd910cab8729239c22245051911803b03a",
+    "reference/evidence/final8/training-trace.json": "a9a8016bf4672083859daafe1a548c436bc5ebbbb7c463bf2ef265778917e5d1",
+    "reference/evidence/final8/weak-pair-inventory.json": "d12b5cbc4de33a5cca3a01f67f9bb69997d921f44360d77356c1f24b687d860f",
+    "reference/evidence/mlm-gradient-full-verification.json": "b203140daf7c944e6a3094c257c81b96ac52444190ffeb561bf37ba14332fa06",
+    "reference/evidence/mlm-gradient-negative-verification.json": "72e8705976d3daf6780ccb57fdc3db056a2a3d24ed3185c6758a3eec87e70d6e",
+    "reference/evidence/objective-plot-amendment.json": "eec63637b431de2fde9335fb4bf66d2eb250a9444306a7d01002a36703a7b1ee",
+    "reference/teaching/manifest.json": "744fbc7e7889511dd5b16327381515c0075bd8af13ce8d01e027c46d8ab8fef1",
+    "reference/teaching/objective-panels.svg": "6e86d755412a3943f6befa3b7f8524956679498e5f21e5dd86f2cd2f0edb8936"
+  },
+  "retained_numeric_derivations": {
+    "bm25": {
+      "dtype": "uint16",
+      "field": "ranked_doc_ids",
+      "input_path": "raw/bm25/final_official_dev_custom_protocol/rankings.npz",
+      "input_sha256": "6e4a49898aa2e99d2a23968383997a0315f9f2c1817adfe4153ceff14cac6c34",
+      "sha256": "902a7ffb49013e8dbf98b58c3b40aa7b628462458608db6620c77900aef7acf4",
+      "shape": [
+        300,
+        5183
+      ],
+      "size_bytes": 2594817,
+      "transformation": "Map every ranked document ID to its ordinal in shared-inventory.document_ids; store full ordering as uint16 indices."
+    },
+    "external_minilm_l6_v2": {
+      "dtype": "uint16",
+      "field": "ranked_doc_ids",
+      "input_path": "raw/external_minilm_l6_v2/final_official_dev_custom_protocol/retrieval-arrays.npz",
+      "input_sha256": "419a91c97169f34e235874c20901fe531fb1173271f00983293ba49b60992133",
+      "sha256": "0e2c0ff52ac66fc9b5479b334a91db40ca9c0a128d99575015d2e5e294362dab",
+      "shape": [
+        300,
+        5183
+      ],
+      "size_bytes": 2731520,
+      "transformation": "Map every ranked document ID to its ordinal in shared-inventory.document_ids; store full ordering as uint16 indices."
+    },
+    "phase1_mlm": {
+      "dtype": "uint16",
+      "field": "ranked_doc_ids",
+      "input_path": "raw/phase1_mlm/final_official_dev_custom_protocol/retrieval-arrays.npz",
+      "input_sha256": "8803005ac09bd6c9232bafc9ffcaa93a89cc8656cc72ec0bc31c53f659d265c8",
+      "sha256": "ecbb81d19d614c8544cd2fe4cbcc86426ec71fbcb82aa00a0fcae09edae1fc29",
+      "shape": [
+        300,
+        5183
+      ],
+      "size_bytes": 2732229,
+      "transformation": "Map every ranked document ID to its ordinal in shared-inventory.document_ids; store full ordering as uint16 indices."
+    },
+    "phase2_contrastive_only": {
+      "dtype": "uint16",
+      "field": "ranked_doc_ids",
+      "input_path": "raw/phase2_contrastive_only/final_official_dev_custom_protocol/retrieval-arrays.npz",
+      "input_sha256": "6630193d92954b5ee0eaec97bd428e5e7ba72f11e408e6c4ba33ad4f5f340590",
+      "sha256": "c60c6cb5e0c715c0d060cc51b767c7343caac067c0cbd86a822965167a1abeb0",
+      "shape": [
+        300,
+        5183
+      ],
+      "size_bytes": 2732230,
+      "transformation": "Map every ranked document ID to its ordinal in shared-inventory.document_ids; store full ordering as uint16 indices."
+    },
+    "phase2_contrastive_plus_retained_mlm": {
+      "dtype": "uint16",
+      "field": "ranked_doc_ids",
+      "input_path": "raw/phase2_contrastive_plus_retained_mlm/final_official_dev_custom_protocol/retrieval-arrays.npz",
+      "input_sha256": "d4f5cf8364df0836b6547b603b69436558b4b9a1dd3e019426a57e1bb7cf64ed",
+      "sha256": "cb6d39c45f02990b6b1ecc8bd518c10b94288cc7213dae4d17b2a9d8cae13603",
+      "shape": [
+        300,
+        5183
+      ],
+      "size_bytes": 2732220,
+      "transformation": "Map every ranked document ID to its ordinal in shared-inventory.document_ids; store full ordering as uint16 indices."
+    },
+    "phase3_human_pairs": {
+      "dtype": "uint16",
+      "field": "ranked_doc_ids",
+      "input_path": "raw/phase3_human_pairs/final_official_dev_custom_protocol/retrieval-arrays.npz",
+      "input_sha256": "d87e88ec28063927b2977c6ed53cfeae7b58e859a873a918f1de43bd7495c600",
+      "sha256": "67ed78120def8a0c1461d3398cfde19f82cfb1e75f72c6cd711e3ae5eea78167",
+      "shape": [
+        300,
+        5183
+      ],
+      "size_bytes": 2732204,
+      "transformation": "Map every ranked document ID to its ordinal in shared-inventory.document_ids; store full ordering as uint16 indices."
+    },
+    "random_initialization": {
+      "dtype": "uint16",
+      "field": "ranked_doc_ids",
+      "input_path": "raw/random_initialization/final_official_dev_custom_protocol/retrieval-arrays.npz",
+      "input_sha256": "8d0cbedaa5e65dd5f42f68c6b27f5b58f052fd1dfc893d335c95e714e71ae7ca",
+      "sha256": "83b37eeba2d682d555798b9ec55f3d7ac413ae478b8ddd61d021912452fa6962",
+      "shape": [
+        300,
+        5183
+      ],
+      "size_bytes": 2732141,
+      "transformation": "Map every ranked document ID to its ordinal in shared-inventory.document_ids; store full ordering as uint16 indices."
+    }
+  },
+  "schema": "jaxpathways.embedding-c01.public-evidence-index.v1",
+  "source_files_sha256": {
+    "projects/embedding-model-300m/baseline.py": "9ae760fd52ed76acfac4131087fd25b09af0ad4b5b96b9594edc4e21d1f0749c",
+    "projects/embedding-model-300m/config.py": "e61e01ad3f56d2fbcdbed72874de727bd9038c042d0070c6b907f5d49fd06a49",
+    "projects/embedding-model-300m/data/LICENSES.md": "fe7d1ba6e253521377a66d0cfc9e5488b1f82545513050aa221fa248ba184625",
+    "projects/embedding-model-300m/data/RECIPE_AMENDMENTS.md": "d1383661680d17d8014c07a686574dd7cbf6ee95ee6873e573de0b417844af36",
+    "projects/embedding-model-300m/data/dataset.py": "de8a207682b9ce55a13868068df3854a50bc119d7a91ad754f1ed7662cdb797d",
+    "projects/embedding-model-300m/data/frozen_recipe.json": "70649244860d731f92d09e805b025e05a731dbef90463d62b0428d0cb7e21134",
+    "projects/embedding-model-300m/data/prepare.py": "533431a5f56ba51274e1f5169c4b7b9c51584698efa316fbb41ed6372b558f62",
+    "projects/embedding-model-300m/data/recipe-history/c01-original-pretraining-recipe.json": "c74bf0e06cc6dc6f8972c6fecae6c86ed03623f60cfa2b91cff9e141e002e5a3",
+    "projects/embedding-model-300m/evaluation.py": "ba3c22efb2eb0ea8ed8afef012c329eb185a39dda84c629b27b81308d3d2dced",
+    "projects/embedding-model-300m/model.py": "0d50093ea497730be48007265b3db25b9044fa13b88a4485cfce7e4c45266f90",
+    "projects/embedding-model-300m/objectives.py": "b6970a4015c6646b39b89f77c129e37b2c8ce0a6f612bdddd9074d86f3239738",
+    "projects/embedding-model-300m/package_runtime.py": "1ab45e32baa18b05af7c651a9c81001b0846e9c8ec5302c88390730a78f60f57",
+    "projects/embedding-model-300m/plots.py": "f131d705fbe3962cdce716990fbbc98642a59e77a64805bdc260671740d99927",
+    "projects/embedding-model-300m/requirements-embedding-lock.txt": "ca59464c7c5e6ef56b7a952d26d6d97de7612e378ab70876dac17d91f1f265d3",
+    "projects/embedding-model-300m/requirements-embedding.txt": "f83afe66ff40961b580b6c40cf19b35c1f222f037f4148d12b56c26111dd3008",
+    "projects/embedding-model-300m/run.py": "d00008fec0cc11170e5253e4285ed2c4d2412f429204e696430022896455e55e",
+    "projects/embedding-model-300m/tests/check.py": "a3867129f43df1a1b6d8bf671d449488987e1339f7abfcae0caf35fc88c6d952",
+    "projects/embedding-model-300m/tests/resume_worker.py": "8ee26a7370d73e9a982beae059f7f7d4a51efc9b6f419d8e1ffeaf52bbb5a562",
+    "projects/embedding-model-300m/trainer.py": "8b40db81209571d48e209d983e04879f502ce65031bc51152c978f7944608f90"
+  },
+  "teaching_extension": {
+    "historical_inputs": {
+      "figure_data": {
+        "path": "reference/evidence/final8/figure-data.json",
+        "sha256": "1ca4d365ca5f1179ecd858647d6eb781cab504bc3c1fd20e23968b79c9ce6766",
+        "trace_rows_equal_training_trace": true
+      },
+      "historical_combined_plot": {
+        "path": "reference/evidence/final8/figures/training-objectives.svg",
+        "preserved_unchanged": true,
+        "sha256": "485b691ed3ddf9b11239de4d6f4a30a0a31b433d5be5c6330189824776bfed72"
+      },
+      "historical_receipt": {
+        "path": "reference/evidence/final8/sourcebound-receipt.json",
+        "sha256": "514287dcfd125d3127f93c43d0c20540b6325c9d4d39f4a803ea2fa57aa942b8"
+      },
+      "training_trace": {
+        "path": "reference/evidence/final8/training-trace.json",
+        "sha256": "a9a8016bf4672083859daafe1a548c436bc5ebbbb7c463bf2ef265778917e5d1"
+      }
+    },
+    "manifest": {
+      "path": "reference/teaching/manifest.json",
+      "sha256": "744fbc7e7889511dd5b16327381515c0075bd8af13ce8d01e027c46d8ab8fef1"
+    },
+    "outputs": {
+      "phase_panels": {
+        "path": "reference/teaching/objective-panels.svg",
+        "sha256": "6e86d755412a3943f6befa3b7f8524956679498e5f21e5dd86f2cd2f0edb8936",
+        "size_bytes": 19568
+      }
+    },
+    "renderer": {
+      "path": "tools/render_teaching_objectives.py",
+      "sha256": "f867da008fa9bdaac11e1cb2ad85d82ee0dba65d8db455b9140982d1767d6008"
+    }
+  }
+}

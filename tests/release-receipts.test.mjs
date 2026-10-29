@@ -13,16 +13,22 @@ test('rerunning execution receipts preserves a release while canonical source ch
     writeFileSync(path.join(directory, 'release.mjs'), readFileSync('scripts/release.mjs'));
     writeFileSync(path.join(directory, 'portable-path.mjs'), readFileSync('scripts/portable-path.mjs'));
     write('package.json', { version: '1.0.0' });
-    write('curriculum/releases.json', [{ version: '1.0.0', date: '2026-10-13', title: 'Fixture' }]);
+    write('curriculum/releases.json', [{ version: '1.0.0', date: '2026-10-13', title: 'Fixture',
+      editionKey: 'jaxpathways-release-receipts-fixture', modifiedAt: '2026-10-13T12:00:00Z' }]);
     write('curriculum/course.json', { phases: [] });
     write('curriculum/projects.json', ['projects/fixture/project.json']);
     mkdirSync(path.join(directory, 'projects/fixture'));
     write('projects/fixture/project.json', {id:'fixture'});
     writeFileSync(path.join(directory, 'projects/fixture/model.py'), 'value = 1\n');
+    mkdirSync(path.join(directory, 'projects/fixture/foundations/reference/corrupt-package'), {recursive:true});
+    writeFileSync(path.join(directory, 'projects/fixture/foundations/reference/corrupt-package/tokenizer.json'), '{"intentional":"invalid"}corrupt');
+    mkdirSync(path.join(directory, 'projects/fixture/foundations/data'));
+    write('projects/fixture/foundations/data/manifest.json', {split:'train'});
     write('curriculum/project-plans.json', [{id:'planned', source:'projects/planned/README.md'}]);
     mkdirSync(path.join(directory, 'projects/planned'));
     mkdirSync(path.join(directory, 'assessments'));
     writeFileSync(path.join(directory, 'projects/planned/README.md'), 'Original planned recipe\n');
+    writeFileSync(path.join(directory, 'projects/planned/task.yaml'), 'task: frozen-task\n');
     writeFileSync(path.join(directory, 'assessments/fixture.md'), 'Original assessment\n');
     write('curriculum/project-validation.json', { executedAt: 'first run', projects: [] });
     const run = (...args) => spawnSync(process.execPath, ['release.mjs', ...args], { cwd: directory, encoding: 'utf8' });
@@ -30,7 +36,13 @@ test('rerunning execution receipts preserves a release while canonical source ch
     write('curriculum/project-validation.json', { executedAt: 'later run', projects: [{ status: 'passed' }] });
     write('curriculum/validation.json', { executedAt: 'later lesson run' });
     assert.equal(run().status, 0, 'Execution timestamps are not canonical course revisions');
-    for (const source of ['projects/planned/README.md', 'assessments/fixture.md']) {
+    writeFileSync(path.join(directory, 'projects/fixture/foundations/reference/corrupt-package/tokenizer.json'), 'another deliberately invalid corruption fixture');
+    assert.equal(run().status, 0, 'Nested retained failure fixtures are evidence, not canonical JSON');
+    write('projects/fixture/foundations/data/manifest.json', {split:'changed'});
+    assert.match(run().stderr, /Course sources changed/, 'Canonical nested data recipes still invalidate the snapshot');
+    write('projects/fixture/foundations/data/manifest.json', {split:'train'});
+    assert.equal(run().status, 0);
+    for (const source of ['projects/planned/README.md', 'projects/planned/task.yaml', 'assessments/fixture.md']) {
       const filename=path.join(directory, source);
       const original=readFileSync(filename,'utf8');
       writeFileSync(filename,original+'A revised teaching contract\n');
@@ -52,7 +64,7 @@ test('rerunning execution receipts preserves a release while canonical source ch
 test('the declared corrupt tokenizer canary is tracked by bytes while other JSON stays canonical and strict', () => {
   const directory = mkdtempSync(path.join(tmpdir(), 'jax-release-negative-json-'));
   const fixture = 'projects/text-harness/foundations/reference/run/corrupt-package/tokenizer.json';
-  const neighbor = 'projects/text-harness/foundations/reference/run/corrupt-package/package.json';
+  const neighbor = 'projects/text-harness/foundations/data/tokenizer-info.json';
   const write = (name, content) => {
     const filename = path.join(directory, name);
     mkdirSync(path.dirname(filename), { recursive: true });
@@ -65,7 +77,8 @@ test('the declared corrupt tokenizer canary is tracked by bytes while other JSON
   try {
     for (const name of ['curriculum', 'learning-paths', 'projects']) mkdirSync(path.join(directory, name));
     write('package.json', JSON.stringify({ version: '1.0.0' }));
-    write('curriculum/releases.json', JSON.stringify([{ version: '1.0.0', date: '2026-10-29', title: 'Fixture' }]));
+    write('curriculum/releases.json', JSON.stringify([{ version: '1.0.0', date: '2026-10-29', title: 'Fixture',
+      editionKey: 'jaxpathways-negative-json-fixture', modifiedAt: '2026-10-29T12:00:00Z' }]));
     write('curriculum/course.json', JSON.stringify({ phases: [] }));
     write('curriculum/projects.json', '[]');
     write(fixture, '{"tokenizer":1}corrupt');

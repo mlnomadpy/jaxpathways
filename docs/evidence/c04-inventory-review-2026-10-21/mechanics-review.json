@@ -1,0 +1,33 @@
+{
+  "source_hashes": {
+    "project_lock.py": "541ea80cdbd4ed5f91d973c0d3bb7e8cc3ff18dcd92535d4210cf442542fa551",
+    "metrics.py": "e86c0626a8b66f7768af7a2f7d1cfa44108819712c8cf76b383a143c129e7345",
+    "prepare_sources.py": "d1ef8b18119837ebac605f0a0b2893521fa797fde4a9a5f76aaffb381cebcf61",
+    "config.py": "116c79bdfab004da7e2fd00cd9e87c8d24b876d6c3e925da19d910ec933b6b61",
+    "checkpoint.py": "89faacc889a5d18674497b743d706f58e7d4eaff3e046f2dc28caf478fc62150",
+    "ctc.py": "9260e715c344668574c0140351ea3b56850228669265960ee9098b61e3f606c3",
+    "SOURCES.md": "52aa7ded2b5be2f1b42cbd4fd98d0158d4ab6fb7c6b808163d3d73265b09e1e7",
+    "exposure.py": "44237870c0a2714a65bbe328f102345d3210566299e4262f94aa725b5c588db3",
+    "model.py": "26cb9300893d106be011eee96c0caac6e4d860325a4225bfe69ad205044560e7",
+    "README.md": "49d359d27d449e0c7014e8208cdb84cc23f88d1481c916066630fdea6647d3b9",
+    "requirements-audio-lock.txt": "2fcf1f71f6fdda82dce4e43ebd5bfdc6fd87cffcbc6673ade3da38e941984f3f",
+    "objectives.py": "87876f65eca09f4a4b9f84c21d8ca97891c9fa4235f6c0f9af212b6711bbf36f",
+    "data_integrity.py": "30fc653bcf0c2538699f8eafb8ab0bd22fe71094cb1fab03272518150ad7ed40",
+    "audio.py": "7627823e827271d444b9358ff8da4fcba82f1dff6af9b3cd196f632f9924a165",
+    "run_pilot.py": "84bbcadfbcb6f55359c3e56e78b225276446c8a1b19aa68667667a751dcf19eb",
+    "training.py": "add4c3a48bdfb22b692a258abab4bc4f4cf4fec17efd34bbb8a7fab4001328bc",
+    "tests/check_mechanics.py": "2366afc0e5acc931ea59c651b0f5f58ef07681a0a3dbda4cb97a9293447c9811",
+    "tests/resume_worker.py": "13194bd4815ef048b1747ded9b0cfc3accba345557b26aa361563da6b6deac82",
+    "reference/oracles.py": "141dc1c9302a1a62b6c0000ce2274dc20d086478c0d39e1e8047077dc5494b76"
+  },
+  "command": [
+    "/private/tmp/jaxpathways-c04-luna-20261021/env/venv/bin/python",
+    "/var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/c04-sol-mechanic-source-yqpit44h/project/tests/check_mechanics.py"
+  ],
+  "test_original_sha256": "2366afc0e5acc931ea59c651b0f5f58ef07681a0a3dbda4cb97a9293447c9811",
+  "test_temporary_sha256": "98c4cf2290f45a89142fd67a010cf1c1b9256c8dfb1a57c151ecd0afe33d30e9",
+  "amendment": "Only hardcoded external scratch directory changed to preserve immutable handoff outputs; implementation source copied byte-exact.",
+  "returncode": 0,
+  "stdout": "{'status': 'passed', 'jax': '0.9.2', 'numpy': '2.4.4', 'optax': '0.2.8', 'soundfile': '0.13.1', 'libsndfile': '1.2.2'}\n",
+  "stderr": ""
+}

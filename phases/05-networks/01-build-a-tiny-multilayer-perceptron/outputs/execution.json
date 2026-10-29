@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "networks-01",
-  "contentHash": "fbf7b99a3dd4c3534bf2625027ca97cf49f446810f60665a1c89bc9cd63e7fc4",
-  "executedAt": "2026-10-21T16:04:55.576473+00:00",
+  "contentHash": "62bdb1019b86ea36d0597b60532b987dcba612c536c2e59c4dd2f527f6270527",
+  "executedAt": "2026-10-27T17:04:17.932100+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -50,7 +50,7 @@
       "outputs": []
     },
     {
-      "sourceHash": "25df6d662f9d3f0c4e984c6a201f79fa0cfd7a2633dc4b0773dfba6c2dd4ee6c",
+      "sourceHash": "53dc08a479da44f2b1718bf964cd5c4d3e3305811c536df9d501b1833a6e3476",
       "outputs": [
         {
           "output_type": "display_data",

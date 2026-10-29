@@ -1,6 +1,6 @@
 """Health, logs, and workload observability · learner-only exercises (3/3 contracts ready)"""
 
-# Exercise: Compute the fraction of supervisor wall time spent inside synchronized updates, and state precisely what that fraction excludes.
+# Exercise: Use the emitted healthy and incident logs to recompute synchronized examples/s and the step-5 versus checkpoint-4 gap. Change checkpoint_every from 2 to 3, rerun, and describe how the actual failure log changes the recovery gap.
 
 # Inputs:
 # - The synchronized-update duration and supervisor wall-clock duration for the same run.

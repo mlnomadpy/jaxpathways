@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "posttraining-01",
-  "contentHash": "4750bef6c7401821da4531d3b6a0ae1a9e19fa93f0df81bbffe010a90de9e0ae",
-  "executedAt": "2026-10-21T16:11:27.894234+00:00",
+  "contentHash": "5e4ba277984c740bb53e9d39d1b7593d3d3cbf2ea6f3713be7f2d9a80371d72f",
+  "executedAt": "2026-10-27T16:12:01.504208+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -11,7 +11,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Response-only token NLL initial/final: 1.6094379425048828 0.07985548675060272\nResponse-only token NLL initial/final: 1.6094379425048828 0.07985548675060272\nPrompt rows learn to predict first answers; the final end-token row has no target.\nSupervised targets per sequence: [2 3]\nTwo first-response targets: 0.07894014567136765\nNo-target SFT batch rejected\nIdentical final tokens force identical table predictions despite different contexts.\nPASS: posttraining-01\n",
+  "stdout": "Response-only token NLL initial/final: 1.6094379425048828 0.07985548675060272\nResponse-only token NLL initial/final: 1.6094379425048828 0.07985548675060272\nPrompt rows learn to predict first answers; the final end-token row has no target.\nSupervised targets per sequence: [2 3]\nTwo first-response targets: 0.07894014567136765\nNo-target SFT batch rejected\nIdentical final tokens force identical table predictions despite different contexts.\nsaved decoder identity: 271cb6457de5da3f727c343c64b7bd350c00e503ea7ac847eecf51fbd5558802 c92b534443cc6a1eacd5e78406b2c42e59553df704a07102a03c639d3694f586\nresponse target count includes EOS and excludes prompt/PAD; example counts: [3, 4]\none SFT step train NLL before/after: 5.847196578979492 5.8463287353515625\nheldout response NLL baseline/after: [5.896312713623047, 5.893064022064209] [5.896141529083252, 5.89309549331665]\nchild inference bundle parent-bound; no optimizer resume or quality claim\nPASS: posttraining-01\n",
   "notebookCells": [
     {
       "sourceHash": "890aace622acd7ecc6fae0b55dff339a05d12d28dff4d7a3507e703c11990049",
@@ -50,7 +50,7 @@
       "outputs": []
     },
     {
-      "sourceHash": "25df6d662f9d3f0c4e984c6a201f79fa0cfd7a2633dc4b0773dfba6c2dd4ee6c",
+      "sourceHash": "53dc08a479da44f2b1718bf964cd5c4d3e3305811c536df9d501b1833a6e3476",
       "outputs": [
         {
           "output_type": "display_data",
@@ -132,6 +132,26 @@
           "name": "stdout",
           "text": [
             "Identical final tokens force identical table predictions despite different contexts.\n"
+          ]
+        }
+      ]
+    },
+    {
+      "sourceHash": "22d5d8896e54aecd8b70f9aafa0c68cf3475cdb9799648df8d1bbbd8b53d1ac8",
+      "outputs": []
+    },
+    {
+      "sourceHash": "ba71012ae8daa030dee9960cfe3464fd0255ae5d6721a82b52daeb521ec3120a",
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "saved decoder identity: 271cb6457de5da3f727c343c64b7bd350c00e503ea7ac847eecf51fbd5558802 c92b534443cc6a1eacd5e78406b2c42e59553df704a07102a03c639d3694f586\n",
+            "response target count includes EOS and excludes prompt/PAD; example counts: [3, 4]\n",
+            "one SFT step train NLL before/after: 5.847196578979492 5.8463287353515625\n",
+            "heldout response NLL baseline/after: [5.896312713623047, 5.893064022064209] [5.896141529083252, 5.89309549331665]\n",
+            "child inference bundle parent-bound; no optimizer resume or quality claim\n"
           ]
         }
       ]

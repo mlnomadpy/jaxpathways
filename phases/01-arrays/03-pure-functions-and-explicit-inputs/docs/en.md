@@ -4,6 +4,8 @@ Phase 01: Arrays & pure functions · about 45 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Shapes, broadcasting, and dtypes](https://www.tahabouhsine.com/jaxpathways/lesson-arrays-02.html).
+
 ## What you will be able to do
 
 - Identify hidden inputs and side effects in a numerical function.
@@ -21,14 +23,14 @@ A pure function makes its changing inputs visible and returns its result without
 
 ## Make a repeated call explainable
 
-Imagine a prediction function that receives features and weights but reads a global bias. You compile it, change that Python global, and call the compiled function again. The source file now displays the new bias, but the already-traced computation may still embody the old value. The hidden dependency makes the result difficult to reason about.
+Imagine a predictor whose source accepts features and weights but reads its bias from a Python global. You compile it, edit the global, and call the compiled function again. The source now displays a different bias, but the traced computation may still contain the earlier value. The real dependency is hidden from the function signature.
 
-Pass the bias as an explicit argument instead. Then two calls with different bias arrays are visibly two computations with different data. For a linear prediction, increasing the bias by $1$ must increase every output by $1$, while changing the weight vector can affect rows differently.
+Make the bias an explicit input so each call states which value it uses. The recorded prediction series make this dependence visible: with weight $2$, inputs $0,1,2$, and biases $1$ and $3$, the outputs are $[1,3,5]$ and $[3,5,7]$. Increasing only the bias by $2$ raises every prediction by $2$, while preserving the slope.
 
-Purity does not mean a whole application has no state. It means the numerical function receives the state it needs and returns any new state. Files, logs and orchestration can live outside that numerical boundary.
+Purity does not mean an application has no state. It means the numerical function receives the state it needs and returns values; orchestration and reporting can remain outside that boundary.
 
 $$
-X'[i] = \begin{cases} v & \text{if } i = k \\ X[i] & \text{otherwise} \end{cases}
+f(X,w,b)=Xw+b\mathbf{1},\qquad f(X,w,b+1)-f(X,w,b)=\mathbf{1}
 $$
 
 ### Pause and reason
@@ -49,9 +51,9 @@ Passing the weight explicitly makes the dependency visible. It also allows two m
 
 ## Array immutability does not make a dictionary immutable
 
-JAX arrays are immutable values, but a Python dictionary holding them is still a mutable container. Assigning `params["weight"] = ...` changes which value the dictionary holds. If another variable refers to the same dictionary, it sees the changed entry.
+An array stored in a Python dictionary is immutable as an array value, but the dictionary binding is mutable. After `params["weight"] = new_weight`, any alias to that same dictionary sees the new entry. The recorded example therefore reports aliased container weight $9.0$, even though no JAX array was edited in place.
 
-Constructing `{**params, "weight": new_weight}` makes a new dictionary with a changed binding and keeps the old container intact. This is a shallow copy: nested mutable objects can still be shared. Our example has only array leaves, so the shallow update is sufficient for the declared structure. More general parameter trees will need deliberate tree-aware transformations.
+Constructing `{**params, "weight": new_weight}` instead returns a new dictionary and leaves the old mapping available for comparison. This is a shallow copy, which is enough for this example because the leaves are arrays. If you change the example, keep both mappings and predict their `weight` entries before printing; that separates container mutation from array-value semantics.
 
 ## Treat a step as an input/output contract
 
@@ -151,7 +153,7 @@ visual_data = {'kind': 'line', 'x': x.tolist(), 'xlabel': 'input', 'ylabel': 'pr
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:03:25.827380+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:02:41.212050+00:00. JAX 0.9.2.
 
 ```text
 [1. 3. 5.]

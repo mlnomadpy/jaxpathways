@@ -4,6 +4,8 @@ Phase 07: Transformers & language models · about 90 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Attention from small pieces](https://www.tahabouhsine.com/jaxpathways/lesson-transformers-01.html).
+
 ## What you will be able to do
 
 - Build a causal mask from positions
@@ -21,11 +23,9 @@ An attention mask controls which positions supply context. A loss mask controls 
 
 ## Keep context eligibility separate from scored targets
 
-At input position $t$, causal next-token training predicts target $t+1$. A response-only role flag must follow that shifted target. Using unshifted role flags can score the wrong token at the prompt/response boundary.
+Next-token training has two separate questions: what may a position read, and which target contributes to loss? At input position $t$, the target is token $t+1$, so a response-only role flag must follow that shifted target. Otherwise the prompt/response boundary can score the wrong token.
 
-An unscored prompt token can still influence a scored response through attention. Removing its direct loss does not remove it from the computation. A blocked attention edge instead prevents a context contribution.
-
-Packed documents need segment boundaries in addition to a causal triangle. A later segment must not read an unrelated earlier segment merely because its positions occur earlier in the tensor. Trace one query and target across these rules before trusting a batch average.
+A prompt token can be excluded from direct loss while still influencing a scored response through attention. A blocked attention edge changes context; a loss mask changes supervision. For packed examples, also prevent the next segment from reading the previous one and stop targets at the boundary. Trace one query, its allowed keys, and its shifted target before trusting the batch loss.
 
 ### Pause and reason
 
@@ -39,9 +39,9 @@ It blocks future positions but can allow one document to attend to another earli
 
 ## Build a causal mask from positions
 
-For query position i, allow keys j ≤ i. Including the diagonal lets a token use its own representation. The model predicts the next token from that prefix; the target array is shifted one position ahead. Excluding the diagonal is a different convention that requires changing how inputs and labels are aligned.
+For query position $i$, the causal rule permits keys $j\le i$, including the diagonal. With equal allowed scores, values $(2,4,8,16)$ give prefix means $2,3,14/3,7.5$, matching the recorded output. The last position sees all four values; earlier positions see shorter prefixes.
 
-With values $2$, $4$, $8$, $16$ and uniform permitted scores, the outputs are prefix means: $2$, $3$, $14/3$ and $7.5$. Changing the last value must not change the first three outputs. This counterfactual tests causal isolation directly.
+Change the final value and check that the first three outputs remain fixed. That counterfactual tests whether future information can leak backward. If you use a strict triangle that excludes the diagonal, input and target alignment must be changed to match.
 
 ```text
 allowed key columns
@@ -53,29 +53,37 @@ query 3: 1 1 1 1
 
 ## Keep token IDs and targets aligned
 
-For vocabulary {a:$0$, b:$1$, c:$2$}, abcab becomes $[0,1,2,0,1]$. Inputs $[0,1,2,0]$ pair with next-token targets $[1,2,0,1]$. Do not train the last token to predict the first token of an unrelated packed example. A separator or an ignored loss position must express that boundary.
+Token IDs are positions in a vocabulary table, so the miniature mapping $a\mapsto0,b\mapsto1,c\mapsto2$ turns `abcab` into $[0,1,2,0,1]$. Next-token training pairs inputs $[0,1,2,0]$ with targets $[1,2,0,1]$: each target is one step ahead.
 
-Production tokenizers add Unicode normalization, special control IDs, and subword merges on top of this exact index-alignment contract. Validate unknown characters explicitly rather than silently assigning an existing ID.
+At the end of a packed example, do not use the next unrelated example as its target. Mark the boundary with a separator or an ignored loss position. Larger tokenizers add normalization and subword rules, but the ID and target alignment still needs an explicit check; reject unknown characters rather than silently reusing an ID.
 
 ## Combine causal and segment boundaries
 
-Packing segments $[0,0,1,1]$ means positions $2$ and $3$ belong to a new example. Require equal segment IDs as well as causal order. With our values, packed means become $2$, $3$, $8$ and $12$. Position $2$ must not read earlier positions from segment $0$ even though they are causally prior.
+A causal triangle only knows order. For packed segment IDs $[0,0,1,1]$, positions 2 and 3 begin a new example, so a valid key must be both earlier-or-equal and in the same segment. With the fixture's values, the outputs are $2,3,8,12$: the second segment averages only its own values, rather than inheriting the earlier segment's mean.
 
-Segment IDs must identify separate examples within a packed row. Reusing an ID for two unrelated spans could reconnect them. The mask is only one part of packing: target eligibility must also stop at each segment boundary.
+Check both halves of the contract separately: the attention mask blocks cross-segment context, and target eligibility stops next-token loss at the segment edge. Reusing one segment ID for unrelated spans would reconnect them.
 
 ## Handle padding without an all-masked softmax
 
-An all-masked row represented by all −infinity scores has no normalized distribution and can produce NaN. Padding queries create precisely that row if you forbid every key. Provide a harmless fallback key for those queries, then replace their outputs with zero and ignore their loss. Every real query still uses its original permitted keys.
+A padded query may have no valid key. Softmax of an all-negative-infinity row has no normalized distribution and can produce NaNs. The code gives such a query a harmless fallback key, then zeros its output and excludes its loss; real queries keep their original allowed keys.
 
-The fallback is a numerical convention, not permission for padding to carry semantic information. Test that perturbing padded values does not change real outputs. Also reject any real query with no valid key when that violates your model contract.
+Treat that fallback as numerical bookkeeping, not semantic content. Perturb padded values and verify real outputs stay unchanged. A real query with no valid key should still fail if that state violates the model contract.
 
 ## Turn the allowed positions into weights
 
-For causal attention, query position $i$ may use key position $j$ only when $j\le i$. We leave an allowed score unchanged and replace a blocked score with negative infinity before softmax. This gives blocked positions zero weight when the row has at least one allowed key. If a row is entirely blocked, an ordinary softmax has no valid distribution; handle that case explicitly, as the code does.
+The heatmap makes the causal rule visible: row $i$ is query $i$, column $j$ is key $j$; a blocked future edge is replaced by negative infinity before softmax and therefore gets zero weight when the row has an allowed key. Allowed scores are unchanged. If a row has no allowed key, the code handles it explicitly instead of asking softmax to normalize an empty set.
+
+This mask sets eligibility, not preference: learned scores can still favor one allowed key over another. After a row is normalized, use its weights with the matching value rows to compute the result.
 
 $$
 \widetilde S_{ij}=\begin{cases}S_{ij}&\text{if key }j\text{ is allowed for query }i\\-\infty&\text{otherwise}\end{cases}
 $$
+
+## Carry token and segment identity into packed training
+
+The character example isolates index alignment and boundaries. The optional foundations workflow adds reversible UTF-8 bytes and a train-only ByteLevel BPE processor with explicit PAD/BOS/EOS/UNK IDs and byte fallback. Its records are deduplicated and grouped by Project Gutenberg chapter before tokenization; chapters I–IV train, V validates, and VI–VIII remain final test.
+
+Chunk packing records document IDs, preserves each selected text token, masks padding, and blocks attention and next-token loss across document boundaries. Inspect `projects/text-harness/foundations/data.py` and its report counts to verify that each boundary survives preprocessing.
 
 ## 1. Prepare the experiment
 
@@ -171,15 +179,11 @@ Expected: Causal means $[2, 3, 4.666667, 7.5]$; no weight above the diagonal.
 
 ### Read the figure
 
-Rows select query positions and columns select key positions. The diagonal and cells to its left are allowed; the white cells to the right of the diagonal have exactly zero attention weight because they refer to future tokens.
-
-Query $0$ puts all its weight on key $0$. Query $1$ splits weight equally across keys $0$ and $1$. The last row assigns $1/4$ to every key because, at the last position, all four positions are available.
+Rows are query positions and columns are key positions; cell color encodes attention weight from 0 to 1. The diagonal and cells left of it are eligible, while cells to the right are future positions and have weight exactly zero. Row 0 puts weight 1 on key 0; row 1 splits $0.5/0.5$ across keys 0 and 1; row 2 splits about $1/3$ across keys 0–2; row 3 splits $1/4$ across all four.
 
 ### Connect it to the computation
 
-The allowed scores are equal in this constructed example, so each row averages its visible prefix. The causal mask determines which entries must be zero; it does not generally make the remaining entries uniform. Learned scores can distribute weight unevenly within the allowed region.
-
-For values $(2,4,8,16)$, query $2$ returns $(2+4+8)/3=14/3$, not the full-sequence average $7.5$. The zero in its last column is what prevents the future value $16$ from influencing that result. Verify normalization across rows, not down columns.
+The fixture uses equal scores among the keys that remain eligible, which is why the allowed cells are uniform; a causal mask alone does not impose uniform weights. With values $(2,4,8,16)$, query 2 therefore returns $(2+4+8)/3=14/3$, while the final query returns $7.5$. Its zero at key 3 is the concrete protection against reading the future value 16. Next, perturb that last value and predict which rows can change; only the final query can use it.
 
 ```python
 visual_data = {'kind': 'heatmap', 'values': weights.tolist(), 'rows': ['query ' + str(i) for i in range(4)], 'columns': ['key ' + str(i) for i in range(4)], 'unit': 'attention weight'}
@@ -187,7 +191,7 @@ visual_data = {'kind': 'heatmap', 'values': weights.tolist(), 'rows': ['query ' 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-29T12:43:40.841103+00:00. JAX 0.9.2.
+CPU run: 2026-10-29T13:57:26.696315+00:00. JAX 0.9.2.
 
 ```text
 Causal means: [2.       3.       4.666667 7.5     ]

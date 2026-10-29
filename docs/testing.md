@@ -12,6 +12,8 @@ Use `npm test` during development. It runs the unit suite without generating the
 | `npm run test:tools` | Python runner selection, receipts, hashing and CI scopes | None; Python standard library |
 | `npm run test:browser` | Real Chromium desktop/mobile behavior | Existing site build |
 
+The site suite includes native book-print qualification and requires Playwright Chromium plus Poppler (`pdfinfo` and `pdftotext`). Install the browser with `npx playwright install chromium`; CI installs the browser and PDF tools before full verification. EPUB identity and appendix checks remain part of `npm run check`.
+
 The content pipeline refreshes generated files. It does not rerun lesson executions, numerical figures or hardware qualification. A stale source-bound receipt is a real failure: regenerate it using the documented execution tool, or update its status when the evidence no longer applies. Test preparation does not change release snapshots; `npm run check` and `npm run build` retain the release gate.
 
 To refresh a changed lesson, recompute its figure, generate the current notebook, execute both companions, then attach the recorded outputs:

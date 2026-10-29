@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "posttraining-02",
-  "contentHash": "038a491d4ef6f114f92937b8eaff4ac8d655ae21382f8778ee8ca07288149c05",
-  "rendererHash": "a1bd5b648f4731ae5d5f0a24811c2540d1a0a132149ce589d17c4113509cbedf",
+  "contentHash": "a65d2eca70cd24360177c44b6225e354095e6015814b00c27e1ff9cc272769cc",
+  "rendererHash": "17e3bbad72ee4c43425845aaee76b86b85e84750551278be03d8c16842f4dc63",
   "kind": "executed",
-  "generatedAt": "2026-10-21T16:06:21.743047+00:00",
+  "generatedAt": "2026-10-27T16:10:53.090262+00:00",
   "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",
@@ -810,7 +810,7 @@
   "diagram": {
     "title": "Frozen base plus a low-rank correction",
     "prediction": "If rank changes while alpha stays fixed, can you omit the scaling when merging?",
-    "reading": "Input enters both branches. The base weight is frozen; A and B are trainable. Both paths return four features before addition. Include \\(\\alpha/r\\) when merging. These are forward-data arrows: gradients update adapter factors but not frozen base parameters.",
+    "reading": "Use the diagram to trace the frozen base and scaled adapter branches, then use the gradient panel to predict which factor changes first. Check the final merge on new inputs and verify the saved artifact in a fresh process; a low training loss alone does not test rank capacity or saved-model identity.",
     "alt": "Input enters both branches. The base weight is frozen; A and B are trainable. Both paths return four features before addition. Include \\(\\alpha/r\\) when merging. These are forward-data arrows: gradients update adapter factors but not frozen base parameters.",
     "scope": "Architecture and dataflow mechanism diagram.",
     "height": 7,

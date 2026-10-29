@@ -1,0 +1,45 @@
+---
+import GuideContents from '../../components/shared/GuideContents.astro';
+import MaterialStatus from '../../components/shared/MaterialStatus.astro';
+import PageIntro from '../../components/shared/PageIntro.astro';
+import GuideLayout from '../../layouts/GuideLayout.astro';
+import { course } from '../../lib/course-data.js';
+import { projectGuide } from '../../lib/server/project-guide.js';
+import { siteUrl } from '../../lib/urls.js';
+
+const content = projectGuide(
+  { id: 'text-harness', source: 'projects/text-harness/foundations/README.md' },
+  course,
+);
+---
+
+<GuideLayout
+  title="Natural-text decoder foundations: training, recovery and cache checks"
+  description="Build a configurable causal Transformer with train-only BPE, natural-text splits, a measured CPU pilot, cache parity and fresh-process recovery."
+  active="projects"
+  skipLabel="Skip to decoder foundations"
+  mainClass="project-guide"
+>
+  <PageIntro
+    backHref="project-guides/text-harness.html"
+    backLabel="Text harness guide"
+    edition="Optional workflow · CPU reference"
+    intro="Move from the small text harness to a configurable decoder and a reproducible natural-text experiment."
+  >
+    <Fragment slot="title" set:html={content.heading} />
+    <p>
+      Use the separate environment below. The retained short pilot exercises the pipeline;
+      larger-model training and language-quality evaluation remain open.
+    </p>
+    <a class="button" href={siteUrl('downloads/text-harness.zip')} download>
+      Download workflow, starter and evidence
+    </a>
+  </PageIntro>
+  <MaterialStatus kind="projects" id="text-harness" />
+  <GuideContents
+    sections={content.sections}
+    label="Decoder workflow sections"
+    title="In this workflow"
+  />
+  <article set:html={content.body} />
+</GuideLayout>

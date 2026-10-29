@@ -12,7 +12,9 @@ Start with likelihoods, stable losses and explicit random keys. Check a known po
 
 ## Study guide: Which uncertainty does your model actually represent?
 
-Use an exactly solvable Bayesian regression to check inference. Separate uncertainty about weights, uncertainty about a future observation, and mismatch between the assumed likelihood and the data.
+A point estimate answers which parameters fit, but it leaves open how uncertain they are and how uncertain a future observation should be. A small solvable Bayesian regression lets you calculate those quantities separately and compare an approximate method with a known target.
+
+Read distribution plots by their units: density height is not the probability of one value, and latent-function uncertainty does not include all observation noise. Follow the mean, covariance and predictive intervals through sampling or variational inference. Use residuals to question the assumed likelihood as well as the inference algorithm.
 
 ### Check your starting point
 

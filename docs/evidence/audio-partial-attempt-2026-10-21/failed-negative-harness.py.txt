@@ -1,0 +1,61 @@
+import copy,hashlib,json,subprocess,sys
+from pathlib import Path
+ROOT=Path('/Users/tahabsn/Documents/ChatGPT/jaxpathways/projects/audio-model-300m')
+BASE=Path('/private/tmp/c04-v6-final-original-cpu-attempt-20261021')
+LOCK=json.loads((BASE/'approved-run-lock.json').read_text())
+ORIG_ACT=Path(LOCK['source_schedule_manifest']['path'])
+ORIG_APPROVAL=Path(LOCK['approval_artifact']['path'])
+def sha(p): return hashlib.sha256(Path(p).read_bytes()).hexdigest()
+def writej(p,v): Path(p).write_text(json.dumps(v,sort_keys=True,indent=2)+'\n')
+def run(name, lock, candidate=None):
+    lockpath=BASE/f'{name}-lock.json'; writej(lockpath,lock)
+    out=BASE/f'{name}-must-not-exist'
+    cmd=[sys.executable,str(ROOT/'run_pilot.py'),'--preflight-lock',str(lockpath)]
+    if candidate: cmd += ['--candidate',str(candidate)]
+    proc=subprocess.run(cmd,text=True,capture_output=True,timeout=30)
+    assert proc.returncode!=0, f'{name} unexpectedly passed'
+    assert not out.exists()
+    return {'name':name,'exit_code':proc.returncode,'stderr':proc.stderr.strip().splitlines()[-1], 'output_created':out.exists()}
+results=[]
+# Ordinary approved execution is still blocked before any output is created.
+normal_out=BASE/'normal-run-must-not-exist'
+p=subprocess.run([sys.executable,str(ROOT/'run_pilot.py'),'--lock',str(BASE/'approved-run-lock.json'),'--output',str(normal_out)],text=True,capture_output=True,timeout=30)
+assert p.returncode!=0 and 'execution remains closed' in p.stderr and not normal_out.exists()
+results.append({'name':'ordinary-approved-run-closed-gate','exit_code':p.returncode,'stderr':p.stderr.strip().splitlines()[-1],'output_created':normal_out.exists()})
+# Wrong activation bytes under the pinned identity.
+act=BASE/'tampered-activation.json'; act.write_bytes(ORIG_ACT.read_bytes()+b' ')
+l=copy.deepcopy(LOCK); l['source_schedule_manifest']['path']=str(act)
+results.append(run('activation-tamper',l))
+# Wrong approval bytes and altered role/schedule approval claims under unchanged source pin.
+for kind in ('approval-byte-tamper','role-identity-tamper','schedule-identity-tamper'):
+    payload=json.loads(ORIG_APPROVAL.read_text())
+    if kind=='approval-byte-tamper': raw=ORIG_APPROVAL.read_bytes()+b' '
+    else:
+        if kind=='role-identity-tamper': payload['role_ordered_manifest_sha256']['general_fit']='0'*64
+        else: payload['schedule_sha256']='0'*64
+        raw=(json.dumps(payload,sort_keys=True,indent=2)+'\n').encode()
+    altered=BASE/f'{kind}.json'; altered.write_bytes(raw)
+    l=copy.deepcopy(LOCK); l['approval_artifact']['path']=str(altered)
+    results.append(run(kind,l))
+# Contract mutations cover whole source, selected candidate, helper, and dependency identities.
+for kind,mutate in [
+ ('source-contract-tamper',lambda s:s['files_sha256'].__setitem__('runner.py','0'*64)),
+ ('candidate-contract-tamper',lambda s:s['candidate'].__setitem__('sha256','0'*64)),
+ ('helper-contract-tamper',lambda s:s['candidate_helpers_sha256'].__setitem__('candidate_helpers/fake.py','0'*64)),
+ ('dependency-contract-tamper',lambda s:s['dependencies'].__setitem__('numpy','0.0.0')),
+]:
+    l=copy.deepcopy(LOCK); mutate(l['source_contract']); results.append(run(kind,l))
+# A changed schedule packet digest is rejected by the pinned activation identity.
+l=copy.deepcopy(LOCK); l['source_schedule_manifest']['sha256']='0'*64
+results.append(run('schedule-packet-tamper',l))
+# An ordinary unapproved v5 candidate remains preflight-only on the public run route.
+candidate=json.loads((BASE/'ordinary-v5-candidate-lock.json').read_text())
+candidate_path=BASE/'ordinary-v5-candidate-lock.json'; writej(candidate_path,candidate)
+p=subprocess.run([sys.executable,str(ROOT/'run_pilot.py'),'--lock',str(candidate_path),'--output',str(BASE/'candidate-normal-run-must-not-exist')],text=True,capture_output=True,timeout=30)
+assert p.returncode!=0 and 'preflight-only' in p.stderr and not (BASE/'candidate-normal-run-must-not-exist').exists()
+results.append({'name':'ordinary-candidate-run-closed','exit_code':p.returncode,'stderr':p.stderr.strip().splitlines()[-1],'output_created':False})
+report={'schema':'c04-v6-postpin-public-negative-receipt-v1','status':'passed','checks':results,
+ 'all_rejected_before_output':all(not item['output_created'] for item in results),
+ 'corpus_execution_enabled':False,'corpus_data_opened':False,'model_imported':False,'model_initialized':False,'updates':0}
+report_path=BASE/'negative-receipt.json';writej(report_path,report)
+print(json.dumps({'status':report['status'],'negative_count':len(results),'receipt_path':str(report_path),'receipt_sha256':sha(report_path),'checks':results},sort_keys=True))

@@ -15,7 +15,7 @@
       {
         "id": "guided-reasoning",
         "title": "A buffer cannot be reused while a consumer still needs it",
-        "body": "Draw time across the page and a separate lane for load, compute and store. Label buffers by identity and mark the last use of each version. Loading new data too early can overwrite values still needed by computation.\n\nLarger tiles may reduce program count while increasing local storage and per-program work. The lesson's bars expose those modeled tradeoffs. Fewer programs alone is not proof of lower runtime.\n\nKeep illustrative overlap separate from measured overlap. The CPU interpretation and race checks validate bounded aspects of the schedule; a device trace and completed measurements are needed to claim TPU performance. Buffer-count changes should be checked against both correctness and the actual target constraints.",
+        "body": "The pipeline changes where tiles wait, not the \\(2X+Y\\) result. During steady state, tile `k` is still read by `axpy_body` while tile `k+1` may load into another input slot. Reusing the first slot too soon overwrites live data; reusing an output slot before its store finishes loses a result. Follow one tile from load through last use, then predict when that slot becomes free.",
         "check": {
           "prompt": "Why is double buffering not automatically faster?",
           "answer": "It requires useful overlap and enough resources without creating another bottleneck. Correct buffer lifetimes establish validity; measured target behavior establishes any performance benefit."
@@ -23,28 +23,28 @@
       },
       {
         "title": "Keep one numerical operation while changing data movement",
-        "body": "The arithmetic body remains unchanged from the first lesson. The outer kernel receives entire buffers in a global-memory space, and the inner pipeline sees block-local references. This separation lets us change the movement schedule without changing the mathematical result. If a new schedule changes values, it is a correctness regression rather than a performance tradeoff."
+        "body": "`axpy_body` always computes \\(2x+y\\); the outer Pallas kernel handles whole buffers and the inner body sees block-local Refs. Keeping that body fixed isolates changes to data movement. In the recorded execution, synchronous and buffered endpoints are both `-1.75` and `2.25`; matching values are a correctness check, not a claim that overlap made the CPU run faster."
       },
       {
         "title": "What buffering is trying to overlap",
-        "body": "A pipeline can start bringing the next tile into a different buffer while the current tile is being processed. Reusing a buffer too early risks overwriting data still being read; consuming it before its transfer completes risks stale or uninitialized data. The emitter manages copies and waits. We compare two versus three input slots while keeping two output slots: installed JAX 0.9.2 rejects output buffer counts above two. A third input slot consumes more local memory and may or may not hide additional latency."
+        "body": "With two input slots, one can hold tile `k` for compute while the other receives `k+1`; a consumer must finish before its slot is reused. The code allows two or three input buffers and keeps two output buffers. Three input slots add modeled storage but may hide more transfer latency only on a target workload; they do not change arithmetic. Predict what should happen to the output if the buffer count changes: it should remain identical."
       },
       {
         "title": "Use the appropriate interpreter for memory operations",
-        "body": "Ordinary interpret=True is enough for the first lesson’s arithmetic grid, but does not supply all TPU layout information required by this installed pipeline API. Here pltpu.InterpretParams simulates memory spaces and synchronization; an AbstractMesh specifies a simulated TPU v5 lite layout. The actual backend remains CPU. This is JAX 0.9.2 API usage, and its signature should be rechecked when upgrading. The simulated device label must never appear as the actual device in a performance receipt."
+        "body": "Ordinary Pallas `interpret=True` covers the first lesson's arithmetic grid, but this pipeline also models memory spaces and synchronization with `pltpu.InterpretParams` and an `AbstractMesh`. The retained run reports actual backend `cpu` and a simulated TPU v5 lite layout. That lets the interpreter check schedule semantics; the simulated layout label is not a TPU device receipt or timing result."
       },
       {
         "title": "Use synchronous execution as a debugging comparison",
-        "body": "no_pipelining=True requests synchronous copies through the same pipeline. Agreement with the buffered result helps isolate scheduling errors while preserving arithmetic and windows. The interpreter enables race detection, but passing these cases does not prove every target interleaving, layout or compiler path. If a TPU interpretation exception occurs, the documented interpreter state-reset procedure is required before reusing that mode in the same process; fresh-process checks avoid carrying failed state into later evidence."
+        "body": "`no_pipelining=True` requests synchronous copies through the same windows and arithmetic. Compare its output elementwise with the buffered result to isolate a scheduling bug while holding the math constant. Passing CPU race checks is useful evidence for this fixture, but target compiler behavior and every hardware interleaving still need a real target run."
       },
       {
         "title": "Count the cost of a tile choice",
-        "body": "For a logical \\((17,257)\\) matrix, blocks \\((8,128)\\), \\((16,128)\\) and \\((16,256)\\) use \\(9\\), \\(6\\) and \\(4\\) programs. Their padded work grows from \\(9216\\) to \\(12288\\) to \\(16384\\) elements. The corresponding modeled double-buffered data storage grows from \\(24\\) to \\(48\\) to \\(96\\) KiB for two inputs and one output in float32. Fewer programs therefore does not automatically mean less work or lower memory use.",
+        "body": "For logical \\((17,257)\\), tile sizes \\((8,128)\\), \\((16,128)\\), \\((16,256)\\) launch 9, 6, and 4 programs. Yet padded work rises 9,216 → 12,288 → 16,384 elements, and modeled two-input/two-slot-plus-output storage rises 24 → 48 → 96 KiB. Fewer programs therefore trades off against more padding and local storage. These counts predict resource pressure, not runtime; choose a candidate to measure on target.",
         "math": "B_{\\mathrm{model}}=(2n_{\\mathrm{input\\ buffers}}+2)\\,B_mB_n\\,\\mathrm{bytes\\ per\\ element}"
       },
       {
         "title": "Only target measurements can rank pipeline speed",
-        "body": "CPU simulation may execute callbacks, bookkeeping and race tracking that have no relation to TPU throughput. Do not time it and call the result a kernel benchmark. The project’s target runner can execute the actual synchronous or buffered TPU branch without fallback; its correctness checks and synchronized baseline comparison must pass before interpreting latency. No such target performance receipt is available here."
+        "body": "The CPU interpreter performs simulation and bookkeeping that are not TPU execution. Its timings cannot rank pipeline configurations. A target comparison must use the guarded TPU runner, synchronize completed outputs and compare against a strong baseline under the same shapes and arithmetic. This retained receipt contains correctness and modeled counts, but no TPU latency."
       }
     ],
     "output": "Synchronous and buffered CPU simulations agree with NumPy and each other; endpoints -1.75 and 2.25. Tile program counts [9,6,4], padded elements [9216,12288,16384], modeled data buffers [24576,49152,98304] bytes.",
@@ -132,13 +132,13 @@
     "answer": 2,
     "explanation": "Simulation establishes tested semantics. Buffering and tile changes affect several costs, and only actual target measurements can rank performance.",
     "visual": {
-      "title": "Fewer tile programs can require more work and local storage",
       "kind": "executed",
-      "prediction": "Will the tile configuration with the fewest programs also minimize padding and buffer footprint?",
-      "reading": "The first panel shows logical kernel-program counts for three tile shapes on the same \\((17,257)\\) matrix: \\(9\\), \\(6\\) and \\(4\\). The second panel shows modeled double-buffered data storage: \\(24\\), \\(48\\) and \\(96\\) KiB. These are exact configuration-derived counts, not measured timing or device-memory counters.\n\nThe largest tile has fewer programs but four times the modeled data-buffer footprint of the smallest. Its padded element count also rises from \\(9216\\) to \\(16384\\), even though the logical matrix still contains only \\(4369\\) elements.",
-      "connection": "Every pictured configuration also runs through the actual Pallas pipeline in CPU simulation and matches the same NumPy result. The figure explains the resource tradeoff that remains after correctness is established.\n\nThe footprint omits semaphores, bookkeeping, layout padding, registers and compiler scratch. It is distinct from total VMEM use or speedup. A real TPU trace and synchronized timing are needed to learn whether a larger tile improves reuse enough to offset its costs.",
-      "alt": "Program counts fall from nine to four as tile size grows, while modeled double-buffered data storage rises from twenty-four to ninety-six KiB.",
-      "code": "labels=['8 x 128','16 x 128','16 x 256']\nvisual_data={'panels':[{'kind':'bar','labels':labels,'ylabel':'program count (configuration-derived)','series':[{'label':'grid programs','y':[row[0] for row in metadata]}]},{'kind':'bar','labels':labels,'ylabel':'modeled data buffers (KiB)','series':[{'label':'double-buffered inputs and output','y':[row[2]/1024 for row in metadata]}]}]}"
+      "title": "Input and output slots have distinct lifetimes across a tile pipeline",
+      "prediction": "During steady state, why may tile k+1 load into a different slot while tile k computes?",
+      "reading": "Read the three table columns as load `x_hbm/y_hbm`, compute `axpy_body`, then store `out_hbm`; rows are prologue, steady state and drain. In steady state, load `k+1` fills input slot B while compute reads tile `k` from A, then output `k` is stored. The arrow of time is left to right across stages and top to bottom across phases. Predict which slot can be reused: only after that tile's last consumer or store has finished. The schedule is schematic, not measured overlap.",
+      "connection": "The actual code declares `x_hbm` and `y_hbm` input buffers with a configurable count of two or three and `out_hbm` with two slots. Thus adding an input slot raises storage while retaining the same output count and same \\(2X+Y\\) values. The retained CPU execution confirms synchronous and buffered endpoints match; the figure explains the lifetime condition that makes this safe, not a speedup.",
+      "alt": "A table shows prologue, steady state and drain by pipeline phase. x[k], y[k] load into input slot A, compute reads those exact references, and output slot A stores out[k]. In steady state, x[k+1] and y[k+1] load into slot B while tile k computes. The drain completes the final output store before slots are reused.",
+      "code": "visual_data = {'kind': 'flow', 'layout': 'sequence', 'nodes': ['prologue: load first tile', 'steady state: load next while compute consumes live refs', 'drain: finish compute and store before reuse']}"
     },
     "buildSteps": [
       {
@@ -210,6 +210,49 @@
         "Keep input and output buffer counts separate."
       ],
       "code": "import numpy as np\nimport jax.numpy as jnp\n\ndef compare_pipeline_modes(run_pipeline, seed, tile, dtypes):\n    # TODO: generate the two fixed arrays once and compare all schedule/dtype combinations.\n    raise NotImplementedError(\"Compare synchronous and buffered pipelines on fixed represented inputs\")"
+    },
+    "diagram": {
+      "title": "Buffer lifetime through prologue, steady state, and drain",
+      "prediction": "Which slot can receive tile k+1 while the compute stage still reads tile k?",
+      "reading": "The nodes/columns show load → compute → store; the phase rows show prologue → steady state → drain. In prologue tile 0 enters A; in steady state tile `k+1` enters B while `axpy_body` consumes `k` in A; in drain the last compute and store complete. Input Refs become reusable after compute consumes them, and output slots after store completes. Buffer letters describe this schedule, not Pallas variable names. Predict the failure if A were overwritten before compute: the result could read the next tile's values.",
+      "alt": "Prologue loads tile 0 into input slot A. During steady state, compute consumes x[k], y[k] from one slot while the next tile loads into the other; out[k] is stored after compute. Drain finishes the last compute and store before any slot is reused.",
+      "scope": "Schematic schedule of buffer lifetimes; stage overlap is illustrative, not measured.",
+      "height": 5.5,
+      "panel": {
+        "kind": "table",
+        "headers": [
+          "phase",
+          "load x_hbm / y_hbm",
+          "compute axpy_body",
+          "store out_hbm / reuse"
+        ],
+        "widths": [
+          0.17,
+          0.27,
+          0.27,
+          0.29
+        ],
+        "rows": [
+          [
+            "Prologue",
+            "tile 0 into A",
+            "wait for inputs",
+            "idle"
+          ],
+          [
+            "Steady",
+            "tile k+1 into B",
+            "tile k reads A",
+            "out[k]; release after store"
+          ],
+          [
+            "Drain",
+            "no next tile",
+            "finish final tile",
+            "finish store; then reuse"
+          ]
+        ]
+      }
     }
   }
 }

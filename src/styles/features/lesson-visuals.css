@@ -6,6 +6,44 @@
 .lesson-mechanism {
   margin: 1.5rem 0;
 }
+.reading-disclosure {
+  margin-block: 1rem;
+  border-top: 1px solid var(--line);
+}
+.reading-disclosure > summary {
+  padding-block: 0.8rem;
+  color: var(--blue);
+  font: 600 0.9rem/1.6 var(--ui);
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+.reading-disclosure > summary:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+.reading-disclosure > summary:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+.disclosure-body {
+  padding-block: 0.2rem 0.8rem;
+}
+.disclosure-body > :first-child {
+  margin-top: 0;
+}
+.disclosure-body > :last-child {
+  margin-bottom: 0;
+}
+.figure-provenance {
+  margin-top: 1.5rem;
+}
+.build-code-breakdown.reading-disclosure {
+  padding: 0;
+  border: 0;
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+}
 .reasoning-check {
   margin-block: 1.5rem;
   padding: 1rem 1.25rem;

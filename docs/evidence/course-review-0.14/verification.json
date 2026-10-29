@@ -1,0 +1,116 @@
+{
+  "artifacts_sha256": {
+    "dist/book.html": "9bbd799773445aaa213749e27f3d96ed1addd8c5618d77c7d801a72b84a680f7",
+    "dist/downloads/jax-foundations.html": "fbd5ad01c8a20322c28c4de9c97a91ffe6ccec1991208e53b7fd03f95a3647f3",
+    "projects/causal-model-300m/reference/evidence-index.json": "e3170945eada0dfb732e8acf3ee09a7d02399983325f623e0082625c6b17ec78",
+    "projects/embedding-model-300m/reference/evidence-index.json": "011b027f03dc7bb7913ae00b48864b92d9c09c378d6d07387739083cdce40ea3",
+    "public/downloads/causal-model-300m-pilot.zip": "bb168354e79a2eb4dc8d67f62720f47b7ec7a793851e43fc9fa5881c2450fd5a",
+    "public/downloads/embedding-model-300m-pilot.zip": "594e7a76b8cfc2c643fa64bc68a8f8fe11a6befde478517eb917c826faedb5cb",
+    "public/downloads/jax-course-workspace.zip": "c75bfd26d516f88e5c5fc1fba0dff7dca24d6cda07ec3f8aefca3506ad3de688",
+    "public/downloads/jax-foundations.epub": "f1dffaaf634c077c333a0376f752621fd4b4a6d533b527dd4ebedfae33d29284"
+  },
+  "canonical_source_snapshot_sha256": "7e70bfa15ea494ef7d5b88028ee049426292f9fbe6b42044c2b36f34b42b14a9",
+  "checks": {
+    "browser": {
+      "engines": [
+        "desktop Chromium",
+        "mobile Chromium"
+      ],
+      "exit_code": 0,
+      "passed": 46
+    },
+    "deployment": {
+      "bases": [
+        "/",
+        "/jaxpathways/"
+      ],
+      "canonical_urls": 212,
+      "exit_code": 0,
+      "maturity_labels": 203,
+      "pages": 217
+    },
+    "epubcheck": {
+      "errors": 0,
+      "exit_code": 0,
+      "fatals": 0,
+      "version": "5.4.0",
+      "warnings": 0
+    },
+    "main_check": {
+      "automated_tests_passed": 163,
+      "exit_code": 0,
+      "scope": "Astro/types/lint/format, curriculum, build, Node tests, distribution, site and SEO. Final project receipts were refreshed afterward, followed by final content/build and deployment checks."
+    },
+    "registered_projects": {
+      "exit_code": 0,
+      "suites_passed": 31
+    }
+  },
+  "date": "2026-10-21",
+  "hosted_checks": {
+    "status": "Pending draft pull request; not presumed passed."
+  },
+  "independent_review_sha256": {
+    "c01-amendment-review.json": "62da32520b22bf37399b5f16ed6629d01473cd0753b4aafc09f1170b87cac619",
+    "c02-integration-review.json": "71f9de8cfd8a1b7fa5c00826e1156b4274805baeb21ee05bfff2f362108742f8",
+    "recovery-protocol-evidence.json": "85f720718d0b6a59f60a4e0c4fc77343fc5c41fede2fbee81cef50a3f301abed",
+    "recovery-review.json": "b54b1e2331f00b6248c6338dd42b84a3322e8871285181997b76947c687a88a3"
+  },
+  "lesson_execution_scope": "All 104 unchanged canonical lesson hashes match retained CPU execution receipts. This edition freshly ran all registered projects and the separately recorded current embedding full workflow; unchanged lesson executions are not labeled newly run.",
+  "logs_sha256": {
+    "browser.log": "e8eb65a87f2498b0a5997b3f4ba46171e7c0bce52febc548b74c8cc0dbfb4801",
+    "deployment.log": "96cc3b44d2da933a22e0849b4ba688cd5f1ceaadc16c9ffa9bb4330e37ebce48",
+    "epubcheck.log": "a0ccb9442db4808c4a4f1d51310a27603a09f8c0b0a35c49073cc63fb18fcb86",
+    "main-check.log": "f80c1dd5644db5c6c6ea929af7811291d57245e8b1df5f5b6ae44d6b19dc871b",
+    "registered-projects.log": "4223f9844fc4b9f433b887c51e6ab59a7902fbb13dcb2543041c919ca42c4ee6"
+  },
+  "material_inventory": {
+    "boundedHardwareQualifications": 4,
+    "byKind": {
+      "assessments": 11,
+      "book": 1,
+      "careers": 7,
+      "guides": 3,
+      "lessons": 104,
+      "pathways": 10,
+      "phases": 22,
+      "plans": 10,
+      "projects": 31,
+      "tracks": 4
+    },
+    "choiceSpecificFeedbackLessons": 104,
+    "currentCpuLessons": 104,
+    "currentProjectReferences": 31,
+    "expertReviewedLessons": 0,
+    "fullCapstonesPlanned": 10,
+    "itemLevels": {
+      "available-draft": 165,
+      "in-development": 28,
+      "planned": 10
+    },
+    "lessonTasks": 409,
+    "novicePilotedLessons": 0,
+    "optionalPilots": 2,
+    "phaseLevels": {
+      "available-draft": 9,
+      "in-development": 13
+    },
+    "projectStages": 130,
+    "tasks": 539,
+    "verifiedOptionalPilots": 2
+  },
+  "open_gates": [
+    "13 developing phases and 10 full Planned capstones",
+    "Image/audio implementation and real-data integration excluded from this edition",
+    "Approximately-300M training, full benchmarks, physical targets and rights-reviewed model releases",
+    "Independent expert/novice/career calibration",
+    "Native EPUB reader, actual assistive technology and new-edition physical print acceptance"
+  ],
+  "optional_workflows": {
+    "causal": "Accepted four-file training identity, six-branch replay, raw score reconstruction and portable cold consumer. Copied executables match accepted handoff. Extracted preparer/model checks pass. All six QA floors failed; native harness is eight records per task.",
+    "embedding": "Current full reference pass and prior constant-zero candidate rejection before optimization are separately indexed. Historical final8 unchanged; retrieval quality floors failed.",
+    "recovery": "Fresh-process, failpoint, caller-shape and writer-conflict protocol checked on local POSIX. No Windows locking, power-loss, network-storage or multi-host qualification."
+  },
+  "scope": "Unmerged author review candidate; no production deployment or trained-model publication.",
+  "version": "0.14.0"
+}

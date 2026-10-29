@@ -4,6 +4,8 @@ Phase 06: Data & checkpoint recovery · about 90 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Recover data position and resume](https://www.tahabouhsine.com/jaxpathways/lesson-recovery-04.html).
+
 ## What you will be able to do
 
 - Distinguish requested, completed, verified and published checkpoint state.
@@ -21,14 +23,12 @@ Asynchronous saving overlaps writing with training. A snapshot moves through req
 
 ## Distinguish a save request from a recovery point
 
-Imagine live training reaches step 42 while a snapshot of step 40 is still being written. The live progress log does not make step 42 recoverable. Failure before the pending snapshot is accepted may leave an earlier checkpoint as the valid choice.
+A save request, a completed write, a verified restore, and an application-accepted checkpoint are separate events. In the injected publication failure, step (2)'s directory exists, but the `LATEST` manifest still points to verified step (1). The live state is at step (2), so recovery chooses step (1) and may replay work.
 
-Keep completion signals separate from the record used to select accepted snapshots. Validate required files and metadata before making a new snapshot eligible. Also ensure live training cannot mutate the snapshot's intended contents during writing.
-
-The saved/live/accepted bars represent different boundaries. Their gaps describe work at risk of replay or loss, not necessarily a defect. Interpret them against the failure location and the checkpoint API's stated guarantees.
+The diagram bars count completed steps, not time: saved snapshot (1), live state (2), accepted checkpoint (1). The gap is work the process completed but the application has not made eligible for recovery. `wait_until_finished()` completes writer work before this example validates and publishes the manifest; completion alone is not acceptance.
 
 $$
-T_{\text{commit}} = \max_{h \in \{1,\dots,H\}} T_{\text{write}}^{(h)} < T_{\text{rename}}
+t_{\rm request}\le t_{\rm return}\le t_{\rm wait\ done}\le t_{\rm validated}\le t_{\rm published}
 $$
 
 ### Pause and reason
@@ -43,33 +43,33 @@ No. The replacement may never complete or validate. Retention should preserve a 
 
 ## Define a completed training boundary
 
-Let the completed training step be $s$. Our state contains a weight vector and that step counter. A snapshot at $s=1$ must restore the vector belonging to that step, even if the live computation advances to $s=2$. The example adds the same known increment to every weight, so an independent array comparison can identify the snapshot without relying on a decreasing training loss.
+The teaching state is a weight vector plus its completed-step counter. The code applies a known increment and snapshots step (1); live computation can advance to step (2) without changing the already captured vector. This makes the restore comparison direct instead of relying on a loss that might move unpredictably.
 
-A real training snapshot also includes optimizer memory, random state and input position from the preceding lessons. Asynchronous writing changes when storage finishes; it does not reduce the state that must be captured.
+A full training checkpoint must also carry optimizer memory, random state, and the consumed-input position. An asynchronous writer changes when the bytes finish, not which state is required to continue.
 
 ## Separate save latency from acceptance
 
-The timer before and after save measures the blocking part of the call. A second interval includes our continuing update and the remaining completion wait. These intervals are adjacent in one run, so their sum describes this application’s request-to-completion boundary. Neither isolates disk throughput.
+The timer around `save()` records the call's blocking time. A second interval covers the continued update and the remaining wait. In the retained observation, these were about (0.0031) s and (0.0143) s, but they vary by machine and this tiny local fixture does not isolate disk throughput.
 
-Keep the checkpointer alive until its work finishes. A quickly returned call can already be finished for a small snapshot; do not require a race to reproduce. The invariant we control is that the application does not update its accepted-checkpoint manifest before completion and restoration checks.
+Keep the checkpointer alive until its work finishes. Small saves may finish before the caller can observe overlap, so do not require a race. The application invariant is to leave the accepted manifest unchanged until completion and restore checks pass.
 
 ## Publish a checkpoint you can actually restore
 
-After waiting, restore against an explicit target and compare the step and every saved value with the snapshot. Write a new manifest to a temporary sibling and replace the old manifest only after the checks pass. On the local filesystem used here this avoids a reader seeing a half-written JSON file.
+After the wait, restore against the expected target and compare the saved step and every value with the captured snapshot. Only after that check does the example write a temporary sibling manifest and replace the existing `LATEST` record. The replace keeps a local reader from observing a partially written JSON file.
 
-A rename alone is not a universal durability or distributed-consistency protocol. Object stores, power failures, concurrent writers and multiple hosts need storage-specific guarantees. Our local manifest is an instructional boundary around a single writer, not a replacement for a production checkpoint manager.
+That local rename is not a general durability or distributed-commit guarantee. Remote object stores, power failures, and concurrent writers need their own supported protocol and failure tests.
 
 ## Practice interruption without relying on lucky timing
 
-The second checkpoint is fully written, but an injected exception prevents application publication. Recovery still selects step one through the unchanged manifest. Step two exists on disk yet is not selected by this application. This distinction explains why “directory exists” is a weak recovery test.
+The injected interruption happens after step (2)'s directory is written but before the application publishes it. The unchanged manifest selects step (1), even though the newer directory is visible. A separate finalization callback failure surfaces from the wait, and no manifest is published for that attempt.
 
-The extra failure experiment injects an exception in a finalization callback. The exception is observed when waiting; no manifest is published for that attempt. It exercises error propagation after finalization, not a claim to reproduce every disk failure. Preserve the old accepted checkpoint until the new one is accepted.
+These checks test application ordering and error propagation; they do not reproduce every storage failure. Keep the old accepted point until the new point restores and validates successfully.
 
 ## Translate the boundary into an operational rule
 
-Log the requested step, completed step and accepted step separately. If a job exits with an outstanding save, wait during orderly shutdown; if it dies abruptly, resume from the last accepted artifact and expect to repeat work after that step. Record the replay policy rather than silently claiming no work was lost.
+Record requested, completed, and accepted steps separately. This run's failed publication leaves accepted step (1) while live work reaches (2); on restart, the application chooses the former and the replay policy accounts for work after it. If a save is outstanding during orderly shutdown, wait for it; abrupt exit resumes from the last accepted artifact.
 
-When a restore differs, compare sample IDs and state before tuning tolerances. A different next batch, reset optimizer or mismatched package/data contract is a different trajectory, even if the restored weights look reasonable.
+When a continuation differs, compare data IDs, optimizer state, key, and contract before loosening numerical tolerances. A matching weight vector or bar height alone does not prove the next transition matches.
 
 ## Define functional state and publication
 
@@ -227,15 +227,11 @@ Expected: The accepted step remains $1$ while the live state reaches $2$. A real
 
 ### Read the figure
 
-The horizontal labels name three different state positions; the vertical axis is a completed-step count, not elapsed time. The saved snapshot and accepted checkpoint both have height $1$, while the live computation reaches $2$. Equal bars here mean equal step counters.
-
-The gap of one step is intentional. It shows work that the live process has completed but the application has not accepted as its recovery point. The failed publication does not move the accepted bar to two merely because a newer directory is present.
+The horizontal axis names three state positions and the vertical axis counts completed steps, not seconds. Saved snapshot is at step 1, live state at step 2, and accepted checkpoint at step 1. The equal saved and accepted bars contrast with the live bar, which is one step ahead.
 
 ### Connect it to the computation
 
-The code verifies the saved vector and then injects an interruption before publishing the next checkpoint. Recovery consults the earlier manifest and restores the earlier vector. The full state comparison, rather than bar height alone, establishes which values were restored.
-
-This plot is a local controlled failure experiment. It does not measure checkpoint bandwidth, simulate power loss or establish multi-host atomicity. Inspect the separately recorded timing intervals and exception output for those different questions.
+After the injected publication interruption, the application selects step 1 even though a step-2 directory exists. Use the acceptance manifest and restored vector to choose the recovery point; bar height alone does not verify contents. The timing intervals and surfaced finalization error answer different questions and do not turn this local experiment into a durability measurement.
 
 ```python
 visual_data={'kind':'bar','labels':['saved snapshot','live state','accepted checkpoint'],'ylabel':'completed step','series':[{'label':'local publication experiment','y':[int(snapshot["step"]),int(live["step"]),report["accepted_step"]]}]}
@@ -243,21 +239,21 @@ visual_data={'kind':'bar','labels':['saved snapshot','live state','accepted chec
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:05:45.217630+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:05:08.241974+00:00. JAX 0.9.2.
 
 ```text
-Checkpoint workspace: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-async-lesson-e6nu1154
+Checkpoint workspace: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-async-lesson-oukfh9cs
 {
-  "save_call_seconds": 0.0043574171140789986,
-  "remaining_work_and_wait_seconds": 0.017880792263895273,
+  "save_call_seconds": 0.0038282088935375214,
+  "remaining_work_and_wait_seconds": 0.017898499965667725,
   "accepted_step": 1,
   "live_step": 2
 }
 Unpublished step 2 exists; application recovery still selects verified step 1.
-Checkpoint workspace: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-async-lesson-i_l7ei0e
+Checkpoint workspace: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-async-lesson-rlb94myr
 {
-  "save_call_seconds": 0.0023497911170125008,
-  "remaining_work_and_wait_seconds": 0.011486874893307686,
+  "save_call_seconds": 0.0023883748799562454,
+  "remaining_work_and_wait_seconds": 0.013635833747684956,
   "accepted_step": 1,
   "live_step": 2
 }

@@ -4,6 +4,8 @@ Phase 04: Math & optimization · about 80 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [The chain rule, Jacobians, and directions](https://www.tahabouhsine.com/jaxpathways/lesson-optimization-07.html).
+
 ## What you will be able to do
 
 - Build an independent derivative estimate
@@ -44,6 +46,8 @@ Our objective is $(w_0-2)^2+(w_1+1)^2$. At $[0.5, 0.25]$, the derivative is $[-3
 
 Central differences probe each coordinate along a basis vector: hold all other coordinates fixed, evaluate at $w+h e_i$ and $w-h e_i$, then divide the difference by $2h$. vmap batches these independent probes; it does not make the approximation exact. In the formula, $e_i$ is a vector with a $1$ in position $i$ and zeros elsewhere. It lets us move just one weight while keeping the others fixed. The symbol $\approx$ reminds us that this is an estimate.
 
+For this objective, differentiating each square gives 2(w0-2) and 2(w1+1). Substituting $(0.5, 0.25)$ gives $2(-1.5)=-3$ and $2(1.25)=2.5$. A positive second component means moving w1 upward locally increases the objective, while the negative first component means moving w0 upward decreases it. The centered probe should reproduce these signed components, not merely a similar gradient norm.
+
 $$
 \frac{\partial L}{\partial w_i}\approx\frac{L(w+h e_i)-L(w-h e_i)}{2h}
 $$
@@ -59,6 +63,8 @@ Float32 cannot represent every nearby number. With an extremely small step, the 
 A directional derivative compares $\nabla L(w)^\mathsf{T}v$ with a finite difference along the direction vector $v$. This is useful for large parameter trees because a few directions cost fewer evaluations than probing every scalar. It can miss an error orthogonal to all tested directions, so combine it with several points and known structural cases.
 
 An allclose check permits absolute error near zero and relative error for larger values. Record the actual difference and dtype alongside a pass/fail result. Relaxing a tolerance until a broken calculation passes removes the value of the check.
+
+For example, along $v=(1,-1)$, the predicted slope is $(-3)(1)+(2.5)(-1)=-5.5$. A small positive step should therefore lower the loss by about $5.5h$ to first order. Checking this scalar projection tests a direction and its sign; testing only the norm would lose that information.
 
 ## Recognize what a gradient check cannot prove
 
@@ -160,6 +166,8 @@ At very small steps, float32 rounding makes the two nearby function evaluations 
 
 This particular objective is quadratic, so a central difference has no truncation error in exact arithmetic. Do not expect a pronounced U-shaped error curve on the right of this example. For a general nonlinear objective, overly large steps can introduce truncation error too. Check several step sizes and look for agreement across a useful range, rather than choosing the smallest available step.
 
+Before checking a new objective, predict whether its central-difference error should first fall with h and where rounding may dominate; then inspect dtype and scale.
+
 ```python
 steps = jnp.logspace(-8.0, -1.0, 22)
 errors = []
@@ -173,7 +181,7 @@ visual_data['yscale'] = 'log'
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:04:13.623123+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:26:26.072369+00:00. JAX 0.9.2.
 
 ```text
 Finite difference: [-2.9999971  2.4999976]

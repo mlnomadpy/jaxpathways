@@ -4,7 +4,7 @@ Copy this template into your own portfolio and fill it after running your modifi
 
 ## Evidence required
 
-Save the Q/K/V axis diagram, uniform hand calculation, NumPy nonuniform reference, paired permutation check, and wrong-axis repair.
+Keep the Q/K/V axis diagram, zero-query hand mean, independent nonuniform fixture and NumPy output, paired permutation invariance and one value-only permutation result. Explain the zero-query exception and repair a wrong softmax axis.
 
 - Command: `python3 phases/07-transformers/01-attention-from-small-pieces/code/main.py`
 - Working directory: Repository root

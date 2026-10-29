@@ -1,14 +1,202 @@
 [
   {
-    "version": "0.11.2",
+    "version": "0.18.3",
     "date": "2026-10-29",
+    "editionKey": "jaxpathways-2026-review-edition",
+    "modifiedAt": "2026-10-29T13:55:52Z",
     "title": "Focus testing and refresh recorded lesson evidence",
-    "summary": "Provide targeted test suites and current CPU artifact receipts while keeping source integrity and published release history intact.",
+    "summary": "Provide targeted test suites and current source-bound CPU artifacts while preserving the current reading experience and release history.",
     "changes": [
       "Organized Node verification into unit, app, content and built-site suites with changed-input selection and automatic build prerequisites. Focused Python lesson/project selection protects complete validation receipts; specialized pull-request jobs run only for relevant changes.",
-      "Removed obsolete fixed-count and duplicate assertions, batched starter syntax checks, and separated representative reader interactions from exhaustive generated-page equation and control coverage.",
-      "Recomputed the existing Transformer, solver, inverse-problem and precision figures and reran their scripts and notebooks against the committed lesson sources. CPU execution remains distinct from accelerator qualification and independent teaching review.",
-      "Hash the exact bytes of the explicitly declared corrupt tokenizer canary while retaining strict canonical JSON parsing elsewhere. Regression checks preserve fixture integrity and immutable published snapshots."
+      "Removed obsolete fixed-count and duplicate assertions, batched starter syntax checks, and separated representative reader interactions from exhaustive generated-page equation and control coverage. Current publication, content, browser and optional workflow checks remain in their appropriate suites.",
+      "Refreshed lesson figure and execution evidence against the current authored sources. CPU execution remains distinct from accelerator qualification and independent teaching review.",
+      "Protect the explicitly declared corrupt tokenizer canary by hashing its exact bytes while retaining strict canonical JSON parsing and existing generated-evidence exclusions. Fixture byte mutations require a new snapshot and published snapshots remain immutable."
+    ]
+  },
+  {
+    "version": "0.18.2",
+    "date": "2026-10-27",
+    "editionKey": "jaxpathways-2026-review-edition",
+    "modifiedAt": "2026-10-27T22:31:48Z",
+    "title": "A calmer reader with supporting details on demand",
+    "summary": "Keep explanations, worked examples and plot readings in the reading flow; open technical records and repeated guidance only when needed.",
+    "changes": [
+      "Keep core explanations, mathematical steps, essential code, figures, figure readings and exercise prompts visible. Keep measured versus calculated figure labels and chapter maturity visible.",
+      "Move repeated preparation and runtime guidance, complete execution logs, figure provenance, API reminders, exercise setup, hints, evidence checklists and references into named disclosures. Keep beginner setup commands expanded.",
+      "Make route selection, phase plans and chapter lists expandable in the illustrated HTML book. Preserve supporting material for printing and the separate reference solutions section.",
+      "This is a presentation update for author review. Lesson content, executable examples, recorded measurements and maturity levels are unchanged."
+    ]
+  },
+  {
+    "version": "0.18.1",
+    "date": "2026-10-27",
+    "editionKey": "jaxpathways-2026-review-edition",
+    "modifiedAt": "2026-10-27T17:00:33Z",
+    "title": "Explain every chapter through worked examples and figures",
+    "summary": "Extend the teaching pass to the remaining 92 lessons and connect all 22 chapter introductions to a clear learning progression.",
+    "changes": [
+      "Rewrite the remaining 92 lesson explanations around motivation, concrete worked examples, observed results, common misconceptions and the learner's next decision, building on the 12 advanced lessons revised in 0.18.0.",
+      "Explain plot axes, units, actual coordinates, curve comparisons and diagram dataflow using each lesson's retained numerical fixture. Preserve explicit distinctions between separate captures, simulations, conceptual diagrams and target evidence.",
+      "Connect all 22 chapter introductions to their learning goals and lesson sequence. Clarify negative and zero slopes, the initial state in trajectory arrays, masked losses, state ownership, uncertainty, sharding and the difference between objective improvement and model quality.",
+      "Preserve executable lesson code, formulas, commands, exercises, plot computations, prerequisite routes, recorded failed quality gates and all maturity levels. Refresh the reader and runnable companions for author review; no merge or deployment."
+    ]
+  },
+  {
+    "version": "0.18.0",
+    "date": "2026-10-27",
+    "editionKey": "jaxpathways-2026-review-edition",
+    "modifiedAt": "2026-10-27T12:18:26Z",
+    "title": "Connect the lessons to inspectable model and engineering workflows",
+    "summary": "Repair content correctness and add guided saved-model, sharding, profiling and operations exercises for author review.",
+    "changes": [
+      "Correct the equations and worked explanations across the course, supply solvable attention inputs, align discounted critic targets with GAE and enforce requested TPU readiness separately from CPU arithmetic rehearsal.",
+      "Report policy-specific precision storage and runtime bytes, prove per-device memory-fit assumptions and explain actual retained CPU trace events using a stable profiling workload.",
+      "Add real multilayer debugging, stateful train/eval checks, an oracle-checked 2x2 parameter-sharded update and an optional saved-decoder PyTorch-to-NNX conversion lab with semantic fault controls.",
+      "Connect masked and contrastive objectives to saved small encoders and held-out probes; add bounded saved-decoder SFT and sequence preference tasks, enforce LoRA base identity and report ambiguous preferences separately.",
+      "Complete MLflow artifact-selection and altered-artifact exercises. Derive operations gates from reloaded predictions, trace a local retrieval workflow, and demonstrate model behavior across activation, rollback and identity-bound retirement.",
+      "Stage long recovery and operations examples around short learner transitions, add mechanism figures and expose the PPO prerequisite branch in both the reader and book without requiring it for SFT, LoRA or DPO.",
+      "Retain earlier failed model-quality outcomes, the existing maturity levels and all ten Planned full capstones. The corrections include independent AI review and bounded CPU checks; expert/novice acceptance, native-reader/assistive review and new physical-target qualification remain separate. No merge or deployment is included."
+    ]
+  },
+  {
+    "version": "0.17.1",
+    "date": "2026-10-22",
+    "editionKey": "jaxpathways-2026-review-edition",
+    "modifiedAt": "2026-10-22T13:04:35Z",
+    "title": "Make the saved-decoder appendix easier to run and review",
+    "summary": "Repair portable hash instructions and parent-manifest links while preserving the independently checked executable source.",
+    "changes": [
+      "Use Python hashlib for candidate hashes so the learner instructions work on stock macOS and paths containing spaces. Link the parent package manifest to its immutable source commit instead of a missing loose download.",
+      "Clarify that saved-decoder mechanics and recovery are implemented, while the recorded quality gate failed and retention and human review remain open.",
+      "Preserve all 104 canonical lesson bodies, prior release snapshots, numeric packet and executable bridge bytes. The final archive differs from the optimizer-tested archive only in three Markdown documents; its extracted no-update checks are recorded separately. No additional optimizer runs, quality retries, cloud work or child-weight releases are authorized."
+    ]
+  },
+  {
+    "version": "0.17.0",
+    "date": "2026-10-22",
+    "editionKey": "jaxpathways-2026-review-edition",
+    "modifiedAt": "2026-10-22T12:36:48Z",
+    "title": "Trace a saved decoder through sequence PPO",
+    "summary": "Add an optional saved-decoder appendix with explained objectives, learner contracts, recovery checks and a recorded failed quality gate.",
+    "changes": [
+      "Connected the post-training project to a separate optional appendix using a saved 10,880-parameter decoder, a restricted four-action policy, a fitted synthetic reward head, a learned critic and multi-epoch sequence PPO. Registered Stage 5 keeps its existing table-policy edit path.",
+      "Added worked EOS/timeout GAE and signed clipping calculations in KaTeX, an explained source-bound figure, a numeric-only packet checker and a complete learner scaffold. The HTML reader and EPUB share the optional appendix and its embedded figure.",
+      "Recorded the completed synthetic CPU experiment honestly: mechanics and replay passed independent review, but child and parent sampled rewards tied and the strict heldout reward-improvement gate failed. All eight sampled responses matched per split despite changed actor parameters. The earlier evaluator failure remains separate.",
+      "Disclosed a one-argument postrun starter-helper repair while retaining the original as-run identities. Added exact parent dependencies and source-bound no-update and bounded learner-check records to the project archive. Clean extracted learner qualification is a separate gate from the recorded training result.",
+      "Kept all 104 canonical lesson bodies and prior release history unchanged. The book and optional extension remain in development; independent human teaching, native-reader/assistive review, target-scale models, retention and full capstones remain open. No child weights or new quality-training authority are distributed."
+    ]
+  },
+  {
+    "version": "0.16.1",
+    "date": "2026-10-21",
+    "editionKey": "jaxpathways-2026-review-edition",
+    "modifiedAt": "2026-10-22T01:45:51Z",
+    "title": "Read accurate code guidance and print numbered pages",
+    "summary": "Explain the API actually used in each build step and keep figure predictions with their charts in the printable book.",
+    "changes": [
+      "Replaced misleading grouped API cards with call-specific descriptions for JAX, NumPy, Flax NNX and Optax. The least-squares solver now explains its input, solution and residual shapes. Comments and strings do not produce API cards, and distinct calls appear in source order.",
+      "Kept printed figure headings, predictions and charts together when they fit on a page. Added a page-number footer and reserved bottom space in the HTML book print stylesheet.",
+      "Extended the print qualification command with full-book and paper-format options, exact source and artifact hashes, bounded large-text extraction and checks of every page number. Actual PDF tests include disabled-rule and disabled-footer negatives.",
+      "Preserved all 104 canonical lesson bodies, numerical source, maturity labels and existing model-pilot quality outcomes. The saved-Transformer PPO bridge remains separate ongoing work; this patch does not include it. Native EPUB engines, assistive-technology speech, independent teaching review, target-scale training and all ten full capstones remain open."
+    ]
+  },
+  {
+    "version": "0.16.0",
+    "date": "2026-10-21",
+    "editionKey": "jaxpathways-2026-review-edition",
+    "modifiedAt": "2026-10-22T00:57:52Z",
+    "title": "Connect preference losses to sequence PPO",
+    "summary": "Add a guided synthetic sequence PPO project stage with learned values, inspectable rollout evidence and explained termination mathematics.",
+    "changes": [
+      "Added an optional fifth post-training audit stage with ragged response masks, fitted synthetic reward, a learned table critic, EOS and timeout GAE, frozen multi-epoch PPO snapshots and explicit token and sequence metric denominators. This is local objective mechanics, not full language-model RLHF.",
+      "Completed the learner scaffold and documented its six implementation functions. Numeric and rollout contracts grade learner candidates independently of source spelling; reference-only mutation self-tests retain sensitivity to wrong masks, clipping and frozen state.",
+      "Added a small project-local pinned environment, per-stage edit-file guidance, and an independently calculated EOS-versus-timeout figure with KaTeX equations, captions, full-size keyboard access and reproducible source.",
+      "Linked the sequence extension from phase 18 while preserving all 104 lesson bodies, current maturity levels and all ten Planned full capstones. Saved Transformer lineage, real preference provenance, retention, target hardware and human review remain separate requirements.",
+      "Retained all 15 successful hosted checks for the unchanged 0.15.1 draft and supplemental browser reading samples. Apple Books 0.15.1, other native readers, assistive-technology speech and full-book print qualification remain pending."
+    ]
+  },
+  {
+    "version": "0.15.1",
+    "date": "2026-10-21",
+    "editionKey": "jaxpathways-2026-review-edition",
+    "modifiedAt": "2026-10-22T00:11:05Z",
+    "title": "Describe optional pilots consistently across the course",
+    "summary": "Scope pilot and preparation status labels accurately and register the image workflow in shared discovery metadata without changing its frozen source or measurements.",
+    "changes": [
+      "Registered the image CPU pilot in the canonical project-plan descriptor, agent-facing discovery and learning-material audit. Its guide, evidence archive and pinned public manifest now come from the same metadata as the parent page and catalog link. Three optional CPU pilots are discoverable; all ten full capstones remain Planned.",
+      "Separated the image pilot's In development label from the full capstone's Planned status and removed an unrelated preparation harness checker badge. Scoped the two-controller extension and its parent preparation project separately. Added a direct source-and-numeric-evidence download and retained full-size keyboard figure access.",
+      "Verified the exact 28 as-run image sources and 29 public packet files before publishing the curated 26 loose documentation/numeric/figure assets. Renderer and audit reject changed manifests, source, numeric evidence or descriptor pins. The image classification failure and the separate partial audio incident remain unchanged.",
+      "Preserved the prior 0.15.0 snapshot and publication edition key. This patch updates the pinned modification timestamp and rendered fingerprint while retaining the publication identity. The 104 lesson bodies, their retained CPU receipts and phase maturity levels are unchanged."
+    ]
+  },
+  {
+    "version": "0.15.0",
+    "date": "2026-10-21",
+    "editionKey": "jaxpathways-2026-review-edition",
+    "modifiedAt": "2026-10-21T23:55:41Z",
+    "title": "Study image outcomes and recover a two-controller training job",
+    "summary": "Add explained image-pilot evidence and a local multi-controller recovery exercise, with explicit EPUB edition metadata and honest limits for ongoing work.",
+    "changes": [
+      "Added the exact 25,605-parameter flower-image CPU source freeze and public numeric packet for eleven stages and 384 updates. The selected classifier fails its 0.40 balanced-accuracy floor and trails its fixed color control. All ten full model/retrieval capstones remain Planned.",
+      "Added a discoverable image-pilot guide with seven explained figures, separate objective units, development-only selection and calibration, raw uncalibrated probabilities and reconstructible retrieval rankings. Full-size keyboard links, intrinsic figure geometry and mobile checks support reading the plots. Source and numeric downloads exclude photos, features, fitted processors and weights.",
+      "Added an optional two-controller local POSIX CPU recovery exercise with count-weighted uneven batches, an independent NumPy oracle, full training-state replay and observed worker loss at committed and incomplete checkpoint boundaries. Whole-cluster restart does not qualify remote networking, TPU execution, Windows recovery or storage durability.",
+      "Introduced an explicit publication edition key, pinned UTC modification time and separate deterministic rendered-content fingerprint for EPUB. Minor revisions retain the publication identity. Release preparation rejects incomplete or invalid new metadata before writing an immutable snapshot; legacy releases retain their historical fallback.",
+      "Retained source-bound independent checks, the frozen 0.14.1 patch hosted results and bounded browser/native-reader evidence. All 104 lesson bodies remain unchanged; independent teaching, broader native-reader and assistive-technology qualification remain open.",
+      "Recorded an audio validation incident separately: a stale harness started the single local attempt, with two committed masked-reconstruction updates and no final evaluation. Exact as-run sources and partial artifacts are retained privately; the gate is closed and the validation wrapper is preflight-only. No replacement attempt, model promotion or C04 runtime inclusion is part of this candidate."
+    ]
+  },
+  {
+    "version": "0.14.1",
+    "date": "2026-10-21",
+    "title": "Keep recovery checks stable across Python formatting",
+    "summary": "Repair the hosted formatter failure and retain source-bound recovery and native-reader review evidence without changing lesson bodies.",
+    "changes": [
+      "Formatted the recovery reference and checker with the pinned CI formatter. The reference model remains AST-identical to 0.14.0. Replaced a whitespace-sensitive wrong-batch mutation anchor with an AST-located expression and require the independent sample-order discrepancy.",
+      "Retained a fresh complete recovery protocol receipt for the exact formatted sources and preserved earlier receipts. Added the full CI Python-format check to this review qualification.",
+      "Recorded a bounded native browser and Apple Books 8.5 inspection of the 0.14.0 reader: TOC navigation, least-squares inline/display math, a labeled chart and wrapped Python code. Native disclosures, another EPUB engine, print and actual assistive-technology acceptance remain open.",
+      "Kept all 104 lesson bodies, pilot quality outcomes and maturity labels unchanged. The frozen 0.14.0 preview and its failed hosted site result remain separately identified; this patch requires its own hosted checks."
+    ]
+  },
+  {
+    "version": "0.14.0",
+    "date": "2026-10-21",
+    "title": "Inspect causal training outcomes and recover complete training streams",
+    "summary": "Add an executable causal CPU lifecycle, repair masked-token grading and test recovery across separate processes while preserving failed quality results and open qualification gates.",
+    "changes": [
+      "Added a separately pinned 33,088-parameter causal CPU workflow connecting next-token pretraining, matched domain/general continuation, full SFT and Q/V LoRA, six complete branch checkpoints and fresh-process replay. Frozen data, target ownership, prompts, processors and source identities remain explicit.",
+      "Added independent generation/cache/mask oracles, raw reconstruction of all 768 generated-answer scores, pretrained snapshot guards and a native harness adapter with full-context window checks. All six QA quality floors failed. The native eight-record-per-task run is an execution smoke test, not benchmark qualification.",
+      "Added a source-only causal pilot download and public measurement packet, explained training/QA and normalized-byte plots, explicit learner contracts, local consumer limits, and a separate CPU CI workflow. The two optional pilots remain distinct from all ten Planned full model/retrieval capstones.",
+      "Repaired the embedding grader with an independent complete encoder/tied-head MLM oracle and nondegenerate finite-difference gradient checks. Reference and equivalent implementations pass; constant-output and disconnected-gradient controls fail. A fresh complete reference run passes the amended checker, with separate source-bound receipts preserving historical final8.",
+      "Expanded the recovery project with a complete sample/optimizer/PRNG stream, separate-process epoch-tail restore, crash failpoints and competing writer arbitration. Its integrated generation protocol is explicitly POSIX-only and does not establish power-loss, network-filesystem or multi-host durability.",
+      "Added YAML task definitions to release source tracking, preserved project-specific pilot descriptions in discovery and prepared a new author review packet. Thirteen developing phases, target-scale training, independent teaching review and native-reader/assistive-technology acceptance remain open."
+    ]
+  },
+  {
+    "version": "0.13.0",
+    "date": "2026-10-21",
+    "title": "Inspect a staged embedding pilot and navigate lessons with one stage bar",
+    "summary": "Make a bounded real-data embedding lifecycle available for practice, preserve its failed quality gates and consolidate the lesson navigation controls.",
+    "changes": [
+      "Added a separately pinned SciFact CPU embedding workflow with a bidirectional RoPE Transformer, masked-token pretraining, matched contrastive continuation branches and human-evidence pair fine-tuning. The workflow records actual sample exposure, checkpoint ancestry, full-state fresh-process recovery and a local custom-library consumer handoff.",
+      "Added independent attention, masking, objective, gradient, retrieval and checkpoint checks, including equivalent learner implementations and deliberately corrupted controls. Retained numeric evidence compares the pilot with BM25 and a pinned MiniLM baseline; the measured pilot fails its precommitted retrieval floors and remains in development.",
+      "Linked the optional CPU pilot from its existing planned-capstone page and the project catalog, with exact environment and named-stage instructions, a source/numeric-evidence download and separate CI execution. All ten full model/retrieval capstones keep their planned status. Target-scale training, broader benchmarks, hardware/service qualification, human review and public model release remain open.",
+      "Consolidated previous/next activity actions into the existing lesson stage bar and removed the overlapping duplicate bottom dock. Responsive controls retain keyboard navigation, reading-position restoration and lesson-boundary targets; browser checks cover short desktop and mobile viewports.",
+      "Reworked the actual runtime objective plot into separate phase panels with explicit units, observed update ranges and zero-preserving axes. A single-candidate tail batch is explained rather than presented as successful retrieval. Historical figures and receipts remain unchanged; the teaching view uses the same current renderer.",
+      "Reserved local PNG/SVG figure geometry before decoding and allowed long evidence paths to wrap in status labels. New browser cases check the pilot page at narrow widths and compare image layout before and after a deliberately delayed load."
+    ]
+  },
+  {
+    "version": "0.12.0",
+    "date": "2026-10-21",
+    "title": "Adaptive solvers and natural-text decoder foundations",
+    "summary": "Connect the scientific and Transformer lessons to separately pinned workflows, explained measurements and independent recovery or numerical checks.",
+    "changes": [
+      "Added an optional Diffrax project extension with adaptive and stiff solves, reverse-mode sensitivity refinement, same-data noisy fitting and identifiable versus insensitive observation profiles. Retained arrays and explained figures keep solver steps distinct from measured speed.",
+      "Added a configurable multi-layer causal decoder, train-only BPE and byte baseline, frozen natural-text chapter splits, a measured six-update CPU pilot, cache parity and fresh-process recovery and package checks. Its larger configuration is count-only; no target-scale training or language-quality qualification is claimed.",
+      "Linked the decoder workflow from Projects and its parent guide, rendered its setup and measured plots as a dedicated page, and published explicitly linked source and evidence assets. Project guides now lead with their learning purpose, and ordinary figures open at full size with accessible links. Both optional environments have separate CI execution jobs.",
+      "Corrected the precision lesson to distinguish BF16 operands, requested and returned result dtypes, compiler evidence and actual accumulation semantics. Retained seeded raw arrays and CPU IR probes show why output error alone cannot establish a partial-sum accumulator policy. Historical physical TPU qualifications retain their original source bindings.",
+      "Aligned TPU setup and runtime prompts with their actual executable APIs and unsigned receipt fields. Extended the slice-comparison exercise to both advertised machines and inclusive capacity thresholds; separated calculated device-count expectations from observed execution.",
+      "Added two explicit optional scientific practice contracts, bringing the authored learner inventory to 305, and carried the reader and print-answer repairs forward. Larger model lifecycles, target qualification, independent teaching review and native-reader acceptance remain open."
     ]
   },
   {

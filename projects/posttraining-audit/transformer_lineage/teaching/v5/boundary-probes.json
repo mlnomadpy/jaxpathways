@@ -1,0 +1,160 @@
+{
+  "gaeLambda": 0.8,
+  "gamma": 0.9,
+  "kind": "transformer-lineage-v5-forced-boundary-probes",
+  "label": "Synthetic forced contract probes with zero optimizer updates; these are not trained model quality measurements.",
+  "probes": {
+    "eos": {
+      "actions": [
+        383,
+        4,
+        2,
+        0
+      ],
+      "advantages": [
+        -0.06686365749239921,
+        -0.07897730186581611,
+        -0.09580180794000626,
+        0.0
+      ],
+      "deltas": [
+        -0.010000000149011604,
+        -0.010000000149011604,
+        -0.09580180794000626,
+        0.0
+      ],
+      "inputRoleMask": [
+        false,
+        true,
+        true,
+        false
+      ],
+      "oldCriticValues": [
+        0.10000000149011612,
+        0.10000000149011612,
+        0.10000000149011612,
+        0.0
+      ],
+      "paddingMask": [
+        false,
+        false,
+        false,
+        true
+      ],
+      "postActionCriticValues": [
+        0.10000000149011612,
+        0.10000000149011612,
+        0.0,
+        0.0
+      ],
+      "targetRoleMask": [
+        true,
+        true,
+        true,
+        false
+      ],
+      "terminalRewardByAction": [
+        0.0,
+        0.0,
+        0.004198193550109863,
+        0.0
+      ],
+      "terminalRewardScore": 0.004198193550109863,
+      "terminatedMask": [
+        false,
+        false,
+        true,
+        false
+      ],
+      "truncatedMask": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "valueTargets": [
+        0.03313634399771691,
+        0.021022699624300006,
+        0.004198193550109863,
+        0.0
+      ]
+    },
+    "timeout": {
+      "actions": [
+        381,
+        4,
+        383,
+        4
+      ],
+      "advantages": [
+        -0.026116391399908047,
+        -0.02238387673735617,
+        -0.017199828594923007,
+        -0.009999761730432502
+      ],
+      "deltas": [
+        -0.010000000149011604,
+        -0.010000000149011604,
+        -0.010000000149011604,
+        -0.009999761730432502
+      ],
+      "inputRoleMask": [
+        false,
+        true,
+        true,
+        true
+      ],
+      "oldCriticValues": [
+        0.10000000149011612,
+        0.10000000149011612,
+        0.10000000149011612,
+        0.10000000149011612
+      ],
+      "paddingMask": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "postActionCriticValues": [
+        0.10000000149011612,
+        0.10000000149011612,
+        0.10000000149011612,
+        0.10000000149011612
+      ],
+      "targetRoleMask": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "terminalRewardByAction": [
+        0.0,
+        0.0,
+        0.0,
+        2.384185791015625e-07
+      ],
+      "terminalRewardScore": 2.384185791015625e-07,
+      "terminatedMask": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "truncatedMask": [
+        false,
+        false,
+        false,
+        true
+      ],
+      "valueTargets": [
+        0.07388361009020808,
+        0.07761612475275995,
+        0.08280017289519312,
+        0.09000023975968362
+      ]
+    }
+  },
+  "schemaVersion": 1,
+  "units": "Rewards and critic values are synthetic reward units; advantages and value targets use the same units."
+}

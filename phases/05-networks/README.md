@@ -12,7 +12,9 @@ Explain a loss curve together with held-out errors; a lower training loss alone 
 
 ## Study guide: Did the network learn the task, or exploit an evaluation mistake?
 
-Move from explicit matrix operations to stateful modules while preserving independent checks. Learn to distinguish capacity, optimization, data quality and evaluation errors before adding layers.
+A neural network combines familiar matrix operations, but several new sources of error arrive together: nonlinear activations, trainable module state, optimizer state and different training/evaluation behavior. Follow one example from features to prediction and loss before reasoning about a whole training curve.
+
+The chapter moves from a small nonlinear task to NNX state, train/eval isolation, a CNN and controlled fault diagnosis. Use the decision regions and confusion counts to ask which examples the model gets wrong. Pair those observations with state snapshots and layer diagnostics to explain the cause.
 
 ### Check your starting point
 
@@ -118,9 +120,9 @@ Status: authored lesson with CPU exercise.
 
 Status: authored lesson with CPU exercise.
 
-**Intended outcome:** Introduce a bad learning rate and diagnose it using loss and gradient evidence.
+**Intended outcome:** Localize a multilayer model failure in data, activations, gradients or update scale, then repair one cause and compare held-out loss.
 
-**Evidence:** Keep the analytic error recurrence, per-step weight/loss/gradient norm for rates 0.1 and 0.3, observed 3.24 loss multiplier, changed-scale comparison, clipping bound, and one repaired nonfinite-input case.
+**Evidence:** Keep the NaN input diagnosis, saturation and excessive-rate controls, per-layer gradient/activation evidence and held-out comparisons for each one-factor repair.
 
 **Checkpoint:** Derive why scaling features and targets by ten changes this squared-loss curvature by 100 without treating that bound as universal.
 

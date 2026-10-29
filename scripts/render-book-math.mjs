@@ -10,7 +10,7 @@ function visit(value, key = '') {
     if (key === 'math') equations[value] = normalizeEpubMathML(renderMath(value, true, 'mathml'));
     else
       for (const paragraph of value.split('\n\n')) {
-        if (/\\\(|\\\[|\$\$|`|\*\*/.test(paragraph))
+        if (/\\\(|\\\[|\$\$|`|\*\*|\[[^\]\n]+\]\([^)]+\)/.test(paragraph))
           prose[paragraph] = normalizeEpubMathML(inlineMath(paragraph, 'mathml'));
       }
   } else if (Array.isArray(value)) value.forEach(item => visit(item, key));

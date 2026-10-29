@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "performance-01",
-  "contentHash": "85a440072dadd40218f394fe012b6ca5a88bd0e1e9f8c125c05910dcc0773d08",
-  "rendererHash": "a1bd5b648f4731ae5d5f0a24811c2540d1a0a132149ce589d17c4113509cbedf",
+  "contentHash": "15ed51d95c844bcf59ac9b3b4e6d154210958e0aed2d8ded5e31c11f8ba7f35b",
+  "rendererHash": "17e3bbad72ee4c43425845aaee76b86b85e84750551278be03d8c16842f4dc63",
   "kind": "executed",
-  "generatedAt": "2026-10-21T16:04:38.316208+00:00",
+  "generatedAt": "2026-10-27T17:10:59.386708+00:00",
   "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",
@@ -13,7 +13,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "{\n  \"backend\": \"TFRT_CPU_0\",\n  \"jax\": \"0.9.2\",\n  \"numpy\": \"2.4.4\",\n  \"python\": \"3.14.3\",\n  \"input_shape\": [\n    64,\n    32\n  ],\n  \"weight_shape\": [\n    32,\n    16\n  ],\n  \"dtype\": \"float32\",\n  \"boundary\": \"input already placed; call plus output synchronization\",\n  \"first_call_seconds\": 0.030080874916166067,\n  \"warm_samples_seconds\": [\n    6.366614252328873e-05,\n    3.929203376173973e-05,\n    4.116678610444069e-05,\n    6.837490946054459e-05,\n    5.333311855792999e-05,\n    4.583410918712616e-05,\n    5.0957780331373215e-05\n  ],\n  \"warm_median_seconds\": 5.0957780331373215e-05,\n  \"max_abs_error\": 2.384185791015625e-07\n}\n",
+  "stdout": "{\n  \"backend\": \"TFRT_CPU_0\",\n  \"jax\": \"0.9.2\",\n  \"numpy\": \"2.4.4\",\n  \"python\": \"3.14.3\",\n  \"input_shape\": [\n    64,\n    32\n  ],\n  \"weight_shape\": [\n    32,\n    16\n  ],\n  \"dtype\": \"float32\",\n  \"boundary\": \"input already placed; call plus output synchronization\",\n  \"first_call_seconds\": 0.054288082756102085,\n  \"warm_samples_seconds\": [\n    0.00025395816192030907,\n    0.0002982919104397297,\n    8.391588926315308e-05,\n    0.00013149995356798172,\n    0.0014217500574886799,\n    0.0007377499714493752,\n    0.00026683416217565536\n  ],\n  \"warm_median_seconds\": 0.00026683416217565536,\n  \"max_abs_error\": 2.384185791015625e-07\n}\n",
   "data": {
     "kind": "panels",
     "panels": [
@@ -28,7 +28,7 @@
           {
             "label": "synchronized call",
             "y": [
-              0.030080874916166067
+              0.054288082756102085
             ]
           }
         ]
@@ -51,13 +51,13 @@
           {
             "label": "synchronized call",
             "y": [
-              6.366614252328873e-05,
-              3.929203376173973e-05,
-              4.116678610444069e-05,
-              6.837490946054459e-05,
-              5.333311855792999e-05,
-              4.583410918712616e-05,
-              5.0957780331373215e-05
+              0.00025395816192030907,
+              0.0002982919104397297,
+              8.391588926315308e-05,
+              0.00013149995356798172,
+              0.0014217500574886799,
+              0.0007377499714493752,
+              0.00026683416217565536
             ]
           }
         ]
@@ -67,7 +67,7 @@
   "diagram": {
     "title": "Time the completed result",
     "prediction": "Where should synchronization occur in completed-result latency measurement?",
-    "reading": "The host dispatches and waits while device work proceeds. The measurement lane includes readiness. Lengths illustrate ordering only and are not measured durations. Compilation and data preparation need separately chosen boundaries when included in a benchmark.",
+    "reading": "Read left to right: already-ready inputs reach the host, the host dispatches a call, and the device-work lane proceeds while the host waits. The timer bracket starts at dispatch and ends at result readiness, so the wait is inside the measurement. The arrows show dependency and elapsed ordering, not measured durations; input preparation and optional compilation need their own boundary if the question includes them.",
     "alt": "The host dispatches and waits while device work proceeds. The measurement lane includes readiness. Lengths illustrate ordering only and are not measured durations. Compilation and data preparation need separately chosen boundaries when included in a benchmark.",
     "scope": "Architecture and dataflow mechanism diagram.",
     "height": 3.8,

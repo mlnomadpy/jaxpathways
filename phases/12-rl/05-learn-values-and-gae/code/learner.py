@@ -1,30 +1,32 @@
 """Learn value functions and generalized advantage estimation · learner-only exercises (3/3 contracts ready)"""
 
-# Exercise: Change the collection key from 313 to 314. Before running, predict which of the fitted values and final MSE should remain identical. Then retain both error histories and explain why changed trajectories should change the fitted table.
+# Exercise: The task lasts at most eight actions and the value target is discounted return with gamma=0.9, matching GAE gamma. Change the collection key from 313 to 314. Before running, predict which of the fitted values and final MSE should remain identical. Then retain both error histories and explain why changed trajectories should change the fitted table.
 
 # Inputs:
 # - A policy, an explicit collection key, and a retained rollout with `observation`, `next_observation`, and `active`.
 # - A changed collection key 314 after the recorded seed 313 run.
-# - The project’s return-to-go and value-fit functions.
+# - The gamma=0.9 discounted-return and value-fit functions.
 
 # Outputs:
-# - The fitted four-state value table and initial/per-update masked-MSE history.
+# - The fitted four-state value table and initial/per-update masked-MSE history for discounted targets.
 # - A comparison that keeps both seed-specific fits visible.
 
 # Invariants to check:
 # - Only active transitions contribute to value loss.
+# - The value target discounts rewards with gamma=0.9, the same discount used by GAE.
 # - The fit uses sampled rollout targets and reports real optimization error.
 # - Different collection keys can produce different trajectories and fitted values.
 
 # Hints:
 # - Build targets from the collected reward array.
+# - Use gamma=.9 in both the discounted return targets and the GAE call.
 # - Keep the retained `next_observation` for the later GAE step.
 # - Compare final errors without expecting stochastic targets to produce zero error.
 
 import jax
 import jax.numpy as jnp
 
-def fit_changed_rollout(theta, seed, rollout, returns_to_go, fit_value_function):
+def fit_changed_rollout(theta, seed, rollout, discounted_returns_to_go, fit_value_function):
     # TODO: collect a new rollout using the supplied seed
     final_state, records = ...
     # TODO: form targets and fit the state-value table

@@ -1,0 +1,10 @@
+file:///private/tmp/jaxpathways-transformer-bridge-review/scripts/qualify-book-print.mjs:220
+          () => reject(new Error(`PDF render exceeded ${PDF_RENDER_TIMEOUT_MS} ms: ${filename}`)),
+                       ^
+
+Error: PDF render exceeded 240000 ms: book-all-a4.pdf
+    at Timeout.<anonymous> (file:///private/tmp/jaxpathways-transformer-bridge-review/scripts/qualify-book-print.mjs:220:24)
+    at listOnTimeout (node:internal/timers:585:17)
+    at process.processTimers (node:internal/timers:521:7)
+
+Node.js v22.22.3

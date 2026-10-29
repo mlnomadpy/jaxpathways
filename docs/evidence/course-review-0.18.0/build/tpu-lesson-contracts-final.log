@@ -1,0 +1,70 @@
+TAP version 13
+# Subtest: tpu-02 validates checkpoint integrity, compatibility, missing and completed resume
+ok 1 - tpu-02 validates checkpoint integrity, compatibility, missing and completed resume
+  ---
+  duration_ms: 1473.805333
+  type: 'test'
+  ...
+# Subtest: tpu-03 memory ledger matches explicit bytes per parameter
+ok 2 - tpu-03 memory ledger matches explicit bytes per parameter
+  ---
+  duration_ms: 965.707334
+  type: 'test'
+  ...
+# Subtest: v5e Flex-start instructions keep a bounded queue and explicit owner cleanup
+ok 3 - v5e Flex-start instructions keep a bounded queue and explicit owner cleanup
+  ---
+  duration_ms: 0.424375
+  type: 'test'
+  ...
+# Subtest: tpu-04 labels the four-device result as calculated expectation
+ok 4 - tpu-04 labels the four-device result as calculated expectation
+  ---
+  duration_ms: 0.236
+  type: 'test'
+  ...
+# Subtest: Phase 19 registry tasks use current HBM and requested-target receipt contracts
+ok 5 - Phase 19 registry tasks use current HBM and requested-target receipt contracts
+  ---
+  duration_ms: 1360.750167
+  type: 'test'
+  ...
+# Subtest: tpu-01 and tpu-04 TPU gates reject missing source identity and CPU target mismatches
+ok 6 - tpu-01 and tpu-04 TPU gates reject missing source identity and CPU target mismatches
+  ---
+  duration_ms: 2259.742083
+  type: 'test'
+  ...
+# Subtest: tpu-05 routes the CPU-only lesson away from TPU and includes a collective update program
+ok 7 - tpu-05 routes the CPU-only lesson away from TPU and includes a collective update program
+  ---
+  duration_ms: 495.639083
+  type: 'test'
+  ...
+# Subtest: tpu-06 retains an inspectable CPU trace from the measured workload
+ok 8 - tpu-06 retains an inspectable CPU trace from the measured workload
+  ---
+  duration_ms: 1555.447083
+  type: 'test'
+  ...
+# Subtest: tpu-06 precision probe retains raw outputs and independently checks dtype and error summaries
+ok 9 - tpu-06 precision probe retains raw outputs and independently checks dtype and error summaries
+  ---
+  duration_ms: 1227.57275
+  type: 'test'
+  ...
+# Subtest: analytic figures render to isolated artifacts with non-device provenance
+ok 10 - analytic figures render to isolated artifacts with non-device provenance
+  ---
+  duration_ms: 1721.47625
+  type: 'test'
+  ...
+1..10
+# tests 10
+# suites 0
+# pass 10
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 11066.348667

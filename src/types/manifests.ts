@@ -5,6 +5,7 @@ export interface ProjectStage {
   evidence: string;
   expected: string;
   diagnosis: string;
+  workspaceFile?: string;
   codeGuide?: string;
   starterSnippet?: string;
   solutionSnippet?: string;

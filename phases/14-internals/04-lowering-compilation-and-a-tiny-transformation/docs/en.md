@@ -4,6 +4,8 @@ Phase 14: Autodiff & JAX internals · about 130 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Custom derivative rules](https://www.tahabouhsine.com/jaxpathways/lesson-internals-03.html).
+
 ## What you will be able to do
 
 - Interpret literals, captured constants and variables in a supported flat jaxpr.
@@ -26,6 +28,8 @@ Imagine an interpreter carrying a value and a directional derivative through eac
 Reject unsupported operations instead of silently passing them through with a made-up derivative. Compare the transformed result with an analytic or independently calculated direction on a small composition.
 
 The directional-derivative curve checks the bounded interpreter example. It is separate from a general-purpose compiler or support for all JAX primitives. Identify which stage your code implements and which later stages JAX supplies.
+
+For this interpreter the accepted set is explicit: add, multiply, negate, sine and sum-reduction. The executed fixture uses `sin`, `mul`, `add` and `reduce_sum`; an `exp` trace is deliberately rejected. This boundary lets the derivative rule be audited operation by operation. When adding a primitive, first write its primal and tangent rule, then add a small independent comparison before extending the accepted set.
 
 ### Pause and reason
 
@@ -56,6 +60,8 @@ The interpreter supports add, multiply, negate, sine and sum-reduction. It rejec
 ## Verify a complete transformed program
 
 Our example is $F(x)=\sum_i(x_i\sin x_i+c_i)$, with captured offset $c$. Its analytic directional derivative is $\sum_i(\sin x_i+x_i\cos x_i)v_i$. The interpreter implements that derivative through local primitive rules, while the reference derives it from the whole expression. Comparing those approaches checks both the local rules and how they are composed.
+
+For the recorded center point, the interpreted primal is about 2.30998 and its tangent is 0.439129; both match the analytic directional derivative and JAX’s JVP. As the base point moves from $\alpha=-1$ to $1$, the derivative changes from about $-0.09853$ to a sampled peak of 0.43913 at zero, then to about 0.04102. Agreement across this curve checks composition of the local rules, not just one hand-picked value.
 
 ## Trace, lower and compile are separate stages
 
@@ -303,15 +309,11 @@ Expected: The program contains sin, mul, add and reduce_sum. Interpreted and com
 
 ### Read the figure
 
-The horizontal axis is a scalar displacement $\alpha$ of the base point $x+\alpha v$. The vertical axis is the directional derivative of the scalar program along the fixed direction $v$. Each point comes from a new evaluation of the same supported trace at a shape-compatible input.
-
-The interpreter and analytic curves overlap. Their derivative is about $-0.09853$ at $\alpha=-1$, rises to a sampled peak of about $0.43913$ at the original point $\alpha=0$, then falls to about $0.04102$ at $\alpha=1$. The sign change and nonmonotone shape reflect a changing Jacobian, not disagreement between the two methods.
+The horizontal axis is displacement $\alpha$ along the fixed direction, from $-1$ to $1$; the vertical axis is directional derivative. The tiny interpreter and analytic reference curves overlap: the values are about $-0.09853$ at $-1$, 0.43913 at 0, and 0.04102 at 1. The slope changes with the base point, so a constant derivative prediction is wrong. Next check a new point, then an unsupported primitive, which should fail explicitly.
 
 ### Connect it to the computation
 
-The interpreter obtains each value by composing local tangent rules; the reference directly evaluates $\sum_i(\sin z_i+z_i\cos z_i)v_i$ at $z=x+\alpha v$. The code also checks the middle point against JAX’s JVP and checks the lowered, compiled transformed program.
-
-Agreement applies to this primitive subset and tested inputs. It does not validate an unsupported operation, nested control flow, compiler performance or device portability. Those require new rules and new evidence rather than extrapolation from this plot.
+The analytic curve evaluates $\sum_i(\sin z_i+z_i\cos z_i)v_i$ at $z=x+\alpha v$; the interpreter composes local tangent rules for the same program. At the center, the executed primal/tangent are 2.3099803 and 0.4391292. The compiled transformed result matches, and `exp` is rejected as unsupported. This supports the declared primitive subset only, not arbitrary jaxprs or compiler speed.
 
 ```python
 alphas=np.linspace(-1,1,9)
@@ -329,7 +331,7 @@ visual_data={'kind':'line','x':alphas.tolist(),'xlabel':'base-point displacement
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:09:01.722702+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:08:58.666573+00:00. JAX 0.9.2.
 
 ```text
 Supported primitives: ['sin', 'mul', 'add', 'reduce_sum']

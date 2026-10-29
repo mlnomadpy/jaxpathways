@@ -4,6 +4,8 @@ Phase 16: Workload operations · about 90 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Changes, rollback, and artifact provenance](https://www.tahabouhsine.com/jaxpathways/lesson-operations-04.html).
+
 ## What you will be able to do
 
 - Measure end-to-end local service time at more than one workload length.
@@ -20,11 +22,9 @@ Operating cost depends on resource allocation, runtime and the billing model. A 
 
 ## Account for billed time as well as useful work
 
-A job may spend time provisioning, loading, compiling, updating and shutting down. For short jobs, fixed startup costs can dominate even if the update loop is efficient. Reusing a warm service changes that tradeoff but introduces its own allocation costs.
+A fresh job pays for imports, initialization, compilation, updates, logging and checkpoint writes. The update timer covers only one part of that lifecycle. If you size workers from the inner update time alone, you omit work the process still has to finish.
 
-Track the resource count and billed interval under the actual pricing assumptions. If a rate is hypothetical, label the resulting cost as modeled. A duration multiplied by an assumed price is not an invoice.
-
-The timing panels compare different intervals. Their ratios can describe job-level busy fraction, but they do not measure accelerator instruction or memory utilization. Choose the metric that answers the operational question before optimizing it.
+The two panels compare fresh jobs with $8$, $32$ and $64$ updates. Their separate vertical scales reveal that synchronized updates occupy a small fraction of the complete local job. Small differences among the wall-time bars can change across captures; this is not a scaling benchmark. First decide whether your planned service launches a new process for each job or reuses a warm worker.
 
 ### Pause and reason
 
@@ -38,11 +38,13 @@ No. The loop can wait on data, synchronization or inefficient kernels. Device ut
 
 ## Measure the service boundary you intend to provision
 
-We run jobs with $8$, $32$ and $64$ updates in fresh child processes. Supervisor wall time includes imports, runtime startup, compilation, updates, logs and checkpoints. If a production worker stays warm across many jobs, this measurement overstates repeated startup cost; if production adds queueing or remote data, it understates those delays. Write the boundary alongside the number. We use the maximum of these three local observations as an illustrative conservative input, not a statistical tail estimate.
+The supervisor starts its clock before child launch and stops after exit. That interval includes Python/JAX startup, compilation warmup, updates, logging and checkpoints. The inner timer begins after `ready` and waits for each update to complete, so those two durations have deliberately different boundaries.
+
+Follow the $8$-update category across the two panels. Both bars summarize the same job, but the lower one accounts for only its synchronized update intervals. The remainder is time outside that timer, not a measurement of idle hardware. A persistent warm worker removes or amortizes some fixed costs and therefore needs a separately measured service-time distribution.
 
 ## Convert seconds into worker demand
 
-Let $\lambda$ be arrivals per hour, $t$ seconds per job and $m$ workers, each running one job at a time. Offered demand is $\lambda t/3600$ worker-hours per hour. Nominal load is this demand divided by $m$. The units cancel to a fraction. A load above one means average demand exceeds nominal capacity under the model; a load below one does not guarantee a latency target.
+For arrival rate $\lambda$ per hour and $t$ seconds of service per job, offered demand is $\lambda t/3600$ worker-hours per hour. With 1,200 arrivals and 6 seconds each, demand is 2 worker-hours each hour. At a 40% reserve, usable capacity is 0.6 per worker, so $\lceil2/0.6\rceil=4$ workers in this simplified model. The arithmetic describes average demand; it does not predict burst queues or latency tails.
 
 $$
 \rho=\frac{\lambda t}{3600m}
@@ -50,7 +52,9 @@ $$
 
 ## State the reserve rather than hiding it
 
-For reserve fraction $r$, require nominal load no greater than $1-r$. The smallest integer worker count in this simple model is the ceiling below, with at least one worker in our function. For $90$-second jobs arriving $80$ times an hour, demand is $2$ worker-hours per hour. A $25$% reserve requires at least $3$ workers; four workers would run at nominal load $0.5$.
+Reserve reduces the capacity you plan to use. A $40\%$ reserve leaves a usable fraction of $1-0.4=0.6$ per worker. For the preceding demand of $2$ worker-hours per hour, three workers provide $1.8$ usable worker-hours, which is insufficient; four provide $2.4$. Rounding the worker count up is part of the decision, not a display preference.
+
+State what the reserve is intended to cover, such as maintenance or variation in offered work. It does not automatically protect a latency target during bursts. Retain the arrival and service-time assumptions so a later measurement can challenge this average-demand plan.
 
 $$
 m_{\min}=\left\lceil\frac{\lambda t}{3600(1-r)}\right\rceil
@@ -58,238 +62,49 @@ $$
 
 ## A cost number needs a declared price model
 
-We use an invented planning rate of $1.50$ currency units per worker-hour, explicitly not a current cloud price. Reserving two workers for an hour costs $3$ under that model, whether busy or idle. A job’s active-time cost is $pt/3600$ for hourly rate $p$, but dividing the reserved hourly bill by actual completed jobs can produce a different cost per completion. Include idle capacity, failed attempts, storage and transfer charges when those belong to the real budget.
+Suppose a worker costs a hypothetical $1.50$ currency units per reserved hour. Holding the four workers from the worked plan for one hour costs $4\times1.50=6$, whether they are busy for the entire hour or not. Charging only the six seconds spent on an individual job answers an active-time allocation question; it does not account for reserved idle capacity.
+
+Keep the rate, billing interval and provisioned duration explicit. Real estimates also need failed attempts, storage, transfer and the provider's current billing rules. The rate here is an arithmetic assumption, not a quoted cloud price.
 
 ## Do not confuse duty fraction with hardware utilization
 
-The worker records seconds inside synchronized compiled updates. Dividing their sum by job wall time is an application duty fraction. A small value in a tiny job mostly reflects startup and operational overhead. It does not measure CPU core occupancy, accelerator compute utilization, memory-bandwidth pressure or scheduler allocation. Those require their own target-specific measurements. Increasing update count can amortize startup without making each update intrinsically faster.
+Define application duty fraction for this measurement as synchronized update time divided by complete job time. For an illustrative job taking $2$ seconds end to end with $0.02$ seconds in that update interval, the fraction is $0.02/2=0.01$, or $1\%$. These example values explain the ratio; read the plotted capture for its actual durations.
+
+The remaining time can include imports, compilation, logging and checkpoint work. The ratio does not reveal CPU-core occupancy, accelerator utilization, bandwidth or allocated-but-idle device time. Use it to choose which stage to inspect next, and use device-specific evidence for hardware utilization.
 
 ## Capacity is a distribution, not just a mean
 
-Real arrivals can burst, job durations can vary, failures consume retries, and a worker may be unavailable. Three short measurements cannot estimate a high percentile reliably. Retain individual timings, choose a larger representative study on the actual target, and test the queue/latency objective before buying capacity. The local examples execute real jobs; all arrival, reserve and price scenarios remain labeled assumptions.
+An average can conceal very different queue behavior. Consider a changed, hypothetical workload where $80\%$ of jobs take $1$ second and $20\%$ take $10$. The mean is $0.8\times1+0.2\times10=2.8$ seconds, while most jobs finish quickly and the slow group can hold a worker much longer. A plan based only on the mean misses which users wait behind that group.
 
-## Create the local artifact helpers
+Retain individual service times and replay representative arrivals with the routing and retry policy you intend to use. Include unavailable workers and burst periods before judging a latency objective. The three local measurements demonstrate complete-process accounting; they are too few to estimate a production high percentile.
 
-Create main.py with this block. Run python3 main.py in the CPU course environment.
+## Keep job duty tied to matching intervals
+
+Read the timing numerator and denominator from the same run.
 
 ```python
-# Step 1: Create the local artifact helpers
-"""Bounded local JAX subprocess supervisor and lifecycle verifier."""
-from pathlib import Path
-import hashlib
-import json
-import math
-import os
-import subprocess
-import sys
-import tempfile
-import time
-
-
-def digest(value):
-    return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(',', ':'), allow_nan=False).encode()).hexdigest()
-
-
-def atomic_json(path, value):
-    """Replace one local JSON file only after its bytes have been flushed."""
-    path = Path(path)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    fd, temporary = tempfile.mkstemp(prefix=path.name+'.', suffix='.tmp', dir=path.parent)
-    try:
-        with os.fdopen(fd, 'w') as stream:
-            json.dump(value, stream, sort_keys=True, allow_nan=False)
-            stream.flush()
-            os.fsync(stream.fileno())
-        os.replace(temporary, path)
-    finally:
-        if os.path.exists(temporary):
-            os.unlink(temporary)
+def update_duty(update_seconds, wall_seconds):
+    return update_seconds / wall_seconds if wall_seconds else 0.
 ```
 
-The only filesystem writes are to the caller-selected run directory. Stable JSON encoding makes hashes reproducible.
+This fraction does not measure device occupancy.
 
-## Define the supervised worker
+## Convert one job into modeled cost
 
-Append this block to main.py. Run python3 main.py in the CPU course environment.
+Keep seconds, hourly rate and worker allocation explicit.
 
 ```python
-# This file is materialized only inside the caller-owned temporary run folder.
-WORKER = r'''
-import hashlib, json, os, sys, time
-from pathlib import Path
-import jax
-import jax.numpy as jnp
-import numpy as np
-root = Path(sys.argv[1])
-cfg = json.loads((root/'config.json').read_text())
-worker_hash = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
-def emit(event, **fields):
-    print(json.dumps(dict(event=event, monotonic_s=time.monotonic(), **fields)), flush=True)
-def digest(value):
-    return hashlib.sha256(json.dumps(value,sort_keys=True,separators=(',', ':'),allow_nan=False).encode()).hexdigest()
-def write_checkpoint(state):
-    target = root/'checkpoint.json'
-    temporary = root/'checkpoint.pending'
-    with temporary.open('w') as stream:
-        json.dump(dict(state,checksum=digest(state)),stream,sort_keys=True,allow_nan=False)
-        stream.flush()
-        os.fsync(stream.fileno())
-    os.replace(temporary,target)
-    emit('checkpoint',step=state['step'],state_hash=digest(state))
-try:
-    emit('started',pid=os.getpid(),backend=jax.default_backend(),device_count=jax.device_count())
-    if jax.default_backend() != cfg['backend'] or jax.device_count() < cfg['min_devices']:
-        raise ValueError('runtime backend/device contract failed')
-    x = jnp.linspace(-1.,1.,64)
-    y = 2*x+1
-    data_hash = digest(dict(x=np.asarray(x).tolist(),y=np.asarray(y).tolist()))
-    training = {name:cfg[name] for name in ('seed','learning_rate','momentum','batch_size')}
-    config_hash = digest(training)
-    if cfg['resume']:
-        saved = json.loads((root/'checkpoint.json').read_text())
-        checksum = saved.pop('checksum',None)
-        if checksum != digest(saved) or saved.get('worker_hash') != worker_hash:
-            raise ValueError('checkpoint checksum/source mismatch')
-        if saved['schema_version'] != 1 or saved['config_hash'] != config_hash or saved['data_hash'] != data_hash:
-            raise ValueError('checkpoint provenance mismatch')
-        state = saved
-        step = saved['step']
-        params=jnp.array(saved['params'])
-        velocity=jnp.array(saved['velocity'])
-        key=jnp.array(saved['key'],dtype=jnp.uint32)
-        if not isinstance(step,int) or isinstance(step,bool) or step < 0 or step > cfg['steps'] or params.shape != (2,) or velocity.shape != (2,) or key.shape != (2,):
-            raise ValueError('invalid checkpoint state shape or step')
-        if not bool(jnp.all(jnp.isfinite(params))) or not bool(jnp.all(jnp.isfinite(velocity))):
-            raise ValueError('nonfinite checkpoint state')
-        emit('restored',step=step,state_hash=digest(saved))
-    else:
-        step=0
-        params=jnp.zeros(2)
-        velocity=jnp.zeros(2)
-        key=jax.random.PRNGKey(cfg['seed'])
-    def update(params,velocity,key):
-        key, sample = jax.random.split(key)
-        indices=jax.random.choice(sample,64,(cfg['batch_size'],),replace=False)
-        objective=lambda p:jnp.mean((p[0]*x[indices]+p[1]-y[indices])**2)
-        loss, grad=jax.value_and_grad(objective)(params)
-        velocity=cfg['momentum']*velocity+grad
-        params=params-cfg['learning_rate']*velocity
-        return params,velocity,key,loss
-    compiled=jax.jit(update)
-    # Compile and synchronize once without consuming actual training state.
-    begin=time.perf_counter()
-    warm=compiled(params,velocity,key)
-    jax.block_until_ready(warm)
-    emit('ready',compile_warmup_s=time.perf_counter()-begin,step=step)
-    while step < cfg['steps']:
-        if cfg.get('stall_at') == step:
-            emit('stall_injected',step=step)
-            time.sleep(cfg.get('stall_seconds',10.))
-        begin=time.perf_counter()
-        params,velocity,key,loss=compiled(params,velocity,key)
-        jax.block_until_ready((params,velocity,key,loss))
-        elapsed=time.perf_counter()-begin
-        step+=1
-        state=dict(schema_version=1,worker_hash=worker_hash,step=step,params=np.asarray(params).tolist(),velocity=np.asarray(velocity).tolist(),key=np.asarray(key).tolist(),config_hash=config_hash,data_hash=data_hash)
-        emit('progress',step=step,loss=float(loss),examples=cfg['batch_size'],update_s=elapsed,state_hash=digest(state))
-        if step % cfg['checkpoint_every'] == 0 or step == cfg['steps']:
-            write_checkpoint(state)
-        if cfg.get('fail_after') == step:
-            raise RuntimeError('controlled failure after update')
-    write_checkpoint(state)
-    emit('completed',step=step,state_hash=digest(state))
-except Exception as error:
-    emit('failed',kind=type(error).__name__,message=str(error))
-    raise SystemExit(23)
-'''
+def cost_per_job(service_seconds, hourly_rate):
+    return service_seconds / 3600 * hourly_rate
 ```
 
-The string is a real Python program launched in a separate process. It emits structured events, synchronizes JAX updates and preserves complete state.
+The rate is an assumption in this CPU fixture, not an invoice.
 
-## Add bounded launch and result collection
+## Apply reserve to offered worker-hours
 
-Append this block to main.py. Run python3 main.py in the CPU course environment.
-
-```python
-# Step 3 — Add bounded launch and result collection
-def default_config(**changes):
-    cfg=dict(seed=3,learning_rate=.04,momentum=.8,batch_size=8,steps=8,
-             checkpoint_every=2,backend='cpu',min_devices=1,resume=False,
-             fail_after=None,stall_at=None,stall_seconds=10.)
-    # Apply configuration overrides before validating the resulting fields.
-    cfg.update(changes)
-    for name in ('steps','checkpoint_every','batch_size','min_devices'):
-        if not isinstance(cfg[name],int) or isinstance(cfg[name],bool) or cfg[name] < 1:
-            raise ValueError(name+' must be a positive integer')
-    if cfg['batch_size'] > 64 or not 0 <= cfg['momentum'] < 1 or not 0 < cfg['learning_rate'] < 1:
-        raise ValueError('invalid training configuration')
-    return cfg
-
-
-def launch(root, config=None, timeout=10.):
-    root=Path(root)
-    root.mkdir(parents=True,exist_ok=True)
-    cfg=default_config(**(config or {}))
-    if timeout <= 0:
-        raise ValueError('timeout must be positive')
-    atomic_json(root/'config.json',cfg)
-    worker=root/'worker.py'
-    worker.write_text(WORKER)
-    env=dict(os.environ,JAX_PLATFORMS=cfg['backend'],PYTHONUNBUFFERED='1')
-    started=time.perf_counter()
-    process=subprocess.Popen([sys.executable,str(worker),str(root)],stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,env=env)
-    timed_out=False
-    try:
-        stdout,stderr=process.communicate(timeout=timeout)
-    except subprocess.TimeoutExpired:
-        timed_out=True
-        process.terminate()
-        try:
-            stdout,stderr=process.communicate(timeout=1.)
-        except subprocess.TimeoutExpired:
-            process.kill()
-            stdout,stderr=process.communicate(timeout=1.)
-    wall=time.perf_counter()-started
-    events=[]
-    malformed=[]
-    for line in stdout.splitlines():
-        if not line.strip():
-            continue
-        try:
-            event=json.loads(line)
-            if not isinstance(event,dict) or 'event' not in event:
-                raise ValueError('not an event')
-            events.append(event)
-        except (ValueError,TypeError):
-            malformed.append(line)
-    status='timed_out' if timed_out else 'completed' if process.returncode == 0 and not malformed and events and events[-1]['event']=='completed' else 'failed'
-    result=dict(status=status,returncode=process.returncode,wall_s=wall,events=events,stderr=stderr,
-                worker_hash=hashlib.sha256(WORKER.encode()).hexdigest(),config=cfg,malformed_stdout=malformed)
-    atomic_json(root/'run.json',result)
-    return result
-```
-
-The supervisor owns the child handle, captures its output and always waits for termination after a timeout.
-
-## Add metric summaries and capacity arithmetic
-
-Append this block to main.py. Run python3 main.py in the CPU course environment.
+Change arrivals while holding the local timing observations fixed.
 
 ```python
-# Step 4 — Add metric summaries and capacity arithmetic
-def summarize(result):
-    updates=[e for e in result['events'] if e['event']=='progress']
-    checkpoints=[e['step'] for e in result['events'] if e['event']=='checkpoint']
-    count=sum(e['examples'] for e in updates)
-    update_s=sum(e['update_s'] for e in updates)
-    latest=max((e['step'] for e in updates),default=0)
-    checkpoint=max(checkpoints,default=0)
-    return dict(status=result['status'],updates=len(updates),examples=count,last_step=latest,checkpoint_step=checkpoint,
-                uncheckpointed_updates=max(0,latest-checkpoint),update_s=update_s,
-                update_examples_per_s=count/update_s if update_s else 0.,
-                job_examples_per_s=count/result['wall_s'] if result['wall_s'] else 0.,
-                update_duty_fraction=update_s/result['wall_s'] if result['wall_s'] else 0.)
-
 def capacity(measured_job_s, arrivals_per_hour, workers, hourly_rate, reserve_fraction=.25):
     """Illustrative one-job-per-worker plan; inputs are not cloud price discovery."""
     values=[measured_job_s,arrivals_per_hour,hourly_rate,reserve_fraction]
@@ -302,34 +117,11 @@ def capacity(measured_job_s, arrivals_per_hour, workers, hourly_rate, reserve_fr
     required=max(1,math.ceil(offered/(1-reserve_fraction)))
     return dict(offered_worker_hours_per_hour=offered,load_fraction=load,
                 minimum_workers_with_reserve=required,hourly_budget=workers*hourly_rate,
-                hypothetical_cost_per_job=measured_job_s*hourly_rate/3600,
+                hypothetical_cost_per_job=cost_per_job(measured_job_s,hourly_rate),
                 within_reserve=load <= 1-reserve_fraction)
 ```
 
-Keep measured quantities separate from invented planning inputs and validate the units.
-
-## Measure jobs before evaluating assumptions
-
-Append this block to main.py. Run python3 main.py in the CPU course environment.
-
-```python
-# Step 5 — Measure jobs before evaluating assumptions
-samples=[]
-# Keep this run’s database and artifacts in a scratch directory removed on exit.
-with tempfile.TemporaryDirectory(prefix='ops-capacity-') as folder:
-    for steps in [8,32,64]:
-        run=launch(Path(folder)/str(steps),dict(steps=steps))
-        assert run['status']=='completed'
-        samples.append((steps,run,summarize(run)))
-measured=max(run['wall_s'] for _,run,_ in samples)
-plan=capacity(measured_job_s=measured,arrivals_per_hour=600,workers=2,hourly_rate=1.5,reserve_fraction=.25)
-assert plan['hourly_budget']==3.
-print('measured local job seconds:',[r['wall_s'] for _,r,_ in samples])
-print('illustrative capacity plan:',plan)
-print('assumptions: 600 arrivals/hour, 2 workers, hypothetical 1.50 per worker-hour, 25% reserve')
-```
-
-Every duration comes from a completed child; arrival and price inputs are labeled hypothetical.
+This estimate exposes the assumed reserve, arrival rate and price for review.
 
 ## Run the example
 
@@ -366,6 +158,12 @@ def atomic_json(path, value):
         if os.path.exists(temporary):
             os.unlink(temporary)
 
+def update_duty(update_seconds, wall_seconds):
+    return update_seconds / wall_seconds if wall_seconds else 0.
+
+def cost_per_job(service_seconds, hourly_rate):
+    return service_seconds / 3600 * hourly_rate
+
 # This file is materialized only inside the caller-owned temporary run folder.
 WORKER = r'''
 import hashlib, json, os, sys, time
@@ -525,7 +323,7 @@ def summarize(result):
                 uncheckpointed_updates=max(0,latest-checkpoint),update_s=update_s,
                 update_examples_per_s=count/update_s if update_s else 0.,
                 job_examples_per_s=count/result['wall_s'] if result['wall_s'] else 0.,
-                update_duty_fraction=update_s/result['wall_s'] if result['wall_s'] else 0.)
+                update_duty_fraction=update_duty(update_s,result['wall_s']))
 
 def capacity(measured_job_s, arrivals_per_hour, workers, hourly_rate, reserve_fraction=.25):
     """Illustrative one-job-per-worker plan; inputs are not cloud price discovery."""
@@ -539,7 +337,7 @@ def capacity(measured_job_s, arrivals_per_hour, workers, hourly_rate, reserve_fr
     required=max(1,math.ceil(offered/(1-reserve_fraction)))
     return dict(offered_worker_hours_per_hour=offered,load_fraction=load,
                 minimum_workers_with_reserve=required,hourly_budget=workers*hourly_rate,
-                hypothetical_cost_per_job=measured_job_s*hourly_rate/3600,
+                hypothetical_cost_per_job=cost_per_job(measured_job_s,hourly_rate),
                 within_reserve=load <= 1-reserve_fraction)
 
 # Step 5 — Measure jobs before evaluating assumptions
@@ -570,11 +368,15 @@ Expected: Three actual local durations feed a first-order plan whose arrival rat
 
 ### Read the figure
 
-The horizontal categories in both panels are actual jobs with $8$, $32$ and $64$ updates. The upper panel shows complete supervisor wall time in seconds. The lower panel shows the sum of synchronized update times in seconds. The panels use separate linear vertical scales, so compare their labeled numerical values rather than bar heights across panels. The labels retain the actual measurements from this run.
+Both panels use the categories $8$, $32$ and $64$ updates in fresh child processes. The upper axis is complete job seconds. The lower axis is summed synchronized update seconds. They have separate linear scales, so equal-looking bar heights across panels do not mean equal durations.
+
+Choose one category and compare its two numerical axis readings. The update interval is only a small part of its complete lifecycle. Then compare categories within a panel. Since each job starts a new process and the sample is tiny, a non-monotone wall-time ordering can reflect fixed costs and host variation rather than the cost of an extra update.
 
 ### Connect it to the computation
 
-The lower-panel values are much smaller than the complete-job values because startup, compilation, logging and checkpoint writes are outside the update timer. Calculate each pair’s ratio from its labels to see how much of the short job is spent in measured updates. The ratio can be large for such small workloads. Host scheduling and filesystem work vary, so close wall-time values need not increase monotonically with update count. This figure explains timing boundaries and startup amortization; it does not measure hardware utilization or prove scaling on an accelerator.
+The upper clock includes startup, initialization, warmup, updates, logging and checkpoints; the lower clock counts only synchronized updates. Their ratio is an application duty fraction under those boundaries. It is not hardware utilization.
+
+Predict how the picture would change for a worker that stays warm for many jobs: some startup and compilation costs could be shared instead of repaid for each category. Measure that actual lifecycle before replacing the current service-time assumption in the capacity calculation. Keep the workload's arrival rate, reserve and hypothetical price separate from the measured local durations.
 
 ```python
 visual_data={'panels':[{'kind':'bar','labels':[str(n) for n,_,_ in samples],'xlabel':'updates in fresh local process','ylabel':'complete job seconds','title':'Complete process lifetime','series':[{'label':'wall time','y':[r['wall_s'] for _,r,_ in samples]}]},{'kind':'bar','labels':[str(n) for n,_,_ in samples],'xlabel':'updates in fresh local process','ylabel':'synchronized update seconds','title':'Training updates only — separate vertical scale','series':[{'label':'update time','y':[st['update_s'] for _,_,st in samples]}]}]}
@@ -582,16 +384,13 @@ visual_data={'panels':[{'kind':'bar','labels':[str(n) for n,_,_ in samples],'xla
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:10:54.671540+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:15:40.807623+00:00. JAX 0.9.2.
 
 ```text
-measured local job seconds: [0.6406106250360608, 0.6188522079028189, 0.648827999830246]
-illustrative capacity plan: {'offered_worker_hours_per_hour': 0.10813799997170766, 'load_fraction': 0.05406899998585383, 'minimum_workers_with_reserve': 1, 'hourly_budget': 3.0, 'hypothetical_cost_per_job': 0.00027034499992926916, 'within_reserve': True}
+measured local job seconds: [0.8413121248595417, 0.8365796250291169, 0.9017954594455659]
+illustrative capacity plan: {'offered_worker_hours_per_hour': 0.15029924324092767, 'load_fraction': 0.07514962162046383, 'minimum_workers_with_reserve': 1, 'hourly_budget': 3.0, 'hypothetical_cost_per_job': 0.0003757481081023191, 'within_reserve': True}
 assumptions: 600 arrivals/hour, 2 workers, hypothetical 1.50 per worker-hour, 25% reserve
-measured local job seconds: [0.7135265413671732, 0.715399167034775, 0.8027491671964526]
-illustrative capacity plan: {'offered_worker_hours_per_hour': 0.13379152786607543, 'load_fraction': 0.06689576393303771, 'minimum_workers_with_reserve': 1, 'hourly_budget': 3.0, 'hypothetical_cost_per_job': 0.00033447881966518857, 'within_reserve': True}
-assumptions: 600 arrivals/hour, 2 workers, hypothetical 1.50 per worker-hour, 25% reserve
-nominal load at two demand scenarios: 0.06689576393303771 0.13379152786607543
+nominal load at two demand scenarios: 0.07514962162046383 0.15029924324092767
 required workers under changed hypothetical reserve: 1
 PASS: operations-05
 
@@ -634,7 +433,7 @@ Demand changes the required capacity; it does not automatically make each job fa
 
 ## Make it yours
 
-Using the measured service-time input, calculate the minimum worker count for $1200$ arrivals per hour with $40$% reserve, then independently verify that the chosen count satisfies the load bound.
+Using the measured duration input, compute workers for 1,200 arrivals/hour, 40% reserve and a $1.5\times$ planning factor. Change arrivals to 2,400 while holding measured service time fixed. Interpret the resulting load and cost assumptions from the actual report.
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 

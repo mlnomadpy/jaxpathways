@@ -1,0 +1,72 @@
+[
+  {
+    "format": "a4",
+    "page": 567,
+    "focus": "sharding",
+    "image": "docs/evidence/course-review-0.18.0/print-samples/a4-sharding-567.png",
+    "titleMatches": [
+      567
+    ]
+  },
+  {
+    "format": "a4",
+    "page": 360,
+    "focus": "mlp",
+    "image": "docs/evidence/course-review-0.18.0/print-samples/a4-mlp-360.png",
+    "titleMatches": [
+      360
+    ]
+  },
+  {
+    "format": "a4",
+    "page": 141,
+    "focus": "tracing",
+    "image": "docs/evidence/course-review-0.18.0/print-samples/a4-tracing-141.png",
+    "titleMatches": [
+      141
+    ]
+  },
+  {
+    "format": "a4",
+    "page": 358,
+    "focus": "math",
+    "image": "docs/evidence/course-review-0.18.0/print-samples/a4-math-358.png",
+    "titleMatches": [
+      358,
+      359,
+      367
+    ]
+  },
+  {
+    "format": "letter",
+    "page": 623,
+    "focus": "sharding",
+    "image": "docs/evidence/course-review-0.18.0/print-samples/letter-sharding-623.png",
+    "titleMatches": [
+      623
+    ]
+  },
+  {
+    "format": "letter",
+    "page": 396,
+    "focus": "math",
+    "image": "docs/evidence/course-review-0.18.0/print-samples/letter-math-396.png",
+    "titleMatches": [
+      396,
+      397,
+      406
+    ]
+  },
+  {
+    "format": "a4",
+    "page": 359,
+    "focus": "equations",
+    "image": "docs/evidence/course-review-0.18.0/print-samples/a4-equations-359.png"
+  },
+  {
+    "format": "letter",
+    "page": 397,
+    "focus": "equations",
+    "image": "docs/evidence/course-review-0.18.0/print-samples/letter-equations-397.png"
+  }
+]

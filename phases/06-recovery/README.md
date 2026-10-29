@@ -12,7 +12,9 @@ Compare sample IDs, optimizer memory, random state and losses after restore.
 
 ## Study guide: Can an interrupted run make exactly the same next update?
 
-Recovery is a contract between data order, model state and publication. Tracking explains which run produced an artifact; a checkpoint supplies the values needed to continue it. Neither replaces the other.
+Imagine a run stops just after an update. Loading the weights is only part of continuing: the optimizer, next random draw and next data record must correspond to the same boundary. A seed can replay a sequence from its beginning, while iterator state identifies where to continue it.
+
+Trace record IDs and complete training state across a save, interruption and fresh restore. Then distinguish a requested save from a completed, verified and accepted checkpoint. Experiment tracking supplies the source and data lineage around that continuation; it does not replace the state required to resume.
 
 ### Check your starting point
 
@@ -132,7 +134,7 @@ Status: authored lesson with CPU exercise.
 
 **Intended outcome:** Track, retrieve and compare two JAX experiments using explicit data identity, metric steps and downloaded model artifacts.
 
-**Evidence:** Keep both MLflow run IDs, source/data hashes, complete loss histories, the selection metric and predictions independently recomputed from the downloaded artifact.
+**Evidence:** Keep retrieved metric histories and data tags, all three model artifacts, actual train/validation predictions after reload, and the different training-only versus held-out selections. Explain the memorizer's zero training MSE and validation MSE of 6.
 
 **Checkpoint:** A run is tagged champion. What does that establish?
 

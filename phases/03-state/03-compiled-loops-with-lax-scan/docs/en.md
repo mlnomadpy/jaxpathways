@@ -4,6 +4,8 @@ Phase 03: State, randomness & control flow · about 65 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Pytrees and structured parameters](https://www.tahabouhsine.com/jaxpathways/lesson-state-02.html).
+
 ## What you will be able to do
 
 - Separate carry from recorded outputs
@@ -21,11 +23,9 @@ A scan separates the state carried between steps from the outputs collected at e
 
 ## Unroll three steps before compiling the loop
 
-For a separate hand-worked recurrence, start with carry $0$ and inputs $[1,2,3]$. Let each step add its input to the carry and emit the new carry. The successive carries are $1,3,6$; the final carry is $6$, while the stacked outputs are $[1,3,6]$.
+A repeated update is easier to translate when we first make its state flow concrete. Start with carry $0$, add inputs $[1,2,3]$, and emit each new carry: the successive values are $1,3,6$. The final carry is the last state $6$; the output history is the three emitted values $[1,3,6]$.
 
-Those two returned objects answer different questions. Keeping only the final carry discards the intermediate outputs. Keeping outputs does not mean the carry itself grows on each iteration. A fixed carry contract is what makes the repeated computation structured.
-
-Trace one horizontal state edge and one downward output edge in the diagram. When adapting a Python loop, write down which variables belong on each edge before translating the loop to `lax.scan`.
+The diagram’s input nodes feed the step nodes, horizontal arrows pass carry from one step to the next, and downward arrows collect outputs. The edge labels $1$ and $3$ are the carry values passed onward; the emitted values are $1,3,6$. Trace these arrows when deciding which Python variables belong in scan’s carry and which belong in its stacked output.
 
 ### Carry moves through time; outputs are collected
 
@@ -35,7 +35,7 @@ Trace one horizontal state edge and one downward output edge in the diagram. Whe
 
 *Architecture and dataflow mechanism diagram.*
 
-An additive scan starts with carry $0$ and inputs $1,2,3$. Horizontal arrows pass updated carry; downward arrows collect emitted values. Final carry $6$ and outputs $[1,3,6]$ are different return values. Arrow lengths do not represent runtime.
+Follow each input node into its step node, then follow the horizontal arrows for carry: initial $0$, then $1$, then $3$, and final $6$. Each downward arrow collects the updated carry as an output, producing $[1,3,6]$. Thus final carry and stacked outputs are separate results. Arrow lengths and node spacing show dataflow only, not runtime.
 
 ### Pause and reason
 
@@ -49,9 +49,9 @@ The final carry is still $6$, but outputs become $[0,1,3]$. A final-state check 
 
 ## Separate carry from recorded outputs
 
-Each scan step receives (carry,input) and returns (next_carry,output). Carry is what the next step needs. Output is what you want stacked into a history. They can have different meanings even when this demonstration returns the new state in both positions.
+A scan step has the contract $(carry_t,input_t)\mapsto(carry_{t+1},output_t)$. The carry is the small state needed by the next transition; the output is a record collected for inspection or later computation. They may contain related values without being the same conceptual object.
 
-For decay $0.5$, initial state $0$ and four inputs of $1$, the states are $1$,$1.5$,$1.75$,$1.875$. There are four recorded outputs; the initial state is not automatically part of history. Decide whether a plot should include that initial point before labeling the time axis.
+For the plotted decay recurrence $c_{t+1}=0.5c_t+1$ from initial carry zero, the horizontal axis is completed step and the vertical axis is carry value. The four outputs are $1,1.5,1.75,1.875$, approaching the dashed fixed point $2$. The initial zero is not plotted. Use the index to avoid labeling the first update as step zero.
 
 ```text
 (state_t, input_t) → transition → (state_(t+1), recorded_t)
@@ -60,15 +60,15 @@ state: 0 → 1 → 1.5 → 1.75 → 1.875
 
 ## Keep the carry contract invariant
 
-Carry values change, but their pytree structure, shapes and dtypes must remain compatible across steps. Growing a Python list or concatenating a larger array into the carry changes that contract. Allocate a fixed-size state or use the separately stacked outputs instead.
+A compiled scan needs a stable carry contract: same pytree structure, shapes and dtypes at every transition. The numerical contents may change, as the carry goes from $0$ to $1.5$, but the container and dimensions stay fixed. A growing Python list or a concatenated history changes the carry shape and violates this contract.
 
-This constraint is a representation decision, not an arbitrary restriction on simulation. A fixed-dimensional physical state naturally meets it. If a system has variable numbers of entities, consider padding and masks with an explicit maximum capacity.
+Keep history in the separately stacked outputs, as the example does, while the carry remains one scalar. For a bounded variable-size problem, represent capacity explicitly and use masks as needed; do not make the repeated state grow implicitly each step.
 
 ## Differentiate the recurrence by hand
 
-With four unit inputs and initial zero, the final value is $1+d+d^2+d^3$. Its derivative is $1+2d+3d^2$, giving $2.75$ at $d=0.5$. The derivative also obeys a recurrence: $s_{t+1}=\mathrm{state}_t+d s_t$, starting from $s_0=0$.
+Differentiating a recurrence is clearer when the final answer is written as a function of the parameter. With four unit inputs and initial zero, the final carry is $1+d+d^2+d^3$, whose derivative at $d=0.5$ is $2.75$. The recurrence for the sensitivity is $s_{t+1}=state_t+d s_t$, starting at zero.
 
-Autodiff through scan differentiates the represented state transition. It does not make an unstable or inaccurate numerical model valid. Verify a small analytic case first, then a changed input sequence, before trusting a longer simulation.
+Autodiff through `scan` follows the represented transition and this same dependency through time. It cannot validate whether the model itself is stable or whether the recurrence was encoded correctly. Compare the short polynomial and one changed input sequence before trusting a long run.
 
 $$
 \begin{aligned}s_{\mathrm{final}}(d)&=1+d+d^2+d^3\\\frac{ds_{\mathrm{final}}}{dd}&=1+2d+3d^2\\s_{\mathrm{final}}(0.5)&=1.875,\qquad s_{\mathrm{final}}\prime(0.5)=2.75\end{aligned}
@@ -76,9 +76,9 @@ $$
 
 ## Compile the repeated transition without a timing promise
 
-A Python loop inside jit can be unrolled while tracing; scan expresses a repeated operation compactly. That can reduce compilation work for long loops, but it is not a universal promise that scan is faster for every workload.
+`scan` describes a fixed repeated transition compactly, while a Python loop inside `jit` may be unrolled during tracing. This distinction can matter for compilation of long loops, but it does not guarantee that scan is faster for every workload.
 
-Before benchmarking, compare numerical results on the same inputs and synchronize execution. Keep step count and precision explicit. For this lesson we verify correctness and derivatives; hardware profiling belongs to a later course unit.
+The retained receipt checks that Python and scan produce history $[1,1.5,1.75,1.875]$ and final value $1.875$, and that a changing carry shape is rejected. Those are correctness and contract checks, not a timing result. If measuring later, compare the same steps, inputs and precision and wait for completion.
 
 ## Prepare the inputs
 
@@ -152,15 +152,11 @@ Expected: History: $[1., 1.5, 1.75, 1.875]$; Final: $1.875$.
 
 ### Read the figure
 
-The solid line shows the carry after each completed scan step. It starts at step $1$ with value $1$, then rises through $1.5$, $1.75$, and $1.875$. The dashed horizontal line marks the fixed point $2$.
-
-The initial carry $0$ is not plotted. Each visible point is the value after applying the recurrence once more, so the first point already includes one update.
+The horizontal axis counts completed scan steps, and the vertical axis is carry value. The solid history is $1,1.5,1.75,1.875$ at steps one through four; the dashed line is the fixed point $2$. The initial carry $0$ is not included, so the first plotted point already follows one update. Notice that the gap to $2$ shrinks from $1$ to $0.125$.
 
 ### Connect it to the computation
 
-The update is $c_{t+1}=0.5c_t+1$. Subtracting it from the fixed point gives $2-c_{t+1}=0.5(2-c_t)$: each step halves the remaining gap. This explains both the upward movement and its slowing pace.
-
-The shrinking gaps are $1$, $0.5$, $0.25$, and $0.125$. `scan` carries the evolving value forward while collecting this history. One more step would produce $1.9375$; it would not add another full unit or restart from the initial carry.
+The recurrence $c_{t+1}=0.5c_t+1$ halves the remaining gap to $2$ each step. In scan terms, each updated scalar is carried to the next transition, while each plotted value is also collected in the output history. Use the horizontal step labels to distinguish final carry from the sequence of emitted values.
 
 ```python
 visual_data = {'kind': 'line', 'x': [1, 2, 3, 4], 'xlabel': 'completed step', 'ylabel': 'carry value', 'series': [{'label': 'scan history', 'y': history.tolist()}, {'label': 'fixed point 2', 'y': [2.0] * 4}]}
@@ -168,7 +164,7 @@ visual_data = {'kind': 'line', 'x': [1, 2, 3, 4], 'xlabel': 'completed step', 'y
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:03:50.876078+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:03:10.197100+00:00. JAX 0.9.2.
 
 ```text
 History: [1.    1.5   1.75  1.875]

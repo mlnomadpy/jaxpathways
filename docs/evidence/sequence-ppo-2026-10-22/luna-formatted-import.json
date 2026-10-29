@@ -1,0 +1,9 @@
+{
+  "README.md": "c46c7f4f71ee0b4b33e07c6dffd589d21b95fe4003057863b32ca0dcc7f22c26",
+  "project.json": "90182332e0f4a6b29528a99057e6e0aa9aa9dc9a23f18f1edd73ab8db9c854f3",
+  "requirements.txt": "5c78d55f74b1cc11c55e2bd84b093f7dfbe2dd3290cdf04799affd8e84885126",
+  "reference/sequence_ppo/recipe.json": "1c9053b83f36b24dfe6f765700e2fab9a51bee87f30c902e35102d11e7cedcc8",
+  "solution/sequence_ppo.py": "792eb35048b6299b467bea4625caf8ec5716150a8d423efdf73c77dc8a08cb26",
+  "starter/sequence_ppo.py": "2e512607f84e54ad90f9d8dfe79064ed0ee661ec9c58c5072dfc50cd55e7fbf9",
+  "tests/check_sequence_ppo.py": "5320ad95be0bd58d00c8ce6010cdb8920661acaf5b88df5945666b5d7518a775"
+}

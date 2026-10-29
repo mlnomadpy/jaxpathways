@@ -1,0 +1,32 @@
+{
+  "filesSha256": {
+    "projects/posttraining-audit/transformer_lineage/README.md": "2d0f9db1a2ec5c3eec8845c7b8267e6cd3044a97d66ecfc37c7eef97d9ec7c98",
+    "projects/posttraining-audit/transformer_lineage/check.py": "12f6709ef0683067ee10d871891bb4d67736c6d5039d5a2809d2dfa92115a0e3",
+    "projects/posttraining-audit/transformer_lineage/evidence-schema.json": "59f5ba83b7129b531fb790c0ac62bae22b70a297b3f35caacd3f4e314418e798",
+    "projects/posttraining-audit/transformer_lineage/fixture.json": "6a47dbe54012ed3013753ca8089fbcd51e57b3d0cbd61ffdb50a6877e0a534ff",
+    "projects/posttraining-audit/transformer_lineage/recipe.json": "8411afc4412c59973d56b2cceae530dd642a5aa1c9e6f57a5dbb7f6ba110bc57",
+    "projects/posttraining-audit/transformer_lineage/requirements.txt": "14c6bdedf000ba836f74beedc4c7aa50bc818939d30b75030a2c47a0cf6df537",
+    "projects/posttraining-audit/transformer_lineage/solution.py": "df56c036a57e8ad1c7be61341290422e7dfa47ea3326b3c82e5cecad5806b569",
+    "projects/posttraining-audit/transformer_lineage/starter.py": "8196af0f989c382ab5c4833102f11a2d1fe2263614e35e8ac1be8ab1ce501d32",
+    "projects/text-harness/foundations/config.py": "5c05801a7ec1a15b3978c87c77ac4e64d1b056c60487cbcff3cdf72475c8bb64",
+    "projects/text-harness/foundations/data.py": "ff8ff698090866d46bc1f2b3540393b9a16db2121ad824110bd2ba53db645bd8",
+    "projects/text-harness/foundations/model.py": "94a88ae7fd6a251b5b190b4631496e04bb71a31c1bfe418511fdd37ffef034c9",
+    "projects/text-harness/foundations/reference/run/inference-package/package.json": "02b92a9f56325e5a38be2c40bf263d2ca91db6122ba84dd4df266339457bf278",
+    "projects/text-harness/foundations/reference/run/inference-package/params.npz": "271cb6457de5da3f727c343c64b7bd350c00e503ea7ac847eecf51fbd5558802",
+    "projects/text-harness/foundations/reference/run/inference-package/tokenizer.json": "c92b534443cc6a1eacd5e78406b2c42e59553df704a07102a03c639d3694f586",
+    "projects/text-harness/foundations/train.py": "ee9f3bc73505ce8e00fe9680589d97805593e5c8c035cba4709b5f334eb27a2b"
+  },
+  "historicalAsRunApprovalSha256": "a47bc625a1a372273f20ddace82d0c3b3ce0d4d5f1336cb448614ace9662eaf9",
+  "historicalAsRunStarterSha256": "b7fc9060123b474de92ac04a5480ef818ab296bc216351ed2f7701474741b03d",
+  "kind": "sol-transformer-lineage-recipe-approval",
+  "qualityResult": "QUALITY_GATE_FAILED",
+  "runAuthorized": false,
+  "schemaVersion": 1,
+  "scope": "Portable source-bound stdlib preflight and zero-update semantic inspection only. No learner-check optimizer mechanics, exhausted 8+4+4 campaign, retune, retry, corpus/cloud/hardware work, or child-weight release. Shipping starter has the disclosed one-argument postrun evaluator helper correction.",
+  "shippingStarterSha256": "8196af0f989c382ab5c4833102f11a2d1fe2263614e35e8ac1be8ab1ce501d32",
+  "sourceBaseCommit": "57f2703b9ed82c349c91045362f65e7b52664ba0",
+  "sourceReviewReceiptSha256": "78c1f71266ba7e05bc16010e34700aec6c4997e10781609353eda4713fe43b75",
+  "sourceReviewRequired": false,
+  "status": "source-reviewed-nonrun",
+  "supersedesPortableApprovalCandidateSha256": "4f4cbf670876050c5efcb9d1f440f154df8d9716a838ef88909a42afc02e139a"
+}

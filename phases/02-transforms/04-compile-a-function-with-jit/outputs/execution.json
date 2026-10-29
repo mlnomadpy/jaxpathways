@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "transforms-04",
-  "contentHash": "d721e8983fc6c60c71b1fe05d7843828601e69b0f9b46869323099ec9c7ba31d",
-  "executedAt": "2026-10-21T16:03:38.371314+00:00",
+  "contentHash": "06a2cfc7d55fb6cb2bfdbb45dd72535e8b64bddb2b8a35ecece54926eb83964a",
+  "executedAt": "2026-10-27T17:02:57.787504+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -11,7 +11,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Loss: 0.46000000834465027\nFirst/repeat seconds: 0.014777290634810925 2.187490463256836e-05\neager median / min / max seconds: 2.4584122002124786e-05 2.3334287106990814e-05 4.179216921329498e-05\ncompiled median / min / max seconds: 4.082918167114258e-06 3.666616976261139e-06 5.499925464391708e-06\nbackend / shapes / dtype: cpu (4, 3) (3,) (4,) float32\ncompiled value-and-grad median seconds: 7.874798029661179e-06\nPASS: transforms-04\n",
+  "stdout": "Loss: 0.46000000834465027\nFirst/repeat seconds: 0.02620441699400544 2.7124769985675812e-05\neager median / min / max seconds: 4.8562418669462204e-05 4.229089245200157e-05 0.00017616711556911469\ncompiled median / min / max seconds: 6.395392119884491e-06 5.917157977819443e-06 8.458271622657776e-06\nbackend / shapes / dtype: cpu (4, 3) (3,) (4,) float32\nIndependent NumPy loss / gradient: 0.46000000834465027 [0.36000004 0.34000006 0.32000008]\nBenchmark boundary: warm the same signature first; start the clock, call,\nthen jax.block_until_ready((value, gradient)) before stopping it.\ncompiled value-and-grad median seconds: 1.241639256477356e-05\nPASS: transforms-04\n",
   "notebookCells": [
     {
       "sourceHash": "804d1fb2173681aa29e6cc555464b209a33a5dfc21c699342755c4856344a511",
@@ -33,7 +33,7 @@
           "name": "stdout",
           "text": [
             "Loss: 0.46000000834465027\n",
-            "First/repeat seconds: 0.017373041715472937 1.941714435815811e-05\n"
+            "First/repeat seconds: 0.02316433284431696 2.5499612092971802e-05\n"
           ]
         }
       ]
@@ -43,7 +43,7 @@
       "outputs": []
     },
     {
-      "sourceHash": "25df6d662f9d3f0c4e984c6a201f79fa0cfd7a2633dc4b0773dfba6c2dd4ee6c",
+      "sourceHash": "53dc08a479da44f2b1718bf964cd5c4d3e3305811c536df9d501b1833a6e3476",
       "outputs": [
         {
           "output_type": "display_data",
@@ -68,8 +68,8 @@
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "eager median / min / max seconds: 2.6083551347255707e-05 2.4707987904548645e-05 4.145922139286995e-05\n",
-            "compiled median / min / max seconds: 4.479661583900452e-06 4.292000085115433e-06 5.667097866535187e-06\n",
+            "eager median / min / max seconds: 4.4479500502347946e-05 3.700004890561104e-05 0.00016916682943701744\n",
+            "compiled median / min / max seconds: 6.520887836813927e-06 5.8747828006744385e-06 8.165836334228516e-06\n",
             "backend / shapes / dtype: cpu (4, 3) (3,) (4,) float32\n"
           ]
         }
@@ -80,8 +80,18 @@
       "outputs": []
     },
     {
-      "sourceHash": "f2e9d2501adcceca18ca16075318afd97fb2749f7ec6633dd5be8b0cdeb536b0",
-      "outputs": []
+      "sourceHash": "f3b996dc7e8a49ee5cb587542b39ed16b00b5e2d4e667ea4bc016599f7408a4b",
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Independent NumPy loss / gradient: 0.46000000834465027 [0.36000004 0.34000006 0.32000008]\n",
+            "Benchmark boundary: warm the same signature first; start the clock, call,\n",
+            "then jax.block_until_ready((value, gradient)) before stopping it.\n"
+          ]
+        }
+      ]
     },
     {
       "sourceHash": "22d5d8896e54aecd8b70f9aafa0c68cf3475cdb9799648df8d1bbbd8b53d1ac8",
@@ -102,7 +112,7 @@
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "compiled value-and-grad median seconds: 9.353971108794212e-06\n"
+            "compiled value-and-grad median seconds: 1.0020798072218895e-05\n"
           ]
         }
       ]

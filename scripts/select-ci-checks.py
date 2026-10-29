@@ -12,11 +12,33 @@ CHECK_NAMES = (
     "tpu",
     "loggers",
     "numpyro",
+    "diffrax",
+    "decoder",
+    "c01",
+    "c02",
+)
+
+PILOT_CHECKS = frozenset({"c01", "c02"})
+# These tools select website/reference checks; pilot jobs invoke their own project
+# entry points directly. Keep unknown shared scripts conservative below.
+SELECTION_TOOLS = frozenset(
+    {
+        "scripts/run-tests.mjs",
+        "scripts/test-suites.mjs",
+        "scripts/select-ci-checks.py",
+        "scripts/check-projects.py",
+        "scripts/smoke-lessons.py",
+        "tests/test-selection.test.mjs",
+        "tests/test_ci_selection.py",
+        "tests/test_python_runners.py",
+    }
 )
 
 
 def checks_for_path(path):
     """Use narrow scopes only for recognized categories with known consumers."""
+    if path in SELECTION_TOOLS:
+        return set(CHECK_NAMES) - PILOT_CHECKS
     if (
         path.startswith(("scripts/", "tests/", ".github/workflows/"))
         or path
@@ -56,6 +78,10 @@ def checks_for_path(path):
         for prefix, check in (
             ("reproducible-experiments/", "loggers"),
             ("bayesian-regression/", "numpyro"),
+            ("scientific-inverse/", "diffrax"),
+            ("text-harness/foundations/", "decoder"),
+            ("embedding-model-300m/", "c01"),
+            ("causal-model-300m/", "c02"),
         ):
             if path.startswith("projects/" + prefix):
                 selected.add(check)

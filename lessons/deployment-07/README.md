@@ -4,6 +4,8 @@ Phase 15: Deployment, interoperability & edge AI · about 110 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Choose weight, activation and accumulation precision](https://www.tahabouhsine.com/jaxpathways/lesson-deployment-05.html).
+
 ## What you will be able to do
 
 - Separate training from inference
@@ -27,6 +29,8 @@ Trace the build context into the image, then configuration and artifact mounts i
 
 The current subprocess experiment demonstrates a process boundary. It is not evidence that a Docker build or container benchmark ran. Use that distinction when extending the lesson to your own container execution and keep the resulting receipt.
 
+The executed companion accepts two valid requests and rejects three invalid boundaries; successful predictions are 0.5, 2.5 and 5.0 across its independent three-input check. That evidence comes from fresh ordinary Python processes. When a case fails, inspect stdout/exit status and artifact validation first; a passing process check still leaves the Docker image and runtime untested.
+
 $$
 \text{Gate}(\mathcal{B}) = \mathbb{I}\!\left[\epsilon_{\text{parity}} \le \tau \;\wedge\; L_{p95} \le L_{\text{SLO}} \;\wedge\; \text{hash}(\mathcal{B}) = h_{\text{manifest}}\right]
 $$
@@ -39,7 +43,7 @@ $$
 
 *Architecture and dataflow mechanism diagram.*
 
-Each row identifies an object and the evidence needed to make a claim about it. The current companion supplies artifact checks and fresh-process predictions. An actual container run must add image, user and runtime evidence; device qualification adds hardware and workload measurements. Do not fill later rows with results from an earlier boundary.
+Rows progress from artifact to local process, container image and target device; each row needs its own evidence. Here two predictions and three rejections support the process contract, while the image and device rows remain unproven by this companion. For a container result, add image digest, non-root identity, mounted-artifact check and readiness; do not copy process evidence into those rows.
 
 ### Pause and reason
 
@@ -107,6 +111,8 @@ CI should run tests, build once, record the resulting image identity, verify the
 A digest answers whether the bytes match an expected artifact. It does not answer whether those bytes encode a valid model. The service therefore checks the model's schema, version and finite coefficients after checking its digest. A valid artifact can still be the wrong model for a task, so the known request is a third check.
 
 Change the weight from $2$ to $3$ without updating the expected digest: loading should fail. Update the digest as well: the artifact can now load, but the old expected scores must fail. This separates artifact identity from behavioral compatibility. A digest by itself is also not proof of who approved an artifact; record the approval and provenance separately.
+
+In the changed-artifact exercise, pass the altered file to the same fresh-process loader with the old recorded digest. Assert the child fails with `artifact mismatch` and writes no prediction to stdout. A hash comparison by itself does not exercise this rejection boundary.
 
 ### Pause and reason
 
@@ -260,11 +266,11 @@ This companion tests the process/artifact contract. Run the Docker lab for conta
 
 ### Read the figure
 
-The horizontal categories separate the two valid request shapes from three deliberately invalid boundaries. Bar height is the number of cases observed by the local subprocess checker: $2$ successful prediction cases and $3$ expected rejections. These counts do not represent throughput, latency or a failure probability. Each success is also checked against independent affine arithmetic.
+The x-axis groups valid prediction cases and expected rejection cases; the y-axis is observed case count in the local process checker. Two valid cases produce predictions and three malformed or mismatched requests are rejected. These are coverage counts, not rates or throughput. The successful values independently match 0.5, 2.5 and 5.0; next test the same contract inside the actual image.
 
 ### Connect it to the computation
 
-A container must preserve this contract. The Docker lab supplies additional engine, user and readiness evidence; this plot comes from ordinary Python processes and cannot prove image behavior by itself.
+The plot’s five cases exercise the Python process/artifact boundary only. A container claim needs a built image identity, mounted artifact, actual container run, user identity and readiness result; a device claim adds hardware and workload evidence. Extend the receipt one boundary at a time so a local process success cannot be mistaken for container qualification.
 
 ```python
 visual_data={'kind':'bar','labels':['valid predictions','expected rejections'],'xlabel':'local process contract','ylabel':'observed case count','series':[{'label':'executed CPU cases','y':[accepted,rejected]}]}
@@ -272,7 +278,7 @@ visual_data={'kind':'bar','labels':['valid predictions','expected rejections'],'
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:09:33.990747+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:09:45.435139+00:00. JAX 0.9.2.
 
 ```text
 Fresh-process valid requests: 2 rejected boundaries: 3
@@ -281,7 +287,7 @@ Fresh-process valid requests: 2 rejected boundaries: 3
 This companion tests the process/artifact contract. Run the Docker lab for container evidence.
 Independent three-input predictions: 0.5, 2.5, 5.0
 Matching digest did not bypass model validation.
-Changed artifact requires a new recorded digest.
+Changed artifact reached fresh-process loader: rejected before prediction; no output.
 Nonfinite input rejected before output.
 New artifact loads, but the old behavioral expectation no longer passes.
 PASS: deployment-07
@@ -334,36 +340,57 @@ Reject an artifact whose bytes changed after its expected digest was recorded.
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
 **Inputs:**
-- Artifact bytes and the digest recorded before those bytes were changed.
+- The service source SERVICE, original artifact bytes and recorded digest, changed artifact bytes, and one valid request.
 
 **Outputs:**
-- An integrity rejection for the artifact whose current digest differs from the recorded digest.
+- A fresh-process integrity rejection before artifact activation or prediction.
 
 **Invariants to check:**
-- Digest comparison uses the exact bytes that would be loaded; a mismatch prevents artifact acceptance.
+- The changed bytes are the MODEL_PATH supplied to the real service process.
+- The expected digest remains the original recorded digest.
+- The child exits unsuccessfully with an integrity error and emits no prediction output.
 
 **Hints:**
-- Hash the bytes after mutation and compare with the stored expected digest.
-- Assert the rejection explicitly instead of treating an absent result as success.
+- Serialize the original model and keep its digest before changing any bytes.
+- Write the changed bytes to the artifact path used by the service, but pass the original digest in the child process environment.
+- Assert the fresh child rejects with the integrity error and emits no prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-import hashlib
+import hashlib, json, os, subprocess, sys, tempfile
+from pathlib import Path
 
-def reject_changed_artifact(artifact_bytes, expected_digest, verifier):
-    # TODO: Verify the changed bytes against the prior digest and require an explicit integrity failure.
+def reject_changed_artifact(service_source, model, valid_request):
+    """Run changed bytes through the fresh-process service boundary."""
+    # TODO: Preserve the original digest, mutate and write the artifact, invoke
+    # the service with the old digest, then assert integrity rejection and no output.
     raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution
-original=json.dumps(MODEL,sort_keys=True).encode()
-mutated=json.dumps(dict(MODEL,bias=2.),sort_keys=True).encode()
-assert hashlib.sha256(original).hexdigest()!=hashlib.sha256(mutated).hexdigest()
-print('Changed artifact requires a new recorded digest.')
+# Exercise solution: send changed artifact bytes through the fresh-process service loader.
+# SERVICE is the service program defined earlier in this lesson. Its integrity check
+# runs before model parsing, request evaluation, or prediction output.
+original = json.dumps(MODEL, sort_keys=True).encode()
+recorded_digest = hashlib.sha256(original).hexdigest()
+mutated = json.dumps(dict(MODEL, bias=2.), sort_keys=True).encode()
+assert hashlib.sha256(mutated).hexdigest() != recorded_digest
+with tempfile.TemporaryDirectory(prefix='changed-artifact-exercise-') as folder:
+    artifact = Path(folder) / 'model.json'
+    service = Path(folder) / 'service.py'
+    artifact.write_bytes(mutated)  # altered bytes reach the actual loader
+    service.write_text(SERVICE)
+    env = dict(os.environ, MODEL_PATH=str(artifact), MODEL_SHA256=recorded_digest)
+    rejected = subprocess.run(
+        [sys.executable, str(service)], input=json.dumps({'inputs': [2.]}),
+        text=True, capture_output=True, env=env, timeout=30)
+    assert rejected.returncode != 0
+    assert 'artifact mismatch' in rejected.stderr
+    assert rejected.stdout == ''  # no prediction was activated or returned
+print('Changed artifact reached fresh-process loader: rejected before prediction; no output.')
 ```
 
 </details>

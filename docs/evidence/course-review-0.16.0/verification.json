@@ -1,0 +1,133 @@
+{
+  "schemaVersion": 1,
+  "edition": "0.16.0",
+  "recordedAt": "2026-10-22T01:09:51.339044+00:00",
+  "baseCommit": "7090e02890b7e3e7f42e46247396a32b510c9e30",
+  "sourceSha256": {
+    "browser-tests/posttraining-sequence.spec.ts": "5ecdfcc6c88b169832bdf1bbfb7f17f066cf2a3d6b098a7182f37849af4fa57d",
+    "curriculum/course.json": "6a29936ac531b5f7ec7459a608664ea0b4c209370c22bcfd8c13271d1c3a75ef",
+    "curriculum/project-validation.json": "5477f1e1193803d44a60b057cbda5093c6fe63ee7841a4835bf82919da87524e",
+    "curriculum/release-snapshots.json": "47cef24b8b6970a7aa1fed66c25f52602ae07d178dc9c5b2d6c8ee35a3b3fe80",
+    "curriculum/releases.json": "358f5e9e4ce377e0a3c026e205d45e4c871718aea1d0f1cbfd4ec7f09945b409",
+    "package-lock.json": "abf133db61391ee7bc90e6dcaa054c1bcd71b2e66b9e902e222835cc19b71ff5",
+    "package.json": "5e803026760498c9e74e31208ee68cdf5e0cd87de1e7cd9d21078fb09b57d678",
+    "projects/posttraining-audit/README.md": "6d0d533f6339d783c00ce190f318ba826de2d7c41e8c43565953038fb8af1341",
+    "projects/posttraining-audit/figures/gae-eos-timeout-fixture.json": "c6d2b035cc7f7a9bc5671b995a10b557c538ddedb608212a93ec9aec9f4845dd",
+    "projects/posttraining-audit/figures/gae-eos-timeout.png": "dd482b636491063aae0bcbc8ea944657b95653ed4b0ffd45ab2aa31a81cc2db6",
+    "projects/posttraining-audit/figures/gae-eos-timeout.svg": "bc36b65eaa2c0c44ab5e90302bb60d691efbc346ac07df035168a885ee51f851",
+    "projects/posttraining-audit/figures/render_gae.py": "848e7cdf318de0fd7df7bcc7cb1d27820e411b19d5f18adf54ea7363c7990177",
+    "projects/posttraining-audit/project.json": "11bddb0c265087eecdc855d0990ede92df68d84932ce95baeff92da08c036721",
+    "projects/posttraining-audit/reference/sequence_ppo/recipe.json": "1c9053b83f36b24dfe6f765700e2fab9a51bee87f30c902e35102d11e7cedcc8",
+    "projects/posttraining-audit/requirements.txt": "5c78d55f74b1cc11c55e2bd84b093f7dfbe2dd3290cdf04799affd8e84885126",
+    "projects/posttraining-audit/solution/model.py": "82810305599ea48173a87fb4251c2fa4347de11b0b39c1a27ac4e09abd927f05",
+    "projects/posttraining-audit/solution/sequence_ppo.py": "792eb35048b6299b467bea4625caf8ec5716150a8d423efdf73c77dc8a08cb26",
+    "projects/posttraining-audit/starter/model.py": "3170319c9ffc0a60c05d1a8c1622e5248244c21ae0dd26bdeedac17ed6f7d52f",
+    "projects/posttraining-audit/starter/sequence_ppo.py": "2e512607f84e54ad90f9d8dfe79064ed0ee661ec9c58c5072dfc50cd55e7fbf9",
+    "projects/posttraining-audit/tests/check.py": "ffb8f860173839e7f8fdf817ed00348e0e013a00451558a063e76a675b6addf8",
+    "projects/posttraining-audit/tests/check_sequence_ppo.py": "5320ad95be0bd58d00c8ce6010cdb8920661acaf5b88df5945666b5d7518a775",
+    "scripts/python-format-files.txt": "81c7c9ee6cee8f51668a63f91676e24031cdb79772920756db383c7700fc30d1",
+    "scripts/render-curriculum.mjs": "76bbaf4ba998e1d6e52276d9dee6742038c21ed8d1f788c11815517c1833da82",
+    "scripts/validate-curriculum.mjs": "370fc8090f509b7449dc009e94fae28463ac455bf50c92376e30d10ed445cf9b",
+    "src/lib/manifests.js": "538f84f2871182a2bfe96e5021e935dd60c365780dd836305ed3026f28f557cf",
+    "src/lib/views/project.js": "c6b55d55cdd7ca48d0f5c430d7018aef6762b8093a4dfd05a79b59c3bb791401",
+    "src/pages/project-guides/[id].astro": "a096831ce670c960138d8a2a1908f313e42e35e5fbe23d6648b9ee0976102c0f",
+    "src/types/manifests.ts": "93174683d7e2f3a86df36a93f6e2a5e95e9101875163db4ca21260c7d55e19a8",
+    "tests/project-stage-files.test.mjs": "bce5ccc0be699c03ed98c0b59f1bef7d92ed6cea11f0ffbd2a9274ad8918a311"
+  },
+  "releaseSourceHash": "a34838834055fe025edf42cd1f8a764ae327febc6f712e365723908f0e54c862",
+  "preservedPriorSnapshots": 22,
+  "priorSnapshotFileSha256": "ea77a476611d5559891d80abeb381d2c5256e1f964e15b0b8063a20518932fa4",
+  "changedLessons": [],
+  "changedPhases": [
+    "posttraining"
+  ],
+  "frozenDirectory": "/private/tmp/jaxpathways-review-0.16.0-final",
+  "preview": "http://127.0.0.1:4200/book.html",
+  "frozenArtifactsSha256": {
+    "book.html": "bf0cee091a540f3399e4e2b0341bcd65112f89f41aaca58fdc8c3ea66da2c62c",
+    "project-guides/posttraining-audit.html": "53743fc56d9a2f34abd60f6acd29778ad172f184446bc0bbd287a5cccf0c4c9b",
+    "downloads/jax-foundations.html": "06f851086a28ac27aff6611543efa048d6deda7ee03db7f8e24cbdd18735c96a",
+    "downloads/jax-foundations.epub": "90c9ce194675dbc1e00b569ff79a12bcba900d1c03c6030c3600b522312d52c9",
+    "downloads/posttraining-audit.zip": "54bb7a13c8a5fc150570d31ed87938f0487adfe6f89a507b20b4163b518b5eef"
+  },
+  "packetFilesSha256": {
+    "browser.log": "577d707998841cc29cf77ccbb69e7b1a8b53e5eedb68d22d3c332897f3cfa611",
+    "epubcheck.json": "57efb71c8630ac3eb60b1eaa563e609739aa3a75186f7b523a6af50f5356231d",
+    "sequence-stage-code.png": "5ac9d3e064e90ec5edcb9520c80642bd42c0e43579d324ab01eb21a03984a56e",
+    "deployment.log": "ca064a96d50fb63e0caba8220931e84c7a23418d3f6b7efa18cf689fc01ebe42",
+    "main-check-first-failure.log": "545cac8de12d57a8adc3eaafb18c3682ae34ba73667a87411b7656faf8097642",
+    "browser-first.log": "a2c48d706ed871c5167bfb261bd6b561d8e57ee150e8cc4a08ad24ddc421b9e7",
+    "sequence-stage-file.png": "dda01aaf91f349f1208ad9cf8d62ff0258a57c7afade883fc13135d01c5f5400",
+    "sequence-guide-figure.png": "d5837942058ead4e2d019e4c44ff928b3f51a0234457ff3d348421f883c533da",
+    "README.md": "3245acfeef1e8711a56ec442f3f850e8e554f1f9c9fe6d744dfdef56bc3274f6",
+    "black.log": "5fb1bf56f177d9566890a5a902628d40d19a2e4811db08716fd65c455a8f0f77",
+    "epubcheck.log": "7762882cc0e77ad791a4d3cbda6ae124ed8682e19906d72b6983987e55585d12",
+    "book-overview.png": "f236a1ea9c763a968682ea54a2cbae1623657aa6160c1cd2c169331697e5f20b",
+    "epub-build.json": "c8eafc344c03f14da40af89019e4b50a9fd20ddf0ac6fd7e59207cc1febb8222",
+    "main-check.log": "5264608f705176646fe3f4f6b6f6b9dddc091fe17f602de94b676d1a86c5416e"
+  },
+  "checks": {
+    "node": {
+      "passed": 177,
+      "failed": 0
+    },
+    "astro": {
+      "files": 146,
+      "errors": 0,
+      "warnings": 0,
+      "hints": 0
+    },
+    "pythonIdentity": {
+      "passed": 11
+    },
+    "browser": {
+      "passed": 52,
+      "failed": 0,
+      "scope": "Desktop and mobile Chromium, including stage edit file, figure and plotting source download."
+    },
+    "black": {
+      "files": 53,
+      "passed": true
+    },
+    "localSite": {
+      "pages": 219,
+      "localReferences": 14409,
+      "canonicalReachableWithin3Clicks": 214,
+      "maturityEntries": 203
+    },
+    "pagesBasePath": {
+      "base": "/jaxpathways",
+      "passed": true,
+      "rootBuildRestored": true
+    },
+    "epubcheck": {
+      "version": "5.4.0",
+      "fatals": 0,
+      "errors": 0,
+      "warnings": 0,
+      "infos": 0
+    }
+  },
+  "sequenceProjectEvidence": "../sequence-ppo-2026-10-22/independent-review.json",
+  "historicalFailures": [
+    {
+      "file": "main-check-first-failure.log",
+      "result": "The plotting Python source link had no emitted loose asset. Fixed the explicitly linked .py copier; final main/browser checks passed."
+    },
+    {
+      "result": "Independent focused browser run overlapped the temporary Pages-base build. Failed artifacts remain referenced by independent receipt; rerun after restored root build passed."
+    }
+  ],
+  "visualScope": {
+    "browser": "Frozen preview at 1280 x 720; book overview, stage 5 file/code/command, complete GAE figure and adjoining explanation observed.",
+    "native": "Pending; native controls remained locked after reported unlock. No 0.16 Apple Books, second-reader, speech or full print acceptance."
+  },
+  "limits": [
+    "Local synthetic table-policy sequence PPO only; no Transformer/RLHF/capstone quality qualification.",
+    "Held-out instances reuse the same two task features; no unseen semantic generalization.",
+    "Conditional categorical KL is exact at sampled contexts, not exact full sequence-distribution KL.",
+    "No fresh local rerun of all 104 lesson executables or all 31 projects; unchanged lesson sources retain earlier hosted/source-bound receipts.",
+    "No hosted 0.16 checks or deployment yet; prior 0.15.1 PR #68 has 15 successful checks on its own exact head.",
+    "Independent teaching, broader native/AT/print, target hardware and ten full capstones remain open."
+  ]
+}

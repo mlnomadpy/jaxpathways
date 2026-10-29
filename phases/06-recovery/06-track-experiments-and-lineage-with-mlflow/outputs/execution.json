@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "recovery-06",
-  "contentHash": "86f40f9b698e86b5ea30e3e8b39c44f195e2b0138964740321f00fef87b87d31",
-  "executedAt": "2026-10-21T16:05:53.428377+00:00",
+  "contentHash": "d9fbd9fd03001f0073680f56ec67a6152a5a8c26fe8ce06592b4b0dc45d25be4",
+  "executedAt": "2026-10-27T17:26:53.719843+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -11,7 +11,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Validation MSE by learning rate: {0.02: 0.11994461715221405, 0.15: 5.049471951679152e-10}\nVerified 30 logged steps per run; selected and reloaded the better validation candidate.\nValidation difference: 0.11994461664726686\nWrong zero model validation MSE: 6.0\nChanged target changes dataset identity.\nPASS: recovery-06\n",
+  "stdout": "Validation MSE by learning rate: {0.02: 0.11994461715221405, 0.15: 5.049471951679152e-10}\nVerified 30 logged steps per run; selected and reloaded the better validation candidate.\nValidation difference: 0.11994461664726686\nActual training MSE: {'linear-rate-0.02': 0.1401000006160622, 'linear-rate-0.15': 5.076259412817308e-10, 'training-lookup': 0.0}\nActual held-out MSE: {'linear-rate-0.02': 0.11994461629745246, 'linear-rate-0.15': 5.076259412817308e-10, 'training-lookup': 6.0}\nTraining-only selects the memorizer; held-out selection rejects it.\nChanged target changes dataset identity.\nPASS: recovery-06\n",
   "notebookCells": [
     {
       "sourceHash": "40d50d8761077082bf78fe5b00b2c0a5c40917b8ddbfe1cb783f19ec0a725a7d",
@@ -22,24 +22,24 @@
       "outputs": []
     },
     {
-      "sourceHash": "caf07d155d83e60f64a30fef23ed23f4717dc75d279fddf9cd4790a5f8f29c10",
+      "sourceHash": "7c27825a15019f060d0d39583df2f6a22c4cabc461c13af8a9ce9818bf5d1e94",
       "outputs": [
         {
           "output_type": "stream",
           "name": "stderr",
           "text": [
-            "2026/10/21 09:05:51 INFO mlflow.store.db.utils: Creating initial MLflow database tables...\n",
-            "2026/10/21 09:05:51 INFO mlflow.store.db.utils: Updating database tables\n",
+            "2026/10/27 10:26:49 INFO mlflow.store.db.utils: Creating initial MLflow database tables...\n",
+            "2026/10/27 10:26:49 INFO mlflow.store.db.utils: Updating database tables\n",
             "\r",
             "Downloading artifacts:   0%|          | 0/1 [00:00<?, ?it/s]\r",
-            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 5322.72it/s]\r",
-            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 2054.02it/s]\n"
+            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 1412.22it/s]\r",
+            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 820.32it/s] \n"
           ]
         }
       ]
     },
     {
-      "sourceHash": "07d7a978b6659dc727ee5e4b2627cab747f9e531f5c580883937606c2ea919b6",
+      "sourceHash": "305747dc45269bada4677a049154293c8f28b0f5ab7535e98cb55b776cb618ca",
       "outputs": [
         {
           "output_type": "stream",
@@ -53,12 +53,12 @@
           "output_type": "stream",
           "name": "stderr",
           "text": [
-            "2026/10/21 09:05:52 INFO mlflow.store.db.utils: Creating initial MLflow database tables...\n",
-            "2026/10/21 09:05:52 INFO mlflow.store.db.utils: Updating database tables\n",
+            "2026/10/27 10:26:51 INFO mlflow.store.db.utils: Creating initial MLflow database tables...\n",
+            "2026/10/27 10:26:51 INFO mlflow.store.db.utils: Updating database tables\n",
             "\r",
             "Downloading artifacts:   0%|          | 0/1 [00:00<?, ?it/s]\r",
-            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 2531.26it/s]\r",
-            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 1697.41it/s]\n"
+            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 1587.55it/s]\r",
+            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 1077.67it/s]\n"
           ]
         }
       ]
@@ -68,7 +68,7 @@
       "outputs": []
     },
     {
-      "sourceHash": "25df6d662f9d3f0c4e984c6a201f79fa0cfd7a2633dc4b0773dfba6c2dd4ee6c",
+      "sourceHash": "53dc08a479da44f2b1718bf964cd5c4d3e3305811c536df9d501b1833a6e3476",
       "outputs": [
         {
           "output_type": "display_data",
@@ -99,13 +99,35 @@
       "outputs": []
     },
     {
-      "sourceHash": "b6e2f879c26b5338a33da2131d3ba96d6d59dabf61a4d775ae988650a10b25cd",
+      "sourceHash": "9ae087f974faadc544e77583f87fb23cfde570882d2ef0c8ec5259838a1f4bdb",
       "outputs": [
         {
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "Wrong zero model validation MSE: 6.0\n"
+            "Actual training MSE: {'linear-rate-0.02': 0.1401000006160622, 'linear-rate-0.15': 5.076259412817308e-10, 'training-lookup': 0.0}\n",
+            "Actual held-out MSE: {'linear-rate-0.02': 0.11994461629745246, 'linear-rate-0.15': 5.076259412817308e-10, 'training-lookup': 6.0}\n",
+            "Training-only selects the memorizer; held-out selection rejects it.\n"
+          ]
+        },
+        {
+          "output_type": "stream",
+          "name": "stderr",
+          "text": [
+            "2026/10/27 10:26:51 INFO mlflow.store.db.utils: Creating initial MLflow database tables...\n",
+            "2026/10/27 10:26:51 INFO mlflow.store.db.utils: Updating database tables\n",
+            "\r",
+            "Downloading artifacts:   0%|          | 0/1 [00:00<?, ?it/s]\r",
+            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 1390.22it/s]\r",
+            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 942.33it/s] \n",
+            "\r",
+            "Downloading artifacts:   0%|          | 0/1 [00:00<?, ?it/s]\r",
+            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 1547.71it/s]\r",
+            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 987.13it/s] \n",
+            "\r",
+            "Downloading artifacts:   0%|          | 0/1 [00:00<?, ?it/s]\r",
+            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 2129.09it/s]\r",
+            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 1302.17it/s]\n"
           ]
         }
       ]

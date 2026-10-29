@@ -1,0 +1,20 @@
+[
+  {
+    "page": "book",
+    "url": "https://www.tahabouhsine.com/jaxpathways/book.html",
+    "sha256": "401ae2368af01e6daf2cac5e67e2a44abc1809358db27186ad5d12edda2005a7",
+    "file": "docs/evidence/course-review-0.18.0/book-pages-schema.html"
+  },
+  {
+    "page": "course",
+    "url": "https://www.tahabouhsine.com/jaxpathways/course.html",
+    "sha256": "272de12b90f539b941e92411568c523f93fba6a2424d68e1c06afae3e87ac0d7",
+    "file": "docs/evidence/course-review-0.18.0/course-pages-schema.html"
+  },
+  {
+    "page": "lesson-posttraining-04",
+    "url": "https://www.tahabouhsine.com/jaxpathways/lesson-posttraining-04.html",
+    "sha256": "0c0189f29379e5c36c2d85d499ab77fcad62d24c1e55b5c1eee2c91e52cf164d",
+    "file": "docs/evidence/course-review-0.18.0/lesson-posttraining-04-pages-schema.html"
+  }
+]

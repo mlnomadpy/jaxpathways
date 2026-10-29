@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "posttraining-05",
-  "contentHash": "e362398242942406096d8edb4ac468bf8efa634dcdb6b479e486495f0ba2a2ae",
-  "executedAt": "2026-10-21T16:11:40.972155+00:00",
+  "contentHash": "fcea90392925ed08deb0714237d044a885d136d9b53922764233b744c5862a44",
+  "executedAt": "2026-10-27T16:12:25.808407+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -11,7 +11,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "DPO initial/final: 0.6931471824645996 0.27227783203125 ; reference-corrected margins: [3.0890286  6.17805719 3.08902884]\nDPO initial/final: 0.6931471824645996 0.27227783203125 ; reference-corrected margins: [3.0890286  6.17805719 3.08902884]\nCorrected/unadjusted initial loss: 0.6931471824645996 0.6540467739105225\nLoss before/after: 0.6931471824645996 0.5418724417686462 ; chosen probability: 0.4 -> 0.3\nReversed-label loss: 1.5064733028411865\nReference gradient is zero.\nOne-pair logit gradient agrees with independent margin derivative.\nPASS: posttraining-05\n",
+  "stdout": "DPO initial/final: 0.6931471824645996 0.27227783203125 ; reference-corrected margins: [3.0890286  6.17805719 3.08902884]\nDPO initial/final: 0.6931471824645996 0.27227783203125 ; reference-corrected margins: [3.0890286  6.17805719 3.08902884]\nCorrected/unadjusted initial loss: 0.6931471824645996 0.6540467739105225\nLoss before/after: 0.6931471824645996 0.5418724417686462 ; chosen probability: 0.4 -> 0.3\nReversed-label loss: 1.5064733028411865\nReference gradient is zero.\nOne-pair logit gradient agrees with independent margin derivative.\nhand sum terms: [-5.877766, -5.884814, -5.825323] sum: -17.58790268250536\nscoring: summed response logps -17.587902069091797 -47.06261873245239 ; response token counts 3 8\nDPO loss before one update: 0.6931471824645996\nheldout preference baseline/after: [{'margin': 11.944979667663574, 'predicted_probability': np.float64(0.999993508300255), 'vote_fraction': 1.0, 'slice': 'unanimous', 'ambiguous': False, 'hard_accuracy': 1.0, 'expected_annotator_agreement': 1.0}, {'margin': -5.983144283294678, 'predicted_probability': np.float64(0.0025145485396998223), 'vote_fraction': 0.5, 'slice': 'disagreement', 'ambiguous': True, 'hard_accuracy': None, 'expected_annotator_agreement': 0.5}] [{'margin': 11.9453444480896, 'predicted_probability': np.float64(0.9999935106678529), 'vote_fraction': 1.0, 'slice': 'unanimous', 'ambiguous': False, 'hard_accuracy': 1.0, 'expected_annotator_agreement': 1.0}, {'margin': -5.983484745025635, 'predicted_probability': np.float64(0.00251369472949755), 'vote_fraction': 0.5, 'slice': 'disagreement', 'ambiguous': True, 'hard_accuracy': None, 'expected_annotator_agreement': 0.5}]\ndisagreement slice baseline/after: [{'margin': -5.983144283294678, 'predicted_probability': np.float64(0.0025145485396998223), 'vote_fraction': 0.5, 'slice': 'disagreement', 'ambiguous': True, 'hard_accuracy': None, 'expected_annotator_agreement': 0.5}] [{'margin': -5.983484745025635, 'predicted_probability': np.float64(0.00251369472949755), 'vote_fraction': 0.5, 'slice': 'disagreement', 'ambiguous': True, 'hard_accuracy': None, 'expected_annotator_agreement': 0.5}]\nsource retention baseline/after: -17.611167430877686 -17.611021518707275\nrecorded PPO heldout reward scale / child-minus-parent: 0.5 0.0\nrecorded PPO heldout reward scale / child-minus-parent: 1.0 0.0\nrecorded PPO heldout reward scale / child-minus-parent: 2.0 0.0\nrecorded heldout response matches: 8 / 8 ; strict heldout reward floor remains FAILED at every scale\nSynthetic objective check only. No human preference or response-quality claim.\nPASS: posttraining-05\n",
   "notebookCells": [
     {
       "sourceHash": "40bee9694450ac4f164968d3c68ae1455e03981e6e2cea45cde775f1409f8f19",
@@ -50,7 +50,7 @@
       "outputs": []
     },
     {
-      "sourceHash": "25df6d662f9d3f0c4e984c6a201f79fa0cfd7a2633dc4b0773dfba6c2dd4ee6c",
+      "sourceHash": "53dc08a479da44f2b1718bf964cd5c4d3e3305811c536df9d501b1833a6e3476",
       "outputs": [
         {
           "output_type": "display_data",
@@ -132,6 +132,32 @@
           "name": "stdout",
           "text": [
             "One-pair logit gradient agrees with independent margin derivative.\n"
+          ]
+        }
+      ]
+    },
+    {
+      "sourceHash": "22d5d8896e54aecd8b70f9aafa0c68cf3475cdb9799648df8d1bbbd8b53d1ac8",
+      "outputs": []
+    },
+    {
+      "sourceHash": "ff59bea94993aa9ab208dfb5ba728969c33e4b9b8132ff001b576ed2cbbd72a3",
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "hand sum terms: [-5.877766, -5.884814, -5.825323] sum: -17.58790268250536\n",
+            "scoring: summed response logps -17.587902069091797 -47.06261873245239 ; response token counts 3 8\n",
+            "DPO loss before one update: 0.6931471824645996\n",
+            "heldout preference baseline/after: [{'margin': 11.944979667663574, 'predicted_probability': np.float64(0.999993508300255), 'vote_fraction': 1.0, 'slice': 'unanimous', 'ambiguous': False, 'hard_accuracy': 1.0, 'expected_annotator_agreement': 1.0}, {'margin': -5.983144283294678, 'predicted_probability': np.float64(0.0025145485396998223), 'vote_fraction': 0.5, 'slice': 'disagreement', 'ambiguous': True, 'hard_accuracy': None, 'expected_annotator_agreement': 0.5}] [{'margin': 11.9453444480896, 'predicted_probability': np.float64(0.9999935106678529), 'vote_fraction': 1.0, 'slice': 'unanimous', 'ambiguous': False, 'hard_accuracy': 1.0, 'expected_annotator_agreement': 1.0}, {'margin': -5.983484745025635, 'predicted_probability': np.float64(0.00251369472949755), 'vote_fraction': 0.5, 'slice': 'disagreement', 'ambiguous': True, 'hard_accuracy': None, 'expected_annotator_agreement': 0.5}]\n",
+            "disagreement slice baseline/after: [{'margin': -5.983144283294678, 'predicted_probability': np.float64(0.0025145485396998223), 'vote_fraction': 0.5, 'slice': 'disagreement', 'ambiguous': True, 'hard_accuracy': None, 'expected_annotator_agreement': 0.5}] [{'margin': -5.983484745025635, 'predicted_probability': np.float64(0.00251369472949755), 'vote_fraction': 0.5, 'slice': 'disagreement', 'ambiguous': True, 'hard_accuracy': None, 'expected_annotator_agreement': 0.5}]\n",
+            "source retention baseline/after: -17.611167430877686 -17.611021518707275\n",
+            "recorded PPO heldout reward scale / child-minus-parent: 0.5 0.0\n",
+            "recorded PPO heldout reward scale / child-minus-parent: 1.0 0.0\n",
+            "recorded PPO heldout reward scale / child-minus-parent: 2.0 0.0\n",
+            "recorded heldout response matches: 8 / 8 ; strict heldout reward floor remains FAILED at every scale\n",
+            "Synthetic objective check only. No human preference or response-quality claim.\n"
           ]
         }
       ]

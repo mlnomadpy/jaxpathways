@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "distributed-04",
-  "contentHash": "a07b5c3037b8b35a11e45e2f62ac33eedc89bf9f1870c68640a83767e9f6f079",
-  "rendererHash": "a1bd5b648f4731ae5d5f0a24811c2540d1a0a132149ce589d17c4113509cbedf",
+  "contentHash": "fef058e782d1a0f225e1a05fd0a000a155f0b9c18103da390bad7b6d175f040c",
+  "rendererHash": "17e3bbad72ee4c43425845aaee76b86b85e84750551278be03d8c16842f4dc63",
   "kind": "executed",
-  "generatedAt": "2026-10-21T16:04:47.372715+00:00",
+  "generatedAt": "2026-10-27T17:01:14.508656+00:00",
   "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",
@@ -13,7 +13,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Recorded backend/processes/devices: cpu 1 4\nRestored step/cursor: 1 8\nNext sample IDs across epoch boundary: [[12, 5, 4, 1, 8, 13, 2, 11], [9, 0, 7, 15, 11, 13, 8, 14], [1, 6, 5, 4, 3, 12, 2, 10]]\nUninterrupted losses: [0.5069587826728821, 0.19637340307235718, 0.1798383891582489]\nRestored losses: [0.5069587826728821, 0.19637340307235718, 0.1798383891582489]\nCheckpoint: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-distributed-recovery-q_mau9ko/step-one\n",
+  "stdout": "Recorded backend/processes/devices: cpu 1 4\nRestored step/cursor: 1 8\nNext sample IDs across epoch boundary: [[12, 5, 4, 1, 8, 13, 2, 11], [9, 0, 7, 15, 11, 13, 8, 14], [1, 6, 5, 4, 3, 12, 2, 10]]\nUninterrupted losses: [0.5069587826728821, 0.19637340307235718, 0.1798383891582489]\nRestored losses: [0.5069587826728821, 0.19637340307235718, 0.1798383891582489]\nCheckpoint: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-distributed-recovery-s5gb0e39/step-one\n",
   "data": {
     "kind": "line",
     "x": [

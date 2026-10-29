@@ -4,18 +4,18 @@
   "questions": [
     {
       "stage": "post",
-      "question": "Why should you run and synchronize at least one warmup step before entering `with jax.profiler.trace(trace_dir):` on a TPU VM?",
+      "question": "Why does the code warm and synchronize before entering the trace, then measure a separate unprofiled loop?",
       "options": [
-        "Because `jax.profiler.trace` deletes all model weights if warmup is skipped",
-        "So the captured `*.xplane.pb` trace measures steady-state TPU execution and collective communication rather than one-time Python tracing and XLA HLO compilation",
-        "Because `bfloat16` only works inside a profiler context"
+        "Warmup removes all host activity, so the trace contains only accelerator instructions",
+        "The fixed-signature warmup moves initial compilation out of the captured window; the trace still records whatever host, device, synchronization and profiler events occur, while the unprofiled loop supplies a separate wall-time measurement",
+        "A matrix dot automatically inserts a cross-device collective, which the profiler needs to show"
       ],
       "correct": 1,
-      "explanation": "Warming and synchronizing the same signature reduces initial compilation in the recorded window. Inspect the trace to confirm: new shapes or static arguments can still compile, and cache state can still affect timing. Record target latency outside profiler overhead too.",
+      "explanation": "The synchronized warmup prepares the tested signature before tracing. The captured function is one fixed-input dot and includes no collective, so it cannot support a communication claim. Trace event durations may nest or overlap and include runtime/profiler activity. The separate unprofiled measurement includes host dispatch and synchronization; it is not a device-only latency.",
       "optionFeedback": [
-        "Tracing should observe execution, not delete model state. Warmup prepares the tested executable before the recorded window.",
-        "Warming and synchronizing the same signature reduces initial compilation in the recorded window. Inspect the trace to confirm: new shapes or static arguments can still compile, and cache state can still affect timing. Record target latency outside profiler overhead too.",
-        "Profiling is not restricted to BF16. Record the precision used and the actual operations in the captured target workload."
+        "Warmup excludes the first invocation from the trace but does not remove host dispatch, synchronization, other compilation events, or profiler overhead from captured work.",
+        "The synchronized warmup prepares the tested signature before tracing. The captured function is one fixed-input dot and includes no collective, so it cannot support a communication claim. Trace event durations may nest or overlap and include runtime/profiler activity. The separate unprofiled measurement includes host dispatch and synchronization; it is not a device-only latency.",
+        "A dot call on one array does not imply a distributed collective. Communication appears only if the actual workload and trace contain such operations."
       ]
     }
   ]

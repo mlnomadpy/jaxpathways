@@ -4,6 +4,8 @@ Phase 03: State, randomness & control flow · about 60 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Compiled loops with lax.scan](https://www.tahabouhsine.com/jaxpathways/lesson-state-03.html).
+
 ## What you will be able to do
 
 - Locate the decision boundary
@@ -21,14 +23,12 @@ A data-dependent branch needs a control-flow operation that can represent both a
 
 ## Trace both possibilities, execute the selected rule
 
-Consider an absolute-value rule: return the input when it is nonnegative and its negation otherwise. Both branches return the same shape and dtype, even though only one scalar case determines a particular result. The function is continuous at zero, but its mathematical derivative is not uniquely defined there.
+A data-dependent choice must be represented inside a staged function because Python cannot choose from a value that will only exist at runtime. `lax.cond` expresses one scalar decision with two possible branch functions, each following the same input and output contract.
 
-The plot of magnitudes shows what the branch computes, not the tracing process. During tracing, Python code in both branch functions can be visited. Avoid using Python side effects as evidence that one numerical branch executed on the device.
-
-After batching or other transformations, the implementation of control flow can change; for example, batching a conditional can turn it into selection. Keep claims about execution scope tied to the actual transformed program.
+The plot uses input on the horizontal axis and returned magnitude on the vertical axis. It passes through $(-3,3)$, $(0,0)$, and $(3,3)$: the negative side is negated and the nonnegative side is returned unchanged. The continuous join has a sharp corner, so matching outputs at zero do not imply a unique mathematical derivative there.
 
 $$
-\mathcal{T} = (\text{Leaves}(\mathcal{T}),\; \text{TreeDef}(\mathcal{T})), \qquad \operatorname{map}(g, \mathcal{T})_k = g(\mathcal{T}_k)
+\operatorname{magnitude}(x)=\begin{cases}x&x\ge0\\-x&x<0\end{cases}
 $$
 
 ### Pause and reason
@@ -43,9 +43,9 @@ Not under the same conditional result contract. Both branches must produce compa
 
 ## Locate the decision boundary
 
-The predicate $x\ge0$ is numerical data when $x$ is a traced argument. A Python if must choose a branch while tracing, before that runtime value is available. lax.cond represents the choice inside the staged computation instead.
+For a scalar predicate, `cond` selects one branch result, but both branch functions are traced to build the staged computation. This is why a Python print or side effect inside a branch is not evidence about which numerical branch ran. The plotted magnitude values show only the returned function.
 
-Its arguments are a scalar Boolean predicate, two pure branch functions and an operand. Each branch receives that operand; each must return the same kind of result. Read the contract as an ordinary state transition with two possible implementations, not as a magic exception to tracing.
+The execution receipt checks inputs $-3$ and $3$, both returning $3$, and confirms the expected failure for a traced Python Boolean. Keep tracing behavior separate from runtime selection, and keep both branch computations pure so the program remains meaningful under transformations.
 
 ```text
 predicate: x>=0
@@ -56,21 +56,21 @@ joined result: scalar float
 
 ## Trace both branches and check their result types
 
-For a scalar predicate, cond selects one branch at runtime, but both branches are traced when building the computation. Therefore an invalid operation in a branch can fail during tracing even if a particular test input would not choose it.
+The conditional result must have one stable contract regardless of which predicate value is supplied. Both branches need compatible pytree structure, corresponding leaf shapes and dtypes. If one returns a scalar and the other a vector, the result cannot be represented as one conditional output.
 
-Both result pytrees must agree and corresponding array leaves must have compatible shapes and dtypes. A scalar in one branch and a vector in the other cannot be joined by this contract. This is different from numerical correctness: matching output types can still hide a wrong branch formula.
+This requirement is independent of whether a test input selects a branch that seems valid. Both branches participate in tracing, so an invalid operation or incompatible output may fail before that specific runtime case is executed. Check branch contracts first, then test the selected numerical results.
 
 ## Choose cond or where by the shape of the question
 
-cond makes one scalar decision for a computation. where chooses values elementwise from compatible arrays. A vector predicate naturally belongs to where or a deliberately batched conditional.
+Choose control flow to match the shape of the decision. `cond` expresses one scalar predicate selecting one result for the computation; `where` selects elementwise from compatible arrays. A vector of independent predicates is an elementwise question or a deliberately batched conditional, not one scalar decision.
 
-When cond is transformed with vmap over predicates, it can become selection. Do not use a branch as a promise that side effects or invalid arithmetic will never be evaluated under transformations. Keep functions pure and design numerical expressions that are valid in the relevant domain.
+Transformations can alter how conditionals are implemented; for example, batching a conditional may turn it into selection. Therefore branch-local side effects or assumptions that an unselected expression is never evaluated are fragile. Keep branch functions pure and expressions valid for their transformed use.
 
 ## Inspect boundary behavior and derivatives
 
-Our magnitude function equals absolute value. Away from zero its derivative is +$1$ for positive inputs and $-1$ for negative inputs. At zero the mathematical function is not differentiable; a selected branch rule is a convention rather than proof of a derivative.
+The magnitude example equals $|x|$. On negative inputs its slope is $-1$; on positive inputs its slope is $1$. At zero the two one-sided slopes differ, so the classical derivative is undefined even though both branches return zero there.
 
-Test negative, positive and exact-boundary inputs because a `>` versus `>=` change can alter boundary behavior in other functions. Keep a separate argument about mathematical smoothness when differentiating conditional computations.
+Test a negative value, a positive value and the exact boundary. Changing $x\ge0$ to $x>0$ does not change this magnitude’s value at zero, but it can matter for other branch formulas. Keep numerical branch correctness and differentiability as separate checks.
 
 ## Prepare the inputs
 
@@ -140,15 +140,11 @@ Expected: $3.0$
 
 ### Read the figure
 
-The horizontal axis varies the input and the vertical axis gives the returned magnitude. The V-shaped line passes through $(-3,3)$, $(0,0)$, and $(3,3)$. Equal distances to the left and right of zero produce equal outputs.
-
-The left arm comes from negating a negative input. The right arm comes from returning a nonnegative input unchanged. At zero the two values meet, so there is no jump in the output.
+The horizontal axis is input $x$; the vertical axis is the returned magnitude. The V-shaped line gives $3$ at both $-3$ and $3$, and $0$ at the join. On the left arm the rule negates negative inputs; on the right it returns nonnegative inputs. Compare equal distances from zero to see the symmetry and continuity.
 
 ### Connect it to the computation
 
-The branches together implement $|x|$. Moving right along the negative side decreases the result with slope $-1$; moving right along the positive side increases it with slope $1$. The sharp corner records that change of rule.
-
-Continuity at the join does not imply differentiability: the classical derivative is undefined at zero because the two slopes disagree. A branch-selected autodiff value there must not be confused with a derivative of a smooth curve. The picture helps separate correct branch outputs from assumptions about gradients.
+The two branch formulas combine to implement $|x|$. Their slopes are $-1$ to the left and $1$ to the right, so the corner at zero marks a change in derivative even though the output has no jump. Read the plot for output behavior; the tracing and branch-selection behavior comes from the control-flow contract, not from this curve.
 
 ```python
 grid = jnp.linspace(-3.0, 3.0, 25)
@@ -158,7 +154,7 @@ visual_data = {'kind': 'line', 'x': grid.tolist(), 'xlabel': 'input', 'ylabel': 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:03:54.491914+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:03:13.077776+00:00. JAX 0.9.2.
 
 ```text
 3.0
@@ -230,7 +226,7 @@ Write a compiled function that applies $2x$ when $x$ is positive and $x-2$ other
 - Pass x as the operand and use one scalar result from each branch.
 
 **Key functions & syntax to use:**
-- `jax.jit(fn) / @jax.jit` — Traces `fn` for its input signatures and compiles an executable. Changed shapes, dtypes or static arguments can trigger another compilation.
+- `jax.jit(fn) / @jax.jit` — Traces a function for its input signatures and compiles it; changed shapes, dtypes, or static arguments can trigger another compilation.
 
 **Starter code scaffold (fill in the TODOs):**
 

@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "recovery-04",
-  "contentHash": "f0bd20bc4fec090f4aa3d4688aaf91b39ff2a078b37a490c2224417d0421c926",
-  "executedAt": "2026-10-21T16:05:42.523863+00:00",
+  "contentHash": "00789fc8060916c35ee2a1a151a44b49ec5d2df0cbc5b0726b8b7d589b23b547",
+  "executedAt": "2026-10-27T17:05:05.152023+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -11,26 +11,16 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Restored next four ID batches: [[4, 10, 11, 3], [2, 0, 11, 1], [5, 7, 6, 8], [4, 3, 10, 9]]\nRestored next four losses: [0.5496272444725037, 0.8390463590621948, 0.07169045507907867, 0.32427603006362915]\nFull state agrees at step six\nRestored next four ID batches: [[4, 10, 11, 3], [2, 0, 11, 1], [5, 7, 6, 8], [4, 3, 10, 9]]\nRestored next four losses: [0.5496272444725037, 0.8390463590621948, 0.07169045507907867, 0.32427603006362915]\nFull state agrees at step six\nMissing iterator restore repeats earlier IDs and changes the next loss\nCorrect IDs alone do not restore the training transition\nRejected incompatible seed\nRejected incompatible sha256\nOriginal run contract remains valid.\nExpected batch-configuration mismatch\nPASS: recovery-04\n",
+  "stdout": "Restored boundary: 2 next IDs: [4, 10, 11, 3]\nRestored next four ID batches: [[4, 10, 11, 3], [2, 0, 11, 1], [5, 7, 6, 8], [4, 3, 10, 9]]\nRestored next four losses: [0.5496272444725037, 0.8390463590621948, 0.07169045507907867, 0.32427603006362915]\nFull state agrees at step six\nMissing iterator restore repeats earlier IDs and changes the next loss\nCorrect IDs alone do not restore the training transition\nRejected incompatible seed\nRejected incompatible sha256\nOriginal run contract remains valid.\nExpected batch-configuration mismatch\nPASS: recovery-04\n",
   "notebookCells": [
     {
-      "sourceHash": "4eb68935c6d6bc9458ebdb1095a92004eab56fcf1d7ecb56e955d4df86f06aae",
-      "outputs": []
-    },
-    {
-      "sourceHash": "53a9c33fa8979505b9b0cde67f50a23336d03ae6e7005196584f7135adb07d20",
-      "outputs": []
-    },
-    {
-      "sourceHash": "77b4fcfc581d22a6effd269d6a1697465b15a2a19eb2627ae7b7be6df69a1c21",
+      "sourceHash": "fd4d6cac3c14e6e0a851fa8ea0b5120b84a8663d02ea22dd17ef620f5f4dc66b",
       "outputs": [
         {
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "Restored next four ID batches: [[4, 10, 11, 3], [2, 0, 11, 1], [5, 7, 6, 8], [4, 3, 10, 9]]\n",
-            "Restored next four losses: [0.5496272444725037, 0.8390463590621948, 0.07169045507907867, 0.32427603006362915]\n",
-            "Full state agrees at step six\n"
+            "Restored boundary: 2 next IDs: [4, 10, 11, 3]\n"
           ]
         }
       ]
@@ -54,7 +44,7 @@
       "outputs": []
     },
     {
-      "sourceHash": "25df6d662f9d3f0c4e984c6a201f79fa0cfd7a2633dc4b0773dfba6c2dd4ee6c",
+      "sourceHash": "53dc08a479da44f2b1718bf964cd5c4d3e3305811c536df9d501b1833a6e3476",
       "outputs": [
         {
           "output_type": "display_data",

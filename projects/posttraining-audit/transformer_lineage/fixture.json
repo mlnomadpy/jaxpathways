@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "kind": "synthetic-direction-preference-fixture",
+  "prompts": [
+    {"id": 0, "split": "train", "text": " Pick one direction:", "tokenIds": [224, 51, 76, 70, 78, 322, 72, 285, 76, 283, 70, 87, 76, 305, 29], "targetAction": 383},
+    {"id": 1, "split": "train", "text": " Choose a route:", "tokenIds": [224, 38, 75, 342, 307, 262, 339, 334, 72, 29], "targetAction": 381},
+    {"id": 2, "split": "train", "text": " Which way now?", "tokenIds": [224, 58, 75, 76, 344, 266, 358, 301, 288, 34], "targetAction": 383},
+    {"id": 3, "split": "train", "text": " Select a path:", "tokenIds": [224, 54, 72, 294, 70, 87, 262, 304, 311, 75, 29], "targetAction": 381},
+    {"id": 4, "split": "dev", "text": " Choose the direction:", "tokenIds": [224, 38, 75, 342, 307, 267, 285, 76, 283, 70, 87, 76, 305, 29], "targetAction": 383},
+    {"id": 5, "split": "dev", "text": " Point the way:", "tokenIds": [224, 51, 82, 265, 87, 267, 266, 358, 29], "targetAction": 381},
+    {"id": 6, "split": "heldout", "text": " Pick a route:", "tokenIds": [224, 51, 76, 70, 78, 262, 339, 334, 72, 29], "targetAction": 383},
+    {"id": 7, "split": "heldout", "text": " Which direction?", "tokenIds": [224, 58, 75, 76, 344, 285, 76, 283, 70, 87, 76, 305, 34], "targetAction": 381}
+  ],
+  "trainingPromptIds": [0, 1, 2, 3],
+  "developmentPromptIds": [4, 5],
+  "heldoutPromptIds": [6, 7],
+  "preferencePairs": [
+    {"promptId": 0, "chosenActionSequence": [383, 4, 2], "rejectedActionSequence": [381, 4, 2], "preferenceLabel": 1},
+    {"promptId": 1, "chosenActionSequence": [381, 4, 2], "rejectedActionSequence": [383, 4, 2], "preferenceLabel": 1},
+    {"promptId": 2, "chosenActionSequence": [383, 4, 2], "rejectedActionSequence": [381, 4, 2], "preferenceLabel": 1},
+    {"promptId": 3, "chosenActionSequence": [381, 4, 2], "rejectedActionSequence": [383, 4, 2], "preferenceLabel": 1}
+  ],
+  "evaluationPreferencePairs": [
+    {"split": "dev", "promptId": 4, "chosenActionSequence": [383, 4, 2], "rejectedActionSequence": [381, 4, 2], "preferenceLabel": 1},
+    {"split": "dev", "promptId": 5, "chosenActionSequence": [381, 4, 2], "rejectedActionSequence": [383, 4, 2], "preferenceLabel": 1},
+    {"split": "heldout", "promptId": 6, "chosenActionSequence": [383, 4, 2], "rejectedActionSequence": [381, 4, 2], "preferenceLabel": 1},
+    {"split": "heldout", "promptId": 7, "chosenActionSequence": [381, 4, 2], "rejectedActionSequence": [383, 4, 2], "preferenceLabel": 1}
+  ],
+  "evaluationPairUse": "Evaluation preference pairs are diagnostic only and are never used in reward fitting, PPO rollouts, recipe selection or checkpoint selection.",
+  "matchedEvaluationPromptIds": {
+    "dev": [4, 5, 4, 5],
+    "heldout": [6, 7, 6, 7]
+  }
+}

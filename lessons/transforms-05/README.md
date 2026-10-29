@@ -4,6 +4,8 @@ Phase 02: JAX transformations · about 60 minutes · CPU
 
 This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
 
+**Before this lesson:** [Compile a function with jit](https://www.tahabouhsine.com/jaxpathways/lesson-transforms-04.html).
+
 ## What you will be able to do
 
 - Distinguish runtime array values from shape/dtype metadata and static configuration.
@@ -21,15 +23,23 @@ Tracing observes how Python builds an array computation from abstract inputs. St
 
 ## Build a call ledger before diagnosing recompilation
 
-Record each call's shape, dtype and static choices next to the observed trace count. Change only values first. Then change one shape, then one static option. This controlled sequence makes a trace increase interpretable; changing everything at once does not.
+A trace count is easier to interpret when each call changes only one thing. Start with two arrays of the same shape, dtype and static mode but different values; then change shape; then change mode. This separates new runtime data from requests to construct a different staged computation.
 
-A Python branch needs a concrete decision during tracing. If the decision is intended to vary with array data at execution time, use an appropriate JAX control-flow operation instead of converting a tracer to a Python boolean. If it genuinely selects a small number of program variants, an explicit static argument may be suitable.
-
-Do not turn every input into a static value to silence an error. Many distinct static values can create many specializations. Trace counts are useful observations, but they are not a universal count of all compilation work or a cross-process cache guarantee.
+In the retained ledger, calls one and two both use shape $(3,)$, float32 and `sum`, while outputs change from $6$ to $9$. The next call uses shape $(4,)$; the last changes mode to `mean`. Read the table as this lesson’s observed signature changes, not as a universal count of JAX cache entries.
 
 $$
-\theta_{t+1} = \theta_t - \eta \cdot \frac{1}{B}\sum_{i=1}^{B} \nabla_\theta \ell(\theta_t, x_i, y_i)
+\sigma=(\operatorname{shape}(x),\operatorname{dtype}(x),m),\qquad f_m(x)=\begin{cases}\sum_i x_i&m=\texttt{sum}\\\frac{1}{n}\sum_i x_i&m=\texttt{mean}\end{cases}
 $$
+
+### The specialization key separates changing data from program choices
+
+**Predict:** If only the array entries change, which ledger fields remain fixed?
+
+![The specialization key separates changing data from program choices](../../phases/02-transforms/05-tracing-static-arguments-and-recompilation/outputs/mechanism.svg)
+
+*Signature-to-trace ledger for the lesson calls.*
+
+The table nodes are four calls. The first two carry different arrays through the same shape, dtype and static-mode signature, so their sums change from $6$ to $9$ while the requested staged computation stays the same. The third changes shape and the fourth changes static mode. Read each arrow as the next call in this controlled sequence; the table is not a global cache counter.
 
 ### Pause and reason
 
@@ -43,39 +53,39 @@ Inspect whether that value truly changes program structure. If it is ordinary ch
 
 ## Separate metadata, configuration, and data
 
-A tensor shape such as $(3,)$ describes the size of the computation; its values $[1, 2, 3]$ are runtime data. A string mode such as sum describes which computation to construct. In this lesson mode is a small finite configuration, so marking it static is reasonable.
+A staged function needs a clear boundary between array values that flow at runtime and choices that determine which program is built. The values $[1,2,3]$ are data; shape $(3,)$ describes their array; `sum` or `mean` selects a reduction rule.
 
-If mode changes rarely while batches change constantly, static configuration lets a stable compiled specialization accept many batches. If you make frequently changing data static, you encourage distinct specializations and may run into hashability constraints. A JAX array is not a convenient static argument just because a Python branch wants to inspect it.
+Here the finite mode string is treated as static configuration. With `sum`, $[1,2,3]$ returns $6$; with `mean`, it returns $2$. Marking a changing batch as static would make each value part of specialization and is not the right way to express ordinary runtime data. Choose the boundary from what the function computes, not merely to silence an error.
 
 ## Read a tiny staged program
 
-make_jaxpr exposes a representation of the traced array operations. A Python print inside the function may run while tracing, but it does not become an ordinary numerical operation in that representation. A multiply and a reduce_sum should appear in a multiply-then-sum example.
+`make_jaxpr` lets us inspect the staged array computation when we need to understand what tracing represented. For the square-and-sum function, the retained output shows multiplication followed by `reduce_sum`, producing a scalar. That connects the source operations to the traced program without needing to infer behavior from timing.
 
-The exact printed formatting and primitive names are not a stable teaching contract. Read it for inputs, outputs, and the broad sequence of numerical operations. The point is to observe that the computation is staged, not to memorize an internal dump or treat the representation as a complete performance explanation.
+A Python `print` may run during tracing, but it is not itself an array operation in the jaxpr. The exact formatting and primitive names can vary, so focus on the dataflow and reduction. Use a tiny example and compare the traced operations with the source rather than treating a jaxpr dump as a stable user-facing format.
 
 ## Why a Python if can fail
 
-Consider if $x$ > $0$ where $x$ is a dynamic scalar argument. Python wants one Boolean immediately to choose which branch to execute while tracing. The tracer represents a runtime value, so that truth test cannot generally be answered at trace time. The resulting conversion error is evidence of a staging mismatch, not evidence that comparisons cannot run on an accelerator.
+Python `if` asks Python to choose a branch immediately. During tracing, a dynamic scalar argument is represented by a tracer whose runtime Boolean value is not yet available to Python. Thus `if x > 0` can fail even though the same function works eagerly for a concrete number.
 
-For a scalar runtime decision, lax.cond expresses the conditional in the numerical program. Its two branches must return compatible structures and shapes/dtypes. Both branch functions are traced; for an ordinary scalar condition the selected branch is the runtime computation. Under batching, a conditional can be transformed into selection behavior, so do not infer cost or side-effect behavior from the Python-like notation alone.
+The failure identifies a staging mismatch: the decision depends on runtime array data. Keep that distinction clear from static configuration, which is intentionally known while specializing. For runtime branching, use a JAX control-flow form such as `lax.cond`; for an elementwise choice over arrays, use selection with compatible shapes.
 
 ## Make configuration choices explicit
 
-The worked reduce_values function chooses sum or mean using a static mode string. Each mode can have its own specialization. It should reject unknown modes instead of silently treating any typo as mean. This is a small input-contract improvement that prevents plausible-looking wrong results.
+The `reduce_values` example uses a small finite mode to select either sum or mean. Its result depends on both inputs: the array supplies values, and the static mode chooses the reduction. Unknown mode strings should be rejected, because silently mapping a typo to a valid reduction can produce plausible but incorrect results.
 
-Keep function identity stable, configure static_argnames at the transformation boundary, and pass mode deliberately. Shape and dtype changes can also require specializations. Different element values with compatible abstract input properties ordinarily do not, though caches and transformation details make exact global compilation counts a poor public guarantee.
+In the observed calls, sum of $[1,2,3]$ is $6$, while mean is $2$. Keep the function identity stable and make the static choice explicit. Changing array values with the same shape and mode changes the answer without changing the intended computation; changing mode requests a different specialization choice.
 
 ## Inspect tracing without confusing it with runtime logging
 
-A Python print in a jitted function is a trace-time observation. If you call the function again with compatible inputs, its absence is consistent with reuse. It is not a reliable counter of all device executions or all compilations across the application. JAX provides debug facilities for observing runtime values.
+A Python print inside a jitted function reports tracing activity, not every execution of the numerical program. If a compatible second call produces no print, that is consistent with reuse of the trace; it does not show that the function did not run.
 
-Use trace observations for a small diagnostic experiment and rely on supported compiler logging/profiling when investigating a real training job. Do not make application behavior depend on a side effect inside a transformed numerical function.
+Use trace observations to diagnose a small controlled call sequence, and use JAX runtime debugging facilities when the question concerns runtime values. The execution output here separately confirms the computed sum and the jaxpr. Avoid turning one print count into a claim about all compilations or device executions.
 
 ## Carry this boundary into the next phase
 
-The upcoming state lessons will make randomness, parameter structure, loops, and branches explicit. The same principle applies: information needed at runtime belongs in the numerical state or arguments, while small program configuration can belong in specialization.
+The next lessons make random keys, parameter trees, repeated state and branches explicit. The same classification helps each one: values needed to choose or update the next numerical result must be represented as runtime data or state; program choices known during specialization can define a static configuration.
 
-Before reaching for a workaround, classify the value and the question: is Python constructing the computation, or is the computation choosing a result based on runtime data? That classification leads to an implementation you can explain and test.
+When a traced program fails, first identify whether the problematic value is an array tracer or a true configuration choice. Then choose the operation that matches the question. This is more reliable than marking arbitrary inputs static, especially when their values change from call to call.
 
 ## Import JAX tracing and array operations
 
@@ -140,32 +150,29 @@ assert jnp.allclose(compiled(x, mode="mean"), 2.)
 
 Expected: Sum: $6.0$; Mean: $2.0$. These mode choices can use separate compiled specializations.
 
-## Compiled branch outputs: sum mode vs. mean mode
+## Call signatures separate runtime values from specialization choices
 
-**Predict:** Predict the ratio between `compiled(x, 'sum')` and `compiled(x, 'mean')` for the input array `x`.
+**Predict:** Which call changes only data values, and which calls request a different staged program?
 
-![Compiled branch outputs: sum mode vs. mean mode](../../phases/02-transforms/05-tracing-static-arguments-and-recompilation/outputs/figure.svg)
+![Call signatures separate runtime values from specialization choices](../../phases/02-transforms/05-tracing-static-arguments-and-recompilation/outputs/figure.svg)
 
 **Recorded CPU computation**
 
 ### Read the figure
 
-Static mode 'sum' returns the sum and 'mean' returns the mean without Python control-flow tracing errors.
+Read each row as a call to the compiled reduction. The value column shows runtime array data; the signature columns show shape, dtype and static mode. Calls one and two both use $((3,),\mathrm{float32},\mathrm{sum})$ but return $6$ and $9$ from different values. Call three changes the shape to $(4,)$; call four changes the mode to mean and returns $2$. The table’s exact signatures belong to this call sequence.
 
 ### Connect it to the computation
 
-Marking `mode` as a static argument in `jax.jit` allows each distinct mode string to specialize and compile its own branch cleanly.
+Changing values while shape, dtype and mode remain fixed changes the result without changing the requested computation. A shape or static-mode change requests another specialization. Use the ledger to predict which property changed before inspecting traces; do not interpret it as a universal cache or compilation counter.
 
 ```python
-# Compare compiled execution in 'sum' mode and 'mean' mode:
-out_sum = float(compiled(x, 'sum'))
-out_mean = float(compiled(x, 'mean'))
-visual_data = {'kind': 'bar', 'x': [0, 1], 'labels': ['sum', 'mean'], 'xlabel': 'static mode argument', 'ylabel': 'compiled(x, mode) output', 'series': [{'label': 'compiled(x, mode)', 'y': [out_sum, out_mean]}]}
+visual_data = {'kind': 'flow', 'layout': 'sequence', 'nodes': ['values change; shape/dtype/mode fixed', 'same signature reused in this call ledger', 'shape or static mode changes specialization']}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T16:03:40.549230+00:00. JAX 0.9.2.
+CPU run: 2026-10-27T17:03:01.003324+00:00. JAX 0.9.2.
 
 ```text
 Sum: 6.0

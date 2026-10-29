@@ -1,105 +1,27 @@
 """Save model, optimizer, and random state: worked experiments and reference solutions. CPU checks."""
 
-# Prepare the data and state
-# Step 1 — Prepare the data and state: This setup makes the dataset and software assumptions explicit.
+# Learner transition: update parameters, optimizer memory, random key, and step
 import jax
-# Select the CPU backend and virtual device count before initializing JAX.
-jax.config.update("jax_platforms","cpu")
 import jax.numpy as jnp
-import numpy as np
 import optax
-import orbax.checkpoint as ocp
-import tempfile
-import json
-import hashlib
-from pathlib import Path
 tx = optax.adam(0.05)
-def initial_state():
-    params = {"weight":jnp.array(0.,jnp.float32),"bias":jnp.array(0.,jnp.float32)}
-    return {"params":params,"optimizer":tx.init(params),
-            "key_data":jax.random.key_data(jax.random.key(7,impl="threefry2x32")),
-            "step":jnp.array(0,jnp.int32)}
-def pack_bytes(raw,capacity=4096):
-    if len(raw)>capacity:
-        raise ValueError("Snapshot exceeds tutorial fixed-byte capacity")
-    buffer = np.zeros(capacity,dtype=np.uint8)
-    buffer[:len(raw)] = np.frombuffer(raw,dtype=np.uint8)
-    return {"buffer":buffer,"length":np.array(len(raw),dtype=np.int32)}
-def unpack_bytes(packed):
-    length = int(packed["length"])
-    if not 0 <= length <= len(packed["buffer"]):
-        raise ValueError("Invalid snapshot length")
-    return np.asarray(packed["buffer"],dtype=np.uint8)[:length].tobytes()
-def same_tree(left,right):
-    assert jax.tree.structure(left)==jax.tree.structure(right)
-    for a,b in zip(jax.tree.leaves(left),jax.tree.leaves(right)):
-        # Transfer the device result to the host for an independent NumPy comparison.
-        host_a,host_b = np.asarray(a),np.asarray(b)
-        # Check tensor shape invariant: `host_a.shape==host_b.shape and host_a.dtype==host_b.dtype`
-        assert host_a.shape==host_b.shape and host_a.dtype==host_b.dtype
-        if np.issubdtype(host_a.dtype,np.integer):
-            np.testing.assert_array_equal(host_a,host_b)
-        else:
-            np.testing.assert_allclose(host_a,host_b,rtol=1e-6,atol=1e-7)
-def step(state,x,y):
-    # Sample deterministic random values into `key` using an explicit PRNG key.
-    key = jax.random.wrap_key_data(state["key_data"],impl="threefry2x32")
-    # Create or split explicit PRNG key(s) (`(next_key, sample_key)`) for reproducible randomness.
-    next_key,sample_key = jax.random.split(key)
-    # Sample deterministic random values into `target_noise` using an explicit PRNG key.
-    target_noise = 0.01*jax.random.normal(sample_key,y.shape)
-    def objective(params):
-        residual = params["weight"]*x+params["bias"]-(y+target_noise)
-        return jnp.mean(residual**2)
-    value,gradient = jax.value_and_grad(objective)(state["params"])
-    updates,opt_state = tx.update(gradient,state["optimizer"],state["params"])
-    next_state = {"params":optax.apply_updates(state["params"],updates),
-                  "optimizer":opt_state,"key_data":jax.random.key_data(next_key),
-                  "step":state["step"]+1}
-    return next_state,value
-def package_versions():
-    import importlib.metadata
-    return {name:importlib.metadata.version(name) for name in ("jax","numpy","optax","orbax-checkpoint")}
-def encode_contract(contract):
-    return pack_bytes(json.dumps(contract,sort_keys=True).encode())
-def validate_contract(saved,expected):
-    actual = json.loads(unpack_bytes(saved))
-    if actual != expected:
-        raise ValueError("Checkpoint contract differs: verify dataset, optimizer configuration, key implementation and package versions")
-workspace = tempfile.TemporaryDirectory()
-root = Path(workspace.name)
-
-# Build the pipeline or state transition
-# Step 2 — Build the pipeline or state transition
-x = jnp.array([0.,0.5,1.],dtype=jnp.float32)
-y = 2*x-1
-# Transfer the device result to the host for an independent NumPy comparison.
-contract = {"schema":1,"learning_rate":0.05,"optimizer":"adam",
-            "key_impl":"threefry2x32","versions":package_versions(),
-            "data_sha256":hashlib.sha256(np.asarray(x).tobytes()+np.asarray(y).tobytes()).hexdigest()}
-state = initial_state()
-for _ in range(3):
-    state,_ = step(state,x,y)
-checkpoint_path = root/"step_3"
-payload = {"training":state,"contract":encode_contract(contract)}
-with ocp.StandardCheckpointer() as checkpointer:
-    checkpointer.save(checkpoint_path,payload)
-    checkpointer.wait_until_finished()
-    restored = checkpointer.restore(checkpoint_path,target={"training":initial_state(),"contract":encode_contract(contract)})
-validate_contract(restored["contract"],contract)
-
-# Run the comparison
-# Step 3 — Run the comparison
-same_tree(state,restored["training"])
-expected_next,expected_loss = step(state,x,y)
-restored_next,restored_loss = step(restored["training"],x,y)
-same_tree(expected_next,restored_next)
-# Transfer the device result to the host for an independent NumPy comparison.
-np.testing.assert_allclose(np.asarray(expected_loss),np.asarray(restored_loss),rtol=1e-6)
-assert int(restored_next["step"])==4
-print("Restored step:",int(restored["training"]["step"]))
-print("Optimizer count:",int(restored["training"]["optimizer"][0].count))
-print("Next update and loss agree; checkpoint exists:",checkpoint_path.exists())
+def learner_state():
+    params = {"weight": jnp.array(0.), "bias": jnp.array(0.)}
+    return {"params": params, "optimizer": tx.init(params),
+            "key": jax.random.key(7), "step": 0}
+def learner_transition(state, x, y):
+    next_key, sample_key = jax.random.split(state["key"])
+    noise = 0.01 * jax.random.normal(sample_key, y.shape)
+    def loss_fn(params):
+        return jnp.mean((params["weight"] * x + params["bias"] - (y + noise)) ** 2)
+    loss, gradient = jax.value_and_grad(loss_fn)(state["params"])
+    updates, optimizer = tx.update(gradient, state["optimizer"], state["params"])
+    return {"params": optax.apply_updates(state["params"], updates),
+            "optimizer": optimizer, "key": next_key, "step": state["step"] + 1}, loss
+small = learner_state()
+small, small_loss = learner_transition(small, jnp.array([0., 0.5, 1.]), jnp.array([-1., 0., 1.]))
+assert small["step"] == 1 and int(small["optimizer"][0].count) == 1
+print("Learner transition step:", small["step"], "Adam count:", int(small["optimizer"][0].count))
 
 # Step 1 — Prepare the data and state: This setup makes the dataset and software assumptions explicit.
 import jax

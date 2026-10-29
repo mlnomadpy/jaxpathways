@@ -2,6 +2,7 @@ import { markdownText } from './lesson-artifacts.mjs';
 import { inlineMath, renderMath } from '../src/lib/math.js';
 import { readFileSync } from 'node:fs';
 import assert from 'node:assert/strict';
+import { validateLessonPrerequisites } from './lesson-prerequisites.mjs';
 const course = JSON.parse(readFileSync(new URL('../public/curriculum.json', import.meta.url)));
 assert.equal(course.schemaVersion, 2);
 const phases = new Map(course.phases.map(p => [p.id,p]));
@@ -11,14 +12,15 @@ for (const [i,phase] of course.phases.entries()) {
   assert.equal(phase.number, String(i).padStart(2,'0'));
   for (const field of ['title','part','hardware','project','checkpoint','source']) assert.ok(phase[field]?.length, `${phase.id}: ${field} is required`);
   for (const dep of phase.prerequisitePhaseIds) assert.ok(phases.has(dep), `Unknown prerequisite ${dep}`);
-  for (const [j,lesson] of phase.lessons.entries()) {
+  for (const lesson of phase.lessons) {
     assert.ok(!lessons.has(lesson.id), `Duplicate canonical lesson ${lesson.id}`);
     lessons.set(lesson.id,lesson);
     for (const field of ['title','objective','exercise','evidence','check']) assert.ok(lesson[field]?.length, `${lesson.id}: ${field} is required`);
     assert.ok(['authored','planned'].includes(lesson.status));
-    assert.deepEqual(lesson.prerequisites,j?[phase.lessons[j-1].id]:[], 'Lesson order must be explicit');
+    assert.ok(Array.isArray(lesson.prerequisites), 'Lesson preparation must be explicit');
   }
 }
+validateLessonPrerequisites(course.phases);
 const visiting = new Set(), visited = new Set();
 function visit(id) {
   assert.ok(!visiting.has(id), `Prerequisite cycle at ${id}`);
@@ -140,6 +142,11 @@ for (const role of course.roles) {
 for(const project of JSON.parse(readFileSync(new URL('../public/api/v1/projects.json',import.meta.url))).projects){
   assert.ok(routes.has(project.pathwayId),`${project.id}: unknown project pathway ${project.pathwayId}`);
   for(const id of project.requiredLessonIds)assert.ok(authored.some(l=>l.id===id),`${project.id}: unavailable project prerequisite ${id}`);
+  for(const stage of project.stages)if(stage.workspaceFile!==undefined){
+    assert.equal(typeof stage.workspaceFile,'string');
+    assert(stage.workspaceFile.startsWith(`projects/${project.id}/`) && !stage.workspaceFile.split('/').includes('..') && !stage.workspaceFile.includes('\\'),`${project.id}: stage edit file must stay within the project`);
+    assert(readFileSync(new URL('../'+stage.workspaceFile,import.meta.url)).length,`${project.id}: stage edit file must exist`);
+  }
 }
 
 // Cross-cutting project plans must point to real preparation, not invented lessons.

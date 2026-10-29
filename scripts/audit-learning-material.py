@@ -30,6 +30,134 @@ def project_digest(directory):
     return result.hexdigest()
 
 
+def pilot_evidence(plan):
+    """Verify a bounded pilot packet without promoting the planned full capstone."""
+    pilot = plan.get("pilot")
+    if not pilot:
+        return None
+    index_path = ROOT / "projects" / plan["id"] / pilot["evidence"]
+    if not index_path.is_file():
+        return {
+            "pilotAvailable": False,
+            "pilotEvidencePath": str(index_path.relative_to(ROOT)),
+            "pilotEvidenceSha256": None,
+            "pilotSourceHashes": {},
+            "pilotPublicFiles": {},
+            "pilotMissing": [str(index_path.relative_to(ROOT))],
+        }
+    index_bytes = index_path.read_bytes()
+    index = json.loads(index_bytes)
+    if plan["id"] == "image-model-300m":
+        expected_manifest_sha = "3b1dcfe589fffc25a43da336beb07d82334b6f8971a73084e2b989b6e8f2a794"
+        expected_recipe_sha = "df0a1a138f0635a39fcaa1b03f154403ed272560df9181fb5ad37722614d3c4c"
+        missing = []
+        manifest_sha = hashlib.sha256(index_bytes).hexdigest()
+        if manifest_sha != expected_manifest_sha or pilot.get("evidenceSha256") != expected_manifest_sha:
+            missing.append("C03 packet manifest SHA-256 mismatch")
+        if (
+            index.get("schema") != "c03-v14-public-packet-manifest-v1"
+            or index.get("hash_algorithm") != "sha256"
+            or not isinstance(index.get("files"), dict)
+            or len(index.get("files", {})) != 29
+        ):
+            missing.append("invalid C03 packet manifest schema or inventory")
+        recipe_path = ROOT / "projects/image-model-300m/reference/evidence/v14/approved-v14-recipe.json"
+        if not recipe_path.is_file():
+            missing.append(str(recipe_path.relative_to(ROOT)))
+            source_hashes = {}
+        else:
+            recipe_bytes = recipe_path.read_bytes()
+            recipe = json.loads(recipe_bytes)
+            source_hashes = recipe.get("source_sha256", {})
+            if hashlib.sha256(recipe_bytes).hexdigest() != expected_recipe_sha:
+                missing.append("C03 approved recipe SHA-256 mismatch")
+            if not isinstance(source_hashes, dict) or len(source_hashes) != 28:
+                missing.append("invalid C03 source inventory")
+                source_hashes = {}
+        project_root = ROOT / "projects/image-model-300m"
+        for relative, expected in source_hashes.items():
+            if not isinstance(relative, str) or not isinstance(expected, str) or len(expected) != 64:
+                missing.append("invalid C03 source inventory entry")
+                continue
+            candidate = (project_root / relative).resolve()
+            if project_root.resolve() not in candidate.parents or not candidate.is_file():
+                missing.append(relative)
+            elif hashlib.sha256(candidate.read_bytes()).hexdigest() != expected:
+                missing.append(relative + " (source hash mismatch)")
+        manifest_files = index.get("files", {})
+        for relative, expected in manifest_files.items():
+            if not isinstance(relative, str) or not isinstance(expected, str) or len(expected) != 64:
+                missing.append("invalid C03 manifest entry")
+                continue
+            candidate = (project_root / relative).resolve()
+            if project_root.resolve() not in candidate.parents or not candidate.is_file():
+                missing.append("invalid or missing C03 manifest entry " + str(relative))
+            elif hashlib.sha256(candidate.read_bytes()).hexdigest() != expected:
+                missing.append(relative + " (manifest hash mismatch)")
+        public_files = {
+            relative: expected
+            for relative, expected in manifest_files.items()
+            if isinstance(relative, str) and not relative.startswith("tools/")
+        }
+        public_files["README.md"] = source_hashes.get("README.md", "")
+        public_files["data/LICENSE.txt"] = source_hashes.get("data/LICENSE.txt", "")
+        public_files[pilot["evidence"]] = manifest_sha
+        if len(public_files) != 26 or any(not value for value in public_files.values()):
+            missing.append("C03 public asset inventory is not the approved 26-file set")
+        return {
+            "pilotAvailable": bool(source_hashes) and not missing,
+            "pilotEvidencePath": str(index_path.relative_to(ROOT)),
+            "pilotEvidenceSha256": manifest_sha,
+            "pilotSourceHashes": {
+                f"projects/image-model-300m/{relative}": expected
+                for relative, expected in source_hashes.items()
+            },
+            "pilotPublicFiles": public_files,
+            "pilotMissing": missing,
+        }
+    missing = []
+    source_hashes = index.get("source_files_sha256", {})
+    public_files = index.get("public_files", {})
+    if not isinstance(source_hashes, dict) or not isinstance(public_files, dict):
+        raise ValueError(f"Invalid pilot evidence index: {index_path}")
+    for relative, expected in {**source_hashes, **public_files}.items():
+        if not isinstance(relative, str) or not isinstance(expected, str) or len(expected) != 64:
+            missing.append("invalid evidence-index hash entry")
+            continue
+        if relative in public_files and not relative.startswith("reference/"):
+            missing.append(relative + " (public path outside reference/)")
+        project_relative = relative.removeprefix(f"projects/{plan['id']}/")
+        candidate = (ROOT / "projects" / plan["id"] / project_relative).resolve()
+        project_root = (ROOT / "projects" / plan["id"]).resolve()
+        if project_root not in candidate.parents or not candidate.is_file():
+            missing.append(relative)
+        elif hashlib.sha256(candidate.read_bytes()).hexdigest() != expected:
+            missing.append(relative + " (hash mismatch)")
+    required_references = (
+        ("execution_verification", "retention")
+        if plan["id"] == "causal-model-300m"
+        else ("historical_receipt", "checker_amendment")
+    )
+    for key in required_references:
+        reference = index.get(key)
+        if (
+            not isinstance(reference, dict)
+            or not isinstance(reference.get("path"), str)
+            or reference.get("path") not in public_files
+            or public_files.get(reference["path"]) != reference.get("sha256")
+        ):
+            missing.append("invalid " + key)
+    available = bool(source_hashes and public_files) and not missing
+    return {
+        "pilotAvailable": available,
+        "pilotEvidencePath": str(index_path.relative_to(ROOT)),
+        "pilotEvidenceSha256": hashlib.sha256(index_bytes).hexdigest(),
+        "pilotSourceHashes": source_hashes,
+        "pilotPublicFiles": public_files,
+        "pilotMissing": missing,
+    }
+
+
 def lesson_check(content, content_hash, receipt, generated_hash):
     """An old receipt, missing notebook run or failed run cannot confer current validation."""
     if not content:
@@ -340,6 +468,25 @@ def build():
             )
 
     for plan in read("curriculum/project-plans.json"):
+        pilot = pilot_evidence(plan)
+        availability = (
+            "Bounded CPU pilot evidence verified; full capstone remains planned"
+            if pilot and pilot["pilotAvailable"]
+            else (
+                "Bounded CPU pilot packet pending; full capstone remains planned"
+                if pilot
+                else "Specification only; no runnable capstone"
+            )
+        )
+        if pilot:
+            availability += (
+                f'; evidence index {pilot["pilotEvidencePath"]}'
+                + (
+                    f' (SHA-256 {pilot["pilotEvidenceSha256"]})'
+                    if pilot["pilotEvidenceSha256"]
+                    else ""
+                )
+            )
         add(
             "plans",
             plan["id"],
@@ -349,8 +496,9 @@ def build():
             "planned",
             plan["summary"],
             "Implement the scoped data recipe, architecture, training stages, independent evaluation and exported reload before attempting the target scale.",
-            "Specification only; no runnable capstone",
+            availability,
             sourceHash=hashlib.sha256((ROOT / plan["source"]).read_bytes()).hexdigest(),
+            **(pilot or {}),
         )
     for assessment in read("curriculum/assessments.json"):
         add(
@@ -472,6 +620,24 @@ def build():
                 current=current,
             )
         )
+    findings = []
+    for finding in review["findings"]:
+        current = dict(finding)
+        if finding.get("id") == "production-capstones":
+            available = [item for item in items if item["kind"] == "plans" and item.get("pilotAvailable")]
+            current["title"] = "All ten full model-lifecycle capstones remain planned"
+            descriptions = []
+            if any(item["id"] == "embedding-model-300m" for item in available):
+                descriptions.append("C01 has a bounded CPU workflow; its precommitted retrieval-quality floors failed.")
+            if any(item["id"] == "causal-model-300m" for item in available):
+                descriptions.append("C02 has a bounded CPU lifecycle; all six branches failed their frozen QA quality floors.")
+            if any(item["id"] == "image-model-300m" for item in available):
+                descriptions.append("C03 has a bounded flower-image CPU pilot; its selected classifier scored 0.318522 below the 0.40 floor and 0.363836 color control, so the classification quality gate failed.")
+            current["action"] = " ".join(descriptions + [
+                "Complete the full-scale and quality gates for all ten capstones, including the remaining implementations.",
+                "Keep scoped CPU workflows separate from target-scale, task-quality and production claims."
+            ])
+        findings.append(current)
     lesson_items = [x for x in items if x["kind"] == "lessons"]
     summary = dict(
         byKind=dict(Counter(x["kind"] for x in items)),
@@ -492,6 +658,9 @@ def build():
             x["metrics"]["choiceSpecificFeedback"] for x in lesson_items
         ),
         boundedHardwareQualifications=sum(x["current"] for x in hardware),
+        fullCapstonesPlanned=sum(x["kind"] == "plans" for x in items),
+        optionalPilots=sum(bool(x.get("pilotEvidencePath")) for x in items),
+        verifiedOptionalPilots=sum(x.get("pilotAvailable", False) for x in items),
     )
     report = dict(
         schemaVersion=1,
@@ -499,7 +668,7 @@ def build():
         baseCommit=review["baseCommit"],
         method=review["method"],
         levels=review["levels"],
-        findings=review["findings"],
+        findings=findings,
         summary=summary,
         hardware=hardware,
         items=items,
@@ -524,6 +693,8 @@ def render_report(report):
         f'{summary["currentCpuLessons"]} current CPU lesson references; {summary["currentProjectReferences"]} source-matching public project receipts; {summary["boundedHardwareQualifications"]} bounded physical target qualifications. {summary["expertReviewedLessons"]} independent expert reviews and {summary["novicePilotedLessons"]} novice pilots are recorded.',
         "",
         f'The inventory covers {sum(summary["byKind"].values())} material entries, {summary["lessonTasks"]} lesson exercises/checkpoints and {summary["projectStages"]} project stages. Section counts describe coverage, not quality scores. Duration estimates have not been calibrated with learners.',
+        "",
+        f'{summary["fullCapstonesPlanned"]} full model-lifecycle capstones remain planned; {summary["verifiedOptionalPilots"]} of {summary["optionalPilots"]} separately scoped optional pilots have source-matching public evidence packets.',
         "",
         "## Learner labels",
         "",

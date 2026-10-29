@@ -12,7 +12,9 @@ For the initial regression project, focus on Linear algebra and loss intuition, 
 
 ## Study guide: Can you explain an optimizer’s behavior from the objective and data?
 
-Use a model small enough to solve independently. Connect residuals, gradients, curvature and update state before comparing optimizer names. A lower training loss is useful evidence, but it does not by itself establish better held-out predictions.
+A learning curve is easier to understand when you can derive the update that produced it. Begin with vectors and residuals, then connect the gradient's direction to curvature and step size. A least-squares solve, a directional derivative and a finite-difference sweep provide different ways to challenge your answer.
+
+Read every optimizer experiment as a controlled comparison: what objective, data reduction, initialization and update budget stayed fixed? Work through one numerical step before interpreting a trajectory. Keep training fit, validation selection and final held-out reporting distinct as the examples become richer.
 
 ### Check your starting point
 

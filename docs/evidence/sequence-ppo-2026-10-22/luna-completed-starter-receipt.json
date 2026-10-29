@@ -1,0 +1,37 @@
+{
+  "candidate_path": "/private/tmp/posttraining-audit-sequence-ppo-completed-starter.py",
+  "candidate_sha256": "792eb35048b6299b467bea4625caf8ec5716150a8d423efdf73c77dc8a08cb26",
+  "helper_functions_ast_identical": [
+    "_array_sha256",
+    "_categorical_kl",
+    "_current_values",
+    "_initial_policy",
+    "_json_array",
+    "_masked_logits",
+    "_records_json",
+    "_selected_log_prob",
+    "_selected_log_probs_for_records",
+    "_tree_sha256",
+    "_tree_to_json",
+    "continuation_value_targets",
+    "evaluate",
+    "initialize",
+    "load_state",
+    "save_state",
+    "sequence_reward",
+    "verify_frozen_components"
+  ],
+  "helper_functions_ast_identical_count": 18,
+  "runtime_solution_import": false,
+  "solution_path": "/Users/tahabsn/Documents/ChatGPT/jaxpathways/projects/posttraining-audit/solution/sequence_ppo.py",
+  "starter_path": "/Users/tahabsn/Documents/ChatGPT/jaxpathways/projects/posttraining-audit/starter/sequence_ppo.py",
+  "starter_sha256": "2e512607f84e54ad90f9d8dfe79064ed0ee661ec9c58c5072dfc50cd55e7fbf9",
+  "target_functions": [
+    "clipped_value_loss",
+    "fit_reward_model",
+    "generalized_advantage_estimate",
+    "ppo_policy_loss",
+    "rollout",
+    "train"
+  ]
+}
