@@ -406,14 +406,14 @@ visual_data = {
 
 ## Recorded reference execution
 
-CPU run: 2026-10-27T16:12:31.866664+00:00. JAX 0.9.2.
+CPU run: 2026-10-29T13:58:32.943903+00:00. JAX 0.9.2.
 
 ```text
 Precision comparison: [{'result_dtype_setting': 'BF16 operands / requested FP32 result', 'returned_dtype': 'float32', 'max_abs_err': 0.03718, 'mean_abs_err': 0.00756, 'input_shape': [64, 256], 'weight_shape': [256, 64], 'result_shape': [64, 64], 'stored_weight_bytes': 32768, 'scale_metadata_bytes': 0, 'runtime_input_bytes': 32768, 'runtime_weight_operand_bytes': 32768, 'dequantized_fp32_workspace_bytes': 0, 'result_bytes': 16384, 'storage_note': 'logical array sizes; not peak HBM or measured traffic'}, {'result_dtype_setting': 'BF16 operands / requested BF16 result', 'returned_dtype': 'bfloat16', 'max_abs_err': 0.05545, 'mean_abs_err': 0.00912, 'input_shape': [64, 256], 'weight_shape': [256, 64], 'result_shape': [64, 64], 'stored_weight_bytes': 32768, 'scale_metadata_bytes': 0, 'runtime_input_bytes': 32768, 'runtime_weight_operand_bytes': 32768, 'dequantized_fp32_workspace_bytes': 0, 'result_bytes': 8192, 'storage_note': 'logical array sizes; not peak HBM or measured traffic'}, {'result_dtype_setting': 'INT8 per-column / FP32 dequantized dot result', 'returned_dtype': 'float32', 'max_abs_err': 0.12516, 'mean_abs_err': 0.02322, 'input_shape': [64, 256], 'weight_shape': [256, 64], 'result_shape': [64, 64], 'stored_weight_bytes': 16384, 'scale_metadata_bytes': 256, 'runtime_input_bytes': 65536, 'runtime_weight_operand_bytes': 65536, 'dequantized_fp32_workspace_bytes': 65536, 'result_bytes': 16384, 'storage_note': 'logical array sizes; not peak HBM or measured traffic'}]
-Observed backend: cpu profiled steps: 5 XPlane files: 8 unprofiled ms/step: 0.351
+Observed backend: cpu profiled steps: 5 XPlane files: 5 unprofiled ms/step: 0.0345
 Precision comparison: [{'result_dtype_setting': 'BF16 operands / requested FP32 result', 'returned_dtype': 'float32', 'max_abs_err': 0.03718, 'mean_abs_err': 0.00756, 'input_shape': [64, 256], 'weight_shape': [256, 64], 'result_shape': [64, 64], 'stored_weight_bytes': 32768, 'scale_metadata_bytes': 0, 'runtime_input_bytes': 32768, 'runtime_weight_operand_bytes': 32768, 'dequantized_fp32_workspace_bytes': 0, 'result_bytes': 16384, 'storage_note': 'logical array sizes; not peak HBM or measured traffic'}, {'result_dtype_setting': 'BF16 operands / requested BF16 result', 'returned_dtype': 'bfloat16', 'max_abs_err': 0.05545, 'mean_abs_err': 0.00912, 'input_shape': [64, 256], 'weight_shape': [256, 64], 'result_shape': [64, 64], 'stored_weight_bytes': 32768, 'scale_metadata_bytes': 0, 'runtime_input_bytes': 32768, 'runtime_weight_operand_bytes': 32768, 'dequantized_fp32_workspace_bytes': 0, 'result_bytes': 8192, 'storage_note': 'logical array sizes; not peak HBM or measured traffic'}, {'result_dtype_setting': 'INT8 per-column / FP32 dequantized dot result', 'returned_dtype': 'float32', 'max_abs_err': 0.12516, 'mean_abs_err': 0.02322, 'input_shape': [64, 256], 'weight_shape': [256, 64], 'result_shape': [64, 64], 'stored_weight_bytes': 16384, 'scale_metadata_bytes': 256, 'runtime_input_bytes': 65536, 'runtime_weight_operand_bytes': 65536, 'dequantized_fp32_workspace_bytes': 65536, 'result_bytes': 16384, 'storage_note': 'logical array sizes; not peak HBM or measured traffic'}]
-Retained trace directory: /private/tmp/jaxpathways-content-repairs-review/tpu-xprof-trace
-Observed backend: cpu profiled steps: 5 XPlane files: 8 unprofiled ms/step: 0.0937
+Retained trace directory: /Users/tahabsn/.codex/worktrees/testing-artifact-fixes/jaxpathways/tpu-xprof-trace
+Observed backend: cpu profiled steps: 5 XPlane files: 5 unprofiled ms/step: 0.0663
 Requested BF16 / FP32 result max-error ratio for seed 0: 1.49
 Observed backend: cpu steps: 5 finite: True XPlane files: 1
 Rejected steps above the fixed maximum before tracing
@@ -421,9 +421,9 @@ Rejected steps above the fixed maximum before tracing
 Observed backend and JAX version: cpu 0.9.2
 Three returned dtypes: ['float32', 'bfloat16', 'float32']
 Three mean absolute errors: [0.0075, 0.00902, 0.02182]
-Trace steps/files: 3 8 unprofiled ms/step: 0.11773609245816867
+Trace steps/files: 3 5 unprofiled ms/step: 0.08372232938806216
 Mean error (per-channel vs per-tensor): 0.01389 0.0979
-xplane.pb bytes: 275765
+xplane.pb bytes: 275758
 PASS: tpu-06
 
 ```

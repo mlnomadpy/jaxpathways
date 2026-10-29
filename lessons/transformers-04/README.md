@@ -485,7 +485,7 @@ visual_data = {'kind': 'heatmap', 'values': probs.tolist(), 'rows': ['position '
 
 ## Recorded reference execution
 
-CPU run: 2026-10-27T17:05:49.769016+00:00. JAX 0.9.2.
+CPU run: 2026-10-29T13:57:52.402324+00:00. JAX 0.9.2.
 
 ```text
 Initial / held loss / held accuracy: 0.9807573556900024 0.0017881905660033226 1.0

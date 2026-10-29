@@ -175,7 +175,7 @@ visual_data = {'kind': 'panels', 'panels': [{'kind': 'heatmap', 'title': 'Zero q
 
 ## Recorded reference execution
 
-CPU run: 2026-10-27T17:05:22.864588+00:00. JAX 0.9.2.
+CPU run: 2026-10-29T13:57:22.821893+00:00. JAX 0.9.2.
 
 ```text
 Weights / output: [[0.33333334 0.33333334 0.33333334]

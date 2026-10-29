@@ -3,10 +3,41 @@ on:
   pull_request:
   workflow_dispatch:
   workflow_call:
+    inputs:
+      full:
+        description: Run every specialized check when called by another workflow
+        type: boolean
+        default: true
 permissions:
   contents: read
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      browser: ${{ steps.scope.outputs.browser }}
+      lessons: ${{ steps.scope.outputs.lessons }}
+      projects: ${{ steps.scope.outputs.projects }}
+      tpu: ${{ steps.scope.outputs.tpu }}
+      loggers: ${{ steps.scope.outputs.loggers }}
+      numpyro: ${{ steps.scope.outputs.numpyro }}
+      diffrax: ${{ steps.scope.outputs.diffrax }}
+      decoder: ${{ steps.scope.outputs.decoder }}
+      c01: ${{ steps.scope.outputs.c01 }}
+      c02: ${{ steps.scope.outputs.c02 }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Select affected checks
+        id: scope
+        env:
+          FULL_CHECKS: ${{ github.event_name != 'pull_request' || inputs.full }}
+        run: python3 scripts/select-ci-checks.py
   tpu-dependencies:
+    needs: changes
+    if: needs.changes.outputs.tpu == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -69,6 +100,8 @@ jobs:
           path: /tmp/epubcheck-report.json
           if-no-files-found: ignore
   browser:
+    needs: changes
+    if: needs.changes.outputs.browser == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -96,6 +129,8 @@ jobs:
             test-results/
           if-no-files-found: ignore
   lessons:
+    needs: changes
+    if: needs.changes.outputs.lessons == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 40
     steps:
@@ -130,6 +165,8 @@ jobs:
           name: lesson-cpu-receipt
           path: curriculum/validation.json
   projects:
+    needs: changes
+    if: needs.changes.outputs.projects == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
@@ -152,6 +189,8 @@ jobs:
           name: project-cpu-receipt-${{ matrix.shard }}
           path: /tmp/projects-${{ matrix.shard }}.json
   c01-embedding-pilot:
+    needs: changes
+    if: needs.changes.outputs.c01 == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 120
     steps:
@@ -186,6 +225,8 @@ jobs:
             /tmp/jaxpathways-embedding-c01-check/full-run/baseline-receipt.json
           if-no-files-found: ignore
   c02-causal-pilot:
+    needs: changes
+    if: needs.changes.outputs.c02 == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 60
     env:
@@ -226,6 +267,8 @@ jobs:
             /tmp/c02-native-smoke.json
           if-no-files-found: ignore
   loggers:
+    needs: changes
+    if: needs.changes.outputs.loggers == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
@@ -243,6 +286,8 @@ jobs:
       - run: python projects/reproducible-experiments/tests/loggers_check.py
 
   numpyro:
+    needs: changes
+    if: needs.changes.outputs.numpyro == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -267,6 +312,8 @@ jobs:
           if-no-files-found: ignore
 
   diffrax:
+    needs: changes
+    if: needs.changes.outputs.diffrax == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -291,6 +338,8 @@ jobs:
           if-no-files-found: ignore
 
   decoder-foundations:
+    needs: changes
+    if: needs.changes.outputs.decoder == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:

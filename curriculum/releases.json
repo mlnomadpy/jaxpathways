@@ -1,5 +1,19 @@
 [
   {
+    "version": "0.18.3",
+    "date": "2026-10-29",
+    "editionKey": "jaxpathways-2026-review-edition",
+    "modifiedAt": "2026-10-29T13:55:52Z",
+    "title": "Focus testing and refresh recorded lesson evidence",
+    "summary": "Provide targeted test suites and current source-bound CPU artifacts while preserving the current reading experience and release history.",
+    "changes": [
+      "Organized Node verification into unit, app, content and built-site suites with changed-input selection and automatic build prerequisites. Focused Python lesson/project selection protects complete validation receipts; specialized pull-request jobs run only for relevant changes.",
+      "Removed obsolete fixed-count and duplicate assertions, batched starter syntax checks, and separated representative reader interactions from exhaustive generated-page equation and control coverage. Current publication, content, browser and optional workflow checks remain in their appropriate suites.",
+      "Refreshed lesson figure and execution evidence against the current authored sources. CPU execution remains distinct from accelerator qualification and independent teaching review.",
+      "Protect the explicitly declared corrupt tokenizer canary by hashing its exact bytes while retaining strict canonical JSON parsing and existing generated-evidence exclusions. Fixture byte mutations require a new snapshot and published snapshots remain immutable."
+    ]
+  },
+  {
     "version": "0.18.2",
     "date": "2026-10-27",
     "editionKey": "jaxpathways-2026-review-edition",

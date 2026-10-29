@@ -192,29 +192,38 @@ test('distributed, science, kernels, and internals have complete authored learne
     })),
   );
   const inventory = learnerStarterInventory(lessons);
-  assert.equal(lessons.length, 16);
-  assert.equal(inventory.totalContracts, 49);
-  assert.equal(inventory.readyContracts, 49);
-  assert.equal(inventory.completeLessons, 16);
+  assert(lessons.length > 0);
+  assert.equal(inventory.readyContracts, inventory.totalContracts);
+  assert.equal(inventory.completeLessons, lessons.length);
   assert.equal(inventory.incompleteLessons, 0);
   assert.deepEqual(inventory.lessons.flatMap((lesson) => lesson.missing), []);
 
+  const scaffolds = [];
   for (const lesson of lessons) {
     assert.deepEqual(readyLearnerArtifactPaths(lesson), learnerArtifactPaths(lesson));
     const contracts = [lesson.content.learnerStarter, ...lesson.content.practice.map((practice) => practice.learnerStarter)];
-    for (const contract of contracts) {
+    for (const [index, contract] of contracts.entries()) {
       for (const field of ['inputs', 'outputs', 'invariants', 'hints']) {
         assert.ok(Array.isArray(contract[field]) && contract[field].length > 0, `${lesson.id} has no ${field}`);
       }
       assert.ok(contract.code.trim(), `${lesson.id} has an empty scaffold`);
-      const syntax = spawnSync('python3', ['-c', 'import ast,sys; ast.parse(sys.stdin.read())'], {
-        input: contract.code,
-        encoding: 'utf8',
-      });
-      assert.equal(syntax.status, 0, `${lesson.id} scaffold is not valid Python: ${syntax.stderr}`);
+      scaffolds.push({ label: `${lesson.id} task ${index + 1}`, code: contract.code });
       assert.match(contract.code, /NotImplementedError\("[^"]+"\)/, `${lesson.id} scaffold needs an actionable TODO stop`);
     }
   }
+  const syntax = spawnSync('python3', ['-c', `
+import ast, json, sys
+failures = []
+for scaffold in json.load(sys.stdin):
+    try:
+        ast.parse(scaffold['code'], filename=scaffold['label'])
+    except SyntaxError as error:
+        failures.append(str(error))
+if failures:
+    sys.exit('Invalid learner scaffolds:\\n' + '\\n'.join(failures))
+`], { input: JSON.stringify(scaffolds), encoding: 'utf8' });
+  assert.ifError(syntax.error);
+  assert.equal(syntax.status, 0, syntax.stderr || syntax.stdout);
 });
 
 test('learner download URL and source paths derive from the lesson registry identity', () => {

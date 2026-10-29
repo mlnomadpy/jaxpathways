@@ -3,10 +3,22 @@ import { createHash } from 'node:crypto';
 import assert from 'node:assert/strict';
 import { portablePath } from './portable-path.mjs';
 
-const read = path => JSON.parse(readFileSync(path, 'utf8'));
+const read = path => {
+  const source = readFileSync(path, 'utf8');
+  try {
+    return JSON.parse(source);
+  } catch (error) {
+    throw new SyntaxError(`Invalid canonical JSON in ${path}: ${error.message}`);
+  }
+};
 const stable = value => Array.isArray(value) ? value.map(stable) : value && typeof value === 'object'
   ? Object.fromEntries(Object.keys(value).sort().map(key => [key, stable(value[key])])) : value;
 const hash = value => createHash('sha256').update(JSON.stringify(stable(value))).digest('hex');
+// This published canary intentionally appends corrupt bytes to a tokenizer file.
+// Track its exact bytes: treating other malformed JSON as a canary would hide source errors.
+const negativeJsonFixtures = new Set([
+  'projects/text-harness/foundations/reference/run/corrupt-package/tokenizer.json',
+]);
 
 const releaseVersionPattern = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/;
 const modifiedAtPattern = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})Z$/;
@@ -32,6 +44,7 @@ function validateReleaseIdentity(release) {
     && hour <= 23 && minute <= 59 && second <= 59,
   'Release modifiedAt must be a valid UTC calendar date and time');
 }
+
 
 const notes = read('curriculum/releases.json');
 const release = notes[0];
@@ -64,6 +77,11 @@ for (const directory of ['curriculum', 'learning-paths', 'projects']) {
     if (!file.endsWith('.json') || /(?:^|\/)(?:releases|release-snapshots|(?:project-)?validation)\.json$/.test(file) || /(?:^|\/)(?:reference|outputs|runs|evidence)\//.test(file)) continue;
     sources[`${directory}/${file}`] = hash(read(`${directory}/${file}`));
   }
+}
+// Retain the release-bound identity of the one explicitly declared negative canary,
+// without changing the policy that generated reference/run/evidence JSON is excluded.
+for (const file of negativeJsonFixtures) {
+  if (existsSync(file)) sources[file] = createHash('sha256').update(readFileSync(file)).digest('hex');
 }
 // Practical guides and their launchers are canonical course material too.
 const projectDirectories = read('curriculum/projects.json').map(file => file.replace(/\/project\.json$/, ''));

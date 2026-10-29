@@ -58,3 +58,8 @@ tests/test_posttraining_appendix_distribution.py
 tests/test_content_math_contracts.py
 tests/test_figure_tables.py
 phases/15-deployment/08-pytorch-to-flax-numerical-parity/labs/transformer_bridge.py
+scripts/check-projects.py
+scripts/smoke-lessons.py
+scripts/select-ci-checks.py
+tests/test_python_runners.py
+tests/test_ci_selection.py

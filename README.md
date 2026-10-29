@@ -65,6 +65,8 @@ npm run check            # Astro, lint, formatting, content, behavior and output
 npm run check:deployment # Build/test /jaxpathways/, then restore the local root build
 ```
 
+For focused feedback, use `npm test` (unit tests), `npm run test:changed` (affected Node tests), or `npm run test:app`, `test:content`, and `test:site`. `npm run test:all` runs every Node suite. See [the testing guide](docs/testing.md) for file/name filters, build reuse, and selected Python lesson/project checks.
+
 Home, Course, Learning paths, Careers, My learning, Resources, the group planner, project workspaces, illustrated project guides, assessments, and the printable reader are Astro routes. Existing `.html` URLs and browser storage keys are preserved. Learning records remain local to the same browser origin; changing hostname or port does not transfer them automatically. Export a backup from My learning when moving between origins.
 
 See [the architecture and authoring guide](docs/astro-migration.md) for content locations, reusable components, browser modules, styles and GitHub Pages setup.

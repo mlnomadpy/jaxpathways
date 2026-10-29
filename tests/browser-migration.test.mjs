@@ -11,7 +11,6 @@ import { initReaderEvents, showLesson } from '../src/scripts/reader.js';
 import { setupChoices } from '../src/scripts/paths.js';
 import { initProject } from '../src/scripts/project.js';
 import { setupPlatform } from '../src/scripts/workspace.js';
-import { renderLesson } from '../src/lib/lesson-template.js';
 import { inlineMath } from '../src/lib/math.js';
 
 async function page(name, query = '', records = {}) {
@@ -69,58 +68,43 @@ test('catalog retains route, roadmap and browser-history filtering under a proje
   } finally {await p.close();}
 });
 
-test('every authored lesson renders, and checkpoint progress stays separate from exercise evidence',async()=>{
+test('reader checkpoints validate answers and preserve independent exercise evidence',async()=>{
   const p=await page('lesson-welcome-01');
   try {
     await loadCourse();initReaderEvents();
-    const fullCourse=JSON.parse(fs.readFileSync('dist/curriculum.json','utf8'));
-    for(const phase of courseState.course.phases) {
-      const fullPhase=fullCourse.phases.find(item=>item.id===phase.id);
-      phase.lessons=phase.lessons.map(lesson=>fullPhase.lessons.find(item=>item.id===lesson.id)||lesson);
-    }
-    for(const phase of courseState.course.phases)for(const lesson of phase.lessons.filter(l=>l.status==='authored')){
-      const pageRoot=p.$('#lesson-page');
-      const body=p.$('#lesson-body');
-      pageRoot.dataset.staticLesson=lesson.id;
-      body.dataset.lesson=lesson.id;
-      body.innerHTML=renderLesson({phase,lesson,prerequisiteLinks:'Fixture prerequisites',allLessons:phase.lessons,index:phase.lessons.findIndex(item=>item.id===lesson.id),activePath:'all'});
-      showLesson(phase,lesson);assert.equal(p.$('#lesson-title').textContent,lesson.title);
-      assert(p.$('#lesson-checkpoint'));assert(p.$('.copy-snippet'));assert(p.$('#reader-toc').children.length>0);
-      const form=p.$('#lesson-checkpoint');
-      form.dispatchEvent(new Event('submit',{bubbles:true,cancelable:true}));
-      assert(!courseState.lessonProgress.lessons[lesson.id]?.checkpointPassed,'an empty answer cannot pass');
-      const malformed=p.$(`input[name="answer"][value="${lesson.content.answer}"]`);
-      malformed.value='';malformed.checked=true;
-      form.dispatchEvent(new Event('submit',{bubbles:true,cancelable:true}));
-      assert(!courseState.lessonProgress.lessons[lesson.id]?.checkpointPassed,'an invalid option value cannot pass');
-      malformed.value=String(lesson.content.answer);
-      for (let choice=0;choice<lesson.content.options.length;choice++) {
-        if(choice===lesson.content.answer)continue;
-        p.$(`input[name="answer"][value="${choice}"]`).checked=true;
-        form.dispatchEvent(new Event('submit',{bubbles:true,cancelable:true}));
-        const expected=p.window.document.createElement('div');
-        expected.innerHTML=inlineMath('Let’s work through it. '+lesson.content.optionFeedback[choice]);
-        assert.equal(p.$('#checkpoint-result').textContent,expected.textContent,lesson.id);
-        assert(!courseState.lessonProgress.lessons[lesson.id]?.checkpointPassed,'wrong answers cannot pass');
-      }
-      const equations=p.all('#lesson-body annotation[encoding="application/x-tex"]').map(node=>node.textContent);
-      for(const section of lesson.content.sections||[])if(section.math)assert(equations.includes(section.math),`reader omitted equation in ${lesson.id}`);
-      // Let pending reader tasks settle before replacing the next full chapter.
-      await new Promise(setImmediate);
-    }
     const phase=courseState.course.phases[0],lesson=phase.lessons[0];
-    p.$('#lesson-page').dataset.staticLesson=lesson.id;
-    p.$('#lesson-body').dataset.lesson=lesson.id;
-    p.$('#lesson-body').innerHTML=renderLesson({phase,lesson,prerequisiteLinks:'Fixture prerequisites',allLessons:phase.lessons,index:0,activePath:'all'});
     showLesson(phase,lesson);
+    assert.equal(p.$('#lesson-title').textContent,lesson.title);
+    assert(p.$('#reader-toc').children.length>0);
+    const form=p.$('#lesson-checkpoint');
+    const submit=()=>form.dispatchEvent(new Event('submit',{bubbles:true,cancelable:true}));
+    submit();
+    assert(!courseState.lessonProgress.lessons[lesson.id]?.checkpointPassed,'an empty answer cannot pass');
+    const correct=p.$(`input[name="answer"][value="${lesson.content.answer}"]`);
+    for(const value of ['', '-1', '1.5', '01', 'NaN', String(lesson.content.options.length)]){
+      correct.value=value;correct.checked=true;submit();
+      assert(!courseState.lessonProgress.lessons[lesson.id]?.checkpointPassed,`invalid answer ${JSON.stringify(value)} cannot pass`);
+    }
+    correct.value=String(lesson.content.answer);
+    for(let choice=0;choice<lesson.content.options.length;choice++){
+      if(choice===lesson.content.answer)continue;
+      p.$(`input[name="answer"][value="${choice}"]`).checked=true;submit();
+      const expected=p.window.document.createElement('div');
+      expected.innerHTML=inlineMath('Let’s work through it. '+lesson.content.optionFeedback[choice]);
+      assert.equal(p.$('#checkpoint-result').textContent,expected.textContent);
+      assert(!courseState.lessonProgress.lessons[lesson.id]?.checkpointPassed,'wrong answers cannot pass');
+    }
     p.$(`input[name="answer"][value="${lesson.content.answer}"]`).checked=true;
-    p.$('#lesson-checkpoint').dispatchEvent(new Event('submit',{bubbles:true,cancelable:true}));
+    submit();
     let saved=JSON.parse(localStorage.getItem('jaxpathways-lessons-v1'));
     assert.equal(saved.lessons[lesson.id].checkpointPassed,true);assert.equal(saved.lessons[lesson.id].evidenceSaved,false);
     p.$(`input[name="answer"][value="${(lesson.content.answer+1)%lesson.content.options.length}"]`).checked=true;
-    p.$('#lesson-checkpoint').dispatchEvent(new Event('submit',{bubbles:true,cancelable:true}));
+    submit();
     assert.equal(JSON.parse(localStorage.getItem('jaxpathways-lessons-v1')).lessons[lesson.id].checkpointPassed,true,'a retry preserves a previously passed checkpoint');
     p.$('#exercise-complete').click();saved=JSON.parse(localStorage.getItem('jaxpathways-lessons-v1'));assert.equal(saved.lessons[lesson.id].evidenceSaved,true);
+    p.$('#exercise-complete').click();saved=JSON.parse(localStorage.getItem('jaxpathways-lessons-v1'));assert.equal(saved.lessons[lesson.id].evidenceSaved,false);
+    p.$('#reset-lesson').click();saved=JSON.parse(localStorage.getItem('jaxpathways-lessons-v1'));
+    assert.deepEqual(saved.lessons[lesson.id],{checkpointPassed:false,evidenceSaved:false});
     const nextLink=p.$('#next').dataset.href;
     const redirects=[];
     p.window.location.replace=(href)=>redirects.push(href);

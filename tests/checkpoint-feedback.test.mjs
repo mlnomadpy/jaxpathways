@@ -7,6 +7,30 @@ import { inlineMath } from '../src/lib/math.js';
 
 const course = JSON.parse(readFileSync('public/curriculum.json', 'utf8'));
 
+test('every authored lesson page retains checkpoint controls, code copy and exact section equations', async () => {
+  const window = new Window();
+  const annotation = window.document.createElement('span');
+  try {
+    for (const phase of course.phases) {
+      for (const lesson of phase.lessons.filter(item => item.status === 'authored')) {
+        const html = readFileSync(`dist/lesson-${lesson.id}.html`, 'utf8');
+        assert.match(html, /id="lesson-checkpoint"/, lesson.id);
+        assert.match(html, /class="copy-snippet"/, lesson.id);
+        // Decode only the TeX annotations; hydrating every full lesson repeats the Astro build.
+        const equations = new Set([...html.matchAll(/<annotation encoding="application\/x-tex">([\s\S]*?)<\/annotation>/g)].map(([, tex]) => {
+          annotation.innerHTML = tex;
+          return annotation.textContent;
+        }));
+        for (const section of lesson.content.sections || []) {
+          if (section.math) assert(equations.has(section.math), `reader omitted equation in ${lesson.id}`);
+        }
+      }
+    }
+  } finally {
+    await window.happyDOM.abort();
+  }
+});
+
 test('every option keeps its own reasoning in quizzes, Markdown and notebook reveals', () => {
   for (const phase of course.phases) {
     for (const lesson of phase.lessons.filter(item => item.status === 'authored')) {
