@@ -68,6 +68,21 @@ test('direct test selection and suite restrictions keep focused runs bounded', (
   assert.equal(preparationFor(suites.site), 'site');
 });
 
+test('release tooling edits select subprocess edition checks without requiring a build', () => {
+  for (const changed of ['scripts/release.mjs', 'scripts/portable-path.mjs']) {
+    const selected = selectTests({ changedFiles: [changed] });
+    for (const consumer of [
+      'tests/releases.test.mjs',
+      'tests/release-receipts.test.mjs',
+      'tests/release-edition-metadata.test.mjs',
+    ]) {
+      assert(selected.includes(consumer), `${changed} must select ${consumer}`);
+    }
+    assert.equal(preparationFor(selected), 'none', changed);
+    assert(!selected.includes('tests/course-reader.test.mjs'), changed);
+  }
+});
+
 test('listing a changed test never builds and invalid runner arguments fail', () => {
   const listed = spawnSync(
     process.execPath,

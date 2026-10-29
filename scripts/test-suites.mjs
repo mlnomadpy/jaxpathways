@@ -134,10 +134,15 @@ export function selectTests({ suite, changedFiles, root = process.cwd() } = {}) 
     const dependents = allTests().filter((test) => dependencyGraph.get(test).has(file));
     add(dependents);
     if (/\.test\.(?:cjs|mjs)$/.test(file)) continue;
-    if (file === 'scripts/release.mjs')
-      add(['tests/releases.test.mjs', 'tests/release-receipts.test.mjs']);
-    if (file === 'scripts/portable-path.mjs')
-      add(['tests/releases.test.mjs', 'tests/release-receipts.test.mjs']);
+    if (file === 'scripts/release.mjs' || file === 'scripts/portable-path.mjs') {
+      // These checks copy or execute the release script instead of importing it.
+      add([
+        'tests/releases.test.mjs',
+        'tests/release-receipts.test.mjs',
+        'tests/release-edition-metadata.test.mjs',
+      ]);
+      continue;
+    }
     if (inDirectory(file, 'src')) {
       // Static pages, CSS and browser entry wiring are read by build/output tests, not imported.
       add(suites.site);
@@ -169,7 +174,6 @@ export function selectTests({ suite, changedFiles, root = process.cwd() } = {}) 
       add(suites.site);
       continue;
     }
-    if (file === 'scripts/release.mjs' || file === 'scripts/portable-path.mjs') continue;
     if (inDirectory(file, 'browser-tests')) continue; // Separate Playwright suite.
     if (file === 'tests/test_material_audit.py') {
       add(['tests/material-status.test.mjs']);
