@@ -154,6 +154,9 @@ class EventSelectionTests(unittest.TestCase):
             {**self.environment, "GITHUB_EVENT_NAME": "workflow_dispatch"},
             {**self.environment, "GITHUB_EVENT_NAME": "workflow_call"},
             {**self.environment, "FULL_CHECKS": "true"},
+            {**self.environment, "FULL_CHECKS": ""},
+            {**self.environment, "FULL_CHECKS": "invalid"},
+            {**self.environment, "FULL_CHECKS": None},
             {
                 key: value
                 for key, value in self.environment.items()
