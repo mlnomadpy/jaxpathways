@@ -104,11 +104,15 @@ def select_checks(environment):
                 [
                     "git",
                     "diff",
+                    # Equivalent to base...head: exclude changes made only on the base.
+                    "--merge-base",
                     "--name-only",
                     "-z",
                     "--no-renames",
+                    "--end-of-options",
                     event["pull_request"]["base"]["sha"],
                     event["pull_request"]["head"]["sha"],
+                    "--",
                 ]
             )
             .decode()
