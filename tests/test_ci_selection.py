@@ -123,7 +123,18 @@ class EventSelectionTests(unittest.TestCase):
                 {"browser", "projects", "diffrax"},
             )
         diff.assert_called_once_with(
-            ["git", "diff", "--name-only", "-z", "--no-renames", "base", "head"]
+            [
+                "git",
+                "diff",
+                "--merge-base",
+                "--name-only",
+                "-z",
+                "--no-renames",
+                "--end-of-options",
+                "base",
+                "head",
+                "--",
+            ]
         )
 
     def test_selection_tools_and_changed_pilot_only_run_that_pilot(self):
@@ -143,6 +154,9 @@ class EventSelectionTests(unittest.TestCase):
             {**self.environment, "GITHUB_EVENT_NAME": "workflow_dispatch"},
             {**self.environment, "GITHUB_EVENT_NAME": "workflow_call"},
             {**self.environment, "FULL_CHECKS": "true"},
+            {**self.environment, "FULL_CHECKS": ""},
+            {**self.environment, "FULL_CHECKS": "invalid"},
+            {**self.environment, "FULL_CHECKS": None},
             {
                 key: value
                 for key, value in self.environment.items()
@@ -192,6 +206,87 @@ class EventSelectionTests(unittest.TestCase):
                 f"{name}={str(name == 'browser').lower()}"
                 for name in selection.CHECK_NAMES
             ],
+        )
+
+
+class GitHistorySelectionTests(unittest.TestCase):
+    """Check PR scoping against real divergent histories, without running projects."""
+
+    def setUp(self):
+        temporary = tempfile.TemporaryDirectory(prefix="jaxpathways-ci-history-")
+        self.addCleanup(temporary.cleanup)
+        self.root = Path(temporary.name)
+        self.repository = self.root / "repository"
+        self.repository.mkdir()
+        self.event = self.root / "event.json"
+        self.git("init", "-q")
+        self.git("config", "user.name", "CI selection regression")
+        self.git("config", "user.email", "ci-selection@example.invalid")
+        self.git("config", "commit.gpgsign", "false")
+        self.write("src/site.js", "original site\n")
+        self.write("projects/causal-model-300m/model.py", "original model\n")
+        self.commit("common ancestor")
+        self.git("branch", "feature")
+        self.write("projects/causal-model-300m/model.py", "base-only model update\n")
+        self.base = self.commit("base changes the causal pilot")
+        self.git("checkout", "-q", "feature")
+
+    def git(self, *arguments):
+        result = subprocess.run(
+            ["git", *arguments],
+            cwd=self.repository,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        return result.stdout.strip()
+
+    def write(self, relative, content):
+        path = self.repository / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(content)
+
+    def commit(self, message):
+        self.git("add", ".")
+        self.git("commit", "-qm", message, "--no-verify")
+        return self.git("rev-parse", "HEAD")
+
+    def select(self, base, head, **overrides):
+        self.event.write_text(
+            json.dumps({"pull_request": {"base": {"sha": base}, "head": {"sha": head}}})
+        )
+        environment = {
+            "GITHUB_EVENT_NAME": "pull_request",
+            "FULL_CHECKS": "false",
+            "GITHUB_EVENT_PATH": str(self.event),
+            **overrides,
+        }
+        with contextlib.chdir(self.repository):
+            return selection.select_checks(environment)
+
+    def test_base_only_pilot_changes_do_not_expand_frontend_pr_scope(self):
+        self.write("src/site.js", "feature site update\n")
+        head = self.commit("PR changes only the website")
+        self.assertEqual(self.select(self.base, head), {"browser"})
+
+    def test_branch_pilot_changes_still_select_only_the_affected_pilot(self):
+        self.write("projects/embedding-model-300m/model.py", "feature encoder\n")
+        head = self.commit("PR changes the embedding pilot")
+        self.assertEqual(self.select(self.base, head), {"browser", "projects", "c01"})
+
+    def test_missing_merge_base_falls_back_to_all_checks(self):
+        self.git("checkout", "-q", "--orphan", "unrelated")
+        self.git("rm", "-qrf", ".")
+        self.write("docs/new.md", "unrelated history\n")
+        unrelated = self.commit("unrelated root")
+        self.assertEqual(self.select(self.base, unrelated), ALL)
+
+    def test_full_and_manual_runs_do_not_require_git_history(self):
+        self.assertEqual(self.select("missing", "missing", FULL_CHECKS="true"), ALL)
+        self.assertEqual(self.select("missing", "missing", FULL_CHECKS=None), ALL)
+        self.assertEqual(
+            self.select("missing", "missing", GITHUB_EVENT_NAME="workflow_dispatch"),
+            ALL,
         )
 
 

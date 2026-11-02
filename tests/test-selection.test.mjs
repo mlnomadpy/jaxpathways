@@ -42,6 +42,17 @@ test('transitive source edits select their consumers and built-page checks', () 
   assert(dependencyReader()('scripts/platform-form.test.cjs').has('src/lib/storage.js'));
 });
 
+test('subprocess book rendering keeps its transitive source checks in changed selection', () => {
+  const consumer = 'tests/book-prose-links.test.mjs';
+  assert(dependencyReader()(consumer).has('scripts/render-book-math.mjs'));
+  for (const changed of ['src/lib/math.js', 'src/lib/mathml-export.js', 'src/lib/html.js']) {
+    const selected = selectTests({ changedFiles: [changed] });
+    assert(selected.includes(consumer), `${changed} must select the subprocess book prose check`);
+    assert(!selected.includes('tests/portable-path.test.mjs'), changed);
+  }
+  assert(!selectTests({ changedFiles: ['src/lib/storage.js'] }).includes(consumer));
+});
+
 test('course and tooling inputs conservatively select generated suites or every test', () => {
   const course = selectTests({ changedFiles: ['phases/00-welcome/01-first/lesson.json'] });
   for (const suite of ['app', 'content', 'site']) {

@@ -33,7 +33,7 @@ jobs:
       - name: Select affected checks
         id: scope
         env:
-          FULL_CHECKS: ${{ github.event_name != 'pull_request' || inputs.full }}
+          FULL_CHECKS: ${{ (github.event_name != 'pull_request' || inputs.full == true) && 'true' || 'false' }}
         run: python3 scripts/select-ci-checks.py
   tpu-dependencies:
     needs: changes

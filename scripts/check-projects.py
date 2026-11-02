@@ -4,6 +4,7 @@ import argparse
 import datetime
 import hashlib
 import json
+import os
 from pathlib import Path
 import shlex
 import subprocess
@@ -12,15 +13,19 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def source_hash(directory):
-    """Preserve the receipt digest without loading entire artifacts into memory."""
-    digest = hashlib.sha256()
-    files = sorted(
+def source_files(directory):
+    """Use one inventory for source digests and receipt alias protection."""
+    return sorted(
         path
         for path in directory.rglob("*")
         if path.is_file() and "__pycache__" not in path.parts
     )
-    for path in files:
+
+
+def source_hash(directory):
+    """Preserve the receipt digest without loading entire artifacts into memory."""
+    digest = hashlib.sha256()
+    for path in source_files(directory):
         digest.update(str(path.relative_to(ROOT)).encode() + b"\0")
         with path.open("rb") as source:
             for chunk in iter(lambda: source.read(1024 * 1024), b""):
@@ -64,12 +69,19 @@ def main(argv=None):
             "focused and sharded runs require --receipt to preserve the complete registry receipt"
         )
 
-    destination = ROOT / (args.receipt or "curriculum/project-validation.json")
+    canonical_destination = ROOT / "curriculum/project-validation.json"
+    destination = ROOT / (args.receipt or canonical_destination)
     if (
         (args.shard or args.project)
         and not args.list
-        and destination.resolve()
-        == (ROOT / "curriculum/project-validation.json").resolve()
+        and (
+            destination.resolve() == canonical_destination.resolve()
+            or (
+                destination.exists()
+                and canonical_destination.exists()
+                and destination.samefile(canonical_destination)
+            )
+        )
     ):
         parser.error("focused and sharded runs must use a separate --receipt path")
 
@@ -90,6 +102,42 @@ def main(argv=None):
     if args.list:
         print("\n".join(manifest["id"] for _, manifest in selected))
         return 0
+
+    project_directories = {manifest_path.parent for manifest_path, _ in selected}
+    project_locations = {
+        location
+        for directory in project_directories
+        for location in (Path(os.path.abspath(directory)), directory.resolve())
+    }
+    # Retain the lexical location when a receipt symlink escapes the project, and
+    # resolve its parent separately when a project directory is reached via an alias.
+    receipt_locations = {
+        Path(os.path.abspath(destination)),
+        destination.resolve(),
+        destination.parent.resolve() / destination.name,
+    }
+    receipt_ancestors = {
+        ancestor
+        for location in receipt_locations
+        for ancestor in location.parents
+        if ancestor.is_dir()
+    }
+    if any(
+        location.is_relative_to(directory)
+        for location in receipt_locations
+        for directory in project_locations
+    ) or any(
+        ancestor.samefile(directory)
+        for ancestor in receipt_ancestors
+        for directory in project_directories
+    ):
+        parser.error("receipt path must be outside selected project directories")
+    if destination.exists() and any(
+        destination.samefile(source)
+        for directory in project_directories
+        for source in source_files(directory)
+    ):
+        parser.error("receipt path must not alias selected project source files")
 
     records = []
     for manifest_path, manifest in selected:

@@ -37,7 +37,14 @@ def main(argv=None):
         "--receipt", type=Path, help="Write a separate receipt containing only this run"
     )
     args = parser.parse_args(argv)
-    course = json.loads((ROOT / "public/curriculum.json").read_text())
+    course_path = ROOT / (
+        "curriculum/course.json" if args.list else "public/curriculum.json"
+    )
+    if not args.list and not course_path.is_file():
+        parser.error(
+            "generated curriculum is missing; run npm run content:build before executing lessons"
+        )
+    course = json.loads(course_path.read_text())
     authored = [
         lesson
         for phase in course["phases"]
@@ -72,11 +79,19 @@ def main(argv=None):
             )
         )
         return 0
-    validation_path = ROOT / (args.receipt or "curriculum/validation.json")
+    canonical_validation_path = ROOT / "curriculum/validation.json"
+    validation_path = ROOT / (args.receipt or canonical_validation_path)
     if (
         focused
         and args.receipt
-        and validation_path.resolve() == (ROOT / "curriculum/validation.json").resolve()
+        and (
+            validation_path.resolve() == canonical_validation_path.resolve()
+            or (
+                validation_path.exists()
+                and canonical_validation_path.exists()
+                and validation_path.samefile(canonical_validation_path)
+            )
+        )
     ):
         parser.error(
             "focused runs must use a separate --receipt path; omit --receipt to merge current results"

@@ -87,6 +87,11 @@ export function validateInventory(root = process.cwd()) {
   }
 }
 
+// Tests that execute a local JS entry point need its imports in the same dependency graph.
+const nonImportDependencies = {
+  'tests/book-prose-links.test.mjs': ['scripts/render-book-math.mjs'],
+};
+
 // Follow literal local imports/requires (including dynamic imports) through the source graph.
 // Non-module inputs such as generated HTML, Python subprocesses and registries are handled below.
 export function dependencyReader(root = process.cwd()) {
@@ -96,7 +101,7 @@ export function dependencyReader(root = process.cwd()) {
     seen.add(file);
     if (!cache.has(file)) {
       const target = path.join(root, file);
-      const imports = [];
+      const imports = [...(nonImportDependencies[file] || [])];
       if (existsSync(target) && /\.(?:[cm]?js|json)$/.test(file)) {
         const source = readFileSync(target, 'utf8');
         const pattern = /(?:\bfrom\s*|\bimport\s*(?:\(\s*)?|\brequire\s*\(\s*)['"]([^'"]+)['"]/g;
